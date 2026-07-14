@@ -1,0 +1,163 @@
+<title>Lesson 4: Composition of Functions — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/interactive.js" defer></script>
+<script src="../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Precalculus · Lesson 4</span>
+  <h1>Composition of Functions</h1>
+  <p class="subtitle">Feeding the output of one function straight into another.</p>
+  <p class="nav-links"><a href="0003-rates-of-change-and-behavior-of-graphs.html">← Lesson 3</a> <a href="0005-transformations-of-functions.html">Lesson 5 →</a> <a href="../index.html">Contents</a> <a href="../reference/glossary.html">Glossary →</a></p>
+
+  <p>You already chain operations without thinking about it: "add 2, then square it" is two steps applied one after another. <strong>Composition</strong> is just the formal name — and notation — for exactly that.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    The composition <span class="expr">(f ∘ g)(x)</span>, also written <span class="expr">f(g(x))</span>, means: first apply <span class="expr">g</span> to <span class="expr">x</span>, then apply <span class="expr">f</span> to whatever <span class="expr">g</span> produced.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why it works</span>
+    Read <span class="expr">f(g(x))</span> from the inside out, not left to right: <span class="expr">g(x)</span> is computed first because it's the innermost thing being fed into <span class="expr">f</span>. This trips people up constantly — the function written second is applied first.
+  </div>
+
+  <h2>1. The composition machine</h2>
+  <p>Below, <span class="expr">g(x) = x + 2</span> and <span class="expr">f(x) = x²</span>. Type a number and watch it flow through both steps. Switch the tab to reverse the order and see whether you get the same answer.</p>
+
+  <div class="widget" id="comp-widget">
+    <div class="widget-label">Try It — Composition Machine</div>
+    <div class="fm-tabs">
+      <button class="fm-tab is-active" data-comp-tab="fg" type="button">f(g(x))</button>
+      <button class="fm-tab" data-comp-tab="gf" type="button">g(f(x))</button>
+    </div>
+    <div class="fm-panel" data-comp-panel="fg">
+      <div class="fm-row">
+        <label>x = <input type="number" class="fm-input" data-comp-input value="3"></label>
+        <span class="fm-arrow">→ g →</span>
+        <span class="fm-output" data-comp-mid>?</span>
+        <span class="fm-arrow">→ f →</span>
+        <span class="fm-output" data-comp-output>?</span>
+      </div>
+      <p class="fm-steps" data-comp-steps></p>
+    </div>
+    <div class="fm-panel" data-comp-panel="gf" hidden>
+      <div class="fm-row">
+        <label>x = <input type="number" class="fm-input" data-comp-input value="3"></label>
+        <span class="fm-arrow">→ f →</span>
+        <span class="fm-output" data-comp-mid>?</span>
+        <span class="fm-arrow">→ g →</span>
+        <span class="fm-output" data-comp-output>?</span>
+      </div>
+      <p class="fm-steps" data-comp-steps></p>
+    </div>
+  </div>
+
+  <p>Try x = 3 on both tabs. f(g(3)) = 25, but g(f(3)) = 11 — <strong>composition is not commutative</strong>. Order isn't a technicality here; it changes the answer.</p>
+
+  <h2>2. Composition can restrict the domain further</h2>
+  <p>A composed function is only defined where <em>both</em> steps succeed. Here, <span class="expr">g(x) = √x</span> and <span class="expr">f(x) = 1/x</span>, so <span class="expr">f(g(x)) = 1/√x</span>. Drag along the line and watch for where it breaks.</p>
+
+  <div class="widget">
+    <div class="widget-label">Try It — Where Is f(g(x)) Defined?</div>
+    <div class="plot-wrap">
+      <svg viewBox="0 0 460 140" width="460" height="140" role="img" aria-label="Draggable point on a number line testing where the composition f of g is defined">
+        <line class="fig-axis" x1="60" y1="70" x2="420" y2="70"></line>
+        <rect class="drag-surface" id="domain-surface" x="60" y="50" width="360" height="40"></rect>
+        <circle class="fig-point" id="domain-point" cy="70" r="6"></circle>
+        <text class="fig-label" x="132" y="95">0</text>
+      </svg>
+    </div>
+    <p class="plot-readout" id="domain-readout">—</p>
+    <p class="plot-hint">Drag left past 0 first, then hover right around 0 itself — two different reasons it fails.</p>
+  </div>
+
+  <p>Left of 0, <span class="expr">g(x) = √x</span> already fails — negative numbers have no real square root, so <span class="expr">f</span> never even gets a number to work with. Right at 0, <span class="expr">g(0) = 0</span> succeeds, but then <span class="expr">f(0) = 1/0</span> fails. Either function can be the one that breaks — the composition's domain is whatever's left after both restrictions apply.</p>
+
+  <h2>Check your recall</h2>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. If g(x) = x + 2 and f(x) = x², what is f(g(3))?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">25</button>
+      <button class="quiz-choice" data-correct="false">11</button>
+      <button class="quiz-choice" data-correct="false">9</button>
+      <button class="quiz-choice" data-correct="false">5</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>g(3) = 5 first, then f(5) = 25. Getting 11 means you computed g(f(3)) instead — the reversed order.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. For g(x) = x + 2 and f(x) = x², is f(g(x)) always equal to g(f(x))?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">No — order changes the result</button>
+      <button class="quiz-choice" data-correct="false">Yes — order never matters here</button>
+      <button class="quiz-choice" data-correct="false">No — but rarely changes result</button>
+      <button class="quiz-choice" data-correct="false">Yes — but rarely matters here</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>You saw it directly in the widget: f(g(3)) = 25 while g(f(3)) = 11. Composition is generally not commutative.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="g|g(x)|inner|the inner function">
+    <p class="quiz-prompt">3. In f(g(x)), the function applied first is ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Read inside-out: g(x) is computed first, and its output becomes f's input.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p><a href="https://openstax.org/books/precalculus-2e/pages/1-4-composition-of-functions">OpenStax Precalculus 2e, §1.4 "Composition of Functions"</a> has more worked examples, including composing a function with itself. <a href="https://www.youtube.com/playlist?list=PLDesaqWTN6ESsmwELdrzhcGiRhk5DjwLP">Professor Leonard's composition videos</a> are useful if the domain-restriction idea in Widget 2 still feels shaky.</p>
+
+  <p class="ask-teacher">Questions on notation, order, or domain restrictions — ask before moving on. Next up: transforming a function's graph by shifting, stretching, and reflecting it.</p>
+
+  <footer class="lesson-footer">STEM+ · Precalculus · Lesson 4 of the course sequence</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var g = function (x) { return x + 2; };
+  var f = function (x) { return x * x; };
+
+  var compWidget = document.getElementById('comp-widget');
+  STEMPlus.mountTabs(compWidget, 'data-comp-tab', 'data-comp-panel');
+
+  STEMPlus.mountComposition(compWidget.querySelector('[data-comp-panel="fg"]'), g, f, {
+    step: function (x, gx, fgx) {
+      return 'g(' + x + ') = ' + x + ' + 2 = ' + gx + ', then f(' + gx + ') = ' + gx + '² = ' + fgx + '.';
+    }
+  });
+  STEMPlus.mountComposition(compWidget.querySelector('[data-comp-panel="gf"]'), f, g, {
+    step: function (x, fx, gfx) {
+      return 'f(' + x + ') = ' + x + '² = ' + fx + ', then g(' + fx + ') = ' + fx + ' + 2 = ' + gfx + '.';
+    }
+  });
+
+  var domainSvg = document.getElementById('domain-surface').ownerSVGElement;
+  var domainReadout = document.getElementById('domain-readout');
+  STEMPlus.mountPointOnCurve(domainSvg, {
+    fn: function () { return 0; },
+    xMin: -2, xMax: 8,
+    originX: 140, originY: 70, scaleX: 32, scaleY: 1,
+    point: document.getElementById('domain-point'),
+    dragSurface: document.getElementById('domain-surface'),
+    initialX: 4,
+    onUpdate: function (x) {
+      if (x < -0.03) {
+        domainReadout.textContent = 'x = ' + x.toFixed(2) + ': g(x) = √x is already undefined — negative input, no real root.';
+        domainReadout.classList.remove('is-pass'); domainReadout.classList.add('is-fail');
+      } else if (x < 0.08) {
+        domainReadout.textContent = 'x = ' + x.toFixed(2) + ': g(0) = 0 succeeds, but f(0) = 1/0 is undefined.';
+        domainReadout.classList.remove('is-pass'); domainReadout.classList.add('is-fail');
+      } else {
+        var gx = Math.sqrt(x);
+        var fgx = 1 / gx;
+        domainReadout.textContent = 'x = ' + x.toFixed(2) + ': g(x) = ' + gx.toFixed(2) + ', f(g(x)) = ' + fgx.toFixed(2) + ' — defined.';
+        domainReadout.classList.remove('is-fail'); domainReadout.classList.add('is-pass');
+      }
+    }
+  });
+});
+</script>

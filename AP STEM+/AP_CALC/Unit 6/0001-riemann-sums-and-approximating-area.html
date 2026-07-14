@@ -1,0 +1,135 @@
+<title>Unit 6, Lesson 1: Riemann Sums and Approximating Area — STEM+</title>
+<link rel="stylesheet" href="../../../assets/style.css">
+<script src="../../../assets/interactive.js" defer></script>
+<script src="../../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · AP Calculus BC · Unit 6 · Lesson 1</span>
+  <h1>Riemann Sums and Approximating Area</h1>
+  <p class="subtitle">Units 1–5 built the derivative. Unit 6 turns around and asks the opposite question: given a rate, how much has actually accumulated? It starts with rectangles.</p>
+  <p class="nav-links"><a href="../Unit%205/0007-behavior-of-implicit-relations.html">← Unit 5, Lesson 7</a> <a href="0002-the-definite-integral.html">Lesson 2 →</a> <a href="../index.html">Contents</a> <a href="../reference/glossary.html">Glossary →</a></p>
+
+  <p>Suppose f(x) is a velocity, and the question is total distance traveled — the area between the velocity curve and the x-axis. For a straight line, that area is a rectangle or triangle, easy geometry. For a curve, there's no formula yet. The fix: chop the region into thin rectangles, whose areas are easy, and add them up.</p>
+
+  <h2>1. Rectangular approximation</h2>
+  <div class="box">
+    <span class="box-label">Method — Riemann Sum</span>
+    Split [a, b] into n subintervals of equal width Δx = (b − a)/n. On each subinterval, build a rectangle whose height is f at some sample point in that subinterval, and whose width is Δx. Adding all n rectangle areas gives a <strong>Riemann sum</strong> — an approximation of the area under the curve.
+  </div>
+  <div class="box">
+    <span class="box-label">Definition — Left, Right, and Midpoint Sums</span>
+    The three most common choices for the sample point: a <strong>left</strong> sum uses each subinterval's left endpoint, a <strong>right</strong> sum uses its right endpoint, and a <strong>midpoint</strong> sum uses the point exactly halfway between. All three converge to the same value as n → ∞, but for a fixed, small n, they typically disagree.
+  </div>
+
+  <h2>2. A worked comparison</h2>
+  <div class="box">
+    <span class="box-label">Worked Example</span>
+    f(x) = x² on [0, 4], with n = 4 rectangles, so Δx = 1. <em>Left sum</em> samples x = 0, 1, 2, 3: heights 0, 1, 4, 9, total <strong>14</strong>. <em>Right sum</em> samples x = 1, 2, 3, 4: heights 1, 4, 9, 16, total <strong>30</strong>. <em>Midpoint sum</em> samples x = 0.5, 1.5, 2.5, 3.5: heights 0.25, 2.25, 6.25, 12.25, total <strong>21</strong>. Since f is increasing here, the left sum underestimates and the right sum overestimates — the true area (found in Lesson 2) turns out to be 64/3 ≈ 21.33, which the midpoint sum lands closest to.
+  </div>
+
+  <h2>3. Watching the approximation improve</h2>
+  <p>Choose a method, then slide out to more rectangles. Both left and right sums squeeze toward the same value as n grows — they just approach it from opposite sides.</p>
+
+  <div class="widget">
+    <div class="widget-label">Try It — Riemann Sums for f(x) = x² on [0, 4]</div>
+    <div class="quiz-fill-row" style="margin-bottom: 0.75rem;">
+      <button class="quiz-fill-check" id="rs-left">Left</button>
+      <button class="quiz-fill-check" id="rs-right">Right</button>
+      <button class="quiz-fill-check" id="rs-mid">Midpoint</button>
+    </div>
+    <div class="plot-wrap">
+      <svg viewBox="0 0 460 300" width="460" height="300" role="img" aria-label="The curve y = x squared on 0 to 4 with Riemann-sum rectangles of adjustable count and sampling method">
+        <line class="fig-axis" x1="40" y1="270" x2="420" y2="270"></line>
+        <line class="fig-axis" x1="40" y1="270" x2="40" y2="20"></line>
+        <g id="rs-rects"></g>
+        <polyline class="fig-curve" id="rs-curve"></polyline>
+      </svg>
+    </div>
+    <div class="slider-row">
+      <label for="rs-slider">Rectangles (n)</label>
+      <input type="range" id="rs-slider" min="1" max="20" step="1" value="4">
+      <span class="slider-value" id="rs-n-label">n = 4</span>
+    </div>
+    <p class="plot-readout" id="rs-readout">—</p>
+  </div>
+
+  <h2>Check your recall</h2>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. As the number of rectangles n increases, a Riemann sum approximation:</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">gets closer to the exact area under the curve</button>
+      <button class="quiz-choice" data-correct="false">gets farther from the exact area under the curve</button>
+      <button class="quiz-choice" data-correct="false">stays exactly the same for every value of n</button>
+      <button class="quiz-choice" data-correct="false">switches from an overestimate to an underestimate</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Thinner rectangles hug the curve more tightly, so the total error between the rectangles' area and the true area under the curve shrinks toward zero as n grows.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="left">
+    <p class="quiz-prompt">2. In a ___ Riemann sum, each rectangle's height comes from the function value at the left endpoint of its subinterval.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The three common sampling rules are named for where in each subinterval the sample point is taken; "left" means the left endpoint sets the rectangle's height.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. For f(x) = x² on [0, 4] with n = 4 subintervals, the left Riemann sum equals:</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">14</button>
+      <button class="quiz-choice" data-correct="false">30</button>
+      <button class="quiz-choice" data-correct="false">21</button>
+      <button class="quiz-choice" data-correct="false">16</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Sampling at x = 0, 1, 2, 3 gives heights 0, 1, 4, 9; each multiplied by Δx = 1 and summed gives 14.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p><a href="https://openstax.org/books/calculus-volume-1/pages/5-1-approximating-areas">OpenStax Calculus Volume 1, §5.1 "Approximating Areas"</a> introduces sigma notation for these sums in full and traces the method back to Archimedes' method of exhaustion.</p>
+
+  <p class="ask-teacher">Left, right, and midpoint sums are really just three specific choices out of infinitely many possible sample points — and every one of them converges to the same limit. Ask what happens with a decreasing function, where the over/underestimate roles flip, if that still feels unclear. Lesson 2 takes that limit as n → ∞ and gives it a name and a notation of its own: the definite integral.</p>
+
+  <footer class="lesson-footer">STEM+ · AP Calculus BC · Unit 6 · Lesson 1 of 9</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var origin = { originX: 40, originY: 270, scaleX: 90, scaleY: 15 };
+  var xMin = 0, xMax = 4;
+  function f(x) { return x * x; }
+
+  STEMPlus.mountLiveCurve(document.getElementById('rs-curve'), Object.assign({ xMin: xMin, xMax: xMax, samples: 100 }, origin)).setFn(f);
+
+  var readout = document.getElementById('rs-readout');
+  var slider = document.getElementById('rs-slider');
+  var nLabel = document.getElementById('rs-n-label');
+  var methodNames = { left: 'Left', right: 'Right', mid: 'Midpoint' };
+
+  var rs = STEMPlus.mountRiemannSum(null, Object.assign({
+    fn: f, xMin: xMin, xMax: xMax,
+    rectsGroup: document.getElementById('rs-rects'),
+    n: 4, method: 'left',
+    onUpdate: function (sum, n, method) {
+      readout.textContent = 'n = ' + n + ' (' + methodNames[method] + ' sum): approximate area ≈ ' + sum.toFixed(2) + '. True area (Lesson 2) is 64/3 ≈ 21.33.';
+    }
+  }, origin));
+
+  slider.addEventListener('input', function () {
+    var n = parseInt(slider.value, 10);
+    nLabel.textContent = 'n = ' + n;
+    rs.render(n);
+  });
+
+  function setMethod(m) {
+    rs.setMethod(m);
+    rs.render(parseInt(slider.value, 10));
+  }
+  document.getElementById('rs-left').addEventListener('click', function () { setMethod('left'); });
+  document.getElementById('rs-right').addEventListener('click', function () { setMethod('right'); });
+  document.getElementById('rs-mid').addEventListener('click', function () { setMethod('mid'); });
+});
+</script>

@@ -1,0 +1,162 @@
+<title>Lesson 1: The Limit Idea — STEM+</title>
+<link rel="stylesheet" href="../../../assets/style.css">
+<script src="../../../assets/interactive.js" defer></script>
+<script src="../../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · AP Calculus BC · Unit 1 · Lesson 1</span>
+  <h1>The Limit Idea</h1>
+  <p class="subtitle">What it means to ask what's happening at a single instant — and the tool Calculus invents to answer it.</p>
+  <p class="nav-links"><a href="0002-estimating-limits-graphically-numerically.html">Lesson 2 →</a> <a href="../index.html">Contents</a> <a href="../reference/glossary.html">Glossary →</a></p>
+
+  <p>An <strong>average rate of change</strong> — the slope of a secant line between two points — is something you can already compute (see <a href="../../../Precalculus/Unit 1/0003-rates-of-change-and-behavior-of-graphs.html">Precalculus Lesson 3</a> if that's unfamiliar). Calculus starts from a harder question: what is the rate of change <em>at a single point</em>, not across an interval? Divide by zero width and the formula breaks — so Calculus needs a new tool. That tool is the <strong>limit</strong>.</p>
+
+  <h2>1. Shrinking the interval to nothing</h2>
+  <p>Below is <span class="expr">f(x) = x²</span> with two points on it. Point A is anchored at x = 1. Drag point B toward it and watch the secant slope in the readout.</p>
+
+  <div class="widget">
+    <div class="widget-label">Try It — Drag Point B Toward Point A</div>
+    <div class="plot-wrap">
+      <svg viewBox="0 0 460 320" width="460" height="320" role="img" aria-label="Two points on the parabola x squared connected by a secant line, one point draggable toward the other">
+        <line class="fig-axis" x1="20" y1="270" x2="440" y2="270"></line>
+        <line class="fig-axis" x1="140" y1="10" x2="140" y2="310"></line>
+        <polyline class="fig-curve" id="hook-curve"></polyline>
+        <rect class="drag-surface" id="hook-surface" x="20" y="10" width="420" height="300"></rect>
+        <line class="fig-secant" id="hook-secant" x1="0" y1="0" x2="0" y2="0"></line>
+        <circle class="fig-point" id="hook-point-a" r="5"></circle>
+        <circle class="fig-point" id="hook-point-b" r="5"></circle>
+      </svg>
+    </div>
+    <p class="plot-readout" id="hook-readout">—</p>
+    <p class="plot-hint">Point A stays at x = 1. As B slides toward x = 1, the gap shrinks toward zero and the secant slope stops changing much — it's homing in on one number.</p>
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why it matters</span>
+    That number the slope homes in on is the <strong>instantaneous rate of change</strong> at x = 1 — what Calculus calls the <em>derivative</em>. You can't compute it by plugging the gap width directly into the slope formula (that's 0/0), but you just watched it anyway, by asking what the slope approaches as the gap shrinks. That "approaches, without ever quite dividing by zero" idea is exactly what a limit formalizes.
+  </div>
+
+  <h2>2. Limit notation, and a case where it's the only way in</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    <span class="expr">lim<sub>x→c</sub> f(x) = L</span> means: as x gets arbitrarily close to c (from either side, without ever equaling c), f(x) gets arbitrarily close to L. Read aloud as "the limit of f(x) as x approaches c is L."
+  </div>
+
+  <p>Here's a function where plugging in x = 2 directly fails outright: <span class="expr">f(x) = (x² − 4) / (x − 2)</span>. At x = 2 that's 0/0 — undefined. Move the slider to shrink the distance from 2 and watch both sides of the table.</p>
+
+  <div class="widget" id="limit-table-widget">
+    <div class="widget-label">Try It — Estimate a Limit From a Table</div>
+    <div class="slider-row">
+      <label for="lt-slider">Distance from c = 2</label>
+      <input type="range" id="lt-slider" data-limit-slider min="0" max="5" step="1" value="0">
+      <span class="slider-value" id="lt-distance">1</span>
+    </div>
+    <div class="dual-plot">
+      <div>
+        <h3>x → 2⁻ (from the left)</h3>
+        <table><thead><tr><th>x</th><th>f(x)</th></tr></thead><tbody data-limit-left></tbody></table>
+      </div>
+      <div>
+        <h3>x → 2⁺ (from the right)</h3>
+        <table><thead><tr><th>x</th><th>f(x)</th></tr></thead><tbody data-limit-right></tbody></table>
+      </div>
+    </div>
+    <p class="plot-readout" id="lt-readout">Both sides start at 3 and 5 — far from agreeing yet.</p>
+  </div>
+
+  <p>f(2) itself is undefined — there's a hole in the graph at x = 2. But the table shows both sides sliding toward the same number as x closes in on 2. That shared number is the limit, even though the function never actually reaches it at x = 2 itself. <strong>A limit describes behavior near a point, and doesn't require the function to be defined at that point at all.</strong></p>
+
+  <h2>Check your recall</h2>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. Based on the table above, lim<sub>x→2</sub> (x² − 4)/(x − 2) equals:</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">4</button>
+      <button class="quiz-choice" data-correct="false">0</button>
+      <button class="quiz-choice" data-correct="false">2</button>
+      <button class="quiz-choice" data-correct="false">8</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Both columns close in on 4 as the distance from 2 shrinks — 3.9 and 4.1, then 3.99 and 4.01, and so on.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. A limit lim<sub>x→c</sub> f(x) describes the behavior of f:</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">near c, regardless of f(c)</button>
+      <button class="quiz-choice" data-correct="false">only exactly at c itself</button>
+      <button class="quiz-choice" data-correct="false">only when f(c) is defined</button>
+      <button class="quiz-choice" data-correct="false">far away from c entirely</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The table widget showed this directly: f(2) is undefined, yet the limit as x approaches 2 still exists and equals 4. Limits are about the approach, not the destination.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="instantaneous|instantaneous rate of change">
+    <p class="quiz-prompt">3. A rate of change over an interval is an average rate of change; a rate of change at a single point is called the ___ rate of change.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>That's the number Widget 1's secant slope was homing in on as the gap shrank to zero — the derivative, in embryo.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>The <a href="https://apcentral.collegeboard.org/media/pdf/ap-calculus-ab-and-bc-course-and-exam-description.pdf">College Board AP Calculus BC Course and Exam Description</a> covers this as Unit 1 topics 1.1–1.2. <a href="https://www.khanacademy.org/math/ap-calculus-bc/bc-limits-new">Khan Academy's "Limits and continuity" unit</a> has short videos and instant-feedback practice on the same idea. <a href="https://www.youtube.com/watch?v=54_XRjHhZzI">Professor Leonard's "Introduction to Limits" lecture</a> works through more examples slowly if the table alone isn't quite enough.</p>
+
+  <p class="ask-teacher">If "a limit doesn't care what happens exactly at c" still feels strange, say so — it's the single idea the rest of Unit 1 is built on. Next up: reading limits off graphs, including cases where a table alone can't be trusted.</p>
+
+  <footer class="lesson-footer">STEM+ · AP Calculus BC · Unit 1 · Lesson 1 of 6</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var hookFn = function (x) { return x * x; };
+  var hookOrigin = { xMin: -3, xMax: 5, originX: 140, originY: 270, scaleX: 45, scaleY: 22, samples: 50 };
+  STEMPlus.mountLiveCurve(document.getElementById('hook-curve'), hookOrigin).setFn(hookFn);
+
+  var hookSecant = document.getElementById('hook-secant');
+  var hookReadout = document.getElementById('hook-readout');
+  var hookSvg = document.getElementById('hook-surface').ownerSVGElement;
+  var hookToSvgX = function (mx) { return hookOrigin.originX + mx * hookOrigin.scaleX; };
+  var hookToSvgY = function (my) { return hookOrigin.originY - my * hookOrigin.scaleY; };
+
+  STEMPlus.mountTwoPointsOnCurve(hookSvg, Object.assign({
+    fn: hookFn,
+    pointA: document.getElementById('hook-point-a'),
+    pointB: document.getElementById('hook-point-b'),
+    dragSurface: document.getElementById('hook-surface'),
+    initialXA: 1, initialXB: 3.5,
+    onUpdate: function (ax, ay, bx, by) {
+      hookSecant.setAttribute('x1', hookToSvgX(ax));
+      hookSecant.setAttribute('y1', hookToSvgY(ay));
+      hookSecant.setAttribute('x2', hookToSvgX(bx));
+      hookSecant.setAttribute('y2', hookToSvgY(by));
+      var gap = Math.abs(bx - ax);
+      if (gap < 0.02) {
+        hookReadout.textContent = 'Gap ≈ 0: secant slope ≈ ' + ((by - ay) / (bx - ax)).toFixed(3) + ' — right at the instantaneous rate of change at x = 1, which is 2.';
+      } else {
+        var slope = (by - ay) / (bx - ax);
+        hookReadout.textContent = 'A = (1, 1), B = (' + bx.toFixed(2) + ', ' + by.toFixed(2) + '). Gap = ' + gap.toFixed(2) + '. Secant slope = ' + slope.toFixed(3) + '.';
+      }
+    }
+  }, hookOrigin));
+
+  var limitFn = function (x) { return (x * x - 4) / (x - 2); };
+  var ltDistance = document.getElementById('lt-distance');
+  var ltReadout = document.getElementById('lt-readout');
+  var distances = [1, 0.5, 0.25, 0.1, 0.01, 0.001];
+
+  STEMPlus.mountLimitTable(document.getElementById('limit-table-widget'), limitFn, {
+    c: 2,
+    distances: distances,
+    onRow: function (xl, yl, xr, yr) {
+      ltReadout.textContent = 'At distance ' + Math.abs(2 - xl).toString() + ' from 2: left side gives ' + yl.toFixed(4) + ', right side gives ' + yr.toFixed(4) + '.';
+    }
+  });
+
+  document.getElementById('lt-slider').addEventListener('input', function (e) {
+    ltDistance.textContent = distances[parseInt(e.target.value, 10)];
+  });
+});
+</script>

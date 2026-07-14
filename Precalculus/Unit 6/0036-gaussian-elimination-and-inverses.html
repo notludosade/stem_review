@@ -1,0 +1,114 @@
+<title>Lesson 36: Gaussian Elimination and Inverses — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/interactive.js" defer></script>
+<script src="../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Precalculus · Lesson 36</span>
+  <h1>Solving Systems with Gaussian Elimination and Inverses</h1>
+  <p class="subtitle">Lessons 32–33's elimination, repackaged as row operations on a matrix — plus a second route that solves the whole system in one multiplication.</p>
+  <p class="nav-links"><a href="0035-matrices-and-matrix-operations.html">← Lesson 35</a> <a href="0037-cramers-rule.html">Lesson 37 →</a> <a href="../index.html">Contents</a> <a href="../reference/glossary.html">Glossary →</a></p>
+
+  <h2>1. Augmented matrices</h2>
+  <div class="box">
+    <span class="box-label">Definition — Augmented Matrix</span>
+    Strip a system's variables away and keep only its coefficients and constants, separated by a vertical bar in place of the equals signs. x + 2y = 5 and 3x − y = 1 becomes [ 1  2 | 5 ; 3  −1 | 1 ] — the same information, arranged for row operations instead of algebra on variables.
+  </div>
+
+  <h2>2. Gaussian elimination</h2>
+  <div class="box">
+    <span class="box-label">Method — Row Operations</span>
+    Three moves are allowed, each preserving the system's solution: multiply a row by a nonzero constant, add one row to another, or swap two rows. The goal is <strong>row-echelon form</strong> — 1's down the main diagonal, 0's below it — after which back-substitution (Lessons 32–33) finishes the job. A row that reduces to all zeros signals infinitely many solutions; a row that reduces to "0 = nonzero" signals no solution at all.
+  </div>
+
+  <h2>3. Matrix inverses</h2>
+  <div class="box">
+    <span class="box-label">Definition — Invertible Matrix</span>
+    The <strong>identity matrix</strong> I has 1's on the main diagonal and 0's elsewhere — the matrix equivalent of the number 1. A square matrix A is <strong>invertible</strong> if some A⁻¹ exists with AA⁻¹ = I. Only square matrices can be invertible, and not every square matrix is. For a 2×2 matrix [[a, b], [c, d]], A⁻¹ = (1 / (ad − bc)) · [[d, −b], [−c, a]] — undefined exactly when ad − bc = 0.
+  </div>
+  <div class="box">
+    <span class="box-label">Method — Solving with an Inverse</span>
+    Write the system as AX = B, where A is the coefficient matrix, X holds the variables, and B holds the constants. Multiplying both sides by A⁻¹ on the left gives X = A⁻¹B — the entire solution in one matrix multiplication, provided A is invertible.
+  </div>
+
+  <div class="box">
+    <span class="box-label">Worked Example — Both Methods, Same System</span>
+    x + 2y = 5, 3x − y = 1. <em>Elimination:</em> R2 − 3R1 turns [3, −1 | 1] into [0, −7 | −14], so y = 2, and back-substituting gives x = 1. <em>Inverse:</em> A = [[1,2],[3,−1]], det = (1)(−1) − (2)(3) = −7, so A⁻¹ = (1/−7)[[−1,−2],[−3,1]] = [[1/7, 2/7],[3/7, −1/7]]. Then X = A⁻¹B gives x = (5/7)+(2/7) = 1 and y = (15/7)−(1/7) = 2. Both routes land on <strong>(1, 2)</strong>.
+  </div>
+
+  <h2>4. Watching the elimination unfold</h2>
+  <p>Step through the row operations from the worked example above, one move at a time.</p>
+
+  <div class="widget">
+    <div class="widget-label">Try It — Gaussian Elimination Step by Step</div>
+    <div class="step-display" id="ge-display" style="min-height: 4.5rem; padding: 1rem; border: 1px solid var(--rule); border-radius: 8px; font-family: var(--mono, monospace); white-space: pre-line;">Click "Next Step" to begin.</div>
+    <div class="quiz-fill-row" style="margin-top: 0.75rem;">
+      <button class="quiz-fill-check" id="ge-next">Next Step →</button>
+      <button class="quiz-fill-check" id="ge-reset">Reset</button>
+    </div>
+  </div>
+
+  <h2>Check your recall</h2>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. The goal of Gaussian elimination's row operations is to reach:</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">row-echelon form</button>
+      <button class="quiz-choice" data-correct="false">the identity matrix</button>
+      <button class="quiz-choice" data-correct="false">a scalar matrix</button>
+      <button class="quiz-choice" data-correct="false">a zero matrix</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Row-echelon form — 1's on the diagonal, 0's below — sets the matrix up for straightforward back-substitution, the same final step used in Lessons 32–33.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="square">
+    <p class="quiz-prompt">2. Only a ___ matrix can possibly have a multiplicative inverse.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Invertibility requires AA⁻¹ = A⁻¹A = I, which forces A to have the same number of rows as columns — a non-square matrix can't satisfy this in both directions.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. For A = [[1,2],[3,−1]], the determinant ad − bc equals:</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">−7</button>
+      <button class="quiz-choice" data-correct="false">7</button>
+      <button class="quiz-choice" data-correct="false">−1</button>
+      <button class="quiz-choice" data-correct="false">5</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>ad − bc = (1)(−1) − (2)(3) = −1 − 6 = −7, matching the worked example's inverse computation.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p><a href="https://openstax.org/books/precalculus-2e/pages/9-6-solving-systems-with-gaussian-elimination">OpenStax Precalculus 2e, §9.6 "Solving Systems with Gaussian Elimination"</a> and <a href="https://openstax.org/books/precalculus-2e/pages/9-7-solving-systems-with-inverses">§9.7 "Solving Systems with Inverses"</a> work through larger 3×3 systems with both methods, including Nancy's bond-investment problem that opens §9.7.</p>
+
+  <p class="ask-teacher">The determinant ad − bc is doing quiet but essential work here — when it's zero, no inverse exists and the system is either dependent or inconsistent. Ask for an example where that happens if the connection between "determinant zero" and "no unique solution" still feels abstract. Lesson 37 introduces one more matrix-based method: Cramer's Rule.</p>
+
+  <footer class="lesson-footer">STEM+ · Precalculus · Lesson 36 of the course sequence</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var steps = [
+    'Start (augmented matrix):\n[  1   2  |   5 ]\n[  3  −1  |   1 ]',
+    'R2 → R2 − 3R1:\n[  1   2  |   5 ]\n[  0  −7  | −14 ]',
+    'Row 2 says: −7y = −14  →  y = 2',
+    'Back-substitute into row 1: x + 2(2) = 5  →  x = 1',
+    'Solution: (x, y) = (1, 2)'
+  ];
+  var idx = 0;
+  var display = document.getElementById('ge-display');
+  document.getElementById('ge-next').addEventListener('click', function () {
+    if (idx < steps.length - 1) idx++;
+    display.textContent = steps[idx];
+  });
+  document.getElementById('ge-reset').addEventListener('click', function () {
+    idx = 0;
+    display.textContent = steps[0];
+  });
+});
+</script>

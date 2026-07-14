@@ -1,0 +1,123 @@
+<title>Unit 10, Lesson 7: Taylor Polynomials and the Lagrange Error Bound — STEM+</title>
+<link rel="stylesheet" href="../../../assets/style.css">
+<script src="../../../assets/interactive.js" defer></script>
+<script src="../../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · AP Calculus BC · Unit 10 · Lesson 7</span>
+  <h1>Taylor Polynomials and the Lagrange Error Bound</h1>
+  <p class="subtitle">A polynomial that matches a function's value and every derivative at one point turns out to approximate the function everywhere nearby — and the approximation's error can be capped without knowing the true value at all.</p>
+  <p class="nav-links"><a href="0006-alternating-series-error-bound.html">← Lesson 6</a> <a href="0008-radius-and-interval-of-convergence.html">Lesson 8 →</a> <a href="../index.html">Contents</a> <a href="../reference/glossary.html">Glossary →</a></p>
+
+  <h2>1. Building a polynomial from derivatives</h2>
+  <div class="box">
+    <span class="box-label">Definition — Taylor Polynomial</span>
+    The <strong>degree-n Taylor polynomial</strong> of f centered at x = a is Pₙ(x) = f(a) + f'(a)(x−a) + f''(a)(x−a)²/2! + ... + f⁽ⁿ⁾(a)(x−a)ⁿ/n! — the unique degree-n polynomial that matches f's value and its first n derivatives at a. For f(x) = eˣ centered at a = 0, every derivative equals eˣ, so f⁽ᵏ⁾(0) = 1 for every k, giving <strong>Pₙ(x) = Σₖ₌₀ⁿ xᵏ/k!</strong>.
+  </div>
+  <div class="box">
+    <span class="box-label">Method — The Lagrange Error Bound</span>
+    The remainder Rₙ(x) = f(x) − Pₙ(x) satisfies <strong>|Rₙ(x)| ≤ M/(n+1)! · |x−a|ⁿ⁺¹</strong>, where M is any upper bound for |f⁽ⁿ⁺¹⁾(c)| on the interval between a and x. This caps the approximation's error without ever computing f(x) exactly — larger n or a smaller distance |x−a| both shrink the bound.
+  </div>
+  <div class="box">
+    <span class="box-label">Worked Example</span>
+    Approximate e^0.5 with P₄(x) centered at 0: P₄(0.5) = 1 + 0.5 + 0.5²/2! + 0.5³/3! + 0.5⁴/4! = <strong>1.648438</strong>. True value e^0.5 ≈ 1.648721, actual error ≈ 0.000284. Lagrange bound: since f⁽⁵⁾(c) = eᶜ is largest at c = 0.5 on [0, 0.5], take M = e^0.5 ≈ 1.6487: bound = 1.6487/5! · 0.5⁵ ≈ <strong>0.000429</strong>. The actual error (0.000284) falls comfortably under the bound (0.000429), exactly as guaranteed.
+  </div>
+
+  <h2>2. Watching the bound tighten as terms are added</h2>
+  <p>Advance the degree n and watch both the actual error and its Lagrange ceiling shrink together — the bound stays above the truth at every step.</p>
+
+  <div class="widget" id="tp-widget">
+    <div class="widget-label">Try It — Approximating e^0.5 with Increasing Degree</div>
+    <div class="slider-row">
+      <label for="tp-slider">n</label>
+      <input type="range" id="tp-slider" min="0" max="6" step="1" value="0">
+      <span class="slider-value" id="tp-n-label">n = 0</span>
+    </div>
+    <table><thead><tr><th>n</th><th>Pₙ(0.5)</th><th>Actual error</th><th>Lagrange bound</th></tr></thead><tbody id="tp-body"></tbody></table>
+  </div>
+
+  <h2>Check your recall</h2>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. Pₙ(x), the degree-n Taylor polynomial at x = a, matches f at a in:</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">value and its first n derivatives</button>
+      <button class="quiz-choice" data-correct="false">value only</button>
+      <button class="quiz-choice" data-correct="false">its first derivative only</button>
+      <button class="quiz-choice" data-correct="false">every derivative, for any n</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A degree-n polynomial has exactly n+1 coefficients to spend, which is enough to match f(a) plus n derivatives — matching every derivative would require infinitely many terms, which is exactly what a full Taylor series (Lesson 9) does.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="1/6,0.16667,0.1667">
+    <p class="quiz-prompt">2. For f(x) = eˣ at a = 0, the x³ coefficient of Pₙ(x) (n ≥ 3) is 1/3! = ___</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Since every derivative of eˣ at 0 equals 1, each coefficient is simply 1/k! — for k = 3, that's 1/6 ≈ 0.1667.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Increasing n in the Lagrange error bound M/(n+1)! · |x−a|ⁿ⁺¹ typically:</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">shrinks the bound, since (n+1)! grows faster than any fixed power</button>
+      <button class="quiz-choice" data-correct="false">grows the bound without limit</button>
+      <button class="quiz-choice" data-correct="false">leaves the bound unchanged</button>
+      <button class="quiz-choice" data-correct="false">only shrinks the bound if x = a exactly</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The factorial in the denominator eventually dominates any fixed base raised to a growing power, so for a fixed x the bound shrinks toward 0 as n grows — the same factorial-beats-exponential idea from the ratio test in Lesson 5.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p><a href="https://openstax.org/books/calculus-volume-2/pages/6-3-taylor-and-maclaurin-series">OpenStax Calculus Volume 2, §6.3 "Taylor and Maclaurin Series"</a> derives the Taylor polynomial formula and proves the Lagrange error bound.</p>
+
+  <p class="ask-teacher">Choosing M for the Lagrange bound requires bounding a derivative on an interval, which sometimes takes a bit of estimation rather than an exact value. Ask for practice picking M on a trickier function, like sin x or ln(1+x), if the e^x case felt too clean.</p>
+
+  <footer class="lesson-footer">STEM+ · AP Calculus BC · Unit 10 · Lesson 7 of 9</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var slider = document.getElementById('tp-slider');
+  var nLabel = document.getElementById('tp-n-label');
+  var body = document.getElementById('tp-body');
+  var x = 0.5;
+  var trueVal = Math.exp(x);
+
+  function factorial(k) {
+    var f = 1;
+    for (var i = 2; i <= k; i++) { f *= i; }
+    return f;
+  }
+
+  function taylorP(n) {
+    var s = 0;
+    for (var k = 0; k <= n; k++) { s += Math.pow(x, k) / factorial(k); }
+    return s;
+  }
+
+  function render() {
+    var n = parseInt(slider.value, 10);
+    nLabel.textContent = 'n = ' + n;
+    body.innerHTML = '';
+    for (var i = 0; i <= n; i++) {
+      var p = taylorP(i);
+      var actualErr = Math.abs(trueVal - p);
+      var bound = trueVal / factorial(i + 1) * Math.pow(x, i + 1);
+      var row = document.createElement('tr');
+      var cells = [i, p.toFixed(6), actualErr.toFixed(6), bound.toFixed(6)];
+      cells.forEach(function (val) {
+        var td = document.createElement('td'); td.textContent = String(val);
+        row.appendChild(td);
+      });
+      body.appendChild(row);
+    }
+  }
+
+  slider.addEventListener('input', render);
+  render();
+});
+</script>

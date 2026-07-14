@@ -1,0 +1,101 @@
+<title>Unit 8, Lesson 4: Area Between Curves — More Than Two Intersections — STEM+</title>
+<link rel="stylesheet" href="../../../assets/style.css">
+<script src="../../../assets/interactive.js" defer></script>
+<script src="../../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · AP Calculus BC · Unit 8 · Lesson 4</span>
+  <h1>Area Between Curves — More Than Two Intersections</h1>
+  <p class="subtitle">When two curves cross more than twice, "top minus bottom" isn't fixed for the whole region — it flips at every crossing, so the integral has to be split.</p>
+  <p class="nav-links"><a href="0003-area-between-curves.html">← Lesson 3</a> <a href="0005-cross-sections.html">Lesson 5 →</a> <a href="../index.html">Contents</a> <a href="../reference/glossary.html">Glossary →</a></p>
+
+  <h2>1. Same formula, more bookkeeping</h2>
+  <div class="box">
+    <span class="box-label">Method — Splitting at Every Crossing</span>
+    Find every intersection of the two curves on the interval of interest, not just the two endpoints. Between each consecutive pair of intersections, decide which curve is on top by testing one point, then integrate |top − bottom| on that piece. The total area is the sum of all the pieces — exactly the same logic Unit 8 Lesson 2 used for total distance when velocity changed sign.
+  </div>
+
+  <h2>2. Worked example, step by step</h2>
+  <p>Find the area of the region between y = sin x and y = sin 2x on [0, π]. Press Next Step to work through it.</p>
+
+  <div class="widget">
+    <div class="widget-label">Try It — Splitting the Region at Each Crossing</div>
+    <div class="step-display" id="mti-display" style="min-height: 7.5em; padding: 1em; border: 1px solid #ccc; border-radius: 6px; margin-bottom: 0.75em;"></div>
+    <button id="mti-next">Next Step</button>
+    <button id="mti-reset">Reset</button>
+  </div>
+
+  <h2>Check your recall</h2>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. When two curves cross three times on an interval, the area between them requires:</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">splitting the integral into two pieces at the middle crossing</button>
+      <button class="quiz-choice" data-correct="false">a single integral with no splitting</button>
+      <button class="quiz-choice" data-correct="false">ignoring the middle crossing entirely</button>
+      <button class="quiz-choice" data-correct="false">switching to integrating with respect to y</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Three crossings create two subintervals, and the curve that's "on top" can differ between them — each piece needs its own top-minus-bottom integrand.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="5/2,2.5">
+    <p class="quiz-prompt">2. The area between y = sin x and y = sin 2x on [0, π] is ___</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Splitting at x = π/3 gives ∫₀^(π/3)[sin2x − sinx]dx + ∫_(π/3)^π[sinx − sin2x]dx = 1/4 + 9/4 = 5/2.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. To find where "top" and "bottom" switch between two curves, you should:</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">solve for every intersection point on the interval</button>
+      <button class="quiz-choice" data-correct="false">only check the two endpoints of the interval</button>
+      <button class="quiz-choice" data-correct="false">assume the switch never happens</button>
+      <button class="quiz-choice" data-correct="false">graph the derivative instead</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Every point where the two curves are equal is a candidate switch point — solving f(x) = g(x) across the whole interval finds all of them, not just the outer bounds.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p><a href="https://openstax.org/books/calculus-volume-1/pages/6-1-areas-between-curves">OpenStax Calculus Volume 1, §6.1 "Areas between Curves"</a> works through a region with multiple crossings using the same splitting strategy.</p>
+
+  <p class="ask-teacher">The hardest part of this skill is rarely the integration — it's correctly testing which curve is on top in each piece. Sketching the two curves, even roughly, is often faster and safer than reasoning about signs symbolically. Ask for a three-curve example if a region bounded on top and bottom by two different pairs of functions sounds useful to see. Lesson 5 leaves the plane entirely: cross sections build solids by stacking two-dimensional slices.</p>
+
+  <footer class="lesson-footer">STEM+ · AP Calculus BC · Unit 8 · Lesson 4 of 8</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var steps = [
+    'Step 1 — Find all intersections on [0, π]. Set sin x = sin 2x = 2 sin x cos x, so sin x (1 − 2cos x) = 0. This gives sin x = 0 (x = 0, π) or cos x = 1/2 (x = π/3). Three intersections: x = 0, π/3, π.',
+    'Step 2 — Test which curve is on top on (0, π/3). At x = π/6: sin x = 0.5, sin 2x = sin(π/3) ≈ 0.866. So sin 2x is on top here.',
+    'Step 3 — Test which curve is on top on (π/3, π). At x = π/2: sin x = 1, sin 2x = sin π = 0. So sin x is on top here — the curves swapped roles at x = π/3.',
+    'Step 4 — Integrate each piece. ∫₀^(π/3) [sin 2x − sin x] dx = [−cos2x/2 + cos x]₀^(π/3) = 3/4 − 1/2 = 1/4.',
+    'Step 5 — ∫_(π/3)^π [sin x − sin 2x] dx = [−cos x + cos2x/2]_(π/3)^π = 3/2 − (−3/4) = 9/4.',
+    'Step 6 — Add the pieces: total area = 1/4 + 9/4 = 5/2. Both subintervals contributed, exactly because the curves crossed a third time inside the region.'
+  ];
+  var idx = 0;
+  var display = document.getElementById('mti-display');
+  var nextBtn = document.getElementById('mti-next');
+  var resetBtn = document.getElementById('mti-reset');
+
+  function render() {
+    display.textContent = steps[idx];
+    nextBtn.disabled = idx >= steps.length - 1;
+  }
+
+  nextBtn.addEventListener('click', function () {
+    if (idx < steps.length - 1) idx++;
+    render();
+  });
+  resetBtn.addEventListener('click', function () {
+    idx = 0;
+    render();
+  });
+  render();
+});
+</script>

@@ -1,0 +1,157 @@
+<title>Lesson 3: Computing Limits Algebraically — STEM+</title>
+<link rel="stylesheet" href="../../../assets/style.css">
+<script src="../../../assets/interactive.js" defer></script>
+<script src="../../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · AP Calculus BC · Unit 1 · Lesson 3</span>
+  <h1>Computing Limits Algebraically</h1>
+  <p class="subtitle">Turning "estimate from a table" into "prove it exactly" — plus a theorem for when nothing simplifies.</p>
+  <p class="nav-links"><a href="0002-estimating-limits-graphically-numerically.html">← Lesson 2</a> <a href="0004-continuity-and-discontinuity.html">Lesson 4 →</a> <a href="../index.html">Contents</a> <a href="../reference/glossary.html">Glossary →</a></p>
+
+  <p>Tables and graphs are how you <em>discover</em> a limit. Algebra is how you <em>prove</em> it exactly, without relying on how many decimal places a table happened to show. Three tools cover almost every limit you'll meet this unit: direct substitution backed by the limit laws, algebraic rewriting when substitution fails, and — for the rare case where nothing simplifies — the Squeeze Theorem.</p>
+
+  <h2>1. The limit laws</h2>
+  <div class="box">
+    <span class="box-label">Rule</span>
+    If <span class="expr">lim<sub>x→c</sub> f(x) = A</span> and <span class="expr">lim<sub>x→c</sub> g(x) = B</span> both exist, then: <span class="expr">lim [f(x) + g(x)] = A + B</span>, <span class="expr">lim [f(x)·g(x)] = A·B</span>, and <span class="expr">lim [f(x)/g(x)] = A/B</span> (provided B ≠ 0). For any polynomial or rational function, this means direct substitution works wherever the function is actually defined.
+  </div>
+
+  <p>The catch is exactly the case Lessons 1–2 kept hitting: substitution fails when it produces 0/0. That's not proof the limit doesn't exist — it's a sign the expression needs to be rewritten <em>before</em> substituting.</p>
+
+  <h2>2. Factor and cancel</h2>
+  <p>Take <span class="expr">lim<sub>x→3</sub> (x² − 9)/(x − 3)</span>. Substituting x = 3 gives 0/0. But the numerator factors:</p>
+  <div class="box">
+    <span class="box-label">Worked Example</span>
+    (x² − 9)/(x − 3) = (x − 3)(x + 3)/(x − 3) = x + 3, for every x ≠ 3.<br>
+    So lim<sub>x→3</sub> (x² − 9)/(x − 3) = lim<sub>x→3</sub> (x + 3) = 3 + 3 = <strong>6</strong> — now direct substitution works, because the (x − 3) causing the 0/0 has been cancelled away.
+  </div>
+
+  <p>Confirm it the way Lesson 1 did — with a table:</p>
+
+  <div class="widget" id="factor-table-widget">
+    <div class="widget-label">Try It — Confirm the Factored Limit</div>
+    <div class="slider-row">
+      <label for="ft-slider">Distance from c = 3</label>
+      <input type="range" id="ft-slider" data-limit-slider min="0" max="5" step="1" value="0">
+      <span class="slider-value" id="ft-distance">1</span>
+    </div>
+    <div class="dual-plot">
+      <div>
+        <h3>x → 3⁻ (from the left)</h3>
+        <table><thead><tr><th>x</th><th>f(x)</th></tr></thead><tbody data-limit-left></tbody></table>
+      </div>
+      <div>
+        <h3>x → 3⁺ (from the right)</h3>
+        <table><thead><tr><th>x</th><th>f(x)</th></tr></thead><tbody data-limit-right></tbody></table>
+      </div>
+    </div>
+  </div>
+
+  <p>Rationalizing works the same way when a square root causes the 0/0: for <span class="expr">lim<sub>x→0</sub> (√(x + 4) − 2)/x</span>, multiply top and bottom by the conjugate √(x + 4) + 2. The numerator becomes (x + 4) − 4 = x, which cancels the x in the denominator, leaving 1/(√(x + 4) + 2) — and substituting x = 0 now gives 1/(2 + 2) = 1/4. Same idea as factoring: rewrite until the offending factor cancels, <em>then</em> substitute.</p>
+
+  <h2>3. When nothing cancels: the Squeeze Theorem</h2>
+  <p>Some functions won't factor or rationalize into anything simpler at all. <span class="expr">g(x) = x²sin(1/x)</span> is one — as x → 0, 1/x swings toward infinity and sin(1/x) oscillates endlessly between −1 and 1, with no algebraic simplification available. But notice: since sin of anything is always between −1 and 1, <span class="expr">g(x)</span> is always trapped between −x² and x², no matter how wildly it oscillates.</p>
+
+  <div class="box">
+    <span class="box-label">Theorem</span>
+    <strong>Squeeze Theorem:</strong> if f(x) ≤ g(x) ≤ h(x) for all x near c, and <span class="expr">lim<sub>x→c</sub> f(x) = lim<sub>x→c</sub> h(x) = L</span>, then <span class="expr">lim<sub>x→c</sub> g(x) = L</span> too — g is squeezed to the same limit as its bounds, whatever g itself is doing in between.
+  </div>
+
+  <p>Drag the point below and watch g(x) stay pinned between the two dashed bounds, however much it wiggles.</p>
+
+  <div class="widget">
+    <div class="widget-label">Try It — Squeeze x²sin(1/x) Between ±x²</div>
+    <div class="plot-wrap">
+      <svg viewBox="0 0 460 300" width="460" height="300" role="img" aria-label="The oscillating function x squared times sine of one over x, trapped between the bounding curves plus and minus x squared, both pinching to zero">
+        <line class="fig-axis" x1="20" y1="150" x2="440" y2="150"></line>
+        <line class="fig-axis" x1="230" y1="20" x2="230" y2="280"></line>
+        <polyline class="fig-ghost" id="sq-upper"></polyline>
+        <polyline class="fig-ghost" id="sq-lower"></polyline>
+        <polyline class="fig-curve" id="sq-mid"></polyline>
+        <rect class="drag-surface" id="sq-surface" x="20" y="20" width="420" height="260"></rect>
+        <circle class="fig-point" id="sq-point" r="6"></circle>
+      </svg>
+    </div>
+    <p class="plot-readout" id="sq-readout">—</p>
+    <p class="plot-hint">Dashed curves: the bounds ±x². Solid curve: g(x) = x²sin(1/x). As |x| shrinks, the bounds squeeze toward 0 — and drag the point close enough and g(x) has nowhere else to go.</p>
+  </div>
+
+  <h2>Check your recall</h2>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. lim<sub>x→3</sub> (x² − 9)/(x − 3) equals:</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">6</button>
+      <button class="quiz-choice" data-correct="false">3</button>
+      <button class="quiz-choice" data-correct="false">9</button>
+      <button class="quiz-choice" data-correct="false">0</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Factoring gives (x − 3)(x + 3)/(x − 3) = x + 3 for x ≠ 3, and substituting x = 3 into the simplified form gives 3 + 3 = 6.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Since x²sin(1/x) is always trapped between −x² and x², and both bounds → 0 as x → 0, the squeezed function's limit at 0:</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">must also equal zero</button>
+      <button class="quiz-choice" data-correct="false">could equal any value</button>
+      <button class="quiz-choice" data-correct="false">does not exist here</button>
+      <button class="quiz-choice" data-correct="false">oscillates without limit</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The Squeeze Theorem forces g's limit to match its bounds' shared limit — since both −x² and x² go to 0, g(x) has nowhere else to converge, however much it oscillates in between.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="1/4|0.25|.25">
+    <p class="quiz-prompt">3. Rationalizing the conjugate, lim<sub>x→0</sub> (√(x + 4) − 2)/x = ___ (as a decimal or fraction).</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>After multiplying by the conjugate and cancelling the x, the expression becomes 1/(√(x + 4) + 2), and substituting x = 0 gives 1/(2 + 2) = 1/4.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>College Board CED Unit 1 topics 1.5–1.8 cover the limit laws, algebraic manipulation, and the Squeeze Theorem. <a href="https://tutorial.math.lamar.edu/Classes/CalcI/LimitsProperties.aspx">Paul's Online Math Notes on limit properties</a> lays out the laws formally with more worked examples. <a href="https://www.youtube.com/watch?v=QvXjKpyS2eE">Professor Leonard's lecture on the Squeeze Theorem and one-sided limits</a> works through several more squeezed functions in detail.</p>
+
+  <p class="ask-teacher">If picking which technique to use — factor, rationalize, or squeeze — feels like guessing, ask. There's a real pattern to it (0/0 with a visible common factor → factor; 0/0 with a square root → rationalize; oscillation with no algebra available → squeeze), and it's worth naming explicitly before the next lesson moves on to continuity.</p>
+
+  <footer class="lesson-footer">STEM+ · AP Calculus BC · Unit 1 · Lesson 3 of 6</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var factorFn = function (x) { return (x * x - 9) / (x - 3); };
+  var ftDistance = document.getElementById('ft-distance');
+  var distances = [1, 0.5, 0.25, 0.1, 0.01, 0.001];
+
+  STEMPlus.mountLimitTable(document.getElementById('factor-table-widget'), factorFn, { c: 3, distances: distances });
+  document.getElementById('ft-slider').addEventListener('input', function (e) {
+    ftDistance.textContent = distances[parseInt(e.target.value, 10)];
+  });
+
+  var sqOrigin = { originX: 230, originY: 150, scaleX: 200, scaleY: 110 };
+  var squeezed = function (x) { return x === 0 ? 0 : x * x * Math.sin(1 / x); };
+  var upper = function (x) { return x * x; };
+  var lower = function (x) { return -x * x; };
+
+  STEMPlus.mountLiveCurve(document.getElementById('sq-upper'), Object.assign({ xMin: -1, xMax: 1, samples: 60 }, sqOrigin)).setFn(upper);
+  STEMPlus.mountLiveCurve(document.getElementById('sq-lower'), Object.assign({ xMin: -1, xMax: 1, samples: 60 }, sqOrigin)).setFn(lower);
+  STEMPlus.mountLiveCurve(document.getElementById('sq-mid'), Object.assign({ xMin: -1, xMax: 1, samples: 400 }, sqOrigin)).setFn(squeezed);
+
+  var sqReadout = document.getElementById('sq-readout');
+  var sqSvg = document.getElementById('sq-surface').ownerSVGElement;
+  STEMPlus.mountPointOnCurve(sqSvg, Object.assign({
+    fn: squeezed, xMin: -1, xMax: 1,
+    point: document.getElementById('sq-point'),
+    dragSurface: document.getElementById('sq-surface'),
+    initialX: 0.6,
+    onUpdate: function (x, y) {
+      var bound = x * x;
+      sqReadout.textContent = 'x = ' + x.toFixed(3) + ': g(x) = ' + y.toFixed(5) + ', bound = ±' + bound.toFixed(5) + '. ' +
+        (Math.abs(x) < 0.05 ? 'Both bounds are nearly 0 here — g has almost no room left.' : 'g stays inside [−' + bound.toFixed(3) + ', ' + bound.toFixed(3) + '].');
+    }
+  }, sqOrigin));
+});
+</script>

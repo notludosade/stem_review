@@ -1,0 +1,201 @@
+<title>Lesson 4: Continuity and Types of Discontinuity — STEM+</title>
+<link rel="stylesheet" href="../../../assets/style.css">
+<script src="../../../assets/interactive.js" defer></script>
+<script src="../../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · AP Calculus BC · Unit 1 · Lesson 4</span>
+  <h1>Continuity and Types of Discontinuity</h1>
+  <p class="subtitle">"Draw it without lifting your pencil" made precise — and the three distinct ways a function can fail at it.</p>
+  <p class="nav-links"><a href="0003-computing-limits-algebraically.html">← Lesson 3</a> <a href="0005-infinite-limits-and-asymptotes.html">Lesson 5 →</a> <a href="../index.html">Contents</a> <a href="../reference/glossary.html">Glossary →</a></p>
+
+  <p>Every widget in Lessons 1–3 quietly relied on limits and function values sometimes <em>disagreeing</em> — that's exactly what made them worth studying. <strong>Continuity</strong> is the special, well-behaved case where they don't disagree at all. Pinning that down precisely also gives a vocabulary for exactly how it can fail.</p>
+
+  <h2>1. The three-part definition</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    f is <strong>continuous at x = c</strong> only if all three hold: (1) <span class="expr">f(c)</span> is defined, (2) <span class="expr">lim<sub>x→c</sub> f(x)</span> exists, and (3) <span class="expr">lim<sub>x→c</sub> f(x) = f(c)</span>. Fail any one of the three and f is discontinuous at c — but <em>which</em> one fails tells you what kind of discontinuity it is.
+  </div>
+
+  <h2>2. Three functions, same point, three different failures</h2>
+  <p>All three functions below have a problem at x = 2 — but drag through each tab and check the list to see it's never the <em>same</em> problem.</p>
+
+  <div class="widget" id="disc-widget">
+    <div class="widget-label">Try It — Three Kinds of Discontinuity at x = 2</div>
+    <div class="fm-tabs">
+      <button class="fm-tab is-active" data-disc-tab="removable" type="button">Removable</button>
+      <button class="fm-tab" data-disc-tab="jump" type="button">Jump</button>
+      <button class="fm-tab" data-disc-tab="infinite" type="button">Infinite</button>
+    </div>
+
+    <div class="fm-panel" data-disc-panel="removable">
+      <p class="plot-hint">p(x) = x + 1 everywhere except at x = 2 itself, where p(2) is defined to be 5 instead.</p>
+      <div class="plot-wrap">
+        <svg viewBox="0 0 400 240" width="400" height="240" role="img" aria-label="Line y equals x plus 1 with a hole at x=2 where the limit is 3, but the point has been moved up to 5">
+          <line class="fig-axis" x1="20" y1="170" x2="380" y2="170"></line>
+          <line class="fig-axis" x1="100" y1="10" x2="100" y2="230"></line>
+          <polyline class="fig-curve" id="p-curve"></polyline>
+          <circle cx="220" cy="80" r="5" style="fill: var(--bg); stroke: var(--accent); stroke-width: 2;"></circle>
+          <circle cx="220" cy="20" r="5" class="fig-point"></circle>
+          <rect class="drag-surface" id="p-surface" x="20" y="10" width="360" height="220"></rect>
+          <circle class="fig-point" id="p-point" r="6"></circle>
+        </svg>
+      </div>
+      <p class="plot-readout" id="p-readout">—</p>
+      <ul>
+        <li><span class="verdict is-pass">✓ f(2) is defined</span> — f(2) = 5 (the filled dot)</li>
+        <li><span class="verdict is-pass">✓ the limit exists</span> — lim<sub>x→2</sub> p(x) = 3 (the hollow dot)</li>
+        <li><span class="verdict is-fail">✗ limit ≠ f(2)</span> — 3 ≠ 5, so continuity fails right here</li>
+      </ul>
+    </div>
+
+    <div class="fm-panel" data-disc-panel="jump" hidden>
+      <p class="plot-hint">q(x) = x for x &lt; 2, and q(x) = x + 2 for x ≥ 2.</p>
+      <div class="plot-wrap">
+        <svg viewBox="0 0 400 240" width="400" height="240" role="img" aria-label="Two line segments with a jump at x=2: left segment approaching 2, right segment starting at 4">
+          <line class="fig-axis" x1="20" y1="190" x2="380" y2="190"></line>
+          <line class="fig-axis" x1="100" y1="10" x2="100" y2="230"></line>
+          <polyline class="fig-curve" id="q-left"></polyline>
+          <polyline class="fig-curve" id="q-right"></polyline>
+          <circle cx="220" cy="130" r="5" style="fill: var(--bg); stroke: var(--accent); stroke-width: 2;"></circle>
+          <circle cx="220" cy="70" r="5" class="fig-point"></circle>
+          <rect class="drag-surface" id="q-surface" x="20" y="10" width="360" height="220"></rect>
+          <circle class="fig-point" id="q-point" r="6"></circle>
+        </svg>
+      </div>
+      <p class="plot-readout" id="q-readout">—</p>
+      <ul>
+        <li><span class="verdict is-pass">✓ f(2) is defined</span> — f(2) = 4</li>
+        <li><span class="verdict is-fail">✗ the limit exists</span> — left side → 2, right side → 4, they disagree, so lim<sub>x→2</sub> q(x) does not exist</li>
+        <li><span class="verdict is-fail">✗ limit = f(2)</span> — can't even ask, since there's no limit to compare</li>
+      </ul>
+    </div>
+
+    <div class="fm-panel" data-disc-panel="infinite" hidden>
+      <p class="plot-hint">r(x) = 1 / (x − 2). Drag close to x = 2 from either side and watch the readout grow without bound.</p>
+      <div class="plot-wrap">
+        <svg viewBox="0 0 400 240" width="400" height="240" role="img" aria-label="Hyperbola with a vertical asymptote at x=2, shooting toward positive and negative infinity on either side">
+          <line class="fig-axis" x1="20" y1="120" x2="380" y2="120"></line>
+          <line class="fig-axis" x1="100" y1="10" x2="100" y2="230"></line>
+          <polyline class="fig-curve" id="r-left"></polyline>
+          <polyline class="fig-curve" id="r-right"></polyline>
+          <rect class="drag-surface" id="r-surface" x="20" y="10" width="360" height="220"></rect>
+          <circle class="fig-point" id="r-point" r="6"></circle>
+        </svg>
+      </div>
+      <p class="plot-readout" id="r-readout">—</p>
+      <ul>
+        <li><span class="verdict is-fail">✗ f(2) is defined</span> — 1/0 is undefined outright</li>
+        <li><span class="verdict is-fail">✗ the limit exists</span> — r(x) grows without bound on both sides, so there's no finite number to converge to</li>
+        <li><span class="verdict is-fail">✗ limit = f(2)</span> — neither side of this even exists to compare</li>
+      </ul>
+    </div>
+  </div>
+
+  <h2>3. Only one of these can be "fixed"</h2>
+  <p>Look back at the removable case: the limit <em>does</em> exist (3) — the only problem is that f(2) was set to the wrong value. Redefine p(2) = 3 instead of 5, and all three conditions hold; the discontinuity is gone. That's precisely why it's called <strong>removable</strong>. The jump and infinite cases have no such fix — there's no single value you could assign at x = 2 that would make a nonexistent limit suddenly exist. A hole can be patched; a cliff or a spike cannot.</p>
+
+  <h2>Check your recall</h2>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. In the removable-discontinuity panel, which single condition fails at x = 2?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">limit does not equal f(2)</button>
+      <button class="quiz-choice" data-correct="false">f(2) is not defined</button>
+      <button class="quiz-choice" data-correct="false">the limit does not exist</button>
+      <button class="quiz-choice" data-correct="false">nothing at all fails</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Both f(2) = 5 and lim<sub>x→2</sub> p(x) = 3 exist individually — they just don't match each other, which is condition 3 failing specifically.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why can't the jump discontinuity in q(x) be fixed by redefining q(2)?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">its two-sided limit never exists</button>
+      <button class="quiz-choice" data-correct="false">q(2) is already correct</button>
+      <button class="quiz-choice" data-correct="false">q has no formula at all</button>
+      <button class="quiz-choice" data-correct="false">jumps are always continuous</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Redefining a single point can only fix condition 3 (limit vs. f(c)). It can't manufacture a limit that doesn't exist in the first place — and here the left and right limits disagree, so there's no single number to patch in.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="infinite">
+    <p class="quiz-prompt">3. A discontinuity where the function grows without bound near a point, like r(x) = 1/(x − 2) at x = 2, is called an ___ discontinuity.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Both f(2) and the limit fail to exist here, and the reason is the same in both cases: r(x) shoots toward positive or negative infinity as x approaches 2, which is exactly what an infinite discontinuity looks like.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>College Board CED Unit 1 topics 1.9–1.13 cover multiple representations of limits, the three discontinuity types, and the formal continuity definition. <a href="https://tutorial.math.lamar.edu/classes/calci/continuity.aspx">Paul's Online Math Notes on continuity</a> has the same three-part definition with more worked classification examples. <a href="https://www.youtube.com/watch?v=OEE5-M4aY4k">Professor Leonard's lecture on continuity of functions</a> works through classifying several graphs by hand.</p>
+
+  <p class="ask-teacher">If it's ever unclear which of the three conditions is the one failing, ask — naming it precisely is exactly the skill AP free-response graders are checking for, not just recognizing "something's wrong" at a glance. Next up: infinite limits and asymptotes, taking the infinite case from today much further.</p>
+
+  <footer class="lesson-footer">STEM+ · AP Calculus BC · Unit 1 · Lesson 4 of 6</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  STEMPlus.mountTabs(document.getElementById('disc-widget'), 'data-disc-tab', 'data-disc-panel');
+
+  var sharedOrigin = { originX: 100, originY: 170, scaleX: 60, scaleY: 30 };
+
+  // Panel 1: removable
+  var pFn = function (x) { return Math.abs(x - 2) < 0.03 ? NaN : x + 1; };
+  var pDragFn = function (x) { return Math.abs(x - 2) < 0.03 ? 5 : x + 1; };
+  STEMPlus.mountLiveCurve(document.getElementById('p-curve'), Object.assign({ xMin: -1, xMax: 4, samples: 60 }, sharedOrigin)).setFn(pFn);
+  var pReadout = document.getElementById('p-readout');
+  var pSvg = document.getElementById('p-surface').ownerSVGElement;
+  STEMPlus.mountPointOnCurve(pSvg, Object.assign({
+    fn: pDragFn, xMin: -1, xMax: 4,
+    point: document.getElementById('p-point'),
+    dragSurface: document.getElementById('p-surface'),
+    initialX: -0.5,
+    onUpdate: function (x, y) {
+      pReadout.textContent = Math.abs(x - 2) < 0.05
+        ? 'x ≈ 2: p(x) jumps to ' + y.toFixed(2) + ' — the patched value, not the limit of 3.'
+        : 'x = ' + x.toFixed(2) + ': p(x) = ' + y.toFixed(2) + '.';
+    }
+  }, sharedOrigin));
+
+  // Panel 2: jump
+  var qOrigin = { originX: 100, originY: 190, scaleX: 60, scaleY: 30 };
+  STEMPlus.mountLiveCurve(document.getElementById('q-left'), Object.assign({ xMin: -1, xMax: 2, samples: 30 }, qOrigin)).setFn(function (x) { return x < 2 ? x : NaN; });
+  STEMPlus.mountLiveCurve(document.getElementById('q-right'), Object.assign({ xMin: 2, xMax: 4.5, samples: 30 }, qOrigin)).setFn(function (x) { return x >= 2 ? x + 2 : NaN; });
+  var qReadout = document.getElementById('q-readout');
+  var qSvg = document.getElementById('q-surface').ownerSVGElement;
+  STEMPlus.mountPointOnCurve(qSvg, Object.assign({
+    fn: function (x) { return x < 2 ? x : x + 2; }, xMin: -1, xMax: 4.5,
+    point: document.getElementById('q-point'),
+    dragSurface: document.getElementById('q-surface'),
+    initialX: -0.5,
+    onUpdate: function (x, y) {
+      var text = x < 2 ? 'x = ' + x.toFixed(2) + ' < 2: q(x) = x = ' + y.toFixed(2) + '.' : 'x = ' + x.toFixed(2) + ' ≥ 2: q(x) = x + 2 = ' + y.toFixed(2) + '.';
+      if (Math.abs(x - 2) < 0.15) text += ' Left was heading to 2, right starts at 4 — no shared limit.';
+      qReadout.textContent = text;
+    }
+  }, qOrigin));
+
+  // Panel 3: infinite
+  var rOrigin = { originX: 100, originY: 120, scaleX: 60, scaleY: 15 };
+  var rFn = function (x) { return 1 / (x - 2); };
+  STEMPlus.mountLiveCurve(document.getElementById('r-left'), Object.assign({ xMin: 0.3, xMax: 1.85, samples: 60 }, rOrigin)).setFn(rFn);
+  STEMPlus.mountLiveCurve(document.getElementById('r-right'), Object.assign({ xMin: 2.15, xMax: 3.9, samples: 60 }, rOrigin)).setFn(rFn);
+  var rReadout = document.getElementById('r-readout');
+  var rSvg = document.getElementById('r-surface').ownerSVGElement;
+  STEMPlus.mountPointOnCurve(rSvg, Object.assign({
+    fn: rFn, xMin: 0.3, xMax: 3.9,
+    point: document.getElementById('r-point'),
+    dragSurface: document.getElementById('r-surface'),
+    initialX: 3.2,
+    onUpdate: function (x, y) {
+      rReadout.textContent = 'x = ' + x.toFixed(3) + ': r(x) = 1/(' + (x - 2).toFixed(3) + ') = ' + y.toFixed(2) + '.' +
+        (Math.abs(x - 2) < 0.2 ? ' Keep going and this grows without bound — no finite limit here.' : '');
+    }
+  }, rOrigin));
+});
+</script>

@@ -1,0 +1,121 @@
+<title>Unit 10, Lesson 6: The Alternating Series Error Bound — STEM+</title>
+<link rel="stylesheet" href="../../../assets/style.css">
+<script src="../../../assets/interactive.js" defer></script>
+<script src="../../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · AP Calculus BC · Unit 10 · Lesson 6</span>
+  <h1>The Alternating Series Error Bound</h1>
+  <p class="subtitle">Knowing a series converges is one thing. Knowing exactly how far a partial sum can be from the true answer, without computing infinitely many terms, is another.</p>
+  <p class="nav-links"><a href="0005-ratio-test-and-absolute-convergence.html">← Lesson 5</a> <a href="0007-taylor-polynomials-and-lagrange-error-bound.html">Lesson 7 →</a> <a href="../index.html">Contents</a> <a href="../reference/glossary.html">Glossary →</a></p>
+
+  <h2>1. The next term bounds the error</h2>
+  <div class="box">
+    <span class="box-label">Method — Alternating Series Error Bound</span>
+    If Σ(−1)ⁿ⁺¹bₙ satisfies the alternating series test and converges to L, then the error after stopping at Sₙ is bounded by the very next term: <strong>|L − Sₙ| ≤ bₙ₊₁</strong>. No limit, no integral, no infinite tail to estimate — just look at the size of the first term left out.
+  </div>
+  <div class="box">
+    <span class="box-label">Why This Works</span>
+    Each partial sum overshoots L in the opposite direction from the one before, by a strictly smaller amount each time (since bₙ is decreasing). That means L is always trapped between any two consecutive partial sums, Sₙ and Sₙ₊₁ — so the gap from Sₙ to L can never exceed the gap from Sₙ to Sₙ₊₁, which is exactly bₙ₊₁.
+  </div>
+  <div class="box">
+    <span class="box-label">Worked Example</span>
+    Approximate Σ(−1)ⁿ⁺¹/n! (which converges to 1/e ≈ 0.3679) using S₄ = 1 − 1/2 + 1/6 − 1/24 = 0.625 − ... = 0.375. The error bound is b₅ = 1/5! = 1/120 ≈ 0.00833. Check: |0.3679 − 0.375| ≈ 0.0071, which is indeed ≤ 0.00833 — the bound holds, and it required computing only one extra term, not the true sum.
+  </div>
+
+  <h2>2. Watching the bound shrink with the true error</h2>
+  <p>Advance n and compare the guaranteed error ceiling bₙ₊₁ against the actual gap between Sₙ and the known limit ln 2. The bound is never tight, but it's never wrong either.</p>
+
+  <div class="widget" id="err-widget">
+    <div class="widget-label">Try It — Error Bound vs. Actual Error</div>
+    <div class="slider-row">
+      <label for="err-slider">n</label>
+      <input type="range" id="err-slider" min="1" max="8" step="1" value="1">
+      <span class="slider-value" id="err-n-label">n = 1</span>
+    </div>
+    <table><thead><tr><th>n</th><th>Sₙ</th><th>Bound bₙ₊₁</th><th>Actual |ln 2 − Sₙ|</th></tr></thead><tbody id="err-body"></tbody></table>
+    <p class="plot-readout" id="err-readout">—</p>
+  </div>
+
+  <h2>Check your recall</h2>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. For a convergent alternating series, |L − Sₙ| is bounded by:</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">bₙ₊₁, the first omitted term</button>
+      <button class="quiz-choice" data-correct="false">bₙ, the last included term</button>
+      <button class="quiz-choice" data-correct="false">the sum of all remaining terms' absolute values</button>
+      <button class="quiz-choice" data-correct="false">half the distance between Sₙ and Sₙ₋₁</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The very next term left out of the partial sum is exactly the size of the largest possible overshoot — no term further down the tail can matter more, since the terms only keep shrinking.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="1/16,0.0625">
+    <p class="quiz-prompt">2. For Σ(−1)ⁿ⁺¹/2ⁿ, stopping at S₃, the error bound is b₄ = ___</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>bₙ = 1/2ⁿ, so b₄ = 1/2⁴ = 1/16 = 0.0625 — the first term excluded from S₃ is the fourth term, and its size caps the error.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. This error bound applies to:</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">only series that satisfy the alternating series test</button>
+      <button class="quiz-choice" data-correct="false">any convergent series</button>
+      <button class="quiz-choice" data-correct="false">only geometric series</button>
+      <button class="quiz-choice" data-correct="false">only series that converge absolutely</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The bound relies on the overshoot-and-undershoot pattern that alternating, decreasing terms produce — a series that converges by some other mechanism (like the ratio test) has no such guarantee from this bound.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p><a href="https://openstax.org/books/calculus-volume-2/pages/5-5-alternating-series">OpenStax Calculus Volume 2, §5.5 "Alternating Series"</a> proves the error bound alongside the convergence test itself.</p>
+
+  <p class="ask-teacher">This bound is a preview of Lesson 7's Lagrange error bound, which does the same job — cap the error without computing infinitely many terms — for ordinary Taylor polynomials that aren't alternating. Ask how the two bounds compare if the parallel isn't obvious yet.</p>
+
+  <footer class="lesson-footer">STEM+ · AP Calculus BC · Unit 10 · Lesson 6 of 9</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var slider = document.getElementById('err-slider');
+  var nLabel = document.getElementById('err-n-label');
+  var body = document.getElementById('err-body');
+  var readout = document.getElementById('err-readout');
+  var ln2 = Math.log(2);
+
+  function partialSum(n) {
+    var s = 0;
+    for (var k = 1; k <= n; k++) { s += (k % 2 === 1 ? 1 : -1) / k; }
+    return s;
+  }
+
+  function render() {
+    var n = parseInt(slider.value, 10);
+    nLabel.textContent = 'n = ' + n;
+    body.innerHTML = '';
+    for (var i = 1; i <= n; i++) {
+      var s = partialSum(i);
+      var bound = 1 / (i + 1);
+      var actual = Math.abs(ln2 - s);
+      var row = document.createElement('tr');
+      var cells = [i, s.toFixed(5), bound.toFixed(5), actual.toFixed(5)];
+      cells.forEach(function (val) {
+        var td = document.createElement('td'); td.textContent = String(val);
+        row.appendChild(td);
+      });
+      body.appendChild(row);
+    }
+    var lastBound = 1 / (n + 1);
+    var lastActual = Math.abs(ln2 - partialSum(n));
+    readout.textContent = 'At n = ' + n + ': the bound (' + lastBound.toFixed(5) + ') comfortably covers the actual error (' + lastActual.toFixed(5) + ').';
+  }
+
+  slider.addEventListener('input', render);
+  render();
+});
+</script>

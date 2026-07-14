@@ -1,0 +1,115 @@
+<title>Unit 7, Lesson 3: Euler's Method — STEM+</title>
+<link rel="stylesheet" href="../../../assets/style.css">
+<script src="../../../assets/interactive.js" defer></script>
+<script src="../../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · AP Calculus BC · Unit 7 · Lesson 3</span>
+  <h1>Euler's Method</h1>
+  <p class="subtitle">Following a slope field by eye gives a rough sketch. Euler's Method turns "follow the arrows" into an exact numerical procedure — small, computable steps that approximate a solution the equation might not even have a clean formula for.</p>
+  <p class="nav-links"><a href="0002-slope-fields.html">← Lesson 2</a> <a href="0004-separation-of-variables.html">Lesson 4 →</a> <a href="../index.html">Contents</a> <a href="../reference/glossary.html">Glossary →</a></p>
+
+  <h2>1. The method</h2>
+  <div class="box">
+    <span class="box-label">Method — Euler's Method</span>
+    Given dy/dx = f(x, y) with y(x₀) = y₀ and a step size h, repeatedly apply: <strong>x<sub>n+1</sub> = x<sub>n</sub> + h</strong> and <strong>y<sub>n+1</sub> = y<sub>n</sub> + h·f(x<sub>n</sub>, y<sub>n</sub>)</strong>. Each step uses the slope field's value at the current point to predict the next one — exactly the "follow the arrow" idea from Lesson 2, but stepped forward by a fixed, precise amount instead of sketched by eye.
+  </div>
+  <div class="box">
+    <span class="box-label">Worked Example</span>
+    For dy/dx = x + y, y(0) = 1, with step size h = 0.5: Step 1 — slope at (0, 1) is 0 + 1 = 1, so y₁ = 1 + 0.5(1) = 1.5 at x₁ = 0.5. Step 2 — slope at (0.5, 1.5) is 0.5 + 1.5 = 2, so y₂ = 1.5 + 0.5(2) = <strong>2.5</strong> at x₂ = 1.0. Euler's Method estimates y(1) ≈ 2.5 using only two steps.
+  </div>
+
+  <h2>2. Smaller steps, better approximations</h2>
+  <p>Euler's Method for dy/dx = y, y(0) = 1 (exact solution y = eˣ) estimates y(1). Watch the estimate close in on the true value, e = 2.718282, as the number of steps grows and h shrinks.</p>
+
+  <div class="widget">
+    <div class="widget-label">Try It — Euler's Method Converging on y(1) = e</div>
+    <div id="em-widget">
+      <div class="slider-row">
+        <label for="em-slider">Number of steps (n)</label>
+        <input type="range" id="em-slider" data-growth-slider min="0" max="6" step="1" value="0">
+        <span class="slider-value" id="em-value">n = 1</span>
+      </div>
+      <table><thead><tr><th>n</th><th>h = 1/n</th><th>Euler estimate of y(1)</th></tr></thead><tbody data-growth-body></tbody></table>
+    </div>
+    <p class="plot-readout" id="em-readout">—</p>
+  </div>
+
+  <h2>3. Sources of error</h2>
+  <div class="box">
+    <span class="box-label">Fact — Euler's Method Is an Approximation</span>
+    Each step uses the slope at the <em>start</em> of the interval and assumes it holds for the whole step — but the true slope is changing continuously. That mismatch is <strong>truncation error</strong>, and it accumulates over steps. Smaller h means more steps but less error per step; in the limit as h → 0, the estimate approaches the exact solution.
+  </div>
+
+  <h2>Check your recall</h2>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. Euler's Method update rule for y is:</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">y_(n+1) = y_n + h·f(x_n, y_n)</button>
+      <button class="quiz-choice" data-correct="false">y_(n+1) = y_n · h·f(x_n, y_n)</button>
+      <button class="quiz-choice" data-correct="false">y_(n+1) = f(x_n, y_n) + h</button>
+      <button class="quiz-choice" data-correct="false">y_(n+1) = y_n + f(x_n)</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Each new y-value is the old one plus the step size times the slope at the current point — a direct numerical version of "follow the arrow for a distance h."</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="2.5">
+    <p class="quiz-prompt">2. For dy/dx = x + y, y(0) = 1, h = 0.5, two Euler steps give y(1) ≈ ___</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Step 1 gives (0.5, 1.5); step 2 uses slope 0.5 + 1.5 = 2 to reach y₂ = 1.5 + 0.5(2) = 2.5 at x = 1.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Making the step size h smaller generally:</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">reduces error, using more steps</button>
+      <button class="quiz-choice" data-correct="false">increases error, using more steps</button>
+      <button class="quiz-choice" data-correct="false">has no effect on accuracy</button>
+      <button class="quiz-choice" data-correct="false">reduces error, using fewer steps</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A smaller h means the slope is re-evaluated more often, so each step's assumption that the slope stays constant holds more nearly true — at the cost of needing more steps to cover the same distance.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p><a href="https://openstax.org/books/calculus-volume-2/pages/4-2-direction-fields-and-numerical-methods">OpenStax Calculus Volume 2, §4.2 "Direction Fields and Numerical Methods"</a> works through several further Euler's Method examples and discusses error more formally.</p>
+
+  <p class="ask-teacher">Euler's Method is a BC-only topic — it shows up on the exam as a small table-filling exercise, usually two or three steps by hand. Ask for practice with a non-constant step size, or a case where f depends on both x and y in a trickier way, if the mechanics still feel unfamiliar. Lesson 4 returns to exact solutions: separation of variables, the technique that solves many of these equations outright instead of approximating.</p>
+
+  <footer class="lesson-footer">STEM+ · AP Calculus BC · Unit 7 · Lesson 3 of 6</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  function eulerEstimate(n) {
+    var h = 1 / n;
+    var x = 0, y = 1;
+    for (var i = 0; i < n; i++) {
+      y = y + h * y;
+      x = x + h;
+    }
+    return y;
+  }
+  var nValues = [1, 2, 5, 10, 50, 100, 1000];
+  var readout = document.getElementById('em-readout');
+  var valueLabel = document.getElementById('em-value');
+  var slider = document.getElementById('em-slider');
+
+  slider.addEventListener('input', function () {
+    valueLabel.textContent = 'n = ' + nValues[parseInt(slider.value, 10)];
+  });
+
+  STEMPlus.mountGrowthTable(document.getElementById('em-widget'), eulerEstimate, {
+    values: nValues,
+    format: function (v) { return v.toFixed(6); },
+    onRow: function (n, y) {
+      readout.textContent = 'n = ' + n + ' steps (h = ' + (1 / n).toFixed(4) + '): estimate = ' + y.toFixed(6) + '. True value e ≈ 2.718282.';
+    }
+  });
+});
+</script>

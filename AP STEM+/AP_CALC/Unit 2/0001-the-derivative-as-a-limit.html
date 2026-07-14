@@ -1,0 +1,159 @@
+<title>Lesson 1: The Derivative as a Limit — STEM+</title>
+<link rel="stylesheet" href="../../../assets/style.css">
+<script src="../../../assets/interactive.js" defer></script>
+<script src="../../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · AP Calculus BC · Unit 2 · Lesson 1</span>
+  <h1>The Derivative as a Limit</h1>
+  <p class="subtitle">Shrinking the secant line's two points into one — and turning "average" into "exact, right now."</p>
+  <p class="nav-links"><a href="../Unit%201/0006-intermediate-value-theorem.html">← Unit 1, Lesson 6</a> <a href="0002-derivative-notation-and-estimating-derivatives.html">Lesson 2 →</a> <a href="../index.html">Contents</a> <a href="../reference/glossary.html">Glossary →</a></p>
+
+  <p>The <a href="../../../Precalculus/Unit%201/0003-rates-of-change-and-behavior-of-graphs.html">average rate of change</a> between two points is a secant line's slope — it tells you how much a function changed <em>on average</em> over an interval. The derivative asks a sharper question: how fast is the function changing at one single instant? Unit 1's whole toolkit — limits — is exactly what's needed to make that question precise.</p>
+
+  <h2>1. Shrinking the secant into a tangent</h2>
+  <div class="box">
+    <span class="box-label">Recall</span>
+    The average rate of change of f from a to a + h is the secant slope: [f(a + h) − f(a)] / h. As h shrinks toward 0, the second point slides along the curve toward the first — and the secant line rotates toward whatever line the graph is instantaneously heading in at a.
+  </div>
+
+  <p>Drag point B along <span class="expr">f(x) = x²</span> and watch the secant line through A (fixed at x = 1) swing as h = x<sub>B</sub> − 1 shrinks.</p>
+
+  <div class="widget">
+    <div class="widget-label">Try It — Secant Sliding Into a Tangent</div>
+    <div class="plot-wrap">
+      <svg viewBox="0 0 460 300" width="460" height="300" role="img" aria-label="Graph of x squared with a fixed point A at x=1 and a draggable point B; the secant line through A and B rotates toward the tangent line as B approaches A">
+        <line class="fig-axis" x1="20" y1="270" x2="440" y2="270"></line>
+        <line class="fig-axis" x1="140" y1="10" x2="140" y2="290"></line>
+        <polyline class="fig-curve" id="sec-curve"></polyline>
+        <line class="fig-guide" id="sec-line" x1="0" y1="0" x2="0" y2="0"></line>
+        <rect class="drag-surface" id="sec-surface" x="20" y="10" width="420" height="280"></rect>
+        <circle class="fig-point" id="sec-pointA" r="5" style="fill: var(--muted);"></circle>
+        <circle class="fig-point" id="sec-pointB" r="6"></circle>
+      </svg>
+    </div>
+    <p class="plot-readout" id="sec-readout">—</p>
+    <p class="plot-hint">A stays fixed at (1, 1). Drag B — the gray secant line is the average rate of change from A to B; watch its slope as h shrinks.</p>
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why it works</span>
+    A secant line only needs two points, so it can always be drawn — but it describes the interval between them, not any single instant. Sliding B toward A removes the interval entirely: in the limit, the "secant" touches the curve at just one point and matches the direction the curve is actually moving there. That limiting line is the <strong>tangent line</strong>, and its slope is the derivative.
+  </div>
+
+  <h2>2. The formal definition</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    The <strong>derivative</strong> of f at x = a is <span class="expr">f′(a) = lim<sub>h→0</sub> [f(a + h) − f(a)] / h</span>, provided this limit exists. It equals the slope of the tangent line to f at a, and it is often read as "the instantaneous rate of change of f at a."
+  </div>
+
+  <p>This is exactly a limit like Unit 1's — just with a slope formula standing in for f(x). Watch it numerically: for f(x) = x² at a = 1, the difference quotient is a function of h alone. Step h down toward 0 from both sides and see where the slope value lands.</p>
+
+  <div class="widget" id="deriv-table-widget">
+    <div class="widget-label">Try It — The Difference Quotient as h → 0</div>
+    <div class="slider-row">
+      <label for="dq-slider">Distance of h from 0</label>
+      <input type="range" id="dq-slider" data-limit-slider min="0" max="5" step="1" value="0">
+      <span class="slider-value" id="dq-distance">1</span>
+    </div>
+    <div class="dual-plot">
+      <div>
+        <h3>h → 0⁻ (from the left)</h3>
+        <table><thead><tr><th>h</th><th>[f(1+h) − f(1)] / h</th></tr></thead><tbody data-limit-left></tbody></table>
+      </div>
+      <div>
+        <h3>h → 0⁺ (from the right)</h3>
+        <table><thead><tr><th>h</th><th>[f(1+h) − f(1)] / h</th></tr></thead><tbody data-limit-right></tbody></table>
+      </div>
+    </div>
+    <p class="plot-hint">Both columns are converging to the same value — that shared limit is f′(1).</p>
+  </div>
+
+  <h2>Check your recall</h2>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. f′(a) is defined as the limit, as h → 0, of:</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">[f(a + h) − f(a)] / h</button>
+      <button class="quiz-choice" data-correct="false">[f(a + h) + f(a)] / h</button>
+      <button class="quiz-choice" data-correct="false">[f(a) − f(a + h)] / a</button>
+      <button class="quiz-choice" data-correct="false">[f(a) + f(h)] / a</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The difference quotient measures the change in output, f(a + h) − f(a), over the change in input, h — exactly the secant slope between a and a + h.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Geometrically, f′(a) is the slope of:</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">the tangent line at x = a</button>
+      <button class="quiz-choice" data-correct="false">the secant line at x = a</button>
+      <button class="quiz-choice" data-correct="false">the y-axis at x = a</button>
+      <button class="quiz-choice" data-correct="false">the normal line at x = a</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The secant line describes an interval; the derivative is what the secant becomes once its second point slides all the way onto a — the tangent line.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="2">
+    <p class="quiz-prompt">3. For f(x) = x², the difference quotient [f(1 + h) − f(1)] / h simplifies to 2 + h. As h → 0, this converges to ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>As h → 0, 2 + h → 2 directly by substitution — no 0/0 to fight through, since the h causing trouble already cancelled out when the quotient was simplified.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>College Board CED Unit 2 topics 2.1–2.3 introduce average vs. instantaneous rate of change and the formal definition of the derivative. <a href="https://tutorial.math.lamar.edu/Classes/CalcI/DefnOfDerivative.aspx">Paul's Online Math Notes on the Definition of the Derivative</a> works through the difference-quotient definition with several examples. <a href="https://www.youtube.com/playlist?list=PLF797E961509B4EB5">Professor Leonard's Calculus 1 playlist</a> covers this definition in its early lectures before moving to derivative shortcuts.</p>
+
+  <p class="ask-teacher">This lesson defined the derivative directly from the limit — the slow, first-principles way. Starting next lesson, faster rules take over for actually computing derivatives, but every one of those rules is secretly this same limit, done once and for all in general form.</p>
+
+  <footer class="lesson-footer">STEM+ · AP Calculus BC · Unit 2 · Lesson 1 of 7</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var secOrigin = { originX: 140, originY: 270, scaleX: 90, scaleY: 35 };
+  function f(x) { return x * x; }
+  STEMPlus.mountLiveCurve(document.getElementById('sec-curve'), Object.assign({ xMin: -0.5, xMax: 2.5, samples: 60 }, secOrigin)).setFn(f);
+
+  var toSvgX = function (mx) { return secOrigin.originX + mx * secOrigin.scaleX; };
+  var toSvgY = function (my) { return secOrigin.originY - my * secOrigin.scaleY; };
+  var pointA = document.getElementById('sec-pointA');
+  pointA.setAttribute('cx', toSvgX(1));
+  pointA.setAttribute('cy', toSvgY(1));
+
+  var secLine = document.getElementById('sec-line');
+  var secReadout = document.getElementById('sec-readout');
+  var secSvg = document.getElementById('sec-surface').ownerSVGElement;
+
+  STEMPlus.mountPointOnCurve(secSvg, Object.assign({
+    fn: f, xMin: -0.5, xMax: 2.5,
+    point: document.getElementById('sec-pointB'),
+    dragSurface: document.getElementById('sec-surface'),
+    initialX: 2.2,
+    onUpdate: function (xb, yb) {
+      secLine.setAttribute('x1', toSvgX(1));
+      secLine.setAttribute('y1', toSvgY(1));
+      secLine.setAttribute('x2', toSvgX(xb));
+      secLine.setAttribute('y2', toSvgY(yb));
+      var h = xb - 1;
+      if (Math.abs(h) < 0.03) {
+        secReadout.textContent = 'h = ' + h.toFixed(3) + ': B is almost on top of A — the secant line is nearly the tangent line at x = 1.';
+      } else {
+        var slope = (yb - 1) / h;
+        secReadout.textContent = 'B = (' + xb.toFixed(2) + ', ' + yb.toFixed(2) + '), h = ' + h.toFixed(2) + '. Secant slope = ' + slope.toFixed(3) + '.';
+      }
+    }
+  }, secOrigin));
+
+  var dqFn = function (h) { return h === 0 ? NaN : ((1 + h) * (1 + h) - 1) / h; };
+  var dqDistance = document.getElementById('dq-distance');
+  var distances = [1, 0.5, 0.25, 0.1, 0.01, 0.001];
+  STEMPlus.mountLimitTable(document.getElementById('deriv-table-widget'), dqFn, { c: 0, distances: distances });
+  document.getElementById('dq-slider').addEventListener('input', function (e) {
+    dqDistance.textContent = distances[parseInt(e.target.value, 10)];
+  });
+});
+</script>

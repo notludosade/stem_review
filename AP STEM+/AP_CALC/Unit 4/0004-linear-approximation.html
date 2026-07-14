@@ -1,0 +1,131 @@
+<title>Lesson 4: Linear Approximation — STEM+</title>
+<link rel="stylesheet" href="../../../assets/style.css">
+<script src="../../../assets/interactive.js" defer></script>
+<script src="../../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · AP Calculus BC · Unit 4 · Lesson 4</span>
+  <h1>Linear Approximation</h1>
+  <p class="subtitle">Zoom in far enough on any smooth curve, and it looks like a straight line — its own tangent line. That line is easy to compute with, and close to the curve nearby.</p>
+  <p class="nav-links"><a href="0003-related-rates.html">← Lesson 3</a> <a href="0005-lhopitals-rule.html">Lesson 5 →</a> <a href="../index.html">Contents</a> <a href="../reference/glossary.html">Glossary →</a></p>
+
+  <p>Every derivative rule in this course builds the tangent line at a point. This lesson asks what that tangent line is <em>good for</em>, beyond just being a slope: near the point of tangency, it's a remarkably good stand-in for the curve itself — one that's built entirely from arithmetic, no matter how nasty the original function is.</p>
+
+  <h2>1. The linearization formula</h2>
+  <div class="box">
+    <span class="box-label">Formula</span>
+    The <strong>linearization</strong> of f at x = a is L(x) = f(a) + f′(a)(x − a) — exactly the tangent line's equation, just renamed. For x near a, <strong>f(x) ≈ L(x)</strong>: the tangent line's height stands in for the curve's actual height, and the approximation gets worse the farther x strays from a.
+  </div>
+  <div class="box">
+    <span class="box-label">Worked Example</span>
+    Approximate √4.1 without a calculator's square-root button. Let f(x) = √x, a = 4 (a perfect square close to 4.1). f(4) = 2, f′(x) = 1/(2√x), so f′(4) = 0.25. Then L(4.1) = 2 + 0.25(4.1 − 4) = 2 + 0.025 = <strong>2.025</strong> — matching the true value 2.02485... to three decimal places, from nothing but a square root you already knew and one derivative.
+  </div>
+
+  <p>Drag the point along the curve. A fixed tangent line sits at a = 4; the widget tracks both the curve's true height and the tangent line's height at your point's x-value, so you can watch the gap between them grow as you drag away from a.</p>
+
+  <div class="widget">
+    <div class="widget-label">Try It — Watching the Approximation Break Down</div>
+    <div class="plot-wrap">
+      <svg viewBox="0 0 460 300" width="460" height="300" role="img" aria-label="Graph of the square root function with a fixed tangent line at x=4 and a draggable point, showing the gap between the true value and the linear approximation as the point moves away from x=4">
+        <line class="fig-axis" x1="20" y1="270" x2="440" y2="270"></line>
+        <line class="fig-axis" x1="60" y1="10" x2="60" y2="290"></line>
+        <polyline class="fig-curve" id="lin-curve"></polyline>
+        <line class="fig-guide" id="lin-tangent"></line>
+        <line class="fig-guide" id="lin-gap"></line>
+        <rect class="drag-surface" id="lin-surface" x="20" y="20" width="420" height="260"></rect>
+        <circle class="fig-point" id="lin-approx-point" r="5"></circle>
+        <circle class="fig-point" id="lin-point" r="6"></circle>
+      </svg>
+    </div>
+    <p class="plot-readout" id="lin-readout">—</p>
+    <p class="plot-hint">Curve: f(x) = √x. Tangent line fixed at a = 4. Larger circle: true f(x). Smaller circle: the tangent line's height L(x) at the same x.</p>
+  </div>
+
+  <h2>2. When the approximation over- or under-shoots</h2>
+  <div class="box">
+    <span class="box-label">Formula — Concavity decides the direction</span>
+    A curve that is <strong>concave up</strong> (f″ &gt; 0) always lies <em>above</em> its tangent lines, so L(x) <strong>underestimates</strong> f(x) for x ≠ a. A curve that is <strong>concave down</strong> (f″ &lt; 0) lies <em>below</em> its tangent lines, so L(x) <strong>overestimates</strong> f(x). √x is concave down (its rate of growth keeps shrinking), which is why the estimate 2.025 came in very slightly above the true 2.02485.
+  </div>
+
+  <h2>Check your recall</h2>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. L(x) = f(a) + f′(a)(x − a) approximates f near x = a using the:</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">tangent line</button>
+      <button class="quiz-choice" data-correct="false">secant line</button>
+      <button class="quiz-choice" data-correct="false">normal line</button>
+      <button class="quiz-choice" data-correct="false">parallel line</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>f(a) is the point of tangency and f′(a) is the tangent line's slope — L(x) is nothing but the tangent line's equation, renamed for this use. A secant needs two curve points, a normal line is perpendicular to the tangent, and neither matches this formula.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="2.025">
+    <p class="quiz-prompt">2. Using f(x) = √x and a = 4 (so f(4) = 2, f′(4) = 0.25), the linearization estimate for √4.1 is L(4.1) = ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>L(4.1) = f(4) + f′(4)(4.1 − 4) = 2 + 0.25(0.1) = 2 + 0.025 = 2.025.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. For a concave-up function, the linearization L(x) always ___ the true value f(x), for x ≠ a.</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">underestimates</button>
+      <button class="quiz-choice" data-correct="false">overestimates</button>
+      <button class="quiz-choice" data-correct="false">exactly matches</button>
+      <button class="quiz-choice" data-correct="false">randomly varies</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Concave up means the curve bends upward away from its tangent lines, sitting above them everywhere except the point of tangency itself — so the tangent line's height, L(x), falls short of the true f(x).</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p><a href="https://tutorial.math.lamar.edu/classes/calci/LinearApproximations.aspx">Paul's Online Math Notes, "Linear Approximations"</a> covers the formula and several more worked examples, including error estimates. This is <a href="https://apcentral.collegeboard.org/media/pdf/ap-calculus-ab-and-bc-course-and-exam-description.pdf">CED</a> topic 4.6.</p>
+
+  <p class="ask-teacher">The concavity rule (over- vs. under-estimate) is easy to state but easy to mix up under exam pressure — ask now for another example if "concave up underestimates" doesn't yet feel automatic. Lesson 5 closes out the unit with a tool for a completely different kind of hard limit: L'Hôpital's Rule.</p>
+
+  <footer class="lesson-footer">STEM+ · AP Calculus BC · Unit 4 · Lesson 4 of 5</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var origin = { originX: 60, originY: 270, scaleX: 27, scaleY: 55 };
+  var a = 4, fa = 2, fpa = 0.25;
+  function f(x) { return Math.sqrt(x); }
+  function L(x) { return fa + fpa * (x - a); }
+  function toPx(x, y) { return { px: origin.originX + x * origin.scaleX, py: origin.originY - y * origin.scaleY }; }
+
+  STEMPlus.mountLiveCurve(document.getElementById('lin-curve'), Object.assign({ xMin: 0.3, xMax: 13, samples: 100 }, origin)).setFn(f);
+
+  var t1 = toPx(0.3, L(0.3)), t2 = toPx(13, L(13));
+  var tangentLine = document.getElementById('lin-tangent');
+  tangentLine.setAttribute('x1', t1.px); tangentLine.setAttribute('y1', t1.py);
+  tangentLine.setAttribute('x2', t2.px); tangentLine.setAttribute('y2', t2.py);
+
+  var readout = document.getElementById('lin-readout');
+  var gapLine = document.getElementById('lin-gap');
+  var approxPoint = document.getElementById('lin-approx-point');
+  var svg = document.getElementById('lin-surface').ownerSVGElement;
+
+  STEMPlus.mountPointOnCurve(svg, Object.assign({
+    fn: f, xMin: 0.3, xMax: 13,
+    point: document.getElementById('lin-point'),
+    dragSurface: document.getElementById('lin-surface'),
+    initialX: 4,
+    onUpdate: function (x, y) {
+      var approxY = L(x);
+      var truePt = toPx(x, y), approxPt = toPx(x, approxY);
+      approxPoint.setAttribute('cx', approxPt.px);
+      approxPoint.setAttribute('cy', approxPt.py);
+      gapLine.setAttribute('x1', truePt.px); gapLine.setAttribute('y1', truePt.py);
+      gapLine.setAttribute('x2', approxPt.px); gapLine.setAttribute('y2', approxPt.py);
+      var err = Math.abs(y - approxY);
+      readout.textContent = 'x = ' + x.toFixed(2) + ': true f(x) = ' + y.toFixed(4) + ', linearization L(x) = ' + approxY.toFixed(4) + ' (error = ' + err.toFixed(4) + ').';
+      readout.className = 'plot-readout is-pass';
+    }
+  }, origin));
+});
+</script>
