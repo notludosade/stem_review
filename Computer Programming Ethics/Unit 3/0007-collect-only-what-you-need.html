@@ -1,0 +1,104 @@
+<title>Lesson 7: Collect Only What You Need — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Computer Programming Ethics · Lesson 7</span>
+  <h1>Collect Only What You Need</h1>
+  <p class="subtitle">The easiest way to protect data you didn't collect: don't collect it.</p>
+  <p class="nav-links"><a href="0008-where-data-goes-after-you-collect-it.html">Lesson 8 →</a> <a href="../index.html">Contents</a> <a href="../reference/glossary.html">Glossary →</a></p>
+
+  <p>Units 1 and 2 were about protecting data that's already in your system — hashing passwords, validating input, keeping secrets out of source code. Unit 3 starts one step earlier: deciding what data your program collects in the first place. Every field you ask for is something you now have to secure, store correctly, and eventually be responsible for if it leaks.</p>
+
+  <h2>The signup form that asks too much</h2>
+  <span class="code-label is-bad">Collecting everything "just in case"</span>
+  <pre class="code-block code-bad"><code>signup_form_fields = [
+    "email", "password", "full_name",
+    "date_of_birth", "home_address",
+    "phone_number", "gender"
+]</code></pre>
+
+  <span class="code-label is-good">Collecting what the product actually needs</span>
+  <pre class="code-block code-good"><code>signup_form_fields = ["email", "password"]
+# date_of_birth only requested later, if the feature
+# that actually needs it (age-restricted content) is used</code></pre>
+
+  <p>A newsletter signup doesn't need a home address. A to-do list app doesn't need a phone number. Each unused field in the first version is pure downside: it doesn't make the product better, but it's one more thing a breach can expose, one more thing a user has to trust you with, one more line in a privacy policy nobody reads. This isn't a hypothetical concern — it's a named principle in data protection law: the EU's <a href="https://gdpr-info.eu/art-5-gdpr/">GDPR, Article 5(1)(c)</a>, requires personal data to be "adequate, relevant and limited to what is necessary" for the purpose it's collected for, a rule referred to as <strong>data minimization</strong>.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    <strong>Data minimization</strong> is the practice of collecting only the data a system actually needs to do its job — not data that might be useful someday, might help with a future feature, or is simply easy to ask for on the same form.
+  </div>
+
+  <h2>"We might need it later" is not a reason</h2>
+  <p>It's tempting to add a field because a future feature might use it. But data sitting unused is a liability that starts accumulating the moment it's collected, while the feature that would justify it may never ship. The better order is: build the feature, then add the field it actually needs — collected with a clear, specific reason a user could be told if they asked.</p>
+
+  <div class="box why">
+    <span class="box-label">Why it matters here</span>
+    This connects directly to "avoid harm" and "respect privacy" from Lesson 2. A field you never collected can never leak, can never be subpoenaed, can never be sold to a data broker after a company changes hands — it's the one privacy protection that requires no ongoing effort to maintain.
+  </div>
+
+  <h2>Check your recall</h2>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. According to this lesson, what's the main downside of collecting an unused field?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">It's exposure risk with no corresponding benefit.</button>
+      <button class="quiz-choice" data-correct="false">It slows down the signup form's load time.</button>
+      <button class="quiz-choice" data-correct="false">It requires a more expensive database plan.</button>
+      <button class="quiz-choice" data-correct="false">It makes the form harder to style visually.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>An unused field doesn't improve the product, but it does add something a breach can expose and something the user has to trust you with.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. What does GDPR Article 5(1)(c) require of personal data collection?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Data must be limited to what is necessary.</button>
+      <button class="quiz-choice" data-correct="false">Data must be stored on servers within the EU.</button>
+      <button class="quiz-choice" data-correct="false">Data must be deleted within thirty days.</button>
+      <button class="quiz-choice" data-correct="false">Data must be reviewed by a licensed attorney.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>This is the "data minimization" principle — data collected must be adequate, relevant, and limited to what's necessary for its stated purpose.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. What does this lesson recommend instead of collecting a field for a possible future feature?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Add the field once that feature actually ships.</button>
+      <button class="quiz-choice" data-correct="false">Collect it now but encrypt it immediately.</button>
+      <button class="quiz-choice" data-correct="false">Ask a manager to approve the field first.</button>
+      <button class="quiz-choice" data-correct="false">Collect it only from paying customers.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Data sitting unused is a liability from the moment it's collected — better to add the field when there's a specific, shippable reason for it.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="data minimization|data minimisation">
+    <p class="quiz-prompt">4. Fill in the blank: collecting only the data a system actually needs to do its job is called ___ ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>See the definition box above — GDPR Article 5(1)(c) is the best-known legal statement of this principle.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="gdpr">
+    <p class="quiz-prompt">5. Fill in the blank: the EU regulation cited on this page, whose Article 5(1)(c) requires data to be limited to what's necessary, is called the ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The General Data Protection Regulation — its influence extends well beyond the EU, since many companies apply its rules globally rather than maintaining separate systems.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p><a href="https://gdpr-info.eu/art-5-gdpr/">GDPR Article 5</a> lists all of the core data protection principles in a few short paragraphs — data minimization is one of seven, worth reading in context.</p>
+
+  <p class="ask-teacher">Curious where the line is between "necessary" and "nice to have" for a specific feature you're building? Ask your teacher — that's what I'm here for. Next: what happens to data after it's collected, particularly in logs.</p>
+
+  <footer class="lesson-footer">STEM+ · Computer Programming Ethics · Lesson 7</footer>
+</div>

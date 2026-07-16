@@ -1,0 +1,211 @@
+<title>Lesson 15: Sorting Algorithms — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<script src="../../assets/interactive.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Computer Programming 2 · Lesson 15</span>
+  <h1>Sorting Algorithms</h1>
+  <p class="subtitle">The simplest way to sort is also the slowest. Understanding why points straight at a faster one.</p>
+  <p class="nav-links"><a href="../Unit%206/0016-stack-and-heap-memory.html">Lesson 16 →</a> <a href="../index.html">Contents</a> <a href="../reference/glossary.html">Glossary →</a></p>
+
+  <p><strong>Bubble sort</strong> repeatedly steps through the list, swapping adjacent elements that are out of order, until a full pass makes no swaps. It's easy to write and easy to trace by hand — and it's O(n²): for every one of the n elements, it may scan almost the whole list again.</p>
+
+  <div id="bubble-tabs">
+    <div class="fm-tabs">
+      <button class="fm-tab is-active" data-tab="py">Python</button>
+      <button class="fm-tab" data-tab="java">Java</button>
+      <button class="fm-tab" data-tab="js">JavaScript</button>
+      <button class="fm-tab" data-tab="cpp">C++</button>
+    </div>
+    <div class="fm-panel" data-panel="py">
+      <span class="code-label">Python</span>
+      <pre class="code-block"><code>def bubble_sort(items):
+    n = len(items)
+    for i in range(n):
+        for j in range(0, n - i - 1):
+            if items[j] > items[j + 1]:
+                items[j], items[j + 1] = items[j + 1], items[j]
+    return items</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="java" hidden>
+      <span class="code-label">Java</span>
+      <pre class="code-block"><code>static void bubbleSort(int[] items) {
+    int n = items.length;
+    for (int i = 0; i &lt; n; i++) {
+        for (int j = 0; j &lt; n - i - 1; j++) {
+            if (items[j] &gt; items[j + 1]) {
+                int temp = items[j];
+                items[j] = items[j + 1];
+                items[j + 1] = temp;
+            }
+        }
+    }
+}</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="js" hidden>
+      <span class="code-label">JavaScript</span>
+      <pre class="code-block"><code>function bubbleSort(items) {
+    const n = items.length;
+    for (let i = 0; i &lt; n; i++) {
+        for (let j = 0; j &lt; n - i - 1; j++) {
+            if (items[j] &gt; items[j + 1]) {
+                [items[j], items[j + 1]] = [items[j + 1], items[j]];
+            }
+        }
+    }
+    return items;
+}</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="cpp" hidden>
+      <span class="code-label">C++</span>
+      <pre class="code-block"><code>void bubbleSort(std::vector&lt;int&gt;&amp; items) {
+    int n = static_cast&lt;int&gt;(items.size());
+    for (int i = 0; i &lt; n; i++) {
+        for (int j = 0; j &lt; n - i - 1; j++) {
+            if (items[j] &gt; items[j + 1]) {
+                std::swap(items[j], items[j + 1]);
+            }
+        }
+    }
+}</code></pre>
+    </div>
+  </div>
+
+  <p>Bubble sort's nested loop is the same shape as Lesson 13's O(n²) example — no surprise, since it's a loop inside a loop. <strong>Merge sort</strong> takes a fundamentally different approach: split the list in half, recursively sort each half, then merge the two sorted halves back together in order. Recursively halving the problem — the same move that made binary search O(log n) — combined with an O(n) merge step at each level gives merge sort <strong>O(n log n)</strong>, a real, practical improvement over O(n²) for anything but the smallest lists.</p>
+
+  <div id="merge-tabs">
+    <div class="fm-tabs">
+      <button class="fm-tab is-active" data-tab="py">Python</button>
+      <button class="fm-tab" data-tab="java">Java</button>
+      <button class="fm-tab" data-tab="js">JavaScript</button>
+      <button class="fm-tab" data-tab="cpp">C++</button>
+    </div>
+    <div class="fm-panel" data-panel="py">
+      <span class="code-label">Python</span>
+      <pre class="code-block"><code>def merge_sort(items):
+    if len(items) &lt;= 1:                 # base case
+        return items
+    mid = len(items) // 2
+    left = merge_sort(items[:mid])      # recursive case
+    right = merge_sort(items[mid:])     # recursive case
+    return merge(left, right)
+
+def merge(left, right):
+    result = []
+    i = j = 0
+    while i &lt; len(left) and j &lt; len(right):
+        if left[i] &lt;= right[j]:
+            result.append(left[i]); i += 1
+        else:
+            result.append(right[j]); j += 1
+    result.extend(left[i:])
+    result.extend(right[j:])
+    return result</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="java" hidden>
+      <span class="code-label">Java</span>
+      <pre class="code-block"><code>// Same structure as Python: split at the midpoint, sort each
+// half recursively, then merge. Java's Collections.sort() and
+// Arrays.sort() use a tuned merge sort variant (Timsort)
+// internally for objects, rather than requiring this by hand.</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="js" hidden>
+      <span class="code-label">JavaScript</span>
+      <pre class="code-block"><code>// Same structure as Python: split at the midpoint, sort each
+// half recursively, then merge. In practice, JavaScript's
+// built-in Array.prototype.sort() already uses a comparable
+// O(n log n) algorithm, so hand-writing this is rarely needed.</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="cpp" hidden>
+      <span class="code-label">C++</span>
+      <pre class="code-block"><code>// Same structure as Python: split at the midpoint, sort each
+// half recursively, then merge. In practice, C++'s std::sort()
+// is a hybrid algorithm (introsort) offering O(n log n) without
+// requiring this to be written by hand.</code></pre>
+    </div>
+  </div>
+
+  <p>Every language's standard library already ships a fast, well-tested O(n log n) sort — Python's <code class="inline-code">sorted()</code>, Java's <code class="inline-code">Collections.sort()</code>, JavaScript's <code class="inline-code">Array.prototype.sort()</code>, C++'s <code class="inline-code">std::sort()</code> — so real code almost never hand-writes bubble sort or merge sort. <strong>Quicksort</strong> is the other classic O(n log n) approach many of those built-ins draw on: pick a "pivot" element, partition everything smaller to one side and everything larger to the other, then recursively sort each side. The value of learning bubble sort and merge sort isn't to replace the built-in — it's to understand, concretely, what "the built-in sort is O(n log n)" actually means and why that's worth caring about.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    <strong>Bubble sort</strong> repeatedly swaps adjacent out-of-order pairs — O(n²). <strong>Merge sort</strong> recursively splits and merges sorted halves — O(n log n). <strong>Quicksort</strong> recursively partitions around a pivot — also O(n log n) on average.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why it matters here</span>
+    This closes the loop on the entire unit. Big-O (Lesson 13) gave you the vocabulary; search (Lesson 14) showed a real O(n) vs. O(log n) gap; sorting shows the same gap between O(n²) and O(n log n) — and shows recursion (Unit 4) as the actual mechanism that makes the faster option possible. Every one of these ideas was necessary to fully explain this one.
+  </div>
+
+  <h2>Check your recall</h2>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. Why is bubble sort O(n²)?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Its nested loop structure means it may scan almost the whole list again for every one of the n elements.</button>
+      <button class="quiz-choice" data-correct="false">It only works correctly on lists with fewer than two elements.</button>
+      <button class="quiz-choice" data-correct="false">It sorts by picking a random pivot and hoping for the best.</button>
+      <button class="quiz-choice" data-correct="false">It is actually O(n), the same as linear search.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>This is the same nested-loop shape as Lesson 13's O(n²) example.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. What technique gives merge sort its O(n log n) time, instead of O(n²)?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Recursively splitting the list in half at each step, the same halving idea that made binary search fast.</button>
+      <button class="quiz-choice" data-correct="false">Comparing every possible pair of elements to each other.</button>
+      <button class="quiz-choice" data-correct="false">Skipping the sort entirely if the list has more than 100 elements.</button>
+      <button class="quiz-choice" data-correct="false">Running four separate copies of bubble sort at once.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Halving the problem recursively, then doing O(n) work to merge, is what produces O(n log n) overall.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. In real code, why do developers rarely hand-write bubble sort or merge sort?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Every mainstream language already ships a fast, well-tested O(n log n) sort in its standard library.</button>
+      <button class="quiz-choice" data-correct="false">Sorting algorithms are illegal to implement outside of a textbook.</button>
+      <button class="quiz-choice" data-correct="false">Built-in sorts are always O(n²), so hand-written ones would be strictly worse.</button>
+      <button class="quiz-choice" data-correct="false">No modern language actually provides any built-in sorting function.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Learning these algorithms is about understanding what "O(n log n)" means, not about replacing the built-in.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="pivot">
+    <p class="quiz-prompt">4. Fill in the blank: quicksort partitions the list around a chosen element called the ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>See the definition box above.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="merge">
+    <p class="quiz-prompt">5. Fill in the blank: after recursively sorting two halves, merge sort combines them back together in a step called the ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>This O(n) step is what combines with the recursive halving to produce O(n log n) overall.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p><a href="https://docs.python.org/3/howto/sorting.html">Python's official Sorting HOW TO</a> explains Python's real, production <code class="inline-code">sorted()</code> implementation and its guarantees directly from the source.</p>
+
+  <p class="ask-teacher">Wondering why so many languages settled on hybrids like Timsort or introsort instead of "pure" merge sort or quicksort? Ask your teacher — it comes down to real-world data rarely being worst-case data. That closes Unit 5: Algorithms & Complexity. Next: what happens to memory while all of this runs.</p>
+
+  <footer class="lesson-footer">STEM+ · Computer Programming 2 · Lesson 15</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  STEMPlus.mountTabs(document.getElementById('bubble-tabs'), 'data-tab', 'data-panel');
+  STEMPlus.mountTabs(document.getElementById('merge-tabs'), 'data-tab', 'data-panel');
+});
+</script>

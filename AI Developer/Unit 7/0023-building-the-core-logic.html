@@ -1,0 +1,115 @@
+<title>Lesson 23: Building the Core Logic — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · AI Developer · Lesson 23</span>
+  <h1>Building the Core Logic</h1>
+  <p class="subtitle">Lesson 22 chose an approach. Now build it as a plain, testable function — before it ever touches a web request, a button, or a user.</p>
+  <p class="nav-links"><a href="0024-integrating-into-a-real-application.html">Lesson 24 →</a> <a href="../index.html">Contents</a> <a href="../reference/glossary.html">Glossary →</a></p>
+
+  <p>Take a concrete example that Lesson 22's reasoning actually points to: a support-ticket triage tool. Rules alone can't judge urgency from free-form text, and the task is specific enough that a general pretrained API doesn't fully solve it out of the box — so it needs a small amount of real logic layered on top of a chat completion call, asking for <strong>structured output</strong>: a response shaped as data, like JSON, rather than free-form prose that would need fragile parsing afterward.</p>
+
+  <span class="code-label">Python — core triage logic</span>
+  <pre class="code-block"><code>import json
+from openai import OpenAI
+
+client = OpenAI()
+
+def triage_ticket(ticket_text):
+    try:
+        response = client.chat.completions.create(
+            model="gpt-4o-mini",
+            temperature=0,
+            response_format={"type": "json_object"},
+            messages=[
+                {"role": "system", "content": (
+                    'Classify the ticket urgency as "low", "medium", or "high" '
+                    'and reply with JSON: {"urgency": "...", "reason": "..."}'
+                )},
+                {"role": "user", "content": ticket_text},
+            ],
+        )
+        result = json.loads(response.choices[0].message.content)
+        if result.get("urgency") not in ("low", "medium", "high"):
+            raise ValueError("unexpected urgency value")
+        return result
+    except (json.JSONDecodeError, ValueError, KeyError):
+        return {"urgency": "medium", "reason": "could not classify automatically"}</code></pre>
+
+  <p><code class="inline-code">response_format={"type": "json_object"}</code> tells the model to reply with valid JSON instead of ordinary prose, and the system message spells out the exact shape expected — this is few-shot prompting's cousin from Lesson 20, describing the desired structure directly rather than showing it through examples. But no external system is ever fully guaranteed to behave — the model could still return unexpected values, or the request could fail outright. The <code class="inline-code">try</code>/<code class="inline-code">except</code> block provides a <strong>fallback</strong>: a safe default result returned when something goes wrong, so one malformed response degrades to "flag this for a human" instead of crashing the whole tool.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    <strong>Structured output</strong> is a model response shaped as data, such as JSON, instead of free-form prose. A <strong>fallback</strong> is a safe default behavior used when the primary logic fails or returns something unexpected.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why it matters here</span>
+    <code class="inline-code">triage_ticket</code> is a plain function with no web framework, no database, and no user interface anywhere in it — that's deliberate. Testing the core logic in isolation, with ordinary function calls and printed results, is far easier than testing it through a live application. Lesson 24 takes this exact function and wires it into one.
+  </div>
+
+  <h2>Check your recall</h2>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What is structured output?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">A model response shaped as data, such as JSON, rather than free-form prose.</button>
+      <button class="quiz-choice" data-correct="false">Any response longer than a single sentence.</button>
+      <button class="quiz-choice" data-correct="false">A response generated with temperature set to a high value.</button>
+      <button class="quiz-choice" data-correct="false">A response that has been translated into a different language.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>response_format={"type": "json_object"} is exactly what requests this shaped, parseable output.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. What does the except block in triage_ticket provide?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">A fallback — a safe default result when the model's response can't be parsed or trusted.</button>
+      <button class="quiz-choice" data-correct="false">A guarantee that the model will never make a mistake again.</button>
+      <button class="quiz-choice" data-correct="false">A second, completely independent trained model.</button>
+      <button class="quiz-choice" data-correct="false">A permanent fix that updates the model's weights.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>It returns a safe default so a malformed response degrades gracefully instead of crashing the tool.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why is triage_ticket written as a plain function with no web framework or user interface in it?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">It's far easier to test the core logic in isolation before wiring it into a real application.</button>
+      <button class="quiz-choice" data-correct="false">Web frameworks are incompatible with any function that calls an external API.</button>
+      <button class="quiz-choice" data-correct="false">Plain functions cannot call chat completion APIs at all.</button>
+      <button class="quiz-choice" data-correct="false">User interfaces must always be built before any of the underlying logic.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Separating core logic from the application around it is exactly what makes it independently testable.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="structured">
+    <p class="quiz-prompt">4. Fill in the blank: a response shaped as data instead of free-form prose is called ___ output.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>See the definition box above.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="fallback">
+    <p class="quiz-prompt">5. Fill in the blank: a safe default behavior used when the primary logic fails is called a ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>See the definition box above.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p><a href="https://platform.openai.com/docs/guides/structured-outputs">OpenAI's official structured outputs guide</a> documents this pattern in more depth, including stricter schema-based options.</p>
+
+  <p class="ask-teacher">Wondering how to handle a request that fails entirely — a timeout or a network error rather than a bad response? Ask your teacher — that's a real, common failure mode this simplified example doesn't fully cover. Next: putting this function behind an actual application.</p>
+
+  <footer class="lesson-footer">STEM+ · AI Developer · Lesson 23</footer>
+</div>

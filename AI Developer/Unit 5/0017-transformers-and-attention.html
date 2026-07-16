@@ -1,0 +1,104 @@
+<title>Lesson 17: Transformers and Attention — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · AI Developer · Lesson 17</span>
+  <h1>Transformers and Attention</h1>
+  <p class="subtitle">An LSTM's gates help it remember further back — but it still has to process a sequence one step at a time. Attention removes that restriction entirely.</p>
+  <p class="nav-links"><a href="../Unit%206/0018-calling-an-llm-api.html">Lesson 18 →</a> <a href="../index.html">Contents</a> <a href="../reference/glossary.html">Glossary →</a></p>
+
+  <p><strong>Attention</strong> lets a model directly relate any two positions in a sequence, regardless of how far apart they are, without passing information step by step through everything in between. A <strong>Transformer</strong> is a network built almost entirely out of this one mechanism, called <strong>self-attention</strong> when every position relates to every other position in the same sequence.</p>
+
+  <span class="code-label">Python — NumPy (simplified scaled dot-product attention)</span>
+  <pre class="code-block"><code>import numpy as np
+
+def softmax(x):
+    e = np.exp(x - np.max(x, axis=-1, keepdims=True))
+    return e / e.sum(axis=-1, keepdims=True)
+
+# 3 tokens, each represented by a 4-number vector
+Q = np.random.rand(3, 4)   # query: what each token is looking for
+K = np.random.rand(3, 4)   # key: what each token offers
+V = np.random.rand(3, 4)   # value: what each token actually contributes
+
+scores = Q @ K.T / np.sqrt(4)        # how relevant every token is to every other, all at once
+weights = softmax(scores)             # normalized into per-token weights summing to 1
+output = weights @ V                  # each token's new representation: a weighted blend of every value</code></pre>
+
+  <p>Every token produces three vectors: a <strong>query</strong> (what it's looking for), a <strong>key</strong> (what it offers to others looking), and a <strong>value</strong> (what it actually contributes once matched). <code class="inline-code">Q @ K.T</code> compares every query against every key in one matrix multiplication, producing a relevance score between every pair of tokens simultaneously — token 3 can attend directly to token 1 exactly as easily as to token 2, with no sequential dependency at all. <code class="inline-code">softmax</code> turns each token's raw scores into proper weights, and the final output blends every token's value according to those weights. Because this whole computation is a handful of matrix multiplications over the entire sequence at once, it runs in parallel — the sequential, one-step-at-a-time bottleneck that limits an RNN or LSTM simply isn't there.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    <strong>Attention</strong> lets a model relate any two sequence positions directly, weighted by learned relevance. <strong>Self-attention</strong> is attention where every position in a sequence attends to every other position in that same sequence. A <strong>Transformer</strong> is a network built primarily from self-attention layers.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why it matters here</span>
+    This closes Unit 5. Attention solves the same long-range dependency problem that motivated Lesson 16's LSTM gates, but by removing the sequential bottleneck entirely rather than managing it — that parallelism is a large part of why Transformers scale to the enormous models Unit 6 accesses through APIs rather than training from scratch.
+  </div>
+
+  <h2>Check your recall</h2>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What problem does attention solve, compared to an RNN's step-by-step processing?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">It lets any two positions in a sequence relate directly, without passing state through every step between them.</button>
+      <button class="quiz-choice" data-correct="false">It eliminates the need for a loss function during training.</button>
+      <button class="quiz-choice" data-correct="false">It removes the need for any training data whatsoever.</button>
+      <button class="quiz-choice" data-correct="false">It makes every sequence exactly the same fixed length.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Q @ K.T relates every pair of tokens directly, regardless of their distance in the sequence.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. What do the query, key, and value vectors represent for a token?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">What it's looking for, what it offers, and what it actually contributes once matched.</button>
+      <button class="quiz-choice" data-correct="false">Three unrelated copies of the exact same random number.</button>
+      <button class="quiz-choice" data-correct="false">The token's position index, its length, and its total count.</button>
+      <button class="quiz-choice" data-correct="false">Three completely separate, independent training datasets.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Query, key, and value each play a distinct role in computing the attention output.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why can attention be computed in parallel across an entire sequence, unlike an RNN?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">It's a matrix multiplication over the whole sequence at once, rather than a loop passing state step by step.</button>
+      <button class="quiz-choice" data-correct="false">Attention only ever processes one token at a time, just like an RNN does.</button>
+      <button class="quiz-choice" data-correct="false">Parallel computation is only possible with sequences shorter than 3 tokens.</button>
+      <button class="quiz-choice" data-correct="false">There is no actual difference in how RNNs and attention process a sequence.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Q @ K.T and weights @ V above are single matrix operations over every token simultaneously.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="attention">
+    <p class="quiz-prompt">4. Fill in the blank: the mechanism that lets a model relate any two sequence positions directly is called ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>See the definition box above.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="parallel">
+    <p class="quiz-prompt">5. Fill in the blank: because attention is one matrix multiplication over a whole sequence, it can run in ___, unlike a step-by-step RNN.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>See the definition box above.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p><a href="https://arxiv.org/abs/1706.03762">"Attention Is All You Need" (Vaswani et al., 2017)</a> is the original paper that introduced the Transformer architecture built from this exact mechanism.</p>
+
+  <p class="ask-teacher">Wondering what "multi-head" attention means, beyond the single attention computation shown here? Ask your teacher — real Transformers run several of these in parallel per layer, each learning something different. That closes Unit 5. Next: using models built on this architecture without training one from scratch.</p>
+
+  <footer class="lesson-footer">STEM+ · AI Developer · Lesson 17</footer>
+</div>

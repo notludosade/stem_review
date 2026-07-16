@@ -1,0 +1,121 @@
+<title>Lesson 21: Fine-Tuning vs. RAG — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · AI Developer · Lesson 21</span>
+  <h1>Fine-Tuning vs. RAG</h1>
+  <p class="subtitle">Lesson 20 changed the prompt to change behavior. Sometimes that isn't enough — a model can't answer with facts it never saw, no matter how the prompt is worded. There are two real fixes, not one.</p>
+  <p class="nav-links"><a href="../Unit%207/0022-choosing-the-right-approach.html">Lesson 22 →</a> <a href="../index.html">Contents</a> <a href="../reference/glossary.html">Glossary →</a></p>
+
+  <p><strong>Fine-tuning</strong> continues training a pretrained model on your own labeled examples, actually updating its weights through the same gradient descent and backpropagation from Unit 4 — just starting from an already-trained model instead of random weights. <strong>RAG (Retrieval-Augmented Generation)</strong> changes no weight at all: it retrieves relevant text via the embeddings and semantic search from Lesson 19, then inserts that text directly into the prompt as context, exactly as Lesson 20 shaped prompts to steer behavior.</p>
+
+  <span class="code-label">Python — RAG, combining Lessons 18-20</span>
+  <pre class="code-block"><code>from openai import OpenAI
+import numpy as np
+
+client = OpenAI()
+
+def embed(text):
+    return np.array(client.embeddings.create(
+        model="text-embedding-3-small", input=text
+    ).data[0].embedding)
+
+def cosine_similarity(a, b):
+    return np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b))
+
+docs = [
+    "Refunds are issued within 5 business days of a return request.",
+    "The battery lasts approximately 10 hours on a full charge.",
+]
+doc_vectors = [embed(d) for d in docs]
+
+question = "How long until I get my money back?"
+q_vector = embed(question)
+best = max(range(len(docs)), key=lambda i: cosine_similarity(q_vector, doc_vectors[i]))
+
+response = client.chat.completions.create(
+    model="gpt-4o-mini",
+    messages=[
+        {"role": "system", "content": f"Answer using only this context: {docs[best]}"},
+        {"role": "user", "content": question},
+    ],
+)
+print(response.choices[0].message.content)</code></pre>
+
+  <p>Nothing about the model's weights changes in that example — the retrieved sentence is just inserted into the system message as context, and the model answers from it. That makes RAG cheap to keep current: add a new document, and the very next query can retrieve it immediately, with no retraining at all. Fine-tuning is the better fit for a different kind of problem entirely — not "the model doesn't know this fact," but "the model needs to consistently respond in a specific style, format, or behavior across every request," which repeated examples in a prompt can only approximate and actual weight updates can lock in directly.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    <strong>Fine-tuning</strong> continues training a pretrained model on new labeled examples, updating its weights. <strong>RAG (Retrieval-Augmented Generation)</strong> retrieves relevant text via semantic search and inserts it into the prompt as context, with no weight changes at all.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why it matters here</span>
+    This closes Unit 6, and it closes the loop on the whole unit: Lesson 18's API, Lesson 19's embeddings, and Lesson 20's prompting all combine directly into the RAG example above. Unit 7 takes this exact combination and builds it into a complete, real application from the ground up.
+  </div>
+
+  <h2>Check your recall</h2>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What actually changes inside the model during fine-tuning?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Its weights are updated further, through the same gradient descent and backpropagation used in original training.</button>
+      <button class="quiz-choice" data-correct="false">Nothing — fine-tuning only changes the text of the prompt sent at request time.</button>
+      <button class="quiz-choice" data-correct="false">Only the temperature parameter is adjusted.</button>
+      <button class="quiz-choice" data-correct="false">The model's architecture is replaced with a completely different one.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Fine-tuning is real further training, starting from an already pretrained model rather than random weights.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. In the RAG example above, how is the most relevant document chosen for a given question?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">By embedding the question and picking the document whose embedding has the highest cosine similarity.</button>
+      <button class="quiz-choice" data-correct="false">By fine-tuning the model separately for every single question asked.</button>
+      <button class="quiz-choice" data-correct="false">By picking whichever document happens to be listed first.</button>
+      <button class="quiz-choice" data-correct="false">By counting exact keyword matches between the question and each document.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>max(..., key=lambda i: cosine_similarity(...)) picks the closest match by meaning, exactly as in Lesson 19.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why is RAG cheap to keep current when new information appears?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">A new document can be added and retrieved immediately on the next query, with no retraining required.</button>
+      <button class="quiz-choice" data-correct="false">New information requires fully retraining the model from random weights every time.</button>
+      <button class="quiz-choice" data-correct="false">RAG systems cannot ever incorporate new information at all.</button>
+      <button class="quiz-choice" data-correct="false">Every new document requires a separate physical model to be deployed.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Since no weights change, adding a document to the retrievable set takes effect on the very next query.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="weights">
+    <p class="quiz-prompt">4. Fill in the blank: fine-tuning is real further training that actually updates the model's ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>See the definition box above.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="context">
+    <p class="quiz-prompt">5. Fill in the blank: RAG retrieves relevant text and inserts it into the prompt as ___, without changing any model weight.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>See the definition box above.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p><a href="https://www.wandb.courses/courses/building-llm-powered-apps">Weights & Biases's "Building LLM-Powered Apps"</a> course covers RAG pipelines like this one, along with fine-tuning workflows, in practical depth.</p>
+
+  <p class="ask-teacher">Wondering whether a real project can combine both — a fine-tuned model that also uses RAG? Ask your teacher — yes, and it's common in production systems. That closes Unit 6. Next: putting all of this together into one real, working application.</p>
+
+  <footer class="lesson-footer">STEM+ · AI Developer · Lesson 21</footer>
+</div>

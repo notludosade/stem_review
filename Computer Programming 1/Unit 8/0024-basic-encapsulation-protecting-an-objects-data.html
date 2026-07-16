@@ -1,0 +1,169 @@
+<title>Lesson 24: Basic Encapsulation — Protecting an Object's Data — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<script src="../../assets/interactive.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Computer Programming 1 · Lesson 24</span>
+  <h1>Basic Encapsulation — Protecting an Object's Data</h1>
+  <p class="subtitle">If any outside code can set a bank balance to whatever it wants, no method's rules can ever be trusted.</p>
+  <p class="nav-links"><a href="../index.html">Contents</a> <a href="../reference/glossary.html">Glossary →</a></p>
+
+  <p>Nothing so far has stopped outside code from reaching directly into an instance's data and changing it — <code class="inline-code">buddy.name = "anything"</code> works fine after Lesson 22. <strong>Encapsulation</strong> is the practice of restricting that direct access, forcing changes to go through methods that can enforce rules.</p>
+
+  <div id="encap-tabs">
+    <div class="fm-tabs">
+      <button class="fm-tab is-active" data-tab="py">Python</button>
+      <button class="fm-tab" data-tab="java">Java</button>
+      <button class="fm-tab" data-tab="js">JavaScript</button>
+      <button class="fm-tab" data-tab="cpp">C++</button>
+    </div>
+    <div class="fm-panel" data-panel="py">
+      <span class="code-label">Python</span>
+      <pre class="code-block"><code>class BankAccount:
+    def __init__(self, balance):
+        self._balance = balance  # leading underscore: internal use only, by convention
+
+    def deposit(self, amount):
+        if amount > 0:
+            self._balance += amount
+
+    def get_balance(self):
+        return self._balance</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="java" hidden>
+      <span class="code-label">Java</span>
+      <pre class="code-block"><code>class BankAccount {
+    private double balance; // enforced by the compiler
+
+    BankAccount(double balance) { this.balance = balance; }
+
+    void deposit(double amount) {
+        if (amount > 0) balance += amount;
+    }
+
+    double getBalance() {
+        return balance;
+    }
+}</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="js" hidden>
+      <span class="code-label">JavaScript</span>
+      <pre class="code-block"><code>class BankAccount {
+    #balance; // enforced private field (ES2022+)
+
+    constructor(balance) { this.#balance = balance; }
+
+    deposit(amount) {
+        if (amount > 0) this.#balance += amount;
+    }
+
+    getBalance() {
+        return this.#balance;
+    }
+}</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="cpp" hidden>
+      <span class="code-label">C++</span>
+      <pre class="code-block"><code>class BankAccount {
+private:
+    double balance; // enforced by the compiler — this is C++'s default anyway
+
+public:
+    BankAccount(double balance) : balance(balance) {}
+
+    void deposit(double amount) {
+        if (amount > 0) balance += amount;
+    }
+
+    double getBalance() {
+        return balance;
+    }
+};</code></pre>
+    </div>
+  </div>
+
+  <p>Java's <code class="inline-code">private</code> and C++'s <code class="inline-code">private:</code> (recall from Lesson 22 that this is actually C++'s default) are enforced by the compiler — code outside the class simply cannot reach <code class="inline-code">balance</code> at all, only through <code class="inline-code">deposit()</code> and <code class="inline-code">getBalance()</code>. JavaScript's <code class="inline-code">#balance</code> syntax is genuinely enforced too, a newer addition to the language. Python is the odd one out: the leading underscore in <code class="inline-code">_balance</code> is a <strong>convention</strong> signaling "internal, don't touch" — nothing in the language actually stops <code class="inline-code">account._balance = -1000000</code> from outside. Python trusts the programmer to respect the underscore rather than enforcing it.</p>
+
+  <p>Because every change to <code class="inline-code">balance</code> is forced through <code class="inline-code">deposit()</code> in the three enforcing languages, that method can guarantee the balance never goes negative through a bad deposit, by checking <code class="inline-code">amount > 0</code> before applying it. Bypass that method, and the guarantee is gone — which is exactly what encapsulation is designed to prevent.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    <strong>Encapsulation</strong> is bundling an object's data together with the methods that operate on it, and restricting direct outside access to that data. A member marked <strong>private</strong> is accessible only from within its own class — enforced by the compiler in Java and C++, enforced by the language in modern JavaScript's <code class="inline-code">#fields</code>, and only a naming convention in Python.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why it matters here</span>
+    Encapsulation is what lets an object make guarantees about itself. A <code class="inline-code">BankAccount</code> whose balance can only change through <code class="inline-code">deposit()</code> can promise it will never go negative from a bad deposit — a promise that direct, unrestricted access would make impossible to keep.
+  </div>
+
+  <h2>Check your recall</h2>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. How does Python's approach to privacy differ from Java's private keyword?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Python's underscore is only a convention; Java's private is enforced by the compiler.</button>
+      <button class="quiz-choice" data-correct="false">Python enforces privacy more strictly than Java does.</button>
+      <button class="quiz-choice" data-correct="false">Python does not allow classes to have any internal data.</button>
+      <button class="quiz-choice" data-correct="false">There is no difference between the two approaches.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Nothing in Python actually stops outside code from reaching a leading-underscore attribute.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. What does JavaScript's #balance syntax provide, compared to a regular this.balance?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">A genuinely enforced private field, inaccessible from outside the class.</button>
+      <button class="quiz-choice" data-correct="false">A faster way to read the value.</button>
+      <button class="quiz-choice" data-correct="false">No difference at all — # is purely decorative.</button>
+      <button class="quiz-choice" data-correct="false">Automatic conversion to a different data type.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>This is a newer JavaScript feature that finally matches Java and C++'s enforced privacy.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why does routing every balance change through deposit() protect the account?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">deposit() can check that the amount is valid before applying it, guaranteeing the balance can't go negative through a bad update.</button>
+      <button class="quiz-choice" data-correct="false">deposit() runs faster than direct assignment.</button>
+      <button class="quiz-choice" data-correct="false">It doesn't protect anything — direct access would work identically.</button>
+      <button class="quiz-choice" data-correct="false">deposit() automatically doubles every amount added.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Bypassing deposit() entirely would remove this guarantee.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="encapsulation">
+    <p class="quiz-prompt">4. Fill in the blank: bundling an object's data with the methods that operate on it, while restricting outside access, is called ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>See the definition box above.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="private">
+    <p class="quiz-prompt">5. Fill in the blank: a class member accessible only from within its own class is marked ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Enforcement of this varies by language, as this lesson covered.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Classes/Private_properties">MDN's reference for JavaScript private class features</a> documents the #field syntax directly from the source.</p>
+
+  <p class="ask-teacher">Curious what Python's double-underscore name mangling does, or how C++'s protected keyword differs from private? Ask your teacher — that's what I'm here for. That's Computer Programming 1 complete — 24 lessons across 8 units, from how code runs at all to bundling data and behavior into objects. Computer Programming 2 picks up from here.</p>
+
+  <footer class="lesson-footer">STEM+ · Computer Programming 1 · 24 lessons across 8 units — course complete</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  STEMPlus.mountTabs(document.getElementById('encap-tabs'), 'data-tab', 'data-panel');
+});
+</script>

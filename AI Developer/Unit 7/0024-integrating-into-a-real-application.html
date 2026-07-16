@@ -1,0 +1,104 @@
+<title>Lesson 24: Integrating Into a Real Application — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · AI Developer · Lesson 24</span>
+  <h1>Integrating Into a Real Application</h1>
+  <p class="subtitle">Lesson 23's function works when called directly in Python. A real user never calls a Python function directly — they submit a form, and something has to receive it.</p>
+  <p class="nav-links"><a href="../Unit%208/0025-latency-cost-and-caching.html">Lesson 25 →</a> <a href="../index.html">Contents</a> <a href="../reference/glossary.html">Glossary →</a></p>
+
+  <p>An <strong>API endpoint</strong> is a specific URL a web application listens on, ready to receive a request and return a response — the same idea as Lesson 18's chat completion endpoint, just one you build yourself instead of calling someone else's. Wiring <code class="inline-code">triage_ticket</code> behind one is mostly about <strong>input validation</strong>: checking that what actually arrived matches what the function expects, before it's ever passed in.</p>
+
+  <span class="code-label">Python — FastAPI</span>
+  <pre class="code-block"><code>from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel, Field
+
+app = FastAPI()
+
+class TicketRequest(BaseModel):
+    text: str = Field(min_length=1, max_length=5000)
+
+@app.post("/triage")
+def triage_endpoint(request: TicketRequest):
+    try:
+        return triage_ticket(request.text)
+    except Exception:
+        raise HTTPException(status_code=502, detail="triage service unavailable")</code></pre>
+
+  <p><code class="inline-code">TicketRequest</code> declares exactly what a valid request looks like — a non-empty string no longer than 5000 characters. FastAPI checks every incoming request against this shape automatically, before <code class="inline-code">triage_endpoint</code> ever runs, and rejects anything that doesn't match with a clear error instead of letting bad input reach <code class="inline-code">triage_ticket</code> and fail in some more confusing way further in. Notice that <code class="inline-code">triage_ticket</code> itself, from Lesson 23, didn't need a single change to be reused here — that's exactly the payoff of having built and tested the core logic as a plain, separate function first.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    An <strong>API endpoint</strong> is a specific URL a web application listens on to receive a request and return a response. <strong>Input validation</strong> is checking that incoming data matches an expected shape before it's used.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why it matters here</span>
+    This closes Unit 7 — problem, approach, core logic, and now a real endpoint a user could actually hit. What this lesson deliberately leaves out is everything about running this reliably at scale: how many requests it can handle, what it costs per call, and what happens when the underlying model's behavior quietly drifts over time. That's Unit 8, in full.
+  </div>
+
+  <h2>Check your recall</h2>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What is an API endpoint?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">A specific URL a web application listens on to receive a request and return a response.</button>
+      <button class="quiz-choice" data-correct="false">A dataset split reserved for final evaluation.</button>
+      <button class="quiz-choice" data-correct="false">A single row in a training dataset.</button>
+      <button class="quiz-choice" data-correct="false">The physical hardware a model is trained on.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>/triage above is exactly this: a URL the application listens on for incoming requests.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. What does the TicketRequest model accomplish in the code above?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Input validation — rejecting requests that don't match the expected shape before triage_ticket ever runs.</button>
+      <button class="quiz-choice" data-correct="false">It trains a new classification model on incoming tickets.</button>
+      <button class="quiz-choice" data-correct="false">It stores every past ticket permanently in memory.</button>
+      <button class="quiz-choice" data-correct="false">It replaces the need for the triage_ticket function entirely.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>FastAPI checks incoming requests against this shape automatically, rejecting anything that doesn't match.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why didn't triage_ticket from Lesson 23 need any changes to be reused in this endpoint?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">It was already built and tested as a plain, self-contained function, independent of any web framework.</button>
+      <button class="quiz-choice" data-correct="false">FastAPI automatically rewrites any function passed to it.</button>
+      <button class="quiz-choice" data-correct="false">Python functions can never be reused across different files.</button>
+      <button class="quiz-choice" data-correct="false">The function happened to be rewritten from scratch for this lesson.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>This is the payoff of Lesson 23's deliberate separation between core logic and application wiring.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="endpoint">
+    <p class="quiz-prompt">4. Fill in the blank: a specific URL a web application listens on for requests is called an API ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>See the definition box above.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="validation">
+    <p class="quiz-prompt">5. Fill in the blank: checking that incoming data matches an expected shape before it's used is called input ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>See the definition box above.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p><a href="https://fastapi.tiangolo.com/">FastAPI's official documentation</a> covers request validation, error handling, and endpoint design in far more depth than this single example.</p>
+
+  <p class="ask-teacher">Wondering why the except block above returns a generic 502 error instead of the specific reason triage_ticket failed? Ask your teacher — hiding internal error details from users is a deliberate, common practice. That closes Unit 7. Next: keeping something like this running reliably once real users depend on it.</p>
+
+  <footer class="lesson-footer">STEM+ · AI Developer · Lesson 24</footer>
+</div>

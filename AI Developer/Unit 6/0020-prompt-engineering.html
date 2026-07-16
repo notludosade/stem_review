@@ -1,0 +1,108 @@
+<title>Lesson 20: Prompt Engineering — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · AI Developer · Lesson 20</span>
+  <h1>Prompt Engineering</h1>
+  <p class="subtitle">Lesson 18 sent a plain question and got a plain answer. The exact wording, structure, and examples in that request change the output far more than most people expect.</p>
+  <p class="nav-links"><a href="0021-fine-tuning-vs-rag.html">Lesson 21 →</a> <a href="../index.html">Contents</a> <a href="../reference/glossary.html">Glossary →</a></p>
+
+  <p><strong>Prompt engineering</strong> is deliberately designing the text sent to a model to reliably get the output you actually want, without changing the model itself at all. Two techniques do most of the work: giving the model a handful of worked examples first, and controlling how much randomness it uses when generating.</p>
+
+  <span class="code-label">Python — OpenAI API</span>
+  <pre class="code-block"><code>from openai import OpenAI
+
+client = OpenAI()
+
+response = client.chat.completions.create(
+    model="gpt-4o-mini",
+    temperature=0,
+    messages=[
+        {"role": "system", "content": "Classify each review as positive or negative. Reply with one word only."},
+        {"role": "user", "content": "Review: The battery died in an hour.\nLabel:"},
+        {"role": "assistant", "content": "negative"},
+        {"role": "user", "content": "Review: Setup took thirty seconds and it just worked.\nLabel:"},
+        {"role": "assistant", "content": "positive"},
+        {"role": "user", "content": "Review: Shipping was fast but the box arrived crushed.\nLabel:"},
+    ],
+)
+
+print(response.choices[0].message.content)</code></pre>
+
+  <p>Giving the model completed examples before the real question — here, two labeled reviews before the unlabeled third one — is called <strong>few-shot prompting</strong>. It shows the exact input/output pattern expected far more reliably than describing the pattern in words alone. <code class="inline-code">temperature</code> controls how much randomness goes into picking each generated word: a low value like <code class="inline-code">0</code> makes output nearly deterministic and consistent, which matters for a task like classification where the same review should always get the same label; a higher value produces more varied, creative output, useful for brainstorming but a liability here.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    <strong>Prompt engineering</strong> is designing the input text sent to a model to reliably shape its output, without changing the model itself. <strong>Few-shot prompting</strong> includes worked examples in the prompt before the real request. <strong>Temperature</strong> controls how much randomness the model uses when generating each word.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why it matters here</span>
+    Every unit before this one changed a model's weights to improve its behavior — through gradient descent, backpropagation, more training data. Prompt engineering gets better output from a model whose weights never change at all. Lesson 21 asks the natural next question: when is changing the prompt enough, and when do you actually need to change the model or give it outside information?
+  </div>
+
+  <h2>Check your recall</h2>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What is prompt engineering?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Designing the input text sent to a model to reliably shape its output, without changing the model itself.</button>
+      <button class="quiz-choice" data-correct="false">Retraining a model's weights on a new labeled dataset.</button>
+      <button class="quiz-choice" data-correct="false">Writing the low-level code that implements a Transformer layer.</button>
+      <button class="quiz-choice" data-correct="false">Choosing which physical server will run the model.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Both few-shot examples and the temperature setting above change output without touching any model weight.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. What does including the two labeled review examples before the real question accomplish?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">It shows the model the exact input/output pattern expected, more reliably than describing it in words.</button>
+      <button class="quiz-choice" data-correct="false">It permanently updates the model's stored weights for all future requests.</button>
+      <button class="quiz-choice" data-correct="false">It has no effect at all on the model's response.</button>
+      <button class="quiz-choice" data-correct="false">It slows down only the network request with no change to output.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>This is few-shot prompting: worked examples demonstrating the pattern directly.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why does the classification example above set temperature to 0?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">To make output nearly deterministic, so the same review always gets the same label.</button>
+      <button class="quiz-choice" data-correct="false">To make the model generate the longest possible response.</button>
+      <button class="quiz-choice" data-correct="false">Temperature only affects how the request is billed, not its output.</button>
+      <button class="quiz-choice" data-correct="false">To maximize randomness and creativity in the generated label.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Low temperature suits tasks needing consistent, repeatable answers rather than creative variation.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="few-shot">
+    <p class="quiz-prompt">4. Fill in the blank: including worked examples in a prompt before the real request is called ___ prompting.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>See the definition box above.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="temperature">
+    <p class="quiz-prompt">5. Fill in the blank: the parameter that controls how much randomness a model uses when generating each word is called ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>See the definition box above.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p><a href="https://www.deeplearning.ai/short-courses/chatgpt-prompt-engineering-for-developers/">DeepLearning.AI's "ChatGPT Prompt Engineering for Developers"</a> short course covers these techniques and several more, hands-on.</p>
+
+  <p class="ask-teacher">Wondering about "chain-of-thought" prompting, where you ask the model to reason step by step before answering? Ask your teacher — it's a real, widely used technique built on this same idea. Next: when a better prompt isn't enough, and what to do instead.</p>
+
+  <footer class="lesson-footer">STEM+ · AI Developer · Lesson 20</footer>
+</div>

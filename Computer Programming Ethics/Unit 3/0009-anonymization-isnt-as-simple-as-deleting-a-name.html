@@ -1,0 +1,99 @@
+<title>Lesson 9: Anonymization Isn't As Simple As Deleting a Name — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Computer Programming Ethics · Lesson 9</span>
+  <h1>Anonymization Isn't As Simple As Deleting a Name</h1>
+  <p class="subtitle">Removing the obvious identifier is rarely enough to make data actually anonymous.</p>
+  <p class="nav-links"><a href="../Unit%204/0010-error-messages-that-tell-the-truth.html">Lesson 10 →</a> <a href="../index.html">Contents</a> <a href="../reference/glossary.html">Glossary →</a></p>
+
+  <p>It's common to see code that removes a <code class="inline-code">name</code> or <code class="inline-code">email</code> column and calls the result "anonymized." In 2000, computer scientist Latanya Sweeney published research showing that roughly 87% of the U.S. population could be uniquely identified using only three remaining fields most datasets keep: ZIP code, birth date, and sex. Removing the name didn't anonymize the data — it just removed the most obvious column, while leaving enough left over to <strong>re-identify</strong> almost everyone anyway.</p>
+
+  <span class="code-label is-bad">"Anonymized" by deleting one column</span>
+  <pre class="code-block code-bad"><code>def anonymize(record):
+    del record["name"]
+    del record["email"]
+    return record
+    # zip_code, birth_date, and sex remain — often enough
+    # on their own to re-identify most individual people</code></pre>
+
+  <p>The function above still leaves the fields that Sweeney's research showed were enough, combined, to identify most people. Real anonymization has to account for what remains, not just what was removed — and has to consider that the remaining fields might be cross-referenced against other public datasets (voter rolls, property records) to re-identify someone.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    <strong>Re-identification</strong> is the process of matching supposedly anonymous data back to a specific real person, usually by combining several remaining fields — none dangerous alone — that together narrow the possibilities down to one individual.
+  </div>
+
+  <h2>Anonymization vs. pseudonymization</h2>
+  <p>These two terms are often confused. <strong>Pseudonymization</strong> replaces a direct identifier with a stand-in — a <code class="inline-code">user_id</code> instead of a name — but the original identity can still be recovered if you have the mapping table, or if enough other fields let you re-identify the person anyway (as above). True <strong>anonymization</strong> is a much higher bar: the data must not be re-identifiable even in principle, which usually requires actively reducing precision (a birth year instead of a birth date, a region instead of an exact ZIP code) rather than just deleting one field and hoping.</p>
+
+  <div class="box why">
+    <span class="box-label">Why it matters here</span>
+    Calling data "anonymized" when it isn't is itself a form of dishonesty from Lesson 2 — it tells users and regulators that a privacy protection exists which doesn't actually hold up. The fix isn't to avoid using data at all; it's to be accurate about how protected it really is.
+  </div>
+
+  <h2>Check your recall</h2>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What did Sweeney's 2000 research find about ZIP code, birth date, and sex combined?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">They uniquely identify most of the U.S. population.</button>
+      <button class="quiz-choice" data-correct="false">They are required fields under U.S. federal law.</button>
+      <button class="quiz-choice" data-correct="false">They cannot be collected without written consent.</button>
+      <button class="quiz-choice" data-correct="false">They are the three fields GDPR explicitly exempts.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Roughly 87% of the U.S. population was found to be uniquely identifiable from just these three fields — none of which look like an "identifier" on their own.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. What's the key difference between pseudonymization and true anonymization?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Pseudonymized data can still be traced back to a person.</button>
+      <button class="quiz-choice" data-correct="false">Pseudonymized data is always encrypted at rest.</button>
+      <button class="quiz-choice" data-correct="false">Anonymized data always excludes numeric fields.</button>
+      <button class="quiz-choice" data-correct="false">Anonymized data is a legal category, not a technical one.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Pseudonymization swaps an identifier for a stand-in that can be reversed with the mapping table or through re-identification; true anonymization aims to make that reversal impossible even in principle.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why does this lesson call mislabeling data as "anonymized" a form of dishonesty?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">It claims a protection that doesn't actually hold up.</button>
+      <button class="quiz-choice" data-correct="false">It always violates a specific software license.</button>
+      <button class="quiz-choice" data-correct="false">It makes the dataset technically impossible to query.</button>
+      <button class="quiz-choice" data-correct="false">It requires deleting the dataset within a year.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Ties back to Lesson 2's "be honest and trustworthy" — telling users their data is anonymized when it can still be re-identified is a factual misrepresentation.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="re-identification|reidentification">
+    <p class="quiz-prompt">4. Fill in the blank: matching supposedly anonymous data back to a specific real person is called ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>See the definition box above — it usually works by combining several individually-harmless fields.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="pseudonymization|pseudonymisation">
+    <p class="quiz-prompt">5. Fill in the blank: replacing a direct identifier with a reversible stand-in, like a user ID instead of a name, is called ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>It's a real and useful privacy technique — the mistake is only in calling it full anonymization when it isn't.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Wikipedia's <a href="https://en.wikipedia.org/wiki/Re-identification">Re-identification</a> article summarizes Sweeney's original study and several later re-identification cases — a good overview before going deeper into any single one.</p>
+
+  <p class="ask-teacher">Want to work through a concrete example of reducing a dataset's precision until it's actually hard to re-identify? Ask your teacher — that's what I'm here for. Unit 3 is complete; Unit 4 turns to transparency and honest failure.</p>
+
+  <footer class="lesson-footer">STEM+ · Computer Programming Ethics · Lesson 9</footer>
+</div>

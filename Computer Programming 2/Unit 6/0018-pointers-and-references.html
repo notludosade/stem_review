@@ -1,0 +1,136 @@
+<title>Lesson 18: Pointers and References — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<script src="../../assets/interactive.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Computer Programming 2 · Lesson 18</span>
+  <h1>Pointers and References</h1>
+  <p class="subtitle">Every variable in these four languages that isn't a raw number is, underneath, pointing at something else. C++ is just the one language that lets you see it.</p>
+  <p class="nav-links"><a href="0019-ownership-and-smart-pointers.html">Lesson 19 →</a> <a href="../index.html">Contents</a> <a href="../reference/glossary.html">Glossary →</a></p>
+
+  <p>A <strong>pointer</strong> is a variable whose value is a memory address — literally the location of some other piece of data. A <strong>reference</strong> is the same underlying idea, usually with the raw address hidden: a variable name that refers to an object elsewhere in memory, without exposing the address itself. Python, Java, and JavaScript variables holding objects, arrays, or lists are always references in this sense — assigning one variable to another doesn't copy the data, it copies what it points to.</p>
+
+  <div id="ref-tabs">
+    <div class="fm-tabs">
+      <button class="fm-tab is-active" data-tab="py">Python</button>
+      <button class="fm-tab" data-tab="java">Java</button>
+      <button class="fm-tab" data-tab="js">JavaScript</button>
+      <button class="fm-tab" data-tab="cpp">C++</button>
+    </div>
+    <div class="fm-panel" data-panel="py">
+      <span class="code-label">Python</span>
+      <pre class="code-block"><code>a = [1, 2, 3]
+b = a          # b references the SAME list object as a
+b.append(4)
+print(a)       # [1, 2, 3, 4] — a sees the change too</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="java" hidden>
+      <span class="code-label">Java</span>
+      <pre class="code-block"><code>int[] a = {1, 2, 3};
+int[] b = a;         // b references the SAME array object as a
+b[0] = 99;
+System.out.println(a[0]); // 99 — a sees the change too</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="js" hidden>
+      <span class="code-label">JavaScript</span>
+      <pre class="code-block"><code>let a = [1, 2, 3];
+let b = a;          // b references the SAME array object as a
+b.push(4);
+console.log(a);     // [1, 2, 3, 4] — a sees the change too</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="cpp" hidden>
+      <span class="code-label">C++</span>
+      <pre class="code-block"><code>int x = 5;
+int* p = &amp;x;    // p holds the ADDRESS of x, made explicit with &amp;
+*p = 99;         // *p means "the value p points to" — this changes x
+std::cout &lt;&lt; x &lt;&lt; std::endl;  // 99 — x itself was changed
+
+int&amp; ref = x;    // a reference: another name for x, no explicit address
+ref = 7;          // changes x directly, no * needed
+std::cout &lt;&lt; x &lt;&lt; std::endl;  // 7</code></pre>
+    </div>
+  </div>
+
+  <p>In Python, Java, and JavaScript, every assignment of an object, array, or list works the way <code class="inline-code">b = a</code> does above — the underlying reference behavior is always on, with no separate syntax for "copy the data instead." C++ makes the choice explicit at every step: <code class="inline-code">&amp;x</code> takes the address of a variable, producing a pointer; <code class="inline-code">*p</code> dereferences a pointer, meaning "the value at that address"; and <code class="inline-code">int&amp; ref = x</code> declares a true reference — like Python's <code class="inline-code">b = a</code>, but for any type, including plain numbers. Lesson 3's <code class="inline-code">a->speak()</code> and Lesson 8's linked-list <code class="inline-code">-></code> were both this same mechanism at work: <code class="inline-code">a->speak()</code> is shorthand for <code class="inline-code">(*a).speak()</code>, dereferencing a pointer and calling a method in one step.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    A <strong>pointer</strong> is a variable holding a memory address. A <strong>reference</strong> is a variable that refers to another piece of data, typically without exposing a raw address. C++: <code class="inline-code">&amp;</code> takes an address, <code class="inline-code">*</code> dereferences a pointer.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why it matters here</span>
+    "Reference semantics" for objects isn't a C++-only idea — it's the default in all four of these languages. C++ just requires naming the mechanism explicitly, which is exactly why the next lesson's bugs (dangling pointers, use-after-free) show up as a distinct, nameable category there, instead of being silently prevented the way garbage collection prevents them elsewhere.
+  </div>
+
+  <h2>Check your recall</h2>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What is a pointer?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">A variable whose value is the memory address of some other piece of data.</button>
+      <button class="quiz-choice" data-correct="false">A variable that can only ever hold the number zero.</button>
+      <button class="quiz-choice" data-correct="false">A special kind of function that cannot take any arguments.</button>
+      <button class="quiz-choice" data-correct="false">A C++ keyword with no equivalent concept in any other language.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>See the definition box above — the address is the whole idea.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. In the Python example, why does modifying b also change what a shows?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">b and a both reference the exact same underlying list object — there's only one list, with two names for it.</button>
+      <button class="quiz-choice" data-correct="false">Python secretly re-runs the entire program after every line.</button>
+      <button class="quiz-choice" data-correct="false">Assigning b = a creates two entirely separate, independent copies of the list.</button>
+      <button class="quiz-choice" data-correct="false">This behavior is a bug specific to this one example, not general Python behavior.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>This is standard, universal reference-assignment behavior for objects in Python, Java, and JavaScript alike.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. What does C++'s * operator do when applied to a pointer?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Dereferences it — accessing or modifying the value stored at the address it holds.</button>
+      <button class="quiz-choice" data-correct="false">Multiplies the pointer's address by two.</button>
+      <button class="quiz-choice" data-correct="false">Permanently deletes the pointer from memory.</button>
+      <button class="quiz-choice" data-correct="false">Converts the pointer into a plain integer with no further meaning.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>*p in the example changes x itself, since *p means "the value p points to."</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="address">
+    <p class="quiz-prompt">4. Fill in the blank: a pointer's value is the memory ___ of some other piece of data.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>See the definition box above.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="dereference">
+    <p class="quiz-prompt">5. Fill in the blank: using * to access the value a pointer points to is called a ___ operation.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>*p in the C++ example dereferences p to reach x's actual value.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p><a href="https://en.cppreference.com/w/cpp/language/pointer">cppreference's page on pointer declarations</a> documents C++ pointer syntax and semantics directly from the language reference.</p>
+
+  <p class="ask-teacher">Wondering what happens if you dereference a pointer that doesn't point anywhere valid? Ask your teacher — that's exactly what the next lesson is about. Next: who's responsible for cleaning up what a pointer points to.</p>
+
+  <footer class="lesson-footer">STEM+ · Computer Programming 2 · Lesson 18</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  STEMPlus.mountTabs(document.getElementById('ref-tabs'), 'data-tab', 'data-panel');
+});
+</script>

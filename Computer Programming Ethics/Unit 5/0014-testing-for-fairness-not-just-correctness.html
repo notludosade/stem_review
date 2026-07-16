@@ -1,0 +1,104 @@
+<title>Lesson 14: Testing for Fairness, Not Just Correctness — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Computer Programming Ethics · Lesson 14</span>
+  <h1>Testing for Fairness, Not Just Correctness</h1>
+  <p class="subtitle">A test suite can pass 100% and still ship a program that fails one group of users far more than another.</p>
+  <p class="nav-links"><a href="0015-proxy-variables-and-hidden-discrimination.html">Lesson 15 →</a> <a href="../index.html">Contents</a> <a href="../reference/glossary.html">Glossary →</a></p>
+
+  <p>A standard test checks: given this input, does the function return the right output? That question has nothing to do with fairness — a facial recognition function can correctly return "no match" or "match" on every test case in the suite and still be dramatically less accurate for some skin tones than others, if the test cases themselves don't cover that range. Testing for fairness means asking a second question on top of correctness: does accuracy hold up evenly <em>across</em> the groups of people who will actually use this?</p>
+
+  <span class="code-label is-bad">A test suite that only checks correctness</span>
+  <pre class="code-block code-bad"><code>def test_face_match():
+    assert recognize(sample_face_1) == "match"
+    assert recognize(sample_face_2) == "no match"
+    # both samples came from the same internal team photo set</code></pre>
+
+  <span class="code-label is-good">A test suite that checks correctness across groups</span>
+  <pre class="code-block code-good"><code>def test_face_match_across_demographics():
+    for group_name, faces in demographic_test_sets.items():
+        accuracy = evaluate_accuracy(recognize, faces)
+        assert accuracy >= MINIMUM_ACCEPTABLE_ACCURACY, \
+            f"Accuracy for {group_name} was {accuracy}, below threshold"</code></pre>
+
+  <p>The second test doesn't just check that the function works — it checks that it works <em>similarly well</em> for every group in <code class="inline-code">demographic_test_sets</code>, and fails loudly if one group falls below an acceptable bar. This is the same discipline as normal edge-case testing (empty input, negative numbers, maximum size) applied to a different kind of edge case: a demographic your original test data didn't happen to include.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    <strong>Disparate impact</strong> is when a policy or system that appears neutral produces significantly different outcomes for different groups. It doesn't require intent to discriminate — only a measurable gap in outcomes, which is exactly what a fairness test is designed to catch before release.
+  </div>
+
+  <h2>You can't test what you didn't measure</h2>
+  <p>The uncomfortable part of this lesson is that fairness testing requires collecting the demographic data needed to run the test — which sits in direct tension with Lesson 7's data minimization principle. There's no universal answer here; the practical resolution most teams use is to collect demographic data for evaluation datasets specifically (often anonymized or aggregated), separately from the production data pipeline the minimization principle governs. The two lessons aren't contradictory — they're about different datasets serving different purposes.</p>
+
+  <div class="box why">
+    <span class="box-label">Why it matters here</span>
+    A passing test suite creates false confidence. "All tests pass" sounds like "this is safe to ship," but if the tests were never designed to catch a fairness gap, passing them proves nothing about whether that gap exists. The gap is discovered later, in production, by the people it harmed — which is the worst place to find it.
+  </div>
+
+  <h2>Check your recall</h2>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. Why can a test suite pass 100% and still ship an unfair system?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">The tests never checked whether accuracy held up across groups.</button>
+      <button class="quiz-choice" data-correct="false">Passing tests always guarantee fairness by definition.</button>
+      <button class="quiz-choice" data-correct="false">Test suites cannot be run on machine learning code.</button>
+      <button class="quiz-choice" data-correct="false">100% pass rate is impossible in real test suites.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Correctness and fairness are different questions — a suite built to answer the first says nothing about the second unless it's specifically designed to.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. What does the fixed test suite check that the original one didn't?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">That accuracy meets a minimum bar for every demographic group tested.</button>
+      <button class="quiz-choice" data-correct="false">That the function runs in under one millisecond.</button>
+      <button class="quiz-choice" data-correct="false">That the function's source code has no comments.</button>
+      <button class="quiz-choice" data-correct="false">That the function works on exactly two sample faces.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>It loops over demographic_test_sets and fails if any group's accuracy drops below MINIMUM_ACCEPTABLE_ACCURACY.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. How does fairness testing relate to Lesson 7's data minimization principle?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">They apply to different datasets and aren't actually contradictory.</button>
+      <button class="quiz-choice" data-correct="false">Fairness testing makes data minimization completely unnecessary.</button>
+      <button class="quiz-choice" data-correct="false">Data minimization means fairness testing is always illegal.</button>
+      <button class="quiz-choice" data-correct="false">They are the exact same practice under two different names.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Demographic data for a separate evaluation dataset is a different collection decision than what the production pipeline gathers from every user.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="disparate impact">
+    <p class="quiz-prompt">4. Fill in the blank: when a seemingly neutral policy or system produces significantly different outcomes for different groups, regardless of intent, that's called ___ ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>See the definition box above — no intent to discriminate is required, only a measurable outcome gap.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="correctness">
+    <p class="quiz-prompt">5. Fill in the blank: a standard test checks ___ (does the function return the right output) — fairness testing adds a second, separate question about groups.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Correctness and fairness are the two separate questions this lesson opens with.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>The <a href="https://www.nist.gov/publications/towards-standard-identifying-and-managing-bias-artificial-intelligence">NIST bias-in-AI publication</a> from Lesson 13 also covers testing and evaluation practices for catching disparate impact before deployment.</p>
+
+  <p class="ask-teacher">Want to see what a real demographic fairness evaluation dataset looks like, or how a company might structure a bias bug bounty? Ask your teacher — that's what I'm here for. Next: proxy variables, the specific mechanism behind the zip code example from Lesson 13.</p>
+
+  <footer class="lesson-footer">STEM+ · Computer Programming Ethics · Lesson 14</footer>
+</div>

@@ -1,0 +1,190 @@
+<title>Lesson 23: Organizing a Multi-File Program — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<script src="../../assets/interactive.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Computer Programming 2 · Lesson 23</span>
+  <h1>Organizing a Multi-File Program</h1>
+  <p class="subtitle">Every example so far has fit in one file. A real program doesn't — it splits by responsibility across many, and each language connects those pieces back together differently.</p>
+  <p class="nav-links"><a href="0024-capstone-putting-it-together.html">Lesson 24 →</a> <a href="../index.html">Contents</a> <a href="../reference/glossary.html">Glossary →</a></p>
+
+  <p>A <strong>module</strong> is a file whose contents can be used from another file. Below, a <code class="inline-code">Circle</code> class — built the same way as Unit 1's classes — lives in its own file and gets used from a separate <code class="inline-code">main</code> file. Watch how many files each language actually needs to make that work.</p>
+
+  <div id="mod-tabs">
+    <div class="fm-tabs">
+      <button class="fm-tab is-active" data-tab="py">Python</button>
+      <button class="fm-tab" data-tab="java">Java</button>
+      <button class="fm-tab" data-tab="js">JavaScript</button>
+      <button class="fm-tab" data-tab="cpp">C++</button>
+    </div>
+    <div class="fm-panel" data-panel="py">
+      <span class="code-label">Python — 2 files</span>
+      <pre class="code-block"><code># shapes.py
+class Circle:
+    def __init__(self, radius):
+        self.radius = radius
+
+    def area(self):
+        return 3.14159 * self.radius ** 2
+
+# main.py
+from shapes import Circle
+
+c = Circle(5)
+print(c.area())   # 78.53975</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="java" hidden>
+      <span class="code-label">Java — 2 files</span>
+      <pre class="code-block"><code>// Circle.java
+public class Circle {
+    private double radius;
+
+    public Circle(double radius) {
+        this.radius = radius;
+    }
+
+    public double area() {
+        return 3.14159 * radius * radius;
+    }
+}
+
+// Main.java
+public class Main {
+    public static void main(String[] args) {
+        Circle c = new Circle(5);
+        System.out.println(c.area());   // same package: no import needed
+    }
+}</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="js" hidden>
+      <span class="code-label">JavaScript — 2 files</span>
+      <pre class="code-block"><code>// shapes.js
+export class Circle {
+    constructor(radius) {
+        this.radius = radius;
+    }
+    area() {
+        return 3.14159 * this.radius ** 2;
+    }
+}
+
+// main.js
+import { Circle } from './shapes.js';
+
+const c = new Circle(5);
+console.log(c.area());   // 78.53975</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="cpp" hidden>
+      <span class="code-label">C++ — 3 files</span>
+      <pre class="code-block"><code>// shapes.h  — the declaration: what Circle offers, not how
+class Circle {
+public:
+    Circle(double radius);
+    double area();
+private:
+    double radius;
+};
+
+// shapes.cpp  — the definition: how Circle actually works
+#include "shapes.h"
+
+Circle::Circle(double radius) : radius(radius) {}
+
+double Circle::area() {
+    return 3.14159 * radius * radius;
+}
+
+// main.cpp
+#include "shapes.h"
+#include &lt;iostream&gt;
+
+int main() {
+    Circle c(5);
+    std::cout &lt;&lt; c.area() &lt;&lt; std::endl;   // 78.53975
+}</code></pre>
+    </div>
+  </div>
+
+  <p>Python's <code class="inline-code">import</code>, Java's same-package visibility, and JavaScript's <code class="inline-code">export</code>/<code class="inline-code">import</code> all do the same job with two files: one file defines the class, another uses it. C++ is the outlier one more time — it needs a <strong>header file</strong> (<code class="inline-code">.h</code>) listing what <code class="inline-code">Circle</code> offers, separate from the <code class="inline-code">.cpp</code> file saying how it actually works, because C++ compiles each file independently and the header is how <code class="inline-code">main.cpp</code> learns about <code class="inline-code">Circle</code> without seeing its implementation at all.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    A <strong>module</strong> is a file whose contents (classes, functions) can be used from another file. A C++ <strong>header file</strong> declares what a class offers, separately from the <code class="inline-code">.cpp</code> file that defines how it works.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why it matters here</span>
+    Every class from Unit 1 onward has lived in one file for simplicity. Real programs split by responsibility — one file per class or feature — precisely so a change to one piece doesn't require rereading the whole program. This is the last idea needed before the capstone in Lesson 24, which pulls every unit in this course together into one small multi-file design.
+  </div>
+
+  <h2>Check your recall</h2>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What is a module?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">A file whose contents can be used from another file.</button>
+      <button class="quiz-choice" data-correct="false">A special kind of loop that runs exactly once.</button>
+      <button class="quiz-choice" data-correct="false">A built-in error type raised on invalid input.</button>
+      <button class="quiz-choice" data-correct="false">A synonym for a single variable declaration.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>shapes.py, Circle.java, and shapes.js are each a module in this sense.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why does C++ need a header file that Python, Java, and JavaScript don't need an equivalent of?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">C++ compiles each file independently, so a header lets one file learn what a class offers without seeing its implementation.</button>
+      <button class="quiz-choice" data-correct="false">C++ is the only one of the four that supports classes at all.</button>
+      <button class="quiz-choice" data-correct="false">Header files make C++ programs run slower than the other three languages.</button>
+      <button class="quiz-choice" data-correct="false">There is no real reason — it's purely a stylistic tradition with no technical cause.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>main.cpp includes shapes.h to know Circle's shape, while shapes.cpp alone holds how it actually works.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. What keyword does shapes.js use to make Circle usable from main.js?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">export</button>
+      <button class="quiz-choice" data-correct="false">public</button>
+      <button class="quiz-choice" data-correct="false">global</button>
+      <button class="quiz-choice" data-correct="false">extern</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>main.js then pulls it in with a matching import statement.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="module">
+    <p class="quiz-prompt">4. Fill in the blank: a file whose contents can be reused from another file is a ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>See the definition box above.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="header">
+    <p class="quiz-prompt">5. Fill in the blank: in C++, a ___ file declares what a class offers, separate from the .cpp file defining how it works.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>shapes.h in the example above is exactly this file.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Modules">MDN's guide to JavaScript modules</a> documents export and import directly from the source, including patterns beyond the single-class example above.</p>
+
+  <p class="ask-teacher">Wondering how a project with hundreds of files decides where to draw the lines between modules? Ask your teacher — it usually comes down to grouping by responsibility, the same instinct that separated Circle from main above. Next: the capstone, bringing every unit in this course together.</p>
+
+  <footer class="lesson-footer">STEM+ · Computer Programming 2 · Lesson 23</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  STEMPlus.mountTabs(document.getElementById('mod-tabs'), 'data-tab', 'data-panel');
+});
+</script>

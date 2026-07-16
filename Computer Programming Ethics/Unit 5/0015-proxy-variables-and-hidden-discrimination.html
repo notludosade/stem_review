@@ -1,0 +1,105 @@
+<title>Lesson 15: Proxy Variables and Hidden Discrimination — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Computer Programming Ethics · Lesson 15</span>
+  <h1>Proxy Variables and Hidden Discrimination</h1>
+  <p class="subtitle">Removing a protected field from your data doesn't remove its influence.</p>
+  <p class="nav-links"><a href="../Unit%206/0016-open-source-licenses-are-not-interchangeable.html">Lesson 16 →</a> <a href="../index.html">Contents</a> <a href="../reference/glossary.html">Glossary →</a></p>
+
+  <p>A common, well-intentioned fix once bias like Lesson 13's zip code example is discovered is: "just don't collect that field." Drop race, drop gender, drop age from the dataset entirely, and the model can't discriminate on something it never sees. This lesson explains why that fix is incomplete on its own — the zip code field itself is the demonstration. Nobody fed race into that shipping rule, and it discriminated anyway.</p>
+
+  <span class="code-label is-bad">Removing the sensitive field, calling it fixed</span>
+  <pre class="code-block code-bad"><code>fields_used_for_credit_score = [
+    "income", "debt_ratio", "payment_history",
+    "zip_code", "years_at_address",  # dropped "race" — done, right?
+]</code></pre>
+
+  <span class="code-label is-good">Checking remaining fields for proxy correlation</span>
+  <pre class="code-block code-good"><code>fields_used_for_credit_score = [
+    "income", "debt_ratio", "payment_history",
+]
+# zip_code and years_at_address were tested for correlation with
+# race and income using the held-out demographic evaluation set
+# from Lesson 14, and dropped once the correlation showed up</code></pre>
+
+  <p>Dropping "race" from the input fields feels like the responsible move, and it is necessary — but not sufficient. <code class="inline-code">zip_code</code>, <code class="inline-code">years_at_address</code>, first name, even shopping category history can each function as a <strong>proxy variable</strong>: a field that doesn't name a protected characteristic but predicts it closely enough that a model can reconstruct its effect without ever seeing it directly.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    <strong>Proxy variable</strong> (or "proxy discrimination") is a field that correlates strongly enough with a protected characteristic — race, gender, age, disability status, religion — that using it produces close to the same discriminatory outcome as using the protected characteristic directly, even though the protected field was never included.
+  </div>
+
+  <h2>You can't eliminate proxies by inspection alone</h2>
+  <p>The hard part is that a proxy relationship isn't usually visible by reading the field name. Nobody looks at "zip code" or "years at current address" and immediately thinks "protected characteristic." Finding a proxy requires the same measurement discipline as Lesson 14's fairness testing: run the model or rule against a demographic evaluation set and check whether its outputs correlate with group membership, not just whether its inputs mention group membership.</p>
+
+  <div class="box why">
+    <span class="box-label">Why it matters here</span>
+    "We don't collect race" is a true and commonly-cited defense that doesn't actually settle the fairness question — and treating it as if it does is how well-intentioned teams end up shipping a discriminatory system while genuinely believing they removed the risk. The fix isn't "collect even less" — it's "measure the actual outcome," which is what Lesson 14 already set up the machinery for.
+  </div>
+
+  <h2>Check your recall</h2>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. Why isn't dropping the "race" field from a dataset sufficient on its own to prevent racial bias?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Other remaining fields can act as proxies that predict race closely.</button>
+      <button class="quiz-choice" data-correct="false">Dropping any field always causes a program to crash.</button>
+      <button class="quiz-choice" data-correct="false">Race is a required field in every database schema.</button>
+      <button class="quiz-choice" data-correct="false">It is actually sufficient, and no further check is needed.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>This is exactly the zip code mechanism from Lesson 13, generalized — proxies reconstruct the effect of a dropped field.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. What makes a field a "proxy variable"?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">It correlates strongly enough with a protected characteristic to reproduce its effect.</button>
+      <button class="quiz-choice" data-correct="false">It has "proxy" somewhere in its variable name.</button>
+      <button class="quiz-choice" data-correct="false">It is always a numeric field rather than a text field.</button>
+      <button class="quiz-choice" data-correct="false">It is explicitly listed as a protected characteristic by law.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>See the definition box — the correlation, not the label, is what makes something a proxy.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. How does the good example actually find which fields are acting as proxies?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">By testing fields for correlation against a demographic evaluation set.</button>
+      <button class="quiz-choice" data-correct="false">By reading each field's name and guessing based on how it sounds.</button>
+      <button class="quiz-choice" data-correct="false">By removing every field from the dataset except one.</button>
+      <button class="quiz-choice" data-correct="false">By asking users to self-report whether a field feels biased.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Reading a field name (like "zip_code") doesn't reveal a proxy relationship — measuring correlation against real outcomes does.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="proxy variable|proxy discrimination">
+    <p class="quiz-prompt">4. Fill in the blank: a field that correlates closely enough with a protected characteristic to reproduce its discriminatory effect, without naming it directly, is called a ___ ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>See the definition box above.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="zip code|zip_code">
+    <p class="quiz-prompt">5. Fill in the blank: across both this lesson and Lesson 13, the recurring example of a proxy variable is ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>It reappears in the credit-score example here for the same reason it appeared in the shipping example — a very common real-world proxy for income and, in many cities, race.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>The <a href="https://www.consumerfinance.gov/rules-policy/final-rules/small-business-lending-under-the-equal-credit-opportunity-act-regulation-b/">Consumer Financial Protection Bureau's guidance under the Equal Credit Opportunity Act</a> addresses proxy discrimination directly in the context of credit decisions — the exact scenario in this lesson's code example.</p>
+
+  <p class="ask-teacher">Want to walk through how to actually run a correlation check between a candidate field and a protected characteristic in a real dataset? Ask your teacher — that's what I'm here for. Unit 5 is complete; Unit 6 turns to licensing, attribution, and trusting open source dependencies.</p>
+
+  <footer class="lesson-footer">STEM+ · Computer Programming Ethics · Lesson 15</footer>
+</div>

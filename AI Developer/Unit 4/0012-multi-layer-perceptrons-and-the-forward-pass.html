@@ -1,0 +1,110 @@
+<title>Lesson 12: Multi-Layer Perceptrons and the Forward Pass — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · AI Developer · Lesson 12</span>
+  <h1>Multi-Layer Perceptrons and the Forward Pass</h1>
+  <p class="subtitle">One perceptron can only draw a straight line between classes. Stack several into layers, and that limitation disappears.</p>
+  <p class="nav-links"><a href="0013-loss-and-gradient-descent.html">Lesson 13 →</a> <a href="../index.html">Contents</a> <a href="../reference/glossary.html">Glossary →</a></p>
+
+  <p>A <strong>multi-layer perceptron (MLP)</strong> arranges perceptrons into layers: an input layer (the raw data), one or more <strong>hidden layers</strong>, and an output layer. Data flows through every layer in sequence — each layer's output becomes the next layer's input — in what's called a <strong>forward pass</strong>.</p>
+
+  <span class="code-label">Python — NumPy</span>
+  <pre class="code-block"><code>import numpy as np
+
+def sigmoid(x):
+    return 1 / (1 + np.exp(-x))
+
+# Layer 1: 2 inputs -> 3 hidden neurons
+W1 = np.array([[0.2, 0.4, -0.5], [0.1, -0.3, 0.8]])
+b1 = np.array([0.0, 0.1, -0.2])
+
+# Layer 2: 3 hidden neurons -> 1 output
+W2 = np.array([[0.6], [0.9], [-0.4]])
+b2 = np.array([0.05])
+
+def forward_pass(x):
+    hidden = sigmoid(x @ W1 + b1)      # every hidden neuron runs Lesson 11's math at once
+    output = sigmoid(hidden @ W2 + b2)  # the hidden layer's output feeds the next layer
+    return output
+
+x = np.array([1.0, 0.5])
+print(forward_pass(x))   # a single number between 0 and 1</code></pre>
+
+  <p>Each of the three hidden neurons is exactly Lesson 11's perceptron — its own weights, its own bias, its own activation — just computed in parallel via one matrix multiplication instead of three separate function calls. The <strong>hidden layer</strong> is what a single perceptron can't provide alone: a way to combine the raw inputs into new, learned representations before the output layer ever sees them, which is what lets an MLP separate patterns a single straight-line perceptron cannot. Real code rarely writes the matrix math out by hand like this — scikit-learn's <code class="inline-code">MLPClassifier</code> handles it directly — but the forward pass itself is precisely this sequence of layer-by-layer transformations, however it's implemented.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    A <strong>multi-layer perceptron (MLP)</strong> is a network of perceptrons arranged in an input layer, one or more hidden layers, and an output layer. A <strong>hidden layer</strong> transforms the input into a new, learned representation before the output layer. A <strong>forward pass</strong> is data flowing through every layer in sequence to produce a final output.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why it matters here</span>
+    "Depth" in deep learning, covered starting in Unit 5, literally means stacking more hidden layers than this two-layer example — the mechanism doesn't change, only the count. Lesson 13 needs this forward pass to already have happened before it can measure how wrong the output was and start correcting it.
+  </div>
+
+  <h2>Check your recall</h2>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What is a forward pass?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Data flowing through every layer in sequence to produce a final output.</button>
+      <button class="quiz-choice" data-correct="false">The process of deleting a layer that performed poorly.</button>
+      <button class="quiz-choice" data-correct="false">Randomly reordering the layers of a network.</button>
+      <button class="quiz-choice" data-correct="false">Splitting a dataset into training and validation sets.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>forward_pass() above runs the input through layer 1, then layer 2, in exactly that order.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. What can a hidden layer provide that a single perceptron alone cannot?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">A new, learned representation of the input, enabling more than a single straight-line separation.</button>
+      <button class="quiz-choice" data-correct="false">A guaranteed 100% accuracy on any dataset.</button>
+      <button class="quiz-choice" data-correct="false">The ability to skip training entirely.</button>
+      <button class="quiz-choice" data-correct="false">A way to avoid ever needing an activation function.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Combining multiple neurons' outputs is what lets an MLP separate patterns a lone perceptron cannot.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. How does an MLP relate to Lesson 11's single perceptron?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">It arranges many perceptrons into layers, each computing the same weighted-sum-plus-activation math.</button>
+      <button class="quiz-choice" data-correct="false">It replaces the perceptron's math entirely with a completely different computation.</button>
+      <button class="quiz-choice" data-correct="false">An MLP can only ever contain exactly one perceptron.</button>
+      <button class="quiz-choice" data-correct="false">There is no relationship between the two at all.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Every hidden neuron in the code above runs Lesson 11's exact perceptron computation.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="hidden">
+    <p class="quiz-prompt">4. Fill in the blank: a layer between the input and output layers, which learns a new representation of the data, is a ___ layer.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>See the definition box above.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="forward">
+    <p class="quiz-prompt">5. Fill in the blank: data flowing through every layer in sequence to produce an output is called a ___ pass.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>See the definition box above.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p><a href="http://neuralnetworksanddeeplearning.com/">Michael Nielsen's free online book "Neural Networks and Deep Learning"</a> walks through this exact layer-by-layer structure in detail, with code.</p>
+
+  <p class="ask-teacher">Wondering how many hidden layers or neurons per layer a real network should use? Ask your teacher — it's part science, part experimentation, and there's real guidance worth knowing. Next: how a network's weights actually get set, rather than guessed by hand.</p>
+
+  <footer class="lesson-footer">STEM+ · AI Developer · Lesson 12</footer>
+</div>

@@ -1,0 +1,107 @@
+<title>Lesson 13: Where Bias Enters a Program — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Computer Programming Ethics · Lesson 13</span>
+  <h1>Where Bias Enters a Program</h1>
+  <p class="subtitle">Code doesn't need to be "trying" to discriminate to produce a discriminatory result.</p>
+  <p class="nav-links"><a href="0014-testing-for-fairness-not-just-correctness.html">Lesson 14 →</a> <a href="../index.html">Contents</a> <a href="../reference/glossary.html">Glossary →</a></p>
+
+  <p>Every lesson so far has looked at a decision one developer makes in one function. This unit looks at a different kind of failure — one where every individual line of code is doing exactly what it was written to do, and the harm shows up only when you look at how the program treats different groups of people differently. This isn't unique to machine learning; it happens in ordinary rule-based code too.</p>
+
+  <span class="code-label is-bad">A rule that looks neutral, but isn't</span>
+  <pre class="code-block code-bad"><code>def qualifies_for_fast_shipping(customer):
+    # Fast shipping is only profitable in areas we can reach same-day
+    return customer.zip_code in FAST_SHIPPING_ZIPS
+
+# FAST_SHIPPING_ZIPS was built from the company's current warehouse
+# locations, which happen to cluster in wealthier zip codes —
+# so the rule quietly correlates with income and, in this city, race</code></pre>
+
+  <span class="code-label is-good">Checking what a "neutral" rule actually produces</span>
+  <pre class="code-block code-good"><code># Before shipping this list to production, someone actually ran:
+coverage_by_zip = analyze_coverage(FAST_SHIPPING_ZIPS, census_data)
+# ...and found fast shipping covered 78% of high-income zip codes
+# vs. 12% of low-income zip codes in the same metro area.
+# The list gets revisited with that finding in hand, not shipped blind.</code></pre>
+
+  <p>Nobody wrote <code class="inline-code">if customer.is_low_income: deny()</code>. The zip code list was built for an entirely defensible operational reason — warehouse proximity. The bias entered through a variable (zip code) that's correlated with a protected characteristic (income, and in many US cities, race) without anyone deciding that on purpose. This is the general shape of most real-world algorithmic bias: not malice, but an unexamined correlation baked into a rule or a training dataset.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    <strong>Algorithmic bias</strong> is a systematic, unfair difference in how a program's output treats different groups — even when no line of code explicitly references group membership. It commonly enters through historical data that reflects past discrimination, through a design choice like the shipping example, or through whoever built and tested the system sharing a narrow set of backgrounds.
+  </div>
+
+  <h2>Three common entry points</h2>
+  <p>Bias tends to enter a program in one of three ways: <strong>biased training data</strong> (a model trained on past hiring decisions inherits whatever bias was in those decisions), <strong>biased rules</strong> (the zip code example — a rule that's neutral on paper but correlated with a protected group in practice), and <strong>biased testing</strong> (a system tested only on one demographic, so failures for anyone else are never caught before release — the subject of the next lesson).</p>
+
+  <div class="box why">
+    <span class="box-label">Why it matters here</span>
+    "I didn't write anything discriminatory" is true and insufficient at the same time — the zip code developer is telling the truth, and the system still produces a discriminatory outcome. Treating fairness as something you check for, the way you'd check for a null pointer, is what catches this before it ships instead of after a customer complaint.
+  </div>
+
+  <h2>Check your recall</h2>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. In the shipping example, what variable ends up correlating with income and race?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Zip code.</button>
+      <button class="quiz-choice" data-correct="false">The customer's name.</button>
+      <button class="quiz-choice" data-correct="false">The customer's order history.</button>
+      <button class="quiz-choice" data-correct="false">The customer's account age.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The warehouse-proximity list wasn't built with income or race in mind, but zip code correlates with both in many US metro areas.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why is this kind of bias harder to spot than an explicit discriminatory rule?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">No line of code references the protected characteristic directly.</button>
+      <button class="quiz-choice" data-correct="false">It only happens in machine learning models, never in rule-based code.</button>
+      <button class="quiz-choice" data-correct="false">It is always intentional and therefore easy to find in a code review.</button>
+      <button class="quiz-choice" data-correct="false">Compilers automatically flag it as a syntax warning.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The rule looks neutral by every normal code-review standard — the problem only shows up when you check the outcome against group membership.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. What did the "good" example actually do differently from the bad one?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">It measured the rule's real-world coverage before shipping it.</button>
+      <button class="quiz-choice" data-correct="false">It removed zip code as a field from the database entirely.</button>
+      <button class="quiz-choice" data-correct="false">It added a comment explaining the warehouse locations.</button>
+      <button class="quiz-choice" data-correct="false">It rewrote the function in a different programming language.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Checking coverage against census data is what surfaces the correlation — the code itself doesn't need to change to reveal the problem.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="algorithmic bias">
+    <p class="quiz-prompt">4. Fill in the blank: a systematic, unfair difference in how a program treats different groups, even without explicit group-referencing code, is called ___ ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>See the definition box above.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="training data|biased training data">
+    <p class="quiz-prompt">5. Fill in the blank: a model that inherits bias from past hiring decisions used to train it is an example of biased ___ ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>One of the three common entry points listed above — see "Three common entry points."</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>The <a href="https://www.nist.gov/publications/towards-standard-identifying-and-managing-bias-artificial-intelligence">NIST publication "Towards a Standard for Identifying and Managing Bias in Artificial Intelligence"</a> categorizes bias sources including data, design, and testing — the same three entry points covered above, in a formal standards context.</p>
+
+  <p class="ask-teacher">Want to look at a real historical case where a shipping or lending algorithm was found to correlate with a protected class? Ask your teacher — that's what I'm here for. Next: how to actually test for fairness instead of just correctness.</p>
+
+  <footer class="lesson-footer">STEM+ · Computer Programming Ethics · Lesson 13</footer>
+</div>

@@ -1,0 +1,148 @@
+<title>Lesson 17: Garbage Collection and Manual Memory — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<script src="../../assets/interactive.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Computer Programming 2 · Lesson 17</span>
+  <h1>Garbage Collection and Manual Memory</h1>
+  <p class="subtitle">Three of these languages clean up heap memory for you. One expects you to do it yourself — and punishes you quietly if you forget.</p>
+  <p class="nav-links"><a href="0018-pointers-and-references.html">Lesson 18 →</a> <a href="../index.html">Contents</a> <a href="../reference/glossary.html">Glossary →</a></p>
+
+  <p>Python, Java, and JavaScript all use <strong>garbage collection</strong>: a background process that tracks which heap objects are still reachable from active variables, and automatically frees the ones that aren't. C++ has no such process built in — heap memory allocated with <code class="inline-code">new</code> stays allocated until something calls <code class="inline-code">delete</code> on it, even after every variable that pointed to it is gone.</p>
+
+  <div id="gc-tabs">
+    <div class="fm-tabs">
+      <button class="fm-tab is-active" data-tab="py">Python</button>
+      <button class="fm-tab" data-tab="java">Java</button>
+      <button class="fm-tab" data-tab="js">JavaScript</button>
+      <button class="fm-tab" data-tab="cpp">C++</button>
+    </div>
+    <div class="fm-panel" data-panel="py">
+      <span class="code-label">Python</span>
+      <pre class="code-block"><code>def make_and_forget():
+    data = [1] * 1000000   # allocated on the heap
+    # function ends; 'data' goes out of scope
+    # nothing else references it — the garbage collector
+    # will reclaim that memory automatically, no action needed
+
+make_and_forget()</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="java" hidden>
+      <span class="code-label">Java</span>
+      <pre class="code-block"><code>static void makeAndForget() {
+    int[] data = new int[1000000];  // allocated on the heap
+    // method ends; 'data' goes out of scope
+    // the garbage collector reclaims that memory automatically
+}
+
+makeAndForget();</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="js" hidden>
+      <span class="code-label">JavaScript</span>
+      <pre class="code-block"><code>function makeAndForget() {
+    const data = new Array(1000000);  // allocated on the heap
+    // function ends; 'data' goes out of scope
+    // the garbage collector reclaims that memory automatically
+}
+
+makeAndForget();</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="cpp" hidden>
+      <span class="code-label">C++</span>
+      <pre class="code-block"><code>void makeAndLeak() {
+    int* data = new int[1000000];  // allocated on the heap
+    // function ends; 'data' goes out of scope...
+    // but *data is NOT freed — nothing called delete[]
+    // that memory is now unreachable AND still allocated: a leak
+}
+
+void makeAndFree() {
+    int* data = new int[1000000];
+    delete[] data;   // explicitly frees the heap memory
+}</code></pre>
+    </div>
+  </div>
+
+  <p><code class="inline-code">makeAndLeak</code> is a <strong>memory leak</strong>: the pointer that could reach that heap memory is gone the moment the function returns, but the memory itself was never freed, so it's permanently unusable for the rest of the program's run. Call a leaking function enough times and a program's memory usage climbs without bound until it crashes. <code class="inline-code">makeAndFree</code> fixes it with one line — but that line has to be written correctly, for every allocation, on every path through the code, including error paths. Garbage collection trades a small, ongoing runtime cost (the collector has to periodically scan for unreachable objects) for never having to get that right by hand.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    <strong>Garbage collection</strong> automatically frees heap memory once nothing references it anymore. <strong>Manual memory management</strong> requires code to explicitly free heap memory (C++'s <code class="inline-code">delete</code>); forgetting causes a <strong>memory leak</strong>.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why it matters here</span>
+    This is the practical cost of Lesson 16's stack/heap choice. Automatic heap allocation in Python, Java, and JavaScript comes with automatic cleanup as part of the same deal. C++ separates the two: you choose to allocate on the heap, and that choice comes with an unwritten promise to also handle freeing it — a promise the compiler does not enforce for you.
+  </div>
+
+  <h2>Check your recall</h2>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What does a garbage collector do?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Automatically frees heap memory once nothing in the program can still reach it.</button>
+      <button class="quiz-choice" data-correct="false">Deletes all variables at the start of every function call.</button>
+      <button class="quiz-choice" data-correct="false">Prevents a program from ever allocating heap memory in the first place.</button>
+      <button class="quiz-choice" data-correct="false">Only runs once, at the very end of a program.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>This is what Python, Java, and JavaScript all do automatically, with no code required from the developer.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. What exactly is a memory leak?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Heap memory that's become unreachable but was never freed, making it permanently unusable for the rest of the run.</button>
+      <button class="quiz-choice" data-correct="false">Any variable declared on the stack instead of the heap.</button>
+      <button class="quiz-choice" data-correct="false">A program that runs slightly slower than expected.</button>
+      <button class="quiz-choice" data-correct="false">A syntax error that prevents a C++ program from compiling.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>makeAndLeak's array is exactly this — the pointer to it is gone, but the memory itself was never released.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. What does C++ require that Python, Java, and JavaScript do not, for heap-allocated memory?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">An explicit delete (or delete[]) call to free the memory once it's no longer needed.</button>
+      <button class="quiz-choice" data-correct="false">A special license to use the new keyword at all.</button>
+      <button class="quiz-choice" data-correct="false">Nothing — C++ also garbage collects automatically, identically to the other three.</button>
+      <button class="quiz-choice" data-correct="false">Recompiling the entire program every time memory is allocated.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>This manual step, and the discipline it requires on every code path, is unique to C++ among these four languages.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="leak">
+    <p class="quiz-prompt">4. Fill in the blank: forgetting to free heap memory that's become unreachable causes a memory ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>See the definition box above.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="delete">
+    <p class="quiz-prompt">5. Fill in the blank: in C++, heap memory allocated with new must be explicitly freed with ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Arrays specifically use the delete[] form, as shown in makeAndFree.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p><a href="https://docs.python.org/3/library/gc.html">Python's official documentation for the gc module</a> documents Python's own garbage collector directly, including how it handles reference cycles.</p>
+
+  <p class="ask-teacher">Wondering why Python needs a cycle-detecting collector on top of simple reference counting? Ask your teacher — it's for objects that reference each other in a loop. Next: what a pointer actually is, and how C++ makes them explicit.</p>
+
+  <footer class="lesson-footer">STEM+ · Computer Programming 2 · Lesson 17</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  STEMPlus.mountTabs(document.getElementById('gc-tabs'), 'data-tab', 'data-panel');
+});
+</script>

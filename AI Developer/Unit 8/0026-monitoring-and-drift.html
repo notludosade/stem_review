@@ -1,0 +1,105 @@
+<title>Lesson 26: Monitoring and Drift — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · AI Developer · Lesson 26</span>
+  <h1>Monitoring and Drift</h1>
+  <p class="subtitle">A model evaluated once, at launch, tells you nothing about how it's behaving six months later — and the real world it's judging keeps changing underneath it.</p>
+  <p class="nav-links"><a href="0027-versioning-and-rollbacks.html">Lesson 27 →</a> <a href="../index.html">Contents</a> <a href="../reference/glossary.html">Glossary →</a></p>
+
+  <p><strong>Monitoring</strong> is continuously logging a deployed system's inputs, outputs, and performance over time, rather than checking it once and assuming that holds forever. Monitoring exists to catch <strong>drift</strong>: a gradual mismatch between what a model learned and the real-world data it now sees, which quietly degrades accuracy without any code ever actually changing.</p>
+
+  <span class="code-label">Python — logging predictions for later review</span>
+  <pre class="code-block"><code>import json
+from datetime import datetime, timezone
+
+def triage_ticket_monitored(ticket_text):
+    result = triage_ticket(ticket_text)   # from Lesson 23
+
+    log_entry = {
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "input": ticket_text,
+        "urgency": result["urgency"],
+    }
+    with open("triage_log.jsonl", "a") as f:
+        f.write(json.dumps(log_entry) + "\n")
+
+    return result</code></pre>
+
+  <p>Every call appends one line to <code class="inline-code">triage_log.jsonl</code> — a simple, durable record of what came in and what the model decided. On its own, a single log entry proves nothing. The value shows up over time: if the fraction of tickets marked <code class="inline-code">"high"</code> urgency slowly climbs week over week with no real change in the tickets themselves, or if a human reviewer starts disagreeing with the model's calls more often than before, that's drift showing up in the data — a sign the model's original training no longer matches current reality closely enough, and it may need retraining, a better prompt, or a different approach entirely.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    <strong>Monitoring</strong> is continuously logging a deployed system's inputs, outputs, and performance over time. <strong>Drift</strong> is a gradual mismatch between what a model learned and the real-world data it currently encounters, degrading its performance without any code change.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why it matters here</span>
+    Unit 2 built a test set specifically so evaluation would be honest and one-time — but "one-time" was only ever meant for development. Once deployed, the real world keeps moving, and only ongoing monitoring can catch a model quietly falling out of step with it. Lesson 27 asks what to actually do once drift, or any other regression, is caught.
+  </div>
+
+  <h2>Check your recall</h2>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What is drift?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">A gradual mismatch between what a model learned and the real-world data it now encounters.</button>
+      <button class="quiz-choice" data-correct="false">A sudden crash caused by malformed JSON in a model's response.</button>
+      <button class="quiz-choice" data-correct="false">The random variation controlled by the temperature parameter.</button>
+      <button class="quiz-choice" data-correct="false">The latency added by a slow network connection.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Drift is specifically about the gap between training-time data and current real-world data widening over time.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why does triage_ticket_monitored log every request instead of just returning the result?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">To build a record over time that can reveal patterns like drift, which a single call could never show.</button>
+      <button class="quiz-choice" data-correct="false">To make the function run faster on repeated calls.</button>
+      <button class="quiz-choice" data-correct="false">Because logging is required for the API call to succeed at all.</button>
+      <button class="quiz-choice" data-correct="false">To automatically fine-tune the model after every request.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A single log entry proves nothing on its own — the value is in the pattern across many entries over time.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. What would a slowly climbing fraction of "high" urgency labels, with no real change in the tickets, suggest?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Drift — a sign the model's behavior no longer matches the original data it was built around.</button>
+      <button class="quiz-choice" data-correct="false">That the caching from Lesson 25 has stopped working correctly.</button>
+      <button class="quiz-choice" data-correct="false">That the API key being used has expired.</button>
+      <button class="quiz-choice" data-correct="false">Nothing meaningful — urgency labels are expected to shift randomly at all times.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A steady trend with no underlying change in the real tickets is exactly the kind of signal monitoring is built to catch.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="drift">
+    <p class="quiz-prompt">4. Fill in the blank: a gradual mismatch between training data and current real-world data is called ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>See the definition box above.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="monitoring">
+    <p class="quiz-prompt">5. Fill in the blank: continuously logging a system's inputs, outputs, and performance over time is called ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>See the definition box above.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p><a href="https://huyenchip.com/2022/02/07/data-distribution-shifts-and-monitoring.html">Chip Huyen's "Data Distribution Shifts and Monitoring"</a> is a widely referenced deep dive into exactly how drift shows up and gets detected in real systems.</p>
+
+  <p class="ask-teacher">Wondering how often you'd realistically need to check logs like this for a small tool versus a large production system? Ask your teacher — the right cadence depends heavily on how much traffic and risk is actually involved. Next: what to do once monitoring reveals a real problem.</p>
+
+  <footer class="lesson-footer">STEM+ · AI Developer · Lesson 26</footer>
+</div>

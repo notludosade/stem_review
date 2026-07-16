@@ -1,0 +1,132 @@
+<title>Lesson 18: Common Collection Operations — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<script src="../../assets/interactive.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Computer Programming 1 · Lesson 18</span>
+  <h1>Common Collection Operations</h1>
+  <p class="subtitle">Three things you'll do with a collection constantly: measure it, grow it, and ask whether it holds something.</p>
+  <p class="nav-links"><a href="../Unit%207/0019-console-output-newlines-and-separators.html">Lesson 19 →</a> <a href="../index.html">Contents</a> <a href="../reference/glossary.html">Glossary →</a></p>
+
+  <p>Lesson 16 showed that Java's <code class="inline-code">int[]</code> array can't grow. To add elements in Java, this lesson switches to <code class="inline-code">ArrayList</code> — Java's built-in dynamic list, the counterpart to Python's list, JavaScript's array, and C++'s <code class="inline-code">std::vector</code> that Lesson 16 already introduced. That gives all four languages a genuinely comparable, growable collection to work with.</p>
+
+  <div id="len-tabs">
+    <div class="fm-tabs">
+      <button class="fm-tab is-active" data-tab="py">Python</button>
+      <button class="fm-tab" data-tab="java">Java</button>
+      <button class="fm-tab" data-tab="js">JavaScript</button>
+      <button class="fm-tab" data-tab="cpp">C++</button>
+    </div>
+    <div class="fm-panel" data-panel="py">
+      <span class="code-label">Python</span>
+      <pre class="code-block"><code>numbers = [10, 20, 30]
+len(numbers)          # 3
+numbers.append(40)     # [10, 20, 30, 40]
+40 in numbers           # True</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="java" hidden>
+      <span class="code-label">Java</span>
+      <pre class="code-block"><code>ArrayList&lt;Integer&gt; numbers = new ArrayList&lt;&gt;(List.of(10, 20, 30));
+numbers.size();          // 3
+numbers.add(40);          // [10, 20, 30, 40]
+numbers.contains(40);   // true</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="js" hidden>
+      <span class="code-label">JavaScript</span>
+      <pre class="code-block"><code>let numbers = [10, 20, 30];
+numbers.length;             // 3
+numbers.push(40);           // [10, 20, 30, 40]
+numbers.includes(40);      // true</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="cpp" hidden>
+      <span class="code-label">C++</span>
+      <pre class="code-block"><code>std::vector&lt;int&gt; numbers = {10, 20, 30};
+numbers.size();                                                             // 3
+numbers.push_back(40);                                                     // [10, 20, 30, 40]
+std::find(numbers.begin(), numbers.end(), 40) != numbers.end();  // true</code></pre>
+    </div>
+  </div>
+
+  <p>Measuring the count is <code class="inline-code">len()</code> in Python (a standalone function, like Lesson 14's string length), <code class="inline-code">size()</code> in Java and C++, and the <code class="inline-code">length</code> property in JavaScript — the exact same split seen with strings back in Lesson 14. Adding to the end is <code class="inline-code">append</code>, <code class="inline-code">add</code>, <code class="inline-code">push</code>, and <code class="inline-code">push_back</code> respectively — four different names for the same action. Checking membership is where C++ falls behind again: Python, Java, and JavaScript each offer a direct membership check (<code class="inline-code">in</code>, <code class="inline-code">.contains()</code>, <code class="inline-code">.includes()</code>), but <code class="inline-code">std::vector</code> has no built-in membership method at all — it requires <code class="inline-code">std::find</code> from the <code class="inline-code">&lt;algorithm&gt;</code> header, echoing the same one-liner gap Lesson 14 found with C++ string case conversion.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    A collection's <strong>length</strong> (or size) is its element count. To <strong>append</strong> (or push) is to add a new element to the end of a dynamic collection. A <strong>contains</strong> (or includes) check tests whether a collection holds a particular value.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why it matters here</span>
+    These three operations show up constantly in ordinary programs — checking whether a username is already taken, adding a new score to a leaderboard, reporting how many results a search found. Recognizing that C++ keeps needing an extra step for things the other three languages give you in one call is worth internalizing now, since it will keep showing up throughout this course.
+  </div>
+
+  <h2>Check your recall</h2>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. Why does this lesson use Java's ArrayList instead of the int[] array from Lesson 16?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">int[] is fixed-size and cannot support adding new elements.</button>
+      <button class="quiz-choice" data-correct="false">int[] cannot store numbers.</button>
+      <button class="quiz-choice" data-correct="false">ArrayList is required for measuring length.</button>
+      <button class="quiz-choice" data-correct="false">There is no difference between the two.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>ArrayList is Java's dynamic list type, comparable to Python's list or C++'s std::vector.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why does checking membership in a C++ std::vector require std::find instead of a single method call?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">std::vector has no built-in membership-check method the way the other three languages' collections do.</button>
+      <button class="quiz-choice" data-correct="false">C++ cannot check membership at all.</button>
+      <button class="quiz-choice" data-correct="false">std::find only works on arrays, not vectors.</button>
+      <button class="quiz-choice" data-correct="false">Membership checks are unnecessary in C++.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>This mirrors the same one-liner gap Lesson 14 found with C++ string case conversion.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. What do append, add, push, and push_back all have in common across the four languages?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">They all add a new element to the end of a dynamic collection.</button>
+      <button class="quiz-choice" data-correct="false">They all remove the first element of a collection.</button>
+      <button class="quiz-choice" data-correct="false">They all measure a collection's length.</button>
+      <button class="quiz-choice" data-correct="false">They only work on fixed-size arrays.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Four different names, but the same underlying action in every language.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="append">
+    <p class="quiz-prompt">4. Fill in the blank: adding a new element to the end of a Python list is called ___ing it.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>JavaScript spells the same idea push; Java spells it add.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="contains">
+    <p class="quiz-prompt">5. Fill in the blank: testing whether a collection holds a particular value is called a ___ check.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>JavaScript calls this includes; C++ has no direct equivalent method at all.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p><a href="https://docs.python.org/3/tutorial/datastructures.html#more-on-lists">The official Python tutorial's section on lists</a> documents append, length, and membership testing directly from the language's own documentation.</p>
+
+  <p class="ask-teacher">Curious how to remove an element instead of adding one, or what std::find actually returns? Ask your teacher — that's what I'm here for. Unit 6 is complete; Unit 7 turns to basic I/O — reading input and writing output.</p>
+
+  <footer class="lesson-footer">STEM+ · Computer Programming 1 · Lesson 18</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  STEMPlus.mountTabs(document.getElementById('len-tabs'), 'data-tab', 'data-panel');
+});
+</script>

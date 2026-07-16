@@ -1,0 +1,106 @@
+<title>Lesson 27: Versioning and Rollbacks — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · AI Developer · Lesson 27</span>
+  <h1>Versioning and Rollbacks</h1>
+  <p class="subtitle">Lesson 26 gave you a way to notice something has gotten worse. This lesson is about what actually happens the moment it does.</p>
+  <p class="nav-links"><a href="../Unit%209/0028-bias-and-fairness-in-ai-models.html">Lesson 28 →</a> <a href="../index.html">Contents</a> <a href="../reference/glossary.html">Glossary →</a></p>
+
+  <p>Every lesson in Unit 6 wrote <code class="inline-code">model="gpt-4o-mini"</code> — a name, not a fixed version. Providers periodically update what that name points to behind the scenes, which means the exact same code can start behaving differently with no change on your end at all. <strong>Version pinning</strong> means using an exact, dated model snapshot instead of a name that can silently shift underneath you, so behavior only changes when you deliberately choose to change it.</p>
+
+  <span class="code-label">Python — pinning and rollback</span>
+  <pre class="code-block"><code>PROMPT_VERSIONS = {
+    "v1": 'Classify urgency as "low", "medium", or "high". Reply with JSON.',
+    "v2": 'Classify urgency as "low", "medium", or "high", erring toward '
+          '"high" for anything mentioning data loss or security. Reply with JSON.',
+}
+
+ACTIVE_VERSION = "v2"
+PINNED_MODEL = "gpt-4o-mini-2024-07-18"   # exact snapshot, not the movable "gpt-4o-mini" alias
+
+def triage_ticket_versioned(ticket_text):
+    system_prompt = PROMPT_VERSIONS[ACTIVE_VERSION]
+    # ...call the pinned model with system_prompt, same as Lesson 23...
+
+def rollback():
+    global ACTIVE_VERSION
+    ACTIVE_VERSION = "v1"</code></pre>
+
+  <p><code class="inline-code">PINNED_MODEL</code> locks in an exact model snapshot, so nothing changes unless the code itself is edited. <code class="inline-code">PROMPT_VERSIONS</code> applies the same idea to the prompt: each version is kept, named, and never overwritten, so switching <code class="inline-code">ACTIVE_VERSION</code> back to <code class="inline-code">"v1"</code> is a <strong>rollback</strong> — reverting to a previous known-good version the instant monitoring flags that a new one regressed — rather than trying to hastily patch the new version under pressure. Real deployments often go further and roll out a new version to a small fraction of traffic first, comparing it against the old one before switching everyone over.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    <strong>Version pinning</strong> is using an exact, fixed model or prompt version instead of one that can change silently over time. A <strong>rollback</strong> is reverting to a previous known-good version once a new one is found to have regressed.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why it matters here</span>
+    This closes Unit 8. Latency and cost (Lesson 25), monitoring and drift (Lesson 26), and versioning with rollback (this lesson) together form the ongoing discipline of running an AI system after launch — a genuinely different skill set from building it in the first place, and one every real deployed system needs.
+  </div>
+
+  <h2>Check your recall</h2>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. Why pin an exact model snapshot instead of using a movable name like "gpt-4o-mini"?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">So behavior only changes when you deliberately choose to change it, not silently when the provider updates the alias.</button>
+      <button class="quiz-choice" data-correct="false">Pinned snapshots are always cheaper than movable aliases.</button>
+      <button class="quiz-choice" data-correct="false">Movable aliases cannot be used with the chat completions API at all.</button>
+      <button class="quiz-choice" data-correct="false">Pinning a snapshot removes the need for any input validation.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>An unpinned alias can point to a different underlying model over time, changing behavior with no code change.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. What does rollback() actually do?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Reverts ACTIVE_VERSION to a previous, known-good prompt version.</button>
+      <button class="quiz-choice" data-correct="false">Deletes the flagged prompt version from the codebase entirely.</button>
+      <button class="quiz-choice" data-correct="false">Retrains the underlying model on new data.</button>
+      <button class="quiz-choice" data-correct="false">Permanently disables the triage tool until manually restarted.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>It simply switches ACTIVE_VERSION back to "v1", reverting to the previous prompt without touching the model.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why keep PROMPT_VERSIONS as a dictionary of every version, rather than overwriting the prompt in place?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">So a previous known-good version still exists to roll back to if a new one regresses.</button>
+      <button class="quiz-choice" data-correct="false">Dictionaries run measurably faster than a single string variable.</button>
+      <button class="quiz-choice" data-correct="false">Python requires prompts to be stored in a dictionary structure.</button>
+      <button class="quiz-choice" data-correct="false">It has no real benefit — either approach works identically.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Overwriting the only copy of a prompt would make rollback impossible once a regression is caught.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="pinning">
+    <p class="quiz-prompt">4. Fill in the blank: using an exact, fixed model version instead of one that can shift silently is called version ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>See the definition box above.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="rollback">
+    <p class="quiz-prompt">5. Fill in the blank: reverting to a previous known-good version after a new one regresses is called a ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>See the definition box above.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p><a href="https://platform.openai.com/docs/deprecations">OpenAI's official model deprecations page</a> documents exactly how dated snapshots versus movable aliases behave over time.</p>
+
+  <p class="ask-teacher">Wondering how "canary" rollouts — testing a new version on a small slice of real traffic first — actually get implemented? Ask your teacher — it's a real, common refinement of the rollback pattern shown here. That closes Unit 8. Next: the responsibility that comes with deploying any of this in the real world.</p>
+
+  <footer class="lesson-footer">STEM+ · AI Developer · Lesson 27</footer>
+</div>

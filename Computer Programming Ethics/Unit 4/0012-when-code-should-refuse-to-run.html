@@ -1,0 +1,106 @@
+<title>Lesson 12: When Code Should Refuse to Run — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Computer Programming Ethics · Lesson 12</span>
+  <h1>When Code Should Refuse to Run</h1>
+  <p class="subtitle">Sometimes the most honest thing a program can do is stop.</p>
+  <p class="nav-links"><a href="../Unit%205/0013-where-bias-enters-a-program.html">Lesson 13 →</a> <a href="../index.html">Contents</a> <a href="../reference/glossary.html">Glossary →</a></p>
+
+  <p>Every lesson in this unit assumed the program keeps running after something goes wrong — it just needs to fail honestly. But some failures are serious enough that continuing at all is the actual mistake. A permissions check that can't reach its database, a payment system that can't confirm a charge went through, an access-control library that fails to load: in each case, "keep going anyway" quietly removes a safety check the rest of the system was relying on.</p>
+
+  <span class="code-label is-bad">Fail-open: errors let the request through</span>
+  <pre class="code-block code-bad"><code>def is_authorized(user, resource):
+    try:
+        return permissions_service.check(user, resource)
+    except ServiceUnavailable:
+        return True  # don't block the user if the check fails</code></pre>
+
+  <span class="code-label is-good">Fail-closed: errors deny by default</span>
+  <pre class="code-block code-good"><code>def is_authorized(user, resource):
+    try:
+        return permissions_service.check(user, resource)
+    except ServiceUnavailable:
+        logger.error("Permission check unavailable", extra={"user_id": user.id})
+        return False  # deny access when the check itself can't run</code></pre>
+
+  <p>The fail-open version was probably written to avoid annoying users during a permissions-service outage — a reasonable-sounding goal. But it means the permission check silently stops enforcing anything the moment it's needed most: during an actual outage or attack, when the service might be unavailable precisely <em>because</em> something is already wrong. The fail-closed version denies access on error, which is inconvenient during an outage but never silently grants access it shouldn't.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    <strong>Fail-closed</strong> (or "fail-secure") means a system defaults to the safer, more restrictive state when it encounters an error it can't resolve. <strong>Fail-open</strong> means it defaults to letting things proceed. Which one is correct depends entirely on what's guarded — a locked door should fail closed; a fire exit should fail open.
+  </div>
+
+  <h2>This isn't a universal rule</h2>
+  <p>Fail-closed isn't automatically "more ethical" than fail-open — that's exactly why the fire-exit example exists. A building's electronic door locks are deliberately designed to fail <em>open</em> during a power outage, because trapping people inside during an emergency is worse than a security gap during a blackout. The judgment call is about which failure mode does less harm for this specific system, and that has to be reasoned through deliberately — not defaulted to out of convenience, in either direction.</p>
+
+  <div class="box why">
+    <span class="box-label">Why it matters here</span>
+    A fail-open default chosen to avoid a support ticket, without thinking through what's actually being protected, is a decision made for the developer's convenience at the expense of whoever the check exists to protect. Making the choice explicit — and logging when it happens, as the fixed example does — turns an invisible default into a decision someone can review.
+  </div>
+
+  <h2>Check your recall</h2>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What does the fail-open version of <code class="inline-code">is_authorized</code> do when the permissions service is unavailable?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">It grants access by default.</button>
+      <button class="quiz-choice" data-correct="false">It retries the request exactly three times.</button>
+      <button class="quiz-choice" data-correct="false">It shuts down the entire application.</button>
+      <button class="quiz-choice" data-correct="false">It emails the user asking them to wait.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>return True on the exception path means the check silently stops enforcing anything during an outage.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why can fail-open on a permissions check be especially dangerous?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">The service may be down precisely during an attack or outage.</button>
+      <button class="quiz-choice" data-correct="false">It uses more memory than the fail-closed version.</button>
+      <button class="quiz-choice" data-correct="false">It is not supported by most programming languages.</button>
+      <button class="quiz-choice" data-correct="false">It always throws an unrelated syntax error.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>An outage and an active attack can happen at the same time, or one can cause the other — exactly when you'd want the check enforced most.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why is a building's electronic door lock deliberately designed to fail open during a power outage?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Trapping people inside during an emergency is worse than a security gap.</button>
+      <button class="quiz-choice" data-correct="false">Fail-closed locks are always more expensive to install.</button>
+      <button class="quiz-choice" data-correct="false">Building codes prohibit fail-closed locks entirely.</button>
+      <button class="quiz-choice" data-correct="false">Power outages never happen during business hours.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>This is the example showing fail-open isn't universally wrong — it depends on which failure mode does less harm for what's being guarded.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="fail-closed|fail closed|fail-secure">
+    <p class="quiz-prompt">4. Fill in the blank: a system that defaults to the safer, more restrictive state on an unresolved error is described as ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>See the definition box above — a locked door failing this way is the canonical example.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="fail-open|fail open">
+    <p class="quiz-prompt">5. Fill in the blank: a system that defaults to letting things proceed on an unresolved error is described as ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Correct for a fire exit during a power outage; wrong for the permissions check in the bad example above.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>The <a href="https://owasp.org/www-community/Fail_open">OWASP Community page on Fail Open</a> covers this exact tradeoff for authentication and authorization systems specifically.</p>
+
+  <p class="ask-teacher">Want to work through which failure mode is correct for a specific system you're building? Ask your teacher — that's what I'm here for. Unit 4 is complete; Unit 5 turns to bias and fairness in algorithms.</p>
+
+  <footer class="lesson-footer">STEM+ · Computer Programming Ethics · Lesson 12</footer>
+</div>

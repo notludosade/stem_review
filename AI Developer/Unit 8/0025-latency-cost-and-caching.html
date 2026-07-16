@@ -1,0 +1,107 @@
+<title>Lesson 25: Latency, Cost, and Caching — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · AI Developer · Lesson 25</span>
+  <h1>Latency, Cost, and Caching</h1>
+  <p class="subtitle">Lesson 24's endpoint works for one request. Once real users depend on it, every single call has a real cost and a real wait attached — and both add up fast.</p>
+  <p class="nav-links"><a href="0026-monitoring-and-drift.html">Lesson 26 →</a> <a href="../index.html">Contents</a> <a href="../reference/glossary.html">Glossary →</a></p>
+
+  <p><strong>Latency</strong> is the time between sending a request and receiving a response — for an LLM API call, often a full second or more, since the model generates its answer piece by piece. Every call also has a real dollar cost, typically priced per token of input and output. A tool called by thousands of users, on the same handful of repeated questions, pays that cost and that wait again for every single one — unless identical requests are answered from a <strong>cache</strong> instead.</p>
+
+  <span class="code-label">Python — measuring latency and caching repeats</span>
+  <pre class="code-block"><code>import time
+import hashlib
+
+cache = {}
+
+def triage_ticket_cached(ticket_text):
+    key = hashlib.sha256(ticket_text.encode()).hexdigest()
+    if key in cache:
+        return cache[key]
+
+    start = time.time()
+    result = triage_ticket(ticket_text)   # from Lesson 23
+    elapsed = time.time() - start
+    print(f"latency: {elapsed:.2f}s")
+
+    cache[key] = result
+    return result</code></pre>
+
+  <p><code class="inline-code">hashlib.sha256</code> turns the ticket text into a fixed-length key, so two identical tickets produce the exact same cache entry. The first time a given ticket text arrives, it pays the full latency and cost of a real API call; every identical repeat after that returns instantly from <code class="inline-code">cache</code>, with no API call at all. A cache like this only helps when genuinely identical requests repeat — for a support-ticket tool where wording rarely matches exactly, a real system would need a smarter cache, perhaps keyed on Lesson 19's embeddings instead of exact text.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    <strong>Latency</strong> is the time between sending a request and receiving a response. A <strong>cache</strong> stores the result of a previous request so an identical future request can be answered instantly, without repeating the original work.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why it matters here</span>
+    Every lesson through Unit 7 treated a model call as free and instant, for the sake of focusing on what the call actually does. In a real deployed system, it's neither — cost and latency are constraints just as real as accuracy, and ignoring them is exactly how a working prototype turns into an unusably slow or expensive production system.
+  </div>
+
+  <h2>Check your recall</h2>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What is latency?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">The time between sending a request and receiving a response.</button>
+      <button class="quiz-choice" data-correct="false">The dollar cost charged for one API call.</button>
+      <button class="quiz-choice" data-correct="false">The number of tokens contained in a single request.</button>
+      <button class="quiz-choice" data-correct="false">The accuracy of a model's classification output.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>elapsed above measures exactly this: the time between sending the request and getting a result back.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. What does the cache dictionary in triage_ticket_cached avoid?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Repeating the full cost and latency of a real API call for a ticket text seen before.</button>
+      <button class="quiz-choice" data-correct="false">The need for any input validation on incoming requests.</button>
+      <button class="quiz-choice" data-correct="false">Ever having to call the triage_ticket function at all.</button>
+      <button class="quiz-choice" data-correct="false">The possibility of the model ever returning malformed JSON.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>An identical repeat is returned instantly from cache, skipping the API call entirely.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why might exact-text caching not help much for a support-ticket tool in practice?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Ticket wording rarely matches exactly, so a hash-based cache rarely finds a hit.</button>
+      <button class="quiz-choice" data-correct="false">Caching is only possible for numeric data, never for text.</button>
+      <button class="quiz-choice" data-correct="false">Caching always makes latency worse, never better.</button>
+      <button class="quiz-choice" data-correct="false">hashlib.sha256 cannot be used on any string data.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The lesson notes embeddings-based caching as a smarter alternative for near-duplicate, not identical, text.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="latency">
+    <p class="quiz-prompt">4. Fill in the blank: the time between sending a request and receiving a response is called ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>See the definition box above.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="cache">
+    <p class="quiz-prompt">5. Fill in the blank: storing a previous result so an identical future request skips repeating the work is a ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>See the definition box above.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p><a href="https://openai.com/api/pricing/">OpenAI's official API pricing page</a> shows real per-token costs, making the actual dollar stakes of every call concrete.</p>
+
+  <p class="ask-teacher">Wondering how caching by embedding similarity, rather than exact text match, would actually work? Ask your teacher — it combines Lesson 19's semantic search directly with this lesson's caching idea. Next: watching a deployed system's behavior over time, not just its speed and cost.</p>
+
+  <footer class="lesson-footer">STEM+ · AI Developer · Lesson 25</footer>
+</div>

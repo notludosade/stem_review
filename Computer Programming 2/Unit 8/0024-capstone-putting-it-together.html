@@ -1,0 +1,251 @@
+<title>Lesson 24: Capstone — Putting It Together — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<script src="../../assets/interactive.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Computer Programming 2 · Lesson 24</span>
+  <h1>Capstone: Putting It Together</h1>
+  <p class="subtitle">One small program, one class each unit built into it — proof that these seven units were never separate topics, just separate facets of the same skill.</p>
+  <p class="nav-links"><a href="../index.html">Contents</a> <a href="../reference/glossary.html">Glossary →</a></p>
+
+  <p>Below is a small <strong>TaskManager</strong>: add a task, look one up by id, and list them by priority. In a real project it would follow Lesson 23's advice and live in its own file, imported into a separate <code class="inline-code">main</code>. Read it slowly — nearly every unit in this course shows up somewhere in it.</p>
+
+  <div id="capstone-tabs">
+    <div class="fm-tabs">
+      <button class="fm-tab is-active" data-tab="py">Python</button>
+      <button class="fm-tab" data-tab="java">Java</button>
+      <button class="fm-tab" data-tab="js">JavaScript</button>
+      <button class="fm-tab" data-tab="cpp">C++</button>
+    </div>
+    <div class="fm-panel" data-panel="py">
+      <span class="code-label">Python</span>
+      <pre class="code-block"><code>class TaskNotFoundError(Exception):   # Unit 2: custom exception
+    pass
+
+class TaskManager:
+    def __init__(self):
+        self.tasks = {}   # Unit 3: hash map, O(1) lookup by id
+
+    def add_task(self, task_id, description, priority):
+        self.tasks[task_id] = (description, priority)
+
+    def get_task(self, task_id):
+        if task_id not in self.tasks:
+            raise TaskNotFoundError(f"No task with id {task_id}")
+        return self.tasks[task_id]
+
+    def tasks_by_priority(self):
+        return sorted(self.tasks.items(), key=lambda t: t[1][1])   # Unit 5: sort
+
+manager = TaskManager()
+manager.add_task(1, "Write report", 2)
+manager.add_task(2, "Fix bug", 1)
+for task_id, (description, priority) in manager.tasks_by_priority():
+    print(priority, description)
+# 1 Fix bug
+# 2 Write report</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="java" hidden>
+      <span class="code-label">Java</span>
+      <pre class="code-block"><code>class Task {   // Unit 1: a plain class holding related data
+    String description;
+    int priority;
+    Task(String description, int priority) {
+        this.description = description;
+        this.priority = priority;
+    }
+}
+
+class TaskNotFoundError extends RuntimeException {   // Unit 2
+    TaskNotFoundError(String message) { super(message); }
+}
+
+class TaskManager {
+    private Map&lt;Integer, Task&gt; tasks = new HashMap&lt;&gt;();   // Unit 3
+
+    void addTask(int id, String description, int priority) {
+        tasks.put(id, new Task(description, priority));
+    }
+
+    Task getTask(int id) {
+        if (!tasks.containsKey(id)) {
+            throw new TaskNotFoundError("No task with id " + id);
+        }
+        return tasks.get(id);
+    }
+
+    List&lt;Task&gt; tasksByPriority() {   // Unit 5: sort
+        List&lt;Task&gt; sorted = new ArrayList&lt;&gt;(tasks.values());
+        sorted.sort((a, b) -&gt; a.priority - b.priority);
+        return sorted;
+    }
+}
+
+// TaskManager manager = new TaskManager();
+// manager.addTask(1, "Write report", 2);
+// manager.addTask(2, "Fix bug", 1);
+// for (Task t : manager.tasksByPriority())
+//     System.out.println(t.priority + " " + t.description);</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="js" hidden>
+      <span class="code-label">JavaScript</span>
+      <pre class="code-block"><code>class TaskNotFoundError extends Error {}   // Unit 2
+
+class TaskManager {
+    constructor() {
+        this.tasks = new Map();   // Unit 3
+    }
+
+    addTask(id, description, priority) {
+        this.tasks.set(id, { description, priority });
+    }
+
+    getTask(id) {
+        if (!this.tasks.has(id)) {
+            throw new TaskNotFoundError(`No task with id ${id}`);
+        }
+        return this.tasks.get(id);
+    }
+
+    tasksByPriority() {   // Unit 5: sort
+        return [...this.tasks.entries()].sort((a, b) =&gt; a[1].priority - b[1].priority);
+    }
+}
+
+const manager = new TaskManager();
+manager.addTask(1, "Write report", 2);
+manager.addTask(2, "Fix bug", 1);
+for (const [id, task] of manager.tasksByPriority()) {
+    console.log(task.priority, task.description);
+}
+// 1 "Fix bug"
+// 2 "Write report"</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="cpp" hidden>
+      <span class="code-label">C++</span>
+      <pre class="code-block"><code>struct Task { std::string description; int priority; };   // Unit 1
+
+class TaskNotFoundError : public std::runtime_error {   // Unit 2
+public:
+    explicit TaskNotFoundError(const std::string&amp; msg) : std::runtime_error(msg) {}
+};
+
+class TaskManager {
+public:
+    void addTask(int id, const std::string&amp; description, int priority) {
+        tasks[id] = Task{description, priority};   // Unit 3
+    }
+
+    Task getTask(int id) {
+        if (tasks.find(id) == tasks.end()) {
+            throw TaskNotFoundError("No task with id " + std::to_string(id));
+        }
+        return tasks[id];
+    }
+
+    std::vector&lt;std::pair&lt;int, Task&gt;&gt; tasksByPriority() {   // Unit 5: sort
+        std::vector&lt;std::pair&lt;int, Task&gt;&gt; sorted(tasks.begin(), tasks.end());
+        std::sort(sorted.begin(), sorted.end(), [](const auto&amp; a, const auto&amp; b) {
+            return a.second.priority &lt; b.second.priority;
+        });
+        return sorted;
+    }
+
+private:
+    std::unordered_map&lt;int, Task&gt; tasks;
+};
+
+int main() {
+    auto manager = std::make_unique&lt;TaskManager&gt;();   // Unit 6: owned via a smart pointer
+    manager-&gt;addTask(1, "Write report", 2);
+    manager-&gt;addTask(2, "Fix bug", 1);
+    for (const auto&amp; [id, task] : manager-&gt;tasksByPriority()) {
+        std::cout &lt;&lt; task.priority &lt;&lt; " " &lt;&lt; task.description &lt;&lt; std::endl;
+    }
+}</code></pre>
+    </div>
+  </div>
+
+  <p>Trace the units through it: a <code class="inline-code">Task</code> class holds related data (Unit 1); <code class="inline-code">TaskNotFoundError</code> is a custom exception raised instead of returning something meaningless (Unit 2); the tasks themselves live in a hash map keyed by id for constant-time lookup, the same structure Unit 3 built by hand (Unit 3); <code class="inline-code">tasksByPriority</code> reaches for a sort exactly like Unit 5's, rather than writing bubble sort from scratch (Unit 5); and the C++ version wraps the whole manager in a <code class="inline-code">unique_ptr</code>, so its heap memory has one clear owner and frees itself automatically — Unit 6's ownership idea, applied (Unit 6). Two units don't appear directly in this code but belong in the exercise: try adding a <code class="inline-code">totalEstimatedHours</code> method that walks a task's subtasks <em>recursively</em> (Unit 4), and write a few unit tests for <code class="inline-code">TaskManager</code> the way Lesson 21 tested <code class="inline-code">factorial</code> — including one that checks <code class="inline-code">get_task</code> actually raises <code class="inline-code">TaskNotFoundError</code> for a missing id (Unit 7). If a test fails, Lesson 22's strategy — reproduce it, read the error, bisect — is exactly how to track it down.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    A <strong>capstone project</strong> is a program deliberately designed to combine ideas from many earlier lessons at once, rather than isolating just one — the test of whether separate topics were actually one connected skill all along.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why it matters here</span>
+    Every one of the last seven units taught one idea in isolation so it could be understood clearly. Real programs never isolate ideas like that — a single class routinely needs error handling, a data structure, and a sort in the same twenty lines, exactly as <code class="inline-code">TaskManager</code> does above. That's the actual skill this course has been building toward.
+  </div>
+
+  <h2>Check your recall</h2>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What does TaskNotFoundError demonstrate, going back to Unit 2?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">A custom exception type, defined by inheriting from a language's built-in exception or error class.</button>
+      <button class="quiz-choice" data-correct="false">A brand new kind of loop unrelated to anything covered earlier.</button>
+      <button class="quiz-choice" data-correct="false">A way to permanently disable error handling in a program.</button>
+      <button class="quiz-choice" data-correct="false">A built-in language keyword that requires no class definition.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>It's built exactly the way Lesson 5 built custom exceptions, just applied to a new problem.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why does TaskManager store tasks in a hash map instead of a list, going back to Unit 3?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Looking up a task by its id averages constant time, instead of scanning every task in order.</button>
+      <button class="quiz-choice" data-correct="false">A list cannot hold more than a few items in any of these languages.</button>
+      <button class="quiz-choice" data-correct="false">Hash maps are required by law in professional codebases.</button>
+      <button class="quiz-choice" data-correct="false">There is no real difference — either structure would perform identically here.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>This is Lesson 9's hash map lookup, reused for a real, concrete reason.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. In the C++ version, what does wrapping TaskManager in a unique_ptr accomplish, going back to Unit 6?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">It ties the TaskManager's heap memory to one clear owner, so it's freed automatically once that owner goes out of scope.</button>
+      <button class="quiz-choice" data-correct="false">It makes the TaskManager class run its methods twice as fast.</button>
+      <button class="quiz-choice" data-correct="false">It converts TaskManager into a value stored entirely on the stack.</button>
+      <button class="quiz-choice" data-correct="false">It has no real effect and is purely decorative syntax.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>This is Lesson 19's RAII idea, applied to a real class instead of an isolated example.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="capstone">
+    <p class="quiz-prompt">4. Fill in the blank: a project deliberately designed to combine ideas from many earlier lessons at once is called a ___ project.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>See the definition box above.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="synthesis">
+    <p class="quiz-prompt">5. Fill in the blank: bringing ideas from many separate earlier units together into one coherent program is a form of ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>TaskManager is exactly this: one program, seven units' worth of ideas.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p><a href="https://docs.python.org/3/library/unittest.html">Python's official unittest documentation</a> is the real tool for the testing extension exercise above — the natural next step for turning this capstone into a fully tested small program.</p>
+
+  <p class="ask-teacher">Wondering what to build next, now that every unit in this course is available at once? Ask your teacher — a small multi-file project of your own choosing, using this TaskManager as a template, is exactly the right next step. That closes Computer Programming 2. Every unit — OOP, error handling, data structures, recursion, algorithms and complexity, memory models, and testing and debugging — is now one connected toolkit rather than seven separate topics.</p>
+
+  <footer class="lesson-footer">STEM+ · Computer Programming 2 · Lesson 24 · Course complete</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  STEMPlus.mountTabs(document.getElementById('capstone-tabs'), 'data-tab', 'data-panel');
+});
+</script>

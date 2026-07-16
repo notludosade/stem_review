@@ -1,0 +1,103 @@
+<title>Lesson 6: Overfitting and Underfitting — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · AI Developer · Lesson 6</span>
+  <h1>Overfitting and Underfitting</h1>
+  <p class="subtitle">Lesson 5's split exists almost entirely to catch these two failure modes — and they look completely different once you know what to compare.</p>
+  <p class="nav-links"><a href="../Unit%203/0007-linear-regression.html">Lesson 7 →</a> <a href="../index.html">Contents</a> <a href="../reference/glossary.html">Glossary →</a></p>
+
+  <p>Comparing a model's score on its training set against its score on its validation set reveals which of two opposite failure modes is happening — if either is.</p>
+
+  <span class="code-label">Python — scikit-learn</span>
+  <pre class="code-block"><code>from sklearn.linear_model import LinearRegression
+
+model = LinearRegression()
+model.fit(X_train, y_train)
+
+train_score = model.score(X_train, y_train)   # how well it fits data it trained on
+val_score = model.score(X_val, y_val)         # how well it fits data it never trained on
+
+print(train_score, val_score)
+
+# Overfitting:   0.98, 0.45   — memorized the training data, fails on anything new
+# Underfitting:  0.40, 0.38   — never learned the real pattern anywhere, even in training
+# Good fit:      0.85, 0.82   — learned the real pattern, and it holds up on new data</code></pre>
+
+  <p><strong>Overfitting</strong> means the model latched onto the training data too closely — including its noise and quirks — so it performs great on data it's already seen and noticeably worse on anything new. <strong>Underfitting</strong> is the opposite problem: the model is too simple, or wasn't trained enough, to capture the real pattern at all, so it performs poorly everywhere, training data included. The goal — <strong>generalization</strong> — sits in between: a model that performs well on new, unseen data because it learned the actual underlying pattern rather than memorizing specific examples.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    <strong>Overfitting</strong> is a large gap between a much better training score and a worse validation score, from memorizing training data instead of the real pattern. <strong>Underfitting</strong> is a poor score on both, from a model too simple to capture the pattern at all. <strong>Generalization</strong> is performing well on new, unseen data — the actual goal.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why it matters here</span>
+    This closes Unit 2. Every unit from here forward assumes this exact check as a habit: after training any model — the classical models in Unit 3, the neural networks in Unit 4 — comparing its training score against its validation score is the very first thing to do, before trusting any other number about it.
+  </div>
+
+  <h2>Check your recall</h2>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What does overfitting look like when comparing training and validation scores?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">A training score noticeably higher than the validation score.</button>
+      <button class="quiz-choice" data-correct="false">Both scores being poor, roughly equally.</button>
+      <button class="quiz-choice" data-correct="false">A validation score higher than the training score.</button>
+      <button class="quiz-choice" data-correct="false">Both scores being identical and perfect.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>0.98 training versus 0.45 validation in the example above is exactly this gap.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. What does underfitting look like?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Both the training and validation scores are poor.</button>
+      <button class="quiz-choice" data-correct="false">The training score is perfect and the validation score is terrible.</button>
+      <button class="quiz-choice" data-correct="false">Only the validation score exists; there is no training score to compare.</button>
+      <button class="quiz-choice" data-correct="false">The model refuses to run at all.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>0.40 training and 0.38 validation in the example above — poor everywhere, not just on new data.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. What is generalization?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">A model performing well on new, unseen data because it learned the real underlying pattern.</button>
+      <button class="quiz-choice" data-correct="false">A model that only ever runs on its original training data.</button>
+      <button class="quiz-choice" data-correct="false">The process of collecting more training data than is actually needed.</button>
+      <button class="quiz-choice" data-correct="false">A synonym for overfitting.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Generalization is the actual goal that both overfitting and underfitting fail to reach, for opposite reasons.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="overfitting">
+    <p class="quiz-prompt">5. Fill in the blank: memorizing training data instead of the real pattern, shown by a much higher training score than validation score, is called ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>See the definition box above.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="generalize">
+    <p class="quiz-prompt">4. Fill in the blank: a model that performs well on new, unseen data is said to ___ well.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Generalizing to new data, not just memorizing old data, is the real target of training.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p><a href="https://scikit-learn.org/stable/auto_examples/model_selection/plot_underfitting_overfitting.html">scikit-learn's official "Underfitting vs. Overfitting" example</a> shows this exact pattern visually, plotted against a real curve-fitting problem.</p>
+
+  <p class="ask-teacher">Wondering what to actually do once overfitting is spotted — besides just noticing it? Ask your teacher — simplifying the model, gathering more data, and regularization are all real fixes worth knowing. That closes Unit 2. Next: training an actual classical model from start to finish.</p>
+
+  <footer class="lesson-footer">STEM+ · AI Developer · Lesson 6</footer>
+</div>

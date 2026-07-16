@@ -1,0 +1,102 @@
+<title>Lesson 9: Decision Trees — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · AI Developer · Lesson 9</span>
+  <h1>Decision Trees</h1>
+  <p class="subtitle">The same spam-or-not problem Lesson 8 solved with probabilities and a sigmoid — solved again with nothing but a sequence of yes/no questions.</p>
+  <p class="nav-links"><a href="0010-accuracy-precision-and-recall.html">Lesson 10 →</a> <a href="../index.html">Contents</a> <a href="../reference/glossary.html">Glossary →</a></p>
+
+  <p>A <strong>decision tree</strong> classifies an example by asking a sequence of simple questions about its features, branching one way or the other at each question, until it reaches a final answer. No probabilities, no sigmoid — just a chain of comparisons.</p>
+
+  <span class="code-label">Python — scikit-learn</span>
+  <pre class="code-block"><code>from sklearn.tree import DecisionTreeClassifier
+
+model = DecisionTreeClassifier(max_depth=3)
+model.fit(X_train, y_train)   # X: num_links, num_exclamations; y: spam or not
+
+predictions = model.predict(X_val)
+
+# What the tree actually learned looks roughly like:
+#   if num_links > 2:
+#       if num_exclamations > 5:  predict spam
+#       else:                     predict not spam
+#   else:                         predict not spam</code></pre>
+
+  <p>Each internal question — <code class="inline-code">num_links > 2</code>, <code class="inline-code">num_exclamations > 5</code> — is a <strong>node</strong>, and the specific feature-and-threshold it tests is a <strong>split</strong>. <code class="inline-code">fit()</code> chooses both which feature to test at each node and where to put the threshold, picking whichever split best separates spam from non-spam at that point. <code class="inline-code">max_depth</code> limits how many questions deep the tree is allowed to go — left unlimited, a tree can keep splitting until every single training example has its own tiny branch, which is a direct route to Lesson 6's overfitting: perfect on training data, unreliable on anything new.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    A <strong>decision tree</strong> classifies by branching through a sequence of feature-based questions to a final answer. A <strong>node</strong> is one question in the tree; a <strong>split</strong> is the specific feature and threshold it tests. <strong>max_depth</strong> limits how many questions deep the tree can grow.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why it matters here</span>
+    max_depth is a direct, concrete example of controlling overfitting from Lesson 6 by limiting model complexity rather than by touching the data at all — the same idea reappears constantly in Unit 4's neural networks, just under different names. Comparing a tree's predictions against logistic regression's from Lesson 8, on the exact same problem, is exactly what Lesson 10's scoring tools are for.
+  </div>
+
+  <h2>Check your recall</h2>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. How does a decision tree arrive at a prediction?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">By branching through a sequence of yes/no questions on feature values.</button>
+      <button class="quiz-choice" data-correct="false">By computing a sigmoid over a weighted sum of features.</button>
+      <button class="quiz-choice" data-correct="false">By finding the nearest cluster center with no labels involved.</button>
+      <button class="quiz-choice" data-correct="false">By averaging every label in the entire training set.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The nested if/else structure above is exactly what a trained tree does at prediction time.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. What does a split at a node consist of?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">A specific feature and a threshold value that the tree tests.</button>
+      <button class="quiz-choice" data-correct="false">A random number with no connection to any feature.</button>
+      <button class="quiz-choice" data-correct="false">The final predicted label itself.</button>
+      <button class="quiz-choice" data-correct="false">The total count of training examples in the dataset.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>num_links > 2 above is a split: one feature, one threshold.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why does an unlimited max_depth risk overfitting?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">The tree can keep splitting until nearly every training example has its own branch, memorizing rather than generalizing.</button>
+      <button class="quiz-choice" data-correct="false">A deeper tree always trains faster than a shallow one.</button>
+      <button class="quiz-choice" data-correct="false">max_depth has no relationship to overfitting at all.</button>
+      <button class="quiz-choice" data-correct="false">Unlimited depth makes the tree incapable of running on new data.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>This is the same overfitting symptom from Lesson 6, caused here by excess model complexity instead of a data problem.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="split">
+    <p class="quiz-prompt">4. Fill in the blank: the specific feature and threshold tested at a tree node is called a ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>See the definition box above.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="depth">
+    <p class="quiz-prompt">5. Fill in the blank: max____ limits how many questions deep a decision tree is allowed to grow.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>See the definition box above.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p><a href="https://scikit-learn.org/stable/modules/tree.html">scikit-learn's official decision trees documentation</a> covers splitting criteria and overfitting controls directly from the source.</p>
+
+  <p class="ask-teacher">Wondering what a random forest is, and how it relates to a single decision tree like this one? Ask your teacher — it's a real, very common extension worth knowing about. Next: how to actually score and compare classifiers like this one and Lesson 8's, beyond just "percent correct."</p>
+
+  <footer class="lesson-footer">STEM+ · AI Developer · Lesson 9</footer>
+</div>

@@ -1,0 +1,160 @@
+<title>Lesson 23: Methods — Giving Objects Behavior — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<script src="../../assets/interactive.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Computer Programming 1 · Lesson 23</span>
+  <h1>Methods — Giving Objects Behavior</h1>
+  <p class="subtitle">A method is a function that lives inside a class and already knows which instance's data to work with.</p>
+  <p class="nav-links"><a href="0024-basic-encapsulation-protecting-an-objects-data.html">Lesson 24 →</a> <a href="../index.html">Contents</a> <a href="../reference/glossary.html">Glossary →</a></p>
+
+  <p>A <strong>method</strong> is defined exactly like the functions from Unit 4, except it lives inside a class — and unlike those standalone functions, it can reach the instance's own data directly, without that data being passed in as a parameter.</p>
+
+  <div id="method-tabs">
+    <div class="fm-tabs">
+      <button class="fm-tab is-active" data-tab="py">Python</button>
+      <button class="fm-tab" data-tab="java">Java</button>
+      <button class="fm-tab" data-tab="js">JavaScript</button>
+      <button class="fm-tab" data-tab="cpp">C++</button>
+    </div>
+    <div class="fm-panel" data-panel="py">
+      <span class="code-label">Python</span>
+      <pre class="code-block"><code>class Dog:
+    def __init__(self, name):
+        self.name = name
+
+    def bark(self):
+        return f"{self.name} says woof!"
+
+buddy = Dog("Buddy")
+print(buddy.bark())  # Buddy says woof!</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="java" hidden>
+      <span class="code-label">Java</span>
+      <pre class="code-block"><code>class Dog {
+    String name;
+    Dog(String name) { this.name = name; }
+
+    String bark() {
+        return name + " says woof!";
+    }
+}
+
+Dog buddy = new Dog("Buddy");
+System.out.println(buddy.bark()); // Buddy says woof!</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="js" hidden>
+      <span class="code-label">JavaScript</span>
+      <pre class="code-block"><code>class Dog {
+    constructor(name) { this.name = name; }
+
+    bark() {
+        return `${this.name} says woof!`;
+    }
+}
+
+let buddy = new Dog("Buddy");
+console.log(buddy.bark()); // Buddy says woof!</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="cpp" hidden>
+      <span class="code-label">C++</span>
+      <pre class="code-block"><code>class Dog {
+public:
+    std::string name;
+    Dog(std::string name) : name(name) {}
+
+    std::string bark() {
+        return name + " says woof!";
+    }
+};
+
+Dog buddy("Buddy");
+std::cout &lt;&lt; buddy.bark() &lt;&lt; std::endl; // Buddy says woof!</code></pre>
+    </div>
+  </div>
+
+  <p><code class="inline-code">bark()</code> uses <code class="inline-code">name</code> without receiving it as a parameter the way Lesson 11's <code class="inline-code">square(n)</code> did — instead, calling <code class="inline-code">buddy.bark()</code> automatically gives the method access to <em>buddy's own</em> <code class="inline-code">name</code>, through <code class="inline-code">self</code> or <code class="inline-code">this</code>. Call <code class="inline-code">bark()</code> on a different <code class="inline-code">Dog</code> instance and it returns a different result, with no extra argument needed — the method already knows which instance it's running on.</p>
+
+  <p>This is a new kind of scope beyond the local and global scope from Lesson 12: an instance's data lives in <strong>instance scope</strong>, reachable by any method on that same instance, but still separate from every other instance of the same class.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    A <strong>method</strong> is a function defined inside a class, describing something instances of that class can do. <code class="inline-code">self</code> (Python) or <code class="inline-code">this</code> (Java, JavaScript, C++) refers to the specific instance a method is currently running on.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why it matters here</span>
+    Bundling data with the behavior that acts on it is what actually distinguishes an object from the loose functions of Unit 4. Instead of a standalone <code class="inline-code">bark(dog_name)</code> function passed a name every time, the <code class="inline-code">Dog</code> itself knows how to bark — which is the core idea the rest of object-oriented programming builds on.
+  </div>
+
+  <h2>Check your recall</h2>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. How does bark() access name without receiving it as a parameter?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Through self or this, which automatically refers to the instance the method was called on.</button>
+      <button class="quiz-choice" data-correct="false">name is a global variable shared by every Dog.</button>
+      <button class="quiz-choice" data-correct="false">It doesn't — the example contains an error.</button>
+      <button class="quiz-choice" data-correct="false">Methods can never access any of an instance's data.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Calling buddy.bark() automatically connects the method to buddy's own data.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. How is a method different from the standalone functions covered in Unit 4?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">A method lives inside a class and can access that instance's own data automatically.</button>
+      <button class="quiz-choice" data-correct="false">A method cannot take any parameters.</button>
+      <button class="quiz-choice" data-correct="false">A method cannot return a value.</button>
+      <button class="quiz-choice" data-correct="false">There is no meaningful difference.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Aside from living inside a class and gaining access to instance data, a method works just like the functions from Unit 4.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. What is instance scope, as introduced in this lesson?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Data belonging to one specific instance, reachable by any method on that same instance but not by other instances.</button>
+      <button class="quiz-choice" data-correct="false">Another name for global scope from Lesson 12.</button>
+      <button class="quiz-choice" data-correct="false">Data that disappears the instant a method finishes running.</button>
+      <button class="quiz-choice" data-correct="false">A scope shared identically across every instance of a class.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Each Dog instance has its own separate name, even though they share the same class.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="method">
+    <p class="quiz-prompt">4. Fill in the blank: a function defined inside a class, describing something its instances can do, is called a ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>See the definition box above.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="this">
+    <p class="quiz-prompt">5. Fill in the blank: in Java, JavaScript, and C++, the keyword referring to the current instance a method is running on is ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Python spells the same idea self instead.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p><a href="https://en.cppreference.com/w/cpp/language/classes">The cppreference page for C++ classes</a> documents member functions (methods) directly from the language reference.</p>
+
+  <p class="ask-teacher">Curious what happens when one method calls another method on the same instance? Ask your teacher — that's what I'm here for. Next: protecting an object's data from being changed in ways that break its own rules.</p>
+
+  <footer class="lesson-footer">STEM+ · Computer Programming 1 · Lesson 23</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  STEMPlus.mountTabs(document.getElementById('method-tabs'), 'data-tab', 'data-panel');
+});
+</script>

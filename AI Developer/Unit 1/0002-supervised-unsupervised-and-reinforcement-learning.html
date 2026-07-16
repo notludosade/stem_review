@@ -1,0 +1,106 @@
+<title>Lesson 2: Supervised, Unsupervised, and Reinforcement Learning — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · AI Developer · Lesson 2</span>
+  <h1>Supervised, Unsupervised, and Reinforcement Learning</h1>
+  <p class="subtitle">Machine learning means learning from data — but what the data looks like, and what "correct" even means, splits into three very different setups.</p>
+  <p class="nav-links"><a href="../Unit%202/0003-datasets-features-and-labels.html">Lesson 3 →</a> <a href="../index.html">Contents</a> <a href="../reference/glossary.html">Glossary →</a></p>
+
+  <p>In <strong>supervised learning</strong>, every training example comes with the correct answer attached. Lesson 1's spam filter is supervised: each email in <code class="inline-code">X_train</code> had a known label in <code class="inline-code">y_train</code> — spam or not — and the model's whole job was matching that answer as closely as possible.</p>
+
+  <span class="code-label">Unsupervised learning — no labels at all</span>
+  <pre class="code-block"><code>from sklearn.cluster import KMeans
+
+# X: customer purchase data — no "correct group" was ever assigned to anyone
+model = KMeans(n_clusters=3)
+model.fit(X)          # notice: no y argument exists here
+
+labels = model.labels_   # the 3 groups were *discovered*, not looked up</code></pre>
+
+  <p>There's no <code class="inline-code">y_train</code> here at all — nobody labeled any customer with their "correct" group in advance. <strong>Unsupervised learning</strong> finds structure in data that was never labeled to begin with; <code class="inline-code">KMeans</code> above groups similar customers together purely from patterns in the data itself, and it's up to a person afterward to look at each group and decide what it seems to represent.</p>
+
+  <span class="code-label">Reinforcement learning — no labels, but a reward signal</span>
+  <pre class="code-block"><code># A game-playing agent — nobody labeled the "correct" move for any position
+for step in range(num_steps):
+    action = agent.choose_action(current_state)
+    current_state, reward = environment.step(action)
+    agent.learn(current_state, action, reward)   # adjusts strategy toward higher reward</code></pre>
+
+  <p><strong>Reinforcement learning</strong> has no labeled correct answers either, but it isn't structureless like clustering — it has a <strong>reward</strong>: a number telling the agent how good or bad an action turned out to be (points scored, a game won or lost). The agent learns a strategy purely by trying actions and adjusting toward whatever earned more reward, the same way a person gets better at a game through repeated feedback rather than being told the right move in advance.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    <strong>Supervised learning</strong> learns from labeled input/output pairs. <strong>Unsupervised learning</strong> finds structure in unlabeled data, with no correct answer given. <strong>Reinforcement learning</strong> learns a strategy from reward feedback on actions taken in an environment, with no labels at all.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why it matters here</span>
+    Nearly everything in Unit 3 (classical ML) and Unit 4 (neural networks) is supervised learning — it's the easiest setup to get concrete, checkable results from, which is why it dominates this course's early, foundational units. Recognizing which of these three setups a real problem actually is comes first, though: trying to force a clustering problem into a supervised mold, or vice versa, is a common and avoidable mistake.
+  </div>
+
+  <h2>Check your recall</h2>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What defines supervised learning specifically?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Every training example comes with the correct output already attached.</button>
+      <button class="quiz-choice" data-correct="false">The model receives a reward signal after each action it takes.</button>
+      <button class="quiz-choice" data-correct="false">The data has no structure of any kind, labeled or otherwise.</button>
+      <button class="quiz-choice" data-correct="false">A person manually reviews every single prediction the model makes.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The spam filter's y_train — the correct spam/not-spam label for each email — is exactly this.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. In the KMeans example above, why is this unsupervised learning rather than supervised?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">There's no y_train at all — no customer was ever assigned a "correct" group in advance.</button>
+      <button class="quiz-choice" data-correct="false">KMeans is incapable of running on labeled data.</button>
+      <button class="quiz-choice" data-correct="false">Unsupervised learning always uses more data than supervised learning.</button>
+      <button class="quiz-choice" data-correct="false">There is no real difference between the two in this example.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>fit(X) with no second argument is the tell — there's no label to learn to predict.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. What signal does reinforcement learning use to improve, instead of a labeled correct answer?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">A reward number reflecting how good or bad an action turned out to be.</button>
+      <button class="quiz-choice" data-correct="false">A manually written correct answer for every possible situation.</button>
+      <button class="quiz-choice" data-correct="false">Clusters discovered by grouping similar situations together.</button>
+      <button class="quiz-choice" data-correct="false">Nothing — reinforcement learning cannot improve over time.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The agent.learn(current_state, action, reward) call is where that reward feedback gets used.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="labeled">
+    <p class="quiz-prompt">4. Fill in the blank: supervised learning requires training data that is ___, meaning each example has a known correct output.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>See the definition box above.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="reward">
+    <p class="quiz-prompt">5. Fill in the blank: reinforcement learning improves a strategy using a ___ signal received after each action.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>See the definition box above.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p><a href="https://www.coursera.org/specializations/machine-learning-introduction">Andrew Ng's Machine Learning Specialization (DeepLearning.AI / Coursera)</a>, free to audit, covers this exact three-way split as its opening framing before going deeper into each one.</p>
+
+  <p class="ask-teacher">Wondering which category a real recommendation system or self-driving car actually uses — often more than one at once? Ask your teacher — plenty of real systems blend these paradigms. That closes Unit 1. Next: the data itself, which every one of these three paradigms depends on.</p>
+
+  <footer class="lesson-footer">STEM+ · AI Developer · Lesson 2</footer>
+</div>

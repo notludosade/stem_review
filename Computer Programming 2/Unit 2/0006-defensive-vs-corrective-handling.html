@@ -1,0 +1,140 @@
+<title>Lesson 6: Defensive vs Corrective Handling — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<script src="../../assets/interactive.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Computer Programming 2 · Lesson 6</span>
+  <h1>Defensive vs Corrective Handling</h1>
+  <p class="subtitle">Two honest ways to handle a risky operation: check first, or try it and catch the failure. Neither is universally "more correct."</p>
+  <p class="nav-links"><a href="../Unit%203/0007-stacks-and-queues.html">Lesson 7 →</a> <a href="../index.html">Contents</a> <a href="../reference/glossary.html">Glossary →</a></p>
+
+  <p><strong>Defensive</strong> handling checks a condition before acting, so the risky operation never runs unless it's safe. Below, all four look up a key in a map before reading it, avoiding a missing-key failure entirely.</p>
+
+  <div id="defensive-tabs">
+    <div class="fm-tabs">
+      <button class="fm-tab is-active" data-tab="py">Python</button>
+      <button class="fm-tab" data-tab="java">Java</button>
+      <button class="fm-tab" data-tab="js">JavaScript</button>
+      <button class="fm-tab" data-tab="cpp">C++</button>
+    </div>
+    <div class="fm-panel" data-panel="py">
+      <span class="code-label">Python</span>
+      <pre class="code-block"><code>if "key" in my_dict:
+    value = my_dict["key"]
+else:
+    value = "default"</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="java" hidden>
+      <span class="code-label">Java</span>
+      <pre class="code-block"><code>String value;
+if (myMap.containsKey("key")) {
+    value = myMap.get("key");
+} else {
+    value = "default";
+}</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="js" hidden>
+      <span class="code-label">JavaScript</span>
+      <pre class="code-block"><code>let value = myMap.has("key") ? myMap.get("key") : "default";</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="cpp" hidden>
+      <span class="code-label">C++</span>
+      <pre class="code-block"><code>std::string value;
+if (myMap.count("key")) {
+    value = myMap["key"];
+} else {
+    value = "default";
+}</code></pre>
+    </div>
+  </div>
+
+  <p>This style is often called <strong>LBYL</strong> — "look before you leap." It's the natural fit in Java and C++, where an unhandled exception is comparatively costly to set up and where a missing key might not even throw a catchable exception at all. Python's own standard culture actually leans the opposite way for exactly this situation, a style called <strong>EAFP</strong> — "easier to ask forgiveness than permission." A Pythonic version of the same lookup just tries the access and reacts if it fails:</p>
+
+  <pre class="code-block"><code>try:
+    value = my_dict["key"]
+except KeyError:
+    value = "default"</code></pre>
+
+  <p>Both snippets above produce the exact same result. The difference is entirely about idiom and cost. Python's dictionary lookups are cheap to try and its exceptions are cheap to raise, so checking first buys nothing and is considered less idiomatic there — most Python style guides actively prefer the <code class="inline-code">try</code>/<code class="inline-code">except</code> version. (Python actually offers a third option here too — <code class="inline-code">my_dict.get("key", "default")</code> — which is defensive in spirit but written as a single expression; worth knowing it exists, even though it doesn't fit this lesson's four-language comparison.)</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    <strong>Defensive</strong> (LBYL) handling checks a condition before attempting a risky operation, preventing failure rather than reacting to it. <strong>Corrective</strong> (EAFP) handling attempts the operation directly and reacts if it fails, via <code class="inline-code">try</code>/<code class="inline-code">catch</code>.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why it matters here</span>
+    Neither approach is more "correct" in the abstract — matching the idiom your language's community actually expects is itself part of writing professional code, the same theme the ethics course raised about code as something other people have to read and trust. Java or C++ written in a heavily EAFP style, or Python written in a heavily LBYL style, both work — but both read as unfamiliar to someone fluent in that language's usual conventions.
+  </div>
+
+  <h2>Check your recall</h2>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What is the core difference between defensive and corrective error handling?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Defensive checks a condition before acting; corrective attempts the action and reacts if it fails.</button>
+      <button class="quiz-choice" data-correct="false">Defensive handling is only possible in Python; corrective only in Java.</button>
+      <button class="quiz-choice" data-correct="false">They always produce different final results for the same input.</button>
+      <button class="quiz-choice" data-correct="false">Corrective handling never uses try/catch.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Both the LBYL and EAFP dictionary-lookup examples above produce the exact same result.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. What does EAFP stand for, and which language's culture is it most associated with in this lesson?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">"Easier to ask forgiveness than permission" — associated with Python's idiomatic style.</button>
+      <button class="quiz-choice" data-correct="false">"Every application fails permanently" — associated with C++.</button>
+      <button class="quiz-choice" data-correct="false">"Errors are formally prohibited" — associated with Java's checked exceptions.</button>
+      <button class="quiz-choice" data-correct="false">It has no relationship to any language's idiomatic style.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Most Python style guides actively prefer try/except over checking first for cases like this one.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why does the lesson say neither defensive nor corrective handling is universally "more correct"?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Because the better choice depends on the target language's idiomatic conventions and costs, not on an absolute rule.</button>
+      <button class="quiz-choice" data-correct="false">Because one of the two approaches doesn't actually work in any language.</button>
+      <button class="quiz-choice" data-correct="false">Because only compiled languages can use defensive handling.</button>
+      <button class="quiz-choice" data-correct="false">Because corrective handling always runs faster than defensive handling.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Java and C++ tend to favor LBYL, while Python's own culture leans toward EAFP for cases like this.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="LBYL">
+    <p class="quiz-prompt">4. Fill in the blank: checking a condition before attempting a risky operation is often nicknamed ___ ("look before you leap").</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>See the definition box above.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="EAFP">
+    <p class="quiz-prompt">5. Fill in the blank: attempting an operation directly and reacting if it fails is often nicknamed ___ ("easier to ask forgiveness than permission").</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>This is Python's culturally preferred style for cases like a dictionary lookup.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p><a href="https://docs.python.org/3/glossary.html#term-EAFP">Python's official glossary entry for EAFP</a> defines the term directly from the language whose culture popularized it.</p>
+
+  <p class="ask-teacher">Wondering which style this course's own example code has been using all along? Ask your teacher — it's worth noticing the pattern. That closes Unit 2: Error Handling & Exceptions. Next: the data structures every real program reaches for.</p>
+
+  <footer class="lesson-footer">STEM+ · Computer Programming 2 · Lesson 6</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  STEMPlus.mountTabs(document.getElementById('defensive-tabs'), 'data-tab', 'data-panel');
+});
+</script>

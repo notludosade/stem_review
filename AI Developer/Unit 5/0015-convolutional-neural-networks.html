@@ -1,0 +1,104 @@
+<title>Lesson 15: Convolutional Neural Networks — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · AI Developer · Lesson 15</span>
+  <h1>Convolutional Neural Networks</h1>
+  <p class="subtitle">Feeding a raw image into Unit 4's fully-connected MLP would need one weight per pixel per neuron. CNNs exist because that's both wasteful and the wrong shape for the problem.</p>
+  <p class="nav-links"><a href="0016-recurrent-neural-networks-and-lstms.html">Lesson 16 →</a> <a href="../index.html">Contents</a> <a href="../reference/glossary.html">Glossary →</a></p>
+
+  <p>A <strong>convolutional neural network (CNN)</strong> is built for image-shaped data. Instead of one weight per pixel, it slides a small <strong>filter</strong> (or kernel) across the image, computing the same small weighted sum at every position — the exact math from Lesson 11's perceptron, just applied repeatedly across a grid instead of once.</p>
+
+  <span class="code-label">Python — PyTorch</span>
+  <pre class="code-block"><code>import torch
+import torch.nn as nn
+
+class SimpleCNN(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.conv1 = nn.Conv2d(in_channels=1, out_channels=8, kernel_size=3)
+        self.pool = nn.MaxPool2d(kernel_size=2)
+        self.fc = nn.Linear(8 * 13 * 13, 10)   # after conv + pool, flatten to a normal layer
+
+    def forward(self, x):
+        x = self.pool(torch.relu(self.conv1(x)))   # slide filters, then downsample
+        x = x.view(x.size(0), -1)                    # flatten before the final layer
+        return self.fc(x)</code></pre>
+
+  <p>Each of the 8 filters in <code class="inline-code">conv1</code> is a small grid of weights, reused at every position across the input image — this <strong>weight sharing</strong> is what makes a CNN dramatically smaller than a fully-connected layer over raw pixels, and it also means a filter that learns to detect, say, a vertical edge can detect that edge anywhere in the image, not just in one fixed spot. Sliding a filter across the image produces a <strong>feature map</strong>: a grid that lights up wherever that filter's pattern appears. <strong>Pooling</strong> then shrinks that feature map, keeping the strongest signal in each small region and discarding the rest, which both reduces the data size and makes the network less sensitive to a feature's exact pixel position.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    A <strong>convolutional neural network (CNN)</strong> processes image-shaped data using filters shared across positions. A <strong>filter</strong> (kernel) is a small set of weights slid across the input to produce a <strong>feature map</strong>. <strong>Pooling</strong> downsamples a feature map, keeping the strongest signal in each region.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why it matters here</span>
+    This is the first of three specialized architectures in this unit — each one takes the forward pass, loss, and backpropagation from Unit 4 completely unchanged, and simply reshapes what the layers themselves look like to suit a specific kind of data. Lesson 16's RNNs do the same for sequences that CNNs just did for images.
+  </div>
+
+  <h2>Check your recall</h2>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What does a convolutional filter do as it slides across an image?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Computes the same small weighted sum at every position, producing a feature map.</button>
+      <button class="quiz-choice" data-correct="false">Deletes every pixel below a certain brightness threshold.</button>
+      <button class="quiz-choice" data-correct="false">Assigns a unique, independent weight to every single pixel in the image.</button>
+      <button class="quiz-choice" data-correct="false">Randomly reorders the pixels in the image.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The filter's weights are reused at every position — that reuse is exactly what weight sharing means.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why do CNNs need far fewer weights than a fully-connected layer over raw pixels?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">The same filter's weights are shared and reused across every position in the image.</button>
+      <button class="quiz-choice" data-correct="false">CNNs simply discard most of the pixels before processing begins.</button>
+      <button class="quiz-choice" data-correct="false">CNNs are only ever applied to extremely small images.</button>
+      <button class="quiz-choice" data-correct="false">There is no actual difference in weight count between the two.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Weight sharing means one small filter, not one weight per pixel, drives the entire feature map.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. What does pooling do to a feature map?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Downsamples it, keeping the strongest signal in each region and discarding the rest.</button>
+      <button class="quiz-choice" data-correct="false">Multiplies every value in it by a random weight.</button>
+      <button class="quiz-choice" data-correct="false">Adds an entirely new color channel to the input image.</button>
+      <button class="quiz-choice" data-correct="false">Reverses the order of the convolution operation that produced it.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>MaxPool2d above keeps the maximum value in each small region, shrinking the feature map.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="filter">
+    <p class="quiz-prompt">4. Fill in the blank: a small set of weights slid across an image to detect a pattern is called a ___ (or kernel).</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>See the definition box above.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="pooling">
+    <p class="quiz-prompt">5. Fill in the blank: downsampling a feature map by keeping only the strongest signal in each region is called ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>See the definition box above.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p><a href="https://pytorch.org/tutorials/beginner/blitz/cifar10_tutorial.html">PyTorch's official CNN image classification tutorial</a> builds and trains a network almost identical to the one above, directly from the source.</p>
+
+  <p class="ask-teacher">Wondering why deeper CNNs stack many conv+pool pairs instead of just one? Ask your teacher — each stage tends to detect increasingly complex patterns built from the ones before it. Next: an architecture built for sequences instead of grids.</p>
+
+  <footer class="lesson-footer">STEM+ · AI Developer · Lesson 15</footer>
+</div>

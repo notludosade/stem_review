@@ -1,0 +1,108 @@
+<title>Lesson 20: Documenting Decisions, Not Just Code — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Computer Programming Ethics · Lesson 20</span>
+  <h1>Documenting Decisions, Not Just Code</h1>
+  <p class="subtitle">The code shows what happens. It rarely shows why — and "why" is what future decisions actually need.</p>
+  <p class="nav-links"><a href="0021-putting-it-all-together-an-ethics-checklist.html">Lesson 21 →</a> <a href="../index.html">Contents</a> <a href="../reference/glossary.html">Glossary →</a></p>
+
+  <p>Good code is largely self-documenting about <em>what</em> it does — a well-named function like <code class="inline-code">is_authorized</code> doesn't need a comment explaining that it checks authorization. But nothing in the code itself explains <em>why</em> it fails closed instead of open, why a field was deliberately left out of the dataset, or why a dependency was pinned to an older version instead of upgraded. Six months later, a new developer looking at that decision has no way to tell "someone thought carefully about this" from "nobody's gotten around to fixing it yet" — and might change it back, undoing a deliberate safety decision.</p>
+
+  <span class="code-label is-bad">A decision with no record of its reasoning</span>
+  <pre class="code-block code-bad"><code>def is_authorized(user, resource):
+    try:
+        return permissions_service.check(user, resource)
+    except ServiceUnavailable:
+        return False</code></pre>
+
+  <span class="code-label is-good">The same decision, with its reasoning preserved</span>
+  <pre class="code-block code-good"><code>def is_authorized(user, resource):
+    try:
+        return permissions_service.check(user, resource)
+    except ServiceUnavailable:
+        # Deliberately fail-closed: an outage here should deny
+        # access, not grant it. See Ethics course Unit 4, Lesson 12,
+        # and incident postmortem INC-4471 for the reasoning.
+        return False</code></pre>
+
+  <p>Notice this comment passes the Lesson-1-through-20 bar for a good comment: it explains a non-obvious <em>why</em>, not an obvious <em>what</em>. A comment saying <code class="inline-code"># return False on error</code> would just restate the code. This one preserves the reasoning — fail-closed was chosen deliberately, here's the source of that judgment — so the next person to touch this function inherits the decision instead of just the code.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    <strong>An Architecture Decision Record (ADR)</strong> is a short, standalone document capturing one significant technical decision: the context that prompted it, the options considered, the choice made, and the reasoning — kept alongside the code rather than buried in a chat thread or a closed pull request.
+  </div>
+
+  <h2>Not every decision needs a formal document</h2>
+  <p>Most of this course's decisions fit in a code comment, like the fail-closed example above. A full ADR is worth the overhead for decisions with wider blast radius — choosing a password hashing algorithm for the whole system, deciding what demographic data an evaluation dataset will collect, picking which license to release your own project under. The test isn't "is this decision big" so much as "would someone reasonably ask 'why did we do it this way' months from now, without an easy way to find out."</p>
+
+  <div class="box why">
+    <span class="box-label">Why it matters here</span>
+    Every good decision this course has walked through — hash instead of encrypt, fail closed instead of open, collect less instead of more — looks, from the outside, exactly like an arbitrary choice unless the reasoning travels with it. Undocumented good decisions get silently reverted by people who had no way to know they were deliberate; that's not a hypothetical, it's one of the most common ways security and privacy regressions actually happen in real codebases.
+  </div>
+
+  <h2>Check your recall</h2>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What's the risk of a deliberate, well-reasoned decision with no comment explaining why?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">A future developer might revert it, not knowing it was intentional.</button>
+      <button class="quiz-choice" data-correct="false">The code will fail to compile without an explanatory comment.</button>
+      <button class="quiz-choice" data-correct="false">Version control systems require comments to track changes.</button>
+      <button class="quiz-choice" data-correct="false">The function will run measurably slower without a comment.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Without the reasoning, "deliberate decision" and "unfinished work" look identical from the outside.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why does the fixed comment in the code example count as a "good" comment by this course's own standard?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">It explains a non-obvious why instead of restating what the code does.</button>
+      <button class="quiz-choice" data-correct="false">It is exactly one line long, which is required for all comments.</button>
+      <button class="quiz-choice" data-correct="false">It contains no references to any other lesson or document.</button>
+      <button class="quiz-choice" data-correct="false">It uses formal legal language throughout.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A comment restating "return False on error" would add nothing — this one preserves reasoning that isn't visible in the code itself.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. According to this lesson, when does a decision deserve a full Architecture Decision Record rather than just a code comment?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">When it has wider blast radius and someone would reasonably ask "why" months later.</button>
+      <button class="quiz-choice" data-correct="false">Every single decision, no matter how small, needs a full ADR.</button>
+      <button class="quiz-choice" data-correct="false">Only decisions made by the most senior engineer need an ADR.</button>
+      <button class="quiz-choice" data-correct="false">ADRs are only used for decisions about user interface design.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The test given is whether the decision's reasoning would be hard to find later without one — not decision size alone.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="architecture decision record|adr">
+    <p class="quiz-prompt">4. Fill in the blank: a short document capturing a decision's context, options considered, and final reasoning is called an ___ ___ ___ (abbreviated ADR).</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>See the definition box above.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="fail-closed|fail closed">
+    <p class="quiz-prompt">5. Fill in the blank: the code example's comment preserves the reasoning behind choosing ___ over fail-open for the permissions check, referencing Lesson 12.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The example reuses Lesson 12's exact function, now with its reasoning made durable through documentation.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Michael Nygard's original <a href="https://cognitect.com/blog/2011/11/15/documenting-architecture-decisions">"Documenting Architecture Decisions"</a> post is the widely-cited origin of the ADR practice referenced in this lesson's definition box.</p>
+
+  <p class="ask-teacher">Want to draft a real ADR for a decision in a project you're working on? Ask your teacher — that's what I'm here for. Unit 7's final lesson pulls every lesson in this course together into a single checklist you can actually use.</p>
+
+  <footer class="lesson-footer">STEM+ · Computer Programming Ethics · Lesson 20</footer>
+</div>

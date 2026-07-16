@@ -1,0 +1,142 @@
+<title>Lesson 11: Parameters and Return Values — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<script src="../../assets/interactive.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Computer Programming 1 · Lesson 11</span>
+  <h1>Parameters and Return Values</h1>
+  <p class="subtitle">A function that always does exactly the same thing is far less useful than one you can hand different input.</p>
+  <p class="nav-links"><a href="0012-scope-where-variables-live.html">Lesson 12 →</a> <a href="../index.html">Contents</a> <a href="../reference/glossary.html">Glossary →</a></p>
+
+  <p>A <strong>parameter</strong> is a named input a function accepts, listed inside its parentheses when defined. An <strong>argument</strong> is the actual value you pass in when calling the function. A <strong>return value</strong> is the result a function hands back to whatever called it, using a <code class="inline-code">return</code> statement.</p>
+
+  <div id="params-tabs">
+    <div class="fm-tabs">
+      <button class="fm-tab is-active" data-tab="py">Python</button>
+      <button class="fm-tab" data-tab="java">Java</button>
+      <button class="fm-tab" data-tab="js">JavaScript</button>
+      <button class="fm-tab" data-tab="cpp">C++</button>
+    </div>
+    <div class="fm-panel" data-panel="py">
+      <span class="code-label">Python</span>
+      <pre class="code-block"><code>def square(n):
+    return n * n
+
+result = square(5)  # 25</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="java" hidden>
+      <span class="code-label">Java</span>
+      <pre class="code-block"><code>static int square(int n) {
+    return n * n;
+}
+
+int result = square(5); // 25</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="js" hidden>
+      <span class="code-label">JavaScript</span>
+      <pre class="code-block"><code>function square(n) {
+    return n * n;
+}
+
+let result = square(5); // 25</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="cpp" hidden>
+      <span class="code-label">C++</span>
+      <pre class="code-block"><code>int square(int n) {
+    return n * n;
+}
+
+int result = square(5); // 25</code></pre>
+    </div>
+  </div>
+
+  <p>In every version, <code class="inline-code">n</code> is the parameter — the placeholder name used inside the function — and <code class="inline-code">5</code> is the argument — the actual value supplied at the call site. The gap between Java/C++ and Python/JavaScript from Lesson 10 shows up again here: Java and C++ replace <code class="inline-code">void</code> with the actual return type (<code class="inline-code">int</code>, since <code class="inline-code">square</code> now hands back a number) and must also state each parameter's type (<code class="inline-code">int n</code>). Python and JavaScript need neither — <code class="inline-code">n</code> could be given any type of value at the call site, and the function would just try to use it as written.</p>
+
+  <span class="code-label is-bad">Calling square with the wrong kind of value</span>
+  <pre class="code-block code-bad"><code># Python
+result = square("5")  # runs — but produces "55", not 25
+# multiplying a string by itself repeats it, it doesn't do arithmetic</code></pre>
+
+  <p>This is the static-versus-dynamic-typing tradeoff from Lesson 5 showing up concretely: Java and C++ would refuse to compile <code class="inline-code">square("5")</code> at all, since <code class="inline-code">"5"</code> isn't an <code class="inline-code">int</code>. Python runs it — and because <code class="inline-code">*</code> is also defined for strings (repeating them), it produces a confusing result instead of an obvious error.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    A <strong>parameter</strong> is the named placeholder a function declares for its input. An <strong>argument</strong> is the specific value passed in at a call site. A <strong>return value</strong> is what a function hands back via <code class="inline-code">return</code>; a function with no <code class="inline-code">return</code> statement (or Java/C++'s <code class="inline-code">void</code>) simply produces no value.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why it matters here</span>
+    Parameters and return values are what let a function generalize — <code class="inline-code">square</code> works for any number, not just 5. Every function you write from here forward will use this pattern, and the static-typing safety net (or lack of it) shown above is exactly the kind of category of bug worth watching for in Python and JavaScript specifically.
+  </div>
+
+  <h2>Check your recall</h2>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. In <code class="inline-code">square(5)</code>, what is <code class="inline-code">5</code> called?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">An argument.</button>
+      <button class="quiz-choice" data-correct="false">A parameter.</button>
+      <button class="quiz-choice" data-correct="false">A return value.</button>
+      <button class="quiz-choice" data-correct="false">A function.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>n, the placeholder name in the function's definition, is the parameter; 5 is the argument supplied at the call site.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why does Java refuse to compile a call like <code class="inline-code">square("5")</code> when <code class="inline-code">square</code> is defined to take an <code class="inline-code">int</code>?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Java checks argument types against declared parameter types before the program runs.</button>
+      <button class="quiz-choice" data-correct="false">Java does not allow calling functions with any arguments at all.</button>
+      <button class="quiz-choice" data-correct="false">Java requires every argument to be exactly the number 5.</button>
+      <button class="quiz-choice" data-correct="false">Java functions can only be called once.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>This is the same static-typing behavior from Lesson 5, applied to function parameters specifically.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why does Python's <code class="inline-code">square("5")</code> produce <code class="inline-code">"55"</code> instead of an error?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true"><code>*</code> is also defined for strings, where it means repetition, and Python doesn't check types beforehand.</button>
+      <button class="quiz-choice" data-correct="false">Python automatically converts "5" into the number 5 first.</button>
+      <button class="quiz-choice" data-correct="false">square() only works correctly with string arguments.</button>
+      <button class="quiz-choice" data-correct="false">"55" is a typo and this code would actually crash.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>This is exactly the kind of confusing-instead-of-obvious failure dynamic typing can produce.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="parameter">
+    <p class="quiz-prompt">4. Fill in the blank: the named placeholder a function declares for its input, written inside its parentheses at definition time, is a ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>See the definition box above — this is distinct from an argument, the actual value passed in.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="return">
+    <p class="quiz-prompt">5. Fill in the blank: the statement a function uses to hand a value back to its caller is ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A function with no return statement (or Java/C++'s void) produces no value at all.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p><a href="https://docs.oracle.com/javase/tutorial/java/javaOO/methods.html">Oracle's Java tutorial on defining methods</a> documents Java's parameter and return-type requirements precisely.</p>
+
+  <p class="ask-teacher">Curious what happens when a function takes more than one parameter, or none at all? Ask your teacher — that's what I'm here for. Next: scope — where a variable actually lives, and why a function's parameters don't leak outside it.</p>
+
+  <footer class="lesson-footer">STEM+ · Computer Programming 1 · Lesson 11</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  STEMPlus.mountTabs(document.getElementById('params-tabs'), 'data-tab', 'data-panel');
+});
+</script>

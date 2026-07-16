@@ -1,0 +1,111 @@
+<title>Lesson 4: Cleaning Data — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · AI Developer · Lesson 4</span>
+  <h1>Cleaning Data</h1>
+  <p class="subtitle">Lesson 3's dataset was tidy on purpose. Real data never is — it has gaps, mistakes, and mismatched scales, all before a model ever sees it.</p>
+  <p class="nav-links"><a href="0005-train-validation-and-test-splits.html">Lesson 5 →</a> <a href="../index.html">Contents</a> <a href="../reference/glossary.html">Glossary →</a></p>
+
+  <p>Three problems show up in almost every real dataset: a <strong>missing value</strong> (a gap where a measurement was never recorded), an <strong>outlier</strong> (a value so extreme it's likely an error or a genuinely unusual case), and features on wildly different scales, which <strong>normalization</strong> fixes.</p>
+
+  <span class="code-label">Python — pandas + scikit-learn</span>
+  <pre class="code-block"><code>import pandas as pd
+from sklearn.preprocessing import StandardScaler
+
+data = pd.DataFrame({
+    "square_feet": [1200, 1800, 950, None, 50000],   # None: missing; 50000: likely an error
+    "bedrooms":    [2, 3, 1, 2, 3],
+    "price":       [250000, 340000, 180000, 210000, 9000000],
+})
+
+# 1. Handle missing values
+data = data.dropna()                       # remove rows with a gap
+# (or: data["square_feet"].fillna(data["square_feet"].mean()) to fill it in instead)
+
+# 2. Handle outliers — a simple, visible threshold here
+data = data[data["square_feet"] < 10000]   # drops the 50,000 sq ft "house"
+
+# 3. Normalize — put features on comparable scales
+scaler = StandardScaler()
+data[["square_feet", "bedrooms"]] = scaler.fit_transform(data[["square_feet", "bedrooms"]])
+# square_feet (hundreds to thousands) and bedrooms (single digits) are now
+# both centered around 0 with comparable spread</code></pre>
+
+  <p>Each step matters for a different reason. A missing value left in place usually crashes the model outright or silently poisons a calculation — <code class="inline-code">dropna()</code> or filling it with a sensible value (often the column's average) are the two basic options. An outlier like a 50,000-square-foot "house" is almost certainly a data-entry mistake, and left in, it can badly distort a model that's sensitive to extreme values — it deserves at least a second look, not automatic trust. And without normalization, a model that measures distance or slope between features — including the <code class="inline-code">KMeans</code> clustering from Lesson 2 and the gradient descent Unit 4 builds — would treat <code class="inline-code">square_feet</code>'s much larger numbers as automatically more important than <code class="inline-code">bedrooms</code>, purely because of scale, not real importance.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    A <strong>missing value</strong> is a gap where data was never recorded. An <strong>outlier</strong> is a value extreme enough to likely be an error or a genuinely unusual case. <strong>Normalization</strong> rescales features onto comparable ranges so no feature dominates purely due to its raw scale.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why it matters here</span>
+    "Garbage in, garbage out" applies to every model in this course — Unit 3's classical models and Unit 4's neural networks alike are only as good as the data they're trained on. Cleaning isn't a chore that happens before the real work starts; for most real projects, it <em>is</em> most of the real work.
+  </div>
+
+  <h2>Check your recall</h2>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What is a missing value?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">A gap in the dataset where a measurement was never recorded.</button>
+      <button class="quiz-choice" data-correct="false">Any value that happens to equal zero.</button>
+      <button class="quiz-choice" data-correct="false">A label that was assigned incorrectly by a person.</button>
+      <button class="quiz-choice" data-correct="false">A feature that a model chooses to ignore during training.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The None in the square_feet column above is exactly this — a gap, not a real value of zero or anything else.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why is the 50,000-square-foot entry treated as an outlier worth checking rather than trusted automatically?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">It's extreme enough to likely be a data-entry mistake, and left in, it can badly distort a model sensitive to extreme values.</button>
+      <button class="quiz-choice" data-correct="false">Outliers always improve a model's accuracy, so they should be kept.</button>
+      <button class="quiz-choice" data-correct="false">50,000 square feet is a completely typical house size.</button>
+      <button class="quiz-choice" data-correct="false">There's no reason — the value should always just be trusted as-is.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>It's roughly 25 times larger than any other value in the column — a strong signal something went wrong when it was recorded.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why does normalization matter for a model like KMeans or a neural network using gradient descent?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Without it, a feature with naturally larger raw numbers would seem more important purely due to scale, not real significance.</button>
+      <button class="quiz-choice" data-correct="false">Normalization is only relevant for datasets with fewer than ten rows.</button>
+      <button class="quiz-choice" data-correct="false">It permanently deletes any feature with small numeric values.</button>
+      <button class="quiz-choice" data-correct="false">It has no effect on any model of any kind.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>square_feet's naturally larger numbers would otherwise dominate distance and gradient calculations over bedrooms.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="missing">
+    <p class="quiz-prompt">4. Fill in the blank: a gap where a measurement was never recorded is called a ___ value.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>See the definition box above.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="normalization">
+    <p class="quiz-prompt">5. Fill in the blank: rescaling features onto comparable ranges so none dominates purely by raw scale is called ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>StandardScaler above is one common tool that performs exactly this rescaling.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p><a href="https://scikit-learn.org/stable/modules/preprocessing.html">scikit-learn's official preprocessing documentation</a> covers StandardScaler and several other real normalization tools directly from the source.</p>
+
+  <p class="ask-teacher">Wondering how to decide whether to drop a row with a missing value versus filling it in? Ask your teacher — it depends on how much data would be lost either way. Next: once data is clean, how to split it so a model can be tested honestly.</p>
+
+  <footer class="lesson-footer">STEM+ · AI Developer · Lesson 4</footer>
+</div>

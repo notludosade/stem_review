@@ -1,0 +1,161 @@
+<title>Lesson 17: Indexing and Iterating Over a Collection — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<script src="../../assets/interactive.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Computer Programming 1 · Lesson 17</span>
+  <h1>Indexing and Iterating Over a Collection</h1>
+  <p class="subtitle">The same 0-based index model from strings applies here — and every language has a shortcut for visiting every element.</p>
+  <p class="nav-links"><a href="0018-common-collection-operations.html">Lesson 18 →</a> <a href="../index.html">Contents</a> <a href="../reference/glossary.html">Glossary →</a></p>
+
+  <p>Just like the strings in Lesson 14, every element in a collection has a position — its <strong>index</strong> — starting at 0. Unlike strings, where Java broke from the pattern and required <code class="inline-code">charAt(0)</code>, all four languages use plain square brackets to index into an array or list.</p>
+
+  <div id="index-tabs">
+    <div class="fm-tabs">
+      <button class="fm-tab is-active" data-tab="py">Python</button>
+      <button class="fm-tab" data-tab="java">Java</button>
+      <button class="fm-tab" data-tab="js">JavaScript</button>
+      <button class="fm-tab" data-tab="cpp">C++</button>
+    </div>
+    <div class="fm-panel" data-panel="py">
+      <span class="code-label">Python</span>
+      <pre class="code-block"><code>numbers = [10, 20, 30]
+numbers[0]  # 10</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="java" hidden>
+      <span class="code-label">Java</span>
+      <pre class="code-block"><code>int[] numbers = {10, 20, 30};
+numbers[0]; // 10</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="js" hidden>
+      <span class="code-label">JavaScript</span>
+      <pre class="code-block"><code>let numbers = [10, 20, 30];
+numbers[0]; // 10</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="cpp" hidden>
+      <span class="code-label">C++</span>
+      <pre class="code-block"><code>std::vector&lt;int&gt; numbers = {10, 20, 30};
+numbers[0]; // 10</code></pre>
+    </div>
+  </div>
+
+  <p>What happens when the index doesn't exist — say, <code class="inline-code">numbers[10]</code> on a 3-element collection — differs sharply across languages. Python raises an <code class="inline-code">IndexError</code>, and Java raises an <code class="inline-code">ArrayIndexOutOfBoundsException</code> — both stop the program immediately with a clear error. JavaScript quietly returns <code class="inline-code">undefined</code> instead of raising anything at all. C++ is the riskiest of the four: reading past the end of a <code class="inline-code">std::vector</code> with <code class="inline-code">[]</code> is <strong>undefined behavior</strong> — it might crash, might silently return garbage, and might appear to work while corrupting unrelated memory. This is exactly the kind of gap that makes bounds-checked accessors, like C++'s <code class="inline-code">.at()</code>, worth reaching for whenever the index isn't guaranteed safe.</p>
+
+  <p>Rather than counting indices by hand, every language also offers a dedicated way to visit each element in turn — to <strong>iterate</strong> over the collection.</p>
+
+  <div id="iterate-tabs">
+    <div class="fm-tabs">
+      <button class="fm-tab is-active" data-tab="py">Python</button>
+      <button class="fm-tab" data-tab="java">Java</button>
+      <button class="fm-tab" data-tab="js">JavaScript</button>
+      <button class="fm-tab" data-tab="cpp">C++</button>
+    </div>
+    <div class="fm-panel" data-panel="py">
+      <span class="code-label">Python</span>
+      <pre class="code-block"><code>for n in numbers:
+    print(n)</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="java" hidden>
+      <span class="code-label">Java</span>
+      <pre class="code-block"><code>for (int n : numbers) {
+    System.out.println(n);
+}</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="js" hidden>
+      <span class="code-label">JavaScript</span>
+      <pre class="code-block"><code>for (const n of numbers) {
+    console.log(n);
+}</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="cpp" hidden>
+      <span class="code-label">C++</span>
+      <pre class="code-block"><code>for (int n : numbers) {
+    std::cout &lt;&lt; n &lt;&lt; std::endl;
+}</code></pre>
+    </div>
+  </div>
+
+  <p>Lesson 9 pointed out that Python's <code class="inline-code">for</code> loop was never really about counting — it iterates over a sequence directly, and a collection is exactly the sequence it was built for. Java, JavaScript, and C++ each add a dedicated for-each form here too — <code class="inline-code">for (type n : collection)</code> in Java and C++, <code class="inline-code">for (const n of collection)</code> in JavaScript — instead of forcing the three-part counting header from Lesson 9 every time you just want to visit each element.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    To <strong>iterate</strong> over a collection is to visit each of its elements in turn. A <strong>for-each loop</strong> (also called an enhanced <code class="inline-code">for</code> or <code class="inline-code">for...of</code>) is loop syntax that iterates directly over a collection's elements, rather than counting an index up by hand.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why it matters here</span>
+    Out-of-bounds access isn't a theoretical curiosity — inconsistent bounds checking across languages is a real, ongoing source of security bugs in production software, which is exactly why memory-safety-focused languages and modern C++ style guides push toward bounds-checked accessors for anything touching untrusted input.
+  </div>
+
+  <h2>Check your recall</h2>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What happens when you access an out-of-range index on a JavaScript array, unlike Python or Java?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">It quietly returns undefined instead of raising an error.</button>
+      <button class="quiz-choice" data-correct="false">It crashes the entire program immediately.</button>
+      <button class="quiz-choice" data-correct="false">It automatically resizes the array to fit.</button>
+      <button class="quiz-choice" data-correct="false">JavaScript arrays cannot be indexed at all.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Python and Java both raise a clear error instead; JavaScript's silent undefined can hide bugs.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. What is a for-each loop best suited for, compared to the three-part for loop from Lesson 9?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Iterating directly over a collection's elements, without manually counting an index.</button>
+      <button class="quiz-choice" data-correct="false">Running a loop body exactly once.</button>
+      <button class="quiz-choice" data-correct="false">Repeating a block until a condition becomes false.</button>
+      <button class="quiz-choice" data-correct="false">Declaring a new collection.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The three-part header from Lesson 9 is still available, but a for-each is shorter when you just need every element.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why is reading past the end of a C++ std::vector with [] considered riskier than the equivalent mistake in Python or Java?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">It's undefined behavior — it might crash, return garbage, or silently corrupt memory instead of raising a clear error.</button>
+      <button class="quiz-choice" data-correct="false">C++ does not allow indexing into a vector at all.</button>
+      <button class="quiz-choice" data-correct="false">It always immediately crashes the program.</button>
+      <button class="quiz-choice" data-correct="false">It behaves identically to Python's IndexError.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Bounds-checked accessors like .at() exist in C++ specifically to avoid this risk.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="iterate">
+    <p class="quiz-prompt">4. Fill in the blank: to visit each element of a collection in turn is to ___ over it.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>See the definition box above.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="bounds">
+    <p class="quiz-prompt">5. Fill in the blank: accessing an index outside a collection's valid range is called going out of ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Each language handles going out of bounds differently, from a clear exception to undefined behavior.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/for...of">MDN's reference for JavaScript's for...of statement</a> documents the for-each iteration form used in this lesson directly from the source.</p>
+
+  <p class="ask-teacher">Curious what .at() looks like in practice, or why undefined behavior can't just be defined as an error? Ask your teacher — that's what I'm here for. Next: common operations every collection supports — length, adding elements, and checking membership.</p>
+
+  <footer class="lesson-footer">STEM+ · Computer Programming 1 · Lesson 17</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  STEMPlus.mountTabs(document.getElementById('index-tabs'), 'data-tab', 'data-panel');
+  STEMPlus.mountTabs(document.getElementById('iterate-tabs'), 'data-tab', 'data-panel');
+});
+</script>

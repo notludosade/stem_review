@@ -1,0 +1,139 @@
+<title>Lesson 3: Polymorphism — One Interface, Many Behaviors — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<script src="../../assets/interactive.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Computer Programming 2 · Lesson 3</span>
+  <h1>Polymorphism — One Interface, Many Behaviors</h1>
+  <p class="subtitle">Inheritance and interfaces both set this up. Polymorphism is the payoff: code that works with "any Animal" without caring which one.</p>
+  <p class="nav-links"><a href="../Unit%202/0004-try-catch-and-throw.html">Lesson 4 →</a> <a href="../index.html">Contents</a> <a href="../reference/glossary.html">Glossary →</a></p>
+
+  <p><strong>Polymorphism</strong> means treating objects of different but related types uniformly through a shared type, while each object still responds according to what it actually is. Below, a collection holds both <code class="inline-code">Dog</code> and <code class="inline-code">Cat</code> — both subclasses of Lesson 1's <code class="inline-code">Animal</code> — and calling <code class="inline-code">speak()</code> on each gets the right answer automatically, with no <code class="inline-code">if</code> statement checking which one it is.</p>
+
+  <div id="poly-tabs">
+    <div class="fm-tabs">
+      <button class="fm-tab is-active" data-tab="py">Python</button>
+      <button class="fm-tab" data-tab="java">Java</button>
+      <button class="fm-tab" data-tab="js">JavaScript</button>
+      <button class="fm-tab" data-tab="cpp">C++</button>
+    </div>
+    <div class="fm-panel" data-panel="py">
+      <span class="code-label">Python</span>
+      <pre class="code-block"><code>animals = [Dog("Buddy"), Cat("Whiskers")]
+for a in animals:
+    print(a.speak())
+# Buddy says Woof!
+# Whiskers says Meow!</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="java" hidden>
+      <span class="code-label">Java</span>
+      <pre class="code-block"><code>List&lt;Animal&gt; animals = List.of(new Dog("Buddy"), new Cat("Whiskers"));
+for (Animal a : animals) {
+    System.out.println(a.speak());
+}
+// Buddy says Woof!
+// Whiskers says Meow!</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="js" hidden>
+      <span class="code-label">JavaScript</span>
+      <pre class="code-block"><code>let animals = [new Dog("Buddy"), new Cat("Whiskers")];
+for (const a of animals) {
+    console.log(a.speak());
+}
+// Buddy says Woof!
+// Whiskers says Meow!</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="cpp" hidden>
+      <span class="code-label">C++</span>
+      <pre class="code-block"><code>std::vector&lt;Animal*&gt; animals = { new Dog("Buddy"), new Cat("Whiskers") };
+for (Animal* a : animals) {
+    std::cout &lt;&lt; a-&gt;speak() &lt;&lt; std::endl;
+}
+// Buddy says Woof!
+// Whiskers says Meow!</code></pre>
+    </div>
+  </div>
+
+  <p>Python, Java, and JavaScript give you this "correct override runs automatically" behavior for free. C++ does not — and this is exactly where Lesson 1's <code class="inline-code">virtual</code> keyword earns its keep. The loop variable <code class="inline-code">a</code> is declared as <code class="inline-code">Animal*</code>, not <code class="inline-code">Dog*</code> or <code class="inline-code">Cat*</code>. Without <code class="inline-code">virtual</code> on <code class="inline-code">Animal::speak()</code>, C++ would call <em>Animal's</em> version for every element, because it decides which function to run based on the declared type, not the actual object — a behavior called static dispatch. Marking the method <code class="inline-code">virtual</code> switches C++ to <strong>virtual dispatch</strong>: it checks the object's real type at runtime and calls the matching override, exactly like the other three languages do automatically. Also notice the C++ collection holds <em>pointers</em> (<code class="inline-code">Animal*</code>), not plain <code class="inline-code">Animal</code> values — storing a <code class="inline-code">Dog</code> by value in an <code class="inline-code">Animal</code> slot would truncate it down to just its <code class="inline-code">Animal</code> part, a bug called object slicing. (These raw <code class="inline-code">new</code>-allocated pointers are also never freed here, which leaks memory — Unit 6 covers how C++ manages this properly.)</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    <strong>Polymorphism</strong> is the ability to treat objects of different but related types uniformly through a shared interface or base type, with each object responding according to its own actual type. <strong>Virtual dispatch</strong> is the mechanism that makes this happen — automatic in Python, Java, and JavaScript, and opt-in via C++'s <code class="inline-code">virtual</code> keyword.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why it matters here</span>
+    This is what inheritance and interfaces were building toward. Code written against "any Animal" or "any Flyable" doesn't need to know every subclass that exists today, or that will exist next year. Add a brand new <code class="inline-code">Bird</code> subclass later, and the loop above prints its sound too — without a single line of it changing.
+  </div>
+
+  <h2>Check your recall</h2>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What does polymorphism let you do?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Treat objects of different related types uniformly, while each still responds according to its own actual type.</button>
+      <button class="quiz-choice" data-correct="false">Force every subclass to behave identically to its parent class.</button>
+      <button class="quiz-choice" data-correct="false">Combine two unrelated classes into a single class.</button>
+      <button class="quiz-choice" data-correct="false">Skip writing a constructor for any subclass.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The same loop, calling the same method name, gets different correct behavior per object.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why does the C++ example specifically need Animal::speak() marked virtual?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Without it, C++ calls the version matching the declared type (Animal*) instead of the object's actual type.</button>
+      <button class="quiz-choice" data-correct="false">virtual is required by C++ syntax rules for every method, with no effect on behavior.</button>
+      <button class="quiz-choice" data-correct="false">Without it, the program fails to compile.</button>
+      <button class="quiz-choice" data-correct="false">virtual only changes how fast the loop runs.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>This is static dispatch versus virtual dispatch — Python, Java, and JavaScript always use the equivalent of virtual dispatch.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why does the C++ example store Animal* pointers instead of plain Animal values?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Storing a Dog by value in an Animal slot would truncate it to just its Animal part (object slicing).</button>
+      <button class="quiz-choice" data-correct="false">C++ vectors cannot hold class objects of any kind.</button>
+      <button class="quiz-choice" data-correct="false">Pointers make the speak() method run faster in every case.</button>
+      <button class="quiz-choice" data-correct="false">Python, Java, and JavaScript also require explicit pointers for this pattern.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Pointers (or references) preserve the object's actual type, which is what virtual dispatch depends on.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="polymorphism">
+    <p class="quiz-prompt">4. Fill in the blank: treating different related types uniformly, with each responding as itself, is called ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>See the definition box above.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="virtual">
+    <p class="quiz-prompt">5. Fill in the blank: in C++, the keyword that enables virtual dispatch on a method is ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>First introduced on Animal::speak() back in Lesson 1.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p><a href="https://en.cppreference.com/w/cpp/language/virtual">cppreference's page on virtual function specifiers</a> documents exactly how C++ resolves virtual dispatch at runtime.</p>
+
+  <p class="ask-teacher">Wondering what happens if C++'s destructor isn't marked virtual too, in a case like this? Ask your teacher — it's a real and common bug. That closes Unit 1: OOP Deep Dive. Next: handling things going wrong, deliberately.</p>
+
+  <footer class="lesson-footer">STEM+ · Computer Programming 2 · Lesson 3</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  STEMPlus.mountTabs(document.getElementById('poly-tabs'), 'data-tab', 'data-panel');
+});
+</script>

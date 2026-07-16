@@ -1,0 +1,106 @@
+<title>Lesson 11: Logging Without Oversharing — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Computer Programming Ethics · Lesson 11</span>
+  <h1>Logging Without Oversharing</h1>
+  <p class="subtitle">Lesson 10 pushed the detail into a log. This lesson is about what belongs in that log — and what still doesn't.</p>
+  <p class="nav-links"><a href="0012-when-code-should-refuse-to-run.html">Lesson 12 →</a> <a href="../index.html">Contents</a> <a href="../reference/glossary.html">Glossary →</a></p>
+
+  <p>It's tempting to think of the internal log as a safe place to put everything, since the user never sees it. That's true relative to the user — but Lesson 8 already established that logs are a second copy of your data with their own access list, retention period, and export paths, often less carefully controlled than the primary database. A full stack trace including live request data can put exactly the sensitive fields Unit 3 spent three lessons protecting right back into an unprotected file.</p>
+
+  <span class="code-label is-bad">Logging the exception object directly</span>
+  <pre class="code-block code-bad"><code>except Exception as e:
+    logger.error(f"Payment failed: {e}")
+    # str(e) on a database error can include the full failed query,
+    # which may contain the customer's card number and billing address</code></pre>
+
+  <span class="code-label is-good">Logging a structured, scrubbed summary</span>
+  <pre class="code-block code-good"><code>except Exception as e:
+    logger.error("Payment failed", extra={
+        "error_type": type(e).__name__,
+        "order_id": order.id,
+        "amount": order.amount,
+    })
+    # the exception's own message/args are deliberately left out</code></pre>
+
+  <p>The difference isn't "log less" — the second version is arguably more useful, because <code class="inline-code">error_type</code> and <code class="inline-code">order_id</code> are exactly what you'd search logs for later. The difference is <em>choosing</em> what goes in, field by field, instead of dumping whatever an exception object happens to contain and hoping it's nothing sensitive.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    <strong>Log scrubbing</strong> is the practice of removing or masking sensitive fields — passwords, tokens, card numbers, full request bodies — before a message is written to a log, rather than trusting that sensitive data will never end up in a log statement by accident.
+  </div>
+
+  <h2>Structured beats freeform</h2>
+  <p>Notice the good example doesn't build a sentence with an f-string — it passes a dictionary of named fields. This is <strong>structured logging</strong>, and it has a security benefit beyond being easier to search: a developer writing <code class="inline-code">logger.error("Payment failed", extra={...})</code> has to consciously list each field, which makes it much harder to accidentally interpolate an entire object — and everything nested inside it — into a log line without noticing.</p>
+
+  <div class="box why">
+    <span class="box-label">Why it matters here</span>
+    Every field logged is a field someone with log access can see — which, at most companies, is a much larger group than the people with production database access. Deciding what goes into a log is the same "collect only what you need" discipline from Lesson 7, applied to a second, easy-to-forget data store.
+  </div>
+
+  <h2>Check your recall</h2>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. Why is logging the raw exception object risky, even though users never see logs directly?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Logs have their own access list, often less controlled than the database.</button>
+      <button class="quiz-choice" data-correct="false">Exception objects cannot be written to a log file at all.</button>
+      <button class="quiz-choice" data-correct="false">Logging frameworks automatically publish logs online.</button>
+      <button class="quiz-choice" data-correct="false">It doubles the size of the production database.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Lesson 8's "log leak" idea applies directly here — the log is a second copy of data with its own, often weaker, protections.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. What does the good example log instead of the raw exception message?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">A chosen, structured set of specific fields.</button>
+      <button class="quiz-choice" data-correct="false">Nothing at all — the error is silently discarded.</button>
+      <button class="quiz-choice" data-correct="false">The customer's full billing address, encrypted.</button>
+      <button class="quiz-choice" data-correct="false">A screenshot of the server's terminal output.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>error_type, order_id, and amount are useful for debugging without carrying whatever an exception's own message happened to contain.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. What security benefit does structured logging (named fields) have over an f-string sentence?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">It forces a conscious choice of exactly what's included.</button>
+      <button class="quiz-choice" data-correct="false">It makes the log file permanently unreadable to anyone.</button>
+      <button class="quiz-choice" data-correct="false">It automatically encrypts the entire log file.</button>
+      <button class="quiz-choice" data-correct="false">It is required by every logging library by default.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>An f-string can silently absorb an entire object's contents; a dictionary of named fields makes each piece of included data explicit.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="log scrubbing">
+    <p class="quiz-prompt">4. Fill in the blank: removing or masking sensitive fields before a message is written to a log is called ___ ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>See the definition box above.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="structured logging">
+    <p class="quiz-prompt">5. Fill in the blank: passing a dictionary of named fields to a logger, instead of a freeform sentence, is called ___ ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>It's easier to search later and harder to accidentally overshare through.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>The <a href="https://cheatsheetseries.owasp.org/cheatsheets/Logging_Cheat_Sheet.html">OWASP Logging Cheat Sheet</a> has a full list of data categories that should never appear in a log, alongside guidance on structured logging and log access controls.</p>
+
+  <p class="ask-teacher">Want to see what a log-scrubbing utility looks like across a whole codebase, applied automatically rather than field-by-field? Ask your teacher — that's what I'm here for. Next: what a program should do when it genuinely can't proceed safely.</p>
+
+  <footer class="lesson-footer">STEM+ · Computer Programming Ethics · Lesson 11</footer>
+</div>

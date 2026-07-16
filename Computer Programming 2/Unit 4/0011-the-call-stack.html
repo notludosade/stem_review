@@ -1,0 +1,168 @@
+<title>Lesson 11: The Call Stack — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<script src="../../assets/interactive.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Computer Programming 2 · Lesson 11</span>
+  <h1>The Call Stack</h1>
+  <p class="subtitle">Recursion doesn't just resemble Unit 3's stack. It's built out of one, literally, by the language runtime itself.</p>
+  <p class="nav-links"><a href="0012-classic-recursion-examples.html">Lesson 12 →</a> <a href="../index.html">Contents</a> <a href="../reference/glossary.html">Glossary →</a></p>
+
+  <p>Every function call pushes a <strong>call frame</strong> onto the <strong>call stack</strong> — a record of where to resume once the call returns, plus its own local variables. When a function returns, its frame pops off, and execution resumes exactly where it left off in the frame below. Below, each call prints once on the way down, then again on the way back up, revealing that order directly.</p>
+
+  <div id="callstack-tabs">
+    <div class="fm-tabs">
+      <button class="fm-tab is-active" data-tab="py">Python</button>
+      <button class="fm-tab" data-tab="java">Java</button>
+      <button class="fm-tab" data-tab="js">JavaScript</button>
+      <button class="fm-tab" data-tab="cpp">C++</button>
+    </div>
+    <div class="fm-panel" data-panel="py">
+      <span class="code-label">Python</span>
+      <pre class="code-block"><code>def countdown(n):
+    if n == 0:
+        print("Liftoff!")
+        return
+    print(f"{n}...")
+    countdown(n - 1)
+    print(f"Back from {n}")
+
+countdown(3)
+# 3...
+# 2...
+# 1...
+# Liftoff!
+# Back from 1
+# Back from 2
+# Back from 3</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="java" hidden>
+      <span class="code-label">Java</span>
+      <pre class="code-block"><code>static void countdown(int n) {
+    if (n == 0) {
+        System.out.println("Liftoff!");
+        return;
+    }
+    System.out.println(n + "...");
+    countdown(n - 1);
+    System.out.println("Back from " + n);
+}
+
+countdown(3);
+// same output as Python, above</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="js" hidden>
+      <span class="code-label">JavaScript</span>
+      <pre class="code-block"><code>function countdown(n) {
+    if (n === 0) {
+        console.log("Liftoff!");
+        return;
+    }
+    console.log(`${n}...`);
+    countdown(n - 1);
+    console.log(`Back from ${n}`);
+}
+
+countdown(3);
+// same output as Python, above</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="cpp" hidden>
+      <span class="code-label">C++</span>
+      <pre class="code-block"><code>void countdown(int n) {
+    if (n == 0) {
+        std::cout &lt;&lt; "Liftoff!" &lt;&lt; std::endl;
+        return;
+    }
+    std::cout &lt;&lt; n &lt;&lt; "..." &lt;&lt; std::endl;
+    countdown(n - 1);
+    std::cout &lt;&lt; "Back from " &lt;&lt; n &lt;&lt; std::endl;
+}
+
+countdown(3);
+// same output as Python, above</code></pre>
+    </div>
+  </div>
+
+  <p>Notice the order: <code class="inline-code">"Back from 1"</code> prints before <code class="inline-code">"Back from 2"</code>, which prints before <code class="inline-code">"Back from 3"</code>. That's Unit 3's LIFO rule, happening automatically — <code class="inline-code">countdown(1)</code>'s frame was the last one pushed, so it's the first one popped. Every call stacks its frame on top of the one that called it; when the base case finally returns, the frames unwind in exactly the reverse order they were built, one <code class="inline-code">"Back from"</code> line per pop. If the base case is never reached, frames keep pushing with nowhere to stop, eventually exhausting the memory set aside for the stack — a <strong>stack overflow</strong>. Each language reports it differently: Python raises <code class="inline-code">RecursionError</code>, Java throws <code class="inline-code">StackOverflowError</code>, JavaScript throws a <code class="inline-code">RangeError</code> ("Maximum call stack size exceeded"). C++ is the outlier once again — it has no managed runtime to catch the problem gracefully, so a stack overflow there is undefined behavior, typically just crashing the program outright with no informative error at all.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    The <strong>call stack</strong> is the LIFO structure a language runtime uses to track active function calls. Each active call has a <strong>call frame</strong> holding its local state and return point. A <strong>stack overflow</strong> happens when frames keep pushing with no base case ever reached, exhausting the stack's memory.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why it matters here</span>
+    This is Unit 3's stack, not a metaphor for it. Understanding that recursion literally builds a LIFO chain of pending calls is what makes stack overflows, recursion depth limits, and "why does this print in reverse order" all make sense at once, instead of needing to be memorized separately.
+  </div>
+
+  <h2>Check your recall</h2>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What does the call stack track?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Every active function call, each with its own local state and where to resume when it returns.</button>
+      <button class="quiz-choice" data-correct="false">Only the very first function call a program makes.</button>
+      <button class="quiz-choice" data-correct="false">The total number of variables declared anywhere in the program.</button>
+      <button class="quiz-choice" data-correct="false">A list of every function name defined in the source code.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Each active call gets its own call frame, pushed when the call starts and popped when it returns.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. In the countdown example, why does "Back from 1" print before "Back from 3"?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">countdown(1)'s frame was pushed last, so it's the first one popped — the same LIFO order as Unit 3's stack.</button>
+      <button class="quiz-choice" data-correct="false">The print statements execute in a random order.</button>
+      <button class="quiz-choice" data-correct="false">countdown(3) is never actually called in this example.</button>
+      <button class="quiz-choice" data-correct="false">Java, JavaScript, and C++ reverse this order compared to Python.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>All four languages produce the identical output order, since the call stack's LIFO behavior isn't language-specific.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. What makes C++'s stack overflow behavior different from the other three languages?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">It has no managed runtime to catch the problem, so it's undefined behavior — typically an uninformative crash.</button>
+      <button class="quiz-choice" data-correct="false">C++ programs are physically incapable of stack overflow.</button>
+      <button class="quiz-choice" data-correct="false">C++ automatically increases the stack size to prevent any overflow.</button>
+      <button class="quiz-choice" data-correct="false">C++ is the only language of the four where this can happen at all.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Python, Java, and JavaScript all raise a specific, catchable error naming the problem; C++ generally just crashes.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="frame">
+    <p class="quiz-prompt">4. Fill in the blank: the record of an active call's local state and return point, held on the call stack, is a call ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>See the definition box above.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="overflow">
+    <p class="quiz-prompt">5. Fill in the blank: exhausting the call stack's memory because a base case is never reached is called a stack ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Python calls its version RecursionError; Java calls its version StackOverflowError.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p><a href="https://developer.mozilla.org/en-US/docs/Glossary/Call_stack">MDN's glossary entry on the call stack</a> explains the mechanism in language-neutral terms directly from the source.</p>
+
+  <p class="ask-teacher">Curious how a debugger's "stack trace" relates to everything in this lesson? Ask your teacher — they're the exact same structure, just printed out. Next: recursive problems that branch into more than one call at a time.</p>
+
+  <footer class="lesson-footer">STEM+ · Computer Programming 2 · Lesson 11</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  STEMPlus.mountTabs(document.getElementById('callstack-tabs'), 'data-tab', 'data-panel');
+});
+</script>

@@ -1,0 +1,146 @@
+<title>Lesson 10: Base Case and Recursive Case — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<script src="../../assets/interactive.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Computer Programming 2 · Lesson 10</span>
+  <h1>Base Case and Recursive Case</h1>
+  <p class="subtitle">A function that calls itself sounds like it shouldn't work. It does — as long as it always gets closer to a stopping point.</p>
+  <p class="nav-links"><a href="0011-the-call-stack.html">Lesson 11 →</a> <a href="../index.html">Contents</a> <a href="../reference/glossary.html">Glossary →</a></p>
+
+  <p><strong>Recursion</strong> is a function calling itself to solve a smaller version of the same problem. Every recursive function needs two parts: a <strong>base case</strong> — the simplest input, answered directly with no further recursive call — and a <strong>recursive case</strong> — the general input, which calls the function again on something smaller, moving toward the base case. Below, <code class="inline-code">factorial(n)</code> multiplies <code class="inline-code">n</code> by the factorial of everything smaller than it, stopping at <code class="inline-code">0</code>.</p>
+
+  <div id="recursion-tabs">
+    <div class="fm-tabs">
+      <button class="fm-tab is-active" data-tab="py">Python</button>
+      <button class="fm-tab" data-tab="java">Java</button>
+      <button class="fm-tab" data-tab="js">JavaScript</button>
+      <button class="fm-tab" data-tab="cpp">C++</button>
+    </div>
+    <div class="fm-panel" data-panel="py">
+      <span class="code-label">Python</span>
+      <pre class="code-block"><code>def factorial(n):
+    if n == 0:                      # base case
+        return 1
+    return n * factorial(n - 1)     # recursive case
+
+print(factorial(5))  # 120</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="java" hidden>
+      <span class="code-label">Java</span>
+      <pre class="code-block"><code>static int factorial(int n) {
+    if (n == 0) {                    // base case
+        return 1;
+    }
+    return n * factorial(n - 1);     // recursive case
+}
+
+System.out.println(factorial(5)); // 120</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="js" hidden>
+      <span class="code-label">JavaScript</span>
+      <pre class="code-block"><code>function factorial(n) {
+    if (n === 0) {                   // base case
+        return 1;
+    }
+    return n * factorial(n - 1);     // recursive case
+}
+
+console.log(factorial(5)); // 120</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="cpp" hidden>
+      <span class="code-label">C++</span>
+      <pre class="code-block"><code>int factorial(int n) {
+    if (n == 0) {                     // base case
+        return 1;
+    }
+    return n * factorial(n - 1);      // recursive case
+}
+
+std::cout &lt;&lt; factorial(5) &lt;&lt; std::endl; // 120</code></pre>
+    </div>
+  </div>
+
+  <p>All four are nearly identical here — recursion itself is one of the rare ideas in this course that doesn't meaningfully differ by language. <code class="inline-code">factorial(5)</code> calls <code class="inline-code">factorial(4)</code>, which calls <code class="inline-code">factorial(3)</code>, and so on, until <code class="inline-code">factorial(0)</code> hits the base case and returns <code class="inline-code">1</code> without calling itself again. Each pending multiplication then completes on the way back: <code class="inline-code">1 * 1</code>, then <code class="inline-code">2 * 1</code>, then <code class="inline-code">3 * 2</code>, and so on up to <code class="inline-code">120</code>.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    <strong>Recursion</strong> is a function calling itself on a smaller version of its own problem. The <strong>base case</strong> is the simplest input, answered directly with no further recursive call. The <strong>recursive case</strong> is the general input, which calls the function again on something smaller.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why it matters here</span>
+    A recursive function with no base case — or one that never actually gets closer to it — is the function-call equivalent of Computer Programming 1's infinite <code class="inline-code">while</code> loop: it never stops on its own. Instead of freezing the program, it typically crashes it outright once it runs out of room to keep track of all those pending calls — exactly what the next lesson explains.
+  </div>
+
+  <h2>Check your recall</h2>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What must every recursive function have to eventually stop?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">A base case that returns a result directly, without calling itself again.</button>
+      <button class="quiz-choice" data-correct="false">A loop counter defined outside the function.</button>
+      <button class="quiz-choice" data-correct="false">At least three separate recursive calls per invocation.</button>
+      <button class="quiz-choice" data-correct="false">A return type of void.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>factorial(0) is the base case here — it returns 1 directly, with no further call.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. What does the recursive case do?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Handles the general input by calling the function again on something smaller, moving toward the base case.</button>
+      <button class="quiz-choice" data-correct="false">Runs exactly once, regardless of the input.</button>
+      <button class="quiz-choice" data-correct="false">Always returns the same fixed value as the base case.</button>
+      <button class="quiz-choice" data-correct="false">Prevents the function from ever calling itself.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>factorial(n) calling factorial(n - 1) is the recursive case — each call works on a strictly smaller n.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. What is the function-call equivalent of an infinite while loop?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">A recursive function whose base case is never reached.</button>
+      <button class="quiz-choice" data-correct="false">A function that returns before its first line executes.</button>
+      <button class="quiz-choice" data-correct="false">A function with more than one parameter.</button>
+      <button class="quiz-choice" data-correct="false">Any function that calls a different function instead of itself.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Both keep running with no way to stop, though the specific failure they cause differs — the next lesson explains why.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="base">
+    <p class="quiz-prompt">4. Fill in the blank: the simplest input a recursive function can answer directly, with no further call, is the ___ case.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>See the definition box above.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="recursion">
+    <p class="quiz-prompt">5. Fill in the blank: a function calling itself to solve a smaller version of the same problem is called ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>factorial(5) calling factorial(4) calling factorial(3), and so on, is recursion in action.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p><a href="https://docs.python.org/3/library/sys.html#sys.setrecursionlimit">Python's official documentation for sys.setrecursionlimit</a> explains the real, enforced limit on how deep recursion is allowed to go — exactly why a missing base case is a serious bug, not just a style issue.</p>
+
+  <p class="ask-teacher">Wondering what actually happens in memory each time factorial calls itself? Ask your teacher — that's what I'm here for. Next: the mechanism that makes recursion possible at all.</p>
+
+  <footer class="lesson-footer">STEM+ · Computer Programming 2 · Lesson 10</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  STEMPlus.mountTabs(document.getElementById('recursion-tabs'), 'data-tab', 'data-panel');
+});
+</script>

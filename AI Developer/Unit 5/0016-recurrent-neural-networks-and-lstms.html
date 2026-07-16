@@ -1,0 +1,97 @@
+<title>Lesson 16: Recurrent Neural Networks and LSTMs — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · AI Developer · Lesson 16</span>
+  <h1>Recurrent Neural Networks and LSTMs</h1>
+  <p class="subtitle">A CNN's filter has no sense of order. Text, audio, and time series all depend on order completely — that calls for a different architecture.</p>
+  <p class="nav-links"><a href="0017-transformers-and-attention.html">Lesson 17 →</a> <a href="../index.html">Contents</a> <a href="../reference/glossary.html">Glossary →</a></p>
+
+  <p>A <strong>recurrent neural network (RNN)</strong> processes a sequence one element at a time, carrying a <strong>hidden state</strong> forward at each step — a running summary of everything seen so far, updated with each new element rather than discarded between them.</p>
+
+  <span class="code-label">Python — PyTorch</span>
+  <pre class="code-block"><code>import torch.nn as nn
+
+rnn = nn.RNN(input_size=10, hidden_size=20, batch_first=True)
+output, hidden = rnn(sequence)   # hidden carries context from earlier steps forward
+
+lstm = nn.LSTM(input_size=10, hidden_size=20, batch_first=True)
+output, (hidden, cell) = lstm(sequence)   # gates decide what to keep, forget, and output</code></pre>
+
+  <p>A plain RNN's hidden state lets it use context from earlier in a sequence — predicting the next word in a sentence depends on the words already read. But over a long sequence, backpropagation (Lesson 14) has to flow the gradient through every single step, and that gradient tends to shrink toward zero the further back it travels — a <strong>vanishing gradient</strong>. In practice, the network effectively forgets context from many steps ago. An <strong>LSTM (Long Short-Term Memory)</strong> fixes this with explicit <strong>gates</strong> — small learned mechanisms that decide what to keep, what to forget, and what to output from its state at each step — letting important information survive across much longer stretches of a sequence than a plain RNN can manage.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    A <strong>recurrent neural network (RNN)</strong> processes a sequence step by step, carrying a <strong>hidden state</strong> forward. A <strong>vanishing gradient</strong> is a gradient that shrinks toward zero over many steps, weakening long-range learning. An <strong>LSTM</strong> uses learned <strong>gates</strong> to control what its state keeps, forgets, or outputs.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why it matters here</span>
+    Vanishing gradients are the exact "historically important problem" flagged back in Lesson 14 without explanation — this is it, in its most visible form. Lesson 17's Transformers exist largely because even LSTM gates only partly solve this: processing a whole sequence at once, instead of one step at a time, sidesteps the problem in a completely different way.
+  </div>
+
+  <h2>Check your recall</h2>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What does an RNN's hidden state carry from one step to the next?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">A running summary of the sequence elements seen so far.</button>
+      <button class="quiz-choice" data-correct="false">A fixed copy of the very first element in the sequence, unchanged.</button>
+      <button class="quiz-choice" data-correct="false">The total number of elements remaining in the sequence.</button>
+      <button class="quiz-choice" data-correct="false">Nothing — each step is processed completely independently.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The hidden state is updated at every step, folding in new context rather than discarding what came before.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. What problem do long sequences cause for a plain RNN?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Vanishing gradients — the effect of early elements shrinks toward zero and gets effectively forgotten.</button>
+      <button class="quiz-choice" data-correct="false">The hidden state grows without limit until it crashes the program.</button>
+      <button class="quiz-choice" data-correct="false">Long sequences cause no issues at all for a plain RNN.</button>
+      <button class="quiz-choice" data-correct="false">The network becomes incapable of processing any input whatsoever.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The gradient has to flow back through every step during training, and tends to shrink the further it travels.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. What do an LSTM's gates control?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">What information the network's state keeps, forgets, or outputs at each step.</button>
+      <button class="quiz-choice" data-correct="false">How many layers the overall network has.</button>
+      <button class="quiz-choice" data-correct="false">The total size of the training dataset used.</button>
+      <button class="quiz-choice" data-correct="false">Whether the network runs on a CPU or a GPU.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Gates are learned mechanisms deciding exactly this at every single step of the sequence.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="hidden">
+    <p class="quiz-prompt">4. Fill in the blank: the running summary an RNN carries forward at each step is its ___ state.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>See the definition box above.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="gates">
+    <p class="quiz-prompt">5. Fill in the blank: LSTMs use learned ___ to decide what to keep, forget, or output at each step.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>See the definition box above.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p><a href="https://colah.github.io/posts/2015-08-Understanding-LSTMs/">Christopher Olah's "Understanding LSTM Networks"</a> is one of the most widely used explanations of exactly how these gates work, with clear diagrams.</p>
+
+  <p class="ask-teacher">Wondering what a GRU is, and how it compares to the LSTM described here? Ask your teacher — it's a real, simpler alternative with a very similar gating idea. Next: an architecture that skips step-by-step processing entirely.</p>
+
+  <footer class="lesson-footer">STEM+ · AI Developer · Lesson 16</footer>
+</div>

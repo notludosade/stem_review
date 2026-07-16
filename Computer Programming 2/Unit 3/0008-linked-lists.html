@@ -1,0 +1,155 @@
+<title>Lesson 8: Linked Lists — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<script src="../../assets/interactive.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Computer Programming 2 · Lesson 8</span>
+  <h1>Linked Lists</h1>
+  <p class="subtitle">Computer Programming 1's arrays and lists sit in one contiguous block of memory. A linked list scatters its elements — and gains something valuable by doing so.</p>
+  <p class="nav-links"><a href="0009-hash-maps-and-dictionaries.html">Lesson 9 →</a> <a href="../index.html">Contents</a> <a href="../reference/glossary.html">Glossary →</a></p>
+
+  <p>A <strong>linked list</strong> is a chain of <strong>nodes</strong>, where each node holds a value and a reference to the next node. The list itself is just a reference to the first node — the <strong>head</strong>. None of these languages requires a linked list to be hand-built (Java ships <code class="inline-code">java.util.LinkedList</code>, C++ ships <code class="inline-code">std::list</code> and <code class="inline-code">std::forward_list</code>) but building one from scratch, using Lesson 1's class knowledge, shows exactly what those built-in versions are doing underneath.</p>
+
+  <div id="linked-tabs">
+    <div class="fm-tabs">
+      <button class="fm-tab is-active" data-tab="py">Python</button>
+      <button class="fm-tab" data-tab="java">Java</button>
+      <button class="fm-tab" data-tab="js">JavaScript</button>
+      <button class="fm-tab" data-tab="cpp">C++</button>
+    </div>
+    <div class="fm-panel" data-panel="py">
+      <span class="code-label">Python</span>
+      <pre class="code-block"><code>class Node:
+    def __init__(self, value, next=None):
+        self.value = value
+        self.next = next
+
+head = Node(1)
+head = Node(0, head)  # insert new head
+print(head.value, head.next.value)  # 0 1</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="java" hidden>
+      <span class="code-label">Java</span>
+      <pre class="code-block"><code>class Node {
+    int value;
+    Node next;
+    Node(int value, Node next) {
+        this.value = value;
+        this.next = next;
+    }
+}
+
+Node head = new Node(1, null);
+head = new Node(0, head); // insert new head
+System.out.println(head.value + " " + head.next.value); // 0 1</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="js" hidden>
+      <span class="code-label">JavaScript</span>
+      <pre class="code-block"><code>class Node {
+    constructor(value, next = null) {
+        this.value = value;
+        this.next = next;
+    }
+}
+
+let head = new Node(1);
+head = new Node(0, head); // insert new head
+console.log(head.value, head.next.value); // 0 1</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="cpp" hidden>
+      <span class="code-label">C++</span>
+      <pre class="code-block"><code>struct Node {
+    int value;
+    Node* next;
+    Node(int value, Node* next) : value(value), next(next) {}
+};
+
+Node* head = new Node(1, nullptr);
+head = new Node(0, head); // insert new head
+std::cout &lt;&lt; head-&gt;value &lt;&lt; " " &lt;&lt; head-&gt;next-&gt;value &lt;&lt; std::endl; // 0 1</code></pre>
+    </div>
+  </div>
+
+  <p>All four build the exact same shape: the new node's <code class="inline-code">next</code> points at the old head, then the variable named <code class="inline-code">head</code> is reassigned to the new node — an insertion at the front, done in one step, regardless of how many nodes already exist. Compare that to inserting at the front of Unit 6's array-backed list, where every existing element has to shift over by one to make room. The C++ version introduces <code class="inline-code">-&gt;</code> formally: <code class="inline-code">head-&gt;value</code> is shorthand for "follow the pointer, then access the member," equivalent to <code class="inline-code">(*head).value</code>. C++ also uses <code class="inline-code">struct</code> here instead of <code class="inline-code">class</code> — functionally almost identical, except a <code class="inline-code">struct</code>'s members are public by default, which is convenient for a bare data holder like <code class="inline-code">Node</code>.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    A <strong>node</strong> holds a value and a reference to the next node. A <strong>linked list</strong> is a chain of nodes, accessed starting from its <strong>head</strong> — the first node.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why it matters here</span>
+    Lesson 16 of Computer Programming 1 introduced dynamic lists that can grow — but growing at the front still means shifting every element over. A linked list makes inserting or removing at any known position genuinely cheap, at a real cost: there's no way to jump straight to "the fifth element" the way an array's index does — you have to walk the chain from the head, one <code class="inline-code">next</code> at a time. Unit 5's Big-O lesson gives this trade-off a precise name.
+  </div>
+
+  <h2>Check your recall</h2>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What does each node in a linked list hold?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">A value and a reference to the next node in the chain.</button>
+      <button class="quiz-choice" data-correct="false">Only a value, with no connection to any other node.</button>
+      <button class="quiz-choice" data-correct="false">References to every other node in the list at once.</button>
+      <button class="quiz-choice" data-correct="false">A fixed-size array of all the list's values.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Each node only knows about the one node that comes after it.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why is inserting at the front of a linked list cheap regardless of its length?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Only the new node's next pointer and the head reference need to change — no existing node moves.</button>
+      <button class="quiz-choice" data-correct="false">Linked lists automatically limit themselves to three elements.</button>
+      <button class="quiz-choice" data-correct="false">Every node has to be rebuilt from scratch on every insertion.</button>
+      <button class="quiz-choice" data-correct="false">It isn't cheap — it's exactly as costly as an array-backed list.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Contrast this with an array-backed list, where inserting at the front shifts every existing element.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. What is the real trade-off a linked list makes in exchange for cheap insertion anywhere?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">No direct indexed access — reaching a specific position requires walking the chain from the head.</button>
+      <button class="quiz-choice" data-correct="false">Linked lists cannot hold more than one data type.</button>
+      <button class="quiz-choice" data-correct="false">Linked lists cannot be used inside a class.</button>
+      <button class="quiz-choice" data-correct="false">There is no trade-off — linked lists are strictly better than arrays in every case.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>An array's numbers[5] is instant; a linked list has to follow next five times to reach the same position.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="node">
+    <p class="quiz-prompt">4. Fill in the blank: an individual element in a linked list, holding a value and a reference to the next one, is called a ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>See the definition box above.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="head">
+    <p class="quiz-prompt">5. Fill in the blank: the first node in a linked list, from which the rest of the chain is reached, is called the ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Losing the head reference without saving it elsewhere means losing access to the entire list.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p><a href="https://en.cppreference.com/w/cpp/container/forward_list">cppreference's page on std::forward_list</a> documents C++'s standard singly-linked list container, built on exactly this node structure.</p>
+
+  <p class="ask-teacher">Curious what a doubly-linked list adds, where each node also points backward? Ask your teacher — it's a small change with real trade-offs of its own. Next: a structure built for near-instant lookup by key.</p>
+
+  <footer class="lesson-footer">STEM+ · Computer Programming 2 · Lesson 8</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  STEMPlus.mountTabs(document.getElementById('linked-tabs'), 'data-tab', 'data-panel');
+});
+</script>

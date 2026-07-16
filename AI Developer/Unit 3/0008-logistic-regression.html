@@ -1,0 +1,100 @@
+<title>Lesson 8: Logistic Regression — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · AI Developer · Lesson 8</span>
+  <h1>Logistic Regression</h1>
+  <p class="subtitle">Lesson 1's spam filter used this model already, without explaining how it turns a weighted sum into a yes-or-no answer. Here's the missing piece.</p>
+  <p class="nav-links"><a href="0009-decision-trees.html">Lesson 9 →</a> <a href="../index.html">Contents</a> <a href="../reference/glossary.html">Glossary →</a></p>
+
+  <p>Despite the name, <strong>logistic regression</strong> is a <strong>classification</strong> model — it predicts a category (spam or not spam), not a continuous number. It computes the same kind of weighted sum as linear regression, then passes that sum through a <strong>sigmoid function</strong>, which squashes any real number into a value strictly between 0 and 1 — interpretable as a probability.</p>
+
+  <span class="code-label">Python — scikit-learn</span>
+  <pre class="code-block"><code>from sklearn.linear_model import LogisticRegression
+
+model = LogisticRegression()
+model.fit(X_train, y_train)   # y_train: 0 for "not spam", 1 for "spam"
+
+probabilities = model.predict_proba(X_val)[:, 1]   # P(spam) for each email
+predictions = model.predict(X_val)                  # probabilities >= 0.5 become 1
+
+print(probabilities[:3])   # e.g. [0.92, 0.13, 0.55]
+print(predictions[:3])     # e.g. [1, 0, 1]</code></pre>
+
+  <p>An email with <code class="inline-code">probability = 0.92</code> is one the model is quite confident is spam; <code class="inline-code">0.13</code> is confident it isn't; <code class="inline-code">0.55</code> is barely leaning spam at all. <code class="inline-code">predict()</code> turns each of these probabilities into a final 0-or-1 answer using a <strong>threshold</strong> — 0.5 by default, meaning anything at or above 0.5 becomes a positive prediction. That threshold isn't fixed by the math; it can be moved deliberately, which matters once Lesson 10 gets into exactly what kind of mistake a classifier is making.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    <strong>Logistic regression</strong> is a classification model that produces a probability via a sigmoid function applied to a weighted sum of features. The <strong>sigmoid function</strong> maps any real number to a value between 0 and 1. <strong>Classification</strong> is predicting a category rather than a continuous number.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why it matters here</span>
+    This is the exact model Lesson 1 used for the spam filter, and it's the direct predecessor to the neural network output layer built in Unit 4 — a neural network doing binary classification ends with this same sigmoid step. Lesson 9 tackles the identical spam-or-not problem with a completely different kind of model, decision trees, so the two approaches can be compared directly.
+  </div>
+
+  <h2>Check your recall</h2>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. Despite its name, what does logistic regression actually do?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Classification — predicting a category, using a probability.</button>
+      <button class="quiz-choice" data-correct="false">Predicting a continuous number directly, exactly like linear regression.</button>
+      <button class="quiz-choice" data-correct="false">Grouping data into clusters with no labels at all.</button>
+      <button class="quiz-choice" data-correct="false">Choosing actions to maximize a reward signal over time.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The name is historical — the model itself predicts a category, like spam or not spam.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. What does the sigmoid function do to the weighted sum computed inside the model?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Squashes it into a value strictly between 0 and 1, interpretable as a probability.</button>
+      <button class="quiz-choice" data-correct="false">Multiplies it by the number of training examples.</button>
+      <button class="quiz-choice" data-correct="false">Rounds it to the nearest whole number immediately.</button>
+      <button class="quiz-choice" data-correct="false">Leaves it completely unchanged.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Any real number in, a value between 0 and 1 out — that squashing is the sigmoid's entire job.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. What threshold does predict() use by default to convert a probability into a final 0-or-1 answer?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">0.5</button>
+      <button class="quiz-choice" data-correct="false">1.0</button>
+      <button class="quiz-choice" data-correct="false">0.0</button>
+      <button class="quiz-choice" data-correct="false">There is no default threshold at all.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Anything at or above 0.5 becomes a positive prediction by default, though this can be moved deliberately.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="sigmoid">
+    <p class="quiz-prompt">4. Fill in the blank: the function that squashes any real number into a value between 0 and 1 is the ___ function.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>See the definition box above.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="probability">
+    <p class="quiz-prompt">5. Fill in the blank: predict_proba() returns a ___ that a given example belongs to the positive class.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>0.92 above means the model estimates a 92% chance the email is spam.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p><a href="https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LogisticRegression.html">scikit-learn's official LogisticRegression API reference</a> documents predict_proba, the threshold behavior, and every parameter directly from the source.</p>
+
+  <p class="ask-teacher">Wondering why you'd ever want to move the 0.5 threshold away from its default? Ask your teacher — it's a real, common decision once the cost of one kind of mistake outweighs the other. Next: a completely different model, aimed at the same kind of problem.</p>
+
+  <footer class="lesson-footer">STEM+ · AI Developer · Lesson 8</footer>
+</div>

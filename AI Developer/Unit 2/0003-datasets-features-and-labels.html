@@ -1,0 +1,106 @@
+<title>Lesson 3: Datasets, Features, and Labels — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · AI Developer · Lesson 3</span>
+  <h1>Datasets, Features, and Labels</h1>
+  <p class="subtitle">Every model in this course learns from a table. Knowing what each column in that table is called is the first real vocabulary this unit builds.</p>
+  <p class="nav-links"><a href="0004-cleaning-data.html">Lesson 4 →</a> <a href="../index.html">Contents</a> <a href="../reference/glossary.html">Glossary →</a></p>
+
+  <p>A <strong>dataset</strong> is the collection of examples a model learns from — usually one row per example. Each column is either a <strong>feature</strong> (an input the model is given) or, for supervised learning, the <strong>label</strong> (the correct output it's trying to predict). A small housing dataset makes this concrete:</p>
+
+  <span class="code-label">Python — pandas</span>
+  <pre class="code-block"><code>import pandas as pd
+
+data = pd.DataFrame({
+    "square_feet": [1200, 1800, 950],
+    "bedrooms":    [2, 3, 1],
+    "price":       [250000, 340000, 180000],
+})
+
+features = data[["square_feet", "bedrooms"]]   # X: what the model sees
+labels = data["price"]                          # y: what the model predicts
+
+print(features)
+#    square_feet  bedrooms
+# 0         1200         2
+# 1         1800         3
+# 2          950         1</code></pre>
+
+  <p>Each row is one house — one <strong>example</strong>. <code class="inline-code">square_feet</code> and <code class="inline-code">bedrooms</code> are features: information available before the sale, which the model is allowed to look at. <code class="inline-code">price</code> is the label: the actual number the model is trying to learn to predict, known for every house in this training set but not known for a new house the model will see later. By convention, features are called <code class="inline-code">X</code> and labels are called <code class="inline-code">y</code> in almost all machine learning code — the exact names <code class="inline-code">fit(X_train, y_train)</code> used back in Lesson 1.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    A <strong>dataset</strong> is a collection of examples used to train or evaluate a model. A <strong>feature</strong> is an input column the model is given. A <strong>label</strong> is the correct output value paired with an example, present in supervised learning and absent in unsupervised learning.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why it matters here</span>
+    Every classical ML model in Unit 3 and every neural network in Unit 4 is, underneath, just a function that turns a row of features into a prediction — trained by comparing that prediction to the real label, over and over, across every row in the dataset. Nothing else in this course makes sense without this vocabulary in place first.
+  </div>
+
+  <h2>Check your recall</h2>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What is a feature, in the housing dataset above?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">An input column, like square_feet or bedrooms, that the model is given to make a prediction.</button>
+      <button class="quiz-choice" data-correct="false">The correct sale price the model is trying to predict.</button>
+      <button class="quiz-choice" data-correct="false">A row that has been removed from the dataset entirely.</button>
+      <button class="quiz-choice" data-correct="false">A synonym for the entire dataset itself.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>square_feet and bedrooms are exactly this — information the model is allowed to look at.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Which column in the housing dataset is the label?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">price</button>
+      <button class="quiz-choice" data-correct="false">square_feet</button>
+      <button class="quiz-choice" data-correct="false">bedrooms</button>
+      <button class="quiz-choice" data-correct="false">None of the columns — this dataset has no label at all.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>price is the correct output the model is trying to learn to predict from the other columns.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why do features get called X and labels get called y in most machine learning code?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">It's a near-universal naming convention across the field's tools and documentation.</button>
+      <button class="quiz-choice" data-correct="false">X and y are required keywords enforced by the Python language itself.</button>
+      <button class="quiz-choice" data-correct="false">X always means "wrong" and y always means "yes" in this context.</button>
+      <button class="quiz-choice" data-correct="false">There is no real convention — every library picks different names.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>fit(X_train, y_train) from Lesson 1 uses exactly this convention.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="feature">
+    <p class="quiz-prompt">4. Fill in the blank: an input column the model is given, like square_feet, is called a ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>See the definition box above.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="label">
+    <p class="quiz-prompt">5. Fill in the blank: the correct output value paired with a training example is called its ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>See the definition box above.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p><a href="https://pandas.pydata.org/docs/user_guide/10min.html">pandas' official "10 minutes to pandas" guide</a> covers the DataFrame operations used above directly from the source.</p>
+
+  <p class="ask-teacher">Wondering how to turn something non-numeric, like a house's neighborhood name, into a feature a model can actually use? Ask your teacher — that's called encoding, and it's a real, common step. Next: real data is never this clean — cleaning it up first.</p>
+
+  <footer class="lesson-footer">STEM+ · AI Developer · Lesson 3</footer>
+</div>

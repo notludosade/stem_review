@@ -1,0 +1,122 @@
+<title>Lesson 2: The Professional Codes — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Computer Programming Ethics · Lesson 2</span>
+  <h1>The Professional Codes</h1>
+  <p class="subtitle">Two documents turn "be a good programmer" into something you can actually check a pull request against.</p>
+  <p class="nav-links"><a href="0003-reading-code-for-ethical-red-flags.html">Lesson 3 →</a> <a href="../index.html">Contents</a> <a href="../reference/glossary.html">Glossary →</a></p>
+
+  <p>Lesson 1 showed a function that lied about what it did. This lesson gives you the actual reference documents the software field uses to name and judge that kind of failure — not company-specific policy, but two widely-recognized professional codes you can point to regardless of where you work.</p>
+
+  <h2>The ACM Code of Ethics and Professional Conduct</h2>
+  <p>The <a href="https://www.acm.org/code-of-ethics">ACM Code of Ethics</a>, most recently revised in 2018, is organized as a short list of general principles, each phrased as an imperative. In summary, a computing professional should:</p>
+  <ul>
+    <li><strong>Contribute to society and to human well-being</strong>, acknowledging that all people are stakeholders in computing.</li>
+    <li><strong>Avoid harm</strong> — the one from Lesson 1. Harm includes unjustified physical, financial, or psychological injury, and unauthorized destruction or disclosure of information.</li>
+    <li><strong>Be honest and trustworthy</strong> — don't misrepresent what a system does, including through omission.</li>
+    <li><strong>Be fair and take action not to discriminate.</strong></li>
+    <li><strong>Respect the work required to produce new ideas</strong>, inventions, creative works, and computing artifacts — credit and licensing matter.</li>
+    <li><strong>Respect privacy.</strong></li>
+    <li><strong>Honor confidentiality.</strong></li>
+  </ul>
+  <p>These aren't laws with penalties attached — they're a professional's own definition of "good work," the same way a doctor has one. Reading them side by side with actual code decisions is the point of this course.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    A <strong>principle</strong> (as used here) is a general commitment — "avoid harm" — that has to be interpreted for a specific decision. It's not a rule with a single correct mechanical answer; it's a lens you apply.
+  </div>
+
+  <h2>The Software Engineering Code</h2>
+  <p>A second, older, more specific document exists: the <a href="https://ethics.acm.org/code-of-ethics/software-engineering-code/">ACM/IEEE-CS Software Engineering Code of Ethics and Professional Practice</a> (1999). Where the general ACM Code applies to anyone in computing, this one is written specifically for people who build software, organized around eight areas of obligation: the <strong>public</strong>, <strong>client and employer</strong>, the <strong>product</strong> itself, <strong>judgment</strong>, <strong>management</strong>, the <strong>profession</strong>, <strong>colleagues</strong>, and <strong>self</strong> (ongoing learning). Its "Product" principle is the most directly relevant to code you write today: engineers should strive for high quality, acceptable cost, and a reasonable schedule, while making sure significant risks are disclosed, not buried.</p>
+
+  <h2>Honesty shows up in error handling, too</h2>
+  <p>"Be honest and trustworthy" isn't only about big decisions like the delete-account example. It shows up in small, everyday code — like what happens when something goes wrong.</p>
+
+  <span class="code-label is-bad">Silently swallowing the problem</span>
+  <pre class="code-block code-bad"><code>try:
+    charge_card(amount)
+except Exception:
+    pass  # nothing logged, nothing surfaced
+print("Payment successful!")</code></pre>
+
+  <span class="code-label is-good">Honest about failure</span>
+  <pre class="code-block code-good"><code>try:
+    charge_card(amount)
+    print("Payment successful!")
+except PaymentError as e:
+    logger.error("Payment failed for order %s: %s", order_id, e)
+    raise</code></pre>
+
+  <p>The first version tells the user "Payment successful!" even when the payment failed — it's not lying on purpose in the way a dark pattern is, but the effect on the user is the same: the code claims something happened that didn't. The second version does the harder, more honest thing: it only claims success when success actually occurred, and it makes the failure visible instead of hiding it.</p>
+
+  <div class="box why">
+    <span class="box-label">Why it matters here</span>
+    A silent <code class="inline-code">except: pass</code> is one of the most common ways ordinary, well-intentioned code becomes dishonest by accident. Nobody set out to lie to the user — but that's what the program does.
+  </div>
+
+  <h2>Check your recall</h2>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. How many general principles does the 2018 ACM Code of Ethics list?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Seven.</button>
+      <button class="quiz-choice" data-correct="false">Three.</button>
+      <button class="quiz-choice" data-correct="false">Twelve.</button>
+      <button class="quiz-choice" data-correct="false">One.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Contribute to society, avoid harm, be honest and trustworthy, be fair, respect the work behind new ideas, respect privacy, honor confidentiality — seven in total.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. What is the Software Engineering Code's relationship to the general ACM Code of Ethics?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">A separate, older code specific to software engineers.</button>
+      <button class="quiz-choice" data-correct="false">An early, now-withdrawn draft of the ACM Code.</button>
+      <button class="quiz-choice" data-correct="false">A legal requirement replacing the ACM Code.</button>
+      <button class="quiz-choice" data-correct="false">An identical document with a different title.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Published in 1999 by ACM and IEEE-CS jointly, it's a distinct document narrowed to software engineering practice, organized around eight areas of obligation.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. What specifically makes the first <code class="inline-code">charge_card</code> example on this page dishonest?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">It reports success even when the charge failed.</button>
+      <button class="quiz-choice" data-correct="false">It logs too much information about the order.</button>
+      <button class="quiz-choice" data-correct="false">It charges the customer more than once.</button>
+      <button class="quiz-choice" data-correct="false">It runs the charge before checking the amount.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The bare <code class="inline-code">except: pass</code> discards the failure entirely, so the unconditional "Payment successful!" print statement runs regardless of what actually happened.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="product">
+    <p class="quiz-prompt">4. Fill in the blank: of the Software Engineering Code's eight areas, the one most about disclosing risk in what you actually ship is "___."</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The "Product" principle calls for high quality and disclosure of significant risks — not burying problems to hit a schedule.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="principle">
+    <p class="quiz-prompt">5. Fill in the blank: a general commitment like "avoid harm," which must be interpreted for each specific decision, is called a ___ (as defined on this page).</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>See the definition box above — a principle is a lens, not a mechanical rule with one right answer.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Both primary documents are short and worth reading in full: the <a href="https://www.acm.org/code-of-ethics">ACM Code of Ethics</a> and the <a href="https://ethics.acm.org/code-of-ethics/software-engineering-code/">Software Engineering Code</a>.</p>
+
+  <p class="ask-teacher">If any of the eight Software Engineering Code areas felt vague, ask your teacher for a concrete example from real code — that's what I'm here for. Next: turning these principles into an actual scanning habit, reading real snippets across four languages for ethical red flags.</p>
+
+  <footer class="lesson-footer">STEM+ · Computer Programming Ethics · Lesson 2</footer>
+</div>

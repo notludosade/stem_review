@@ -1,0 +1,137 @@
+<title>Lesson 19: Ownership and Smart Pointers — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<script src="../../assets/interactive.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Computer Programming 2 · Lesson 19</span>
+  <h1>Ownership and Smart Pointers</h1>
+  <p class="subtitle">If a raw pointer outlives what it points to, using it doesn't fail loudly. It fails silently — until it doesn't.</p>
+  <p class="nav-links"><a href="../Unit%207/0020-assertions-and-defensive-checks.html">Lesson 20 →</a> <a href="../index.html">Contents</a> <a href="../reference/glossary.html">Glossary →</a></p>
+
+  <p>A <strong>dangling pointer</strong> points to memory that has already been freed. Reading or writing through it is <strong>use-after-free</strong> — one of the most notorious categories of bug in C++, because it often doesn't crash immediately; it silently corrupts whatever now happens to occupy that freed memory.</p>
+
+  <div id="dangling-tabs">
+    <div class="fm-tabs">
+      <button class="fm-tab is-active" data-tab="py">Python</button>
+      <button class="fm-tab" data-tab="java">Java</button>
+      <button class="fm-tab" data-tab="js">JavaScript</button>
+      <button class="fm-tab" data-tab="cpp">C++</button>
+    </div>
+    <div class="fm-panel" data-panel="py">
+      <span class="code-label">Python</span>
+      <pre class="code-block"><code># There is no direct equivalent of this bug in Python.
+# The garbage collector will never free an object while
+# any reference to it still exists, so a "dangling reference"
+# to already-freed memory simply cannot happen here.</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="java" hidden>
+      <span class="code-label">Java</span>
+      <pre class="code-block"><code>// Same guarantee as Python: the garbage collector will never
+// free an object while a reference to it still exists.
+// Dangling references of this kind cannot happen in Java.</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="js" hidden>
+      <span class="code-label">JavaScript</span>
+      <pre class="code-block"><code>// Same guarantee again: JavaScript's garbage collector will
+// never free an object that's still reachable from a live
+// reference. This category of bug does not exist here.</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="cpp" hidden>
+      <span class="code-label">C++</span>
+      <pre class="code-block"><code>int* makeDangling() {
+    int value = 42;
+    return &amp;value;      // returns the ADDRESS of a stack variable —
+}                          // 'value' is destroyed the instant this returns
+
+int* p = makeDangling();
+std::cout &lt;&lt; *p;          // undefined behavior: p points to freed stack memory
+
+int* q = new int(10);
+delete q;                  // the heap memory is freed
+std::cout &lt;&lt; *q;          // undefined behavior: use-after-free</code></pre>
+    </div>
+  </div>
+
+  <p>This is the one bug category unique to C++ among these four languages — and it exists precisely because C++ hands you a raw pointer with no built-in tracking of whether what it points to is still alive. Modern C++ has a fix that doesn't give up manual control: <strong>smart pointers</strong>. <code class="inline-code">std::unique_ptr</code> owns its heap memory exclusively and frees it automatically the instant it goes out of scope — no <code class="inline-code">delete</code> required, and no way to accidentally share ownership. <code class="inline-code">std::shared_ptr</code> allows multiple owners, keeping a running count and freeing the memory only once the last owner is gone. This pattern — tying a resource's lifetime to an object's own scope — is called <strong>RAII</strong> (Resource Acquisition Is Initialization), and it's how modern C++ gets close to garbage-collector convenience while keeping deterministic, immediate cleanup.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    A <strong>dangling pointer</strong> points to already-freed memory; using it is <strong>use-after-free</strong>. A <strong>smart pointer</strong> (<code class="inline-code">unique_ptr</code>, <code class="inline-code">shared_ptr</code>) automatically frees its memory when it goes out of scope — a pattern called <strong>RAII</strong>.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why it matters here</span>
+    This closes the loop on the whole unit. Stack and heap (Lesson 16) explained where memory lives; garbage collection versus manual freeing (Lesson 17) explained who cleans it up; pointers and references (Lesson 18) explained how code reaches it. This lesson is the payoff: C++'s smart pointers tie a heap object's cleanup to a stack variable's own automatic lifetime — borrowing the stack's "cleans up on its own" guarantee from Lesson 16 and applying it to the heap.
+  </div>
+
+  <h2>Check your recall</h2>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What is a dangling pointer?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">A pointer that still holds the address of memory that has already been freed.</button>
+      <button class="quiz-choice" data-correct="false">A pointer that has never been assigned any address at all.</button>
+      <button class="quiz-choice" data-correct="false">A pointer that only exists in Python, Java, and JavaScript.</button>
+      <button class="quiz-choice" data-correct="false">Any pointer pointing to a variable declared with const.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>makeDangling's returned pointer is exactly this — pointing to a stack variable that's already gone.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why can't dangling pointers happen in Python, Java, or JavaScript?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Their garbage collectors never free an object while any reference to it still exists.</button>
+      <button class="quiz-choice" data-correct="false">Those languages don't allow variables to reference objects at all.</button>
+      <button class="quiz-choice" data-correct="false">Those languages don't have a heap, so there's nothing to dangle toward.</button>
+      <button class="quiz-choice" data-correct="false">Dangling pointers can happen in all four languages equally.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>This is the direct payoff of Lesson 17's garbage collection guarantee.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. What does a C++ unique_ptr do automatically that a raw pointer does not?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Frees its owned heap memory automatically the instant it goes out of scope.</button>
+      <button class="quiz-choice" data-correct="false">Prevents the program from ever allocating any heap memory.</button>
+      <button class="quiz-choice" data-correct="false">Allows unlimited copies to share ownership with no tracking at all.</button>
+      <button class="quiz-choice" data-correct="false">Makes dereferencing permanently impossible.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>This is RAII: tying the heap memory's lifetime to the smart pointer variable's own automatic scope.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="dangling">
+    <p class="quiz-prompt">4. Fill in the blank: a pointer that still holds the address of already-freed memory is called a ___ pointer.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>See the definition box above.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="RAII">
+    <p class="quiz-prompt">5. Fill in the blank: tying a resource's cleanup to an object's own automatic scope, as smart pointers do, is called ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Resource Acquisition Is Initialization — the object's constructor acquires it, its destructor releases it.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p><a href="https://en.cppreference.com/w/cpp/memory/unique_ptr">cppreference's page on std::unique_ptr</a> documents the standard library's own RAII smart pointer directly from the language reference.</p>
+
+  <p class="ask-teacher">Wondering when to reach for unique_ptr versus shared_ptr in real code? Ask your teacher — the short answer is: default to unique_ptr, and only use shared_ptr when ownership genuinely needs to be shared. That closes Unit 6: Memory Models. Next: catching bugs like these before they ever reach a user.</p>
+
+  <footer class="lesson-footer">STEM+ · Computer Programming 2 · Lesson 19</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  STEMPlus.mountTabs(document.getElementById('dangling-tabs'), 'data-tab', 'data-panel');
+});
+</script>

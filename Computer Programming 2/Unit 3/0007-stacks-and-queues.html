@@ -1,0 +1,183 @@
+<title>Lesson 7: Stacks and Queues — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<script src="../../assets/interactive.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Computer Programming 2 · Lesson 7</span>
+  <h1>Stacks and Queues</h1>
+  <p class="subtitle">Computer Programming 1's lists could grow and shrink from anywhere. These two structures deliberately restrict where you're allowed to touch them — and that restriction is the point.</p>
+  <p class="nav-links"><a href="0008-linked-lists.html">Lesson 8 →</a> <a href="../index.html">Contents</a> <a href="../reference/glossary.html">Glossary →</a></p>
+
+  <p>A <strong>stack</strong> only lets you add or remove from one end — the last thing pushed on is the first thing to come off, a rule called <strong>LIFO</strong> (last-in, first-out). Push 1, 2, 3 and pop, and you always get 3 back first.</p>
+
+  <div id="stack-tabs">
+    <div class="fm-tabs">
+      <button class="fm-tab is-active" data-tab="py">Python</button>
+      <button class="fm-tab" data-tab="java">Java</button>
+      <button class="fm-tab" data-tab="js">JavaScript</button>
+      <button class="fm-tab" data-tab="cpp">C++</button>
+    </div>
+    <div class="fm-panel" data-panel="py">
+      <span class="code-label">Python</span>
+      <pre class="code-block"><code>stack = []
+stack.append(1)
+stack.append(2)
+stack.append(3)
+print(stack.pop())  # 3</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="java" hidden>
+      <span class="code-label">Java</span>
+      <pre class="code-block"><code>Deque&lt;Integer&gt; stack = new ArrayDeque&lt;&gt;();
+stack.push(1);
+stack.push(2);
+stack.push(3);
+System.out.println(stack.pop()); // 3</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="js" hidden>
+      <span class="code-label">JavaScript</span>
+      <pre class="code-block"><code>let stack = [];
+stack.push(1);
+stack.push(2);
+stack.push(3);
+console.log(stack.pop()); // 3</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="cpp" hidden>
+      <span class="code-label">C++</span>
+      <pre class="code-block"><code>std::stack&lt;int&gt; s;
+s.push(1);
+s.push(2);
+s.push(3);
+std::cout &lt;&lt; s.top() &lt;&lt; std::endl; // 3
+s.pop(); // removes it — pop() itself returns nothing</code></pre>
+    </div>
+  </div>
+
+  <p>A <strong>queue</strong> is the opposite restriction: add at one end, remove from the other — <strong>FIFO</strong> (first-in, first-out). Enqueue 1, 2, 3 and dequeue, and you get 1 back first.</p>
+
+  <div id="queue-tabs">
+    <div class="fm-tabs">
+      <button class="fm-tab is-active" data-tab="py">Python</button>
+      <button class="fm-tab" data-tab="java">Java</button>
+      <button class="fm-tab" data-tab="js">JavaScript</button>
+      <button class="fm-tab" data-tab="cpp">C++</button>
+    </div>
+    <div class="fm-panel" data-panel="py">
+      <span class="code-label">Python</span>
+      <pre class="code-block"><code>from collections import deque
+queue = deque()
+queue.append(1)
+queue.append(2)
+queue.append(3)
+print(queue.popleft())  # 1</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="java" hidden>
+      <span class="code-label">Java</span>
+      <pre class="code-block"><code>Deque&lt;Integer&gt; queue = new ArrayDeque&lt;&gt;();
+queue.offer(1);
+queue.offer(2);
+queue.offer(3);
+System.out.println(queue.poll()); // 1</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="js" hidden>
+      <span class="code-label">JavaScript</span>
+      <pre class="code-block"><code>let queue = [];
+queue.push(1);
+queue.push(2);
+queue.push(3);
+console.log(queue.shift()); // 1</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="cpp" hidden>
+      <span class="code-label">C++</span>
+      <pre class="code-block"><code>std::queue&lt;int&gt; q;
+q.push(1);
+q.push(2);
+q.push(3);
+std::cout &lt;&lt; q.front() &lt;&lt; std::endl; // 1
+q.pop();</code></pre>
+    </div>
+  </div>
+
+  <p>Two details worth flagging. First, C++'s <code class="inline-code">pop()</code> on both <code class="inline-code">std::stack</code> and <code class="inline-code">std::queue</code> returns nothing at all — you must read the value with <code class="inline-code">top()</code> or <code class="inline-code">front()</code> first, then call <code class="inline-code">pop()</code> separately to remove it. Every other language here combines "read and remove" into a single call. Second, Python's queue example deliberately avoids using a plain list — removing from the front of a list (<code class="inline-code">pop(0)</code>) has to shift every remaining element down by one, making it slow for large queues. Python's <code class="inline-code">collections.deque</code> is built specifically to make both ends fast, and JavaScript's array-based queue above has that exact same shifting cost with no built-in alternative — worth knowing if a queue ever needs to hold a very large number of items.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    A <strong>stack</strong> is LIFO: last in, first out. A <strong>queue</strong> is FIFO: first in, first out. Both restrict access to specific ends, trading the flexibility of a general-purpose list for a guaranteed, predictable order of removal.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why it matters here</span>
+    An undo history is a stack — the most recent action is always the one undone first. A print queue or a task queue is a queue — the first job submitted is the first one handled. Picking the structure that matches the real access pattern isn't a style choice; it's what makes the code both correct and fast without extra bookkeeping.
+  </div>
+
+  <h2>Check your recall</h2>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. If you push 1, 2, then 3 onto a stack and pop once, what do you get?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">3 — the last item pushed is the first one popped.</button>
+      <button class="quiz-choice" data-correct="false">1 — the first item pushed is the first one popped.</button>
+      <button class="quiz-choice" data-correct="false">All three values at once.</button>
+      <button class="quiz-choice" data-correct="false">Nothing — pop always fails on a stack with more than one item.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>LIFO: last in, first out.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. If you enqueue 1, 2, then 3 onto a queue and dequeue once, what do you get?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">1 — the first item enqueued is the first one dequeued.</button>
+      <button class="quiz-choice" data-correct="false">3 — the last item enqueued is the first one dequeued.</button>
+      <button class="quiz-choice" data-correct="false">A random one of the three values.</button>
+      <button class="quiz-choice" data-correct="false">Queues cannot be dequeued more than once.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>FIFO: first in, first out — the opposite order from a stack.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why does the Python queue example use collections.deque instead of a plain list?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Removing from the front of a plain list requires shifting every remaining element, which is slow for large queues.</button>
+      <button class="quiz-choice" data-correct="false">A plain list cannot store more than three items.</button>
+      <button class="quiz-choice" data-correct="false">deque is required syntax with no performance difference.</button>
+      <button class="quiz-choice" data-correct="false">Lists in Python cannot use the append() method.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>deque is built to make operations at both ends fast, unlike a plain list's front-removal cost.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="LIFO">
+    <p class="quiz-prompt">4. Fill in the blank: a stack's removal order is called ___ (last in, first out).</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>See the definition box above.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="FIFO">
+    <p class="quiz-prompt">5. Fill in the blank: a queue's removal order is called ___ (first in, first out).</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The opposite order from a stack's LIFO.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p><a href="https://docs.python.org/3/library/collections.html#collections.deque">Python's official documentation for collections.deque</a> explains exactly why it's fast at both ends where a plain list isn't.</p>
+
+  <p class="ask-teacher">Wondering how the "undo" button in most apps is implemented under the hood? Ask your teacher — it's almost always a stack, sometimes two. Next: a structure that makes inserting anywhere cheap.</p>
+
+  <footer class="lesson-footer">STEM+ · Computer Programming 2 · Lesson 7</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  STEMPlus.mountTabs(document.getElementById('stack-tabs'), 'data-tab', 'data-panel');
+  STEMPlus.mountTabs(document.getElementById('queue-tabs'), 'data-tab', 'data-panel');
+});
+</script>

@@ -1,0 +1,202 @@
+<title>Lesson 13: Big-O Notation — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<script src="../../assets/interactive.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Computer Programming 2 · Lesson 13</span>
+  <h1>Big-O Notation</h1>
+  <p class="subtitle">A way to describe how an algorithm's running time grows as its input grows — without depending on a particular computer, language, or day.</p>
+  <p class="nav-links"><a href="0014-linear-and-binary-search.html">Lesson 14 →</a> <a href="../index.html">Contents</a> <a href="../reference/glossary.html">Glossary →</a></p>
+
+  <p><strong>Big-O notation</strong> describes how the number of operations an algorithm performs grows relative to the size of its input, written <code class="inline-code">n</code>. It ignores constant factors and hardware speed — a Big-O class is a shape of growth, not a stopwatch reading. Below, <code class="inline-code">sum_list</code> visits each of the <code class="inline-code">n</code> elements exactly once, no matter how large the list is: that's <strong>O(n)</strong>, linear time.</p>
+
+  <div id="on-tabs">
+    <div class="fm-tabs">
+      <button class="fm-tab is-active" data-tab="py">Python</button>
+      <button class="fm-tab" data-tab="java">Java</button>
+      <button class="fm-tab" data-tab="js">JavaScript</button>
+      <button class="fm-tab" data-tab="cpp">C++</button>
+    </div>
+    <div class="fm-panel" data-panel="py">
+      <span class="code-label">Python</span>
+      <pre class="code-block"><code>def sum_list(numbers):
+    total = 0
+    for x in numbers:      # runs n times
+        total += x
+    return total</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="java" hidden>
+      <span class="code-label">Java</span>
+      <pre class="code-block"><code>static int sumList(int[] numbers) {
+    int total = 0;
+    for (int x : numbers) {    // runs n times
+        total += x;
+    }
+    return total;
+}</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="js" hidden>
+      <span class="code-label">JavaScript</span>
+      <pre class="code-block"><code>function sumList(numbers) {
+    let total = 0;
+    for (const x of numbers) {  // runs n times
+        total += x;
+    }
+    return total;
+}</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="cpp" hidden>
+      <span class="code-label">C++</span>
+      <pre class="code-block"><code>int sumList(const std::vector&lt;int&gt;&amp; numbers) {
+    int total = 0;
+    for (int x : numbers) {     // runs n times
+        total += x;
+    }
+    return total;
+}</code></pre>
+    </div>
+  </div>
+
+  <p>Now compare that to a function checking every pair of elements for a match — a loop inside a loop.</p>
+
+  <div id="on2-tabs">
+    <div class="fm-tabs">
+      <button class="fm-tab is-active" data-tab="py">Python</button>
+      <button class="fm-tab" data-tab="java">Java</button>
+      <button class="fm-tab" data-tab="js">JavaScript</button>
+      <button class="fm-tab" data-tab="cpp">C++</button>
+    </div>
+    <div class="fm-panel" data-panel="py">
+      <span class="code-label">Python</span>
+      <pre class="code-block"><code>def has_duplicate_pair(numbers):
+    for i in range(len(numbers)):
+        for j in range(len(numbers)):   # n runs of n runs
+            if i != j and numbers[i] == numbers[j]:
+                return True
+    return False</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="java" hidden>
+      <span class="code-label">Java</span>
+      <pre class="code-block"><code>static boolean hasDuplicatePair(int[] numbers) {
+    for (int i = 0; i &lt; numbers.length; i++) {
+        for (int j = 0; j &lt; numbers.length; j++) {   // n runs of n runs
+            if (i != j &amp;&amp; numbers[i] == numbers[j]) {
+                return true;
+            }
+        }
+    }
+    return false;
+}</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="js" hidden>
+      <span class="code-label">JavaScript</span>
+      <pre class="code-block"><code>function hasDuplicatePair(numbers) {
+    for (let i = 0; i &lt; numbers.length; i++) {
+        for (let j = 0; j &lt; numbers.length; j++) {   // n runs of n runs
+            if (i !== j &amp;&amp; numbers[i] === numbers[j]) {
+                return true;
+            }
+        }
+    }
+    return false;
+}</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="cpp" hidden>
+      <span class="code-label">C++</span>
+      <pre class="code-block"><code>bool hasDuplicatePair(const std::vector&lt;int&gt;&amp; numbers) {
+    for (size_t i = 0; i &lt; numbers.size(); i++) {
+        for (size_t j = 0; j &lt; numbers.size(); j++) {   // n runs of n runs
+            if (i != j &amp;&amp; numbers[i] == numbers[j]) {
+                return true;
+            }
+        }
+    }
+    return false;
+}</code></pre>
+    </div>
+  </div>
+
+  <p>The nested loop runs its inner body roughly <code class="inline-code">n * n</code> times — <strong>O(n²)</strong>, quadratic time. Doubling the input roughly quadruples the work, where the linear version's work only doubled. A handful of classes cover almost everything you'll see: <strong>O(1)</strong> constant — Lesson 9's hash map lookup, the same cost regardless of size; <strong>O(log n)</strong> logarithmic — cutting the problem in half each step, coming up next lesson; <strong>O(n)</strong> linear — this lesson's <code class="inline-code">sum_list</code>; <strong>O(n²)</strong> quadratic — this lesson's nested loop; and <strong>O(2ⁿ)</strong> exponential — Lesson 12's naive Fibonacci, whose call tree doubled in size with every added level. Ranked from best to worst: O(1) < O(log n) < O(n) < O(n²) < O(2ⁿ).</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    <strong>Big-O notation</strong> describes how an algorithm's number of operations grows as its input size <code class="inline-code">n</code> grows, ignoring constant factors and hardware. Common classes, best to worst: O(1), O(log n), O(n), O(n²), O(2ⁿ).
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why it matters here</span>
+    This gives precise names to costs this unit already showed you informally: the hash map's near-instant lookup (Unit 3), the linked list's linear walk, and naive Fibonacci's exponential blowup (Lesson 12) were all Big-O differences in disguise. Now you have the vocabulary to compare any two approaches to the same problem — starting with search, next lesson.
+  </div>
+
+  <h2>Check your recall</h2>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What does Big-O notation describe?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">How the number of operations an algorithm performs grows as its input size grows.</button>
+      <button class="quiz-choice" data-correct="false">The exact number of seconds a program takes to run on a specific computer.</button>
+      <button class="quiz-choice" data-correct="false">How many lines of source code an algorithm's implementation has.</button>
+      <button class="quiz-choice" data-correct="false">Which programming language produces the fastest machine code.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Big-O ignores hardware speed and constant factors, focusing purely on growth shape.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why is the nested-loop duplicate-pair check O(n²)?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">The inner loop runs n times for every one of the n outer loop iterations, roughly n * n total.</button>
+      <button class="quiz-choice" data-correct="false">It only ever checks the very first element against itself.</button>
+      <button class="quiz-choice" data-correct="false">It always finds a duplicate on the first comparison.</button>
+      <button class="quiz-choice" data-correct="false">Nested loops are always O(1) regardless of how many there are.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Compare this to sum_list's single loop, which only runs n times total.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Which of these Big-O classes describes Lesson 12's naive recursive Fibonacci?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">O(2ⁿ), exponential — because its call tree roughly doubles with each added level.</button>
+      <button class="quiz-choice" data-correct="false">O(1), constant — it takes the same number of steps no matter the input.</button>
+      <button class="quiz-choice" data-correct="false">O(n), linear — it makes exactly n total function calls.</button>
+      <button class="quiz-choice" data-correct="false">Naive Fibonacci cannot be described with Big-O notation at all.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>This is exactly the "exponential branching" problem Lesson 12 identified — now it has a formal name.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="quadratic">
+    <p class="quiz-prompt">4. Fill in the blank: O(n²) is called ___ time.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>See the ranked list of classes above.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="constant">
+    <p class="quiz-prompt">5. Fill in the blank: O(1), the cost of a hash map lookup regardless of size, is called ___ time.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>This is the best class in the ranking — the cost never grows at all.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p><a href="https://developer.mozilla.org/en-US/docs/Glossary/Big_O_notation">MDN's glossary entry on Big-O notation</a> gives a concise, language-neutral definition straight from the source.</p>
+
+  <p class="ask-teacher">Curious how to figure out the Big-O of your own code, step by step? Ask your teacher — there's a simple method for it. Next: putting O(n) and O(log n) head-to-head on the same problem.</p>
+
+  <footer class="lesson-footer">STEM+ · Computer Programming 2 · Lesson 13</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  STEMPlus.mountTabs(document.getElementById('on-tabs'), 'data-tab', 'data-panel');
+  STEMPlus.mountTabs(document.getElementById('on2-tabs'), 'data-tab', 'data-panel');
+});
+</script>

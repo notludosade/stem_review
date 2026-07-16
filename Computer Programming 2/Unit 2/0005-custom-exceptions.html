@@ -1,0 +1,159 @@
+<title>Lesson 5: Custom Exceptions — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<script src="../../assets/interactive.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Computer Programming 2 · Lesson 5</span>
+  <h1>Custom Exceptions</h1>
+  <p class="subtitle">Built-in exceptions describe generic failures. Your own domain has its own — and Lesson 1's inheritance is exactly how you define them.</p>
+  <p class="nav-links"><a href="0006-defensive-vs-corrective-handling.html">Lesson 6 →</a> <a href="../index.html">Contents</a> <a href="../reference/glossary.html">Glossary →</a></p>
+
+  <p>A <strong>custom exception</strong> is a named exception type specific to your program's own domain — not a generic <code class="inline-code">ValueError</code>, but something like "insufficient funds," so calling code can catch precisely that failure and nothing else. In every language, defining one means inheriting from the language's built-in exception class, exactly the mechanism Lesson 1 introduced.</p>
+
+  <div id="custom-tabs">
+    <div class="fm-tabs">
+      <button class="fm-tab is-active" data-tab="py">Python</button>
+      <button class="fm-tab" data-tab="java">Java</button>
+      <button class="fm-tab" data-tab="js">JavaScript</button>
+      <button class="fm-tab" data-tab="cpp">C++</button>
+    </div>
+    <div class="fm-panel" data-panel="py">
+      <span class="code-label">Python</span>
+      <pre class="code-block"><code>class InsufficientFundsError(Exception):
+    pass
+
+def withdraw(balance, amount):
+    if amount > balance:
+        raise InsufficientFundsError("Not enough funds.")
+    return balance - amount</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="java" hidden>
+      <span class="code-label">Java</span>
+      <pre class="code-block"><code>class InsufficientFundsException extends Exception {
+    InsufficientFundsException(String message) {
+        super(message);
+    }
+}
+
+double withdraw(double balance, double amount) throws InsufficientFundsException {
+    if (amount > balance) {
+        throw new InsufficientFundsException("Not enough funds.");
+    }
+    return balance - amount;
+}</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="js" hidden>
+      <span class="code-label">JavaScript</span>
+      <pre class="code-block"><code>class InsufficientFundsError extends Error {
+    constructor(message) {
+        super(message);
+        this.name = "InsufficientFundsError";
+    }
+}
+
+function withdraw(balance, amount) {
+    if (amount > balance) {
+        throw new InsufficientFundsError("Not enough funds.");
+    }
+    return balance - amount;
+}</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="cpp" hidden>
+      <span class="code-label">C++</span>
+      <pre class="code-block"><code>class InsufficientFundsError : public std::runtime_error {
+public:
+    InsufficientFundsError(const std::string&amp; msg) : std::runtime_error(msg) {}
+};
+
+double withdraw(double balance, double amount) {
+    if (amount > balance) {
+        throw InsufficientFundsError("Not enough funds.");
+    }
+    return balance - amount;
+}</code></pre>
+    </div>
+  </div>
+
+  <p>Every version is a subclass of the language's base exception type — <code class="inline-code">Exception</code> in Python and Java, <code class="inline-code">Error</code> in JavaScript, <code class="inline-code">std::runtime_error</code> in C++ — carrying a message string through to whatever eventually catches it. Java has one extra wrinkle worth noting: <code class="inline-code">withdraw</code>'s signature must declare <code class="inline-code">throws InsufficientFundsException</code>. This is a <strong>checked exception</strong> — Java's compiler forces every caller to either catch it or declare it themselves, all the way up the call stack. Python, JavaScript, and C++ have no equivalent compile-time enforcement; nothing stops a caller from forgetting to handle any of their exceptions until the failure actually happens at runtime.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    A <strong>custom exception</strong> is a named exception type specific to a program's own domain, defined by inheriting from a built-in exception class. A <strong>checked exception</strong> (Java-specific) is one the compiler forces every caller to either catch or explicitly declare.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why it matters here</span>
+    A generic exception tells you something failed. A specific one tells you what — and lets calling code catch exactly that failure while letting unrelated bugs propagate instead of being silently swallowed by a catch-all. Catching <code class="inline-code">InsufficientFundsError</code> specifically means a genuine typo elsewhere in the program still surfaces as a crash, instead of being mistaken for a funds problem.
+  </div>
+
+  <h2>Check your recall</h2>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. How is a custom exception type defined in all four languages?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">By inheriting from the language's built-in exception or error class.</button>
+      <button class="quiz-choice" data-correct="false">By writing an entirely new keyword into the language itself.</button>
+      <button class="quiz-choice" data-correct="false">Custom exceptions cannot be defined in any of these four languages.</button>
+      <button class="quiz-choice" data-correct="false">By copying the text of a built-in exception's error message.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>InsufficientFundsError/Exception is a subclass in every one of the four examples — the same inheritance mechanism from Lesson 1.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. What does Java's throws InsufficientFundsException on the method signature require of callers?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Every caller must catch it or declare it themselves — enforced by the compiler.</button>
+      <button class="quiz-choice" data-correct="false">Nothing — it's a comment with no effect on compilation.</button>
+      <button class="quiz-choice" data-correct="false">It automatically catches the exception so no caller ever needs to.</button>
+      <button class="quiz-choice" data-correct="false">It prevents the exception from ever actually being thrown.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>This is Java's checked exception system — unique among these four languages.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why catch a specific exception type like InsufficientFundsError instead of catching everything?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">So unrelated bugs still surface as crashes instead of being mistaken for the specific failure being handled.</button>
+      <button class="quiz-choice" data-correct="false">Catching everything runs faster in every language.</button>
+      <button class="quiz-choice" data-correct="false">Specific exception types cannot carry a message string.</button>
+      <button class="quiz-choice" data-correct="false">There is no difference — both approaches behave identically.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A catch-all can accidentally swallow a genuine bug that has nothing to do with the failure it was meant to handle.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="custom">
+    <p class="quiz-prompt">4. Fill in the blank: a named exception type specific to a program's own domain is called a ___ exception.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>See the definition box above.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="checked">
+    <p class="quiz-prompt">5. Fill in the blank: in Java specifically, an exception the compiler forces callers to catch or declare is a ___ exception.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>This concept doesn't exist in the same form in Python, JavaScript, or C++.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p><a href="https://docs.oracle.com/javase/tutorial/essential/exceptions/create.html">Oracle's Java Tutorials: "Creating Exception Classes"</a> covers custom exceptions and Java's checked-exception rules directly.</p>
+
+  <p class="ask-teacher">Curious why some Java developers argue checked exceptions were a mistake? Ask your teacher — it's a genuinely debated design choice. Next: two philosophies for when to check versus when to just try.</p>
+
+  <footer class="lesson-footer">STEM+ · Computer Programming 2 · Lesson 5</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  STEMPlus.mountTabs(document.getElementById('custom-tabs'), 'data-tab', 'data-panel');
+});
+</script>

@@ -1,0 +1,101 @@
+<title>Lesson 14: Backpropagation Intuition — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · AI Developer · Lesson 14</span>
+  <h1>Backpropagation Intuition</h1>
+  <p class="subtitle">Lesson 13's loop needs a gradient for every weight in every layer. Computing each one independently from scratch would be far too slow — backpropagation is the shortcut.</p>
+  <p class="nav-links"><a href="../Unit%205/0015-convolutional-neural-networks.html">Lesson 15 →</a> <a href="../index.html">Contents</a> <a href="../reference/glossary.html">Glossary →</a></p>
+
+  <p>A real network can have thousands of weights spread across many layers. <strong>Backpropagation</strong> computes the gradient for every one of them efficiently, by walking backward through the network — output layer first, then each earlier layer in turn — reusing work instead of repeating it.</p>
+
+  <span class="code-label">Python — conceptual shape, not a full derivation</span>
+  <pre class="code-block"><code># Forward pass (Lesson 12): compute predictions, left to right
+hidden = sigmoid(x @ W1 + b1)
+output = sigmoid(hidden @ W2 + b2)
+loss_value = loss(output, true_label)
+
+# Backward pass: walk in the opposite direction, right to left
+output_gradient = loss_gradient(output, true_label)     # how loss reacts to the output
+W2_gradient = hidden.T @ output_gradient                 # how loss reacts to W2
+
+hidden_gradient = output_gradient @ W2.T                 # reuses output_gradient directly
+W1_gradient = x.T @ (hidden_gradient * sigmoid_derivative(hidden))</code></pre>
+
+  <p>Notice that <code class="inline-code">hidden_gradient</code> is built directly out of <code class="inline-code">output_gradient</code>, which was already computed one step earlier — nothing about the output layer gets recalculated. This chaining is the <strong>chain rule</strong> from calculus in action: the effect of an early weight on the final loss passes through every layer in between, and each layer's already-computed gradient becomes an ingredient in the previous layer's, rather than something to derive over again. That reuse is precisely why backpropagation scales to networks with millions of weights, where computing each gradient in isolation would be hopelessly slow.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    <strong>Backpropagation</strong> is the algorithm that computes the loss gradient for every weight in a network by walking backward from the output layer, reusing each layer's result in the one before it. The <strong>chain rule</strong> is the calculus principle that makes this reuse valid.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why it matters here</span>
+    This closes Unit 4. The full training loop is now complete end to end: forward pass (Lesson 12) produces a prediction, loss (Lesson 13) measures how wrong it was, backpropagation computes every gradient, and gradient descent (Lesson 13) uses them to update every weight. Unit 5's CNNs, RNNs, and Transformers change only the architecture that the forward pass runs through — this exact training loop underneath stays unchanged.
+  </div>
+
+  <h2>Check your recall</h2>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What problem does backpropagation solve?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Efficiently computing the loss gradient for every weight across every layer of a network.</button>
+      <button class="quiz-choice" data-correct="false">Cleaning missing values and outliers out of a training dataset.</button>
+      <button class="quiz-choice" data-correct="false">Splitting a dataset into training, validation, and test sets.</button>
+      <button class="quiz-choice" data-correct="false">Choosing how many hidden layers a network should have.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Every weight, in every layer, needs a gradient — backpropagation is how all of them get computed efficiently.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. What direction does backpropagation move through the network's layers?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Backward — from the output layer toward the earlier layers.</button>
+      <button class="quiz-choice" data-correct="false">Forward — the exact same direction as the forward pass.</button>
+      <button class="quiz-choice" data-correct="false">Randomly, in no fixed order between layers.</button>
+      <button class="quiz-choice" data-correct="false">It only ever touches the output layer, never any earlier one.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>output_gradient is computed first, and hidden_gradient is derived from it afterward — output to input, in that order.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why is backpropagation efficient compared to computing each weight's gradient from scratch independently?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">It reuses each layer's already-computed gradient as an ingredient for the layer before it, via the chain rule.</button>
+      <button class="quiz-choice" data-correct="false">It skips computing gradients for most of the network's weights entirely.</button>
+      <button class="quiz-choice" data-correct="false">It only works correctly on networks with a single layer.</button>
+      <button class="quiz-choice" data-correct="false">It avoids using the loss value at all during training.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>hidden_gradient is built directly from output_gradient rather than recomputed from scratch — that reuse is the efficiency gain.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="backpropagation">
+    <p class="quiz-prompt">4. Fill in the blank: the algorithm that computes gradients for every weight by walking backward through a network is ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>See the definition box above.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="chain">
+    <p class="quiz-prompt">5. Fill in the blank: the calculus principle that lets each layer's gradient reuse the next layer's result is the ___ rule.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>See the definition box above.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p><a href="https://www.nature.com/articles/323533a0">Rumelhart, Hinton, and Williams' original 1986 Nature paper, "Learning representations by back-propagating errors"</a> is the primary source that introduced this exact algorithm.</p>
+
+  <p class="ask-teacher">Wondering why deep networks used to be notoriously hard to train, before certain fixes became standard? Ask your teacher — vanishing gradients are a real, historically important problem worth knowing about. That closes Unit 4. Next: the specific architectures — CNNs, RNNs, Transformers — that this training loop actually gets applied to.</p>
+
+  <footer class="lesson-footer">STEM+ · AI Developer · Lesson 14</footer>
+</div>

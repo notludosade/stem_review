@@ -1,0 +1,126 @@
+<title>Lesson 15: String Interpolation and Formatting — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<script src="../../assets/interactive.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Computer Programming 1 · Lesson 15</span>
+  <h1>String Interpolation and Formatting</h1>
+  <p class="subtitle">Building a string out of variables gets unreadable fast with concatenation alone — every language offers something better.</p>
+  <p class="nav-links"><a href="../Unit%206/0016-arrays-lists-fixed-vs-dynamic.html">Lesson 16 →</a> <a href="../index.html">Contents</a> <a href="../reference/glossary.html">Glossary →</a></p>
+
+  <span class="code-label is-bad">Concatenation gets hard to read fast</span>
+  <pre class="code-block code-bad"><code># Python
+message = "Hello, " + name + "! You are " + str(age) + " years old."</code></pre>
+
+  <p>Every <code class="inline-code">+</code> is a place to miscount a space or forget a conversion — notice <code class="inline-code">str(age)</code> is required here, since Python's <code class="inline-code">+</code> can't mix a string with a number directly. <strong>String interpolation</strong> and <strong>string formatting</strong> both solve this by letting you write the target string as a single template, with placeholders for the variable parts.</p>
+
+  <div id="interp-tabs">
+    <div class="fm-tabs">
+      <button class="fm-tab is-active" data-tab="py">Python</button>
+      <button class="fm-tab" data-tab="java">Java</button>
+      <button class="fm-tab" data-tab="js">JavaScript</button>
+      <button class="fm-tab" data-tab="cpp">C++</button>
+    </div>
+    <div class="fm-panel" data-panel="py">
+      <span class="code-label code-good">Python — f-string</span>
+      <pre class="code-block code-good"><code>message = f"Hello, {name}! You are {age} years old."</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="java" hidden>
+      <span class="code-label code-good">Java — String.format</span>
+      <pre class="code-block code-good"><code>String message = String.format("Hello, %s! You are %d years old.", name, age);</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="js" hidden>
+      <span class="code-label code-good">JavaScript — template literal</span>
+      <pre class="code-block code-good"><code>let message = `Hello, ${name}! You are ${age} years old.`;</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="cpp" hidden>
+      <span class="code-label code-good">C++20 — std::format</span>
+      <pre class="code-block code-good"><code>std::string message = std::format("Hello, {}! You are {} years old.", name, age);</code></pre>
+    </div>
+  </div>
+
+  <p>Python's <strong>f-string</strong> (an <code class="inline-code">f</code> right before the opening quote) and JavaScript's <strong>template literal</strong> (backticks instead of regular quotes, with <code class="inline-code">${...}</code> placeholders) both let you embed the actual variable name directly inside the string — true interpolation. Java's <code class="inline-code">String.format</code> and C++20's <code class="inline-code">std::format</code> instead take a separate template string with generic placeholders (<code class="inline-code">%s</code>/<code class="inline-code">%d</code> in Java, <code class="inline-code">{}</code> in C++) and a list of values matched up in order — this style is usually just called <strong>formatting</strong> rather than interpolation, since the variable names themselves never appear inside the template.</p>
+
+  <p>Notice also that neither <code class="inline-code">String.format</code> nor <code class="inline-code">std::format</code> needed an explicit type conversion for <code class="inline-code">age</code> the way raw concatenation did — both handle converting the number to text automatically as part of formatting it into the template.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    <strong>String interpolation</strong> embeds variable references directly inside a string template (Python's f-strings, JavaScript's template literals). <strong>String formatting</strong> uses a separate template with generic placeholders, filled in by a list of values in order (Java's <code class="inline-code">String.format</code>, C++'s <code class="inline-code">std::format</code>). Both avoid the readability and type-mixing problems of chained concatenation.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why it matters here</span>
+    Building readable, correct output strings is something almost every program needs to do — error messages, logs, user-facing text. This is also a direct callback to the Ethics course: Unit 4's lesson on error messages relied on exactly this kind of templating to avoid leaking unintended detail into what gets shown to a user versus what gets logged.
+  </div>
+
+  <h2>Check your recall</h2>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What makes Python's f-strings and JavaScript's template literals true "interpolation," as opposed to Java/C++'s formatting?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">The variable names are embedded directly inside the string template itself.</button>
+      <button class="quiz-choice" data-correct="false">They run faster than String.format or std::format.</button>
+      <button class="quiz-choice" data-correct="false">They only work with numbers, not text.</button>
+      <button class="quiz-choice" data-correct="false">They require importing an external library.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Java and C++'s formatting keeps the template and values separate, matched up by position instead.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. In the bad concatenation example, why was <code class="inline-code">str(age)</code> necessary?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Python's + operator can't mix a string with a number directly.</button>
+      <button class="quiz-choice" data-correct="false">age was declared with the wrong type keyword.</button>
+      <button class="quiz-choice" data-correct="false">str() makes the program run faster.</button>
+      <button class="quiz-choice" data-correct="false">It was unnecessary — this was a mistake in the example.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Interpolation and formatting both handle this conversion automatically, which is part of why they're preferred.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. What are JavaScript template literals delimited with, instead of regular quotes?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Backticks.</button>
+      <button class="quiz-choice" data-correct="false">Triple quotes.</button>
+      <button class="quiz-choice" data-correct="false">Square brackets.</button>
+      <button class="quiz-choice" data-correct="false">Angle brackets.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The backtick-delimited string can then contain ${...} placeholders for interpolated expressions.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="interpolation">
+    <p class="quiz-prompt">4. Fill in the blank: embedding a variable reference directly inside a string template, as Python's f-strings do, is called string ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>See the definition box above — this is distinct from formatting, which uses a separate value list.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="formatting">
+    <p class="quiz-prompt">5. Fill in the blank: using a template with generic placeholders filled in by a separately supplied list of values, as Java's String.format does, is called string ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>C++20's std::format works the same way, using {} placeholders instead of Java's %s/%d.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p><a href="https://docs.python.org/3/reference/lexical_analysis.html#f-strings">The Python language reference's section on f-strings</a> documents Python's interpolation syntax directly from the language spec.</p>
+
+  <p class="ask-teacher">Curious about controlling decimal places or padding numbers within these templates? Ask your teacher — that's what I'm here for. Unit 5 is complete; Unit 6 turns to arrays, lists, and collections — grouping many values together instead of handling them one at a time.</p>
+
+  <footer class="lesson-footer">STEM+ · Computer Programming 1 · Lesson 15</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  STEMPlus.mountTabs(document.getElementById('interp-tabs'), 'data-tab', 'data-panel');
+});
+</script>

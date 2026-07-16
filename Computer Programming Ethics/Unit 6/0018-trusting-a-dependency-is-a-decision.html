@@ -1,0 +1,102 @@
+<title>Lesson 18: Trusting a Dependency Is a Decision — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Computer Programming Ethics · Lesson 18</span>
+  <h1>Trusting a Dependency Is a Decision</h1>
+  <p class="subtitle">Every <code class="inline-code">import</code> statement is a decision to run someone else's code with your program's own permissions.</p>
+  <p class="nav-links"><a href="../Unit%207/0019-code-review-is-an-ethical-practice.html">Lesson 19 →</a> <a href="../index.html">Contents</a> <a href="../reference/glossary.html">Glossary →</a></p>
+
+  <p><code class="inline-code">pip install</code>, <code class="inline-code">npm install</code>, <code class="inline-code">cargo add</code> — these commands feel instantaneous and low-stakes, more like a search than a decision. But installing a package doesn't just add code to read later; for most languages, it runs that package's code immediately, during install scripts and at every subsequent import, with exactly the same permissions your own program has. A malicious or compromised dependency doesn't need to trick you into running anything — you already ran it, on purpose, the moment you added it.</p>
+
+  <span class="code-label is-bad">Adding a dependency without checking anything</span>
+  <pre class="code-block code-bad"><code># needed a quick date-formatting helper, found one with a
+# nice-sounding name, added it straight to requirements.txt
+pretty-dates==0.0.3</code></pre>
+
+  <span class="code-label is-good">Evaluating a dependency before adding it</span>
+  <pre class="code-block code-good"><code># Checked before adding: maintained (last release 2 months ago),
+# 40k+ weekly downloads, no open security advisories, source
+# readable and small enough to skim end-to-end. Pinned exact version.
+pretty-dates==2.4.1</code></pre>
+
+  <p>This isn't paranoia for its own sake — it's a response to a well-documented attack pattern called <strong>supply chain compromise</strong>: an attacker publishes a malicious package with a name close to a popular one (typosquatting), or gains access to a legitimate, trusted package's publishing credentials and slips malicious code into a routine-looking update. Because the package is already trusted and already imported everywhere, the malicious code runs inside thousands of unrelated projects without any of those developers writing a single insecure line themselves.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    <strong>Supply chain compromise</strong> is an attack that targets a piece of software indirectly, by compromising one of its trusted dependencies, build tools, or distribution channels, rather than attacking the software directly.
+  </div>
+
+  <h2>Reasonable diligence, not paranoia</h2>
+  <p>Nobody reads every line of every dependency's dependencies — that's not realistic, and it's not what this lesson is asking for. What's realistic: checking that a package is actively maintained, has a plausible number of other users, doesn't have open security advisories, and pinning a specific version rather than always pulling "latest" so an update can't silently change what's running without your knowledge. Tools like <code class="inline-code">npm audit</code>, <code class="inline-code">pip-audit</code>, and GitHub's Dependabot automate most of this check.</p>
+
+  <div class="box why">
+    <span class="box-label">Why it matters here</span>
+    This closes the loop on the whole unit: Lesson 16 was about respecting the license terms attached to someone else's code, Lesson 17 was about being honest about where code in your project came from, and this lesson is about the risk you accept, on behalf of everyone who eventually uses your software, every time you decide to trust code you didn't write and mostly won't read.
+  </div>
+
+  <h2>Check your recall</h2>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. Why is installing a package different from just "adding code to read later"?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">The package's code runs immediately, with the same permissions as your program.</button>
+      <button class="quiz-choice" data-correct="false">Installed packages are automatically sandboxed and cannot access anything.</button>
+      <button class="quiz-choice" data-correct="false">Packages are only read, never executed, until you call a function from them.</button>
+      <button class="quiz-choice" data-correct="false">Package managers require manual approval before any code executes.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Install scripts and imports both execute code — trusting a dependency means running its code, not just referencing it.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. What is "typosquatting" in the context of package registries?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Publishing a malicious package with a name close to a popular one.</button>
+      <button class="quiz-choice" data-correct="false">A tool that automatically fixes typos in your source code.</button>
+      <button class="quiz-choice" data-correct="false">A test that checks whether your code compiles without errors.</button>
+      <button class="quiz-choice" data-correct="false">A license violation specific to open source documentation.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>It relies on a developer mistyping a package name and getting the malicious lookalike instead of the real one.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why does a supply chain attack on a trusted, widely-used package do more damage than attacking one project directly?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">The malicious code runs inside every project that already trusts and imports it.</button>
+      <button class="quiz-choice" data-correct="false">Trusted packages are always larger in file size than untrusted ones.</button>
+      <button class="quiz-choice" data-correct="false">It requires no attacker skill compared to a direct attack.</button>
+      <button class="quiz-choice" data-correct="false">Package registries have no security scanning of any kind.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>One compromised update can propagate to thousands of downstream projects without any of them writing insecure code themselves.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="supply chain compromise|supply chain attack">
+    <p class="quiz-prompt">4. Fill in the blank: an attack that targets software indirectly, through a trusted dependency or distribution channel rather than the software itself, is called a ___ ___ ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>See the definition box above.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="pin|pinning|version pinning">
+    <p class="quiz-prompt">5. Fill in the blank: locking a dependency to a specific, tested version instead of always pulling "latest" is called version ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>This prevents an update from silently changing what code is running without your knowledge — see the good code example's comment.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p><a href="https://docs.github.com/en/code-security/supply-chain-security/understanding-your-software-supply-chain/about-supply-chain-security">GitHub's documentation on software supply chain security</a> covers dependency risk, Dependabot alerts, and how these attacks typically unfold in real package ecosystems.</p>
+
+  <p class="ask-teacher">Want to run a real audit tool against a project's dependencies and see what it flags? Ask your teacher — that's what I'm here for. Unit 6 is complete; Unit 7 closes the course by treating code itself as a professional artifact — review, documentation, and a final ethics checklist you can carry forward.</p>
+
+  <footer class="lesson-footer">STEM+ · Computer Programming Ethics · Lesson 18</footer>
+</div>

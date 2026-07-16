@@ -1,0 +1,142 @@
+<title>Lesson 16: Stack and Heap Memory — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<script src="../../assets/interactive.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Computer Programming 2 · Lesson 16</span>
+  <h1>Stack and Heap Memory</h1>
+  <p class="subtitle">Two regions of memory, two very different lifetimes — and this unit is where C++ stops just differing in syntax and starts differing in kind.</p>
+  <p class="nav-links"><a href="0017-garbage-collection-and-manual-memory.html">Lesson 17 →</a> <a href="../index.html">Contents</a> <a href="../reference/glossary.html">Glossary →</a></p>
+
+  <p>Unit 4 already introduced the <strong>call stack</strong> — the LIFO structure holding each function call's local variables, popped automatically when the call returns. That's the <strong>stack</strong>. The <strong>heap</strong> is a separate region for data that needs to outlive the function call that created it: objects, arrays, anything whose size or lifetime isn't known until the program is running. A stack variable disappears the instant its frame pops; heap data sticks around until something explicitly frees it or a garbage collector notices nothing references it anymore.</p>
+
+  <div id="stackheap-tabs">
+    <div class="fm-tabs">
+      <button class="fm-tab is-active" data-tab="py">Python</button>
+      <button class="fm-tab" data-tab="java">Java</button>
+      <button class="fm-tab" data-tab="js">JavaScript</button>
+      <button class="fm-tab" data-tab="cpp">C++</button>
+    </div>
+    <div class="fm-panel" data-panel="py">
+      <span class="code-label">Python</span>
+      <pre class="code-block"><code>def make_list():
+    numbers = [1, 2, 3]   # the list object lives on the heap;
+    return numbers        # 'numbers' itself is a stack reference to it
+
+result = make_list()      # the heap object outlives the call that made it</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="java" hidden>
+      <span class="code-label">Java</span>
+      <pre class="code-block"><code>static int[] makeArray() {
+    int[] numbers = {1, 2, 3};  // the array object lives on the heap;
+    return numbers;             // 'numbers' is a stack reference to it
+}
+
+int[] result = makeArray();     // the heap object outlives the call</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="js" hidden>
+      <span class="code-label">JavaScript</span>
+      <pre class="code-block"><code>function makeArray() {
+    const numbers = [1, 2, 3];  // the array object lives on the heap;
+    return numbers;             // 'numbers' is a stack reference to it
+}
+
+const result = makeArray();     // the heap object outlives the call</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="cpp" hidden>
+      <span class="code-label">C++</span>
+      <pre class="code-block"><code>int localValue() {
+    int x = 5;              // x lives on the stack — gone when the function returns
+    return x;                // the VALUE is copied out before that happens
+}
+
+int* heapValue() {
+    int* p = new int(5);    // *p lives on the heap — explicitly requested
+    return p;                // the POINTER is copied out; *p still exists after return
+}</code></pre>
+    </div>
+  </div>
+
+  <p>In Python, Java, and JavaScript, this distinction happens automatically and mostly invisibly — <em>every</em> object you create lives on the heap, and a variable is always just a reference to it sitting on the stack; there's no syntax for choosing otherwise. C++ is the outlier: it gives you a direct choice. <code class="inline-code">int x = 5;</code> is a genuine stack variable, allocated and destroyed automatically with its scope. <code class="inline-code">new int(5)</code> explicitly requests heap memory that outlives the current scope — and, unlike the other three languages, C++ will not clean it up for you. That single difference is what the next three lessons are about.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    The <strong>stack</strong> holds function-local data, sized and freed automatically with each call frame. The <strong>heap</strong> holds data whose lifetime outlives the call that created it, sized and freed independently of any one function's frame.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why it matters here</span>
+    Every bug this unit covers — memory leaks, dangling pointers, use-after-free — happens on the heap, never the stack. The stack cleans up after itself by construction; the heap only cleans up if something makes sure it does. Knowing which region a piece of data lives in is the first step to knowing whether that "something" is even necessary.
+  </div>
+
+  <h2>Check your recall</h2>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What happens to stack-allocated data when its function returns?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">It's automatically freed as the call frame pops, with no manual action needed.</button>
+      <button class="quiz-choice" data-correct="false">It moves permanently onto the heap.</button>
+      <button class="quiz-choice" data-correct="false">It must be manually deleted before the function can return.</button>
+      <button class="quiz-choice" data-correct="false">It stays valid forever, identical to heap data.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>This automatic cleanup is exactly what the call stack from Unit 4 already does with each frame.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. How does C++ differ from Python, Java, and JavaScript regarding the stack/heap choice?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">C++ lets code explicitly choose stack (plain variables) or heap (new); the other three always heap-allocate objects automatically.</button>
+      <button class="quiz-choice" data-correct="false">C++ has no heap at all — everything lives on the stack.</button>
+      <button class="quiz-choice" data-correct="false">Python, Java, and JavaScript have no stack at all — everything lives on the heap.</button>
+      <button class="quiz-choice" data-correct="false">There is no meaningful difference between any of the four languages here.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>This explicit choice, and the responsibility that comes with it, is unique to C++ among these four.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why does heap data need something to explicitly manage its lifetime, unlike stack data?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Its lifetime isn't tied to any one function call, so nothing automatically knows when it's safe to free.</button>
+      <button class="quiz-choice" data-correct="false">Heap data is always smaller than stack data, so it needs less oversight.</button>
+      <button class="quiz-choice" data-correct="false">Heap data is actually freed at the exact same moment stack data is.</button>
+      <button class="quiz-choice" data-correct="false">Nothing ever needs to manage heap memory in any language.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>This is exactly the gap that garbage collectors and manual memory management, next lesson, exist to fill.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="heap">
+    <p class="quiz-prompt">4. Fill in the blank: data whose lifetime outlives the function call that created it lives on the ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>See the definition box above.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="stack">
+    <p class="quiz-prompt">5. Fill in the blank: function-local data, freed automatically when its call frame pops, lives on the ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>This is the same stack structure introduced in Unit 4's lesson on the call stack.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Memory_management">MDN's guide to JavaScript memory management</a> explains stack and heap allocation directly, including how automatic memory management works under the hood.</p>
+
+  <p class="ask-teacher">Wondering how the computer decides how big to make the stack, or what happens if it runs out of room? Ask your teacher — that connects directly back to Unit 4's stack overflow. Next: what actually frees heap memory in each of these languages.</p>
+
+  <footer class="lesson-footer">STEM+ · Computer Programming 2 · Lesson 16</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  STEMPlus.mountTabs(document.getElementById('stackheap-tabs'), 'data-tab', 'data-panel');
+});
+</script>

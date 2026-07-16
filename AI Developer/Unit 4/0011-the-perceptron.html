@@ -1,0 +1,102 @@
+<title>Lesson 11: The Perceptron — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · AI Developer · Lesson 11</span>
+  <h1>The Perceptron</h1>
+  <p class="subtitle">Every neural network in this course, no matter how large, is built entirely out of copies of one small idea.</p>
+  <p class="nav-links"><a href="0012-multi-layer-perceptrons-and-the-forward-pass.html">Lesson 12 →</a> <a href="../index.html">Contents</a> <a href="../reference/glossary.html">Glossary →</a></p>
+
+  <p>A <strong>perceptron</strong> is a single artificial neuron. It takes some inputs, multiplies each by its own <strong>weight</strong>, adds a <strong>bias</strong>, and passes the result through an <strong>activation function</strong> to produce one output. That's the entire structure — nothing hidden.</p>
+
+  <span class="code-label">Python — NumPy</span>
+  <pre class="code-block"><code>import numpy as np
+
+def perceptron_forward(inputs, weights, bias):
+    weighted_sum = np.dot(inputs, weights) + bias
+    return 1 if weighted_sum > 0 else 0   # step activation: fire, or don't
+
+inputs = np.array([1.0, 0.5])
+weights = np.array([0.8, -0.3])
+bias = 0.1
+
+output = perceptron_forward(inputs, weights, bias)
+print(output)   # 1 — weighted_sum here is 0.75, above 0</code></pre>
+
+  <p><code class="inline-code">np.dot(inputs, weights)</code> is the weighted sum — exactly the same computation Lesson 7's linear regression and Lesson 8's logistic regression both used, just given a new name and a new picture: an input layer feeding into a single unit. The <strong>bias</strong> is a number added independent of any input, letting the neuron shift its decision boundary rather than being forced to fire only when the weighted sum is exactly balanced around zero. The <strong>activation function</strong> is what turns that raw sum into the actual output — here, a simple step: fire (1) if positive, stay silent (0) otherwise. Swap that step for a sigmoid, and this perceptron computes exactly what Lesson 8's logistic regression computes.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    A <strong>perceptron</strong> is a single artificial neuron that computes a weighted sum of inputs plus a bias, then applies an activation function. A <strong>weight</strong> scales one input's contribution. A <strong>bias</strong> is an input-independent offset. An <strong>activation function</strong> converts the weighted sum into the neuron's output.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why it matters here</span>
+    A perceptron with a sigmoid activation is logistic regression, restated in neural-network vocabulary — nothing new is being learned here mathematically, only the building block that Lesson 12 wires together, by the hundreds or thousands, into an actual neural network.
+  </div>
+
+  <h2>Check your recall</h2>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What does a perceptron compute before applying its activation function?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">A weighted sum of its inputs, plus a bias.</button>
+      <button class="quiz-choice" data-correct="false">The average of all previous outputs it has ever produced.</button>
+      <button class="quiz-choice" data-correct="false">A random number unrelated to its inputs.</button>
+      <button class="quiz-choice" data-correct="false">The total count of training examples seen so far.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>np.dot(inputs, weights) + bias in the code above is exactly this computation.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. What is the bias term for?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">An input-independent offset that lets the neuron shift its decision boundary.</button>
+      <button class="quiz-choice" data-correct="false">A second copy of one of the input values.</button>
+      <button class="quiz-choice" data-correct="false">The neuron's final output before activation is applied.</button>
+      <button class="quiz-choice" data-correct="false">A count of how many inputs the perceptron has.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Bias is added regardless of what the inputs are, unlike a weight which scales a specific input.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. How does a perceptron with a sigmoid activation relate to Lesson 8's logistic regression?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">They compute the exact same thing — a weighted sum passed through a sigmoid.</button>
+      <button class="quiz-choice" data-correct="false">They have no mathematical relationship at all.</button>
+      <button class="quiz-choice" data-correct="false">A perceptron can only ever use a step function, never a sigmoid.</button>
+      <button class="quiz-choice" data-correct="false">Logistic regression requires far more training data than a perceptron.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Swapping the step activation for a sigmoid turns this perceptron into logistic regression exactly.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="weight">
+    <p class="quiz-prompt">4. Fill in the blank: the number that scales one input's contribution to the weighted sum is a ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>See the definition box above.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="bias">
+    <p class="quiz-prompt">5. Fill in the blank: the input-independent offset added to a perceptron's weighted sum is its ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>See the definition box above.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p><a href="https://www.3blue1brown.com/topics/neural-networks">3Blue1Brown's Neural Networks video series</a> builds this exact intuition visually, from a single neuron up to a full network.</p>
+
+  <p class="ask-teacher">Wondering why a step activation is rarely used in practice, compared to a sigmoid or other smoother functions? Ask your teacher — it comes down to how these networks actually learn, covered starting in Lesson 13. Next: wiring many of these neurons together into actual layers.</p>
+
+  <footer class="lesson-footer">STEM+ · AI Developer · Lesson 11</footer>
+</div>

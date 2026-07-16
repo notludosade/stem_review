@@ -1,0 +1,134 @@
+<title>Lesson 9: Hash Maps and Dictionaries — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<script src="../../assets/interactive.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Computer Programming 2 · Lesson 9</span>
+  <h1>Hash Maps and Dictionaries</h1>
+  <p class="subtitle">A linked list finds something by walking the whole chain. This structure finds it in roughly one step, no matter how much data it holds.</p>
+  <p class="nav-links"><a href="../Unit%204/0010-base-case-and-recursive-case.html">Lesson 10 →</a> <a href="../index.html">Contents</a> <a href="../reference/glossary.html">Glossary →</a></p>
+
+  <p>A <strong>hash map</strong> stores <strong>key</strong>-<strong>value</strong> pairs. Instead of searching for a key, it converts the key into a number — a <strong>hash</strong> — and uses that number to jump almost directly to the right storage slot. That's why lookup, insertion, and deletion all run in roughly constant time on average, regardless of how many entries exist.</p>
+
+  <div id="hashmap-tabs">
+    <div class="fm-tabs">
+      <button class="fm-tab is-active" data-tab="py">Python</button>
+      <button class="fm-tab" data-tab="java">Java</button>
+      <button class="fm-tab" data-tab="js">JavaScript</button>
+      <button class="fm-tab" data-tab="cpp">C++</button>
+    </div>
+    <div class="fm-panel" data-panel="py">
+      <span class="code-label">Python</span>
+      <pre class="code-block"><code>ages = {"Alice": 30, "Bob": 25}
+ages["Carol"] = 40
+print(ages["Alice"])  # 30</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="java" hidden>
+      <span class="code-label">Java</span>
+      <pre class="code-block"><code>Map&lt;String, Integer&gt; ages = new HashMap&lt;&gt;();
+ages.put("Alice", 30);
+ages.put("Bob", 25);
+ages.put("Carol", 40);
+System.out.println(ages.get("Alice")); // 30</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="js" hidden>
+      <span class="code-label">JavaScript</span>
+      <pre class="code-block"><code>let ages = new Map();
+ages.set("Alice", 30);
+ages.set("Bob", 25);
+ages.set("Carol", 40);
+console.log(ages.get("Alice")); // 30</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="cpp" hidden>
+      <span class="code-label">C++</span>
+      <pre class="code-block"><code>std::unordered_map&lt;std::string, int&gt; ages;
+ages["Alice"] = 30;
+ages["Bob"] = 25;
+ages["Carol"] = 40;
+std::cout &lt;&lt; ages["Alice"] &lt;&lt; std::endl; // 30</code></pre>
+    </div>
+  </div>
+
+  <p>Python's <code class="inline-code">dict</code>, Java's <code class="inline-code">HashMap</code>, JavaScript's <code class="inline-code">Map</code>, and C++'s <code class="inline-code">unordered_map</code> are all hash maps under different names. C++'s name is the most literal: it also has a <code class="inline-code">std::map</code>, which keeps keys in sorted order using a tree instead of a hash table, trading that average constant-time lookup for guaranteed-ordered iteration at O(log n) per operation — the "unordered" in <code class="inline-code">unordered_map</code> is what signals "this one's the hash map." JavaScript deserves one more note: plain <code class="inline-code">{}</code> objects can also hold key-value pairs and are extremely common for this, but they carry inherited properties from <code class="inline-code">Object.prototype</code> that can collide with certain keys — <code class="inline-code">Map</code> avoids that entirely and is the more deliberate choice when a lookup structure is really what you mean.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    A <strong>hash map</strong> (hash table) stores key-value pairs, using a <strong>hash</strong> of each <strong>key</strong> to jump directly to its storage slot — giving average constant-time lookup, insertion, and deletion.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why it matters here</span>
+    This unit covered three structures, each optimized for a different access pattern: a stack for last-in-first-out, a queue for first-in-first-out, a linked list for cheap insertion anywhere, and now a hash map for near-instant lookup by key. None of them is the "best" structure — each is the right tool for a specific job, and picking correctly is exactly what Unit 5's look at algorithmic complexity will give you the vocabulary to justify precisely.
+  </div>
+
+  <h2>Check your recall</h2>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. How does a hash map achieve fast lookup by key?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">It converts the key into a hash number and uses that to jump almost directly to the right storage slot.</button>
+      <button class="quiz-choice" data-correct="false">It checks every stored key one at a time until it finds a match.</button>
+      <button class="quiz-choice" data-correct="false">It sorts every key alphabetically before each lookup.</button>
+      <button class="quiz-choice" data-correct="false">It stores a separate copy of the entire map for every key.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>This is what gives hash maps their average constant-time performance, unlike a linear search through a list.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. What does the "unordered" in C++'s unordered_map signal, compared to std::map?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">It's the hash-based version, trading sorted iteration order for average constant-time operations.</button>
+      <button class="quiz-choice" data-correct="false">It stores its entries in a completely random location every time the program runs.</button>
+      <button class="quiz-choice" data-correct="false">It cannot store more than one entry per key.</button>
+      <button class="quiz-choice" data-correct="false">There is no actual difference between the two types.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>std::map is tree-based and keeps keys sorted, at O(log n) per operation instead of average O(1).</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why might JavaScript's Map be a more deliberate choice than a plain {} object for a lookup structure?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Plain objects inherit properties from Object.prototype that can collide with certain keys; Map avoids that entirely.</button>
+      <button class="quiz-choice" data-correct="false">Plain objects cannot store more than three key-value pairs.</button>
+      <button class="quiz-choice" data-correct="false">Map is the only one of the two that supports string keys.</button>
+      <button class="quiz-choice" data-correct="false">There is no meaningful difference between the two in any situation.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Both are common in real JavaScript code, but Map signals "this is a lookup structure" more precisely.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="hash">
+    <p class="quiz-prompt">4. Fill in the blank: the number a hash map computes from a key, used to locate its storage slot, is called a ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>See the definition box above.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="key">
+    <p class="quiz-prompt">5. Fill in the blank: in a hash map, the identifier used to look up a stored value is called the ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>"Alice" is the key; 30 is its associated value.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Map">MDN's JavaScript Map reference</a> documents Map's behavior and explains directly why it's often preferable to a plain object.</p>
+
+  <p class="ask-teacher">Wondering what happens when two different keys hash to the same slot? Ask your teacher — it's called a collision, and every real hash map has a strategy for it. That closes Unit 3: Core Data Structures. Next: functions that call themselves.</p>
+
+  <footer class="lesson-footer">STEM+ · Computer Programming 2 · Lesson 9</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  STEMPlus.mountTabs(document.getElementById('hashmap-tabs'), 'data-tab', 'data-panel');
+});
+</script>

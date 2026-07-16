@@ -1,0 +1,100 @@
+<title>Lesson 28: Bias and Fairness in AI Models — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · AI Developer · Lesson 28</span>
+  <h1>Bias and Fairness in AI Models</h1>
+  <p class="subtitle">Everything built since Unit 2 learns its behavior from data. When that data reflects a real-world pattern of unfair treatment, the model learns that pattern too — and can apply it at a scale no individual person ever could.</p>
+  <p class="nav-links"><a href="0029-hallucination-and-ai-safety.html">Lesson 29 →</a> <a href="../index.html">Contents</a> <a href="../reference/glossary.html">Glossary →</a></p>
+
+  <p>Unit 2 described bias in data — outliers, skew, missing values. This lesson is about a narrower, higher-stakes case: <strong>algorithmic bias</strong>, where a model's predictions systematically disadvantage a group of people, usually because its training data reflects historical human decisions that were themselves unfair. A hiring-screening model trained on ten years of past hiring decisions doesn't just learn "who was hired" — it learns whatever bias, conscious or not, shaped those past decisions, and reproduces it automatically on every future application.</p>
+
+  <span class="code-label">Python — checking recall across groups, not just overall</span>
+  <pre class="code-block"><code>from sklearn.metrics import recall_score
+
+# group_a and group_b are subsets of the same validation set (Unit 2),
+# split by some protected attribute rather than treated as one pool
+recall_a = recall_score(y_true_group_a, y_pred_group_a)
+recall_b = recall_score(y_true_group_b, y_pred_group_b)
+
+print(f"recall, group A: {recall_a:.2f}")
+print(f"recall, group B: {recall_b:.2f}")
+# a large gap here is a fairness problem invisible in one overall score</code></pre>
+
+  <p>Lesson 10's <code class="inline-code">recall_score</code> reappears here unchanged — the only difference is computing it separately per group instead of pooling everyone into one number. A model can post excellent overall accuracy while its recall for one group is dramatically worse than another's, and that gap simply doesn't show up unless someone deliberately looks for it. This is exactly why bias review has to be a deliberate, separate check, not something that overall accuracy happens to catch on its own.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    <strong>Algorithmic bias</strong> is a model's predictions systematically disadvantaging a group of people, typically because training data reflects historical unfair treatment of that group.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why it matters here</span>
+    <a href="../../Computer%20Programming%20Ethics/Unit%205/0013-where-bias-enters-a-program.html">Computer Programming Ethics, Lesson 13, "Where Bias Enters a Program"</a> already covers where bias comes from and how to think about it as a developer — that reasoning applies directly here and isn't repeated. What's specific to this course is the mechanism: a trained model doesn't just risk containing bias the way hand-written code can, it actively learns and can amplify whatever bias already exists in its training data, at the scale of every prediction it ever makes.
+  </div>
+
+  <h2>Check your recall</h2>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What is algorithmic bias?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">A model's predictions systematically disadvantaging a group, typically from training data reflecting past unfair treatment.</button>
+      <button class="quiz-choice" data-correct="false">Any prediction a model gets wrong for a single individual.</button>
+      <button class="quiz-choice" data-correct="false">A bug that causes a model to crash on unexpected input.</button>
+      <button class="quiz-choice" data-correct="false">The random variation controlled by a model's temperature setting.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>It's specifically about a systematic, group-level pattern, not an isolated individual error.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why can a model post excellent overall accuracy while still being unfair to one group?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">A single pooled score can hide a large recall gap between groups unless it's checked separately per group.</button>
+      <button class="quiz-choice" data-correct="false">Overall accuracy and fairness are mathematically guaranteed to always match.</button>
+      <button class="quiz-choice" data-correct="false">recall_score cannot be computed on any subset of a dataset.</button>
+      <button class="quiz-choice" data-correct="false">Fairness problems only ever appear in models with poor overall accuracy.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>recall_a and recall_b can differ substantially even when the pooled accuracy looks strong.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why does a hiring-screening model trained on historical hiring data risk reproducing past bias?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">It learns whatever pattern, including unfair ones, shaped the past decisions in its training data.</button>
+      <button class="quiz-choice" data-correct="false">Training data has no influence at all on a model's learned behavior.</button>
+      <button class="quiz-choice" data-correct="false">Hiring models are always explicitly programmed with biased rules by hand.</button>
+      <button class="quiz-choice" data-correct="false">Historical hiring data is impossible to use for training any model.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A model learns "who was hired" from the data, bias and all, rather than some idealized fair standard.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="bias">
+    <p class="quiz-prompt">4. Fill in the blank: a model's predictions systematically disadvantaging a group is called algorithmic ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>See the definition box above.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="recall">
+    <p class="quiz-prompt">5. Fill in the blank: computing ___ separately per group, rather than pooled, is how the fairness gap in this lesson's example was found.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>See the code example above.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p><a href="https://fairmlbook.org/">"Fairness and Machine Learning" by Barocas, Hardt, and Narayanan</a> is a free, widely cited textbook covering this exact problem in far more mathematical depth.</p>
+
+  <p class="ask-teacher">Wondering what "protected attribute" means precisely, and how it varies by context or law? Ask your teacher — the exact list depends heavily on jurisdiction and application. Next: a different kind of AI risk — one that shows up even without any group of people involved at all.</p>
+
+  <footer class="lesson-footer">STEM+ · AI Developer · Lesson 28</footer>
+</div>

@@ -1,0 +1,112 @@
+<title>Lesson 1: What "Ethical Code" Actually Means — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Computer Programming Ethics · Lesson 1</span>
+  <h1>What "Ethical Code" Actually Means</h1>
+  <p class="subtitle">Every line of code is a decision. This course is about learning to notice which decisions matter.</p>
+  <p class="nav-links"><a href="0002-the-professional-codes.html">Lesson 2 →</a> <a href="../index.html">Contents</a> <a href="../reference/glossary.html">Glossary →</a></p>
+
+  <p>It's tempting to think of "ethics" as something that lives outside code — a policy document, a lawyer's sign-off, a training video you click through once a year. It isn't. Ethics lives inside the function bodies themselves, in choices that look purely technical but aren't. This first lesson is about seeing that clearly, before this course touches a single line of Python, Java, JavaScript, or C++ syntax in depth.</p>
+
+  <h2>Two functions, same name, different world</h2>
+  <p>Both of the functions below are called <code class="inline-code">deleteAccount()</code>. Both compile. Both "work," in the sense that nothing crashes. Read them and ask: if you were the user who clicked "Delete my account," which one actually happened to you?</p>
+
+  <span class="code-label is-bad">What it looks like it does</span>
+  <pre class="code-block code-bad"><code>function deleteAccount(userId) {
+  // Hide the account from the UI
+  users[userId].hidden = true;
+  // Data stays in the database, fully intact
+}</code></pre>
+
+  <span class="code-label is-good">What "delete" actually means</span>
+  <pre class="code-block code-good"><code>function deleteAccount(userId) {
+  db.execute("DELETE FROM users WHERE id = ?", [userId]);
+  db.execute("DELETE FROM user_data WHERE user_id = ?", [userId]);
+  logDeletion(userId, new Date());
+}</code></pre>
+
+  <p>The first version isn't a bug — it compiles, it runs, it probably even passes a test that checks <code class="inline-code">users[userId].hidden === true</code>. It's a <em>decision</em>, made by whoever wrote it, to make the button lie. That gap — between what code appears to do and what it actually does — is where this entire course lives.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    A <strong>dark pattern</strong> is code deliberately written so its visible behavior misleads the person using it — often to retain data, money, or attention the user believed they were opting out of.
+  </div>
+
+  <h2>Why this isn't just "be a good person"</h2>
+  <p>"Don't be evil" is not a specification. It doesn't tell you what to check before merging a pull request. The field has already done the work of turning broad good intentions into something checkable: the <a href="https://www.acm.org/code-of-ethics">ACM Code of Ethics and Professional Conduct</a>, adopted in its current form in 2018, lays out concrete principles — contribute to society, avoid harm, be honest and trustworthy, respect privacy, be fair — that apply whether or not you're an ACM member. Lesson 2 goes through it in detail. For now, the point is narrower:</p>
+
+  <div class="box why">
+    <span class="box-label">Why it matters here</span>
+    "Avoid harm" is not abstract when you're the one writing <code class="inline-code">deleteAccount()</code>. It means: does this function do what its name and its UI promise? If not, that's the harm — and it was a choice, not an accident.
+  </div>
+
+  <h2>Where this fits in the course</h2>
+  <p>This is the first course in a four-course sequence on STEM+: <strong>Computer Programming Ethics → Computer Programming 1 → Computer Programming 2 → AI Developer</strong>. Ethics comes first on purpose. The plan is for secure, honest, fair defaults to already be habit by the time the syntax-heavy courses start — not a checklist bolted on after a project is "done."</p>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What specifically makes the first <code class="inline-code">deleteAccount()</code> example on this page unethical?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">It hides data while claiming to delete it.</button>
+      <button class="quiz-choice" data-correct="false">It runs too slowly to be useful.</button>
+      <button class="quiz-choice" data-correct="false">It deletes data the user still needs.</button>
+      <button class="quiz-choice" data-correct="false">It logs actions the user did not take.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The code compiles and runs fine — the problem isn't a crash, it's that the function's real behavior (hide, keep) doesn't match what a user reasonably believes "delete" means.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. According to this lesson, where does ethics in software actually live?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Inside the everyday choices in function bodies.</button>
+      <button class="quiz-choice" data-correct="false">Inside an annual compliance training video.</button>
+      <button class="quiz-choice" data-correct="false">Inside a lawyer's separate sign-off document.</button>
+      <button class="quiz-choice" data-correct="false">Inside the company's public marketing pages.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Policy documents and training exist, but the actual decision — does this function do what it claims — is made line by line, by whoever writes the code.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why does this course teach ethics before teaching programming syntax?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">So ethical defaults form before habits do.</button>
+      <button class="quiz-choice" data-correct="false">So syntax lessons can be skipped entirely.</button>
+      <button class="quiz-choice" data-correct="false">So grading criteria are easier to define.</button>
+      <button class="quiz-choice" data-correct="false">So only experienced programmers can enroll here.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The sequence is Ethics → Computer Programming 1 → Computer Programming 2 → AI Developer specifically so the defaults are already in place before deep language fluency arrives.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="harm">
+    <p class="quiz-prompt">4. Fill in the blank: the ACM principle "Avoid ___" means considering who could be hurt by a system before shipping it.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Lesson 2 covers the full ACM Code of Ethics — "avoid harm" is one of its core general principles.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="dark pattern|dark patterns">
+    <p class="quiz-prompt">5. Fill in the blank: code deliberately written so its visible behavior misleads the user is called a ___ ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The "hide instead of delete" example on this page is a textbook dark pattern — full definition in the box above.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: the <a href="https://www.acm.org/code-of-ethics">ACM Code of Ethics and Professional Conduct</a> is short, free, and is the actual document Lesson 2 is built from — worth reading once in full before it gets broken into pieces.</p>
+
+  <p class="ask-teacher">Stuck on anything above, or want another example of a dark pattern in real code? Ask your teacher — that's what I'm here for. Next up: the ACM Code of Ethics and the Software Engineering Code, in enough detail to actually apply them.</p>
+
+  <footer class="lesson-footer">STEM+ · Computer Programming Ethics · Lesson 1</footer>
+</div>

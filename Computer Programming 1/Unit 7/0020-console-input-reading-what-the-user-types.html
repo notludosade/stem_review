@@ -1,0 +1,133 @@
+<title>Lesson 20: Console Input — Reading What the User Types — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<script src="../../assets/interactive.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Computer Programming 1 · Lesson 20</span>
+  <h1>Console Input — Reading What the User Types</h1>
+  <p class="subtitle">A program that can never receive new information can't react to anything — input is what makes it interactive.</p>
+  <p class="nav-links"><a href="0021-reading-a-text-file.html">Lesson 21 →</a> <a href="../index.html">Contents</a> <a href="../reference/glossary.html">Glossary →</a></p>
+
+  <p>Just as programs write to standard output, they read from <strong>standard input</strong> — by default, whatever the user types at the keyboard.</p>
+
+  <div id="input-tabs">
+    <div class="fm-tabs">
+      <button class="fm-tab is-active" data-tab="py">Python</button>
+      <button class="fm-tab" data-tab="java">Java</button>
+      <button class="fm-tab" data-tab="js">JavaScript</button>
+      <button class="fm-tab" data-tab="cpp">C++</button>
+    </div>
+    <div class="fm-panel" data-panel="py">
+      <span class="code-label">Python</span>
+      <pre class="code-block"><code>name = input("What is your name? ")
+print("Hello, " + name)</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="java" hidden>
+      <span class="code-label">Java</span>
+      <pre class="code-block"><code>Scanner scanner = new Scanner(System.in);
+System.out.print("What is your name? ");
+String name = scanner.nextLine();
+System.out.println("Hello, " + name);</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="js" hidden>
+      <span class="code-label">JavaScript (Node.js)</span>
+      <pre class="code-block"><code>const readline = require('readline').createInterface({ input: process.stdin, output: process.stdout });
+readline.question('What is your name? ', name =&gt; {
+    console.log('Hello, ' + name);
+    readline.close();
+});</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="cpp" hidden>
+      <span class="code-label">C++</span>
+      <pre class="code-block"><code>std::string name;
+std::cout &lt;&lt; "What is your name? ";
+std::getline(std::cin, name);
+std::cout &lt;&lt; "Hello, " &lt;&lt; name &lt;&lt; std::endl;</code></pre>
+    </div>
+  </div>
+
+  <p>Python's <code class="inline-code">input()</code>, Java's <code class="inline-code">Scanner</code>, and C++'s <code class="inline-code">std::getline(std::cin, ...)</code> all work the same basic way: the program pauses, waits for the user to type a line and press Enter, and hands that line back as a string. Notice the C++ example uses <code class="inline-code">std::getline</code> rather than <code class="inline-code">std::cin >> name</code> — plain <code class="inline-code">>></code> stops reading at the first whitespace, so it would silently cut off a name like "Ada Lovelace" at the space.</p>
+
+  <p>JavaScript is the odd one out. In a browser there's no equivalent to a blocking keyboard read at all, and even in Node.js the <code class="inline-code">readline</code> module doesn't pause the program the way the other three do — it registers a callback function that runs later, once the user finishes typing. This asynchronous style is a deeper topic than this course covers, but it's worth knowing the difference exists: JavaScript's input model is fundamentally not "stop and wait" the way Python, Java, and C++'s are.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    <strong>Standard input</strong> (often shortened to <strong>stdin</strong>) is the default source a program reads input from — almost always the keyboard in this course's examples.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why it matters here</span>
+    Whatever comes in from standard input should be treated the same way the Ethics course discussed treating any input from outside your program's control — never assume it's well-formed. A user asked for their age might type "banana," and code that reads input without checking it will crash or misbehave the moment that happens.
+  </div>
+
+  <h2>Check your recall</h2>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. Why does the C++ example use std::getline instead of std::cin >> name?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">>> stops reading at the first whitespace, which would cut off a multi-word name.</button>
+      <button class="quiz-choice" data-correct="false">std::cin >> does not exist in C++.</button>
+      <button class="quiz-choice" data-correct="false">std::getline is required for reading numbers.</button>
+      <button class="quiz-choice" data-correct="false">There is no difference between the two.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>std::getline reads an entire line, whitespace included, up to the newline.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. What makes JavaScript's console input model different from Python, Java, and C++'s?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">It doesn't pause and wait — it registers a callback that runs later, once input is available.</button>
+      <button class="quiz-choice" data-correct="false">JavaScript cannot read any input at all.</button>
+      <button class="quiz-choice" data-correct="false">JavaScript reads input faster than the other three languages.</button>
+      <button class="quiz-choice" data-correct="false">There is no meaningful difference.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>This asynchronous, callback-based style is a deeper topic outside this lesson's scope.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why shouldn't a program assume input typed by a user is always well-formed?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">A user could type anything, including something the program isn't prepared to handle, like text where a number was expected.</button>
+      <button class="quiz-choice" data-correct="false">Standard input is always pre-validated by the operating system.</button>
+      <button class="quiz-choice" data-correct="false">Users never make typing mistakes.</button>
+      <button class="quiz-choice" data-correct="false">It's fine to assume this — validation is unnecessary.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>This mirrors the Ethics course's broader point about never trusting input from outside your program's control.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="stdin">
+    <p class="quiz-prompt">4. Fill in the blank: the default source a program reads input from is called standard input, or ___ for short.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>See the definition box above.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="input">
+    <p class="quiz-prompt">5. Fill in the blank: Python's built-in function for reading a line typed by the user is called ___().</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>It always returns a string, even if the user types a number.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p><a href="https://docs.python.org/3/library/functions.html#input">The Python standard library reference for input()</a> documents Python's console input function directly from the language's own documentation.</p>
+
+  <p class="ask-teacher">Curious how you'd convert what input() returns into an actual number instead of a string? Ask your teacher — that's what I'm here for. Next: reading input not from the keyboard, but from a file.</p>
+
+  <footer class="lesson-footer">STEM+ · Computer Programming 1 · Lesson 20</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  STEMPlus.mountTabs(document.getElementById('input-tabs'), 'data-tab', 'data-panel');
+});
+</script>

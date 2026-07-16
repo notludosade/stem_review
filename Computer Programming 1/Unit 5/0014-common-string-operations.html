@@ -1,0 +1,135 @@
+<title>Lesson 14: Common String Operations — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<script src="../../assets/interactive.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Computer Programming 1 · Lesson 14</span>
+  <h1>Common String Operations</h1>
+  <p class="subtitle">Finding a string's length, grabbing one character, and pulling out a slice — three operations you'll use constantly.</p>
+  <p class="nav-links"><a href="0015-string-interpolation-and-formatting.html">Lesson 15 →</a> <a href="../index.html">Contents</a> <a href="../reference/glossary.html">Glossary →</a></p>
+
+  <p>A string can be thought of as a sequence of individual characters, each with a position — its <strong>index</strong> — starting at 0. That indexing model is shared by all four languages, though how you ask for the length and how you pull out a piece differs.</p>
+
+  <div id="length-tabs">
+    <div class="fm-tabs">
+      <button class="fm-tab is-active" data-tab="py">Python</button>
+      <button class="fm-tab" data-tab="java">Java</button>
+      <button class="fm-tab" data-tab="js">JavaScript</button>
+      <button class="fm-tab" data-tab="cpp">C++</button>
+    </div>
+    <div class="fm-panel" data-panel="py">
+      <span class="code-label">Python</span>
+      <pre class="code-block"><code>name = "Ada"
+len(name)     # 3
+name[0]       # "A"
+name[0:2]     # "Ad"</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="java" hidden>
+      <span class="code-label">Java</span>
+      <pre class="code-block"><code>String name = "Ada";
+name.length();        // 3
+name.charAt(0);        // 'A'
+name.substring(0, 2); // "Ad"</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="js" hidden>
+      <span class="code-label">JavaScript</span>
+      <pre class="code-block"><code>let name = "Ada";
+name.length;          // 3, a property, not a call
+name[0];               // "A"
+name.substring(0, 2); // "Ad"</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="cpp" hidden>
+      <span class="code-label">C++</span>
+      <pre class="code-block"><code>std::string name = "Ada";
+name.length();        // 3
+name[0];               // 'A'
+name.substr(0, 2);    // "Ad"</code></pre>
+    </div>
+  </div>
+
+  <p>Getting the length is a method call — <code class="inline-code">length()</code> — in Python (as a standalone function, <code class="inline-code">len(name)</code>), Java, and C++, but a plain property with no parentheses in JavaScript (<code class="inline-code">name.length</code>). Getting a single character by index uses square brackets in Python, JavaScript, and C++ (<code class="inline-code">name[0]</code>), but a method call in Java (<code class="inline-code">name.charAt(0)</code>) — Java doesn't support square-bracket indexing on strings directly. Extracting a range of characters is spelled <code class="inline-code">substring</code> in Java and JavaScript, Python-style slicing (<code class="inline-code">name[0:2]</code>) in Python, and <code class="inline-code">substr</code> in C++ — three different names for essentially the same idea, so this is worth memorizing per language rather than assuming a shared pattern.</p>
+
+  <h2>Case conversion — where C++ genuinely lacks a one-liner</h2>
+  <p>Python, Java, and JavaScript each provide a direct method: <code class="inline-code">name.upper()</code> or <code class="inline-code">name.lower()</code> in Python, <code class="inline-code">name.toUpperCase()</code>/<code class="inline-code">toLowerCase()</code> in Java and JavaScript. C++'s standard string type has no equivalent single method — converting case requires looping over each character and calling <code class="inline-code">std::toupper</code> individually, or using an algorithm from the <code class="inline-code">&lt;algorithm&gt;</code> header. This isn't a small syntax difference like the others in this lesson; it's a real capability gap between C++'s standard string type and the other three languages' built-in convenience.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    An <strong>index</strong> is a character's position within a string, counting from 0. A <strong>substring</strong> is a contiguous piece of a string, extracted by specifying a start (and often end) index.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why it matters here</span>
+    These three operations — length, single-character access, and substring extraction — are the building blocks nearly every text-processing task is made of, from validating a password's length to parsing a name into first and last. The exact method names are worth memorizing per language now, since guessing wrong (like trying <code class="inline-code">name[0]</code> in Java) produces an error you'll otherwise have to look up every time.
+  </div>
+
+  <h2>Check your recall</h2>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. In JavaScript, why is <code class="inline-code">name.length</code> written without parentheses, unlike Java's <code class="inline-code">name.length()</code>?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">It's a property in JavaScript, not a method call.</button>
+      <button class="quiz-choice" data-correct="false">JavaScript strings do not have a length at all.</button>
+      <button class="quiz-choice" data-correct="false">Parentheses are optional in JavaScript for every method.</button>
+      <button class="quiz-choice" data-correct="false">This is a typo — JavaScript actually requires parentheses too.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>length is accessed as a plain property in JavaScript, unlike the method calls in the other three languages.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why can't you write <code class="inline-code">name[0]</code> to get the first character of a string in Java?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Java doesn't support square-bracket indexing on strings — it requires charAt(0) instead.</button>
+      <button class="quiz-choice" data-correct="false">Java strings do not have individual characters.</button>
+      <button class="quiz-choice" data-correct="false">Index 0 is invalid in Java; indexing starts at 1.</button>
+      <button class="quiz-choice" data-correct="false">Square brackets are reserved exclusively for arrays in every language.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Python, JavaScript, and C++ all support square-bracket indexing on strings; Java is the exception here.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. What makes C++'s handling of uppercase/lowercase conversion different from the other three languages?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">C++'s standard string has no single built-in method — it requires looping over characters or an algorithm header.</button>
+      <button class="quiz-choice" data-correct="false">C++ cannot represent lowercase letters at all.</button>
+      <button class="quiz-choice" data-correct="false">C++ converts case automatically without any code.</button>
+      <button class="quiz-choice" data-correct="false">C++'s method is spelled toUpper() instead of toUpperCase().</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>This is a genuine capability gap, not just a spelling difference, unlike most of this lesson's other contrasts.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="index">
+    <p class="quiz-prompt">4. Fill in the blank: a character's position within a string, counting from 0, is its ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>See the definition box above — this indexing model is shared across all four languages.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="substring">
+    <p class="quiz-prompt">5. Fill in the blank: a contiguous piece of a string, extracted by a start and end index, is called a ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Java and JavaScript both spell the method for this substring, Python uses slicing syntax, and C++ uses substr.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">MDN's JavaScript String reference</a> documents every built-in string method, including length, indexing, and substring, directly from the source.</p>
+
+  <p class="ask-teacher">Curious what happens if you try to index past the end of a string in each language? Ask your teacher — that's what I'm here for. Next: string interpolation and formatting — building strings out of variables cleanly, instead of chaining concatenation.</p>
+
+  <footer class="lesson-footer">STEM+ · Computer Programming 1 · Lesson 14</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  STEMPlus.mountTabs(document.getElementById('length-tabs'), 'data-tab', 'data-panel');
+});
+</script>

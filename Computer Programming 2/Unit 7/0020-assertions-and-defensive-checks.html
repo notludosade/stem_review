@@ -1,0 +1,143 @@
+<title>Lesson 20: Assertions and Defensive Checks — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<script src="../../assets/interactive.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Computer Programming 2 · Lesson 20</span>
+  <h1>Assertions and Defensive Checks</h1>
+  <p class="subtitle">Unit 2's exceptions handle failures that can legitimately happen. Assertions catch failures that should be flatly impossible — if the code is correct.</p>
+  <p class="nav-links"><a href="0021-unit-testing.html">Lesson 21 →</a> <a href="../index.html">Contents</a> <a href="../reference/glossary.html">Glossary →</a></p>
+
+  <p>An <strong>assertion</strong> checks a condition that the programmer believes must always be true at that point in the code, and stops the program immediately if it isn't. Unlike Unit 2's exceptions — for failures that can happen even in correct code, like a file that doesn't exist — an assertion failing means the code itself has a bug. It documents an assumption and checks it, in one line.</p>
+
+  <div id="assert-tabs">
+    <div class="fm-tabs">
+      <button class="fm-tab is-active" data-tab="py">Python</button>
+      <button class="fm-tab" data-tab="java">Java</button>
+      <button class="fm-tab" data-tab="js">JavaScript</button>
+      <button class="fm-tab" data-tab="cpp">C++</button>
+    </div>
+    <div class="fm-panel" data-panel="py">
+      <span class="code-label">Python</span>
+      <pre class="code-block"><code>def average(numbers):
+    assert len(numbers) > 0, "average() requires a non-empty list"
+    return sum(numbers) / len(numbers)
+
+average([])   # AssertionError: average() requires a non-empty list</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="java" hidden>
+      <span class="code-label">Java</span>
+      <pre class="code-block"><code>static double average(int[] numbers) {
+    assert numbers.length > 0 : "average() requires a non-empty array";
+    int total = 0;
+    for (int n : numbers) total += n;
+    return (double) total / numbers.length;
+}
+// Note: Java assertions are disabled by default — must run with the -ea flag</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="js" hidden>
+      <span class="code-label">JavaScript</span>
+      <pre class="code-block"><code>function average(numbers) {
+    console.assert(numbers.length > 0, "average() requires a non-empty array");
+    return numbers.reduce((a, b) =&gt; a + b, 0) / numbers.length;
+}
+// Note: console.assert only logs a warning — it does NOT stop execution,
+// unlike the assert in the other three languages</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="cpp" hidden>
+      <span class="code-label">C++</span>
+      <pre class="code-block"><code>#include &lt;cassert&gt;
+
+double average(const std::vector&lt;int&gt;&amp; numbers) {
+    assert(!numbers.empty());   // no custom message built in
+    int total = 0;
+    for (int n : numbers) total += n;
+    return static_cast&lt;double&gt;(total) / numbers.size();
+}
+// Note: assert() is stripped out entirely in release builds (when NDEBUG is defined)</code></pre>
+    </div>
+  </div>
+
+  <p>All four have real gaps worth knowing. Python's <code class="inline-code">assert</code> can be globally disabled with the <code class="inline-code">-O</code> flag. Java's <code class="inline-code">assert</code> is disabled <em>by default</em> — it silently does nothing unless the program is run with <code class="inline-code">-ea</code>. C++'s <code class="inline-code">assert()</code> vanishes entirely in release builds. JavaScript's <code class="inline-code">console.assert()</code> is the biggest outlier of all: it only prints a warning to the console and lets execution continue regardless — it isn't really a stopping assertion at all, just a conditional log message. The shared lesson: assertions are a development-time safety net for catching bugs early, not a mechanism your program's actual runtime behavior should ever depend on.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    An <strong>assertion</strong> checks a condition the programmer believes must always hold, halting the program if it doesn't. Assertions guard against bugs (things that should never happen); exceptions handle expected failures (things that can happen even in correct code).
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why it matters here</span>
+    Custom exceptions (Unit 2) and assertions solve different problems that look similar on the surface. Confusing them is a common mistake: using an assertion for user input validation means the check silently vanishes in some languages' release builds — exactly the wrong place to lose a safety check.
+  </div>
+
+  <h2>Check your recall</h2>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What does an assertion failing indicate, as opposed to a caught exception?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">A bug in the code itself — a condition the programmer assumed would always be true turned out false.</button>
+      <button class="quiz-choice" data-correct="false">A normal, expected situation that well-written code should always plan for.</button>
+      <button class="quiz-choice" data-correct="false">A problem with the computer's hardware, unrelated to the program's logic.</button>
+      <button class="quiz-choice" data-correct="false">Nothing — assertions and exceptions mean exactly the same thing.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Exceptions are for expected failures; assertions are for catching violations of assumptions the code relies on.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why is JavaScript's console.assert() the biggest outlier of the four languages here?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">It only logs a warning to the console and lets execution continue — it never actually stops the program.</button>
+      <button class="quiz-choice" data-correct="false">It's the only one of the four that can never be disabled under any circumstances.</button>
+      <button class="quiz-choice" data-correct="false">JavaScript has no concept of assertions whatsoever.</button>
+      <button class="quiz-choice" data-correct="false">It behaves identically to Python's assert in every respect.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Unlike Python, Java, and C++'s assert, a failed console.assert doesn't halt anything on its own.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why is it risky to use an assertion for validating user input?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Assertions can be disabled or stripped out in several of these languages' release builds, silently removing the check.</button>
+      <button class="quiz-choice" data-correct="false">Assertions are always slower than exceptions in every language.</button>
+      <button class="quiz-choice" data-correct="false">User input can never be checked with an assertion in any language.</button>
+      <button class="quiz-choice" data-correct="false">There is no risk at all — assertions and input validation are interchangeable.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Java's -ea flag requirement and C++'s NDEBUG stripping are exactly this risk in practice.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="assertion">
+    <p class="quiz-prompt">4. Fill in the blank: a check that halts the program if a supposedly-always-true condition turns out false is an ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>See the definition box above.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="disabled">
+    <p class="quiz-prompt">5. Fill in the blank: Java's assert statements are ___ by default, unless the program is run with the -ea flag.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>This is a common surprise for developers new to Java's assert statement.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p><a href="https://docs.python.org/3/reference/simple_stmts.html#the-assert-statement">Python's official language reference for the assert statement</a> documents assert's exact behavior, including how the -O flag disables it, directly from the source.</p>
+
+  <p class="ask-teacher">Wondering why C++ strips assertions out of release builds instead of just leaving them in? Ask your teacher — it's a deliberate performance trade-off. Next: turning individual assertions into an automated, repeatable safety net.</p>
+
+  <footer class="lesson-footer">STEM+ · Computer Programming 2 · Lesson 20</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  STEMPlus.mountTabs(document.getElementById('assert-tabs'), 'data-tab', 'data-panel');
+});
+</script>

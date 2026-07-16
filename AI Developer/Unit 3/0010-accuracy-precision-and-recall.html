@@ -1,0 +1,101 @@
+<title>Lesson 10: Accuracy, Precision, and Recall — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · AI Developer · Lesson 10</span>
+  <h1>Accuracy, Precision, and Recall</h1>
+  <p class="subtitle">"Percent correct" sounds like the obvious way to score a classifier — until the classes aren't evenly split, where it can be badly misleading.</p>
+  <p class="nav-links"><a href="../Unit%204/0011-the-perceptron.html">Lesson 11 →</a> <a href="../index.html">Contents</a> <a href="../reference/glossary.html">Glossary →</a></p>
+
+  <p>Suppose spam is genuinely rare — 5% of emails, 95% legitimate. A model that predicts "not spam" for every single email, never even looking at the content, is right 95% of the time. That number, <strong>accuracy</strong>, sounds great and is completely useless — the model catches zero spam.</p>
+
+  <span class="code-label">Python — scikit-learn</span>
+  <pre class="code-block"><code>from sklearn.metrics import accuracy_score, precision_score, recall_score, confusion_matrix
+
+predictions = model.predict(X_val)
+
+print(confusion_matrix(y_val, predictions))
+# [[190   2]     true negatives, false positives
+#  [  4   14]]   false negatives, true positives
+
+print(accuracy_score(y_val, predictions))    # 0.97 — looks great
+print(precision_score(y_val, predictions))   # 0.88 — of predicted spam, 88% really was
+print(recall_score(y_val, predictions))      # 0.78 — of real spam, 78% got caught</code></pre>
+
+  <p>The confusion matrix's four cells give both better metrics their names. <strong>Precision</strong> asks: of everything the model flagged as spam, what fraction actually was spam? It's hurt by <strong>false positives</strong> — legitimate emails wrongly flagged. <strong>Recall</strong> asks: of all the real spam that existed, what fraction did the model actually catch? It's hurt by <strong>false negatives</strong> — real spam that slipped through unflagged. The always-predict-"not spam" model from above would score 0.0 recall despite its 95% accuracy — recall is what exposes the flaw that accuracy alone hides completely.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    <strong>Accuracy</strong> is the percent of all predictions that were correct. <strong>Precision</strong> is, of everything predicted positive, the fraction that truly was positive. <strong>Recall</strong> is, of everything truly positive, the fraction the model actually caught.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why it matters here</span>
+    This closes Unit 3. It's also the direct payoff of Lesson 8's mention that the 0.5 decision threshold can be moved deliberately — raising it trades recall for precision, lowering it trades the other way, and knowing which one a real problem actually needs is exactly why these three numbers exist instead of just one. Unit 4's neural network classifiers get scored with these same three metrics, unchanged.
+  </div>
+
+  <h2>Check your recall</h2>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What does accuracy measure?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">The percent of all predictions, across both classes, that were correct.</button>
+      <button class="quiz-choice" data-correct="false">Only how many spam emails were correctly caught.</button>
+      <button class="quiz-choice" data-correct="false">Only how many legitimate emails were wrongly flagged.</button>
+      <button class="quiz-choice" data-correct="false">The total number of features used by the model.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Accuracy treats every correct prediction the same, which is exactly why it can be misleading on imbalanced data.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why did the always-predict-"not spam" model score 0.0 recall despite 95% accuracy?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">It caught none of the real spam that existed, and recall specifically measures that.</button>
+      <button class="quiz-choice" data-correct="false">Recall and accuracy always move together, so this result is a contradiction.</button>
+      <button class="quiz-choice" data-correct="false">Recall only applies to legitimate emails, never to spam.</button>
+      <button class="quiz-choice" data-correct="false">The model actually caught all the spam, but recall was computed incorrectly.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Recall is precisely the metric that exposes this flaw, which raw accuracy hides completely.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. What does precision measure?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Of everything the model predicted as positive, the fraction that truly was positive.</button>
+      <button class="quiz-choice" data-correct="false">Of everything that was truly positive, the fraction the model predicted correctly.</button>
+      <button class="quiz-choice" data-correct="false">The total count of true negatives in the confusion matrix.</button>
+      <button class="quiz-choice" data-correct="false">How quickly the model computes a prediction.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Precision is hurt specifically by false positives — legitimate emails wrongly flagged as spam.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="precision">
+    <p class="quiz-prompt">4. Fill in the blank: of everything predicted positive, the fraction that truly was positive is ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>See the definition box above.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="recall">
+    <p class="quiz-prompt">5. Fill in the blank: of everything truly positive, the fraction the model actually caught is ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>See the definition box above.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p><a href="https://scikit-learn.org/stable/modules/model_evaluation.html">scikit-learn's official model evaluation documentation</a> covers these metrics, plus several related ones, directly from the source.</p>
+
+  <p class="ask-teacher">Wondering what a single number that balances precision and recall together looks like? Ask your teacher — it's called an F1 score, and it's a real, common answer to exactly that need. That closes Unit 3. Next: the building block every neural network is made of.</p>
+
+  <footer class="lesson-footer">STEM+ · AI Developer · Lesson 10</footer>
+</div>

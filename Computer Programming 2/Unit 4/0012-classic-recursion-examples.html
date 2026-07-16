@@ -1,0 +1,146 @@
+<title>Lesson 12: Classic Recursion Examples — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<script src="../../assets/interactive.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Computer Programming 2 · Lesson 12</span>
+  <h1>Classic Recursion Examples</h1>
+  <p class="subtitle">Factorial made one recursive call per invocation. This example makes two — and that small change has a large cost.</p>
+  <p class="nav-links"><a href="../Unit%205/0013-big-o-notation.html">Lesson 13 →</a> <a href="../index.html">Contents</a> <a href="../reference/glossary.html">Glossary →</a></p>
+
+  <p>The <strong>Fibonacci sequence</strong> defines each number as the sum of the two before it: 0, 1, 1, 2, 3, 5, 8, 13… Written recursively, <code class="inline-code">fibonacci(n)</code> has two base cases (<code class="inline-code">0</code> and <code class="inline-code">1</code>) and a recursive case that calls itself <em>twice</em>.</p>
+
+  <div id="fib-tabs">
+    <div class="fm-tabs">
+      <button class="fm-tab is-active" data-tab="py">Python</button>
+      <button class="fm-tab" data-tab="java">Java</button>
+      <button class="fm-tab" data-tab="js">JavaScript</button>
+      <button class="fm-tab" data-tab="cpp">C++</button>
+    </div>
+    <div class="fm-panel" data-panel="py">
+      <span class="code-label">Python</span>
+      <pre class="code-block"><code>def fibonacci(n):
+    if n &lt;= 1:                                   # base cases
+        return n
+    return fibonacci(n - 1) + fibonacci(n - 2)   # two recursive calls
+
+print(fibonacci(6))  # 8</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="java" hidden>
+      <span class="code-label">Java</span>
+      <pre class="code-block"><code>static int fibonacci(int n) {
+    if (n &lt;= 1) {                                 // base cases
+        return n;
+    }
+    return fibonacci(n - 1) + fibonacci(n - 2);    // two recursive calls
+}
+
+System.out.println(fibonacci(6)); // 8</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="js" hidden>
+      <span class="code-label">JavaScript</span>
+      <pre class="code-block"><code>function fibonacci(n) {
+    if (n &lt;= 1) {                                  // base cases
+        return n;
+    }
+    return fibonacci(n - 1) + fibonacci(n - 2);     // two recursive calls
+}
+
+console.log(fibonacci(6)); // 8</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="cpp" hidden>
+      <span class="code-label">C++</span>
+      <pre class="code-block"><code>int fibonacci(int n) {
+    if (n &lt;= 1) {                                   // base cases
+        return n;
+    }
+    return fibonacci(n - 1) + fibonacci(n - 2);      // two recursive calls
+}
+
+std::cout &lt;&lt; fibonacci(6) &lt;&lt; std::endl; // 8</code></pre>
+    </div>
+  </div>
+
+  <p>Trace <code class="inline-code">fibonacci(6)</code> by hand and something wasteful shows up fast: it calls <code class="inline-code">fibonacci(5)</code> and <code class="inline-code">fibonacci(4)</code>, but <code class="inline-code">fibonacci(5)</code> itself calls <code class="inline-code">fibonacci(4)</code> again — the exact same computation, redone from scratch. Every one of those recomputes its own two children the same way. The call tree branches out exponentially, redoing enormous amounts of duplicate work for larger <code class="inline-code">n</code>. Unit 5's Big-O lesson gives that blowup a precise name; for now, the fix worth knowing is called <strong>memoization</strong> — caching each result the first time it's computed, keyed by its input, using exactly Lesson 9's hash map. Python even has a one-line version of this built in: decorating the function with <code class="inline-code">@functools.lru_cache</code> caches every call automatically. Java, JavaScript, and C++ don't have an equivalent decorator, but reach the same result by hand, storing results in a <code class="inline-code">HashMap</code>, <code class="inline-code">Map</code>, or <code class="inline-code">unordered_map</code> keyed by <code class="inline-code">n</code> and checking it before recursing.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    <strong>Memoization</strong> is caching the result of a function call keyed by its input, so a repeated call with the same input returns instantly instead of redoing the work.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why it matters here</span>
+    This lesson closes the loop on the whole unit. A recursive definition (this unit) that keeps recomputing the same subproblem is fixed by caching those results in a hash map (Unit 3) — two ideas from different lessons combining into one practical technique. Recognizing when recursive work is being needlessly repeated, and knowing exactly which structure fixes it, is the kind of judgment Unit 5 builds on directly.
+  </div>
+
+  <h2>Check your recall</h2>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. How many recursive calls does the naive fibonacci function make per invocation of the recursive case?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Two — fibonacci(n - 1) and fibonacci(n - 2).</button>
+      <button class="quiz-choice" data-correct="false">One, exactly like factorial.</button>
+      <button class="quiz-choice" data-correct="false">Zero — fibonacci never calls itself.</button>
+      <button class="quiz-choice" data-correct="false">A number that depends on which language is used.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>This branching is exactly what causes the same subproblems to be recomputed repeatedly.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why does naive recursive fibonacci become so wasteful for larger n?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">The same smaller subproblems get computed over and over again as the call tree branches.</button>
+      <button class="quiz-choice" data-correct="false">It runs out of valid base cases for large n.</button>
+      <button class="quiz-choice" data-correct="false">Larger numbers cannot be represented in any of these four languages.</button>
+      <button class="quiz-choice" data-correct="false">It has nothing to do with repeated work — it's simply a slow language feature.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>fibonacci(4) gets recomputed independently inside both the fibonacci(5) and fibonacci(6) branches, and that duplication compounds.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. What data structure does memoization typically use to cache results?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">A hash map, keyed by the input value, storing its already-computed result.</button>
+      <button class="quiz-choice" data-correct="false">A brand new stack pushed for every single call.</button>
+      <button class="quiz-choice" data-correct="false">Memoization requires no data structure of any kind.</button>
+      <button class="quiz-choice" data-correct="false">A linked list, searched from the head for every lookup.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A hash map's near-instant lookup by key is exactly what makes checking "have I already computed this?" cheap.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="memoization">
+    <p class="quiz-prompt">4. Fill in the blank: caching a function's result keyed by its input, to avoid recomputing it, is called ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>See the definition box above.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="fibonacci">
+    <p class="quiz-prompt">5. Fill in the blank: the sequence where each number is the sum of the two before it (0, 1, 1, 2, 3, 5…) is the ___ sequence.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Named for the sequence explored in this lesson's recursive and memoized versions.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p><a href="https://docs.python.org/3/library/functools.html#functools.lru_cache">Python's official documentation for functools.lru_cache</a> documents Python's built-in one-decorator memoization tool directly.</p>
+
+  <p class="ask-teacher">Wondering how to convert a memoized recursive solution into a fully iterative one with no recursion at all? Ask your teacher — it's a technique called "bottom-up" dynamic programming. That closes Unit 4: Recursion. Next: giving performance differences like today's a precise, measurable name.</p>
+
+  <footer class="lesson-footer">STEM+ · Computer Programming 2 · Lesson 12</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  STEMPlus.mountTabs(document.getElementById('fib-tabs'), 'data-tab', 'data-panel');
+});
+</script>

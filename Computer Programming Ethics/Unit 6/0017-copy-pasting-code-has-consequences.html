@@ -1,0 +1,110 @@
+<title>Lesson 17: Copy-Pasting Code Has Consequences — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Computer Programming Ethics · Lesson 17</span>
+  <h1>Copy-Pasting Code Has Consequences</h1>
+  <p class="subtitle">Stack Overflow answers, tutorial snippets, and AI-generated code all carry the same licensing question as a full library.</p>
+  <p class="nav-links"><a href="0018-trusting-a-dependency-is-a-decision.html">Lesson 18 →</a> <a href="../index.html">Contents</a> <a href="../reference/glossary.html">Glossary →</a></p>
+
+  <p>Lesson 16 covered whole libraries with a clear <code class="inline-code">LICENSE</code> file. This lesson covers the much more common case: a fifteen-line snippet copied from a Stack Overflow answer, a blog post, or an AI coding assistant, pasted straight into a codebase with no attribution and no thought given to where it came from. It feels too small to matter. Legally and ethically, size isn't the deciding factor — origin and terms are.</p>
+
+  <span class="code-label is-bad">Pasted in, no record of where it came from</span>
+  <pre class="code-block code-bad"><code>def debounce(fn, delay):
+    # copied this from somewhere, works great
+    timer = None
+    def wrapper(*args, **kwargs):
+        nonlocal timer
+        if timer:
+            timer.cancel()
+        timer = threading.Timer(delay, lambda: fn(*args, **kwargs))
+        timer.start()
+    return wrapper</code></pre>
+
+  <span class="code-label is-good">Attributed, with the license terms checked</span>
+  <pre class="code-block code-good"><code># Adapted from Stack Overflow answer by user "jfs",
+# https://stackoverflow.com/a/12345678 — CC BY-SA 4.0,
+# which requires attribution on reuse. Modified for this project.
+def debounce(fn, delay):
+    ...</code></pre>
+
+  <p>Stack Overflow content is licensed under Creative Commons Attribution-ShareAlike (CC BY-SA) — which, like the GPL, requires attribution and technically requires that adaptations be shared under compatible terms. Most companies handle this pragmatically for very small, generic snippets (a five-line debounce function has limited originality to protect), but the moment a copied block is substantial, distinctive, or something a court could call a "creative expression," pretending it appeared in your codebase from nowhere is the problem this lesson is about.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    <strong>Attribution</strong> means crediting the original author or source of code, text, or an idea you've reused or adapted — not because it's a bureaucratic formality, but because it's the mechanism by which someone's license terms are actually honored and their work is traceable if a problem is later found in it.
+  </div>
+
+  <h2>AI-generated code raises the same question, less visibly</h2>
+  <p>Code suggested by an AI assistant can be trained on and sometimes closely reproduce licensed source material, without the tool surfacing where a given suggestion came from the way a Stack Overflow link does. This doesn't mean AI-assisted code is unusable — it means the same judgment from this lesson still applies: for anything beyond a short, generic pattern, treat a suspiciously specific or complete suggestion the way you'd treat an unattributed copy-paste, and verify rather than assume it's clean.</p>
+
+  <div class="box why">
+    <span class="box-label">Why it matters here</span>
+    Untracked snippets accumulate into exactly the kind of unauditable codebase Lesson 3 warned about — nobody can answer "where did this come from" months later, which is also exactly when a licensing question is most likely to surface, during an acquisition's legal due diligence or an audit.
+  </div>
+
+  <h2>Check your recall</h2>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What license typically covers content posted as a Stack Overflow answer?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Creative Commons Attribution-ShareAlike (CC BY-SA).</button>
+      <button class="quiz-choice" data-correct="false">No license — Stack Overflow answers are automatically public domain.</button>
+      <button class="quiz-choice" data-correct="false">The MIT License.</button>
+      <button class="quiz-choice" data-correct="false">A proprietary Stack Overflow-only license that forbids all reuse.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>CC BY-SA requires attribution and, like the GPL, asks that adaptations carry compatible terms.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why does size ("it's only fifteen lines") not automatically settle the licensing question?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Origin and license terms matter more than the snippet's length.</button>
+      <button class="quiz-choice" data-correct="false">All code snippets under 20 lines are automatically license-free.</button>
+      <button class="quiz-choice" data-correct="false">Line count is the only factor courts have ever considered.</button>
+      <button class="quiz-choice" data-correct="false">Short snippets cannot legally be copyrighted under any law.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Very small, generic snippets are often handled pragmatically, but distinctiveness and origin — not raw size — are what actually matter.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. What's a reasonable practice for handling code suggested by an AI assistant?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Treat suspiciously specific or complete suggestions the way you'd treat an unattributed copy-paste.</button>
+      <button class="quiz-choice" data-correct="false">Assume all AI-generated code is automatically license-free.</button>
+      <button class="quiz-choice" data-correct="false">Never use any code suggested by an AI assistant under any circumstance.</button>
+      <button class="quiz-choice" data-correct="false">Only use AI-generated code in private, unpublished projects.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The same judgment applies — verify rather than assume, especially for longer or unusually specific suggestions.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="attribution">
+    <p class="quiz-prompt">4. Fill in the blank: crediting the original author or source of reused code so a license's terms are actually honored is called ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>See the definition box above.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="cc by-sa|cc by sa">
+    <p class="quiz-prompt">5. Fill in the blank: the specific Creative Commons license variant that covers Stack Overflow content is ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Attribution-ShareAlike — the same term used in the good code example's comment.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p><a href="https://stackoverflow.com/help/licensing">Stack Overflow's own licensing help page</a> explains the CC BY-SA terms that apply to content posted on the site, including what attribution is expected to look like.</p>
+
+  <p class="ask-teacher">Want help figuring out whether a specific snippet you've already used needs an attribution comment added? Ask your teacher — that's what I'm here for. Next: the same trust question, scaled up to an entire dependency you didn't write.</p>
+
+  <footer class="lesson-footer">STEM+ · Computer Programming Ethics · Lesson 17</footer>
+</div>

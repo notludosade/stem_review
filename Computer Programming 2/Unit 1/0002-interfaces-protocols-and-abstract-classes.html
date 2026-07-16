@@ -1,0 +1,153 @@
+<title>Lesson 2: Interfaces, Protocols and Abstract Classes — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<script src="../../assets/interactive.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Computer Programming 2 · Lesson 2</span>
+  <h1>Interfaces, Protocols and Abstract Classes</h1>
+  <p class="subtitle">Inheritance shares an implementation. This lesson is about sharing a requirement instead — a promise that certain methods will exist.</p>
+  <p class="nav-links"><a href="0003-polymorphism-one-interface-many-behaviors.html">Lesson 3 →</a> <a href="../index.html">Contents</a> <a href="../reference/glossary.html">Glossary →</a></p>
+
+  <p>An <strong>interface</strong> is a contract: it names methods a class must provide, without necessarily saying how. The four languages enforce that contract very differently — and JavaScript, honestly, barely enforces it at all. Below, anything that can <code class="inline-code">fly()</code> is treated as <code class="inline-code">Flyable</code>.</p>
+
+  <div id="iface-tabs">
+    <div class="fm-tabs">
+      <button class="fm-tab is-active" data-tab="py">Python</button>
+      <button class="fm-tab" data-tab="java">Java</button>
+      <button class="fm-tab" data-tab="js">JavaScript</button>
+      <button class="fm-tab" data-tab="cpp">C++</button>
+    </div>
+    <div class="fm-panel" data-panel="py">
+      <span class="code-label">Python</span>
+      <pre class="code-block"><code>from abc import ABC, abstractmethod
+
+class Flyable(ABC):
+    @abstractmethod
+    def fly(self):
+        pass
+
+class Bird(Flyable):
+    def fly(self):
+        return "Flap flap, off I go!"</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="java" hidden>
+      <span class="code-label">Java</span>
+      <pre class="code-block"><code>interface Flyable {
+    String fly();
+}
+
+class Bird implements Flyable {
+    public String fly() {
+        return "Flap flap, off I go!";
+    }
+}</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="js" hidden>
+      <span class="code-label">JavaScript</span>
+      <pre class="code-block"><code>// JavaScript has no interface keyword.
+// A Bird "satisfies" Flyable just by having a fly() method.
+class Bird {
+    fly() {
+        return "Flap flap, off I go!";
+    }
+}</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="cpp" hidden>
+      <span class="code-label">C++</span>
+      <pre class="code-block"><code>class Flyable {
+public:
+    virtual std::string fly() = 0; // pure virtual: no body
+};
+
+class Bird : public Flyable {
+public:
+    std::string fly() override {
+        return "Flap flap, off I go!";
+    }
+};</code></pre>
+    </div>
+  </div>
+
+  <p>Java's <code class="inline-code">interface</code> is a dedicated language feature: <code class="inline-code">Bird implements Flyable</code> fails to compile unless <code class="inline-code">Bird</code> provides every method <code class="inline-code">Flyable</code> declares. C++ has no separate interface keyword, but reaches the same result with an <strong>abstract class</strong> — a class made entirely of <strong>pure virtual</strong> methods, marked <code class="inline-code">= 0</code> instead of given a body. An abstract class can't be instantiated directly; only a subclass that fills in every pure virtual method can. Python's <code class="inline-code">abc</code> module gives you the same compiler-checked-at-runtime enforcement, but it's opt-in — you only get it if you inherit <code class="inline-code">ABC</code> and mark methods <code class="inline-code">@abstractmethod</code>. JavaScript has nothing built in at all: <code class="inline-code">Bird</code> works as a <code class="inline-code">Flyable</code> purely because it happens to have a <code class="inline-code">fly()</code> method — a style called <strong>duck typing</strong>. Nothing stops you from passing an object that's missing <code class="inline-code">fly()</code> until the moment it's actually called and crashes.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    An <strong>interface</strong> is a contract specifying required method(s) without necessarily providing their implementation. An <strong>abstract class</strong> is a class that cannot be instantiated directly, and may mix implemented methods with unimplemented ("pure virtual" or "abstract") ones. <strong>Duck typing</strong> is relying purely on an object having the right methods, with no formal declared contract at all.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why it matters here</span>
+    A contract lets independent pieces of code work together without knowing each other's exact class hierarchy. Anything that promises to be <code class="inline-code">Flyable</code> can be handed to code that only asks "can this fly?" — a new bird, a plane, a paper airplane class written next year, all interchangeable at that boundary. That's the setup for the next lesson: treating different types uniformly through the interface they share.
+  </div>
+
+  <h2>Check your recall</h2>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What does an interface specify?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Required methods a class must provide, without necessarily saying how they work.</button>
+      <button class="quiz-choice" data-correct="false">The exact internal data fields every implementing class must use.</button>
+      <button class="quiz-choice" data-correct="false">A finished implementation that every class copies verbatim.</button>
+      <button class="quiz-choice" data-correct="false">The order in which a program's functions must be called.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Flyable only names fly() — it says nothing about how each class implements it.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. How does C++ achieve interface-like behavior without an interface keyword?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">An abstract class made of pure virtual methods (marked = 0), which cannot be instantiated directly.</button>
+      <button class="quiz-choice" data-correct="false">By using the same duck typing approach as JavaScript.</button>
+      <button class="quiz-choice" data-correct="false">C++ cannot express this concept at all.</button>
+      <button class="quiz-choice" data-correct="false">By renaming a regular class to end in "able".</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>= 0 marks a pure virtual method — no body, and any subclass must supply one to become instantiable.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. What is the risk of JavaScript's duck typing approach compared to Java's interface?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">An object missing a required method won't be caught until that method is actually called and crashes.</button>
+      <button class="quiz-choice" data-correct="false">JavaScript objects can never have methods at all.</button>
+      <button class="quiz-choice" data-correct="false">Duck typing makes JavaScript code run slower than Java in every case.</button>
+      <button class="quiz-choice" data-correct="false">There is no risk — the two approaches catch identical errors at identical times.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Java's compiler rejects a missing method before the program ever runs; JavaScript only discovers it at the moment of the call.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="interface">
+    <p class="quiz-prompt">4. Fill in the blank: a contract specifying required methods without necessarily providing their implementation is an ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>See the definition box above.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="duck">
+    <p class="quiz-prompt">5. Fill in the blank: relying purely on an object having the right methods, with no formal contract, is called ___ typing.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>"If it walks like a duck and quacks like a duck" — JavaScript's default style.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p><a href="https://docs.python.org/3/library/abc.html">Python's official documentation for the abc module</a> covers abstract base classes and the @abstractmethod decorator in full.</p>
+
+  <p class="ask-teacher">Curious how TypeScript changes this picture for JavaScript specifically? Ask your teacher — that's outside this course's scope, but worth understanding. Next: putting these contracts to work.</p>
+
+  <footer class="lesson-footer">STEM+ · Computer Programming 2 · Lesson 2</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  STEMPlus.mountTabs(document.getElementById('iface-tabs'), 'data-tab', 'data-panel');
+});
+</script>

@@ -1,0 +1,103 @@
+<title>Lesson 18: Calling an LLM API — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · AI Developer · Lesson 18</span>
+  <h1>Calling an LLM API</h1>
+  <p class="subtitle">Nobody trains a model like Lesson 17's from scratch just to use one. Units 6 through 9 are about the far more common path: using models someone else already trained.</p>
+  <p class="nav-links"><a href="0019-embeddings-and-semantic-search.html">Lesson 19 →</a> <a href="../index.html">Contents</a> <a href="../reference/glossary.html">Glossary →</a></p>
+
+  <p>A large language model API lets a program send text in and get generated text back, without training anything at all — just <strong>inference</strong>: running an already-trained model forward to produce output.</p>
+
+  <span class="code-label">Python — OpenAI API</span>
+  <pre class="code-block"><code>from openai import OpenAI
+
+client = OpenAI()
+
+response = client.chat.completions.create(
+    model="gpt-4o-mini",
+    messages=[
+        {"role": "system", "content": "You are a helpful assistant."},
+        {"role": "user", "content": "Explain what a for loop does, in one sentence."},
+    ],
+)
+
+print(response.choices[0].message.content)</code></pre>
+
+  <p><code class="inline-code">model</code> picks which pretrained model — built from Transformer layers exactly like Lesson 17 described, just trained on far more data than any individual could realistically gather — handles the request. <code class="inline-code">messages</code> is a list of turns, each tagged with a <strong>role</strong>: <code class="inline-code">system</code> sets overall behavior and instructions before the real request arrives, <code class="inline-code">user</code> is the actual question or task, and an <code class="inline-code">assistant</code> role would hold the model's own prior reply if the conversation continues across multiple turns. The response comes back as a structured object, not raw text — the generated text itself sits at <code class="inline-code">response.choices[0].message.content</code>.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    <strong>Inference</strong> is generating output from an already-trained model, with no further training taking place. A <strong>role</strong> tags each message in an API conversation as system, user, or assistant, shaping how the model interprets it.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why it matters here</span>
+    Every unit before this one was about building a model. From here forward, the far more common real-world task is using one someone else already built and trained — a completely different skill set. Lesson 19's embeddings and Lesson 20's prompt engineering are both about getting more out of exactly this kind of API call.
+  </div>
+
+  <h2>Check your recall</h2>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What is inference, in the context of using a pretrained model through an API?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Generating output from an already-trained model, with no further training happening.</button>
+      <button class="quiz-choice" data-correct="false">Retraining the entire model from scratch on new data.</button>
+      <button class="quiz-choice" data-correct="false">Cleaning and splitting a dataset before training begins.</button>
+      <button class="quiz-choice" data-correct="false">Computing gradients to update the model's weights.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The API call above just runs the model forward — nothing about it is training or updating any weight.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. What does the "system" role in the messages list typically set?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">The assistant's overall behavior and instructions, before the actual request arrives.</button>
+      <button class="quiz-choice" data-correct="false">The exact model name and version to run.</button>
+      <button class="quiz-choice" data-correct="false">The user's precise question or task for this turn.</button>
+      <button class="quiz-choice" data-correct="false">A previous reply the assistant already generated.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>"You are a helpful assistant." above is exactly this kind of overall behavior instruction.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Where does the model's actual generated text appear in the response object above?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">response.choices[0].message.content</button>
+      <button class="quiz-choice" data-correct="false">response.text</button>
+      <button class="quiz-choice" data-correct="false">response.messages[0]</button>
+      <button class="quiz-choice" data-correct="false">The generated text isn't in the response at all — it must be fetched separately.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The response is a structured object, and this exact path is where the generated reply text lives.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="inference">
+    <p class="quiz-prompt">4. Fill in the blank: generating output from an already-trained model, without any further training, is called ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>See the definition box above.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="role">
+    <p class="quiz-prompt">5. Fill in the blank: each message in an API conversation is tagged with a ___ — system, user, or assistant.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>See the definition box above.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p><a href="https://platform.openai.com/docs/api-reference/chat">OpenAI's official Chat Completions API reference</a> documents every field and role directly from the source.</p>
+
+  <p class="ask-teacher">Wondering how much a call like this actually costs, or how fast it responds? Ask your teacher — Unit 8 covers exactly this, once the model is actually running in a real application. Next: turning text into numbers a model can search and compare directly.</p>
+
+  <footer class="lesson-footer">STEM+ · AI Developer · Lesson 18</footer>
+</div>

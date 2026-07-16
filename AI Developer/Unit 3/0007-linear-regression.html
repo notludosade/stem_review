@@ -1,0 +1,104 @@
+<title>Lesson 7: Linear Regression — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · AI Developer · Lesson 7</span>
+  <h1>Linear Regression</h1>
+  <p class="subtitle">The simplest real model in this course — and the clearest place to see what "training" actually means underneath everything fancier.</p>
+  <p class="nav-links"><a href="0008-logistic-regression.html">Lesson 8 →</a> <a href="../index.html">Contents</a> <a href="../reference/glossary.html">Glossary →</a></p>
+
+  <p>Lesson 3's housing dataset had a continuous numeric label — <code class="inline-code">price</code> — rather than a category. <strong>Linear regression</strong> predicts exactly that kind of label: a number produced from a weighted sum of the input features.</p>
+
+  <span class="code-label">Python — scikit-learn</span>
+  <pre class="code-block"><code>from sklearn.linear_model import LinearRegression
+from sklearn.metrics import mean_squared_error
+
+model = LinearRegression()
+model.fit(X_train, y_train)
+
+print(model.coef_)         # one weight per feature, e.g. [142.5, 8900.0]
+print(model.intercept_)    # baseline value when every feature is 0
+
+# predicted_price = intercept + coef[0]*square_feet + coef[1]*bedrooms
+
+predictions = model.predict(X_val)
+error = mean_squared_error(y_val, predictions)
+print(error)</code></pre>
+
+  <p>Each entry in <code class="inline-code">model.coef_</code> is a <strong>coefficient</strong> (or weight) — how much the prediction changes for a one-unit increase in that feature, holding the others fixed. <code class="inline-code">fit()</code> doesn't guess these numbers; it searches for the exact coefficients that make predictions on the training set as close as possible to the true labels, where "as close as possible" is measured by a <strong>loss function</strong> — here, <strong>mean squared error</strong>: the average of each prediction's squared distance from the true value. Smaller loss means better-fitting coefficients.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    <strong>Linear regression</strong> predicts a continuous numeric value as a weighted sum of input features. A <strong>coefficient</strong> is the weight applied to one feature. A <strong>loss function</strong> measures how far a model's predictions are from the true values — mean squared error is one common choice.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why it matters here</span>
+    "Search for the coefficients that minimize the loss" is exactly what every model in this course does, including the neural networks in Unit 4 — linear regression is just the simplest case, small enough to reason about by hand. Lesson 8's logistic regression reuses this same weighted-sum idea for a completely different kind of label.
+  </div>
+
+  <h2>Check your recall</h2>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What kind of label does linear regression predict?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">A continuous numeric value, like a price.</button>
+      <button class="quiz-choice" data-correct="false">One of a small fixed set of categories.</button>
+      <button class="quiz-choice" data-correct="false">A cluster assignment with no predefined meaning.</button>
+      <button class="quiz-choice" data-correct="false">A sequence of actions to take in an environment.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>price in the housing example is exactly this — a continuous number, not a category.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. What does a value in model.coef_ represent?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">How much the prediction changes for a one-unit increase in that feature.</button>
+      <button class="quiz-choice" data-correct="false">The total number of rows in the training set.</button>
+      <button class="quiz-choice" data-correct="false">The exact predicted price for every single house at once.</button>
+      <button class="quiz-choice" data-correct="false">A random number with no relationship to the data.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Each coefficient is a per-feature weight, found by fit() to best match the training labels.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. What is a loss function measuring?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">How far off a model's predictions are from the true values.</button>
+      <button class="quiz-choice" data-correct="false">How many features exist in the dataset.</button>
+      <button class="quiz-choice" data-correct="false">How long the training process takes to run, in seconds.</button>
+      <button class="quiz-choice" data-correct="false">How many rows were dropped during data cleaning.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Mean squared error, used above, is one specific way of measuring this distance.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="coefficient">
+    <p class="quiz-prompt">4. Fill in the blank: the weight applied to one feature in a linear regression model is called a ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>See the definition box above.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="loss">
+    <p class="quiz-prompt">5. Fill in the blank: fit() searches for coefficients that minimize a ___ function measuring prediction error.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>See the definition box above.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p><a href="https://scikit-learn.org/stable/modules/linear_model.html">scikit-learn's official linear models documentation</a> covers LinearRegression and several related variants directly from the source.</p>
+
+  <p class="ask-teacher">Wondering why mean squared error specifically squares the errors instead of just averaging them directly? Ask your teacher — it's a deliberate choice with real consequences for outliers. Next: the same weighted-sum idea, adapted to predict a category instead of a number.</p>
+
+  <footer class="lesson-footer">STEM+ · AI Developer · Lesson 7</footer>
+</div>

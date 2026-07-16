@@ -1,0 +1,106 @@
+<title>Lesson 10: Error Messages That Tell the Truth — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Computer Programming Ethics · Lesson 10</span>
+  <h1>Error Messages That Tell the Truth</h1>
+  <p class="subtitle">Two different audiences see an error message, and they need two different amounts of detail.</p>
+  <p class="nav-links"><a href="0011-logging-without-oversharing.html">Lesson 11 →</a> <a href="../index.html">Contents</a> <a href="../reference/glossary.html">Glossary →</a></p>
+
+  <p>Lesson 2 covered the basic honesty problem: don't silently swallow an error and claim success anyway. This lesson goes one level deeper — once you've decided to surface a failure, <em>what</em> you show depends entirely on who's looking at it, and getting this wrong is a mistake in both directions.</p>
+
+  <span class="code-label is-bad">Too vague to be useful</span>
+  <pre class="code-block code-bad"><code>except Exception:
+    return {"error": "Something went wrong."}</code></pre>
+
+  <span class="code-label is-bad">Too detailed to be safe</span>
+  <pre class="code-block code-bad"><code>except Exception as e:
+    return {"error": str(e), "traceback": traceback.format_exc(),
+            "query": failed_query, "db_host": DB_HOST}</code></pre>
+
+  <span class="code-label is-good">Honest to the user, detailed to the developer</span>
+  <pre class="code-block code-good"><code>except Exception as e:
+    error_id = log_error_with_details(e, traceback.format_exc())
+    return {"error": "We couldn't process that request.",
+            "reference_id": error_id}</code></pre>
+
+  <p>The first version is honest that something failed, but useless for a user trying to figure out what to fix — did they mistype a field, or is the server down? The second version is useful for debugging but hands an attacker a database hostname, a raw SQL query, and internals they were never supposed to see. The third version splits the difference correctly: the user gets an honest, actionable message and a reference number; the full technical detail goes somewhere only the development team can see it.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    <strong>Information disclosure</strong> is a security weakness where a system reveals internal details — stack traces, file paths, database structure, software versions — that help an attacker understand and exploit it. It's listed among the OWASP Top 10's broader "Security Misconfiguration" category.
+  </div>
+
+  <h2>Honest doesn't mean unfiltered</h2>
+  <p>It's worth being precise about what "honest error messages" from Lesson 2 actually means. It does not mean showing the user everything the system knows about the failure. It means never claiming something succeeded when it didn't, and never hiding that a failure happened at all. Within those two boundaries, there's a real design decision about how much detail belongs in front of the user versus in a log only the team can see.</p>
+
+  <div class="box why">
+    <span class="box-label">Why it matters here</span>
+    Getting this wrong in either direction causes real harm: a too-vague error frustrates and confuses a genuine user trying to get help, while a too-detailed one hands an attacker a map of your system. A reference ID pattern like the good example gives support staff enough to look up the real error without exposing it publicly.
+  </div>
+
+  <h2>Check your recall</h2>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What's the problem with the "Something went wrong" error message on its own?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">It gives the user nothing actionable to work with.</button>
+      <button class="quiz-choice" data-correct="false">It exposes the database hostname to attackers.</button>
+      <button class="quiz-choice" data-correct="false">It runs slower than a detailed error message.</button>
+      <button class="quiz-choice" data-correct="false">It is not technically a valid HTTP response.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>It's honest that something failed, but a user has no way to tell whether it was their mistake or a server problem.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. What's the risk of returning a full traceback and database host directly to the user?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">It hands an attacker internal system details.</button>
+      <button class="quiz-choice" data-correct="false">It makes the response too large to transmit.</button>
+      <button class="quiz-choice" data-correct="false">It is automatically flagged as spam by browsers.</button>
+      <button class="quiz-choice" data-correct="false">It requires the user to have a developer account.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>This is information disclosure — internal details that help someone understand and exploit the system, not information the user asked for.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. What does the fixed version give the user instead of the full error detail?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">A plain message and a reference ID for support.</button>
+      <button class="quiz-choice" data-correct="false">The exact line number where the error occurred.</button>
+      <button class="quiz-choice" data-correct="false">A copy of the server's current configuration.</button>
+      <button class="quiz-choice" data-correct="false">A list of every table in the database.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The full technical detail is logged separately (Lesson 11 covers logging it safely), and only the reference ID connects the user's report to it.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="information disclosure">
+    <p class="quiz-prompt">4. Fill in the blank: revealing internal system details that help an attacker exploit it is called ___ ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>See the definition box above — this sits under OWASP's broader "Security Misconfiguration" category.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="reference id|reference_id">
+    <p class="quiz-prompt">5. Fill in the blank: the good example returns a ___ that connects a user's vague-but-honest error to the full internal detail logged separately.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>This lets support staff look up the real error without ever exposing the details publicly.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>The <a href="https://owasp.org/Top10/A05_2021-Security_Misconfiguration/">OWASP Top 10 — Security Misconfiguration</a> entry covers information disclosure through error messages as one of its named examples.</p>
+
+  <p class="ask-teacher">Want to see what a good "reference ID" error-tracking setup looks like in a real framework? Ask your teacher — that's what I'm here for. Next: applying the same principle to logging itself.</p>
+
+  <footer class="lesson-footer">STEM+ · Computer Programming Ethics · Lesson 10</footer>
+</div>

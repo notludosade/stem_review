@@ -1,0 +1,110 @@
+<title>Lesson 5: Validating Input Before You Trust It — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Computer Programming Ethics · Lesson 5</span>
+  <h1>Validating Input Before You Trust It</h1>
+  <p class="subtitle">The injection fix from Unit 1 was one example of a much bigger rule.</p>
+  <p class="nav-links"><a href="0006-passwords-are-never-stored-theyre-hashed.html">Lesson 6 →</a> <a href="../index.html">Contents</a> <a href="../reference/glossary.html">Glossary →</a></p>
+
+  <p>Lesson 3 fixed one specific problem — user input glued into a SQL query. The general principle behind that fix is bigger than SQL: <strong>anything that enters your program from outside it is untrusted until it's checked.</strong> That includes form fields, URL parameters, uploaded files, API responses, even data read back out of your own database if another program could have written to it.</p>
+
+  <h2>What "checked" actually means</h2>
+  <p>Validation isn't one thing — it's a small set of questions asked of every piece of external input before it's used:</p>
+  <ul>
+    <li><strong>Type</strong> — is this actually a number, if a number is expected?</li>
+    <li><strong>Range</strong> — is this number, or string length, within a sane bound?</li>
+    <li><strong>Format</strong> — does this look like a real email address, date, or ID?</li>
+    <li><strong>Allowed values</strong> — if only three options are valid, is this one of them?</li>
+  </ul>
+
+  <span class="code-label is-bad">Trusting the input as-is</span>
+  <pre class="code-block code-bad"><code>def set_age(age):
+    user.age = age  # could be -5, "banana", or 9999999</code></pre>
+
+  <span class="code-label is-good">Checking before using it</span>
+  <pre class="code-block code-good"><code>def set_age(age):
+    if not isinstance(age, int) or not (0 <= age <= 130):
+        raise ValueError(f"Invalid age: {age!r}")
+    user.age = age</code></pre>
+
+  <p>The fixed version doesn't just avoid a crash — it refuses to let obviously-wrong data ever reach the rest of the program. That matters even when nobody is attacking anything: bad input arrives from bugs, from other systems, from users who mistype a field, just as often as it arrives from someone probing for a weakness.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    <strong>Input validation</strong> is the practice of checking that external data meets expected type, range, format, and value constraints <em>before</em> it's used — rejecting or correcting it if it doesn't, rather than trusting it by default.
+  </div>
+
+  <h2>Validate at the boundary, trust inside</h2>
+  <p>A useful mental model, drawn from the <a href="https://cheatsheetseries.owasp.org/cheatsheets/Input_Validation_Cheat_Sheet.html">OWASP Input Validation Cheat Sheet</a>: draw a line around your program. Outside that line — anything from a user, a network request, a file — is untrusted. Validate right at the boundary, the moment data crosses in. Once it's validated, the rest of the program can trust it, instead of every function re-checking everything defensively forever.</p>
+
+  <div class="box why">
+    <span class="box-label">Why it matters here</span>
+    Skipping validation is rarely a deliberate ethical failure the way a dark pattern is — it's usually just skipped for speed. But the OWASP Top 10's "Injection" category, and a long list of real breaches, trace back to exactly this: input that should have been checked at the boundary and wasn't.
+  </div>
+
+  <h2>Check your recall</h2>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. According to this lesson, when should external input be treated as untrusted?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Always, until it has actually been checked.</button>
+      <button class="quiz-choice" data-correct="false">Only when it comes from an anonymous user.</button>
+      <button class="quiz-choice" data-correct="false">Only when the input is longer than expected.</button>
+      <button class="quiz-choice" data-correct="false">Only after the program has already crashed once.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The rule applies to any external source — form fields, files, API responses — not just user-typed text, and applies by default, not after a failure.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. What does the fixed <code class="inline-code">set_age</code> example check, beyond just "is this a number"?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Whether the number falls in a sane range.</button>
+      <button class="quiz-choice" data-correct="false">Whether the number was typed or pasted in.</button>
+      <button class="quiz-choice" data-correct="false">Whether the user has an existing account.</button>
+      <button class="quiz-choice" data-correct="false">Whether the request arrived over a secure connection.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Type alone isn't enough — an age of <code class="inline-code">9999999</code> is a valid integer but not a valid age, so the range check <code class="inline-code">0 <= age <= 130</code> catches it.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. In the "boundary" mental model, where should validation happen?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Right where external data first enters the program.</button>
+      <button class="quiz-choice" data-correct="false">Only in the final function before a response is sent.</button>
+      <button class="quiz-choice" data-correct="false">Redundantly, inside every single function that runs.</button>
+      <button class="quiz-choice" data-correct="false">Only once, during the program's initial setup phase.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Validating at the boundary means the rest of the program can trust the data without re-checking it everywhere — the check happens once, at the point of entry.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="input validation">
+    <p class="quiz-prompt">4. Fill in the blank: checking that external data meets expected type, range, format, and value constraints before use is called ___ ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>See the definition box above — it's the general principle behind Lesson 3's specific SQL-injection fix.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="boundary">
+    <p class="quiz-prompt">5. Fill in the blank: the mental model in this lesson says to validate at the ___ where data enters the program, then trust it inside.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Drawing this line clearly avoids both extremes: trusting nothing (defensive checks everywhere) and trusting everything (no checks at all).</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>The <a href="https://cheatsheetseries.owasp.org/cheatsheets/Input_Validation_Cheat_Sheet.html">OWASP Input Validation Cheat Sheet</a> goes deeper into allowlisting versus denylisting and format-specific validation — worth skimming before writing your next form handler.</p>
+
+  <p class="ask-teacher">Curious how this applies to file uploads specifically, which have their own extra risks? Ask your teacher — that's what I'm here for. Next: why passwords are hashed, never stored directly, and what that actually means.</p>
+
+  <footer class="lesson-footer">STEM+ · Computer Programming Ethics · Lesson 5</footer>
+</div>

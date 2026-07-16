@@ -1,0 +1,136 @@
+<title>Lesson 4: Try, Catch, and Throw — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<script src="../../assets/interactive.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Computer Programming 2 · Lesson 4</span>
+  <h1>Try, Catch, and Throw</h1>
+  <p class="subtitle">Unit 1 was about shaping objects. Unit 2 is about shaping what happens when something goes wrong.</p>
+  <p class="nav-links"><a href="0005-custom-exceptions.html">Lesson 5 →</a> <a href="../index.html">Contents</a> <a href="../reference/glossary.html">Glossary →</a></p>
+
+  <p>An <strong>exception</strong> is a signal that something went wrong, raised at the point of failure and handled somewhere else — possibly far away in the call stack. A <code class="inline-code">try</code> block wraps code that might fail; a matching <code class="inline-code">catch</code> block runs if it does. Below, all four attempt to convert text the user typed into a number, and handle the case where it isn't one.</p>
+
+  <div id="trycatch-tabs">
+    <div class="fm-tabs">
+      <button class="fm-tab is-active" data-tab="py">Python</button>
+      <button class="fm-tab" data-tab="java">Java</button>
+      <button class="fm-tab" data-tab="js">JavaScript</button>
+      <button class="fm-tab" data-tab="cpp">C++</button>
+    </div>
+    <div class="fm-panel" data-panel="py">
+      <span class="code-label">Python</span>
+      <pre class="code-block"><code>try:
+    age = int(text)
+except ValueError:
+    print("That wasn't a number.")</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="java" hidden>
+      <span class="code-label">Java</span>
+      <pre class="code-block"><code>try {
+    int age = Integer.parseInt(text);
+} catch (NumberFormatException e) {
+    System.out.println("That wasn't a number.");
+}</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="js" hidden>
+      <span class="code-label">JavaScript</span>
+      <pre class="code-block"><code>try {
+    let age = parseInt(text, 10);
+    if (isNaN(age)) throw new Error("Not a number");
+} catch (e) {
+    console.log("That wasn't a number.");
+}</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="cpp" hidden>
+      <span class="code-label">C++</span>
+      <pre class="code-block"><code>try {
+    int age = std::stoi(text);
+} catch (const std::invalid_argument&amp; e) {
+    std::cout &lt;&lt; "That wasn't a number." &lt;&lt; std::endl;
+}</code></pre>
+    </div>
+  </div>
+
+  <p>Python's <code class="inline-code">int()</code>, Java's <code class="inline-code">Integer.parseInt()</code>, and C++'s <code class="inline-code">std::stoi()</code> all <strong>throw</strong> automatically the instant they receive text they can't convert — <code class="inline-code">ValueError</code>, <code class="inline-code">NumberFormatException</code>, and <code class="inline-code">std::invalid_argument</code>, respectively. Each <code class="inline-code">catch</code>/<code class="inline-code">except</code> names the exact exception type it's prepared to handle; anything else would pass straight through unhandled. JavaScript's <code class="inline-code">parseInt()</code> is the odd one out — it never throws at all, just quietly returns <code class="inline-code">NaN</code> ("not a number") on bad input. To get the same fail-loud behavior here, the code has to check for <code class="inline-code">NaN</code> itself and manually <code class="inline-code">throw</code>. That's the same <code class="inline-code">throw</code> keyword doing the same job either way: raising an exception for some other code to catch.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    An <strong>exception</strong> is a signal raised when something goes wrong. A <code class="inline-code">try</code> block wraps code that might raise one; a matching <code class="inline-code">catch</code> (Python: <code class="inline-code">except</code>) block runs if it does. <code class="inline-code">throw</code> (Python: <code class="inline-code">raise</code>) creates and raises an exception, either automatically inside a built-in operation or manually in your own code.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why it matters here</span>
+    A program that silently produces a wrong answer instead of failing is far more dangerous than one that stops and says so — that's the same honest-failure instinct the ethics course built earlier in this strand, now given real mechanics. <code class="inline-code">try</code>/<code class="inline-code">catch</code> is how a program fails loudly on purpose, in exactly the place equipped to do something about it.
+  </div>
+
+  <h2>Check your recall</h2>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What does a try block do?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Wraps code that might raise an exception, so a matching catch block can respond if it does.</button>
+      <button class="quiz-choice" data-correct="false">Permanently prevents any exception from ever occurring.</button>
+      <button class="quiz-choice" data-correct="false">Runs code twice to check for consistency.</button>
+      <button class="quiz-choice" data-correct="false">Deletes the exception class after it's used once.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The try block itself doesn't stop failures — it just gives you a place to catch them.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why is JavaScript's parseInt() different from the other three languages' conversion functions here?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">It never throws on bad input — it returns NaN instead, so the code must check and throw manually.</button>
+      <button class="quiz-choice" data-correct="false">It cannot convert text to numbers under any circumstances.</button>
+      <button class="quiz-choice" data-correct="false">It throws two different exception types instead of one.</button>
+      <button class="quiz-choice" data-correct="false">It behaves identically to Python's int() in every way.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>NaN is a valid number-typed value in JavaScript, which is exactly why it's easy to miss without an explicit isNaN() check.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. What determines which catch/except block handles a given exception?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">The exception's type must match the type named in the catch/except clause.</button>
+      <button class="quiz-choice" data-correct="false">Whichever catch block appears first in the file, regardless of type.</button>
+      <button class="quiz-choice" data-correct="false">The order in which the program was compiled.</button>
+      <button class="quiz-choice" data-correct="false">Catch blocks always run, regardless of what was thrown.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A ValueError won't be caught by an except clause written for a different exception type.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="exception">
+    <p class="quiz-prompt">4. Fill in the blank: a signal raised when something goes wrong during a program's execution is called an ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>See the definition box above.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="throw">
+    <p class="quiz-prompt">5. Fill in the blank: the keyword used in Java, JavaScript, and C++ to manually raise an exception is ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Python uses raise instead — the same job, a different keyword.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/try...catch">MDN's JavaScript try...catch reference</a> documents the syntax and control flow in full detail.</p>
+
+  <p class="ask-teacher">Wondering what happens if an exception is thrown but nothing ever catches it? Ask your teacher — that's what I'm here for. Next: defining your own exception types.</p>
+
+  <footer class="lesson-footer">STEM+ · Computer Programming 2 · Lesson 4</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  STEMPlus.mountTabs(document.getElementById('trycatch-tabs'), 'data-tab', 'data-panel');
+});
+</script>

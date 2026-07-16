@@ -1,0 +1,137 @@
+<title>Lesson 21: Reading a Text File — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<script src="../../assets/interactive.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Computer Programming 1 · Lesson 21</span>
+  <h1>Reading a Text File</h1>
+  <p class="subtitle">Files behave a lot like standard input — open a stream, read from it a line at a time, close it when done.</p>
+  <p class="nav-links"><a href="../Unit%208/0022-defining-a-class-and-creating-instances.html">Lesson 22 →</a> <a href="../index.html">Contents</a> <a href="../reference/glossary.html">Glossary →</a></p>
+
+  <p>Reading a file follows the same shape in every language: open it, read through its contents, then close it. Here, all four read <code class="inline-code">scores.txt</code> line by line and print each one — reusing the same iteration ideas from Lesson 17 and Lesson 8.</p>
+
+  <div id="file-tabs">
+    <div class="fm-tabs">
+      <button class="fm-tab is-active" data-tab="py">Python</button>
+      <button class="fm-tab" data-tab="java">Java</button>
+      <button class="fm-tab" data-tab="js">JavaScript</button>
+      <button class="fm-tab" data-tab="cpp">C++</button>
+    </div>
+    <div class="fm-panel" data-panel="py">
+      <span class="code-label">Python</span>
+      <pre class="code-block"><code>with open("scores.txt") as f:
+    for line in f:
+        print(line.strip())</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="java" hidden>
+      <span class="code-label">Java</span>
+      <pre class="code-block"><code>Scanner fileScanner = new Scanner(new File("scores.txt"));
+while (fileScanner.hasNextLine()) {
+    System.out.println(fileScanner.nextLine());
+}
+fileScanner.close();</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="js" hidden>
+      <span class="code-label">JavaScript (Node.js)</span>
+      <pre class="code-block"><code>const fs = require('fs');
+const lines = fs.readFileSync('scores.txt', 'utf8').split('\n');
+for (const line of lines) {
+    console.log(line);
+}</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="cpp" hidden>
+      <span class="code-label">C++</span>
+      <pre class="code-block"><code>std::ifstream file("scores.txt");
+std::string line;
+while (std::getline(file, line)) {
+    std::cout &lt;&lt; line &lt;&lt; std::endl;
+}
+file.close();</code></pre>
+    </div>
+  </div>
+
+  <p>Python's <code class="inline-code">with open(...) as f</code> and JavaScript's single <code class="inline-code">readFileSync</code> call both close the file automatically once finished — Python closes it when the <code class="inline-code">with</code> block ends, JavaScript closes it because <code class="inline-code">readFileSync</code> reads the whole file at once and hands back a finished string. Java and C++ open a <strong>file handle</strong> that stays open until you explicitly call <code class="inline-code">close()</code> — forgetting to do so leaves the file locked or wastes a system resource, the same category of bug as the infinite loop from Lesson 8 where a program keeps running long after it should have stopped.</p>
+
+  <p>The loop shapes should look familiar too: Java's <code class="inline-code">while (fileScanner.hasNextLine())</code> is the same "keep going while a condition holds" pattern from Lesson 8, and Python's and JavaScript's <code class="inline-code">for</code> loops are iterating over a sequence exactly the way Lesson 17 iterated over a list — a file's lines behave like just another collection to loop through.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    A <strong>file handle</strong> (or file stream) is an open connection to a file that a program reads from or writes to, similar to how standard input is a stream connected to the keyboard. Like any open resource, it should be closed once you're done with it.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why it matters here</span>
+    Console input disappears the moment a program ends, but a file persists — it's how programs save settings, load data sets, or write out logs that survive after the program has finished running. Every data-driven program eventually needs this same three-step pattern: open, read (or write), close.
+  </div>
+
+  <h2>Check your recall</h2>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What happens if a Java or C++ program opens a file but never calls close() on it?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">The file handle stays open, potentially locking the file or wasting a system resource.</button>
+      <button class="quiz-choice" data-correct="false">The program automatically closes it after five seconds.</button>
+      <button class="quiz-choice" data-correct="false">Nothing — closing a file handle is purely optional with no consequences.</button>
+      <button class="quiz-choice" data-correct="false">The file's contents are permanently deleted.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>This is the same category of bug as an infinite loop — something that should have stopped but didn't.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why doesn't the Python example need an explicit close() call?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">The with block automatically closes the file once it ends.</button>
+      <button class="quiz-choice" data-correct="false">Python files close themselves after being read once, with no special syntax involved.</button>
+      <button class="quiz-choice" data-correct="false">Python does not require files to ever be closed.</button>
+      <button class="quiz-choice" data-correct="false">open() only works for files that don't need closing.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The with statement guarantees cleanup even if an error occurs while reading.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. How does looping over a file's lines in Java resemble Lesson 8's while loop?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Both keep repeating for as long as a condition — hasNextLine() here — stays true.</button>
+      <button class="quiz-choice" data-correct="false">Both are guaranteed to run exactly three times.</button>
+      <button class="quiz-choice" data-correct="false">Neither actually uses a loop.</button>
+      <button class="quiz-choice" data-correct="false">They are unrelated concepts with no similarity.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>hasNextLine() plays the same role as any other while-loop condition.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="handle">
+    <p class="quiz-prompt">4. Fill in the blank: an open connection to a file that a program reads from or writes to is called a file ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>See the definition box above — also sometimes called a file stream.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="close">
+    <p class="quiz-prompt">5. Fill in the blank: the three-step pattern every file operation follows is open, read (or write), and ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Some languages do this automatically; others require it explicitly.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p><a href="https://docs.python.org/3/tutorial/inputoutput.html#reading-and-writing-files">The official Python tutorial's section on reading and writing files</a> documents Python's file-handling syntax directly from the language's own documentation.</p>
+
+  <p class="ask-teacher">Curious how to write to a file instead of just reading one? Ask your teacher — that's what I'm here for. Unit 7 is complete; Unit 8 turns to objects and classes — bundling data and behavior together instead of keeping them separate.</p>
+
+  <footer class="lesson-footer">STEM+ · Computer Programming 1 · Lesson 21</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  STEMPlus.mountTabs(document.getElementById('file-tabs'), 'data-tab', 'data-panel');
+});
+</script>

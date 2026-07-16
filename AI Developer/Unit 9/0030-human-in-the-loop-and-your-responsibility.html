@@ -1,0 +1,99 @@
+<title>Lesson 30: Human-in-the-Loop and Your Responsibility — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · AI Developer · Lesson 30</span>
+  <h1>Human-in-the-Loop and Your Responsibility as a Developer</h1>
+  <p class="subtitle">Bias can hide in data. Hallucination can hide behind fluent confidence. The last safeguard, when a decision actually matters, is never fully automating it away.</p>
+  <p class="nav-links"><a href="../index.html">Contents</a> <a href="../reference/glossary.html">Glossary →</a></p>
+
+  <p><strong>Human-in-the-loop</strong> means a system is designed so a person reviews or confirms a model's output before it takes effect, rather than acting on it automatically — especially for decisions with real consequences for someone's life, money, health, or safety. Lesson 23's fallback already gestured at this: routing an uncertain case to a human rather than guessing was a deliberate design choice, not a limitation to eventually remove.</p>
+
+  <span class="code-label">Python — routing high-stakes cases to a human</span>
+  <pre class="code-block"><code>def triage_ticket_with_review(ticket_text):
+    result = triage_ticket_versioned(ticket_text)   # from Lessons 23 and 27
+
+    consequential = result["urgency"] == "high"
+    if consequential:
+        result["needs_human_review"] = True
+        # queued for a person to confirm before any automatic action is taken
+
+    return result</code></pre>
+
+  <p>Nothing about this code is technically difficult — the entire safeguard is the decision to add <code class="inline-code">needs_human_review</code> at all, for exactly the cases where being wrong matters most. That decision doesn't come from a training run or a metric; it comes from you, as the developer, judging which outputs are safe to automate fully and which ones genuinely need a person in the loop. No lesson in this course can make that judgment call for you on a real project — it depends on what's actually at stake.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    <strong>Human-in-the-loop</strong> is a system design where a person reviews or confirms a model's output before it takes effect, rather than the system acting on it fully automatically.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why it matters here</span>
+    <a href="../../Computer%20Programming%20Ethics/Unit%204/0012-when-code-should-refuse-to-run.html">Computer Programming Ethics, Lesson 12, "When Code Should Refuse to Run,"</a> and <a href="../../Computer%20Programming%20Ethics/Unit%207/0021-putting-it-all-together-an-ethics-checklist.html">Lesson 21's ethics checklist</a> already cover a developer's responsibility for what their code does in the world — that reasoning applies in full here, and isn't re-derived. What Units 6 through 9 add is specific to AI: bias that hides inside training data instead of source code, hallucinations that sound exactly as confident right or wrong, and a need for human oversight precisely because these systems can act at a scale and speed no individual reviewer ever could.
+  </div>
+
+  <h2>Check your recall</h2>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What does human-in-the-loop mean?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">A person reviews or confirms a model's output before it takes effect, rather than it acting fully automatically.</button>
+      <button class="quiz-choice" data-correct="false">A model trained using labeled examples provided by a person.</button>
+      <button class="quiz-choice" data-correct="false">A user interface that displays a picture of a human being.</button>
+      <button class="quiz-choice" data-correct="false">A model that requires no data at all to produce output.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>needs_human_review flags exactly this: a case queued for a person to confirm before anything automatic happens.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. In the code above, what determines whether a ticket is routed for human review?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Whether the case is consequential enough that a wrong automatic decision would genuinely matter.</button>
+      <button class="quiz-choice" data-correct="false">Whether the ticket text happens to be longer than 100 characters.</button>
+      <button class="quiz-choice" data-correct="false">Whether the request was served from the cache in Lesson 25.</button>
+      <button class="quiz-choice" data-correct="false">Whether the model's temperature setting was above zero.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The example uses urgency as a stand-in for "consequential" — the real judgment is a developer's, based on actual stakes.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. According to this lesson, where does the judgment of which decisions need human review actually come from?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">The developer, deciding based on what's genuinely at stake in a specific real project.</button>
+      <button class="quiz-choice" data-correct="false">A fixed, universal rule that applies identically to every AI system ever built.</button>
+      <button class="quiz-choice" data-correct="false">A metric automatically computed during model training.</button>
+      <button class="quiz-choice" data-correct="false">The pretrained model itself, deciding entirely on its own.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The lesson is explicit that no course can make this call for you — it depends on the real stakes of your project.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="human-in-the-loop">
+    <p class="quiz-prompt">4. Fill in the blank: designing a system so a person confirms a model's output before it takes effect is called ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>See the definition box above.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="responsibility">
+    <p class="quiz-prompt">5. Fill in the blank: judging which outputs are safe to automate is ultimately the developer's ___, not something a metric decides.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>See the paragraph above the definition box.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p><a href="https://pair.withgoogle.com/guidebook">Google's People + AI Guidebook</a> is a practical, widely used resource for designing exactly this kind of human oversight into a real AI-powered product.</p>
+
+  <p class="ask-teacher">Have a real project in mind you'd like to think through — where it fits on the build-vs-buy spectrum from Lesson 22, and where a human needs to stay in the loop? Ask your teacher — that conversation is the best way to put all nine units to real use. This closes AI Developer, and with it, the entire Computer Programming strand: Ethics, Computer Programming 1 and 2, and finally this course. Well done.</p>
+
+  <footer class="lesson-footer">STEM+ · AI Developer · Lesson 30 · Course complete</footer>
+</div>

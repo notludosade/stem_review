@@ -1,0 +1,145 @@
+<title>Lesson 22: Debugging Strategy — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<script src="../../assets/interactive.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Computer Programming 2 · Lesson 22</span>
+  <h1>Debugging Strategy</h1>
+  <p class="subtitle">A test tells you something is wrong. Debugging is the separate skill of finding out exactly what and where.</p>
+  <p class="nav-links"><a href="../Unit%208/0023-organizing-a-multi-file-program.html">Lesson 23 →</a> <a href="../index.html">Contents</a> <a href="../reference/glossary.html">Glossary →</a></p>
+
+  <p>An off-by-one error is one of the most common real bugs: a loop that runs one time too many or too few. Below, each version reads one index past the end of a list — and each language reports it completely differently.</p>
+
+  <div id="bug-tabs">
+    <div class="fm-tabs">
+      <button class="fm-tab is-active" data-tab="py">Python</button>
+      <button class="fm-tab" data-tab="java">Java</button>
+      <button class="fm-tab" data-tab="js">JavaScript</button>
+      <button class="fm-tab" data-tab="cpp">C++</button>
+    </div>
+    <div class="fm-panel" data-panel="py">
+      <span class="code-label">Python</span>
+      <pre class="code-block"><code>scores = [90, 85, 77]
+for i in range(len(scores) + 1):   # bug: should be len(scores)
+    print(scores[i])
+# IndexError: list index out of range
+# Traceback shows the exact line and the call stack (Unit 4) leading to it</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="java" hidden>
+      <span class="code-label">Java</span>
+      <pre class="code-block"><code>int[] scores = {90, 85, 77};
+for (int i = 0; i &lt;= scores.length; i++) {   // bug: should be &lt;
+    System.out.println(scores[i]);
+}
+// ArrayIndexOutOfBoundsException: Index 3 out of bounds for length 3
+// Also prints a full stack trace pinpointing the exact line</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="js" hidden>
+      <span class="code-label">JavaScript</span>
+      <pre class="code-block"><code>let scores = [90, 85, 77];
+for (let i = 0; i &lt;= scores.length; i++) {   // bug: should be &lt;
+    console.log(scores[i]);
+}
+// 90
+// 85
+// 77
+// undefined   — NO ERROR AT ALL. JavaScript just returns undefined
+// for an out-of-range index, silently continuing.</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="cpp" hidden>
+      <span class="code-label">C++</span>
+      <pre class="code-block"><code>std::vector&lt;int&gt; scores = {90, 85, 77};
+for (size_t i = 0; i &lt;= scores.size(); i++) {   // bug: should be &lt;
+    std::cout &lt;&lt; scores[i] &lt;&lt; std::endl;
+}
+// undefined behavior via operator[] — might print garbage, might
+// crash, might appear to work. .at(i) would throw std::out_of_range
+// instead, trading a little speed for a real, catchable error.</code></pre>
+    </div>
+  </div>
+
+  <p>Python and Java fail loudly with a clear error and a stack trace — read from the top, it names the exact line and the chain of calls that led there (Unit 4's call stack, made visible). C++'s <code class="inline-code">[]</code> is the dangerous outlier once again, exactly as in Lesson 19: no promise of any error at all. JavaScript sits in between — no crash, but also no error, just a wrong value (<code class="inline-code">undefined</code>) quietly flowing forward into whatever uses it next, often failing somewhere far away from the actual bug.</p>
+
+  <p>A general strategy handles all four cases: <strong>reproduce it reliably</strong> first — a bug you can trigger on demand is a bug you can investigate. <strong>Read the error and stack trace</strong> when one exists; it usually names the exact line. When it doesn't — JavaScript's silent <code class="inline-code">undefined</code>, C++'s undefined behavior — <strong>bisect</strong>: check a value halfway through the suspect code, narrow to the half where things went wrong, and repeat. That's Unit 5's binary search, applied to a bug instead of a sorted list, and it turns "somewhere in this function" into the exact line in a handful of steps. A debugger's breakpoints let you pause and inspect state at any line directly, and are usually faster than sprinkling print statements once a bug resists the first two steps.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    <strong>Debugging</strong> is the process of locating the cause of a bug. Strategy: reproduce reliably, read the error and stack trace, then <strong>bisect</strong> — narrow the suspect range in half repeatedly — when no clear error points the way.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why it matters here</span>
+    Bisecting a bug is Unit 5's binary search wearing a different hat — proof that ideas from earlier units keep resurfacing as tools, not just isolated facts. This closes Unit 7: assertions (Lesson 20) and tests (Lesson 21) try to catch bugs before they matter; this lesson is what to do once one gets through anyway.
+  </div>
+
+  <h2>Check your recall</h2>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What's the first step in the debugging strategy this lesson recommends?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Reproduce the bug reliably, so it can be triggered and investigated on demand.</button>
+      <button class="quiz-choice" data-correct="false">Immediately rewrite the entire function from scratch.</button>
+      <button class="quiz-choice" data-correct="false">Add a print statement to every single line in the entire program.</button>
+      <button class="quiz-choice" data-correct="false">Ignore the bug and hope it doesn't happen again.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A bug that can't be reliably triggered is very hard to confirm has actually been fixed.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why is JavaScript's silent undefined arguably more dangerous to debug than Python's IndexError?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">There's no error or stack trace pointing to the mistake — the wrong value just flows forward silently.</button>
+      <button class="quiz-choice" data-correct="false">JavaScript crashes the entire computer when this happens.</button>
+      <button class="quiz-choice" data-correct="false">Python's IndexError is actually less informative than undefined.</button>
+      <button class="quiz-choice" data-correct="false">There is no real difference between the two languages' behavior here.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A loud, immediate error is often easier to debug than a quiet wrong value discovered much later.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. What does "bisecting" a bug mean?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Checking a value halfway through the suspect code and repeatedly narrowing to the half where things went wrong.</button>
+      <button class="quiz-choice" data-correct="false">Deleting exactly half of the codebase at random.</button>
+      <button class="quiz-choice" data-correct="false">Running the program on two different computers simultaneously.</button>
+      <button class="quiz-choice" data-correct="false">Splitting one bug report into two separate, unrelated tickets.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>This is exactly Unit 5's binary search, applied to narrowing down a bug's location instead of a sorted list.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="bisect">
+    <p class="quiz-prompt">4. Fill in the blank: repeatedly narrowing the suspect range in half to locate a bug is called doing a ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>See the definition box above.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="breakpoints">
+    <p class="quiz-prompt">5. Fill in the blank: a debugger lets you pause execution at specific lines, called ___, to inspect state directly.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Breakpoints are usually faster than sprinkling print statements once bisection narrows the search enough.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/debugger">MDN's reference for the JavaScript debugger statement</a> documents a real, practical breakpoint mechanism directly from the source.</p>
+
+  <p class="ask-teacher">Wondering how professional teams debug issues that only happen in production, not on their own machine? Ask your teacher — logging and monitoring tools are the answer, and they build directly on everything in this lesson. That closes Unit 7: Testing & Debugging. Next: bringing everything from this entire course together into one small program.</p>
+
+  <footer class="lesson-footer">STEM+ · Computer Programming 2 · Lesson 22</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  STEMPlus.mountTabs(document.getElementById('bug-tabs'), 'data-tab', 'data-panel');
+});
+</script>

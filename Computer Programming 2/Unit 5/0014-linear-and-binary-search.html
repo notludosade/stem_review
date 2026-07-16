@@ -1,0 +1,222 @@
+<title>Lesson 14: Linear and Binary Search — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<script src="../../assets/interactive.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Computer Programming 2 · Lesson 14</span>
+  <h1>Linear and Binary Search</h1>
+  <p class="subtitle">Same goal — find a value in a list. One approach checks every element. The other throws half the list away with every guess.</p>
+  <p class="nav-links"><a href="0015-sorting-algorithms.html">Lesson 15 →</a> <a href="../index.html">Contents</a> <a href="../reference/glossary.html">Glossary →</a></p>
+
+  <p><strong>Linear search</strong> checks each element in order until it finds a match or runs out of elements. It works on any list, sorted or not — but in the worst case it looks at every single element, making it <strong>O(n)</strong>.</p>
+
+  <div id="linear-tabs">
+    <div class="fm-tabs">
+      <button class="fm-tab is-active" data-tab="py">Python</button>
+      <button class="fm-tab" data-tab="java">Java</button>
+      <button class="fm-tab" data-tab="js">JavaScript</button>
+      <button class="fm-tab" data-tab="cpp">C++</button>
+    </div>
+    <div class="fm-panel" data-panel="py">
+      <span class="code-label">Python</span>
+      <pre class="code-block"><code>def linear_search(items, target):
+    for i, value in enumerate(items):
+        if value == target:
+            return i
+    return -1</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="java" hidden>
+      <span class="code-label">Java</span>
+      <pre class="code-block"><code>static int linearSearch(int[] items, int target) {
+    for (int i = 0; i &lt; items.length; i++) {
+        if (items[i] == target) {
+            return i;
+        }
+    }
+    return -1;
+}</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="js" hidden>
+      <span class="code-label">JavaScript</span>
+      <pre class="code-block"><code>function linearSearch(items, target) {
+    for (let i = 0; i &lt; items.length; i++) {
+        if (items[i] === target) {
+            return i;
+        }
+    }
+    return -1;
+}</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="cpp" hidden>
+      <span class="code-label">C++</span>
+      <pre class="code-block"><code>int linearSearch(const std::vector&lt;int&gt;&amp; items, int target) {
+    for (size_t i = 0; i &lt; items.size(); i++) {
+        if (items[i] == target) {
+            return static_cast&lt;int&gt;(i);
+        }
+    }
+    return -1;
+}</code></pre>
+    </div>
+  </div>
+
+  <p><strong>Binary search</strong> takes a shortcut only available on <em>sorted</em> data: check the middle element, and if it's not a match, the sorted order guarantees the target — if present — is entirely on one side. Discard the other half and repeat. Each check eliminates half of what's left.</p>
+
+  <div id="binary-tabs">
+    <div class="fm-tabs">
+      <button class="fm-tab is-active" data-tab="py">Python</button>
+      <button class="fm-tab" data-tab="java">Java</button>
+      <button class="fm-tab" data-tab="js">JavaScript</button>
+      <button class="fm-tab" data-tab="cpp">C++</button>
+    </div>
+    <div class="fm-panel" data-panel="py">
+      <span class="code-label">Python</span>
+      <pre class="code-block"><code>def binary_search(sorted_items, target):
+    low, high = 0, len(sorted_items) - 1
+    while low &lt;= high:
+        mid = (low + high) // 2
+        if sorted_items[mid] == target:
+            return mid
+        elif sorted_items[mid] &lt; target:
+            low = mid + 1
+        else:
+            high = mid - 1
+    return -1</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="java" hidden>
+      <span class="code-label">Java</span>
+      <pre class="code-block"><code>static int binarySearch(int[] sortedItems, int target) {
+    int low = 0, high = sortedItems.length - 1;
+    while (low &lt;= high) {
+        int mid = (low + high) / 2;
+        if (sortedItems[mid] == target) {
+            return mid;
+        } else if (sortedItems[mid] &lt; target) {
+            low = mid + 1;
+        } else {
+            high = mid - 1;
+        }
+    }
+    return -1;
+}</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="js" hidden>
+      <span class="code-label">JavaScript</span>
+      <pre class="code-block"><code>function binarySearch(sortedItems, target) {
+    let low = 0, high = sortedItems.length - 1;
+    while (low &lt;= high) {
+        const mid = Math.floor((low + high) / 2);
+        if (sortedItems[mid] === target) {
+            return mid;
+        } else if (sortedItems[mid] &lt; target) {
+            low = mid + 1;
+        } else {
+            high = mid - 1;
+        }
+    }
+    return -1;
+}</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="cpp" hidden>
+      <span class="code-label">C++</span>
+      <pre class="code-block"><code>int binarySearch(const std::vector&lt;int&gt;&amp; sortedItems, int target) {
+    int low = 0, high = static_cast&lt;int&gt;(sortedItems.size()) - 1;
+    while (low &lt;= high) {
+        int mid = (low + high) / 2;
+        if (sortedItems[mid] == target) {
+            return mid;
+        } else if (sortedItems[mid] &lt; target) {
+            low = mid + 1;
+        } else {
+            high = mid - 1;
+        }
+    }
+    return -1;
+}</code></pre>
+    </div>
+  </div>
+
+  <p>Cutting the remaining search space in half every step is exactly what makes binary search <strong>O(log n)</strong> — for a list of a million items, linear search might check a million elements in the worst case, while binary search needs at most about 20. That gap only widens as the list grows. The catch is the precondition: binary search's correctness depends entirely on the data already being sorted. Sort it once (next lesson), and every future search on that data gets the O(log n) discount.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    <strong>Linear search</strong> checks each element in order — O(n), works on any data. <strong>Binary search</strong> repeatedly halves the remaining range on sorted data — O(log n), but requires the data to already be sorted.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why it matters here</span>
+    This is Big-O from last lesson made concrete: same problem, same correct answer, and a real, measurable difference in how the cost scales. Binary search's requirement — sorted data — is also the reason sorting algorithms, up next, are worth learning even though sorting itself costs time upfront.
+  </div>
+
+  <h2>Check your recall</h2>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What precondition does binary search require that linear search does not?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">The data must already be sorted.</button>
+      <button class="quiz-choice" data-correct="false">The data must contain no duplicate values.</button>
+      <button class="quiz-choice" data-correct="false">The data must be stored in a linked list, not an array.</button>
+      <button class="quiz-choice" data-correct="false">Binary search has no special requirements at all.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Without sorted order, discarding half the data based on a single comparison would be unsafe.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why is binary search O(log n) instead of O(n)?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Each comparison eliminates half of the remaining search space, so the range shrinks exponentially fast.</button>
+      <button class="quiz-choice" data-correct="false">It checks two elements at once instead of one.</button>
+      <button class="quiz-choice" data-correct="false">It always finds the target on the very first comparison.</button>
+      <button class="quiz-choice" data-correct="false">It skips elements at random until it happens to find the target.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Halving repeatedly is what produces logarithmic — not linear — growth in worst-case comparisons.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. When is linear search still the right choice over binary search?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">When the data isn't sorted and sorting it first wouldn't be worth the cost for a one-off search.</button>
+      <button class="quiz-choice" data-correct="false">Linear search is always strictly better than binary search in every situation.</button>
+      <button class="quiz-choice" data-correct="false">Only when the list contains exactly one element.</button>
+      <button class="quiz-choice" data-correct="false">Binary search can never be used on numeric data.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Binary search's O(log n) advantage only pays off once the sorting precondition is satisfied.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="sorted">
+    <p class="quiz-prompt">4. Fill in the blank: binary search only works correctly on data that is already ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>See the definition box above.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="half">
+    <p class="quiz-prompt">5. Fill in the blank: binary search discards one ___ of the remaining range with every comparison.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>That repeated halving is exactly what produces O(log n) growth.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p><a href="https://docs.python.org/3/library/bisect.html">Python's official documentation for the bisect module</a> documents a real, production-ready binary search implementation directly from the standard library.</p>
+
+  <p class="ask-teacher">Wondering how a phone book or dictionary app finds a word so fast? Ask your teacher — it's this exact algorithm. Next: how to get unsorted data into sorted order in the first place.</p>
+
+  <footer class="lesson-footer">STEM+ · Computer Programming 2 · Lesson 14</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  STEMPlus.mountTabs(document.getElementById('linear-tabs'), 'data-tab', 'data-panel');
+  STEMPlus.mountTabs(document.getElementById('binary-tabs'), 'data-tab', 'data-panel');
+});
+</script>

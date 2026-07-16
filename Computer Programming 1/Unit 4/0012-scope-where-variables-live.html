@@ -1,0 +1,146 @@
+<title>Lesson 12: Scope — Where Variables Live — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<script src="../../assets/interactive.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Computer Programming 1 · Lesson 12</span>
+  <h1>Scope — Where Variables Live</h1>
+  <p class="subtitle">A variable created inside a function doesn't exist anywhere else — and that's a feature, not a limitation.</p>
+  <p class="nav-links"><a href="../Unit%205/0013-string-literals-and-concatenation.html">Lesson 13 →</a> <a href="../index.html">Contents</a> <a href="../reference/glossary.html">Glossary →</a></p>
+
+  <p><strong>Scope</strong> is the region of a program where a variable can be referred to by name. A variable declared inside a function is <strong>local</strong> to that function — it's created when the function runs and disappears when the function finishes, invisible to any code outside it.</p>
+
+  <span class="code-label is-bad">Trying to use a local variable outside its function</span>
+  <pre class="code-block code-bad"><code># Python
+def square(n):
+    result = n * n
+    return result
+
+square(5)
+print(result)  # error: result is not defined out here</code></pre>
+
+  <p><code class="inline-code">result</code> and <code class="inline-code">n</code> only exist while <code class="inline-code">square</code> is running. Once <code class="inline-code">square(5)</code> finishes, both are gone — trying to reference <code class="inline-code">result</code> afterward fails, because it was never in scope outside the function. This behavior is identical in Java, JavaScript, and C++.</p>
+
+  <div id="scope-tabs">
+    <div class="fm-tabs">
+      <button class="fm-tab is-active" data-tab="py">Python</button>
+      <button class="fm-tab" data-tab="java">Java</button>
+      <button class="fm-tab" data-tab="js">JavaScript</button>
+      <button class="fm-tab" data-tab="cpp">C++</button>
+    </div>
+    <div class="fm-panel" data-panel="py">
+      <span class="code-label">Python</span>
+      <pre class="code-block"><code>max_attempts = 3  # global — visible everywhere in this file
+
+def is_allowed(attempts):
+    return attempts &lt; max_attempts  # reads the global fine</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="java" hidden>
+      <span class="code-label">Java</span>
+      <pre class="code-block"><code>static int maxAttempts = 3; // class-level — visible to every method in the class
+
+static boolean isAllowed(int attempts) {
+    return attempts &lt; maxAttempts; // reads the class-level variable fine
+}</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="js" hidden>
+      <span class="code-label">JavaScript</span>
+      <pre class="code-block"><code>const maxAttempts = 3; // global — visible everywhere in this file
+
+function isAllowed(attempts) {
+    return attempts &lt; maxAttempts; // reads the global fine
+}</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="cpp" hidden>
+      <span class="code-label">C++</span>
+      <pre class="code-block"><code>int maxAttempts = 3; // global — visible everywhere in this file
+
+bool isAllowed(int attempts) {
+    return attempts &lt; maxAttempts; // reads the global fine
+}</code></pre>
+    </div>
+  </div>
+
+  <p>A variable declared outside any function — at the top level of a file, or (in Java's case) at the class level — is <strong>global</strong>, meaning any function in that file or class can read it. Functions can read global variables freely, but assigning to one from inside a function generally requires an extra step (different per language, and outside this lesson's scope) — which is a deliberate safeguard, not an oversight.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    <strong>Scope</strong> is the region of code where a variable's name is valid. A <strong>local</strong> variable is scoped to the function (or block) it's declared in, and stops existing once that function finishes. A <strong>global</strong> variable is scoped to the entire file (or class), visible to every function within it.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why it matters here</span>
+    Local scope is what makes functions safely reusable — <code class="inline-code">square</code>'s internal <code class="inline-code">result</code> can never accidentally collide with a variable of the same name somewhere else in your program, because it simply doesn't exist outside <code class="inline-code">square</code>. Relying heavily on global variables instead of parameters and return values is a common early mistake, since it makes a function's behavior depend on state scattered elsewhere in the program instead of just its own inputs.
+  </div>
+
+  <h2>Check your recall</h2>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. Why does <code class="inline-code">print(result)</code> fail after <code class="inline-code">square(5)</code> has already run?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true"><code>result</code> is local to <code>square</code> and stops existing once the function finishes.</button>
+      <button class="quiz-choice" data-correct="false"><code>print</code> cannot display numbers, only text.</button>
+      <button class="quiz-choice" data-correct="false"><code>square</code> was never actually called.</button>
+      <button class="quiz-choice" data-correct="false">Python does not allow variables named <code>result</code>.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Local variables are created when a function runs and disappear when it finishes.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. What makes <code class="inline-code">maxAttempts</code> in the second example different from <code class="inline-code">result</code> in the first?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">It's declared outside any function, so it's global and visible to every function that follows.</button>
+      <button class="quiz-choice" data-correct="false">It holds a different data type than result.</button>
+      <button class="quiz-choice" data-correct="false">It is actually still a local variable, just named differently.</button>
+      <button class="quiz-choice" data-correct="false">Nothing — the two behave identically.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Global variables are scoped to the whole file (or class), unlike local ones scoped to a single function.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why is relying heavily on global variables instead of parameters considered a common early mistake?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">It makes a function's behavior depend on state scattered elsewhere in the program, not just its own inputs.</button>
+      <button class="quiz-choice" data-correct="false">Global variables are not supported in most languages.</button>
+      <button class="quiz-choice" data-correct="false">It makes the program run noticeably slower every time.</button>
+      <button class="quiz-choice" data-correct="false">It is actually always the correct approach, with no downside.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Parameters and return values keep a function's behavior self-contained and predictable from its inputs alone.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="scope">
+    <p class="quiz-prompt">4. Fill in the blank: the region of a program where a variable's name is valid is called its ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>See the definition box above.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="local">
+    <p class="quiz-prompt">5. Fill in the blank: a variable scoped to the single function it's declared in, ceasing to exist once that function finishes, is ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>This is in contrast to a global variable, visible throughout the whole file or class.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p><a href="https://docs.python.org/3/tutorial/classes.html#python-scopes-and-namespaces">The official Python tutorial's section on scopes and namespaces</a> explains local versus global scope directly from the language's own documentation.</p>
+
+  <p class="ask-teacher">Curious about the extra step needed to modify a global variable from inside a function? Ask your teacher — that's what I'm here for. Unit 4 is complete; Unit 5 turns to strings — working with text, one of the two data types every program eventually needs.</p>
+
+  <footer class="lesson-footer">STEM+ · Computer Programming 1 · Lesson 12</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  STEMPlus.mountTabs(document.getElementById('scope-tabs'), 'data-tab', 'data-panel');
+});
+</script>

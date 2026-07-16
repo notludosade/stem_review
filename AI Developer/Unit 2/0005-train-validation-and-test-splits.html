@@ -1,0 +1,101 @@
+<title>Lesson 5: Train/Validation/Test Splits — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · AI Developer · Lesson 5</span>
+  <h1>Train/Validation/Test Splits</h1>
+  <p class="subtitle">Grading a model on the same data it studied from tells you almost nothing about how it'll do on data it's never seen.</p>
+  <p class="nav-links"><a href="0006-overfitting-and-underfitting.html">Lesson 6 →</a> <a href="../index.html">Contents</a> <a href="../reference/glossary.html">Glossary →</a></p>
+
+  <p>A model can memorize its training data instead of learning a genuine pattern — score it against that same data afterward, and memorization looks identical to real learning. The fix is splitting a dataset into three separate pieces before training even starts, each with a strict, different job.</p>
+
+  <span class="code-label">Python — scikit-learn</span>
+  <pre class="code-block"><code>from sklearn.model_selection import train_test_split
+
+# First split off the test set, untouched until the very end
+X_train, X_temp, y_train, y_temp = train_test_split(X, y, test_size=0.3, random_state=42)
+
+# Then split the remainder into validation and test
+X_val, X_test, y_val, y_test = train_test_split(X_temp, y_temp, test_size=0.5, random_state=42)
+
+# X_train, y_train (70%): fit the model on this
+# X_val,   y_val   (15%): tune settings and compare models on this, repeatedly
+# X_test,  y_test  (15%): touch this exactly once, right at the end</code></pre>
+
+  <p>The <strong>training set</strong> is what the model actually learns from — every weight, rule, or split it produces comes from studying these examples. The <strong>validation set</strong> is for every decision made <em>while building</em> the model: trying a different setting, comparing two candidate models, deciding when to stop training. It gets checked repeatedly, and that's fine — it was never meant to stay untouched. The <strong>test set</strong> exists for exactly one purpose: one final, honest score, checked exactly once, after every decision has already been made using the other two sets. Checking it early, or more than once, quietly turns it into a second validation set — and the honest final number disappears.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    The <strong>training set</strong> is the data a model learns from directly. The <strong>validation set</strong> is used repeatedly during development to tune choices and compare models. The <strong>test set</strong> is held out and checked exactly once, for a final, honest measure of how the model performs on data it's never influenced any decision about.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why it matters here</span>
+    This three-way split is the actual mechanism behind Lesson 6's overfitting check — a model whose training score is far better than its validation score is showing the exact symptom this split exists to catch. Skipping this split, or reusing the test set too early, is one of the most common ways an otherwise correct model ends up silently overrated.
+  </div>
+
+  <h2>Check your recall</h2>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. Why is scoring a model on its own training data a poor way to judge it?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">The model may have simply memorized that data, which looks identical to real learning when scored the same way.</button>
+      <button class="quiz-choice" data-correct="false">Training data is always too small to produce a meaningful score.</button>
+      <button class="quiz-choice" data-correct="false">Scoring on training data is technically impossible to compute.</button>
+      <button class="quiz-choice" data-correct="false">There's no issue at all — training-set scores are the most honest measure available.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Lesson 6 names this exact failure mode directly: overfitting.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. What is the validation set for?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Tuning settings and comparing candidate models repeatedly during development.</button>
+      <button class="quiz-choice" data-correct="false">Training the model's core parameters directly, exactly like the training set.</button>
+      <button class="quiz-choice" data-correct="false">Providing the single final honest score, checked exactly once.</button>
+      <button class="quiz-choice" data-correct="false">Storing data that will never be used for any purpose.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Unlike the test set, the validation set is meant to be checked repeatedly throughout development.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. What's the rule about how often the test set should be checked?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Exactly once, at the very end, after every other decision has already been made.</button>
+      <button class="quiz-choice" data-correct="false">As often as possible throughout development, the more the better.</button>
+      <button class="quiz-choice" data-correct="false">Only before training begins, never afterward.</button>
+      <button class="quiz-choice" data-correct="false">There is no rule — it can be reused as freely as the validation set.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Checking it early or repeatedly turns it into a second validation set, and the final honest number is lost.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="validation">
+    <p class="quiz-prompt">4. Fill in the blank: the set checked repeatedly during development to tune choices and compare models is the ___ set.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>See the definition box above.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="test">
+    <p class="quiz-prompt">5. Fill in the blank: the set held out and checked exactly once, at the very end, is the ___ set.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>See the definition box above.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p><a href="https://scikit-learn.org/stable/modules/cross_validation.html">scikit-learn's official cross-validation user guide</a> covers exactly why this split is necessary, plus a more advanced technique (cross-validation) for using limited data more efficiently.</p>
+
+  <p class="ask-teacher">Wondering what to do when there isn't enough data to comfortably afford three separate splits? Ask your teacher — cross-validation, mentioned in the source above, is the real answer for exactly that situation. Next: what it actually looks like when a model has memorized instead of learned.</p>
+
+  <footer class="lesson-footer">STEM+ · AI Developer · Lesson 5</footer>
+</div>

@@ -1,0 +1,104 @@
+<title>Lesson 13: Loss and Gradient Descent — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · AI Developer · Lesson 13</span>
+  <h1>Loss and Gradient Descent</h1>
+  <p class="subtitle">Lesson 7 said fit() "searches for the coefficients that minimize the loss" without saying how. This is how.</p>
+  <p class="nav-links"><a href="0014-backpropagation-intuition.html">Lesson 14 →</a> <a href="../index.html">Contents</a> <a href="../reference/glossary.html">Glossary →</a></p>
+
+  <p>After a forward pass produces a prediction, the <strong>loss</strong> measures how wrong it was compared to the true label. <strong>Gradient descent</strong> is the algorithm that uses that loss to adjust every weight, a small step at a time, in whichever direction actually reduces it.</p>
+
+  <span class="code-label">Python — a minimal example</span>
+  <pre class="code-block"><code>def loss(w):
+    return (w - 3) ** 2       # some loss function, minimized when w == 3
+
+def gradient(w):
+    return 2 * (w - 3)        # the slope of loss at this w
+
+w = 0.0
+learning_rate = 0.1
+
+for step in range(20):
+    grad = gradient(w)
+    w = w - learning_rate * grad   # step opposite the slope
+
+print(w)   # converges toward 3.0</code></pre>
+
+  <p>The <strong>gradient</strong> is the slope of the loss with respect to a weight — it says which direction increases the loss, and by how much. Gradient descent always steps in the <em>opposite</em> direction, since the goal is to decrease loss, not increase it. The <strong>learning rate</strong> controls how big each step is: too small, and training crawls; too large, and the weight can overshoot the minimum entirely and bounce around without ever settling. In a real network, this same idea runs for every single weight across every layer simultaneously, using the exact mean-squared-error-style loss from Lesson 7 or a classification-suited loss for a network like Lesson 8's logistic regression — computing all of those gradients at once, efficiently, is exactly what Lesson 14 covers next.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    <strong>Gradient descent</strong> repeatedly adjusts weights in the direction that reduces loss. The <strong>gradient</strong> is the slope of the loss with respect to a weight. The <strong>learning rate</strong> controls how large each adjustment step is.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why it matters here</span>
+    This is the literal mechanism behind "fit() searches for the coefficients that minimize the loss," stated back in Lesson 7 without explanation — every model in this course that learns from data, classical or neural, is running some version of this loop. Lesson 14 covers the one remaining piece: how a network with thousands of weights gets a gradient for every single one of them without thousands of separate calculations.
+  </div>
+
+  <h2>Check your recall</h2>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What does the gradient represent?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">The slope of the loss with respect to a weight — which direction increases it, and by how much.</button>
+      <button class="quiz-choice" data-correct="false">The final trained value a weight will eventually reach.</button>
+      <button class="quiz-choice" data-correct="false">The total number of training examples used so far.</button>
+      <button class="quiz-choice" data-correct="false">A random number added to every weight each step.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>gradient(w) above computes exactly this slope at the current value of w.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why does gradient descent step opposite the gradient's direction?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Because the gradient points toward increasing loss, and the goal is to decrease it.</button>
+      <button class="quiz-choice" data-correct="false">Because stepping with the gradient would decrease accuracy on the training set.</button>
+      <button class="quiz-choice" data-correct="false">The direction doesn't matter — either way converges equally well.</button>
+      <button class="quiz-choice" data-correct="false">Because the learning rate is always negative.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>w = w - learning_rate * grad subtracts the gradient, moving toward lower loss.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. What can happen if the learning rate is set too large?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">The weight can overshoot the minimum and fail to settle, bouncing around instead of converging.</button>
+      <button class="quiz-choice" data-correct="false">Training becomes perfectly accurate on the first step.</button>
+      <button class="quiz-choice" data-correct="false">The loss function stops being computable entirely.</button>
+      <button class="quiz-choice" data-correct="false">Nothing changes — learning rate size has no effect on training.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Steps that are too large can jump past the minimum instead of approaching it smoothly.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="gradient">
+    <p class="quiz-prompt">4. Fill in the blank: the slope of the loss with respect to a weight is called the ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>See the definition box above.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="rate">
+    <p class="quiz-prompt">5. Fill in the blank: the learning ___ controls how large each gradient descent step is.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>See the definition box above.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p><a href="https://www.ruder.io/optimizing-gradient-descent/">Sebastian Ruder's "An Overview of Gradient Descent Optimization Algorithms"</a> covers this exact algorithm and its real, widely-used variants directly from the source.</p>
+
+  <p class="ask-teacher">Wondering what "Adam" or "momentum" mean when a real training script mentions them? Ask your teacher — they're real, common refinements on this exact basic algorithm. Next: how one loss value at the output turns into a gradient for every weight in every layer.</p>
+
+  <footer class="lesson-footer">STEM+ · AI Developer · Lesson 13</footer>
+</div>

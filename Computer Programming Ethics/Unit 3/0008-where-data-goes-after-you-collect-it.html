@@ -1,0 +1,102 @@
+<title>Lesson 8: Where Data Goes After You Collect It — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Computer Programming Ethics · Lesson 8</span>
+  <h1>Where Data Goes After You Collect It</h1>
+  <p class="subtitle">Sensitive data doesn't just live in the database. It leaks sideways, into logs, most often by accident.</p>
+  <p class="nav-links"><a href="0009-anonymization-isnt-as-simple-as-deleting-a-name.html">Lesson 9 →</a> <a href="../index.html">Contents</a> <a href="../reference/glossary.html">Glossary →</a></p>
+
+  <p>A team can do everything right in Lessons 6 and 7 — hash the password, minimize the fields collected — and still leak sensitive data through a place nobody thinks to check: the application logs. Logging is usually treated as a debugging convenience, invisible to users, so it gets far less scrutiny than the database schema. That's exactly why it's a common leak point.</p>
+
+  <span class="code-label is-bad">Logging the whole request</span>
+  <pre class="code-block code-bad"><code>def handle_login(request):
+    logger.info(f"Login attempt: {request.body}")
+    # request.body contains { "email": "...", "password": "..." }
+    return authenticate(request.body)</code></pre>
+
+  <span class="code-label is-good">Logging what's needed to debug, nothing more</span>
+  <pre class="code-block code-good"><code>def handle_login(request):
+    logger.info(f"Login attempt for user: {request.body['email']}")
+    return authenticate(request.body)</code></pre>
+
+  <p>The first version is convenient — one line, logs everything, never needs updating when the request shape changes. That convenience is exactly the problem: it logs the plaintext password on every single login attempt, successful or not, into a log file that's typically kept for months, often copied to a third-party log aggregation service, often readable by a much larger set of engineers than the production database itself. A logging system was never designed to hold secrets, but a careless <code class="inline-code">logger.info(request.body)</code> turns it into one anyway.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    A <strong>log leak</strong> is the unintentional exposure of sensitive data through application logs, monitoring systems, or error trackers — channels that usually have weaker access controls and longer retention than the primary database.
+  </div>
+
+  <h2>The pattern to watch for</h2>
+  <p>The general shape of this mistake is logging an entire object — a request, a form submission, a database row — instead of the specific fields actually needed for debugging. The <a href="https://cheatsheetseries.owasp.org/cheatsheets/Logging_Cheat_Sheet.html">OWASP Logging Cheat Sheet</a> lists passwords, session tokens, credit card numbers, and other authentication data among the categories that should never appear in logs at all, in any form.</p>
+
+  <div class="box why">
+    <span class="box-label">Why it matters here</span>
+    This is Unit 2's "secrets don't belong in source code" and Unit 3's "collect only what you need," applied to a place that's easy to forget: logs are a second copy of your data, created automatically, often with none of the protections applied to the first copy.
+  </div>
+
+  <h2>Check your recall</h2>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. Why does this lesson call logging a common, accidental leak point?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">It gets far less scrutiny than the main database.</button>
+      <button class="quiz-choice" data-correct="false">It is illegal in most countries to log anything.</button>
+      <button class="quiz-choice" data-correct="false">It always runs on a separate, unpatched server.</button>
+      <button class="quiz-choice" data-correct="false">It is only used by junior engineers on a team.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Logging is usually treated as an invisible debugging convenience, so it doesn't get the same review a database schema or API response would.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. What specifically is wrong with <code class="inline-code">logger.info(f"Login attempt: {request.body}")</code> in the example?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">It writes the plaintext password into the log file.</button>
+      <button class="quiz-choice" data-correct="false">It only runs when the login attempt fails.</button>
+      <button class="quiz-choice" data-correct="false">It is too slow to run on every request.</button>
+      <button class="quiz-choice" data-correct="false">It does not record which user attempted to log in.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden><code class="inline-code">request.body</code> contains the raw submitted password, which now sits in plaintext in a log file rather than only ever being hashed.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. What does the OWASP Logging Cheat Sheet say about data like passwords and session tokens?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">They should never appear in logs in any form.</button>
+      <button class="quiz-choice" data-correct="false">They should be logged only in staging environments.</button>
+      <button class="quiz-choice" data-correct="false">They should be logged once per user session.</button>
+      <button class="quiz-choice" data-correct="false">They should be logged with a shortened prefix only.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Even a truncated or partial version of a secret is still guidance to avoid — the cheat sheet's recommendation is exclusion, not partial logging.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="log leak">
+    <p class="quiz-prompt">4. Fill in the blank: unintentional exposure of sensitive data through logs or monitoring systems is called a ___ ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>See the definition box above — logs typically have weaker access controls and longer retention than a primary database.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="request.body|request body">
+    <p class="quiz-prompt">5. Fill in the blank: in the bad example, the field logged wholesale instead of picking out just the email was ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The fixed version logs <code class="inline-code">request.body['email']</code> specifically, instead of the entire <code class="inline-code">request.body</code> object.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>The <a href="https://cheatsheetseries.owasp.org/cheatsheets/Logging_Cheat_Sheet.html">OWASP Logging Cheat Sheet</a> has a full list of data categories to exclude from logs, plus guidance on log retention and access control.</p>
+
+  <p class="ask-teacher">Wondering how to debug an issue that genuinely needs to see a full request, without permanently logging it? Ask your teacher — that's what I'm here for. Next: why "anonymized" data isn't as safe as it sounds.</p>
+
+  <footer class="lesson-footer">STEM+ · Computer Programming Ethics · Lesson 8</footer>
+</div>

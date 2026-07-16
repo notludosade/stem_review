@@ -1,0 +1,103 @@
+<title>Lesson 19: Code Review Is an Ethical Practice, Not Just a Quality Gate — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Computer Programming Ethics · Lesson 19</span>
+  <h1>Code Review Is an Ethical Practice, Not Just a Quality Gate</h1>
+  <p class="subtitle">Every red flag in this course is easier to catch with a second set of eyes — that's what review is actually for.</p>
+  <p class="nav-links"><a href="0020-documenting-decisions-not-just-code.html">Lesson 20 →</a> <a href="../index.html">Contents</a> <a href="../reference/glossary.html">Glossary →</a></p>
+
+  <p>This final unit is about the practices that surround the code, not the code itself. Code review is usually framed as a bug-catching and style-consistency step — and it is that. But every single lesson in this course described a mistake made by one developer, alone, without anyone else looking at the code before it shipped: the hardcoded secret, the unhashed password, the fail-open permissions check, the zip code proxy, the unattributed snippet. A second reviewer, deliberately looking for these patterns, is one of the cheapest and most effective controls this whole course has to offer.</p>
+
+  <span class="code-label is-bad">A review that only checks "does it work"</span>
+  <pre class="code-block code-bad"><code># PR comment: "LGTM, tests pass 👍"
+# (the PR added a new field to the signup form with no
+#  data-minimization justification, and logged the raw request body)</code></pre>
+
+  <span class="code-label is-good">A review that checks the patterns from this course</span>
+  <pre class="code-block code-good"><code># PR comment: "Tests pass. Two questions before I approve:
+#  1. Do we need the new 'employer' field for anything we're
+#     building now, or is this speculative? (data minimization)
+#  2. This logs request.body directly — can we log just the
+#     fields we actually need instead? (log leak risk)"</code></pre>
+
+  <p>The second reviewer isn't slower because they're being difficult — they're applying the same checklist this course has built up, lesson by lesson, as a habit rather than a one-time read-through. Approving a pull request is a small act of trust extended to a colleague; taking five extra minutes to actually look for these patterns is what makes that trust well-placed instead of a formality.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    <strong>Code review</strong> is the practice of having at least one other person examine code before it's merged or shipped — for correctness, but also, as this lesson argues, for the security, privacy, fairness, and licensing patterns covered throughout this course.
+  </div>
+
+  <h2>Review is also where honesty about disagreement belongs</h2>
+  <p>Lesson 2 covered the ACM's professional codes, including the obligation to give honest, substantiated evaluations. A review culture where reviewers rubber-stamp everything to avoid friction — or where authors get defensive at any pushback — quietly disables the exact mechanism that's supposed to catch the mistakes this course spent eighteen lessons cataloging. The goal of a good review comment isn't to find fault; it's the same goal as the rest of this course, applied by someone other than the original author.</p>
+
+  <div class="box why">
+    <span class="box-label">Why it matters here</span>
+    Nearly every example used across this course — the hardcoded key, the SQL injection, the plaintext password log — is the kind of thing a reviewer who's seen this course's patterns before would catch in thirty seconds. The individual discipline this course teaches matters, but a review culture that expects and rewards catching these patterns is what makes the discipline durable across an entire team, not just one careful developer.
+  </div>
+
+  <h2>Check your recall</h2>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What's the main argument this lesson makes about code review?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">It's one of the cheapest, most effective controls against the mistakes covered in this course.</button>
+      <button class="quiz-choice" data-correct="false">Code review is only useful for catching style inconsistencies.</button>
+      <button class="quiz-choice" data-correct="false">Code review should be replaced entirely by automated testing.</button>
+      <button class="quiz-choice" data-correct="false">Only senior developers should be allowed to review code.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Every earlier lesson's mistake was made by one developer alone — a second reviewer applying this course's patterns is a real, cheap control.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. What's the problem with a review culture that rubber-stamps everything ("LGTM, tests pass")?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">It disables the mechanism meant to catch security, privacy, and fairness issues.</button>
+      <button class="quiz-choice" data-correct="false">It makes the test suite run measurably slower.</button>
+      <button class="quiz-choice" data-correct="false">It is required by most professional coding standards.</button>
+      <button class="quiz-choice" data-correct="false">It has no real downside as long as tests pass.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Tests passing says nothing about data minimization, log leaks, or the other patterns this course covers — a rubber stamp skips exactly the check that matters.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Which earlier lesson's professional codes does this lesson connect to honest, substantiated review feedback?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Lesson 2, on the ACM Code of Ethics and Software Engineering Code.</button>
+      <button class="quiz-choice" data-correct="false">Lesson 8, on where data goes after collection.</button>
+      <button class="quiz-choice" data-correct="false">Lesson 12, on fail-closed versus fail-open defaults.</button>
+      <button class="quiz-choice" data-correct="false">Lesson 17, on copy-pasting code with attribution.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Lesson 2 introduced the professional obligation to give honest, substantiated evaluations — the same obligation applies to reviewing a colleague's work.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="code review">
+    <p class="quiz-prompt">4. Fill in the blank: the practice of having at least one other person examine code before it's merged or shipped is called ___ ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>See the definition box above.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="data minimization">
+    <p class="quiz-prompt">5. Fill in the blank: the good review example's first question ("do we need this field for anything we're building now?") is checking for a violation of ___ ___, from Lesson 7.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The reviewer is applying the exact principle from Lesson 7 — don't collect fields you don't currently need.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Google's <a href="https://google.github.io/eng-practices/review/reviewer/">Engineering Practices documentation on code review</a> is a widely-referenced public standard for what a thorough, respectful review process looks like at scale.</p>
+
+  <p class="ask-teacher">Want to practice writing a review comment for a PR with one of this course's red flags planted in it? Ask your teacher — that's what I'm here for. Next: documenting the reasoning behind a decision, not just what the code does.</p>
+
+  <footer class="lesson-footer">STEM+ · Computer Programming Ethics · Lesson 19</footer>
+</div>

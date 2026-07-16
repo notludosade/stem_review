@@ -1,0 +1,111 @@
+<title>Lesson 19: Embeddings and Semantic Search — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · AI Developer · Lesson 19</span>
+  <h1>Embeddings and Semantic Search</h1>
+  <p class="subtitle">Lesson 18's API turns text into text. This lesson turns text into numbers — and those numbers turn out to be searchable by meaning, not just by matching words.</p>
+  <p class="nav-links"><a href="0020-prompt-engineering.html">Lesson 20 →</a> <a href="../index.html">Contents</a> <a href="../reference/glossary.html">Glossary →</a></p>
+
+  <p>An <strong>embedding</strong> is a list of numbers — a vector — representing a piece of text's meaning, produced by a model trained so that texts with similar meaning end up with similar vectors. Comparing two embeddings with <strong>cosine similarity</strong> gives a number close to 1 for closely related meanings and close to 0 for unrelated ones, even when the two texts don't share a single word.</p>
+
+  <span class="code-label">Python — OpenAI API</span>
+  <pre class="code-block"><code>from openai import OpenAI
+import numpy as np
+
+client = OpenAI()
+
+def embed(text):
+    response = client.embeddings.create(
+        model="text-embedding-3-small",
+        input=text,
+    )
+    return np.array(response.data[0].embedding)
+
+def cosine_similarity(a, b):
+    return np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b))
+
+query = embed("How do I reset my password?")
+doc_a = embed("Steps to change your account password")
+doc_b = embed("Our refund policy for annual subscriptions")
+
+print(cosine_similarity(query, doc_a))   # high — related meaning
+print(cosine_similarity(query, doc_b))   # low — unrelated meaning</code></pre>
+
+  <p>Notice that <code class="inline-code">query</code> and <code class="inline-code">doc_a</code> share almost no words in common, yet their embeddings land close together because the underlying meaning is close. This is <strong>semantic search</strong>: instead of matching exact keywords like a traditional search engine, embed every document once, embed the incoming query, and rank documents by cosine similarity to find the ones that mean the same thing. In practice, a real system embeds a whole library of documents ahead of time and stores the vectors, so only the query needs embedding at search time.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    An <strong>embedding</strong> is a vector representing a piece of text's meaning, positioned so similar meanings produce similar vectors. <strong>Cosine similarity</strong> measures how close two vectors point in the same direction. <strong>Semantic search</strong> ranks results by embedding similarity rather than exact keyword matches.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why it matters here</span>
+    Lesson 18's chat API only knows what it was trained on — it can't see your private documents. Embeddings are the standard way to bridge that gap: find the most relevant passages from your own data by meaning, then hand just those passages to the chat API as context. Lesson 21's RAG is built entirely on this exact pattern.
+  </div>
+
+  <h2>Check your recall</h2>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What does an embedding represent?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">A piece of text's meaning, as a vector positioned near other vectors with similar meaning.</button>
+      <button class="quiz-choice" data-correct="false">The exact number of words contained in a piece of text.</button>
+      <button class="quiz-choice" data-correct="false">A compressed, lossless copy of the original raw text.</button>
+      <button class="quiz-choice" data-correct="false">A count of how many times each keyword appears.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>doc_a scores high similarity to the query despite sharing almost no words, because the vectors capture meaning.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why does the password-reset query score highly against "Steps to change your account password" despite sharing few exact words?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Their embeddings land close together because the underlying meaning is close, not because the words match.</button>
+      <button class="quiz-choice" data-correct="false">The two pieces of text are actually character-for-character identical.</button>
+      <button class="quiz-choice" data-correct="false">cosine_similarity always returns a high score regardless of input.</button>
+      <button class="quiz-choice" data-correct="false">The embedding model simply guessed the higher score at random.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>This is exactly what makes semantic search different from keyword matching.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. In a real semantic search system, what is typically done ahead of time, before any query arrives?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Every document in the library is embedded once and its vector is stored.</button>
+      <button class="quiz-choice" data-correct="false">Every possible future query is guessed and pre-written by hand.</button>
+      <button class="quiz-choice" data-correct="false">Nothing — embeddings can only be computed after a query arrives.</button>
+      <button class="quiz-choice" data-correct="false">The chat model is retrained from scratch on the document library.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Only the incoming query needs embedding at search time; the documents' vectors are already stored.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="embedding">
+    <p class="quiz-prompt">4. Fill in the blank: a vector representing a piece of text's meaning is called an ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>See the definition box above.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="semantic">
+    <p class="quiz-prompt">5. Fill in the blank: ranking results by embedding similarity rather than exact keyword matches is called ___ search.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>See the definition box above.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p><a href="https://platform.openai.com/docs/guides/embeddings">OpenAI's official embeddings guide</a> covers the API shown above along with common similarity metrics and use cases in more depth.</p>
+
+  <p class="ask-teacher">Wondering how thousands of stored vectors get searched quickly instead of comparing against every single one? Ask your teacher — dedicated vector databases exist specifically for this. Next: shaping exactly what you send a model to get the response you actually want.</p>
+
+  <footer class="lesson-footer">STEM+ · AI Developer · Lesson 19</footer>
+</div>

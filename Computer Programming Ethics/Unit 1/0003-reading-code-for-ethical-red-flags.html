@@ -1,0 +1,144 @@
+<title>Lesson 3: Reading Code for Ethical Red Flags — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<script src="../../assets/interactive.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Computer Programming Ethics · Lesson 3</span>
+  <h1>Reading Code for Ethical Red Flags</h1>
+  <p class="subtitle">The syntax changes from language to language. The red flags don't.</p>
+  <p class="nav-links"><a href="../Unit%202/0004-secrets-dont-belong-in-source-code.html">Lesson 4 →</a> <a href="../index.html">Contents</a> <a href="../reference/glossary.html">Glossary →</a></p>
+
+  <p>This lesson turns Lessons 1 and 2 into a scanning habit: a short list of patterns that should make you slow down and look closer, no matter which of the four languages this course covers you're reading. Five to know, to start:</p>
+
+  <ul>
+    <li><strong>Hardcoded secrets</strong> — API keys, passwords, or tokens written directly into source code instead of loaded from a secure config.</li>
+    <li><strong>Unsanitized input reaching a query or command</strong> — user-typed text pasted directly into SQL, a shell command, or <code class="inline-code">eval</code>.</li>
+    <li><strong>Silent exception handling</strong> — an empty <code class="inline-code">catch</code>/<code class="inline-code">except</code> block that hides a failure instead of surfacing it (Lesson 2).</li>
+    <li><strong>Plaintext sensitive data</strong> — passwords or personal data stored or logged without hashing/encryption.</li>
+    <li><strong>Missing authorization checks</strong> — a sensitive action (delete, refund, admin action) with no check that the caller is actually allowed to do it.</li>
+  </ul>
+
+  <p>The second one — unsanitized input reaching a query — is worth seeing in all four languages side by side, because it's the same vulnerability wearing four different outfits.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    An <strong>injection vulnerability</strong> is a flaw where untrusted input is inserted directly into a command, query, or expression, letting an attacker change what that command does. It's been on the <a href="https://owasp.org/Top10/">OWASP Top 10</a> list of critical web risks for over a decade.
+  </div>
+
+  <div id="redflag-tabs">
+    <div class="fm-tabs">
+      <button class="fm-tab is-active" data-tab="py">Python</button>
+      <button class="fm-tab" data-tab="java">Java</button>
+      <button class="fm-tab" data-tab="js">JavaScript</button>
+      <button class="fm-tab" data-tab="cpp">C++</button>
+    </div>
+    <div class="fm-panel" data-panel="py">
+      <span class="code-label is-bad">Python — login query</span>
+      <pre class="code-block code-bad"><code>query = ("SELECT * FROM users WHERE username = '" + username +
+         "' AND password = '" + password + "'")
+cursor.execute(query)</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="java" hidden>
+      <span class="code-label is-bad">Java — login query</span>
+      <pre class="code-block code-bad"><code>String query = "SELECT * FROM users WHERE username = '" + username +
+    "' AND password = '" + password + "'";
+Statement stmt = connection.createStatement();
+ResultSet rs = stmt.executeQuery(query);</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="js" hidden>
+      <span class="code-label is-bad">JavaScript — login query</span>
+      <pre class="code-block code-bad"><code>const query = "SELECT * FROM users WHERE username = '" + username +
+  "' AND password = '" + password + "'";
+db.query(query);</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="cpp" hidden>
+      <span class="code-label is-bad">C++ — login query</span>
+      <pre class="code-block code-bad"><code>std::string query = "SELECT * FROM users WHERE username = '" + username +
+    "' AND password = '" + password + "'";
+sqlite3_exec(db, query.c_str(), callback, 0, &errMsg);</code></pre>
+    </div>
+  </div>
+
+  <p>Four languages, four syntaxes, one mistake: the username and password are stitched straight into the query text. Someone typing <code class="inline-code">' OR '1'='1</code> as a username can rewrite what the query does — no password required. The fix isn't language-specific either: send the input <em>separately</em> from the query, and let the database driver keep the two apart.</p>
+
+  <span class="code-label is-good">Python — fixed with a parameterized query</span>
+  <pre class="code-block code-good"><code>query = "SELECT * FROM users WHERE username = ? AND password = ?"
+cursor.execute(query, (username, password))</code></pre>
+
+  <p>Java, JavaScript, and C++ each have their own equivalent — a <code class="inline-code">PreparedStatement</code>, a parameterized query builder, a bound-parameter API — but the shape of the fix is identical everywhere: never let user input become part of the query text itself.</p>
+
+  <div class="box why">
+    <span class="box-label">Why it matters here</span>
+    This is the payoff of learning to scan for patterns instead of memorizing per-language rules. Once you can spot "input glued into a command string" in one language, you can spot it in all four — and in languages this course never covers.</div>
+
+  <h2>Check your recall</h2>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What do all four login-query examples above have in common?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">They all build the query by concatenating input.</button>
+      <button class="quiz-choice" data-correct="false">They all validate input before querying anything.</button>
+      <button class="quiz-choice" data-correct="false">They all encrypt the password field first.</button>
+      <button class="quiz-choice" data-correct="false">They all limit login attempts per minute.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Different syntax, same mistake: <code class="inline-code">username</code> and <code class="inline-code">password</code> are pasted directly into the query string in every version.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. What is the general name for this class of vulnerability?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">An injection vulnerability.</button>
+      <button class="quiz-choice" data-correct="false">A memory leak vulnerability.</button>
+      <button class="quiz-choice" data-correct="false">A race condition vulnerability.</button>
+      <button class="quiz-choice" data-correct="false">A null pointer vulnerability.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>It's been on the OWASP Top 10 for over a decade precisely because it's this common and this language-independent.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. What does the fixed, parameterized version of the query do differently?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">It sends user input separately from the query text.</button>
+      <button class="quiz-choice" data-correct="false">It runs the same query on a faster server.</button>
+      <button class="quiz-choice" data-correct="false">It stores the password with extra whitespace.</button>
+      <button class="quiz-choice" data-correct="false">It converts the username to uppercase first.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The <code class="inline-code">?</code> placeholders keep the query's structure fixed; the database driver binds the values without letting them change what the query means.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="injection">
+    <p class="quiz-prompt">4. Fill in the blank: pasting untrusted input directly into a query or command is called an ___ vulnerability.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>See the definition box above — this exact term is what you'll see it called in OWASP and most security literature.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="parameterized">
+    <p class="quiz-prompt">5. Fill in the blank: the fix shown above uses a ___ query, which keeps user input separate from the query's structure.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Every mainstream database driver in all four languages this course covers supports parameterized (or "prepared") queries.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>The <a href="https://owasp.org/Top10/">OWASP Top 10</a> is the field's own running list of the most critical web application risks, injection among them — worth bookmarking now, since it will come back throughout this course.</p>
+
+  <p class="ask-teacher">Want to walk through what the Java <code class="inline-code">PreparedStatement</code> or C++ bound-parameter fix looks like in full? Ask your teacher — that's what I'm here for. Unit 1 is complete; Unit 2 turns to secure defaults in more depth.</p>
+
+  <footer class="lesson-footer">STEM+ · Computer Programming Ethics · Lesson 3</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  STEMPlus.mountTabs(document.getElementById('redflag-tabs'), 'data-tab', 'data-panel');
+});
+</script>

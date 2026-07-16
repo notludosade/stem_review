@@ -1,0 +1,150 @@
+<title>Lesson 21: Unit Testing — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<script src="../../assets/interactive.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Computer Programming 2 · Lesson 21</span>
+  <h1>Unit Testing</h1>
+  <p class="subtitle">A unit test is last lesson's assertions, aimed at one small piece of code, organized so they run automatically — every time, not just once by hand.</p>
+  <p class="nav-links"><a href="0022-debugging-strategy.html">Lesson 22 →</a> <a href="../index.html">Contents</a> <a href="../reference/glossary.html">Glossary →</a></p>
+
+  <p>A <strong>unit test</strong> calls one small piece of code — a "unit," typically a single function — with known inputs, and asserts the output matches what's expected. Below, each test targets Unit 4's <code class="inline-code">factorial</code> function, checking both its base case and a general case in one test.</p>
+
+  <div id="test-tabs">
+    <div class="fm-tabs">
+      <button class="fm-tab is-active" data-tab="py">Python</button>
+      <button class="fm-tab" data-tab="java">Java</button>
+      <button class="fm-tab" data-tab="js">JavaScript</button>
+      <button class="fm-tab" data-tab="cpp">C++</button>
+    </div>
+    <div class="fm-panel" data-panel="py">
+      <span class="code-label">Python</span>
+      <pre class="code-block"><code>def test_factorial():
+    assert factorial(0) == 1     # base case
+    assert factorial(5) == 120   # general case
+
+test_factorial()
+print("All tests passed")</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="java" hidden>
+      <span class="code-label">Java</span>
+      <pre class="code-block"><code>static void testFactorial() {
+    assert factorial(0) == 1;     // base case
+    assert factorial(5) == 120;   // general case
+}
+
+testFactorial();
+System.out.println("All tests passed");</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="js" hidden>
+      <span class="code-label">JavaScript</span>
+      <pre class="code-block"><code>const assert = require('assert');   // Node's built-in assert module —
+                                     // unlike console.assert, this one throws
+
+function testFactorial() {
+    assert.strictEqual(factorial(0), 1);      // base case
+    assert.strictEqual(factorial(5), 120);    // general case
+}
+
+testFactorial();
+console.log("All tests passed");</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="cpp" hidden>
+      <span class="code-label">C++</span>
+      <pre class="code-block"><code>#include &lt;cassert&gt;
+
+void testFactorial() {
+    assert(factorial(0) == 1);     // base case
+    assert(factorial(5) == 120);   // general case
+}
+
+int main() {
+    testFactorial();
+    std::cout &lt;&lt; "All tests passed" &lt;&lt; std::endl;
+}</code></pre>
+    </div>
+  </div>
+
+  <p>Notice the JavaScript panel's callback to last lesson: <code class="inline-code">console.assert</code> only warns, so it's useless for testing — a failed test needs to actually stop and report failure, which is exactly what Node's <code class="inline-code">assert</code> module does instead. These hand-rolled test functions are the real idea in miniature. Real projects use a dedicated <strong>test framework</strong> instead of writing this by hand: Python's <code class="inline-code">pytest</code> or built-in <code class="inline-code">unittest</code>, Java's JUnit, JavaScript's Jest or Mocha, C++'s Google Test or Catch2. What they add on top of plain assertions is automatic discovery of every test in a project, a report of exactly which ones passed or failed, and the ability to run hundreds of tests with one command — turning "did I break anything?" from a manual question into an automated one, run before every change ships.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    A <strong>unit test</strong> calls a single small piece of code with known inputs and asserts the output is correct. A <strong>test framework</strong> (pytest, JUnit, Jest, Google Test) automatically discovers and runs many tests, reporting pass/fail for each.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why it matters here</span>
+    A test suite is what turns "I think this still works" into "I know this still works" — especially valuable after a refactor, where behavior should stay identical even as the implementation changes underneath it. Writing tests for the functions built across this entire course, starting with the ones in this unit's examples, is exactly what the capstone in Unit 8 will ask you to do.
+  </div>
+
+  <h2>Check your recall</h2>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What does a unit test check?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">That one small piece of code, given known inputs, produces the expected output.</button>
+      <button class="quiz-choice" data-correct="false">That an entire program compiles without any warnings.</button>
+      <button class="quiz-choice" data-correct="false">That a program's user interface looks visually appealing.</button>
+      <button class="quiz-choice" data-correct="false">Nothing specific — "unit test" has no precise meaning.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>testFactorial checks factorial specifically, in isolation from the rest of the program.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why does the JavaScript example use Node's assert module instead of console.assert?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">console.assert only logs a warning and lets execution continue; a real test needs to actually fail when wrong.</button>
+      <button class="quiz-choice" data-correct="false">console.assert does not exist in Node.js at all.</button>
+      <button class="quiz-choice" data-correct="false">They behave identically, so the choice makes no difference.</button>
+      <button class="quiz-choice" data-correct="false">Node's assert module is slower than console.assert in every case.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>This is the exact gap Lesson 20 flagged in console.assert's behavior.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. What does a dedicated test framework add on top of plain assertions?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Automatic discovery and running of every test, plus a clear report of which passed or failed.</button>
+      <button class="quiz-choice" data-correct="false">It makes assertions run faster at the CPU instruction level.</button>
+      <button class="quiz-choice" data-correct="false">It removes the need to ever write any assertions at all.</button>
+      <button class="quiz-choice" data-correct="false">It guarantees a program has zero bugs once tests are added.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Frameworks like pytest and JUnit turn a pile of individual test functions into one automated, reportable run.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="unit">
+    <p class="quiz-prompt">4. Fill in the blank: a test that checks one small piece of code in isolation is called a ___ test.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>See the definition box above.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="framework">
+    <p class="quiz-prompt">5. Fill in the blank: a tool like pytest or JUnit that automatically discovers and runs many tests is a test ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>See the definition box above.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p><a href="https://junit.org/junit5/docs/current/user-guide/">JUnit 5's official user guide</a> documents a real, widely-used test framework directly, showing what these hand-rolled examples grow into in professional Java code.</p>
+
+  <p class="ask-teacher">Wondering what percentage of code should realistically have tests? Ask your teacher — "test coverage" is the term for that, and 100% is rarely the right target. Next: what to do once a test actually fails.</p>
+
+  <footer class="lesson-footer">STEM+ · Computer Programming 2 · Lesson 21</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  STEMPlus.mountTabs(document.getElementById('test-tabs'), 'data-tab', 'data-panel');
+});
+</script>

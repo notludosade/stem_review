@@ -1,0 +1,186 @@
+<title>Lesson 1: Inheritance — Extending a Class — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<script src="../../assets/interactive.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Computer Programming 2 · Lesson 1</span>
+  <h1>Inheritance — Extending a Class</h1>
+  <p class="subtitle">Computer Programming 1 taught you to define a class. Now: how one class can build on another instead of starting from scratch.</p>
+  <p class="nav-links"><a href="0002-interfaces-protocols-and-abstract-classes.html">Lesson 2 →</a> <a href="../index.html">Contents</a> <a href="../reference/glossary.html">Glossary →</a></p>
+
+  <p>Many related classes share the same core data and behavior, with only a few differences. <strong>Inheritance</strong> lets a new class — the <strong>subclass</strong> — acquire everything a <strong>parent class</strong> (or superclass) already defines, then add to it or override specific pieces. Below, <code class="inline-code">Animal</code> defines a generic <code class="inline-code">speak()</code>; <code class="inline-code">Dog</code> inherits from it and overrides <code class="inline-code">speak()</code> with its own version.</p>
+
+  <div id="inherit-tabs">
+    <div class="fm-tabs">
+      <button class="fm-tab is-active" data-tab="py">Python</button>
+      <button class="fm-tab" data-tab="java">Java</button>
+      <button class="fm-tab" data-tab="js">JavaScript</button>
+      <button class="fm-tab" data-tab="cpp">C++</button>
+    </div>
+    <div class="fm-panel" data-panel="py">
+      <span class="code-label">Python</span>
+      <pre class="code-block"><code>class Animal:
+    def __init__(self, name):
+        self.name = name
+
+    def speak(self):
+        return f"{self.name} makes a sound."
+
+class Dog(Animal):
+    def speak(self):
+        return f"{self.name} says Woof!"
+
+buddy = Dog("Buddy")
+print(buddy.speak())  # Buddy says Woof!</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="java" hidden>
+      <span class="code-label">Java</span>
+      <pre class="code-block"><code>class Animal {
+    String name;
+    Animal(String name) { this.name = name; }
+
+    String speak() {
+        return name + " makes a sound.";
+    }
+}
+
+class Dog extends Animal {
+    Dog(String name) { super(name); }
+
+    @Override
+    String speak() {
+        return name + " says Woof!";
+    }
+}
+
+Dog buddy = new Dog("Buddy");
+System.out.println(buddy.speak()); // Buddy says Woof!</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="js" hidden>
+      <span class="code-label">JavaScript</span>
+      <pre class="code-block"><code>class Animal {
+    constructor(name) { this.name = name; }
+
+    speak() {
+        return `${this.name} makes a sound.`;
+    }
+}
+
+class Dog extends Animal {
+    speak() {
+        return `${this.name} says Woof!`;
+    }
+}
+
+let buddy = new Dog("Buddy");
+console.log(buddy.speak()); // Buddy says Woof!</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="cpp" hidden>
+      <span class="code-label">C++</span>
+      <pre class="code-block"><code>class Animal {
+public:
+    std::string name;
+    Animal(std::string name) : name(name) {}
+
+    virtual std::string speak() {
+        return name + " makes a sound.";
+    }
+};
+
+class Dog : public Animal {
+public:
+    Dog(std::string name) : Animal(name) {}
+
+    std::string speak() override {
+        return name + " says Woof!";
+    }
+};
+
+Dog buddy("Buddy");
+std::cout &lt;&lt; buddy.speak() &lt;&lt; std::endl; // Buddy says Woof!</code></pre>
+    </div>
+  </div>
+
+  <p>Python's <code class="inline-code">class Dog(Animal):</code> and C++'s <code class="inline-code">class Dog : public Animal</code> both name the parent class right in the class header; Java and JavaScript spell it out with <code class="inline-code">extends</code>. Notice <code class="inline-code">Dog</code> never redefines a constructor in Python or JavaScript — it simply inherits <code class="inline-code">Animal</code>'s automatically. Java and C++ require a bit more ceremony: their <code class="inline-code">Dog</code> constructors explicitly call the parent constructor — <code class="inline-code">super(name)</code> in Java, <code class="inline-code">Animal(name)</code> in C++'s initializer list — before doing anything else. One detail to bank for later: C++'s <code class="inline-code">speak()</code> is marked <code class="inline-code">virtual</code> in <code class="inline-code">Animal</code>. Leave that word alone for now — Lesson 3 explains exactly why it's there and what breaks without it.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    <strong>Inheritance</strong> is a mechanism where a <strong>subclass</strong> acquires the data and methods of a <strong>parent class</strong> (superclass), and may override or extend them. A subclass that overrides a method replaces the parent's version with its own when called on an instance of the subclass.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why it matters here</span>
+    Computer Programming 1's functions let you reuse a single block of logic by calling it repeatedly. Inheritance is the same instinct applied to whole classes: instead of copying <code class="inline-code">Animal</code>'s fields and methods into every new kind of animal, related classes share one definition and only write down what's actually different. A codebase with a hundred kinds of animal still has one place that defines what "having a name" means.
+  </div>
+
+  <h2>Check your recall</h2>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What does a subclass get from its parent class through inheritance?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">The parent's data and methods, which it can then use, override, or extend.</button>
+      <button class="quiz-choice" data-correct="false">Only the parent's method names, without any of their behavior.</button>
+      <button class="quiz-choice" data-correct="false">A copy of the parent's source file.</button>
+      <button class="quiz-choice" data-correct="false">Nothing — inheritance only affects how errors are displayed.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Dog automatically has everything Animal defines, plus its own overridden speak().</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. In the Java and C++ examples, why does Dog's constructor explicitly call the parent constructor?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Because Java and C++ require the subclass to explicitly initialize the inherited parts of the object.</button>
+      <button class="quiz-choice" data-correct="false">It's optional decoration with no effect on the program.</button>
+      <button class="quiz-choice" data-correct="false">Because Python and JavaScript don't allow constructors to be inherited at all.</button>
+      <button class="quiz-choice" data-correct="false">To delete the parent class's speak() method.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Python and JavaScript's Dog classes skip this because they don't define their own constructor at all — the parent's runs automatically.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. What happens when Dog overrides Animal's speak() method?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Calling speak() on a Dog instance runs Dog's version, not Animal's.</button>
+      <button class="quiz-choice" data-correct="false">Both versions run every time, one after the other.</button>
+      <button class="quiz-choice" data-correct="false">Animal's speak() is permanently deleted from the program.</button>
+      <button class="quiz-choice" data-correct="false">The program fails to compile or run in every language.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Overriding replaces the parent's version for that specific subclass, without touching Animal itself.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="subclass">
+    <p class="quiz-prompt">4. Fill in the blank: a class that acquires the data and methods of a parent class is called a ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Also sometimes called a "derived class" or "child class."</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="override">
+    <p class="quiz-prompt">5. Fill in the blank: when a subclass replaces a parent's method with its own version, that's called an ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Dog's speak() overrides Animal's speak() in every one of the four examples above.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p><a href="https://docs.oracle.com/javase/tutorial/java/IandI/subclasses.html">Oracle's Java Tutorials: "Subclasses, Subtypes, and Substitutability"</a> lays out the mechanics of inheritance in careful, language-neutral terms.</p>
+
+  <p class="ask-teacher">Wondering what happens if a subclass wants to run the parent's original version of a method, not just replace it? Ask your teacher — that's what I'm here for. Next: what a class can require without actually providing.</p>
+
+  <footer class="lesson-footer">STEM+ · Computer Programming 2 · Lesson 1</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  STEMPlus.mountTabs(document.getElementById('inherit-tabs'), 'data-tab', 'data-panel');
+});
+</script>
