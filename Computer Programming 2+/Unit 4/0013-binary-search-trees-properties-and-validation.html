@@ -1,0 +1,153 @@
+<title>Lesson 13: Binary Search Trees: Properties and Validation — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<script src="../../assets/interactive.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Computer Programming 2+ · Lesson 13</span>
+  <h1>Binary Search Trees: Properties and Validation</h1>
+  <p class="subtitle">One ordering rule turns a plain binary tree into a structure that supports Lesson 8's O(log n) search — if every node actually obeys it.</p>
+  <p class="nav-links"><a href="0012-breadth-first-level-order-traversal.html">← Lesson 12</a> <a href="0014-common-tree-patterns-lca-and-path-sum.html">Lesson 14 →</a> <a href="../index.html">Contents</a> <a href="../reference/glossary.html">Glossary →</a></p>
+
+  <p>A <strong>binary search tree (BST)</strong> is a binary tree where, for <em>every</em> node, everything in its left subtree is smaller than the node's value, and everything in its right subtree is larger. Note the word every: it's not enough for a node's immediate children to satisfy this — the entire left subtree, however deep, must stay below the node's value, and the entire right subtree must stay above it.</p>
+
+  <div class="box">
+    <span class="box-label">The idea</span>
+    A common mistake is checking only <code class="inline-code">node.left.val &lt; node.val &lt; node.right.val</code> at each node. That misses violations further down. Instead, carry a valid <code class="inline-code">(min, max)</code> range down through the recursion: each node must fall strictly inside its inherited range, and it narrows that range differently for its left child (new max) versus its right child (new min).
+  </div>
+
+  <div id="bst-tabs">
+    <div class="fm-tabs">
+      <button class="fm-tab is-active" data-tab="py">Python</button>
+      <button class="fm-tab" data-tab="java">Java</button>
+      <button class="fm-tab" data-tab="js">JavaScript</button>
+      <button class="fm-tab" data-tab="cpp">C++</button>
+    </div>
+    <div class="fm-panel" data-panel="py">
+      <span class="code-label is-good">Python</span>
+      <pre class="code-block"><code>def is_valid_bst(root, low=float('-inf'), high=float('inf')):
+    if root is None:
+        return True
+    if not (low &lt; root.val &lt; high):
+        return False
+    return (is_valid_bst(root.left, low, root.val) and
+            is_valid_bst(root.right, root.val, high))</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="java" hidden>
+      <span class="code-label is-good">Java</span>
+      <pre class="code-block"><code>boolean isValidBST(TreeNode root) {
+    return validate(root, Long.MIN_VALUE, Long.MAX_VALUE);
+}
+
+boolean validate(TreeNode node, long low, long high) {
+    if (node == null) return true;
+    if (!(low &lt; node.val &amp;&amp; node.val &lt; high)) return false;
+    return validate(node.left, low, node.val) &amp;&amp; validate(node.right, node.val, high);
+}</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="js" hidden>
+      <span class="code-label is-good">JavaScript</span>
+      <pre class="code-block"><code>function isValidBST(root, low = -Infinity, high = Infinity) {
+  if (root === null) return true;
+  if (!(low &lt; root.val &amp;&amp; root.val &lt; high)) return false;
+  return isValidBST(root.left, low, root.val) &amp;&amp;
+         isValidBST(root.right, root.val, high);
+}</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="cpp" hidden>
+      <span class="code-label is-good">C++</span>
+      <pre class="code-block"><code>bool validate(TreeNode* node, long low, long high) {
+    if (node == nullptr) return true;
+    if (!(low &lt; node-&gt;val &amp;&amp; node-&gt;val &lt; high)) return false;
+    return validate(node-&gt;left, low, node-&gt;val) &amp;&amp;
+           validate(node-&gt;right, node-&gt;val, high);
+}
+
+bool isValidBST(TreeNode* root) {
+    return validate(root, LONG_MIN, LONG_MAX);
+}</code></pre>
+    </div>
+  </div>
+
+  <p>This is O(n) time — every node is visited once — and O(h) space, the same call-stack rule from Lesson 11. An equivalent alternative: an in-order traversal of a valid BST always produces values in strictly increasing order, so running Lesson 11's in-order traversal and checking the result is sorted also validates a BST, at the cost of O(n) extra space to store the values.</p>
+
+  <div class="box why">
+    <span class="box-label">Why it matters here</span>
+    A valid BST is what makes Lesson 8 and Lesson 10's binary search ideas apply to a tree instead of an array: search, minimum, and maximum are all O(h). But an unbalanced BST — built by inserting already-sorted data, for instance — degenerates into a straight line, making every operation O(n). Self-balancing variants like AVL trees and red-black trees exist specifically to guarantee <code class="inline-code">h</code> stays O(log n) no matter the insertion order, by automatically restructuring the tree after insertions and deletions. That guarantee is genuinely useful to know exists — but implementing one from scratch is deliberately out of scope for this course; production code always reaches for a language's built-in balanced structure instead (Java's TreeMap, C++'s std::map) rather than hand-rolling one.
+  </div>
+
+  <h2>Check your recall</h2>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. Why is checking only a node's immediate children insufficient to validate a BST?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">It is sufficient — nothing further down the tree can violate the property.</button>
+      <button class="quiz-choice" data-correct="true">A deeper descendant could violate an ancestor's bound even while satisfying its immediate parent.</button>
+      <button class="quiz-choice" data-correct="false">Immediate children are never part of the BST property at all.</button>
+      <button class="quiz-choice" data-correct="false">Only leaf nodes need to be checked.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A node deep in a left subtree could be locally fine with its own parent, yet still exceed a value far above it in the tree.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. When recursing into a node's right child, how does the valid range change?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">The range resets to (-infinity, infinity) again.</button>
+      <button class="quiz-choice" data-correct="true">The lower bound becomes the current node's value; the upper bound stays the same.</button>
+      <button class="quiz-choice" data-correct="false">The upper bound becomes the current node's value; the lower bound stays the same.</button>
+      <button class="quiz-choice" data-correct="false">Both bounds are discarded entirely.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Everything in the right subtree must be greater than the current node, so the current node's value becomes the new floor.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. What happens to a BST's operations if it becomes completely unbalanced, such as by inserting already-sorted data?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Nothing changes — BST operations are always O(log n) regardless of shape.</button>
+      <button class="quiz-choice" data-correct="true">Operations degrade to O(n), since the tree becomes effectively a linked list.</button>
+      <button class="quiz-choice" data-correct="false">The tree stops being a valid BST entirely.</button>
+      <button class="quiz-choice" data-correct="false">Operations improve to O(1).</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The height h grows to n in the worst case, and BST operation cost is O(h).</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="increasing">
+    <p class="quiz-prompt">4. Fill in the blank: an in-order traversal of a valid BST always produces values in strictly ___ order.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>This gives an equivalent way to validate a BST: traverse it in-order and check the result is sorted.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="balanced">
+    <p class="quiz-prompt">5. Fill in the blank: AVL trees and red-black trees are both examples of self-___ trees, which restructure themselves to keep height at O(log n).</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>This course doesn't implement one from scratch, but knowing why they exist explains a lot about production data structure choices.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p><a href="https://usaco.guide/general/resources-cp">USACO Guide's Resources: Competitive Programming</a> page links out to deeper treatments of self-balancing trees for readers who want to go past this course's conceptual-only coverage.</p>
+
+  <div class="box">
+    <span class="box-label">Practice on LeetCode</span>
+    <a href="https://leetcode.com/problems/validate-binary-search-tree/">LeetCode #98 — Validate Binary Search Tree</a>. Try writing the buggy "check immediate children only" version first, then find an input where it wrongly returns true.
+  </div>
+
+  <p class="ask-teacher">Wondering how insertion and deletion work in a BST while keeping the ordering property intact? Ask your teacher — insertion is a short, natural extension of the search logic from Lesson 8. Next: two of the most common patterns built on top of tree traversal — finding a common ancestor, and summing a path.</p>
+
+  <footer class="lesson-footer">STEM+ · Computer Programming 2+ · Lesson 13</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  STEMPlus.mountTabs(document.getElementById('bst-tabs'), 'data-tab', 'data-panel');
+});
+</script>

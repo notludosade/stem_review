@@ -1,0 +1,208 @@
+<title>Lesson 20: Topological Sort &amp; Course Scheduling — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<script src="../../assets/interactive.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Computer Programming 2+ · Lesson 20</span>
+  <h1>Topological Sort &amp; Course Scheduling</h1>
+  <p class="subtitle">A directed graph — where edges only go one way — introduces a new question: is there any valid order to do everything in at all?</p>
+  <p class="nav-links"><a href="0019-bfs-and-shortest-paths-in-unweighted-graphs.html">← Lesson 19</a> <a href="0021-union-find-and-redundant-connection.html">Lesson 21 →</a> <a href="../index.html">Contents</a> <a href="../reference/glossary.html">Glossary →</a></p>
+
+  <p>Problem: there are <code class="inline-code">numCourses</code> courses, and a list of prerequisite pairs <code class="inline-code">[course, prereq]</code> meaning <code class="inline-code">prereq</code> must be taken before <code class="inline-code">course</code>. Determine whether it's possible to finish every course at all. Every edge here is <strong>directed</strong> — "prereq → course" is not the same as "course → prereq" — and a valid ordering exists if and only if the graph has no cycle.</p>
+
+  <div class="box">
+    <span class="box-label">The idea</span>
+    <strong>Kahn's algorithm</strong> finds a topological order (or proves none exists) using BFS. Track each course's <strong>in-degree</strong> — how many prerequisites still point into it. Start a queue with every course that has in-degree zero (nothing blocks it). Process the queue: for each course removed, decrement the in-degree of everything it unlocks, adding any that drop to zero. If every course eventually gets processed, no cycle exists. If some are left over, they're stuck in a cycle blocking each other forever.
+  </div>
+
+  <div id="topo-tabs">
+    <div class="fm-tabs">
+      <button class="fm-tab is-active" data-tab="py">Python</button>
+      <button class="fm-tab" data-tab="java">Java</button>
+      <button class="fm-tab" data-tab="js">JavaScript</button>
+      <button class="fm-tab" data-tab="cpp">C++</button>
+    </div>
+    <div class="fm-panel" data-panel="py">
+      <span class="code-label is-good">Python</span>
+      <pre class="code-block"><code>from collections import deque
+
+def can_finish(num_courses, prerequisites):
+    graph = [[] for _ in range(num_courses)]
+    in_degree = [0] * num_courses
+    for course, prereq in prerequisites:
+        graph[prereq].append(course)
+        in_degree[course] += 1
+
+    queue = deque(c for c in range(num_courses) if in_degree[c] == 0)
+    visited = 0
+    while queue:
+        node = queue.popleft()
+        visited += 1
+        for neighbor in graph[node]:
+            in_degree[neighbor] -= 1
+            if in_degree[neighbor] == 0:
+                queue.append(neighbor)
+    return visited == num_courses     # false means a cycle blocked some courses</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="java" hidden>
+      <span class="code-label is-good">Java</span>
+      <pre class="code-block"><code>boolean canFinish(int numCourses, int[][] prerequisites) {
+    List&lt;List&lt;Integer&gt;&gt; graph = new ArrayList&lt;&gt;();
+    int[] inDegree = new int[numCourses];
+    for (int i = 0; i &lt; numCourses; i++) graph.add(new ArrayList&lt;&gt;());
+    for (int[] pair : prerequisites) {
+        int course = pair[0], prereq = pair[1];
+        graph.get(prereq).add(course);
+        inDegree[course]++;
+    }
+
+    Queue&lt;Integer&gt; queue = new LinkedList&lt;&gt;();
+    for (int c = 0; c &lt; numCourses; c++) if (inDegree[c] == 0) queue.add(c);
+
+    int visited = 0;
+    while (!queue.isEmpty()) {
+        int node = queue.poll();
+        visited++;
+        for (int neighbor : graph.get(node)) {
+            inDegree[neighbor]--;
+            if (inDegree[neighbor] == 0) queue.add(neighbor);
+        }
+    }
+    return visited == numCourses;   // false means a cycle blocked some courses
+}</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="js" hidden>
+      <span class="code-label is-good">JavaScript</span>
+      <pre class="code-block"><code>function canFinish(numCourses, prerequisites) {
+  const graph = Array.from({ length: numCourses }, () =&gt; []);
+  const inDegree = new Array(numCourses).fill(0);
+  for (const [course, prereq] of prerequisites) {
+    graph[prereq].push(course);
+    inDegree[course]++;
+  }
+
+  const queue = [];
+  for (let c = 0; c &lt; numCourses; c++) if (inDegree[c] === 0) queue.push(c);
+
+  let visited = 0;
+  while (queue.length &gt; 0) {
+    const node = queue.shift();
+    visited++;
+    for (const neighbor of graph[node]) {
+      inDegree[neighbor]--;
+      if (inDegree[neighbor] === 0) queue.push(neighbor);
+    }
+  }
+  return visited === numCourses;   // false means a cycle blocked some courses
+}</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="cpp" hidden>
+      <span class="code-label is-good">C++</span>
+      <pre class="code-block"><code>bool canFinish(int numCourses, std::vector&lt;std::vector&lt;int&gt;&gt;&amp; prerequisites) {
+    std::vector&lt;std::vector&lt;int&gt;&gt; graph(numCourses);
+    std::vector&lt;int&gt; inDegree(numCourses, 0);
+    for (auto&amp; pair : prerequisites) {
+        int course = pair[0], prereq = pair[1];
+        graph[prereq].push_back(course);
+        inDegree[course]++;
+    }
+
+    std::queue&lt;int&gt; q;
+    for (int c = 0; c &lt; numCourses; c++) if (inDegree[c] == 0) q.push(c);
+
+    int visited = 0;
+    while (!q.empty()) {
+        int node = q.front(); q.pop();
+        visited++;
+        for (int neighbor : graph[node]) {
+            if (--inDegree[neighbor] == 0) q.push(neighbor);
+        }
+    }
+    return visited == numCourses;   // false means a cycle blocked some courses
+}</code></pre>
+    </div>
+  </div>
+
+  <p>Building the graph and in-degree array costs O(V + E). The BFS itself visits each node once and each edge once, also O(V + E) — so the whole algorithm is O(V + E) overall, the same bound as ordinary BFS from Lesson 19, just tracking one extra counter per node.</p>
+
+  <div class="box why">
+    <span class="box-label">Why it matters here</span>
+    Kahn's algorithm is Lesson 19's multi-source BFS wearing a different hat: instead of seeding the queue with "already rotten" oranges, it's seeded with "already unblocked" courses, and instead of tracking distance, it's tracking whether every node eventually gets freed. Any problem phrased as "given these dependencies, can everything be scheduled" — build order, task scheduling, package installation order — is this same in-degree-counting BFS underneath.
+  </div>
+
+  <h2>Check your recall</h2>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What does a course's in-degree represent in this problem?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">The total number of courses in the program.</button>
+      <button class="quiz-choice" data-correct="true">How many prerequisites still must be completed before that course can be taken.</button>
+      <button class="quiz-choice" data-correct="false">How many other courses list it as a prerequisite.</button>
+      <button class="quiz-choice" data-correct="false">The course's position in a sorted list.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A course with in-degree zero has nothing left blocking it and can start the queue.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. If the queue empties before every course has been visited, what does that indicate?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">The prerequisite list was empty from the start.</button>
+      <button class="quiz-choice" data-correct="true">A cycle exists among the remaining courses, each blocking the others forever.</button>
+      <button class="quiz-choice" data-correct="false">There are more courses than prerequisites.</button>
+      <button class="quiz-choice" data-correct="false">The graph is not connected.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A cycle means every course in it always has at least one unmet prerequisite, so none can ever reach in-degree zero.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. How does Kahn's algorithm here relate to Lesson 19's multi-source BFS?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">They are unrelated algorithms that happen to both use a queue.</button>
+      <button class="quiz-choice" data-correct="true">It's the same multi-source BFS pattern, seeded with unblocked nodes instead of rotten oranges.</button>
+      <button class="quiz-choice" data-correct="false">Kahn's algorithm never uses a queue at all.</button>
+      <button class="quiz-choice" data-correct="false">Kahn's algorithm only works on undirected graphs.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Both seed a queue with every valid starting point at once and process level by level, tracking a counter as they go.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="cycle">
+    <p class="quiz-prompt">4. Fill in the blank: a valid course order exists if and only if the prerequisite graph contains no ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Any cycle means each course in it depends on another that depends back on it.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="directed">
+    <p class="quiz-prompt">5. Fill in the blank: prerequisite edges only go one way, making this a ___ graph rather than the undirected grids from Lessons 18 and 19.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>"Prereq unlocks course" is not the same relationship as "course unlocks prereq."</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p><a href="https://cp-algorithms.com/graph/topological-sort.html">Algorithms for Competitive Programming</a> covers both the BFS (Kahn's) and DFS-based approaches to topological sorting, including why either one detects cycles correctly.</p>
+
+  <div class="box">
+    <span class="box-label">Practice on LeetCode</span>
+    <a href="https://leetcode.com/problems/course-schedule/">LeetCode #207 — Course Schedule</a>. The follow-up, <a href="https://leetcode.com/problems/course-schedule-ii/">#210 — Course Schedule II</a>, asks for the actual order — the same algorithm, just recording visit order instead of only counting it.
+  </div>
+
+  <p class="ask-teacher">Curious how the DFS-based version of topological sort detects a cycle, using a "currently in this path" marker instead of in-degree counting? Ask your teacher — it's a useful second way to see the same idea. Next: a completely different way of tracking connectivity, with no traversal at all.</p>
+
+  <footer class="lesson-footer">STEM+ · Computer Programming 2+ · Lesson 20</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  STEMPlus.mountTabs(document.getElementById('topo-tabs'), 'data-tab', 'data-panel');
+});
+</script>

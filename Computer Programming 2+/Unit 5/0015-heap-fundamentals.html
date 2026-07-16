@@ -1,0 +1,172 @@
+<title>Lesson 15: Heap Fundamentals — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<script src="../../assets/interactive.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Computer Programming 2+ · Lesson 15</span>
+  <h1>Heap Fundamentals</h1>
+  <p class="subtitle">A structure that keeps "the smallest so far" instantly available, without ever fully sorting anything.</p>
+  <p class="nav-links"><a href="../Unit%204/0014-common-tree-patterns-lca-and-path-sum.html">← Lesson 14</a> <a href="0016-kth-largest-and-smallest-pattern.html">Lesson 16 →</a> <a href="../index.html">Contents</a> <a href="../reference/glossary.html">Glossary →</a></p>
+
+  <p>A <strong>heap</strong> is a binary tree with one relaxed rule: every parent is smaller than (or equal to) both of its children — a <strong>min-heap</strong> — or larger than both, a <strong>max-heap</strong>. Unlike a BST from Lesson 13, there's no ordering between siblings or between a node and the rest of its subtree beyond its own children — only the parent-child relationship matters. That looser rule is exactly what makes inserting and removing the minimum (or maximum) cost only O(log n), while still being far cheaper to build than a fully sorted structure.</p>
+
+  <div class="box">
+    <span class="box-label">The idea</span>
+    A heap is stored as a plain array, not as linked nodes — the tree structure is implicit: the children of index <code class="inline-code">i</code> live at <code class="inline-code">2i + 1</code> and <code class="inline-code">2i + 2</code>. Every language here provides (or nearly provides) a built-in heap; using it directly is almost always the right call over implementing one from scratch.
+  </div>
+
+  <div id="heap-tabs">
+    <div class="fm-tabs">
+      <button class="fm-tab is-active" data-tab="py">Python</button>
+      <button class="fm-tab" data-tab="java">Java</button>
+      <button class="fm-tab" data-tab="js">JavaScript</button>
+      <button class="fm-tab" data-tab="cpp">C++</button>
+    </div>
+    <div class="fm-panel" data-panel="py">
+      <span class="code-label is-good">Python</span>
+      <pre class="code-block"><code>import heapq
+
+def three_smallest(nums):
+    heapq.heapify(nums)                 # O(n), turns the list into a min-heap in place
+    return [heapq.heappop(nums) for _ in range(3)]   # each pop is O(log n)</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="java" hidden>
+      <span class="code-label is-good">Java</span>
+      <pre class="code-block"><code>List&lt;Integer&gt; threeSmallest(List&lt;Integer&gt; nums) {
+    PriorityQueue&lt;Integer&gt; heap = new PriorityQueue&lt;&gt;(nums);   // min-heap by default
+    List&lt;Integer&gt; result = new ArrayList&lt;&gt;();
+    for (int i = 0; i &lt; 3; i++) result.add(heap.poll());        // each poll is O(log n)
+    return result;
+}</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="js" hidden>
+      <span class="code-label is-good">JavaScript</span>
+      <pre class="code-block"><code>class MinHeap {
+  constructor() { this.data = []; }
+  push(val) {
+    this.data.push(val);
+    let i = this.data.length - 1;
+    while (i &gt; 0) {
+      const parent = Math.floor((i - 1) / 2);
+      if (this.data[parent] &lt;= this.data[i]) break;
+      [this.data[parent], this.data[i]] = [this.data[i], this.data[parent]];
+      i = parent;
+    }
+  }
+  pop() {                                // O(log n): swap last leaf to root, sink it down
+    const top = this.data[0];
+    const last = this.data.pop();
+    if (this.data.length &gt; 0) {
+      this.data[0] = last;
+      let i = 0;
+      while (true) {
+        const l = 2 * i + 1, r = 2 * i + 2;
+        let smallest = i;
+        if (l &lt; this.data.length &amp;&amp; this.data[l] &lt; this.data[smallest]) smallest = l;
+        if (r &lt; this.data.length &amp;&amp; this.data[r] &lt; this.data[smallest]) smallest = r;
+        if (smallest === i) break;
+        [this.data[i], this.data[smallest]] = [this.data[smallest], this.data[i]];
+        i = smallest;
+      }
+    }
+    return top;
+  }
+}</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="cpp" hidden>
+      <span class="code-label is-good">C++</span>
+      <pre class="code-block"><code>std::vector&lt;int&gt; threeSmallest(std::vector&lt;int&gt; nums) {
+    std::priority_queue&lt;int, std::vector&lt;int&gt;, std::greater&lt;int&gt;&gt; heap(nums.begin(), nums.end());
+    std::vector&lt;int&gt; result;
+    for (int i = 0; i &lt; 3; i++) {
+        result.push_back(heap.top());   // O(1) peek
+        heap.pop();                       // O(log n)
+    }
+    return result;
+}</code></pre>
+    </div>
+  </div>
+
+  <p>Python's <code class="inline-code">heapq</code> and C++'s <code class="inline-code">std::priority_queue</code> default to a max-heap and min-heap respectively in the opposite way you might expect — <code class="inline-code">heapq</code> is min-heap-only, and <code class="inline-code">priority_queue</code> is max-heap unless given <code class="inline-code">std::greater</code> explicitly, as above. JavaScript alone has no built-in heap at all — implementing one by hand, as shown, is the normal, expected solution, not a workaround.</p>
+
+  <div class="box why">
+    <span class="box-label">Why it matters here</span>
+    Building a heap from an existing collection (heapify) costs O(n), not O(n log n) — it's cheaper than it looks, because most nodes are near the bottom and need very few swaps to settle. Every individual push or pop afterward is O(log n), and peeking at the min or max is O(1). Whenever a problem repeatedly needs "the current smallest (or largest) of a changing collection," a heap is almost always the answer — Lessons 16 and 17 are both this exact instinct applied to specific problems.
+  </div>
+
+  <h2>Check your recall</h2>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What is the one ordering rule a min-heap actually enforces?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Every node's entire subtree must be sorted in increasing order.</button>
+      <button class="quiz-choice" data-correct="true">Every parent must be smaller than or equal to both of its children.</button>
+      <button class="quiz-choice" data-correct="false">Sibling nodes must always be equal to each other.</button>
+      <button class="quiz-choice" data-correct="false">The heap must contain no duplicate values.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Unlike a BST, there's no rule relating a node to its whole subtree or to its siblings — only to its direct children.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. How is a heap typically stored in memory?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">As linked nodes, each holding explicit left and right pointers.</button>
+      <button class="quiz-choice" data-correct="true">As a plain array, with a node's children found at computed index positions.</button>
+      <button class="quiz-choice" data-correct="false">As a hash map keyed by depth.</button>
+      <button class="quiz-choice" data-correct="false">As a doubly linked list sorted by value.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The tree shape is implicit in the array's indices — index i's children live at 2i+1 and 2i+2 — with no pointers needed.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. What is the time complexity of building a heap from an existing unsorted collection (heapify)?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">O(n log n), the same cost as fully sorting it.</button>
+      <button class="quiz-choice" data-correct="true">O(n) — cheaper than it looks, since most nodes are near the bottom and need little adjustment.</button>
+      <button class="quiz-choice" data-correct="false">O(n²), since every pair of elements must be compared.</button>
+      <button class="quiz-choice" data-correct="false">O(1), regardless of how many elements are being heapified.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>This is a common surprise — heapify is asymptotically cheaper than a full sort, even though extracting all elements one at a time afterward is not.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="heap">
+    <p class="quiz-prompt">4. Fill in the blank: a binary tree where every parent is smaller (or larger) than both of its children is called a ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>This is the name for the entire structure this lesson introduces.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="javascript">
+    <p class="quiz-prompt">5. Fill in the blank: of the four languages in this course, ___ is the only one without a built-in heap or priority queue.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Implementing a small MinHeap class by hand, as shown above, is the standard practice in this language.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p><a href="https://visualgo.net/en">VisuAlgo</a>'s heap visualization animates push and pop operations directly on the array-as-tree representation, making the implicit index math concrete.</p>
+
+  <div class="box">
+    <span class="box-label">Practice on LeetCode</span>
+    <a href="https://leetcode.com/problems/last-stone-weight/">LeetCode #1046 — Last Stone Weight</a>. A direct, minimal exercise in repeatedly popping the two largest values from a max-heap.
+  </div>
+
+  <p class="ask-teacher">Wondering why heapify is O(n) while extracting every element one at a time afterward costs O(n log n) total? Ask your teacher — the two facts aren't in tension, and the reasoning is worth walking through carefully. Next: the pattern that shows up constantly in interviews — finding the kth largest or smallest value.</p>
+
+  <footer class="lesson-footer">STEM+ · Computer Programming 2+ · Lesson 15</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  STEMPlus.mountTabs(document.getElementById('heap-tabs'), 'data-tab', 'data-panel');
+});
+</script>

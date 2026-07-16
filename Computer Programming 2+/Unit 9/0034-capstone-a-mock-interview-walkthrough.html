@@ -1,0 +1,181 @@
+<title>Lesson 34: Capstone — A Mock Interview Walkthrough — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<script src="../../assets/interactive.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Computer Programming 2+ · Lesson 34</span>
+  <h1>Capstone: A Mock Interview Walkthrough</h1>
+  <p class="subtitle">One unfamiliar problem, worked from a blank page using nothing but Lesson 3's five-step framework and Lesson 33's pattern table.</p>
+  <p class="nav-links"><a href="0033-the-pattern-recognition-cheat-sheet.html">← Lesson 33</a> <a href="../index.html">Contents</a> <a href="../reference/glossary.html">Glossary →</a></p>
+
+  <p>Problem (LeetCode #560, Subarray Sum Equals K): given an array of integers and an integer k, return the number of contiguous subarrays whose elements sum to exactly k. This lesson doesn't introduce a new technique — it works this problem the way an actual interview or contest attempt should go, one framework step at a time.</p>
+
+  <div class="box">
+    <span class="box-label">Step 1: Clarify</span>
+    Can the array contain negative numbers? Yes — nothing here restricts it to positives. Can k be negative or zero? Also yes. This single clarification already matters: it rules out any two-pointer window approach, since Lesson 7's sliding window logic depends on adding an element only ever increasing the running sum, which negative numbers break.
+  </div>
+
+  <div class="box">
+    <span class="box-label">Step 2: Brute force</span>
+    The direct approach: for every pair of start and end indices, sum that subarray and check if it equals k. That's an O(n²) pair of nested loops (or O(n³) if each subarray sum is recomputed from scratch instead of extended from the previous end index). It works, but on the constraint n up to 2 × 10⁴ typically listed for this problem, O(n²) is right at the edge of too slow.
+  </div>
+
+  <div class="box">
+    <span class="box-label">Step 3: Find the bottleneck</span>
+    The repeated work is recomputing overlapping subarray sums from scratch. A running prefix sum fixes that part in O(1) per index — but checking every earlier prefix sum for a match is still an O(n) inner step, leaving O(n²) overall. That inner "check every earlier value" step is the actual bottleneck, and it's a familiar shape.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Step 4: Pattern-match</span>
+    A subarray from index i+1 to j sums to k exactly when <code class="inline-code">prefixSum[j] - prefixSum[i] = k</code>, which rearranges to <code class="inline-code">prefixSum[i] = prefixSum[j] - k</code>. That's Lesson 1's Two Sum complement trick wearing a prefix-sum costume: instead of asking "have I seen target − num before?", this asks "have I seen prefixSum − k before?" A hash map counting how many times each prefix sum has occurred turns the inner check into O(1), and the whole solution into one O(n) pass.
+  </div>
+
+  <div id="capstone-tabs">
+    <div class="fm-tabs">
+      <button class="fm-tab is-active" data-tab="py">Python</button>
+      <button class="fm-tab" data-tab="java">Java</button>
+      <button class="fm-tab" data-tab="js">JavaScript</button>
+      <button class="fm-tab" data-tab="cpp">C++</button>
+    </div>
+    <div class="fm-panel" data-panel="py">
+      <span class="code-label is-good">Python</span>
+      <pre class="code-block"><code>def subarray_sum(nums, k):
+    count = 0
+    prefix_sum = 0
+    sum_counts = {0: 1}       # empty prefix (sum 0) has occurred once, before any element
+    for num in nums:
+        prefix_sum += num
+        count += sum_counts.get(prefix_sum - k, 0)   # how many earlier prefixes make a subarray = k
+        sum_counts[prefix_sum] = sum_counts.get(prefix_sum, 0) + 1
+    return count</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="java" hidden>
+      <span class="code-label is-good">Java</span>
+      <pre class="code-block"><code>int subarraySum(int[] nums, int k) {
+    Map&lt;Integer, Integer&gt; sumCounts = new HashMap&lt;&gt;();
+    sumCounts.put(0, 1);      // empty prefix (sum 0) has occurred once, before any element
+    int count = 0;
+    int prefixSum = 0;
+    for (int num : nums) {
+        prefixSum += num;
+        count += sumCounts.getOrDefault(prefixSum - k, 0);   // earlier prefixes making a subarray = k
+        sumCounts.put(prefixSum, sumCounts.getOrDefault(prefixSum, 0) + 1);
+    }
+    return count;
+}</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="js" hidden>
+      <span class="code-label is-good">JavaScript</span>
+      <pre class="code-block"><code>function subarraySum(nums, k) {
+  const sumCounts = new Map([[0, 1]]);   // empty prefix (sum 0) has occurred once, before any element
+  let count = 0;
+  let prefixSum = 0;
+  for (const num of nums) {
+    prefixSum += num;
+    count += sumCounts.get(prefixSum - k) || 0;   // earlier prefixes making a subarray = k
+    sumCounts.set(prefixSum, (sumCounts.get(prefixSum) || 0) + 1);
+  }
+  return count;
+}</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="cpp" hidden>
+      <span class="code-label is-good">C++</span>
+      <pre class="code-block"><code>int subarraySum(std::vector&lt;int&gt;&amp; nums, int k) {
+    std::unordered_map&lt;int, int&gt; sumCounts;
+    sumCounts[0] = 1;         // empty prefix (sum 0) has occurred once, before any element
+    int count = 0;
+    int prefixSum = 0;
+    for (int num : nums) {
+        prefixSum += num;
+        auto it = sumCounts.find(prefixSum - k);
+        if (it != sumCounts.end()) {
+            count += it-&gt;second;   // earlier prefixes making a subarray = k
+        }
+        sumCounts[prefixSum]++;
+    }
+    return count;
+}</code></pre>
+    </div>
+  </div>
+
+  <div class="box">
+    <span class="box-label">Step 5: Verify</span>
+    Trace nums = [1, 2, 3], k = 3 by hand: prefix sums after each element are 1, 3, 6. At prefix 1, look for 1 − 3 = −2 (not seen, count stays 0). At prefix 3, look for 3 − 3 = 0 (seen once, from the empty prefix — count becomes 1, correctly matching subarray [1, 2]). At prefix 6, look for 6 − 3 = 3 (seen once — count becomes 2, correctly matching subarray [3]). Final answer 2, which matches both subarrays summing to 3 by inspection. Edge case worth checking separately: an all-zero array with k = 0, which relies on that initial <code class="inline-code">sum_counts = {0: 1}</code> entry to count the empty-prefix match correctly.
+  </div>
+
+  <h2>Check your recall</h2>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. Why does this problem rule out a sliding window approach during the clarify step?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Sliding windows can never be used on arrays, only on strings.</button>
+      <button class="quiz-choice" data-correct="true">Negative numbers mean adding an element doesn't always increase the running sum, breaking the window's shrink/grow logic.</button>
+      <button class="quiz-choice" data-correct="false">The array's length is always too small for a window to matter.</button>
+      <button class="quiz-choice" data-correct="false">Sliding windows only work when k is exactly zero.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Sliding window correctness in Lessons 6 and 7 depends on sums moving monotonically as the window grows, which negative numbers break.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. What earlier lesson's pattern does the prefix-sum hash map trick directly reuse?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Lesson 22's Dijkstra's algorithm.</button>
+      <button class="quiz-choice" data-correct="true">Lesson 1's Two Sum complement trick, rearranged around prefix sums instead of raw values.</button>
+      <button class="quiz-choice" data-correct="false">Lesson 20's topological sort via Kahn's algorithm.</button>
+      <button class="quiz-choice" data-correct="false">Lesson 15's heap fundamentals.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Both check "has target − current already been seen," just applied to a running prefix sum instead of a single array value.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why does sumCounts start with the entry {0: 1} before any element is processed?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">It's a harmless default that could just as easily be left out.</button>
+      <button class="quiz-choice" data-correct="true">It represents the empty prefix, needed to correctly count subarrays starting at index 0 that already sum to k.</button>
+      <button class="quiz-choice" data-correct="false">It prevents the hash map from ever growing larger than one entry.</button>
+      <button class="quiz-choice" data-correct="false">It only matters when the array contains exactly one element.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Without it, a subarray starting at index 0 that already equals k would never be counted.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="prefix">
+    <p class="quiz-prompt">4. Fill in the blank: this solution tracks a running ___ sum, turning a subarray-sum check into a single hash map lookup.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The running total up to each index is what makes any subarray's sum a simple subtraction.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="bottleneck">
+    <p class="quiz-prompt">5. Fill in the blank: Lesson 3's framework names the repeated, avoidable work inside a brute-force solution the ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Finding this is exactly what turned an O(n²) scan into an O(n) hash map lookup here.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p><a href="https://cp-algorithms.com/data_structures/">Algorithms for Competitive Programming</a>'s data structures section covers prefix sums and hash-based lookups as a combined technique, worth a final skim before closing this course.</p>
+
+  <div class="box">
+    <span class="box-label">Practice on LeetCode</span>
+    <a href="https://leetcode.com/problems/subarray-sum-equals-k/">LeetCode #560 — Subarray Sum Equals K</a>. Then pick any five problems from the <a href="https://leetcode.com/studyplan/top-interview-150/">Top Interview 150</a> study plan and run this same five-step walkthrough on each, cold, before looking at the pattern table.
+  </div>
+
+  <p class="ask-teacher">This closes Computer Programming 2+ — all nine units, from the two-pointer basics in Unit 1 through greedy proofs and bit tricks in Unit 9. The real skill this course built isn't any single algorithm; it's the five-step framework from Lesson 3 and the pattern table from Lesson 33, applied together against problems neither of them has seen before. Ask your teacher any time a new problem doesn't seem to fit — that's the normal, expected experience of real practice, not a sign something here was missed. Keep working problems, and revisit the glossary and pattern table whenever a signal feels fuzzy.</p>
+
+  <footer class="lesson-footer">STEM+ · Computer Programming 2+ · Lesson 34</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  STEMPlus.mountTabs(document.getElementById('capstone-tabs'), 'data-tab', 'data-panel');
+});
+</script>

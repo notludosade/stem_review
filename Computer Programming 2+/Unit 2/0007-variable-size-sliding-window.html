@@ -1,0 +1,171 @@
+<title>Lesson 7: Variable-Size Sliding Window — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<script src="../../assets/interactive.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Computer Programming 2+ · Lesson 7</span>
+  <h1>Variable-Size Sliding Window</h1>
+  <p class="subtitle">Most real sliding-window problems don't hand you a fixed k — the window has to grow and shrink on its own, based on a rule.</p>
+  <p class="nav-links"><a href="0006-fixed-size-sliding-window.html">← Lesson 6</a> <a href="../index.html">Contents</a> <a href="../reference/glossary.html">Glossary →</a></p>
+
+  <p>Problem: find the length of the longest substring with no repeated characters. There's no fixed window size given up front — the window has to expand while characters stay unique, and shrink the moment a repeat appears.</p>
+
+  <div class="box">
+    <span class="box-label">The idea</span>
+    Keep two pointers, <code class="inline-code">left</code> and <code class="inline-code">right</code>, both starting at 0, plus a set of characters currently inside the window. Expand <code class="inline-code">right</code> one step at a time; whenever the incoming character is already in the set, shrink from <code class="inline-code">left</code> — removing characters from the set — until it isn't anymore.
+  </div>
+
+  <div id="varwindow-tabs">
+    <div class="fm-tabs">
+      <button class="fm-tab is-active" data-tab="py">Python</button>
+      <button class="fm-tab" data-tab="java">Java</button>
+      <button class="fm-tab" data-tab="js">JavaScript</button>
+      <button class="fm-tab" data-tab="cpp">C++</button>
+    </div>
+    <div class="fm-panel" data-panel="py">
+      <span class="code-label is-good">Python</span>
+      <pre class="code-block"><code>def length_of_longest_substring(s):
+    seen = set()
+    left = 0
+    best = 0
+    for right in range(len(s)):
+        while s[right] in seen:
+            seen.remove(s[left])
+            left += 1
+        seen.add(s[right])
+        best = max(best, right - left + 1)
+    return best</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="java" hidden>
+      <span class="code-label is-good">Java</span>
+      <pre class="code-block"><code>int lengthOfLongestSubstring(String s) {
+    Set&lt;Character&gt; seen = new HashSet&lt;&gt;();
+    int left = 0, best = 0;
+    for (int right = 0; right &lt; s.length(); right++) {
+        while (seen.contains(s.charAt(right))) {
+            seen.remove(s.charAt(left));
+            left++;
+        }
+        seen.add(s.charAt(right));
+        best = Math.max(best, right - left + 1);
+    }
+    return best;
+}</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="js" hidden>
+      <span class="code-label is-good">JavaScript</span>
+      <pre class="code-block"><code>function lengthOfLongestSubstring(s) {
+  const seen = new Set();
+  let left = 0, best = 0;
+  for (let right = 0; right &lt; s.length; right++) {
+    while (seen.has(s[right])) {
+      seen.delete(s[left]);
+      left++;
+    }
+    seen.add(s[right]);
+    best = Math.max(best, right - left + 1);
+  }
+  return best;
+}</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="cpp" hidden>
+      <span class="code-label is-good">C++</span>
+      <pre class="code-block"><code>int lengthOfLongestSubstring(std::string s) {
+    std::unordered_set&lt;char&gt; seen;
+    int left = 0, best = 0;
+    for (int right = 0; right &lt; s.size(); right++) {
+        while (seen.count(s[right])) {
+            seen.erase(s[left]);
+            left++;
+        }
+        seen.insert(s[right]);
+        best = std::max(best, right - left + 1);
+    }
+    return best;
+}</code></pre>
+    </div>
+  </div>
+
+  <p>It looks like a nested loop — a <code class="inline-code">while</code> loop inside a <code class="inline-code">for</code> loop — which would suggest O(n²). But <code class="inline-code">left</code> only ever moves forward, never resets, and can move at most <code class="inline-code">n</code> times total across the <em>entire</em> run of the outer loop, not <code class="inline-code">n</code> times per iteration. Each pointer independently makes at most <code class="inline-code">n</code> moves in total, so the real cost is O(n) + O(n) = O(n) — this is exactly Rule 1 from Lesson 2, just harder to see because the two loops are nested in the code rather than sequential.</p>
+
+  <div class="box why">
+    <span class="box-label">Why it matters here</span>
+    This "looks nested, is actually linear" shape is one of the most commonly misjudged complexities in interviews — correctly explaining <em>why</em> it's O(n) and not O(n²) is often worth more to an interviewer than the code itself. The general recipe — expand right to grow the window, shrink left while some condition is violated, track the best result along the way — solves a large share of substring and subarray problems, whatever the specific condition is.
+  </div>
+
+  <h2>Check your recall</h2>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What condition causes the window to shrink from the left in this problem?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">The window has reached a fixed maximum size.</button>
+      <button class="quiz-choice" data-correct="true">The character entering on the right is already inside the current window.</button>
+      <button class="quiz-choice" data-correct="false">The right pointer has reached the end of the string.</button>
+      <button class="quiz-choice" data-correct="false">The window's current length is an even number.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A repeated character is exactly what breaks the "no repeats" rule the window must maintain.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Despite the nested loop structure in the code, what is the actual time complexity, and why?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">O(n²), because nested loops always multiply.</button>
+      <button class="quiz-choice" data-correct="true">O(n), because left only ever moves forward and moves at most n times total across the whole run.</button>
+      <button class="quiz-choice" data-correct="false">O(log n), because the window shrinks by half each time.</button>
+      <button class="quiz-choice" data-correct="false">It cannot be determined from the code alone.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Both pointers make at most n total moves across the entire run, not per outer-loop iteration — the key exception to "nested loops multiply."</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. What is the general recipe this pattern follows, regardless of the specific window condition?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Sort the array first, then apply two pointers from opposite ends.</button>
+      <button class="quiz-choice" data-correct="true">Expand right to grow the window; shrink left while a condition is violated; track the best result along the way.</button>
+      <button class="quiz-choice" data-correct="false">Recompute the entire window from scratch after every character.</button>
+      <button class="quiz-choice" data-correct="false">Only ever move the right pointer, never the left.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>This shape generalizes across many different specific conditions — only what triggers a shrink changes.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="variable">
+    <p class="quiz-prompt">4. Fill in the blank: unlike Lesson 6's window, this lesson's window has no fixed length — it is a ___-size sliding window.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The window's size changes dynamically based on the "no repeated characters" condition.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="right">
+    <p class="quiz-prompt">5. Fill in the blank: in this pattern, the pointer that always expands the window by moving forward one character at a time is ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>right drives the expansion; left only moves in response to a violated condition.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p><a href="https://leetcode.com/explore/">LeetCode's own Explore pattern tracks</a> group this exact problem under "sliding window," alongside several close variants worth comparing once this one is solid.</p>
+
+  <div class="box">
+    <span class="box-label">Practice on LeetCode</span>
+    <a href="https://leetcode.com/problems/longest-substring-without-repeating-characters/">LeetCode #3 — Longest Substring Without Repeating Characters</a>. That closes Unit 2 — solve it unassisted before moving on.
+  </div>
+
+  <p class="ask-teacher">Wondering how this changes when the condition is "at most two distinct characters" instead of "no repeats at all"? Ask your teacher — the same recipe applies with one small change to what's tracked. That closes Unit 2: Two Pointers & Sliding Window. Next: binary search, applied to problems that don't look sorted at first glance.</p>
+
+  <footer class="lesson-footer">STEM+ · Computer Programming 2+ · Lesson 7</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  STEMPlus.mountTabs(document.getElementById('varwindow-tabs'), 'data-tab', 'data-panel');
+});
+</script>

@@ -1,0 +1,236 @@
+<title>Lesson 19: BFS &amp; Shortest Paths in Unweighted Graphs — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<script src="../../assets/interactive.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Computer Programming 2+ · Lesson 19</span>
+  <h1>BFS &amp; Shortest Paths in Unweighted Graphs</h1>
+  <p class="subtitle">Lesson 12's level-order traversal generalizes directly — and starting a BFS from more than one node at once unlocks an entire class of "spreading" problems.</p>
+  <p class="nav-links"><a href="0018-representing-graphs-and-dfs.html">← Lesson 18</a> <a href="0020-topological-sort-and-course-scheduling.html">Lesson 20 →</a> <a href="../index.html">Contents</a> <a href="../reference/glossary.html">Glossary →</a></p>
+
+  <p>Problem: a grid contains fresh oranges (1), rotten oranges (2), and empty cells (0). Every minute, every rotten orange rots any fresh orange directly adjacent to it. Return the number of minutes until no fresh orange remains, or -1 if some fresh orange can never be reached. This is exactly Lesson 12's level-order BFS, except the traversal starts from <em>every</em> rotten orange simultaneously, not from a single root.</p>
+
+  <div class="box">
+    <span class="box-label">The idea</span>
+    Push every initially rotten orange into the queue at once — this is a <strong>multi-source BFS</strong>. Then run the same level-by-level pattern from Lesson 12: process everything currently in the queue as "this minute," pushing newly-rotted neighbors as the next minute's work. The number of rounds run is exactly the number of minutes elapsed.
+  </div>
+
+  <div id="mbfs-tabs">
+    <div class="fm-tabs">
+      <button class="fm-tab is-active" data-tab="py">Python</button>
+      <button class="fm-tab" data-tab="java">Java</button>
+      <button class="fm-tab" data-tab="js">JavaScript</button>
+      <button class="fm-tab" data-tab="cpp">C++</button>
+    </div>
+    <div class="fm-panel" data-panel="py">
+      <span class="code-label is-good">Python</span>
+      <pre class="code-block"><code>from collections import deque
+
+def oranges_rotting(grid):
+    rows, cols = len(grid), len(grid[0])
+    queue = deque()
+    fresh = 0
+    for r in range(rows):
+        for c in range(cols):
+            if grid[r][c] == 2:
+                queue.append((r, c))       # every rotten orange starts in the queue
+            elif grid[r][c] == 1:
+                fresh += 1
+
+    minutes = 0
+    directions = [(1, 0), (-1, 0), (0, 1), (0, -1)]
+    while queue and fresh &gt; 0:
+        minutes += 1
+        for _ in range(len(queue)):        # exactly one minute's worth of spreading
+            r, c = queue.popleft()
+            for dr, dc in directions:
+                nr, nc = r + dr, c + dc
+                if 0 &lt;= nr &lt; rows and 0 &lt;= nc &lt; cols and grid[nr][nc] == 1:
+                    grid[nr][nc] = 2
+                    fresh -= 1
+                    queue.append((nr, nc))
+    return minutes if fresh == 0 else -1</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="java" hidden>
+      <span class="code-label is-good">Java</span>
+      <pre class="code-block"><code>int orangesRotting(int[][] grid) {
+    int rows = grid.length, cols = grid[0].length;
+    Queue&lt;int[]&gt; queue = new LinkedList&lt;&gt;();
+    int fresh = 0;
+    for (int r = 0; r &lt; rows; r++) {
+        for (int c = 0; c &lt; cols; c++) {
+            if (grid[r][c] == 2) queue.add(new int[] { r, c });   // every rotten orange starts in the queue
+            else if (grid[r][c] == 1) fresh++;
+        }
+    }
+
+    int minutes = 0;
+    int[][] directions = { {1, 0}, {-1, 0}, {0, 1}, {0, -1} };
+    while (!queue.isEmpty() &amp;&amp; fresh &gt; 0) {
+        minutes++;
+        int levelSize = queue.size();
+        for (int i = 0; i &lt; levelSize; i++) {   // exactly one minute's worth of spreading
+            int[] cell = queue.poll();
+            for (int[] d : directions) {
+                int nr = cell[0] + d[0], nc = cell[1] + d[1];
+                if (nr &gt;= 0 &amp;&amp; nr &lt; rows &amp;&amp; nc &gt;= 0 &amp;&amp; nc &lt; cols &amp;&amp; grid[nr][nc] == 1) {
+                    grid[nr][nc] = 2;
+                    fresh--;
+                    queue.add(new int[] { nr, nc });
+                }
+            }
+        }
+    }
+    return fresh == 0 ? minutes : -1;
+}</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="js" hidden>
+      <span class="code-label is-good">JavaScript</span>
+      <pre class="code-block"><code>function orangesRotting(grid) {
+  const rows = grid.length, cols = grid[0].length;
+  const queue = [];
+  let fresh = 0;
+  for (let r = 0; r &lt; rows; r++) {
+    for (let c = 0; c &lt; cols; c++) {
+      if (grid[r][c] === 2) queue.push([r, c]);   // every rotten orange starts in the queue
+      else if (grid[r][c] === 1) fresh++;
+    }
+  }
+
+  let minutes = 0;
+  const directions = [[1, 0], [-1, 0], [0, 1], [0, -1]];
+  while (queue.length &gt; 0 &amp;&amp; fresh &gt; 0) {
+    minutes++;
+    const levelSize = queue.length;
+    for (let i = 0; i &lt; levelSize; i++) {   // exactly one minute's worth of spreading
+      const [r, c] = queue.shift();
+      for (const [dr, dc] of directions) {
+        const nr = r + dr, nc = c + dc;
+        if (nr &gt;= 0 &amp;&amp; nr &lt; rows &amp;&amp; nc &gt;= 0 &amp;&amp; nc &lt; cols &amp;&amp; grid[nr][nc] === 1) {
+          grid[nr][nc] = 2;
+          fresh--;
+          queue.push([nr, nc]);
+        }
+      }
+    }
+  }
+  return fresh === 0 ? minutes : -1;
+}</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="cpp" hidden>
+      <span class="code-label is-good">C++</span>
+      <pre class="code-block"><code>int orangesRotting(std::vector&lt;std::vector&lt;int&gt;&gt;&amp; grid) {
+    int rows = grid.size(), cols = grid[0].size();
+    std::queue&lt;std::pair&lt;int,int&gt;&gt; q;
+    int fresh = 0;
+    for (int r = 0; r &lt; rows; r++)
+        for (int c = 0; c &lt; cols; c++) {
+            if (grid[r][c] == 2) q.push({r, c});   // every rotten orange starts in the queue
+            else if (grid[r][c] == 1) fresh++;
+        }
+
+    int minutes = 0;
+    std::vector&lt;std::pair&lt;int,int&gt;&gt; directions = {{1,0},{-1,0},{0,1},{0,-1}};
+    while (!q.empty() &amp;&amp; fresh &gt; 0) {
+        minutes++;
+        int levelSize = q.size();
+        for (int i = 0; i &lt; levelSize; i++) {   // exactly one minute's worth of spreading
+            auto [r, c] = q.front(); q.pop();
+            for (auto [dr, dc] : directions) {
+                int nr = r + dr, nc = c + dc;
+                if (nr &gt;= 0 &amp;&amp; nr &lt; rows &amp;&amp; nc &gt;= 0 &amp;&amp; nc &lt; cols &amp;&amp; grid[nr][nc] == 1) {
+                    grid[nr][nc] = 2;
+                    fresh--;
+                    q.push({nr, nc});
+                }
+            }
+        }
+    }
+    return fresh == 0 ? minutes : -1;
+}</code></pre>
+    </div>
+  </div>
+
+  <p>Every cell is enqueued and processed at most once, so this is O(rows · cols) time and space, same as Lesson 18's DFS. The one new idea is seeding the queue with many starting points instead of one — everything else, including the <code class="inline-code">levelSize</code> trick that separates one round from the next, is identical to Lesson 12.</p>
+
+  <div class="box why">
+    <span class="box-label">Why it matters here</span>
+    Because BFS explores in strict order of distance from its source (or sources), it's the standard algorithm for shortest paths whenever every edge costs the same — one step, one minute, one move. Multi-source BFS is the trick specifically worth remembering: any "starting from all of these points, how long until X spreads everywhere" problem is a queue seeded with more than one node, not a fundamentally different algorithm.
+  </div>
+
+  <h2>Check your recall</h2>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What makes this problem's BFS a "multi-source" BFS?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">It uses more than one queue at the same time.</button>
+      <button class="quiz-choice" data-correct="true">The queue starts with every rotten orange already in it, not just a single root.</button>
+      <button class="quiz-choice" data-correct="false">It traverses the grid in more than one direction.</button>
+      <button class="quiz-choice" data-correct="false">It requires running the algorithm multiple separate times.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Seeding the queue with multiple starting nodes at once is the entire idea — everything else is standard BFS.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why is BFS the right choice here instead of DFS?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">DFS cannot be used on grids at all.</button>
+      <button class="quiz-choice" data-correct="true">BFS explores in strict order of distance from the source, which is exactly what "minutes elapsed" measures.</button>
+      <button class="quiz-choice" data-correct="false">BFS always uses less memory than DFS.</button>
+      <button class="quiz-choice" data-correct="false">There is no meaningful difference for this problem.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>DFS would plunge down one path first, losing the round-by-round structure that "minutes" requires.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. What does the levelSize variable (captured before each inner loop) represent in this problem?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">The total number of fresh oranges remaining.</button>
+      <button class="quiz-choice" data-correct="true">Exactly one minute's worth of oranges to rot, separating this round from the next.</button>
+      <button class="quiz-choice" data-correct="false">The size of the entire grid.</button>
+      <button class="quiz-choice" data-correct="false">A fixed constant that never changes.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>This is the identical trick from Lesson 12, just applied to a grid instead of a tree.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="unweighted">
+    <p class="quiz-prompt">4. Fill in the blank: BFS gives correct shortest-path distances specifically on ___ graphs, where every edge costs the same.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Lesson 22 covers what changes once edges have different costs.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="sources">
+    <p class="quiz-prompt">5. Fill in the blank: seeding a BFS queue with more than one starting node at once is called a multi-___ BFS.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>This is the one genuinely new idea in this lesson — the traversal itself is unchanged from Lesson 12.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p><a href="https://neetcode.io/roadmap">NeetCode's Roadmap</a> groups multi-source BFS directly alongside standard BFS in its graphs section, treating it as a variation rather than a separate topic.</p>
+
+  <div class="box">
+    <span class="box-label">Practice on LeetCode</span>
+    <a href="https://leetcode.com/problems/rotting-oranges/">LeetCode #994 — Rotting Oranges</a>. Trace the queue's contents minute by minute on a small grid before running any code.
+  </div>
+
+  <p class="ask-teacher">Wondering how this same multi-source idea would apply to a problem like "find the distance from every cell to its nearest 0"? Ask your teacher — it's the identical pattern with a different thing being tracked. Next: a graph where edges have direction, and traversal order itself becomes the answer.</p>
+
+  <footer class="lesson-footer">STEM+ · Computer Programming 2+ · Lesson 19</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  STEMPlus.mountTabs(document.getElementById('mbfs-tabs'), 'data-tab', 'data-panel');
+});
+</script>

@@ -1,0 +1,181 @@
+<title>Lesson 23: Backtracking Fundamentals — Subsets &amp; Permutations — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<script src="../../assets/interactive.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Computer Programming 2+ · Lesson 23</span>
+  <h1>Backtracking Fundamentals: Subsets &amp; Permutations</h1>
+  <p class="subtitle">A recursive tree that explores every choice, undoing each one before trying the next — the template behind an entire family of "generate all ___" problems.</p>
+  <p class="nav-links"><a href="../Unit%206/0022-dijkstras-algorithm-and-network-delay-time.html">← Lesson 22</a> <a href="0024-combination-sum-and-combinations-under-constraints.html">Lesson 24 →</a> <a href="../index.html">Contents</a> <a href="../reference/glossary.html">Glossary →</a></p>
+
+  <p>Problem: given an array of distinct integers, return every possible subset (the power set). <strong>Backtracking</strong> is DFS (Unit 6) on an implicit decision tree: at each step, <strong>choose</strong> an option, <strong>explore</strong> deeper by recursing, then <strong>unchoose</strong> that option before trying the next one. That third step — undoing the choice — is the one genuinely new idea; everything else is the recursive DFS already familiar from Unit 4 and Unit 6.</p>
+
+  <div class="box">
+    <span class="box-label">The idea</span>
+    Build subsets one decision at a time: for each number, decide whether to include it, moving to the next number either way. A running <code class="inline-code">path</code> holds the subset built so far. Every time a number is added to <code class="inline-code">path</code>, the current path is recorded as one complete subset, then recursion continues; after returning, that number is removed from <code class="inline-code">path</code> again — the backtrack — so the next number can be tried in its place.
+  </div>
+
+  <div id="subsets-tabs">
+    <div class="fm-tabs">
+      <button class="fm-tab is-active" data-tab="py">Python</button>
+      <button class="fm-tab" data-tab="java">Java</button>
+      <button class="fm-tab" data-tab="js">JavaScript</button>
+      <button class="fm-tab" data-tab="cpp">C++</button>
+    </div>
+    <div class="fm-panel" data-panel="py">
+      <span class="code-label is-good">Python</span>
+      <pre class="code-block"><code>def subsets(nums):
+    result = []
+    path = []
+
+    def backtrack(start):
+        result.append(path[:])          # record the current subset (a copy)
+        for i in range(start, len(nums)):
+            path.append(nums[i])        # choose
+            backtrack(i + 1)            # explore
+            path.pop()                  # unchoose
+
+    backtrack(0)
+    return result</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="java" hidden>
+      <span class="code-label is-good">Java</span>
+      <pre class="code-block"><code>List&lt;List&lt;Integer&gt;&gt; subsets(int[] nums) {
+    List&lt;List&lt;Integer&gt;&gt; result = new ArrayList&lt;&gt;();
+    List&lt;Integer&gt; path = new ArrayList&lt;&gt;();
+    backtrack(nums, 0, path, result);
+    return result;
+}
+
+void backtrack(int[] nums, int start, List&lt;Integer&gt; path, List&lt;List&lt;Integer&gt;&gt; result) {
+    result.add(new ArrayList&lt;&gt;(path));   // record the current subset (a copy)
+    for (int i = start; i &lt; nums.length; i++) {
+        path.add(nums[i]);                // choose
+        backtrack(nums, i + 1, path, result);   // explore
+        path.remove(path.size() - 1);     // unchoose
+    }
+}</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="js" hidden>
+      <span class="code-label is-good">JavaScript</span>
+      <pre class="code-block"><code>function subsets(nums) {
+  const result = [];
+  const path = [];
+
+  function backtrack(start) {
+    result.push([...path]);        // record the current subset (a copy)
+    for (let i = start; i &lt; nums.length; i++) {
+      path.push(nums[i]);          // choose
+      backtrack(i + 1);            // explore
+      path.pop();                  // unchoose
+    }
+  }
+
+  backtrack(0);
+  return result;
+}</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="cpp" hidden>
+      <span class="code-label is-good">C++</span>
+      <pre class="code-block"><code>void backtrack(std::vector&lt;int&gt;&amp; nums, int start, std::vector&lt;int&gt;&amp; path,
+               std::vector&lt;std::vector&lt;int&gt;&gt;&amp; result) {
+    result.push_back(path);            // record the current subset (a copy)
+    for (int i = start; i &lt; (int)nums.size(); i++) {
+        path.push_back(nums[i]);       // choose
+        backtrack(nums, i + 1, path, result);   // explore
+        path.pop_back();               // unchoose
+    }
+}
+
+std::vector&lt;std::vector&lt;int&gt;&gt; subsets(std::vector&lt;int&gt;&amp; nums) {
+    std::vector&lt;std::vector&lt;int&gt;&gt; result;
+    std::vector&lt;int&gt; path;
+    backtrack(nums, 0, path, result);
+    return result;
+}</code></pre>
+    </div>
+  </div>
+
+  <p>There are 2ⁿ possible subsets, and building each one costs up to O(n) to copy, giving O(n · 2ⁿ) time — exponential, but unavoidable since the answer itself has that many entries. A closely related problem, permutations (every possible <em>ordering</em> of all n numbers, LeetCode #46), uses the identical choose-explore-unchoose template with one change: instead of a <code class="inline-code">start</code> index that only moves forward, a <code class="inline-code">used</code> tracker marks which numbers are already placed in <code class="inline-code">path</code>, since any unused number can go next regardless of order. That single change is the whole difference — subsets asks "include or skip," permutations asks "which unused number goes here next," and both explore n! or 2ⁿ leaves of the same kind of recursive tree.</p>
+
+  <div class="box why">
+    <span class="box-label">Why it matters here</span>
+    Backtracking is DFS from Unit 6, applied to a tree of choices instead of a tree of physical nodes — the recursion, the base case, and the traversal shape are all already familiar. The one addition is undoing a choice after exploring it, so the same <code class="inline-code">path</code> variable can be reused across every branch instead of being copied fresh each time. Nearly every "generate all ___" or "find every way to ___" problem — subsets, permutations, combinations, valid arrangements — is this exact template with a different rule for what counts as a valid choice.
+  </div>
+
+  <h2>Check your recall</h2>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What are the three steps of the backtracking template?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Sort, search, and return.</button>
+      <button class="quiz-choice" data-correct="true">Choose, explore (recurse), and unchoose.</button>
+      <button class="quiz-choice" data-correct="false">Split, merge, and combine.</button>
+      <button class="quiz-choice" data-correct="false">Push, pop, and peek.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Undoing the choice after exploring it is what lets one shared path variable be reused across every branch.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why must path.pop() (or its equivalent) run after each recursive call returns?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">To make the recursion run faster overall.</button>
+      <button class="quiz-choice" data-correct="true">To remove the most recent choice so the next option can be tried from a clean state.</button>
+      <button class="quiz-choice" data-correct="false">To permanently delete that number from the input array.</button>
+      <button class="quiz-choice" data-correct="false">To stop the recursion from running at all.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Without undoing the choice, path would keep growing with leftover choices from earlier branches.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. What is the one change that turns the subsets template into a permutations solution?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Replacing the entire recursive approach with a sorting-based one.</button>
+      <button class="quiz-choice" data-correct="true">Tracking which numbers are already used instead of a forward-only start index.</button>
+      <button class="quiz-choice" data-correct="false">Removing the base case that records each result.</button>
+      <button class="quiz-choice" data-correct="false">Running the recursion only once instead of in a loop.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Since order matters for permutations, any unused number can go next — not only ones after the current index.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="unchoose">
+    <p class="quiz-prompt">4. Fill in the blank: the step that removes the most recent choice after exploring it is called the ___ step.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>This is the one genuinely new idea beyond ordinary DFS.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="exponential">
+    <p class="quiz-prompt">5. Fill in the blank: generating all 2ⁿ subsets takes ___ time, which is unavoidable since the answer itself has that many entries.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>No algorithm can list 2ⁿ results any faster than roughly 2ⁿ time.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p><a href="https://cp-algorithms.com/algebra/all-submasks.html">Algorithms for Competitive Programming</a> covers the underlying combinatorics of subset enumeration, including the bitmask-based alternative to recursive backtracking worth knowing for competitive programming.</p>
+
+  <div class="box">
+    <span class="box-label">Practice on LeetCode</span>
+    <a href="https://leetcode.com/problems/subsets/">LeetCode #78 — Subsets</a> and <a href="https://leetcode.com/problems/permutations/">#46 — Permutations</a>. Solve subsets first, then adapt the same template to permutations from scratch.
+  </div>
+
+  <p class="ask-teacher">Wondering how a bitmask (an integer whose bits mark which elements are included) could generate the same subsets iteratively, without recursion at all? Ask your teacher — it's a useful alternative for competitive programming's tighter time limits. Next: adding a constraint that lets branches be cut short before they're even fully explored.</p>
+
+  <footer class="lesson-footer">STEM+ · Computer Programming 2+ · Lesson 23</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  STEMPlus.mountTabs(document.getElementById('subsets-tabs'), 'data-tab', 'data-panel');
+});
+</script>

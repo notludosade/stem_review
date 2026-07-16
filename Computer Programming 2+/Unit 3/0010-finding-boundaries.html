@@ -1,0 +1,190 @@
+<title>Lesson 10: Finding Boundaries — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<script src="../../assets/interactive.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Computer Programming 2+ · Lesson 10</span>
+  <h1>Finding Boundaries</h1>
+  <p class="subtitle">Standard binary search stops the moment it finds a match. Finding the first or last occurrence means teaching it to keep searching on purpose.</p>
+  <p class="nav-links"><a href="0009-binary-search-on-the-answer.html">← Lesson 9</a> <a href="../index.html">Contents</a> <a href="../reference/glossary.html">Glossary →</a></p>
+
+  <p>Problem: given a sorted array that may contain duplicates, find the first and last index of a given target. Standard binary search finds <em>a</em> matching index, but gives no guarantee it's the first or last one among duplicates.</p>
+
+  <div class="box">
+    <span class="box-label">The idea</span>
+    Run two separate binary searches. For the first occurrence: whenever the midpoint matches, record it, but keep searching the <em>left</em> half anyway, in case an earlier match exists. For the last occurrence: on a match, record it and keep searching the <em>right</em> half instead.
+  </div>
+
+  <div id="boundary-tabs">
+    <div class="fm-tabs">
+      <button class="fm-tab is-active" data-tab="py">Python</button>
+      <button class="fm-tab" data-tab="java">Java</button>
+      <button class="fm-tab" data-tab="js">JavaScript</button>
+      <button class="fm-tab" data-tab="cpp">C++</button>
+    </div>
+    <div class="fm-panel" data-panel="py">
+      <span class="code-label is-good">Python</span>
+      <pre class="code-block"><code>def search_range(nums, target):
+    def find_bound(find_first):
+        left, right = 0, len(nums) - 1
+        result = -1
+        while left &lt;= right:
+            mid = (left + right) // 2
+            if nums[mid] == target:
+                result = mid
+                if find_first:
+                    right = mid - 1   # keep looking left
+                else:
+                    left = mid + 1    # keep looking right
+            elif nums[mid] &lt; target:
+                left = mid + 1
+            else:
+                right = mid - 1
+        return result
+
+    return [find_bound(True), find_bound(False)]</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="java" hidden>
+      <span class="code-label is-good">Java</span>
+      <pre class="code-block"><code>int[] searchRange(int[] nums, int target) {
+    return new int[] { findBound(nums, target, true), findBound(nums, target, false) };
+}
+
+int findBound(int[] nums, int target, boolean findFirst) {
+    int left = 0, right = nums.length - 1, result = -1;
+    while (left &lt;= right) {
+        int mid = (left + right) / 2;
+        if (nums[mid] == target) {
+            result = mid;
+            if (findFirst) right = mid - 1;   // keep looking left
+            else left = mid + 1;                // keep looking right
+        } else if (nums[mid] &lt; target) left = mid + 1;
+        else right = mid - 1;
+    }
+    return result;
+}</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="js" hidden>
+      <span class="code-label is-good">JavaScript</span>
+      <pre class="code-block"><code>function searchRange(nums, target) {
+  function findBound(findFirst) {
+    let left = 0, right = nums.length - 1, result = -1;
+    while (left &lt;= right) {
+      const mid = Math.floor((left + right) / 2);
+      if (nums[mid] === target) {
+        result = mid;
+        if (findFirst) right = mid - 1;   // keep looking left
+        else left = mid + 1;                // keep looking right
+      } else if (nums[mid] &lt; target) left = mid + 1;
+      else right = mid - 1;
+    }
+    return result;
+  }
+  return [findBound(true), findBound(false)];
+}</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="cpp" hidden>
+      <span class="code-label is-good">C++</span>
+      <pre class="code-block"><code>int findBound(std::vector&lt;int&gt;&amp; nums, int target, bool findFirst) {
+    int left = 0, right = nums.size() - 1, result = -1;
+    while (left &lt;= right) {
+        int mid = (left + right) / 2;
+        if (nums[mid] == target) {
+            result = mid;
+            if (findFirst) right = mid - 1;   // keep looking left
+            else left = mid + 1;                // keep looking right
+        } else if (nums[mid] &lt; target) left = mid + 1;
+        else right = mid - 1;
+    }
+    return result;
+}
+
+std::vector&lt;int&gt; searchRange(std::vector&lt;int&gt;&amp; nums, int target) {
+    return { findBound(nums, target, true), findBound(nums, target, false) };
+}</code></pre>
+    </div>
+  </div>
+
+  <p>Both searches are still O(log n), so finding the full range costs O(log n) total — dramatically better than finding one match with binary search and then scanning outward linearly in both directions, which degrades to O(n) whenever a value is repeated many times (imagine a target that appears in half the array).</p>
+
+  <div class="box why">
+    <span class="box-label">Why it matters here</span>
+    This closes Unit 3's real point: binary search is not one formula but a small family of variations — search for existence, search for a boundary, search over an abstract answer space — all sharing the same "eliminate half using a decidable rule" core from Lesson 8. Recognizing which variation a problem needs, rather than reaching for the one memorized template, is what separates fluency here from rote recall.
+  </div>
+
+  <h2>Check your recall</h2>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. When searching for the first occurrence and the midpoint matches the target, what should happen next?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Return immediately, since a match was found.</button>
+      <button class="quiz-choice" data-correct="true">Record the match, then keep searching the left half for an earlier one.</button>
+      <button class="quiz-choice" data-correct="false">Restart the search from the beginning of the array.</button>
+      <button class="quiz-choice" data-correct="false">Search the right half instead, ignoring the left.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>An earlier match might still exist further left — stopping immediately could miss it.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why is finding both boundaries with two binary searches better than one binary search plus a linear scan outward?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">There is no difference in performance between the two approaches.</button>
+      <button class="quiz-choice" data-correct="true">The linear scan degrades to O(n) when the target is repeated many times, while two binary searches stay O(log n).</button>
+      <button class="quiz-choice" data-correct="false">A linear scan is always faster in practice.</button>
+      <button class="quiz-choice" data-correct="false">Binary search cannot be used more than once per problem.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>If a target appears across half the array, scanning outward from one match is effectively linear.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. What is the overall time complexity of finding both the first and last index of a target?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">O(n), since duplicates must be scanned.</button>
+      <button class="quiz-choice" data-correct="true">O(log n), since two independent binary searches are run.</button>
+      <button class="quiz-choice" data-correct="false">O(n log n), since the array must be re-sorted first.</button>
+      <button class="quiz-choice" data-correct="false">O(1), since duplicates are ignored entirely.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Two O(log n) searches run one after another still total O(log n).</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="boundary">
+    <p class="quiz-prompt">4. Fill in the blank: modifying binary search to keep narrowing toward the first or last matching index, instead of stopping at any match, is called finding a ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>This is the name for this whole lesson's variation on the standard search.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="duplicates">
+    <p class="quiz-prompt">5. Fill in the blank: the reason a single match isn't enough information in this problem is that the array may contain ___ of the target value.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>With no duplicates, standard binary search would already return the unique correct index.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p><a href="https://visualgo.net/en">VisuAlgo</a>'s binary search visualization supports stepping through boundary-finding variants directly, useful for building the intuition by watching rather than only reading code.</p>
+
+  <div class="box">
+    <span class="box-label">Practice on LeetCode</span>
+    <a href="https://leetcode.com/problems/find-first-and-last-position-of-element-in-sorted-array/">LeetCode #34 — Find First and Last Position of Element in Sorted Array</a>. That closes Unit 3 — implement both bound searches from scratch before moving on.
+  </div>
+
+  <p class="ask-teacher">Wondering whether a single binary search function can be parameterized to handle both first and last, instead of writing two nearly-identical ones? Ask your teacher — it's a clean refactor once both work correctly on their own. That closes Unit 3: Binary Search Beyond Sorted Arrays. Next: trees, and the traversal patterns that unlock almost everything built on top of them.</p>
+
+  <footer class="lesson-footer">STEM+ · Computer Programming 2+ · Lesson 10</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  STEMPlus.mountTabs(document.getElementById('boundary-tabs'), 'data-tab', 'data-panel');
+});
+</script>

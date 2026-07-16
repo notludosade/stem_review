@@ -1,0 +1,170 @@
+<title>Lesson 9: Binary Search on the Answer Space — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<script src="../../assets/interactive.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Computer Programming 2+ · Lesson 9</span>
+  <h1>Binary Search on the Answer Space</h1>
+  <p class="subtitle">Some problems never mention an array to search at all — the thing being searched is the space of possible answers.</p>
+  <p class="nav-links"><a href="0008-binary-search-on-rotated-arrays.html">← Lesson 8</a> <a href="0010-finding-boundaries.html">Lesson 10 →</a> <a href="../index.html">Contents</a> <a href="../reference/glossary.html">Glossary →</a></p>
+
+  <p>Problem: Koko has piles of bananas and <code class="inline-code">h</code> hours to eat them all. Each hour she picks one pile and eats up to <code class="inline-code">k</code> bananas from it (if the pile has fewer than <code class="inline-code">k</code>, she finishes it and stops for the hour). Find the minimum integer <code class="inline-code">k</code> that lets her finish within <code class="inline-code">h</code> hours.</p>
+
+  <p>There's no array of "candidate speeds" to search — but there's still a search space: every integer from 1 up to the largest pile size. And it has exactly the property binary search needs: define <code class="inline-code">canFinish(k)</code> as "can Koko finish in time eating at speed k?" — if <code class="inline-code">canFinish(k)</code> is true, it's also true for every speed <em>faster</em> than <code class="inline-code">k</code>. That's a <strong>monotonic</strong> condition, and monotonicity is the real requirement binary search runs on — sortedness (Lesson 8) is just one common way to get it.</p>
+
+  <div class="box">
+    <span class="box-label">The idea</span>
+    Binary search directly over candidate speeds. For each midpoint speed, simulate whether Koko finishes in time. If she does, that speed (or something smaller) might work — search lower. If she doesn't, search higher.
+  </div>
+
+  <div id="answer-search-tabs">
+    <div class="fm-tabs">
+      <button class="fm-tab is-active" data-tab="py">Python</button>
+      <button class="fm-tab" data-tab="java">Java</button>
+      <button class="fm-tab" data-tab="js">JavaScript</button>
+      <button class="fm-tab" data-tab="cpp">C++</button>
+    </div>
+    <div class="fm-panel" data-panel="py">
+      <span class="code-label is-good">Python</span>
+      <pre class="code-block"><code>import math
+
+def min_eating_speed(piles, h):
+    def hours_needed(speed):
+        return sum(math.ceil(p / speed) for p in piles)
+
+    left, right = 1, max(piles)
+    while left &lt; right:
+        mid = (left + right) // 2
+        if hours_needed(mid) &lt;= h:
+            right = mid       # mid works; try slower
+        else:
+            left = mid + 1    # mid too slow; go faster
+    return left</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="java" hidden>
+      <span class="code-label is-good">Java</span>
+      <pre class="code-block"><code>int minEatingSpeed(int[] piles, int h) {
+    int left = 1, right = 0;
+    for (int p : piles) right = Math.max(right, p);
+    while (left &lt; right) {
+        int mid = (left + right) / 2;
+        long hours = 0;
+        for (int p : piles) hours += Math.ceil((double) p / mid);
+        if (hours &lt;= h) right = mid;   // mid works; try slower
+        else left = mid + 1;             // mid too slow; go faster
+    }
+    return left;
+}</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="js" hidden>
+      <span class="code-label is-good">JavaScript</span>
+      <pre class="code-block"><code>function minEatingSpeed(piles, h) {
+  let left = 1, right = Math.max(...piles);
+  while (left &lt; right) {
+    const mid = Math.floor((left + right) / 2);
+    const hours = piles.reduce((sum, p) =&gt; sum + Math.ceil(p / mid), 0);
+    if (hours &lt;= h) right = mid;   // mid works; try slower
+    else left = mid + 1;             // mid too slow; go faster
+  }
+  return left;
+}</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="cpp" hidden>
+      <span class="code-label is-good">C++</span>
+      <pre class="code-block"><code>int minEatingSpeed(std::vector&lt;int&gt;&amp; piles, int h) {
+    int left = 1, right = *std::max_element(piles.begin(), piles.end());
+    while (left &lt; right) {
+        int mid = (left + right) / 2;
+        long long hours = 0;
+        for (int p : piles) hours += (p + mid - 1) / mid; // ceiling division
+        if (hours &lt;= h) right = mid;   // mid works; try slower
+        else left = mid + 1;             // mid too slow; go faster
+    }
+    return left;
+}</code></pre>
+    </div>
+  </div>
+
+  <p>Each check costs O(piles) to simulate, and the search space of size O(max pile) is halved every step — O(piles · log(max pile)) total, dramatically better than trying every speed one by one starting from 1.</p>
+
+  <div class="box why">
+    <span class="box-label">Why it matters here</span>
+    "Binary search the answer" is one of the highest-leverage patterns for competitive programming specifically: it turns any problem of the shape "find the minimum/maximum value for which some condition holds" into O(log(range)) checks, as long as the condition is monotonic — true past some threshold and false before it (or vice versa). Recognizing that shape — rather than the presence of a sorted array — is the actual skill.
+  </div>
+
+  <h2>Check your recall</h2>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What property must the "answer space" have for binary search to apply, even with no array in sight?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">It must already be an array containing every candidate value.</button>
+      <button class="quiz-choice" data-correct="true">It must be monotonic — the condition being tested is true on one side of some threshold and false on the other.</button>
+      <button class="quiz-choice" data-correct="false">It must contain no more than 100 possible values.</button>
+      <button class="quiz-choice" data-correct="false">It must always start at zero.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Monotonicity is what guarantees eliminating half the remaining candidates is always safe.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. In the Koko problem, what does it mean that canFinish(k) is monotonic?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">canFinish(k) gives a different, unrelated answer for every value of k.</button>
+      <button class="quiz-choice" data-correct="true">If Koko can finish at speed k, she can also finish at any faster speed.</button>
+      <button class="quiz-choice" data-correct="false">canFinish(k) is only ever true for k equal to 1.</button>
+      <button class="quiz-choice" data-correct="false">The piles must be sorted for canFinish to be computed at all.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>That "true past a threshold" behavior is exactly what monotonic means here.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. What is the overall time complexity of binary-searching Koko's eating speed?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">O(piles), since only one pass over the piles is needed.</button>
+      <button class="quiz-choice" data-correct="true">O(piles · log(max pile)), since each of O(log(max pile)) checks costs O(piles).</button>
+      <button class="quiz-choice" data-correct="false">O(1), since the answer is always the largest pile.</button>
+      <button class="quiz-choice" data-correct="false">O(piles²), since every pair of piles must be compared.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The search space (possible speeds) is halved each step, and each step's check costs O(piles).</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="monotonic">
+    <p class="quiz-prompt">4. Fill in the blank: a condition that is false for all values below some threshold and true for all values at or above it (or vice versa) is called ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>This is the actual property binary search depends on — sortedness is just one common source of it.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="minimum">
+    <p class="quiz-prompt">5. Fill in the blank: "binary search on the answer" is typically framed as finding the ___ (or maximum) value for which a monotonic condition holds.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Koko's problem asks for the minimum working speed specifically.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p><a href="https://cp-algorithms.com/index.html">Algorithms for Competitive Programming</a> covers binary search as a general technique for monotonic predicates, beyond the array-searching special case most interview prep starts from.</p>
+
+  <div class="box">
+    <span class="box-label">Practice on LeetCode</span>
+    <a href="https://leetcode.com/problems/koko-eating-bananas/">LeetCode #875 — Koko Eating Bananas</a>. Identify the monotonic condition explicitly before writing the binary search loop.
+  </div>
+
+  <p class="ask-teacher">Wondering how to prove a condition is monotonic before trusting it enough to binary search on it? Ask your teacher — there's a quick sanity check worth running first. Next: finding not just whether a target exists, but the exact range of positions it occupies.</p>
+
+  <footer class="lesson-footer">STEM+ · Computer Programming 2+ · Lesson 9</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  STEMPlus.mountTabs(document.getElementById('answer-search-tabs'), 'data-tab', 'data-panel');
+});
+</script>

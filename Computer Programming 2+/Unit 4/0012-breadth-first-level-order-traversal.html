@@ -1,0 +1,194 @@
+<title>Lesson 12: Breadth-First / Level-Order Traversal — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<script src="../../assets/interactive.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Computer Programming 2+ · Lesson 12</span>
+  <h1>Breadth-First / Level-Order Traversal</h1>
+  <p class="subtitle">Depth-first plunges down one branch at a time. Breadth-first sweeps across each depth before going deeper — and that needs a queue, not recursion.</p>
+  <p class="nav-links"><a href="0011-binary-trees-and-depth-first-traversals.html">← Lesson 11</a> <a href="0013-binary-search-trees-properties-and-validation.html">Lesson 13 →</a> <a href="../index.html">Contents</a> <a href="../reference/glossary.html">Glossary →</a></p>
+
+  <p>Problem: given a binary tree, return its node values grouped level by level — all values at depth 0, then all at depth 1, and so on. Depth-first recursion naturally tracks a path from root to one deep node; it has no built-in notion of "everyone at the same depth." Breadth-first search (BFS) does, by processing nodes in the exact order they were discovered — which is what a <strong>queue</strong> (FIFO, from CP2's Unit 3) is for.</p>
+
+  <div class="box">
+    <span class="box-label">The idea</span>
+    Push the root into a queue. Repeatedly: record how many nodes are currently in the queue (that's exactly one level's worth), pop and process each of them, and push their children as you go — those children become the next level.
+  </div>
+
+  <div id="bfs-tabs">
+    <div class="fm-tabs">
+      <button class="fm-tab is-active" data-tab="py">Python</button>
+      <button class="fm-tab" data-tab="java">Java</button>
+      <button class="fm-tab" data-tab="js">JavaScript</button>
+      <button class="fm-tab" data-tab="cpp">C++</button>
+    </div>
+    <div class="fm-panel" data-panel="py">
+      <span class="code-label is-good">Python</span>
+      <pre class="code-block"><code>from collections import deque
+
+def level_order(root):
+    if root is None:
+        return []
+    result = []
+    queue = deque([root])
+    while queue:
+        level_size = len(queue)
+        level = []
+        for _ in range(level_size):
+            node = queue.popleft()
+            level.append(node.val)
+            if node.left:
+                queue.append(node.left)
+            if node.right:
+                queue.append(node.right)
+        result.append(level)
+    return result</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="java" hidden>
+      <span class="code-label is-good">Java</span>
+      <pre class="code-block"><code>List&lt;List&lt;Integer&gt;&gt; levelOrder(TreeNode root) {
+    List&lt;List&lt;Integer&gt;&gt; result = new ArrayList&lt;&gt;();
+    if (root == null) return result;
+    Queue&lt;TreeNode&gt; queue = new LinkedList&lt;&gt;();
+    queue.add(root);
+    while (!queue.isEmpty()) {
+        int levelSize = queue.size();
+        List&lt;Integer&gt; level = new ArrayList&lt;&gt;();
+        for (int i = 0; i &lt; levelSize; i++) {
+            TreeNode node = queue.poll();
+            level.add(node.val);
+            if (node.left != null) queue.add(node.left);
+            if (node.right != null) queue.add(node.right);
+        }
+        result.add(level);
+    }
+    return result;
+}</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="js" hidden>
+      <span class="code-label is-good">JavaScript</span>
+      <pre class="code-block"><code>function levelOrder(root) {
+  if (root === null) return [];
+  const result = [];
+  const queue = [root];
+  while (queue.length > 0) {
+    const levelSize = queue.length;
+    const level = [];
+    for (let i = 0; i &lt; levelSize; i++) {
+      const node = queue.shift();
+      level.push(node.val);
+      if (node.left) queue.push(node.left);
+      if (node.right) queue.push(node.right);
+    }
+    result.push(level);
+  }
+  return result;
+}</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="cpp" hidden>
+      <span class="code-label is-good">C++</span>
+      <pre class="code-block"><code>std::vector&lt;std::vector&lt;int&gt;&gt; levelOrder(TreeNode* root) {
+    std::vector&lt;std::vector&lt;int&gt;&gt; result;
+    if (root == nullptr) return result;
+    std::queue&lt;TreeNode*&gt; q;
+    q.push(root);
+    while (!q.empty()) {
+        int levelSize = q.size();
+        std::vector&lt;int&gt; level;
+        for (int i = 0; i &lt; levelSize; i++) {
+            TreeNode* node = q.front();
+            q.pop();
+            level.push_back(node-&gt;val);
+            if (node-&gt;left) q.push(node-&gt;left);
+            if (node-&gt;right) q.push(node-&gt;right);
+        }
+        result.push_back(level);
+    }
+    return result;
+}</code></pre>
+    </div>
+  </div>
+
+  <p>Every node is enqueued once and dequeued once, so this is O(n) time and, in the worst case, O(n) space too — a very wide tree's last level can hold close to half its nodes in the queue at once. Capturing <code class="inline-code">level_size</code> before the inner loop starts is the entire trick: it draws a hard line between "this level" and "the next level" even though both live in the same queue.</p>
+
+  <div class="box why">
+    <span class="box-label">Why it matters here</span>
+    BFS is the natural choice whenever a problem cares about depth, distance, or "shortest path" in an unweighted structure — level order gives you depth for free, since every node popped in round k is exactly k steps from the root. Unit 6 reuses this exact queue-based shape for graphs, where it becomes the standard algorithm for shortest paths when every edge costs the same.
+  </div>
+
+  <h2>Check your recall</h2>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What data structure does breadth-first traversal rely on that depth-first recursion doesn't need?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">A hash map.</button>
+      <button class="quiz-choice" data-correct="true">A queue.</button>
+      <button class="quiz-choice" data-correct="false">A second binary tree.</button>
+      <button class="quiz-choice" data-correct="false">A sorted array.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Processing nodes in discovery order, level by level, is exactly what a FIFO queue provides.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why does the algorithm record the queue's size before starting the inner loop each round?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">To know how much memory to allocate in advance.</button>
+      <button class="quiz-choice" data-correct="true">To draw a boundary between the current level and the next level being added to the same queue.</button>
+      <button class="quiz-choice" data-correct="false">It has no real effect on the algorithm's correctness.</button>
+      <button class="quiz-choice" data-correct="false">To detect whether the tree contains a cycle.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Without capturing that count first, newly-pushed children would get processed as part of the current level by mistake.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. What is the worst-case space complexity of level-order traversal, and when does it occur?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">O(log n), always, regardless of tree shape.</button>
+      <button class="quiz-choice" data-correct="true">O(n), when a very wide level holds a large fraction of the tree's nodes at once.</button>
+      <button class="quiz-choice" data-correct="false">O(1), since only one node is processed at a time.</button>
+      <button class="quiz-choice" data-correct="false">O(n²), since every node is compared to every other node.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A tree's widest level can approach n/2 nodes, all sitting in the queue simultaneously.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="queue">
+    <p class="quiz-prompt">4. Fill in the blank: level-order traversal processes nodes in the order they were discovered, which is exactly what a ___ provides.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>First in, first out is exactly the order breadth-first traversal needs.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="depth">
+    <p class="quiz-prompt">5. Fill in the blank: every node popped during round k of level-order traversal is exactly k steps of ___ from the root.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>This is exactly why BFS gives distance/depth information for free.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p><a href="https://neetcode.io/roadmap">NeetCode's Roadmap</a> places level-order traversal directly at the start of its trees section, as the bridge between tree traversal and the graph BFS covered later.</p>
+
+  <div class="box">
+    <span class="box-label">Practice on LeetCode</span>
+    <a href="https://leetcode.com/problems/binary-tree-level-order-traversal/">LeetCode #102 — Binary Tree Level Order Traversal</a>. Trace the queue's contents by hand for a small tree before running any code.
+  </div>
+
+  <p class="ask-teacher">Wondering how you'd modify this to return only the last level, or to traverse right-to-left within each level? Ask your teacher — both are small, common variations on this same shape. Next: the ordering rule that turns a plain binary tree into a binary search tree.</p>
+
+  <footer class="lesson-footer">STEM+ · Computer Programming 2+ · Lesson 12</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  STEMPlus.mountTabs(document.getElementById('bfs-tabs'), 'data-tab', 'data-panel');
+});
+</script>

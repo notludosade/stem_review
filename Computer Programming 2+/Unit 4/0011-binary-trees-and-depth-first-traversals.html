@@ -1,0 +1,172 @@
+<title>Lesson 11: Binary Trees &amp; Depth-First Traversals — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<script src="../../assets/interactive.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Computer Programming 2+ · Lesson 11</span>
+  <h1>Binary Trees &amp; Depth-First Traversals</h1>
+  <p class="subtitle">A tree is recursion's natural habitat — every subtree is itself a smaller tree, base case and all.</p>
+  <p class="nav-links"><a href="../Unit%203/0010-finding-boundaries.html">← Lesson 10</a> <a href="0012-breadth-first-level-order-traversal.html">Lesson 12 →</a> <a href="../index.html">Contents</a> <a href="../reference/glossary.html">Glossary →</a></p>
+
+  <p>A <strong>binary tree</strong> is a node holding a value plus references to at most two children, <code class="inline-code">left</code> and <code class="inline-code">right</code>. Visiting every node in a specific order is called a <strong>traversal</strong>. This maps directly onto the recursion vocabulary from Computer Programming 2's Unit 4: the base case is an empty (<code class="inline-code">null</code>) node, and the recursive case processes the current node's value plus whatever its two children's own traversals produce.</p>
+
+  <div class="box">
+    <span class="box-label">The idea</span>
+    A depth-first traversal visits a node, its left subtree, and its right subtree — but <em>when</em> it visits the node relative to the two subtrees defines three variants: visit-left-right ("in-order"), visit-then-left-right ("pre-order"), or left-right-then-visit ("post-order"). All three are the same three lines of code, just reordered.
+  </div>
+
+  <div id="dfs-tabs">
+    <div class="fm-tabs">
+      <button class="fm-tab is-active" data-tab="py">Python</button>
+      <button class="fm-tab" data-tab="java">Java</button>
+      <button class="fm-tab" data-tab="js">JavaScript</button>
+      <button class="fm-tab" data-tab="cpp">C++</button>
+    </div>
+    <div class="fm-panel" data-panel="py">
+      <span class="code-label is-good">Python</span>
+      <pre class="code-block"><code>class TreeNode:
+    def __init__(self, val=0, left=None, right=None):
+        self.val = val
+        self.left = left
+        self.right = right
+
+def inorder(root):
+    if root is None:
+        return []
+    return inorder(root.left) + [root.val] + inorder(root.right)</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="java" hidden>
+      <span class="code-label is-good">Java</span>
+      <pre class="code-block"><code>class TreeNode {
+    int val;
+    TreeNode left, right;
+    TreeNode(int val) { this.val = val; }
+}
+
+void inorder(TreeNode root, List&lt;Integer&gt; result) {
+    if (root == null) return;
+    inorder(root.left, result);
+    result.add(root.val);
+    inorder(root.right, result);
+}</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="js" hidden>
+      <span class="code-label is-good">JavaScript</span>
+      <pre class="code-block"><code>class TreeNode {
+  constructor(val, left = null, right = null) {
+    this.val = val;
+    this.left = left;
+    this.right = right;
+  }
+}
+
+function inorder(root, result = []) {
+  if (root === null) return result;
+  inorder(root.left, result);
+  result.push(root.val);
+  inorder(root.right, result);
+  return result;
+}</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="cpp" hidden>
+      <span class="code-label is-good">C++</span>
+      <pre class="code-block"><code>struct TreeNode {
+    int val;
+    TreeNode *left, *right;
+    TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}
+};
+
+void inorder(TreeNode* root, std::vector&lt;int&gt;&amp; result) {
+    if (root == nullptr) return;
+    inorder(root-&gt;left, result);
+    result.push_back(root-&gt;val);
+    inorder(root-&gt;right, result);
+}</code></pre>
+    </div>
+  </div>
+
+  <p>This is <strong>in-order</strong> traversal: left subtree, then this node, then right subtree. Move the <code class="inline-code">result.add(root.val)</code> line above both recursive calls and it becomes <strong>pre-order</strong> (node, left, right); move it below both and it becomes <strong>post-order</strong> (left, right, node). Same recursion, same base case, three different places to do the work.</p>
+
+  <p>Time complexity is O(n) — every node is visited exactly once. Space complexity is O(h), where <code class="inline-code">h</code> is the tree's height, because that's how deep the call stack goes (this is Unit 1 Lesson 2's "recursive call-stack space" rule, applied directly). For a balanced tree, <code class="inline-code">h</code> is O(log n); for a completely unbalanced tree — a straight line of left children, say — <code class="inline-code">h</code> degrades to O(n).</p>
+
+  <div class="box why">
+    <span class="box-label">Why it matters here</span>
+    Every recursive call here is doing exactly what CP2's call-stack lesson described: pushing a frame, waiting on two smaller subproblems, then returning. There's also an iterative version of each traversal that replaces the implicit call stack with an explicit one you manage by hand — same idea as CP2's debugging lesson, which bisected a bug instead of a tree. Recognizing traversal order as "just where one line goes" — not three separate things to memorize — is most of what this lesson is trying to build.
+  </div>
+
+  <h2>Check your recall</h2>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What distinguishes pre-order, in-order, and post-order traversal from one another?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">They visit completely different sets of nodes.</button>
+      <button class="quiz-choice" data-correct="true">Only when the current node is visited relative to its left and right subtrees.</button>
+      <button class="quiz-choice" data-correct="false">Only pre-order visits every node in the tree.</button>
+      <button class="quiz-choice" data-correct="false">They require entirely different data structures to implement.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>All three visit every node; only the placement of the "visit" step relative to the two recursive calls changes.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. What is the base case for a recursive tree traversal?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">A node with exactly one child.</button>
+      <button class="quiz-choice" data-correct="true">A null (empty) node.</button>
+      <button class="quiz-choice" data-correct="false">The root node specifically.</button>
+      <button class="quiz-choice" data-correct="false">A node whose value equals zero.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Recursing past the last real node reaches null, where there's nothing left to visit and the recursion stops.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why is the space complexity of a recursive traversal O(h) rather than O(n)?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because only half the nodes are ever visited.</button>
+      <button class="quiz-choice" data-correct="true">Because the call stack only ever holds frames for the current path from root to the deepest active node.</button>
+      <button class="quiz-choice" data-correct="false">Because trees never use any stack space at all.</button>
+      <button class="quiz-choice" data-correct="false">Because h and n are always equal.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>At any moment, only the frames along one root-to-node path are active — not all n nodes at once.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="height">
+    <p class="quiz-prompt">4. Fill in the blank: the space complexity of a recursive traversal is O(h), where h is the tree's ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>This ranges from O(log n) for a balanced tree up to O(n) for a completely unbalanced one.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="traversal">
+    <p class="quiz-prompt">5. Fill in the blank: visiting every node in a tree according to some defined order is called a ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Pre-order, in-order, and post-order are the three depth-first variants of this.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p><a href="https://visualgo.net/en">VisuAlgo</a>'s binary tree visualization animates all three depth-first traversal orders step by step, which makes the "same three lines, reordered" claim concrete.</p>
+
+  <div class="box">
+    <span class="box-label">Practice on LeetCode</span>
+    <a href="https://leetcode.com/problems/binary-tree-inorder-traversal/">LeetCode #94 — Binary Tree Inorder Traversal</a>, then repeat it as <a href="https://leetcode.com/problems/binary-tree-preorder-traversal/">#144 — Preorder</a> and <a href="https://leetcode.com/problems/binary-tree-postorder-traversal/">#145 — Postorder</a>. Solve all three and notice how little actually changes between them.
+  </div>
+
+  <p class="ask-teacher">Wondering how to convert one of these into its iterative, explicit-stack form? Ask your teacher — it's a good way to make the call stack's behavior visible. Next: traversing level by level instead of depth by depth.</p>
+
+  <footer class="lesson-footer">STEM+ · Computer Programming 2+ · Lesson 11</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  STEMPlus.mountTabs(document.getElementById('dfs-tabs'), 'data-tab', 'data-panel');
+});
+</script>

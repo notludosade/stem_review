@@ -1,0 +1,154 @@
+<title>Lesson 5: Fast & Slow Pointers — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<script src="../../assets/interactive.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Computer Programming 2+ · Lesson 5</span>
+  <h1>Fast & Slow Pointers</h1>
+  <p class="subtitle">Two pointers moving at different speeds through a linked list can detect a loop no amount of scanning could otherwise find without extra memory.</p>
+  <p class="nav-links"><a href="0004-opposite-direction-two-pointers.html">← Lesson 4</a> <a href="0006-fixed-size-sliding-window.html">Lesson 6 →</a> <a href="../index.html">Contents</a> <a href="../reference/glossary.html">Glossary →</a></p>
+
+  <p>CP2's linked-list lesson assumed lists are finite chains ending in <code class="inline-code">null</code>. But a corrupted or intentionally malformed list can have its tail point back into itself, forming a <strong>cycle</strong> — and a naive traversal of that list never terminates.</p>
+
+  <p>The brute-force fix is a hash set: store every node visited, and if a node is ever seen twice, a cycle exists. That works, but costs O(n) space. <strong>Floyd's cycle detection</strong> (the "tortoise and hare") gets the same answer in O(1) space: run one pointer one step at a time, and a second pointer two steps at a time. If there's no cycle, the fast pointer reaches the end first. If there is one, the fast pointer eventually laps the slow one and they meet.</p>
+
+  <div id="cycle-tabs">
+    <div class="fm-tabs">
+      <button class="fm-tab is-active" data-tab="py">Python</button>
+      <button class="fm-tab" data-tab="java">Java</button>
+      <button class="fm-tab" data-tab="js">JavaScript</button>
+      <button class="fm-tab" data-tab="cpp">C++</button>
+    </div>
+    <div class="fm-panel" data-panel="py">
+      <span class="code-label is-good">Python</span>
+      <pre class="code-block"><code>def has_cycle(head):
+    slow = fast = head
+    while fast and fast.next:
+        slow = slow.next
+        fast = fast.next.next
+        if slow is fast:
+            return True
+    return False</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="java" hidden>
+      <span class="code-label is-good">Java</span>
+      <pre class="code-block"><code>boolean hasCycle(ListNode head) {
+    ListNode slow = head, fast = head;
+    while (fast != null &amp;&amp; fast.next != null) {
+        slow = slow.next;
+        fast = fast.next.next;
+        if (slow == fast) return true;
+    }
+    return false;
+}</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="js" hidden>
+      <span class="code-label is-good">JavaScript</span>
+      <pre class="code-block"><code>function hasCycle(head) {
+  let slow = head, fast = head;
+  while (fast &amp;&amp; fast.next) {
+    slow = slow.next;
+    fast = fast.next.next;
+    if (slow === fast) return true;
+  }
+  return false;
+}</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="cpp" hidden>
+      <span class="code-label is-good">C++</span>
+      <pre class="code-block"><code>bool hasCycle(ListNode* head) {
+    ListNode* slow = head;
+    ListNode* fast = head;
+    while (fast &amp;&amp; fast-&gt;next) {
+        slow = slow-&gt;next;
+        fast = fast-&gt;next-&gt;next;
+        if (slow == fast) return true;
+    }
+    return false;
+}</code></pre>
+    </div>
+  </div>
+
+  <p>Why do they always meet, and not just repeatedly pass each other? Once both pointers are inside the cycle, the fast pointer gains exactly one node on the slow pointer every step — so the gap between them shrinks by one each time, and a shrinking integer gap must eventually hit zero. That's the whole proof, and it generalizes: whenever "two things moving at different, fixed rates around a loop" describes a problem, expect them to eventually align.</p>
+
+  <div class="box why">
+    <span class="box-label">Why it matters here</span>
+    Fast/slow pointers are the standard O(1)-space answer to cycle-detection and "find the middle of a linked list in one pass" — both frequent as sub-steps inside larger problems (a common one: find the middle, then reverse the second half). They're also a clean example of trading a slightly less obvious proof for real space savings, the same trade Lesson 2 named directly.
+  </div>
+
+  <h2>Check your recall</h2>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What does the brute-force hash-set approach to cycle detection cost that Floyd's algorithm avoids?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Correctness — the hash-set approach doesn't actually work.</button>
+      <button class="quiz-choice" data-correct="true">O(n) extra space, since every visited node must be stored.</button>
+      <button class="quiz-choice" data-correct="false">Time — the hash-set approach is always slower.</button>
+      <button class="quiz-choice" data-correct="false">Nothing; the two approaches are identical.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Storing every visited node in a hash set costs O(n) space; Floyd's algorithm uses only two pointers.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. If there is no cycle in the list, what happens to the fast pointer?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">It loops forever, same as the slow pointer would.</button>
+      <button class="quiz-choice" data-correct="true">It reaches the end of the list (null) before the slow pointer does.</button>
+      <button class="quiz-choice" data-correct="false">It immediately equals the slow pointer.</button>
+      <button class="quiz-choice" data-correct="false">It moves backward through the list.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Moving twice as fast, it simply runs out of list first when there's no cycle to trap it in.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why must the fast and slow pointers eventually meet once both are inside a cycle?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">They are not guaranteed to meet; it depends on the list's length.</button>
+      <button class="quiz-choice" data-correct="true">The fast pointer gains one node on the slow pointer every step, so their gap shrinks to zero.</button>
+      <button class="quiz-choice" data-correct="false">The list automatically resets both pointers to the head.</button>
+      <button class="quiz-choice" data-correct="false">Only the slow pointer actually moves once inside a cycle.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A gap that shrinks by exactly one integer step each iteration must eventually reach zero.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="cycle">
+    <p class="quiz-prompt">4. Fill in the blank: when a linked list's tail points back into an earlier node instead of ending in null, the list contains a ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A naive traversal of such a list never terminates, since it never reaches null.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="tortoise">
+    <p class="quiz-prompt">5. Fill in the blank: Floyd's cycle detection algorithm is commonly nicknamed the "___ and hare" algorithm, after its slow and fast pointers.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The slow pointer is the "tortoise"; the fast pointer is the "hare."</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p><a href="https://visualgo.net/en">VisuAlgo</a>'s linked-list visualizations make the "gap shrinks by one each step" proof easy to see directly, rather than just take on faith.</p>
+
+  <div class="box">
+    <span class="box-label">Practice on LeetCode</span>
+    <a href="https://leetcode.com/problems/linked-list-cycle/">LeetCode #141 — Linked List Cycle</a>. For a harder follow-up once that's solid, try <a href="https://leetcode.com/problems/middle-of-the-linked-list/">LeetCode #876 — Middle of the Linked List</a>, which uses the exact same fast/slow shape without any cycle at all.
+  </div>
+
+  <p class="ask-teacher">Curious how to find <em>where</em> the cycle begins, not just whether one exists? Ask your teacher — it's a clever second phase of the same algorithm. Next: two pointers that both move forward, tracking a window between them instead of chasing each other.</p>
+
+  <footer class="lesson-footer">STEM+ · Computer Programming 2+ · Lesson 5</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  STEMPlus.mountTabs(document.getElementById('cycle-tabs'), 'data-tab', 'data-panel');
+});
+</script>

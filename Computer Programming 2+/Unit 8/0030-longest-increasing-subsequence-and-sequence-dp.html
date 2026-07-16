@@ -1,0 +1,166 @@
+<title>Lesson 30: Longest Increasing Subsequence &amp; Sequence DP — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<script src="../../assets/interactive.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Computer Programming 2+ · Lesson 30</span>
+  <h1>Longest Increasing Subsequence &amp; Sequence DP</h1>
+  <p class="subtitle">Closing this unit with a recurrence that looks back at every earlier index, not just the one or two right before it.</p>
+  <p class="nav-links"><a href="0029-knapsack-patterns-partition-equal-subset-sum.html">← Lesson 29</a> <a href="../index.html">Contents</a> <a href="../reference/glossary.html">Glossary →</a></p>
+
+  <p>Problem: given an array of integers, find the length of the longest strictly increasing subsequence (elements don't need to be contiguous, just in increasing order and in their original relative order). Unlike Lesson 27's House Robber, where each position only depended on the one or two immediately before it, here <code class="inline-code">dp[i]</code> — the length of the longest increasing subsequence ending exactly at index i — depends on <em>every</em> earlier index j where <code class="inline-code">nums[j] &lt; nums[i]</code>.</p>
+
+  <div class="box">
+    <span class="box-label">The idea</span>
+    For each index i, look back at every earlier index j. If <code class="inline-code">nums[j] &lt; nums[i]</code>, then index i could extend that subsequence: <code class="inline-code">dp[i] = max(dp[i], dp[j] + 1)</code>. Every index starts with <code class="inline-code">dp[i] = 1</code> (itself alone is a valid subsequence of length 1). The final answer is the largest value anywhere in <code class="inline-code">dp</code>, since the longest subsequence overall could end at any index.
+  </div>
+
+  <div id="lis-tabs">
+    <div class="fm-tabs">
+      <button class="fm-tab is-active" data-tab="py">Python</button>
+      <button class="fm-tab" data-tab="java">Java</button>
+      <button class="fm-tab" data-tab="js">JavaScript</button>
+      <button class="fm-tab" data-tab="cpp">C++</button>
+    </div>
+    <div class="fm-panel" data-panel="py">
+      <span class="code-label is-good">Python</span>
+      <pre class="code-block"><code>def length_of_lis(nums):
+    dp = [1] * len(nums)         # every element alone is a subsequence of length 1
+    for i in range(len(nums)):
+        for j in range(i):
+            if nums[j] &lt; nums[i]:
+                dp[i] = max(dp[i], dp[j] + 1)   # extend the subsequence ending at j
+    return max(dp)</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="java" hidden>
+      <span class="code-label is-good">Java</span>
+      <pre class="code-block"><code>int lengthOfLIS(int[] nums) {
+    int[] dp = new int[nums.length];
+    Arrays.fill(dp, 1);           // every element alone is a subsequence of length 1
+    int best = 1;
+    for (int i = 0; i &lt; nums.length; i++) {
+        for (int j = 0; j &lt; i; j++) {
+            if (nums[j] &lt; nums[i]) {
+                dp[i] = Math.max(dp[i], dp[j] + 1);   // extend the subsequence ending at j
+            }
+        }
+        best = Math.max(best, dp[i]);
+    }
+    return best;
+}</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="js" hidden>
+      <span class="code-label is-good">JavaScript</span>
+      <pre class="code-block"><code>function lengthOfLIS(nums) {
+  const dp = new Array(nums.length).fill(1);   // every element alone is a subsequence of length 1
+  for (let i = 0; i &lt; nums.length; i++) {
+    for (let j = 0; j &lt; i; j++) {
+      if (nums[j] &lt; nums[i]) {
+        dp[i] = Math.max(dp[i], dp[j] + 1);   // extend the subsequence ending at j
+      }
+    }
+  }
+  return Math.max(...dp);
+}</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="cpp" hidden>
+      <span class="code-label is-good">C++</span>
+      <pre class="code-block"><code>int lengthOfLIS(std::vector&lt;int&gt;&amp; nums) {
+    std::vector&lt;int&gt; dp(nums.size(), 1);   // every element alone is a subsequence of length 1
+    int best = 1;
+    for (int i = 0; i &lt; (int)nums.size(); i++) {
+        for (int j = 0; j &lt; i; j++) {
+            if (nums[j] &lt; nums[i]) {
+                dp[i] = std::max(dp[i], dp[j] + 1);   // extend the subsequence ending at j
+            }
+        }
+        best = std::max(best, dp[i]);
+    }
+    return best;
+}</code></pre>
+    </div>
+  </div>
+
+  <p>With a nested loop checking every pair (i, j), this runs in O(n²) time and O(n) space. A faster O(n log n) approach exists: maintain an array of the smallest possible "tail" value for an increasing subsequence of each length, and use Unit 3's binary search to find where the current number belongs in that array in O(log n) instead of scanning every earlier index — trading the straightforward O(n²) recurrence for a cleverer O(n log n) one when the input is large enough to need it.</p>
+
+  <div class="box why">
+    <span class="box-label">Why it matters here</span>
+    LIS closes this unit by showing that "previous" in a DP recurrence doesn't have to mean "immediately before" — it can mean "any earlier index satisfying some condition," at the cost of an extra inner loop. Across this entire unit, the same skeleton kept reappearing: identify what a state needs to remember (one index, two indices, a capacity, or here, every earlier ending point), write the recurrence connecting a state to the smaller states it depends on, and decide whether to compute it top-down with memoization or bottom-up with tabulation. That skeleton, not any single problem, is the actual thing this unit was teaching.
+  </div>
+
+  <h2>Check your recall</h2>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What does dp[i] represent in this Longest Increasing Subsequence solution?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">The total number of increasing subsequences in the whole array.</button>
+      <button class="quiz-choice" data-correct="true">The length of the longest increasing subsequence that ends exactly at index i.</button>
+      <button class="quiz-choice" data-correct="false">Whether index i belongs to the final answer or not.</button>
+      <button class="quiz-choice" data-correct="false">The value of nums[i] itself.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Since the longest subsequence overall could end at any index, the final answer is the maximum across all of dp.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. How does this recurrence differ from House Robber's in Lesson 27?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">It requires no base case at all.</button>
+      <button class="quiz-choice" data-correct="true">Each dp[i] can depend on any earlier index, not just the one or two immediately before it.</button>
+      <button class="quiz-choice" data-correct="false">It cannot be solved using dynamic programming at all.</button>
+      <button class="quiz-choice" data-correct="false">It only ever needs a single variable to track the whole answer.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>This wider dependency is exactly what forces the extra inner loop over every earlier j.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. What does the faster O(n log n) approach to this problem use to avoid scanning every earlier index?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">A completely different data structure with no connection to earlier units.</button>
+      <button class="quiz-choice" data-correct="true">Binary search, from Unit 3, to find where the current number belongs among tracked subsequence tails.</button>
+      <button class="quiz-choice" data-correct="false">A hash map storing every subsequence ever seen.</button>
+      <button class="quiz-choice" data-correct="false">Sorting the entire array before running any DP at all.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>This reuses Unit 3's binary search technique to cut the inner scan from O(n) down to O(log n).</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="quadratic">
+    <p class="quiz-prompt">4. Fill in the blank: checking every pair (i, j) gives this solution a ___ time complexity of O(n²).</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A nested loop over the same array, each of size n, produces n² total comparisons.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="recurrence">
+    <p class="quiz-prompt">5. Fill in the blank: identifying what a state needs to remember, then writing the ___ connecting it to smaller states, is the shared skeleton behind every DP problem in this unit.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Once that relation is written down, choosing memoization or tabulation is just an implementation detail.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p><a href="https://cp-algorithms.com/sequences/longest_increasing_subsequence.html">Algorithms for Competitive Programming</a>'s LIS article covers both the O(n²) and O(n log n) approaches in full, including a correctness proof for the binary-search-based method.</p>
+
+  <div class="box">
+    <span class="box-label">Practice on LeetCode</span>
+    <a href="https://leetcode.com/problems/longest-increasing-subsequence/">LeetCode #300 — Longest Increasing Subsequence</a>. That closes Unit 8 — implement the O(n²) version first, then attempt the O(n log n) one as a stretch.
+  </div>
+
+  <p class="ask-teacher">Wondering exactly why the O(n log n) approach's "tails" array stays sorted, which is what makes binary search valid on it in the first place? Ask your teacher — it's a subtle but provable invariant. That closes Unit 8: Dynamic Programming. Next: problems where the locally best choice at each step turns out to always be globally correct, no exploration required.</p>
+
+  <footer class="lesson-footer">STEM+ · Computer Programming 2+ · Lesson 30</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  STEMPlus.mountTabs(document.getElementById('lis-tabs'), 'data-tab', 'data-panel');
+});
+</script>

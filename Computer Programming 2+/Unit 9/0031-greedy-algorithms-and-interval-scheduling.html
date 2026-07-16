@@ -1,0 +1,171 @@
+<title>Lesson 31: Greedy Algorithms &amp; Interval Scheduling — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<script src="../../assets/interactive.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Computer Programming 2+ · Lesson 31</span>
+  <h1>Greedy Algorithms &amp; Interval Scheduling</h1>
+  <p class="subtitle">Sometimes the locally best choice at each step turns out to always be globally correct — no backtracking, no DP table, no exploration required.</p>
+  <p class="nav-links"><a href="../Unit%208/0030-longest-increasing-subsequence-and-sequence-dp.html">← Lesson 30</a> <a href="0032-bit-manipulation-essentials-single-number.html">Lesson 32 →</a> <a href="../index.html">Contents</a> <a href="../reference/glossary.html">Glossary →</a></p>
+
+  <p>Problem: given a list of intervals, find the minimum number that must be removed so none of the remaining ones overlap. Unlike Unit 8's DP problems, no table of subproblem answers is needed here — a <strong>greedy algorithm</strong> makes one clearly-best choice at each step and never looks back, and for this specific problem, that greedy choice is provably always correct.</p>
+
+  <div class="box">
+    <span class="box-label">The idea</span>
+    Sort intervals by <strong>end time</strong>. Walk through them in that order, greedily keeping any interval that starts at or after the end of the last interval kept. Whenever the next interval overlaps the last one kept, it must be the one removed — keeping the interval that ends earliest always leaves the most room for everything still to come, so this choice is never worse than any alternative.
+  </div>
+
+  <div id="interval-tabs">
+    <div class="fm-tabs">
+      <button class="fm-tab is-active" data-tab="py">Python</button>
+      <button class="fm-tab" data-tab="java">Java</button>
+      <button class="fm-tab" data-tab="js">JavaScript</button>
+      <button class="fm-tab" data-tab="cpp">C++</button>
+    </div>
+    <div class="fm-panel" data-panel="py">
+      <span class="code-label is-good">Python</span>
+      <pre class="code-block"><code>def erase_overlap_intervals(intervals):
+    intervals.sort(key=lambda interval: interval[1])   # sort by end time
+    removed = 0
+    prev_end = float('-inf')
+    for start, end in intervals:
+        if start &gt;= prev_end:
+            prev_end = end          # keep this interval: it doesn't overlap
+        else:
+            removed += 1             # overlaps the last kept interval: remove this one
+    return removed</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="java" hidden>
+      <span class="code-label is-good">Java</span>
+      <pre class="code-block"><code>int eraseOverlapIntervals(int[][] intervals) {
+    Arrays.sort(intervals, (a, b) -&gt; Integer.compare(a[1], b[1]));   // sort by end time
+    int removed = 0;
+    int prevEnd = Integer.MIN_VALUE;
+    for (int[] interval : intervals) {
+        if (interval[0] &gt;= prevEnd) {
+            prevEnd = interval[1];    // keep this interval: it doesn't overlap
+        } else {
+            removed++;                // overlaps the last kept interval: remove this one
+        }
+    }
+    return removed;
+}</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="js" hidden>
+      <span class="code-label is-good">JavaScript</span>
+      <pre class="code-block"><code>function eraseOverlapIntervals(intervals) {
+  intervals.sort((a, b) =&gt; a[1] - b[1]);   // sort by end time
+  let removed = 0;
+  let prevEnd = -Infinity;
+  for (const [start, end] of intervals) {
+    if (start &gt;= prevEnd) {
+      prevEnd = end;               // keep this interval: it doesn't overlap
+    } else {
+      removed++;                    // overlaps the last kept interval: remove this one
+    }
+  }
+  return removed;
+}</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="cpp" hidden>
+      <span class="code-label is-good">C++</span>
+      <pre class="code-block"><code>int eraseOverlapIntervals(std::vector&lt;std::vector&lt;int&gt;&gt;&amp; intervals) {
+    std::sort(intervals.begin(), intervals.end(),
+              [](const auto&amp; a, const auto&amp; b) { return a[1] &lt; b[1]; });   // sort by end time
+    int removed = 0;
+    int prevEnd = INT_MIN;
+    for (auto&amp; interval : intervals) {
+        if (interval[0] &gt;= prevEnd) {
+            prevEnd = interval[1];    // keep this interval: it doesn't overlap
+        } else {
+            removed++;                // overlaps the last kept interval: remove this one
+        }
+    }
+    return removed;
+}</code></pre>
+    </div>
+  </div>
+
+  <p>Sorting costs O(n log n); the single pass afterward is O(n), so the whole algorithm is O(n log n) — no DP table, no exponential search, just one sort and one linear scan. A closely related problem, Merge Intervals (LeetCode #56), uses the same "sort by start (or end, since they tie at the boundary) then walk through once" shape: sort by start time, and merge the current interval into the previous one whenever they overlap (current start ≤ previous end), extending the previous interval's end to the larger of the two; otherwise, start a new merged interval. Both problems reduce to the same first move — sort the intervals — before a single greedy pass does the rest.</p>
+
+  <div class="box why">
+    <span class="box-label">Why it matters here</span>
+    Greedy algorithms look deceptively similar to DP: both make a sequence of choices toward an optimal answer. The difference is provability — DP is needed when a locally good choice can turn out to be globally wrong (so every option must be tracked), while greedy is usable only when a proof (often an exchange argument: "swapping the greedy choice for any other choice never does better") shows the locally best choice is always safe. Interval problems are the most common place greedy shows up, precisely because sorting by start or end time so often makes that safety argument straightforward.
+  </div>
+
+  <h2>Check your recall</h2>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. Why does this algorithm sort intervals by end time rather than start time?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Sorting by start time would make the array invalid.</button>
+      <button class="quiz-choice" data-correct="true">Keeping the interval that ends earliest always leaves the most room for intervals still to come.</button>
+      <button class="quiz-choice" data-correct="false">End time sorting is always faster than start time sorting.</button>
+      <button class="quiz-choice" data-correct="false">It has no effect on correctness, only on code style.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>An interval ending earlier can never block more future intervals than one ending later would.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. What fundamentally distinguishes a greedy algorithm from a dynamic programming one?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Greedy algorithms never involve sorting the input first.</button>
+      <button class="quiz-choice" data-correct="true">Greedy commits to one locally-best choice per step with no backtracking, provable safe only in specific cases; DP tracks every option because local choices can be globally wrong.</button>
+      <button class="quiz-choice" data-correct="false">DP algorithms can never run in polynomial time.</button>
+      <button class="quiz-choice" data-correct="false">There is no meaningful difference between the two approaches.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Greedy only works when a proof shows the locally best choice is never worse than any alternative.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. What do Non-overlapping Intervals and Merge Intervals have in common as a first step?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Both require building a full 2D DP table before anything else.</button>
+      <button class="quiz-choice" data-correct="true">Both begin by sorting the intervals before a single linear pass.</button>
+      <button class="quiz-choice" data-correct="false">Both require converting the intervals into a graph structure first.</button>
+      <button class="quiz-choice" data-correct="false">Neither problem can be solved without recursion.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Sorting first is what makes a single greedy pass sufficient for either problem.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="exchange">
+    <p class="quiz-prompt">4. Fill in the blank: proving a greedy choice is always safe often uses an ___ argument — showing swapping it for any other choice never does better.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>This is the standard way to justify that a greedy algorithm is actually correct, not just fast.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="greedy">
+    <p class="quiz-prompt">5. Fill in the blank: an algorithm that makes one locally best choice at each step, with no backtracking, is called a ___ algorithm.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>This is the term for the entire category of algorithm this lesson introduces.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p><a href="https://cp-algorithms.com/schedules/schedule-two-machines.html">Algorithms for Competitive Programming</a>'s scheduling section covers interval-based greedy algorithms and the exchange-argument style of proof used to justify them.</p>
+
+  <div class="box">
+    <span class="box-label">Practice on LeetCode</span>
+    <a href="https://leetcode.com/problems/non-overlapping-intervals/">LeetCode #435 — Non-overlapping Intervals</a> and <a href="https://leetcode.com/problems/merge-intervals/">#56 — Merge Intervals</a>. Try proving to yourself, in one sentence, why each greedy choice is safe before trusting the code.
+  </div>
+
+  <p class="ask-teacher">Wondering how to tell, when facing a brand-new problem, whether it's actually safe to be greedy versus requiring the full DP machinery from Unit 8? Ask your teacher — it's one of the harder judgment calls in this course, and worth talking through with real examples. Next: a completely different kind of efficiency trick, working directly with a number's bits.</p>
+
+  <footer class="lesson-footer">STEM+ · Computer Programming 2+ · Lesson 31</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  STEMPlus.mountTabs(document.getElementById('interval-tabs'), 'data-tab', 'data-panel');
+});
+</script>

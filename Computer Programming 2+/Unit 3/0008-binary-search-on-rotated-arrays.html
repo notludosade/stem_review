@@ -1,0 +1,183 @@
+<title>Lesson 8: Binary Search on Rotated Arrays — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<script src="../../assets/interactive.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Computer Programming 2+ · Lesson 8</span>
+  <h1>Binary Search Revisited on Rotated Arrays</h1>
+  <p class="subtitle">CP2's binary search assumed a fully sorted array. This unit is about spotting when binary search still applies once that assumption gets bent.</p>
+  <p class="nav-links"><a href="../Unit%202/0007-variable-size-sliding-window.html">← Lesson 7</a> <a href="0009-binary-search-on-the-answer.html">Lesson 9 →</a> <a href="../index.html">Contents</a> <a href="../reference/glossary.html">Glossary →</a></p>
+
+  <p>A <strong>rotated sorted array</strong> — like <code class="inline-code">[4, 5, 6, 7, 0, 1, 2]</code> — was sorted once, then some prefix was moved to the end. It's no longer sorted overall, so binary search's usual guarantee (everything left of the midpoint is smaller, everything right is larger) seems to break. The key realization: <strong>at least one half of the array, split at any midpoint, is still fully sorted</strong> — and that's enough information to decide which half to search.</p>
+
+  <div class="box">
+    <span class="box-label">The idea</span>
+    At each step, check which half — <code class="inline-code">[left, mid]</code> or <code class="inline-code">[mid, right]</code> — is sorted (compare its endpoints). Then check whether the target falls inside that sorted half's range. If it does, search there; if it doesn't, the target must be in the other half.
+  </div>
+
+  <div id="rotated-tabs">
+    <div class="fm-tabs">
+      <button class="fm-tab is-active" data-tab="py">Python</button>
+      <button class="fm-tab" data-tab="java">Java</button>
+      <button class="fm-tab" data-tab="js">JavaScript</button>
+      <button class="fm-tab" data-tab="cpp">C++</button>
+    </div>
+    <div class="fm-panel" data-panel="py">
+      <span class="code-label is-good">Python</span>
+      <pre class="code-block"><code>def search(nums, target):
+    left, right = 0, len(nums) - 1
+    while left &lt;= right:
+        mid = (left + right) // 2
+        if nums[mid] == target:
+            return mid
+        if nums[left] &lt;= nums[mid]:      # left half is sorted
+            if nums[left] &lt;= target &lt; nums[mid]:
+                right = mid - 1
+            else:
+                left = mid + 1
+        else:                              # right half is sorted
+            if nums[mid] &lt; target &lt;= nums[right]:
+                left = mid + 1
+            else:
+                right = mid - 1
+    return -1</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="java" hidden>
+      <span class="code-label is-good">Java</span>
+      <pre class="code-block"><code>int search(int[] nums, int target) {
+    int left = 0, right = nums.length - 1;
+    while (left &lt;= right) {
+        int mid = (left + right) / 2;
+        if (nums[mid] == target) return mid;
+        if (nums[left] &lt;= nums[mid]) {          // left half is sorted
+            if (nums[left] &lt;= target &amp;&amp; target &lt; nums[mid]) right = mid - 1;
+            else left = mid + 1;
+        } else {                                  // right half is sorted
+            if (nums[mid] &lt; target &amp;&amp; target &lt;= nums[right]) left = mid + 1;
+            else right = mid - 1;
+        }
+    }
+    return -1;
+}</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="js" hidden>
+      <span class="code-label is-good">JavaScript</span>
+      <pre class="code-block"><code>function search(nums, target) {
+  let left = 0, right = nums.length - 1;
+  while (left &lt;= right) {
+    const mid = Math.floor((left + right) / 2);
+    if (nums[mid] === target) return mid;
+    if (nums[left] &lt;= nums[mid]) {            // left half is sorted
+      if (nums[left] &lt;= target &amp;&amp; target &lt; nums[mid]) right = mid - 1;
+      else left = mid + 1;
+    } else {                                    // right half is sorted
+      if (nums[mid] &lt; target &amp;&amp; target &lt;= nums[right]) left = mid + 1;
+      else right = mid - 1;
+    }
+  }
+  return -1;
+}</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="cpp" hidden>
+      <span class="code-label is-good">C++</span>
+      <pre class="code-block"><code>int search(std::vector&lt;int&gt;&amp; nums, int target) {
+    int left = 0, right = nums.size() - 1;
+    while (left &lt;= right) {
+        int mid = (left + right) / 2;
+        if (nums[mid] == target) return mid;
+        if (nums[left] &lt;= nums[mid]) {          // left half is sorted
+            if (nums[left] &lt;= target &amp;&amp; target &lt; nums[mid]) right = mid - 1;
+            else left = mid + 1;
+        } else {                                  // right half is sorted
+            if (nums[mid] &lt; target &amp;&amp; target &lt;= nums[right]) left = mid + 1;
+            else right = mid - 1;
+        }
+    }
+    return -1;
+}</code></pre>
+    </div>
+  </div>
+
+  <p>Still O(log n) — the array size is still halved every step, just with one extra check per step to figure out which half is trustworthy. This is the pattern for the rest of the unit: <strong>binary search doesn't actually require a sorted array. It requires being able to eliminate half the remaining possibilities at every step</strong>, using whatever structure the problem provides.</p>
+
+  <div class="box why">
+    <span class="box-label">Why it matters here</span>
+    Rotated-array search is the standard example interviewers use to test whether binary search is understood as an idea (repeatedly halving a search space using a decidable rule) rather than memorized as a formula for sorted arrays. Lessons 9 and 10 push that same idea further: onto answer spaces that were never an array at all, and onto arrays with duplicate values where a single target has multiple valid positions.
+  </div>
+
+  <h2>Check your recall</h2>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What key fact about a rotated sorted array makes binary search still applicable?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">The array is always fully sorted despite the rotation.</button>
+      <button class="quiz-choice" data-correct="true">At least one half, split at any midpoint, is still fully sorted.</button>
+      <button class="quiz-choice" data-correct="false">The array always contains an even number of elements.</button>
+      <button class="quiz-choice" data-correct="false">Rotated arrays can only be searched with a linear scan.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>That guaranteed sorted half is exactly what makes it possible to decide which side to search next.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Once you know which half is sorted, how do you decide which half to search next?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Always search the left half first, regardless of the target.</button>
+      <button class="quiz-choice" data-correct="true">Check whether the target falls inside the sorted half's value range.</button>
+      <button class="quiz-choice" data-correct="false">Search both halves fully every time, then compare results.</button>
+      <button class="quiz-choice" data-correct="false">Randomly pick a half and check afterward.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>If the target is within the sorted half's range, it must be there; otherwise it must be in the other half.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. What is the time complexity of searching a rotated sorted array with this approach?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">O(n), since the rotation forces a linear scan.</button>
+      <button class="quiz-choice" data-correct="true">O(log n), since the search space is still halved every step.</button>
+      <button class="quiz-choice" data-correct="false">O(n log n), since a sort is required first.</button>
+      <button class="quiz-choice" data-correct="false">O(n²), since two halves must be checked each step.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>One extra comparison per step to identify the sorted half doesn't change the halving — still logarithmic.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="rotated">
+    <p class="quiz-prompt">4. Fill in the blank: an array that was sorted once, then had some prefix moved to the end, is called a ___ sorted array.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The array is no longer sorted overall, but retains a specific, exploitable structure.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="eliminate">
+    <p class="quiz-prompt">5. Fill in the blank: binary search fundamentally requires the ability to ___ half of the remaining possibilities at each step, not necessarily a sorted array specifically.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Sortedness is just one common way to guarantee that elimination is valid — not the only one, as the next two lessons show.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p><a href="https://usaco.guide/general/resources-cp">USACO Guide's Resources: Competitive Programming</a> page links to deeper binary-search treatments that generalize this "eliminate half using any decidable rule" framing even further.</p>
+
+  <div class="box">
+    <span class="box-label">Practice on LeetCode</span>
+    <a href="https://leetcode.com/problems/search-in-rotated-sorted-array/">LeetCode #33 — Search in Rotated Sorted Array</a>. Trace through the "which half is sorted" check by hand on a small example before writing any code.
+  </div>
+
+  <p class="ask-teacher">Wondering what changes if the rotated array is allowed to contain duplicate values? Ask your teacher — it breaks one of this lesson's assumptions in a subtle way. Next: binary search applied to a search space that was never an array in the first place.</p>
+
+  <footer class="lesson-footer">STEM+ · Computer Programming 2+ · Lesson 8</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  STEMPlus.mountTabs(document.getElementById('rotated-tabs'), 'data-tab', 'data-panel');
+});
+</script>

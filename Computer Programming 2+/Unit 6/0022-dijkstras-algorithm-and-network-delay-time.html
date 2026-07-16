@@ -1,0 +1,211 @@
+<title>Lesson 22: Dijkstra's Algorithm &amp; Network Delay Time — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<script src="../../assets/interactive.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Computer Programming 2+ · Lesson 22</span>
+  <h1>Dijkstra's Algorithm &amp; Network Delay Time</h1>
+  <p class="subtitle">Closing this unit by bringing Unit 5's heap back for a graph where edges finally have a cost.</p>
+  <p class="nav-links"><a href="0021-union-find-and-redundant-connection.html">← Lesson 21</a> <a href="../index.html">Contents</a> <a href="../reference/glossary.html">Glossary →</a></p>
+
+  <p>Problem: a signal is sent from node k across a weighted, directed graph, where each edge <code class="inline-code">(u, v, w)</code> takes w time to travel. Find how long it takes for the signal to reach every node, or -1 if some node is unreachable. Lesson 19's BFS finds shortest paths perfectly when every edge costs the same "one step" — but here, edges cost different amounts, so plain BFS no longer guarantees the first arrival is the shortest one.</p>
+
+  <div class="box">
+    <span class="box-label">The idea</span>
+    <strong>Dijkstra's algorithm</strong> is Lesson 19's BFS with one change: instead of a plain queue that processes nodes in the order they were discovered, it uses a <strong>min-heap</strong> (Unit 5) that always processes the node with the smallest known distance-so-far next. Pop the closest unprocessed node, lock in its distance, and relax its neighbors — push each one with its updated (shorter) candidate distance if the new path beats what's known so far.
+  </div>
+
+  <div id="dij-tabs">
+    <div class="fm-tabs">
+      <button class="fm-tab is-active" data-tab="py">Python</button>
+      <button class="fm-tab" data-tab="java">Java</button>
+      <button class="fm-tab" data-tab="js">JavaScript</button>
+      <button class="fm-tab" data-tab="cpp">C++</button>
+    </div>
+    <div class="fm-panel" data-panel="py">
+      <span class="code-label is-good">Python</span>
+      <pre class="code-block"><code>import heapq
+from collections import defaultdict
+
+def network_delay_time(times, n, k):
+    graph = defaultdict(list)
+    for u, v, w in times:
+        graph[u].append((v, w))
+
+    dist = {}
+    heap = [(0, k)]              # (distance so far, node) — a min-heap ordered by distance
+    while heap:
+        d, node = heapq.heappop(heap)
+        if node in dist:
+            continue             # already locked in with a shorter distance
+        dist[node] = d
+        for neighbor, weight in graph[node]:
+            if neighbor not in dist:
+                heapq.heappush(heap, (d + weight, neighbor))
+
+    return max(dist.values()) if len(dist) == n else -1</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="java" hidden>
+      <span class="code-label is-good">Java</span>
+      <pre class="code-block"><code>int networkDelayTime(int[][] times, int n, int k) {
+    Map&lt;Integer, List&lt;int[]&gt;&gt; graph = new HashMap&lt;&gt;();
+    for (int[] time : times) {
+        graph.computeIfAbsent(time[0], x -&gt; new ArrayList&lt;&gt;()).add(new int[] { time[1], time[2] });
+    }
+
+    Map&lt;Integer, Integer&gt; dist = new HashMap&lt;&gt;();
+    PriorityQueue&lt;int[]&gt; heap = new PriorityQueue&lt;&gt;((a, b) -&gt; a[0] - b[0]);   // min-heap by distance
+    heap.offer(new int[] { 0, k });
+
+    while (!heap.isEmpty()) {
+        int[] curr = heap.poll();
+        int d = curr[0], node = curr[1];
+        if (dist.containsKey(node)) continue;   // already locked in with a shorter distance
+        dist.put(node, d);
+        for (int[] edge : graph.getOrDefault(node, new ArrayList&lt;&gt;())) {
+            int neighbor = edge[0], weight = edge[1];
+            if (!dist.containsKey(neighbor)) heap.offer(new int[] { d + weight, neighbor });
+        }
+    }
+
+    if (dist.size() != n) return -1;
+    return Collections.max(dist.values());
+}</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="js" hidden>
+      <span class="code-label is-good">JavaScript</span>
+      <pre class="code-block"><code>// Reuses the MinHeap class introduced in Lesson 15, with a comparator by distance
+function networkDelayTime(times, n, k) {
+  const graph = new Map();
+  for (const [u, v, w] of times) {
+    if (!graph.has(u)) graph.set(u, []);
+    graph.get(u).push([v, w]);
+  }
+
+  const dist = new Map();
+  const heap = new MinHeap((a, b) =&gt; a[0] - b[0]);   // min-heap by distance
+  heap.push([0, k]);
+
+  while (heap.data.length &gt; 0) {
+    const [d, node] = heap.pop();
+    if (dist.has(node)) continue;   // already locked in with a shorter distance
+    dist.set(node, d);
+    for (const [neighbor, weight] of graph.get(node) || []) {
+      if (!dist.has(neighbor)) heap.push([d + weight, neighbor]);
+    }
+  }
+
+  if (dist.size !== n) return -1;
+  return Math.max(...dist.values());
+}</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="cpp" hidden>
+      <span class="code-label is-good">C++</span>
+      <pre class="code-block"><code>int networkDelayTime(std::vector&lt;std::vector&lt;int&gt;&gt;&amp; times, int n, int k) {
+    std::unordered_map&lt;int, std::vector&lt;std::pair&lt;int,int&gt;&gt;&gt; graph;
+    for (auto&amp; t : times) graph[t[0]].push_back({t[1], t[2]});
+
+    std::unordered_map&lt;int, int&gt; dist;
+    std::priority_queue&lt;std::pair&lt;int,int&gt;, std::vector&lt;std::pair&lt;int,int&gt;&gt;, std::greater&lt;&gt;&gt; heap;
+    heap.push({0, k});   // min-heap by distance (pair compares first element first)
+
+    while (!heap.empty()) {
+        auto [d, node] = heap.top(); heap.pop();
+        if (dist.count(node)) continue;   // already locked in with a shorter distance
+        dist[node] = d;
+        for (auto&amp; [neighbor, weight] : graph[node]) {
+            if (!dist.count(neighbor)) heap.push({d + weight, neighbor});
+        }
+    }
+
+    if ((int)dist.size() != n) return -1;
+    int maxDist = 0;
+    for (auto&amp; [node, d] : dist) maxDist = std::max(maxDist, d);
+    return maxDist;
+}</code></pre>
+    </div>
+  </div>
+
+  <p>Each edge can push at most one heap entry, so with E edges the heap does O(E log E) work, which simplifies to O(E log V) since E can never exceed V². This is Lesson 15's heap-push/pop cost, just paid once per edge instead of once per array element.</p>
+
+  <div class="box why">
+    <span class="box-label">Why it matters here</span>
+    Dijkstra's algorithm is not a new traversal — it's Lesson 19's BFS with its queue swapped for Unit 5's min-heap, sorting by distance instead of by discovery order. That single swap is what makes it correct on weighted graphs where BFS would otherwise commit to a path too early. Recognizing "shortest path, but edges have different costs" as the trigger for "BFS plus a heap" ties together nearly everything this unit and Unit 5 have covered.
+  </div>
+
+  <h2>Check your recall</h2>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What single change turns Lesson 19's BFS into Dijkstra's algorithm?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Recursion is used instead of any queue at all.</button>
+      <button class="quiz-choice" data-correct="true">A plain queue is replaced with a min-heap ordered by distance so far.</button>
+      <button class="quiz-choice" data-correct="false">Every edge is visited exactly twice instead of once.</button>
+      <button class="quiz-choice" data-correct="false">The graph must first be converted into a tree.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Sorting by distance instead of discovery order is what lets Dijkstra handle unequal edge weights correctly.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why does plain BFS fail to find shortest paths once edges have different weights?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">BFS cannot run on directed graphs at all.</button>
+      <button class="quiz-choice" data-correct="true">BFS commits to whichever path is discovered first, which isn't guaranteed to be the shortest once costs differ.</button>
+      <button class="quiz-choice" data-correct="false">BFS requires the graph to be a tree.</button>
+      <button class="quiz-choice" data-correct="false">BFS cannot use a queue on a weighted graph.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A path with more hops but lower total weight could easily be shorter than one BFS reaches first.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. When a node is popped from the heap and already has a recorded distance, what should happen?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Its distance should be overwritten with the new, larger value.</button>
+      <button class="quiz-choice" data-correct="true">It should be skipped, since its shortest distance was already locked in earlier.</button>
+      <button class="quiz-choice" data-correct="false">The entire algorithm should restart from the source.</button>
+      <button class="quiz-choice" data-correct="false">The node should be removed from the graph entirely.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The heap can contain stale, larger-distance entries for a node already finalized with a smaller one.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="heap">
+    <p class="quiz-prompt">4. Fill in the blank: Dijkstra's algorithm is BFS with its queue replaced by a min-___ sorted by distance.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>This is the exact structure introduced in Unit 5, reused here for a new purpose.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="weighted">
+    <p class="quiz-prompt">5. Fill in the blank: Dijkstra's algorithm is needed once a graph becomes ___, meaning its edges no longer all cost the same amount.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Plain BFS remains correct and simpler whenever every edge has identical cost.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p><a href="https://cp-algorithms.com/graph/dijkstra_sparse_graphs.html">Algorithms for Competitive Programming</a>'s Dijkstra article covers the heap-based version used here, including why it beats the classic O(V²) array-based implementation on sparse graphs.</p>
+
+  <div class="box">
+    <span class="box-label">Practice on LeetCode</span>
+    <a href="https://leetcode.com/problems/network-delay-time/">LeetCode #743 — Network Delay Time</a>. That closes Unit 6 — trace the heap's contents by hand on a small weighted graph before trusting the code.
+  </div>
+
+  <p class="ask-teacher">Wondering why Dijkstra's algorithm fails outright on graphs with negative edge weights, and what algorithm (Bellman-Ford) handles that case instead? Ask your teacher — it's a sharp edge worth knowing about even outside this course's scope. That closes Unit 6: Graphs. Next: choices that branch, and the recursive backtracking needed to explore every one of them.</p>
+
+  <footer class="lesson-footer">STEM+ · Computer Programming 2+ · Lesson 22</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  STEMPlus.mountTabs(document.getElementById('dij-tabs'), 'data-tab', 'data-panel');
+});
+</script>

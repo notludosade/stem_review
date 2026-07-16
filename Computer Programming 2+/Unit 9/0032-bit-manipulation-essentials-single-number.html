@@ -1,0 +1,152 @@
+<title>Lesson 32: Bit Manipulation Essentials — Single Number — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<script src="../../assets/interactive.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Computer Programming 2+ · Lesson 32</span>
+  <h1>Bit Manipulation Essentials: Single Number</h1>
+  <p class="subtitle">A completely different kind of efficiency trick — working directly with a number's binary representation instead of its value.</p>
+  <p class="nav-links"><a href="0031-greedy-algorithms-and-interval-scheduling.html">← Lesson 31</a> <a href="0033-the-pattern-recognition-cheat-sheet.html">Lesson 33 →</a> <a href="../index.html">Contents</a> <a href="../reference/glossary.html">Glossary →</a></p>
+
+  <p>Problem: given an array where every number appears exactly twice except for one, find that single number — in O(n) time and O(1) space, meaning no hash set counting occurrences is allowed. The trick relies entirely on one property of the <strong>XOR</strong> (exclusive or) operator: <code class="inline-code">a ^ a = 0</code>, and <code class="inline-code">a ^ 0 = a</code>. XOR every number in the array together, and every pair cancels itself out to zero, leaving only the number with no partner.</p>
+
+  <div class="box">
+    <span class="box-label">The idea</span>
+    XOR is both commutative and associative, so the order numbers are combined in doesn't matter. Starting an accumulator at 0 and XOR-ing every element into it means every number that appears twice contributes <code class="inline-code">x ^ x = 0</code> (no effect), while the lone unpaired number survives untouched since it's only XOR-ed with 0 overall.
+  </div>
+
+  <div id="bits-tabs">
+    <div class="fm-tabs">
+      <button class="fm-tab is-active" data-tab="py">Python</button>
+      <button class="fm-tab" data-tab="java">Java</button>
+      <button class="fm-tab" data-tab="js">JavaScript</button>
+      <button class="fm-tab" data-tab="cpp">C++</button>
+    </div>
+    <div class="fm-panel" data-panel="py">
+      <span class="code-label is-good">Python</span>
+      <pre class="code-block"><code>def single_number(nums):
+    result = 0
+    for num in nums:
+        result ^= num       # pairs cancel to 0; the lone number survives
+    return result</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="java" hidden>
+      <span class="code-label is-good">Java</span>
+      <pre class="code-block"><code>int singleNumber(int[] nums) {
+    int result = 0;
+    for (int num : nums) {
+        result ^= num;       // pairs cancel to 0; the lone number survives
+    }
+    return result;
+}</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="js" hidden>
+      <span class="code-label is-good">JavaScript</span>
+      <pre class="code-block"><code>function singleNumber(nums) {
+  let result = 0;
+  for (const num of nums) {
+    result ^= num;        // pairs cancel to 0; the lone number survives
+  }
+  return result;
+}</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="cpp" hidden>
+      <span class="code-label is-good">C++</span>
+      <pre class="code-block"><code>int singleNumber(std::vector&lt;int&gt;&amp; nums) {
+    int result = 0;
+    for (int num : nums) {
+        result ^= num;        // pairs cancel to 0; the lone number survives
+    }
+    return result;
+}</code></pre>
+    </div>
+  </div>
+
+  <p>One pass, one integer accumulator: O(n) time, O(1) space, no hash set required at all. This is one example from a small set of bit tricks worth having memorized:</p>
+
+  <div class="box">
+    <span class="box-label">Reference: common bit tricks</span>
+    <code class="inline-code">n &amp; 1</code> checks whether n is odd (the lowest bit is 1). <code class="inline-code">n &gt;&gt; 1</code> and <code class="inline-code">n &lt;&lt; 1</code> divide or multiply by 2, discarding any remainder on the way down. <code class="inline-code">n &amp; (n - 1)</code> clears the lowest set bit — if the result is 0, n was a power of two to begin with. <code class="inline-code">n | (1 &lt;&lt; k)</code> sets bit k; <code class="inline-code">n &amp; ~(1 &lt;&lt; k)</code> clears bit k; <code class="inline-code">n ^ (1 &lt;&lt; k)</code> toggles bit k.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why it matters here</span>
+    Bit tricks trade a data structure (a hash set, here) for a mathematical property of an operator, which is what makes them valuable specifically when a problem's constraints explicitly forbid extra space. They rarely apply broadly — each trick solves a narrow shape of problem — but recognizing "this problem is really about parity, powers of two, or toggling a flag" is the signal that a bitwise operator might replace an entire data structure with a single expression.
+  </div>
+
+  <h2>Check your recall</h2>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What XOR property makes the Single Number solution work?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">XOR always returns 0 no matter what two numbers are combined.</button>
+      <button class="quiz-choice" data-correct="true">A number XOR-ed with itself is 0, so every paired number cancels out.</button>
+      <button class="quiz-choice" data-correct="false">XOR sorts numbers into ascending order as they're combined.</button>
+      <button class="quiz-choice" data-correct="false">XOR requires the array to be sorted beforehand.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Since every duplicate contributes x ^ x = 0, only the unpaired number is left after all cancellations.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why doesn't the order in which numbers are XOR-ed together matter?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Order actually does matter, and the array must be processed left to right.</button>
+      <button class="quiz-choice" data-correct="true">XOR is both commutative and associative, so any grouping or ordering gives the same result.</button>
+      <button class="quiz-choice" data-correct="false">The array is always sorted before this algorithm runs.</button>
+      <button class="quiz-choice" data-correct="false">Only the first and last elements of the array actually matter.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>These two properties are what let a single running accumulator replace tracking every number's pair explicitly.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. What does the expression n &amp; (n - 1) accomplish?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">It always doubles the value of n.</button>
+      <button class="quiz-choice" data-correct="true">It clears the lowest set bit of n, useful for checking whether n is a power of two.</button>
+      <button class="quiz-choice" data-correct="false">It reverses every bit in n.</button>
+      <button class="quiz-choice" data-correct="false">It sorts the bits of n from smallest to largest.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>If clearing the lowest set bit results in exactly 0, n had only one set bit to begin with, meaning it's a power of two.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="xor">
+    <p class="quiz-prompt">4. Fill in the blank: the operator with the property a ^ a = 0 and a ^ 0 = a is ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Short for exclusive or, this is the operator this entire lesson's solution depends on.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="space">
+    <p class="quiz-prompt">5. Fill in the blank: the XOR approach solves Single Number in O(1) extra ___, unlike a hash-set approach.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Only a single integer accumulator is needed, regardless of how large the input array grows.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p><a href="https://cp-algorithms.com/algebra/bit-manipulation.html">Algorithms for Competitive Programming</a>'s bit manipulation article covers these tricks and several more, including how to count set bits efficiently.</p>
+
+  <div class="box">
+    <span class="box-label">Practice on LeetCode</span>
+    <a href="https://leetcode.com/problems/single-number/">LeetCode #136 — Single Number</a>. Try proving on paper why XOR-ing the whole array must leave exactly the unpaired number.
+  </div>
+
+  <p class="ask-teacher">Wondering how this same XOR trick extends to a version where every number appears three times except one? Ask your teacher — it's a genuinely different technique (tracking bits mod 3), not just a small tweak. Next: a reference lesson tying every pattern in this course back together in one place.</p>
+
+  <footer class="lesson-footer">STEM+ · Computer Programming 2+ · Lesson 32</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  STEMPlus.mountTabs(document.getElementById('bits-tabs'), 'data-tab', 'data-panel');
+});
+</script>

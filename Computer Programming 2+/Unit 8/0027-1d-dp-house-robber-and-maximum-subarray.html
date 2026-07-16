@@ -1,0 +1,154 @@
+<title>Lesson 27: 1D DP — House Robber &amp; Maximum Subarray — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<script src="../../assets/interactive.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Computer Programming 2+ · Lesson 27</span>
+  <h1>1D DP: House Robber &amp; Maximum Subarray</h1>
+  <p class="subtitle">Two of the most common interview DP problems, both solved by tracking just one or two running values instead of a whole array.</p>
+  <p class="nav-links"><a href="0026-memoization-vs-tabulation-climbing-stairs.html">← Lesson 26</a> <a href="0028-2d-dp-grids-and-edit-distance.html">Lesson 28 →</a> <a href="../index.html">Contents</a> <a href="../reference/glossary.html">Glossary →</a></p>
+
+  <p>Problem: given an array of houses with money in each, rob them to maximize total money stolen — without ever robbing two adjacent houses. At each house, there's a real choice: rob it (and skip the previous one) or skip it (and keep whatever the best was up to the previous house). That's a recurrence: <code class="inline-code">rob(i) = max(rob(i - 1), rob(i - 2) + nums[i])</code> — skip this house, or take it plus the best from two houses back.</p>
+
+  <div class="box">
+    <span class="box-label">The idea</span>
+    Since <code class="inline-code">rob(i)</code> only ever depends on the two previous values, there's no need for a full array — Lesson 26's O(1)-space optimization applies directly. Track two running values, <code class="inline-code">prev2</code> (best through i − 2) and <code class="inline-code">prev1</code> (best through i − 1), and slide them forward one house at a time.
+  </div>
+
+  <div id="robber-tabs">
+    <div class="fm-tabs">
+      <button class="fm-tab is-active" data-tab="py">Python</button>
+      <button class="fm-tab" data-tab="java">Java</button>
+      <button class="fm-tab" data-tab="js">JavaScript</button>
+      <button class="fm-tab" data-tab="cpp">C++</button>
+    </div>
+    <div class="fm-panel" data-panel="py">
+      <span class="code-label is-good">Python</span>
+      <pre class="code-block"><code>def rob(nums):
+    prev2, prev1 = 0, 0     # best through i - 2, best through i - 1
+    for num in nums:
+        current = max(prev1, prev2 + num)   # skip this house, or take it
+        prev2, prev1 = prev1, current
+    return prev1</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="java" hidden>
+      <span class="code-label is-good">Java</span>
+      <pre class="code-block"><code>int rob(int[] nums) {
+    int prev2 = 0, prev1 = 0;   // best through i - 2, best through i - 1
+    for (int num : nums) {
+        int current = Math.max(prev1, prev2 + num);   // skip this house, or take it
+        prev2 = prev1;
+        prev1 = current;
+    }
+    return prev1;
+}</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="js" hidden>
+      <span class="code-label is-good">JavaScript</span>
+      <pre class="code-block"><code>function rob(nums) {
+  let prev2 = 0, prev1 = 0;   // best through i - 2, best through i - 1
+  for (const num of nums) {
+    const current = Math.max(prev1, prev2 + num);   // skip this house, or take it
+    prev2 = prev1;
+    prev1 = current;
+  }
+  return prev1;
+}</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="cpp" hidden>
+      <span class="code-label is-good">C++</span>
+      <pre class="code-block"><code>int rob(std::vector&lt;int&gt;&amp; nums) {
+    int prev2 = 0, prev1 = 0;   // best through i - 2, best through i - 1
+    for (int num : nums) {
+        int current = std::max(prev1, prev2 + num);   // skip this house, or take it
+        prev2 = prev1;
+        prev1 = current;
+    }
+    return prev1;
+}</code></pre>
+    </div>
+  </div>
+
+  <p>This runs in O(n) time and O(1) space — the two variables replace what would otherwise be an n-length <code class="inline-code">dp</code> array, since only the two most recent entries are ever read. A closely related problem, Maximum Subarray (LeetCode #53), asks for the largest sum of any contiguous subarray, and is solved by <strong>Kadane's algorithm</strong>: track the best sum ending exactly at the current position, <code class="inline-code">current = max(nums[i], current + nums[i])</code> — either the current element starts a fresh subarray, or it extends the best one ending just before it — updating a running maximum as it goes. Same shape as House Robber: one running value (or two), one O(n) pass, one decision per element between "start fresh" and "extend what came before."</p>
+
+  <div class="box why">
+    <span class="box-label">Why it matters here</span>
+    Both problems share the same 1D DP skeleton: a decision at each position that depends only on a small, fixed number of previous results, collapsed from an array into a handful of variables. This is Lesson 26's Climbing Stairs recurrence generalized — instead of always adding the previous two values, each problem now has its own rule for combining them (a max instead of a sum, or comparing "skip" against "take"). Spotting "the answer at position i depends only on the last one or two positions" is the signal for this entire lesson's pattern.
+  </div>
+
+  <h2>Check your recall</h2>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What is the recurrence relation behind House Robber?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">rob(i) always equals nums[i] plus rob(i - 1).</button>
+      <button class="quiz-choice" data-correct="true">rob(i) is the max of skipping house i or robbing it plus rob(i - 2).</button>
+      <button class="quiz-choice" data-correct="false">rob(i) is always the sum of every house robbed so far.</button>
+      <button class="quiz-choice" data-correct="false">rob(i) depends only on the very first house in the array.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Robbing house i forces skipping house i - 1, so the comparison is against the best result two houses back.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why can House Robber be solved with two variables instead of a full array?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because the array of houses is always sorted beforehand.</button>
+      <button class="quiz-choice" data-correct="true">Because each value only depends on the two immediately preceding results.</button>
+      <button class="quiz-choice" data-correct="false">Because the problem never actually requires visiting every house.</button>
+      <button class="quiz-choice" data-correct="false">Because the answer is always equal to the largest single house value.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Once older results are no longer needed, keeping the full array around is unnecessary.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. In Kadane's algorithm, what does the current variable represent at each step?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">The sum of the entire array processed so far.</button>
+      <button class="quiz-choice" data-correct="true">The best sum of a subarray that ends exactly at the current position.</button>
+      <button class="quiz-choice" data-correct="false">The single largest element seen anywhere in the array.</button>
+      <button class="quiz-choice" data-correct="false">The number of negative elements encountered so far.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Deciding whether to extend this running sum or restart it at the current element is the core of the algorithm.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="kadane">
+    <p class="quiz-prompt">4. Fill in the blank: the algorithm that tracks the best subarray sum ending at each position is known as ___'s algorithm.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Named after the algorithm's discoverer, Jay Kadane.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="adjacent">
+    <p class="quiz-prompt">5. Fill in the blank: House Robber's core constraint is that no two ___ houses can both be robbed.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>This constraint is exactly what makes robbing house i force skipping house i - 1.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p><a href="https://cp-algorithms.com/dynamic_programming/intro-to-dp.html">Algorithms for Competitive Programming</a> covers 1D recurrences like these as the foundational building block before moving to multi-dimensional DP.</p>
+
+  <div class="box">
+    <span class="box-label">Practice on LeetCode</span>
+    <a href="https://leetcode.com/problems/house-robber/">LeetCode #198 — House Robber</a> and <a href="https://leetcode.com/problems/maximum-subarray/">#53 — Maximum Subarray</a>. Solve both with the O(1)-space, two-variable approach directly.
+  </div>
+
+  <p class="ask-teacher">Wondering how House Robber changes if the houses are arranged in a circle, so the first and last are now considered adjacent too? Ask your teacher — it's a small but genuinely tricky variation (LeetCode #213). Next: recurrences that need an entire grid of previous results, not just one or two values.</p>
+
+  <footer class="lesson-footer">STEM+ · Computer Programming 2+ · Lesson 27</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  STEMPlus.mountTabs(document.getElementById('robber-tabs'), 'data-tab', 'data-panel');
+});
+</script>

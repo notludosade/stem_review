@@ -1,0 +1,162 @@
+<title>Lesson 4: Opposite-Direction Two Pointers — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<script src="../../assets/interactive.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Computer Programming 2+ · Lesson 4</span>
+  <h1>Opposite-Direction Two Pointers</h1>
+  <p class="subtitle">On a sorted array, two indices walking toward each other can replace a nested loop entirely.</p>
+  <p class="nav-links"><a href="../Unit%201/0003-a-framework-for-new-problems.html">← Lesson 3</a> <a href="0005-fast-and-slow-pointers.html">Lesson 5 →</a> <a href="../index.html">Contents</a> <a href="../reference/glossary.html">Glossary →</a></p>
+
+  <p>Take Two Sum again, but with one new fact: the array is already <strong>sorted</strong>. That single fact changes the best approach entirely. Instead of a hash map, place one pointer at the start and one at the end, and move them based on how the current sum compares to the target.</p>
+
+  <div class="box">
+    <span class="box-label">The idea</span>
+    If <code class="inline-code">nums[left] + nums[right]</code> is too small, the array being sorted guarantees moving <code class="inline-code">left</code> rightward is the only way to increase the sum. If it's too large, move <code class="inline-code">right</code> leftward. If it matches, you're done.
+  </div>
+
+  <div id="twopointer-tabs">
+    <div class="fm-tabs">
+      <button class="fm-tab is-active" data-tab="py">Python</button>
+      <button class="fm-tab" data-tab="java">Java</button>
+      <button class="fm-tab" data-tab="js">JavaScript</button>
+      <button class="fm-tab" data-tab="cpp">C++</button>
+    </div>
+    <div class="fm-panel" data-panel="py">
+      <span class="code-label is-good">Python</span>
+      <pre class="code-block"><code>def two_sum_sorted(nums, target):
+    left, right = 0, len(nums) - 1
+    while left &lt; right:
+        total = nums[left] + nums[right]
+        if total == target:
+            return [left, right]
+        elif total &lt; target:
+            left += 1
+        else:
+            right -= 1</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="java" hidden>
+      <span class="code-label is-good">Java</span>
+      <pre class="code-block"><code>int[] twoSumSorted(int[] nums, int target) {
+    int left = 0, right = nums.length - 1;
+    while (left &lt; right) {
+        int total = nums[left] + nums[right];
+        if (total == target) return new int[] { left, right };
+        else if (total &lt; target) left++;
+        else right--;
+    }
+    return null;
+}</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="js" hidden>
+      <span class="code-label is-good">JavaScript</span>
+      <pre class="code-block"><code>function twoSumSorted(nums, target) {
+  let left = 0, right = nums.length - 1;
+  while (left &lt; right) {
+    const total = nums[left] + nums[right];
+    if (total === target) return [left, right];
+    else if (total &lt; target) left++;
+    else right--;
+  }
+}</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="cpp" hidden>
+      <span class="code-label is-good">C++</span>
+      <pre class="code-block"><code>std::vector&lt;int&gt; twoSumSorted(std::vector&lt;int&gt;&amp; nums, int target) {
+    int left = 0, right = nums.size() - 1;
+    while (left &lt; right) {
+        int total = nums[left] + nums[right];
+        if (total == target) return {left, right};
+        else if (total &lt; target) left++;
+        else right--;
+    }
+    return {};
+}</code></pre>
+    </div>
+  </div>
+
+  <p>No hash map needed: O(n) time, O(1) extra space — strictly better than Lesson 1's solution, purely because sortedness is guaranteed here. That trade-off is the lesson: <strong>a hash map buys speed when the data has no usable order; two pointers buy speed for free when it does.</strong> Recognizing which situation you're in is the actual skill — not the code itself, which is short either way.</p>
+
+  <p>The same shape solves a very different-looking problem: checking whether a string reads the same forwards and backwards. Walk from both ends inward, comparing characters, stopping the moment they disagree (skipping non-alphanumeric characters and case differences, depending on the exact problem statement).</p>
+
+  <div class="box why">
+    <span class="box-label">Why it matters here</span>
+    "Opposite-direction two pointers" is the single most common shape for problems on <strong>sorted</strong> arrays or symmetric structures like palindromes — the pattern shows up again in Unit 3's binary search boundaries and Unit 9's interval merging. Once it's recognized as its own tool, "the array is sorted" becomes an instant signal to reach for it before anything else.
+  </div>
+
+  <h2>Check your recall</h2>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What fact about the input makes the opposite-direction two-pointer approach to Two Sum work?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">The array contains only positive numbers.</button>
+      <button class="quiz-choice" data-correct="true">The array is already sorted.</button>
+      <button class="quiz-choice" data-correct="false">The array has an even number of elements.</button>
+      <button class="quiz-choice" data-correct="false">The target is always zero.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Sortedness guarantees which direction to move a pointer when the current sum is too high or too low.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. If nums[left] + nums[right] is smaller than the target on a sorted array, which pointer should move, and why?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">right, because it always moves first regardless of the sum.</button>
+      <button class="quiz-choice" data-correct="true">left, because moving it rightward is the only way to increase the sum on sorted data.</button>
+      <button class="quiz-choice" data-correct="false">Both pointers, since the direction doesn't matter.</button>
+      <button class="quiz-choice" data-correct="false">Neither — a sum too small means no answer exists.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Moving right leftward would only decrease the sum further — the wrong direction when the sum needs to grow.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. What is the space complexity of the two-pointer solution, compared to Lesson 1's hash-map solution?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">O(n), the same as the hash-map version.</button>
+      <button class="quiz-choice" data-correct="true">O(1), since it uses no extra data structure.</button>
+      <button class="quiz-choice" data-correct="false">O(n²), since it checks more pairs.</button>
+      <button class="quiz-choice" data-correct="false">It cannot be determined without running the code.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Two pointers need only two integer variables — no hash map or other structure is required.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="sorted">
+    <p class="quiz-prompt">4. Fill in the blank: opposite-direction two pointers require the input to already be ___, or the direction to move each pointer can't be guaranteed correct.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Without a guaranteed order, moving a pointer could move away from the answer instead of toward it.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="palindrome">
+    <p class="quiz-prompt">5. Fill in the blank: a string that reads the same forwards and backwards, checkable by walking two pointers inward from both ends, is called a ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Comparing characters from both ends inward stops the moment a mismatch is found.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p><a href="https://neetcode.io/roadmap">NeetCode's Roadmap</a> places two pointers directly after arrays/hashing for the same reason it's second here — it's the next pattern most brute-force-to-optimal transitions reach for.</p>
+
+  <div class="box">
+    <span class="box-label">Practice on LeetCode</span>
+    <a href="https://leetcode.com/problems/two-sum-ii-input-array-is-sorted/">LeetCode #167 — Two Sum II (Input Array Is Sorted)</a> and <a href="https://leetcode.com/problems/valid-palindrome/">LeetCode #125 — Valid Palindrome</a>. Solve both with two pointers before Lesson 5.
+  </div>
+
+  <p class="ask-teacher">Wondering what happens to this pattern if the array allows duplicate values and needs <em>all</em> matching pairs, not just one? Ask your teacher — it changes how you handle ties. Next: two pointers that move at different speeds instead of from opposite ends.</p>
+
+  <footer class="lesson-footer">STEM+ · Computer Programming 2+ · Lesson 4</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  STEMPlus.mountTabs(document.getElementById('twopointer-tabs'), 'data-tab', 'data-panel');
+});
+</script>

@@ -1,0 +1,205 @@
+<title>Lesson 18: Representing Graphs &amp; DFS — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<script src="../../assets/interactive.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Computer Programming 2+ · Lesson 18</span>
+  <h1>Representing Graphs &amp; Depth-First Search</h1>
+  <p class="subtitle">A tree is a graph with an extra rule: no cycles, and exactly one path between any two nodes. Drop that rule, and traversal needs one new safeguard.</p>
+  <p class="nav-links"><a href="../Unit%205/0017-merging-with-a-heap-top-k-frequent.html">← Lesson 17</a> <a href="0019-bfs-and-shortest-paths-in-unweighted-graphs.html">Lesson 19 →</a> <a href="../index.html">Contents</a> <a href="../reference/glossary.html">Glossary →</a></p>
+
+  <p>A <strong>graph</strong> is a set of nodes connected by edges — no restriction on how many connections a node can have, or whether following edges can loop back on itself. The most common representation is an <strong>adjacency list</strong>: a map (or array) from each node to the list of nodes it directly connects to, for example <code class="inline-code">{0: [1, 2], 1: [0, 3], 2: [0], 3: [1]}</code>. A 2D grid — like a map of land and water — is secretly a graph too: each cell is a node, and it's implicitly connected to its (up to four) neighbors.</p>
+
+  <div class="box">
+    <span class="box-label">The idea</span>
+    Because a graph can contain cycles, DFS needs a way to avoid revisiting the same node forever. Problem: given a grid of <code class="inline-code">'1'</code> (land) and <code class="inline-code">'0'</code> (water), count the number of islands — groups of connected land cells. Run DFS from every unvisited land cell, marking every cell it reaches as visited; each DFS that starts is exactly one new island.
+  </div>
+
+  <div id="dfs-graph-tabs">
+    <div class="fm-tabs">
+      <button class="fm-tab is-active" data-tab="py">Python</button>
+      <button class="fm-tab" data-tab="java">Java</button>
+      <button class="fm-tab" data-tab="js">JavaScript</button>
+      <button class="fm-tab" data-tab="cpp">C++</button>
+    </div>
+    <div class="fm-panel" data-panel="py">
+      <span class="code-label is-good">Python</span>
+      <pre class="code-block"><code>def num_islands(grid):
+    rows, cols = len(grid), len(grid[0])
+
+    def dfs(r, c):
+        if r &lt; 0 or r &gt;= rows or c &lt; 0 or c &gt;= cols or grid[r][c] != '1':
+            return
+        grid[r][c] = '0'          # mark visited by sinking the land
+        dfs(r + 1, c)
+        dfs(r - 1, c)
+        dfs(r, c + 1)
+        dfs(r, c - 1)
+
+    islands = 0
+    for r in range(rows):
+        for c in range(cols):
+            if grid[r][c] == '1':
+                islands += 1
+                dfs(r, c)
+    return islands</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="java" hidden>
+      <span class="code-label is-good">Java</span>
+      <pre class="code-block"><code>int numIslands(char[][] grid) {
+    int rows = grid.length, cols = grid[0].length;
+    int islands = 0;
+    for (int r = 0; r &lt; rows; r++) {
+        for (int c = 0; c &lt; cols; c++) {
+            if (grid[r][c] == '1') {
+                islands++;
+                dfs(grid, r, c);
+            }
+        }
+    }
+    return islands;
+}
+
+void dfs(char[][] grid, int r, int c) {
+    if (r &lt; 0 || r &gt;= grid.length || c &lt; 0 || c &gt;= grid[0].length || grid[r][c] != '1') return;
+    grid[r][c] = '0';               // mark visited by sinking the land
+    dfs(grid, r + 1, c);
+    dfs(grid, r - 1, c);
+    dfs(grid, r, c + 1);
+    dfs(grid, r, c - 1);
+}</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="js" hidden>
+      <span class="code-label is-good">JavaScript</span>
+      <pre class="code-block"><code>function numIslands(grid) {
+  const rows = grid.length, cols = grid[0].length;
+  function dfs(r, c) {
+    if (r &lt; 0 || r &gt;= rows || c &lt; 0 || c &gt;= cols || grid[r][c] !== '1') return;
+    grid[r][c] = '0';               // mark visited by sinking the land
+    dfs(r + 1, c);
+    dfs(r - 1, c);
+    dfs(r, c + 1);
+    dfs(r, c - 1);
+  }
+  let islands = 0;
+  for (let r = 0; r &lt; rows; r++) {
+    for (let c = 0; c &lt; cols; c++) {
+      if (grid[r][c] === '1') {
+        islands++;
+        dfs(r, c);
+      }
+    }
+  }
+  return islands;
+}</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="cpp" hidden>
+      <span class="code-label is-good">C++</span>
+      <pre class="code-block"><code>void dfs(std::vector&lt;std::vector&lt;char&gt;&gt;&amp; grid, int r, int c) {
+    int rows = grid.size(), cols = grid[0].size();
+    if (r &lt; 0 || r &gt;= rows || c &lt; 0 || c &gt;= cols || grid[r][c] != '1') return;
+    grid[r][c] = '0';                // mark visited by sinking the land
+    dfs(grid, r + 1, c);
+    dfs(grid, r - 1, c);
+    dfs(grid, r, c + 1);
+    dfs(grid, r, c - 1);
+}
+
+int numIslands(std::vector&lt;std::vector&lt;char&gt;&gt;&amp; grid) {
+    int islands = 0;
+    for (int r = 0; r &lt; (int)grid.size(); r++) {
+        for (int c = 0; c &lt; (int)grid[0].size(); c++) {
+            if (grid[r][c] == '1') {
+                islands++;
+                dfs(grid, r, c);
+            }
+        }
+    }
+    return islands;
+}</code></pre>
+    </div>
+  </div>
+
+  <p>Marking a visited cell by overwriting it (sinking land to water) avoids needing a separate visited set, but mutates the input — a separate boolean grid is the alternative when the input can't be changed. Either way, each cell is visited at most once, so this is O(rows · cols) time and, worst case, O(rows · cols) space on the call stack if the entire grid is one connected island.</p>
+
+  <div class="box why">
+    <span class="box-label">Why it matters here</span>
+    This is Lesson 11's tree DFS with exactly one addition: a visited check, because a graph (unlike a tree) can lead back to somewhere already seen. That single addition is the entire conceptual gap between "I know tree traversal" and "I know graph traversal" — everything else about recursing into neighbors and processing them is identical. Grids are also worth recognizing as graphs on sight: any "connected region," "reachable cells," or "spreading" problem on a grid is a graph problem wearing a 2D array's clothes.
+  </div>
+
+  <h2>Check your recall</h2>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What is the key structural difference between a tree and a general graph?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">A graph must always have fewer nodes than a tree.</button>
+      <button class="quiz-choice" data-correct="true">A graph can contain cycles and multiple paths between nodes; a tree cannot.</button>
+      <button class="quiz-choice" data-correct="false">A tree can have cycles, but a graph cannot.</button>
+      <button class="quiz-choice" data-correct="false">Graphs cannot be traversed using recursion at all.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A tree is really just a graph with the added guarantee of no cycles and exactly one path between any two nodes.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why does graph DFS need a visited check that tree DFS didn't need?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Trees are always larger than graphs, so the check isn't needed for smaller structures.</button>
+      <button class="quiz-choice" data-correct="true">Without one, a cycle in the graph could cause the traversal to revisit the same nodes forever.</button>
+      <button class="quiz-choice" data-correct="false">Visited checks are only needed for weighted graphs.</button>
+      <button class="quiz-choice" data-correct="false">Graph nodes cannot be compared for equality otherwise.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Trees guarantee no cycles exist, so revisiting was never possible there in the first place.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. In the island-counting solution, what does starting a new DFS call from a cell represent?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">A single water cell being checked.</button>
+      <button class="quiz-choice" data-correct="true">The discovery of one entire new island, about to be fully marked as visited.</button>
+      <button class="quiz-choice" data-correct="false">A failed attempt to find any land at all.</button>
+      <button class="quiz-choice" data-correct="false">The end of the algorithm.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Every unvisited land cell found in the outer loop starts a fresh DFS that sinks its entire connected island at once.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="adjacency">
+    <p class="quiz-prompt">4. Fill in the blank: mapping each node to the list of nodes it directly connects to is called an ___ list.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>This is the most common way to represent a graph in code.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="visited">
+    <p class="quiz-prompt">5. Fill in the blank: marking a cell as ___ (whether by a separate set or by mutating the input) is the one addition graph DFS needs beyond tree DFS.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Without this, a cycle would send the traversal into an infinite loop.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p><a href="https://cp-algorithms.com/index.html">Algorithms for Competitive Programming</a>'s graph section covers adjacency list and matrix representations in depth, including when each one's tradeoffs actually matter.</p>
+
+  <div class="box">
+    <span class="box-label">Practice on LeetCode</span>
+    <a href="https://leetcode.com/problems/number-of-islands/">LeetCode #200 — Number of Islands</a>. Try it both by mutating the grid directly and by using a separate visited set, and compare the two.
+  </div>
+
+  <p class="ask-teacher">Wondering how an adjacency matrix compares to an adjacency list, and when the denser representation is actually worth it? Ask your teacher — it comes down to how many edges the graph actually has. Next: the queue-based traversal from Unit 4, generalized to graphs.</p>
+
+  <footer class="lesson-footer">STEM+ · Computer Programming 2+ · Lesson 18</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  STEMPlus.mountTabs(document.getElementById('dfs-graph-tabs'), 'data-tab', 'data-panel');
+});
+</script>

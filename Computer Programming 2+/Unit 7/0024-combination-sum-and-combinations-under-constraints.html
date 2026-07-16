@@ -1,0 +1,200 @@
+<title>Lesson 24: Combination Sum &amp; Combinations Under Constraints — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<script src="../../assets/interactive.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Computer Programming 2+ · Lesson 24</span>
+  <h1>Combination Sum &amp; Combinations Under Constraints</h1>
+  <p class="subtitle">A constraint isn't just something to check at the end — it's a reason to stop exploring a branch immediately.</p>
+  <p class="nav-links"><a href="0023-backtracking-fundamentals-subsets-and-permutations.html">← Lesson 23</a> <a href="0025-backtracking-on-grids-word-search.html">Lesson 25 →</a> <a href="../index.html">Contents</a> <a href="../reference/glossary.html">Glossary →</a></p>
+
+  <p>Problem: given an array of distinct positive integers and a target, return every combination of numbers (each number reusable any number of times) that sums exactly to the target. This is Lesson 23's exact backtracking template, but now every branch carries a running sum, and the moment that sum exceeds the target, there is no reason to keep exploring deeper — the branch can be abandoned immediately. This early abandonment is called <strong>pruning</strong>.</p>
+
+  <div class="box">
+    <span class="box-label">The idea</span>
+    Choose, explore, unchoose — identical to Lesson 23 — with one addition: before recursing, check whether the current choice has already pushed the running sum past the target. If so, stop; nothing deeper down that branch can possibly work, since every number is positive. Because the same number can be reused, the recursive call passes the <em>same</em> start index rather than advancing it, while still moving forward through the array for numbers not being reused.
+  </div>
+
+  <div id="combsum-tabs">
+    <div class="fm-tabs">
+      <button class="fm-tab is-active" data-tab="py">Python</button>
+      <button class="fm-tab" data-tab="java">Java</button>
+      <button class="fm-tab" data-tab="js">JavaScript</button>
+      <button class="fm-tab" data-tab="cpp">C++</button>
+    </div>
+    <div class="fm-panel" data-panel="py">
+      <span class="code-label is-good">Python</span>
+      <pre class="code-block"><code>def combination_sum(candidates, target):
+    result = []
+    path = []
+
+    def backtrack(start, remaining):
+        if remaining == 0:
+            result.append(path[:])
+            return
+        for i in range(start, len(candidates)):
+            if candidates[i] &gt; remaining:
+                continue                     # prune: too large, and the rest are sorted larger still
+            path.append(candidates[i])       # choose
+            backtrack(i, remaining - candidates[i])   # explore (same i: reuse allowed)
+            path.pop()                        # unchoose
+
+    candidates.sort()
+    backtrack(0, target)
+    return result</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="java" hidden>
+      <span class="code-label is-good">Java</span>
+      <pre class="code-block"><code>List&lt;List&lt;Integer&gt;&gt; combinationSum(int[] candidates, int target) {
+    List&lt;List&lt;Integer&gt;&gt; result = new ArrayList&lt;&gt;();
+    Arrays.sort(candidates);
+    backtrack(candidates, 0, target, new ArrayList&lt;&gt;(), result);
+    return result;
+}
+
+void backtrack(int[] candidates, int start, int remaining, List&lt;Integer&gt; path, List&lt;List&lt;Integer&gt;&gt; result) {
+    if (remaining == 0) {
+        result.add(new ArrayList&lt;&gt;(path));
+        return;
+    }
+    for (int i = start; i &lt; candidates.length; i++) {
+        if (candidates[i] &gt; remaining) break;   // prune: too large, and the rest are sorted larger still
+        path.add(candidates[i]);                 // choose
+        backtrack(candidates, i, remaining - candidates[i], path, result);   // explore (same i: reuse allowed)
+        path.remove(path.size() - 1);            // unchoose
+    }
+}</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="js" hidden>
+      <span class="code-label is-good">JavaScript</span>
+      <pre class="code-block"><code>function combinationSum(candidates, target) {
+  const result = [];
+  const path = [];
+  candidates.sort((a, b) =&gt; a - b);
+
+  function backtrack(start, remaining) {
+    if (remaining === 0) {
+      result.push([...path]);
+      return;
+    }
+    for (let i = start; i &lt; candidates.length; i++) {
+      if (candidates[i] &gt; remaining) break;   // prune: too large, and the rest are sorted larger still
+      path.push(candidates[i]);                // choose
+      backtrack(i, remaining - candidates[i]); // explore (same i: reuse allowed)
+      path.pop();                               // unchoose
+    }
+  }
+
+  backtrack(0, target);
+  return result;
+}</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="cpp" hidden>
+      <span class="code-label is-good">C++</span>
+      <pre class="code-block"><code>void backtrack(std::vector&lt;int&gt;&amp; candidates, int start, int remaining,
+               std::vector&lt;int&gt;&amp; path, std::vector&lt;std::vector&lt;int&gt;&gt;&amp; result) {
+    if (remaining == 0) {
+        result.push_back(path);
+        return;
+    }
+    for (int i = start; i &lt; (int)candidates.size(); i++) {
+        if (candidates[i] &gt; remaining) break;   // prune: too large, and the rest are sorted larger still
+        path.push_back(candidates[i]);           // choose
+        backtrack(candidates, i, remaining - candidates[i], path, result);   // explore (same i: reuse allowed)
+        path.pop_back();                          // unchoose
+    }
+}
+
+std::vector&lt;std::vector&lt;int&gt;&gt; combinationSum(std::vector&lt;int&gt;&amp; candidates, int target) {
+    std::sort(candidates.begin(), candidates.end());
+    std::vector&lt;std::vector&lt;int&gt;&gt; result;
+    std::vector&lt;int&gt; path;
+    backtrack(candidates, 0, target, path, result);
+    return result;
+}</code></pre>
+    </div>
+  </div>
+
+  <p>Sorting first (O(n log n)) makes the prune correct as a <code class="inline-code">break</code> rather than a <code class="inline-code">continue</code> — once one candidate is too large, every candidate after it is too, since the array is sorted ascending. The exact worst-case time complexity is hard to state cleanly since it depends on the target and candidate values, but pruning is what keeps the search from wasting time on branches whose sum has already overshot, rather than only discovering the failure at a much deeper leaf.</p>
+
+  <div class="box why">
+    <span class="box-label">Why it matters here</span>
+    Pruning is the difference between backtracking that merely works and backtracking that runs fast enough to pass — the constraint isn't only a filter applied to finished results, it's a signal to stop early. This is the same principle as Unit 3's binary search on the answer: a condition that can rule out an entire remaining range should be checked as early as possible, not after fully computing something doomed to fail. Any backtracking problem with a numeric constraint (sum, count, capacity) should be scanned for a prune the moment that constraint is violated.
+  </div>
+
+  <h2>Check your recall</h2>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What does "pruning" mean in the context of backtracking?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Sorting the final results before returning them.</button>
+      <button class="quiz-choice" data-correct="true">Abandoning a branch early once it's known that branch cannot lead to a valid answer.</button>
+      <button class="quiz-choice" data-correct="false">Removing duplicate values from the input array first.</button>
+      <button class="quiz-choice" data-correct="false">Converting the recursive solution into an iterative one.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Pruning stops wasted work by recognizing failure before fully exploring a doomed branch.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why does the recursive call pass the same index i instead of i + 1?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">To skip that candidate entirely on the next recursive call.</button>
+      <button class="quiz-choice" data-correct="true">Because each candidate is allowed to be reused any number of times.</button>
+      <button class="quiz-choice" data-correct="false">To avoid needing a base case at all.</button>
+      <button class="quiz-choice" data-correct="false">Because the array was not sorted beforehand.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Advancing to i + 1 would forbid reusing a candidate, which this problem explicitly allows.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why does sorting the candidates first make the prune correct as an early break?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Sorting has no effect on whether the prune is correct.</button>
+      <button class="quiz-choice" data-correct="true">Once one candidate exceeds the remaining target, every candidate after it (being larger) does too.</button>
+      <button class="quiz-choice" data-correct="false">Sorting removes the need for a running sum entirely.</button>
+      <button class="quiz-choice" data-correct="false">Sorting guarantees there is exactly one valid combination.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Without sorting, a break could skip over a smaller, still-valid candidate further along in the array.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="pruning">
+    <p class="quiz-prompt">4. Fill in the blank: stopping a backtracking branch early once it can no longer succeed is called ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>This is the one addition Lesson 24 makes to Lesson 23's plain backtracking template.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="remaining">
+    <p class="quiz-prompt">5. Fill in the blank: each recursive call tracks how much of the target sum is still ___, checking whether it hits exactly zero.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>This mirrors Lesson 14's path-sum trick of tracking what's left rather than a running total.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p><a href="https://cp-algorithms.com/">Algorithms for Competitive Programming</a>'s treatment of brute-force search covers pruning as a general technique, applicable well beyond just sum-based constraints.</p>
+
+  <div class="box">
+    <span class="box-label">Practice on LeetCode</span>
+    <a href="https://leetcode.com/problems/combination-sum/">LeetCode #39 — Combination Sum</a>. Try removing the prune entirely and compare the runtime on a larger input, to see the difference it actually makes.
+  </div>
+
+  <p class="ask-teacher">Wondering how this same combination-sum template changes if each candidate can only be used once instead of reused? Ask your teacher — it's a small index change with a real effect on the result. Next: backtracking where the choices aren't array indices at all, but directions on a 2D grid.</p>
+
+  <footer class="lesson-footer">STEM+ · Computer Programming 2+ · Lesson 24</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  STEMPlus.mountTabs(document.getElementById('combsum-tabs'), 'data-tab', 'data-panel');
+});
+</script>

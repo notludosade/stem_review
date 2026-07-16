@@ -1,0 +1,158 @@
+<title>Lesson 6: Fixed-Size Sliding Window — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<script src="../../assets/interactive.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Computer Programming 2+ · Lesson 6</span>
+  <h1>Fixed-Size Sliding Window</h1>
+  <p class="subtitle">Recomputing a sum over every possible window of size k is wasted work — sliding the window reuses almost all of the previous computation.</p>
+  <p class="nav-links"><a href="0005-fast-and-slow-pointers.html">← Lesson 5</a> <a href="0007-variable-size-sliding-window.html">Lesson 7 →</a> <a href="../index.html">Contents</a> <a href="../reference/glossary.html">Glossary →</a></p>
+
+  <p>Problem: given an array and a fixed size <code class="inline-code">k</code>, find the maximum sum of any <code class="inline-code">k</code> consecutive elements. Brute force: for every starting index, sum the next <code class="inline-code">k</code> elements. With <code class="inline-code">n</code> starting positions and <code class="inline-code">k</code> elements summed each time, that's O(n·k) — and the bottleneck is obvious once you look for it: adjacent windows share <code class="inline-code">k − 1</code> elements, and the brute force re-adds every one of them from scratch.</p>
+
+  <div class="box">
+    <span class="box-label">The idea</span>
+    Compute the first window's sum once. To slide the window forward by one position, subtract the element leaving on the left and add the element entering on the right — O(1) per slide instead of O(k).
+  </div>
+
+  <div id="fixedwindow-tabs">
+    <div class="fm-tabs">
+      <button class="fm-tab is-active" data-tab="py">Python</button>
+      <button class="fm-tab" data-tab="java">Java</button>
+      <button class="fm-tab" data-tab="js">JavaScript</button>
+      <button class="fm-tab" data-tab="cpp">C++</button>
+    </div>
+    <div class="fm-panel" data-panel="py">
+      <span class="code-label is-good">Python</span>
+      <pre class="code-block"><code>def max_window_sum(nums, k):
+    window_sum = sum(nums[:k])
+    best = window_sum
+    for i in range(k, len(nums)):
+        window_sum += nums[i] - nums[i - k]
+        best = max(best, window_sum)
+    return best</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="java" hidden>
+      <span class="code-label is-good">Java</span>
+      <pre class="code-block"><code>int maxWindowSum(int[] nums, int k) {
+    int windowSum = 0;
+    for (int i = 0; i &lt; k; i++) windowSum += nums[i];
+    int best = windowSum;
+    for (int i = k; i &lt; nums.length; i++) {
+        windowSum += nums[i] - nums[i - k];
+        best = Math.max(best, windowSum);
+    }
+    return best;
+}</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="js" hidden>
+      <span class="code-label is-good">JavaScript</span>
+      <pre class="code-block"><code>function maxWindowSum(nums, k) {
+  let windowSum = 0;
+  for (let i = 0; i &lt; k; i++) windowSum += nums[i];
+  let best = windowSum;
+  for (let i = k; i &lt; nums.length; i++) {
+    windowSum += nums[i] - nums[i - k];
+    best = Math.max(best, windowSum);
+  }
+  return best;
+}</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="cpp" hidden>
+      <span class="code-label is-good">C++</span>
+      <pre class="code-block"><code>int maxWindowSum(std::vector&lt;int&gt;&amp; nums, int k) {
+    int windowSum = 0;
+    for (int i = 0; i &lt; k; i++) windowSum += nums[i];
+    int best = windowSum;
+    for (int i = k; i &lt; nums.size(); i++) {
+        windowSum += nums[i] - nums[i - k];
+        best = std::max(best, windowSum);
+    }
+    return best;
+}</code></pre>
+    </div>
+  </div>
+
+  <p>This drops the total cost from O(n·k) to O(n) — each element is added exactly once and subtracted exactly once, no matter how large <code class="inline-code">k</code> is. The general shape — maintain a running aggregate over a window, and update it incrementally as the window moves — extends to more than just sums: max/min over a window, counts of characters, or any total that can be adjusted by "remove the outgoing element's effect, add the incoming element's effect."</p>
+
+  <div class="box why">
+    <span class="box-label">Why it matters here</span>
+    Fixed-size sliding window is the simplest version of a pattern that recurs constantly: whenever a problem asks about every contiguous sub-range of a fixed length, recomputing from scratch is almost always the bottleneck, and incremental updates almost always fix it. Lesson 7 removes the "fixed length" restriction — the harder and far more common real-world case.
+  </div>
+
+  <h2>Check your recall</h2>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What is the time complexity of brute-force recomputing the sum of every window of size k?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">O(n), since there are n possible windows.</button>
+      <button class="quiz-choice" data-correct="true">O(n·k), since each of n windows requires summing k elements.</button>
+      <button class="quiz-choice" data-correct="false">O(k), since only the window size matters.</button>
+      <button class="quiz-choice" data-correct="false">O(1), since sums are always fast.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Both the number of windows (n) and the cost per window (k) contribute, multiplying together.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. What two operations does sliding the window forward by one position require?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Resumming every element in the new window from scratch.</button>
+      <button class="quiz-choice" data-correct="true">Subtracting the element leaving on the left and adding the element entering on the right.</button>
+      <button class="quiz-choice" data-correct="false">Sorting the new window before computing its sum.</button>
+      <button class="quiz-choice" data-correct="false">Doubling the previous window's sum.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Only the element leaving and the element entering actually change — everything else is shared with the previous window.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why do adjacent windows of size k share most of their elements?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">They don't — every window is entirely different from the last.</button>
+      <button class="quiz-choice" data-correct="true">Sliding by one position only changes which single element enters and which single element leaves.</button>
+      <button class="quiz-choice" data-correct="false">All windows in the array are actually identical.</button>
+      <button class="quiz-choice" data-correct="false">The array must be sorted for this to be true.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>k − 1 elements are shared between any two windows that are one position apart — only one element differs on each end.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="window">
+    <p class="quiz-prompt">4. Fill in the blank: a contiguous, fixed-length range of elements that slides across an array one position at a time is called a ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>This is the structure the entire technique is named after.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="incremental">
+    <p class="quiz-prompt">5. Fill in the blank: updating a running total by adjusting only for what entered and left, instead of recomputing from scratch, is called an ___ update.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>This is what turns an O(k)-per-window cost into O(1) per slide.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p><a href="https://neetcode.io/roadmap">NeetCode's Roadmap</a> groups sliding window directly after two pointers, since a sliding window is really two pointers marking the edges of a range that both move forward together.</p>
+
+  <div class="box">
+    <span class="box-label">Practice on LeetCode</span>
+    <a href="https://leetcode.com/problems/maximum-average-subarray-i/">LeetCode #643 — Maximum Average Subarray I</a>. It's the same fixed-size window shape as this lesson's example, just dividing by k for an average instead of comparing raw sums.
+  </div>
+
+  <p class="ask-teacher">Wondering how this changes if the aggregate is a maximum instead of a sum — since a maximum can't simply be "subtracted"? Ask your teacher — it needs a different supporting structure. Next: windows whose size isn't fixed at all, and grows or shrinks based on a condition.</p>
+
+  <footer class="lesson-footer">STEM+ · Computer Programming 2+ · Lesson 6</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  STEMPlus.mountTabs(document.getElementById('fixedwindow-tabs'), 'data-tab', 'data-panel');
+});
+</script>

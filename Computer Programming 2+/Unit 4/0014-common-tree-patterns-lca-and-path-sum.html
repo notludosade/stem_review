@@ -1,0 +1,150 @@
+<title>Lesson 14: Common Tree Patterns: LCA &amp; Path Sum — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<script src="../../assets/interactive.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Computer Programming 2+ · Lesson 14</span>
+  <h1>Common Tree Patterns: Lowest Common Ancestor &amp; Path Sum</h1>
+  <p class="subtitle">Two problems that look unrelated turn out to share the same shape: return something from a recursive call, and combine what comes back from both children.</p>
+  <p class="nav-links"><a href="0013-binary-search-trees-properties-and-validation.html">← Lesson 13</a> <a href="../index.html">Contents</a> <a href="../reference/glossary.html">Glossary →</a></p>
+
+  <p>Problem one: given a binary tree and two nodes <code class="inline-code">p</code> and <code class="inline-code">q</code>, find their <strong>lowest common ancestor</strong> (LCA) — the deepest node that has both <code class="inline-code">p</code> and <code class="inline-code">q</code> somewhere in its subtrees. Problem two: given a binary tree and a target sum, determine whether any root-to-leaf path adds up to exactly that target. Both are solved by a recursive function that returns information upward and combines results from its two children.</p>
+
+  <div class="box">
+    <span class="box-label">The idea</span>
+    For LCA: at each node, recurse into both children. If both recursive calls find something (one found p, the other found q), the current node <em>is</em> the answer. If only one side found something, pass that result upward unchanged. For path sum: subtract the current node's value from the remaining target as you recurse down, and check at each leaf whether the remaining target has reached exactly zero.
+  </div>
+
+  <div id="lca-tabs">
+    <div class="fm-tabs">
+      <button class="fm-tab is-active" data-tab="py">Python</button>
+      <button class="fm-tab" data-tab="java">Java</button>
+      <button class="fm-tab" data-tab="js">JavaScript</button>
+      <button class="fm-tab" data-tab="cpp">C++</button>
+    </div>
+    <div class="fm-panel" data-panel="py">
+      <span class="code-label is-good">Python</span>
+      <pre class="code-block"><code>def lowest_common_ancestor(root, p, q):
+    if root is None or root is p or root is q:
+        return root
+    left = lowest_common_ancestor(root.left, p, q)
+    right = lowest_common_ancestor(root.right, p, q)
+    if left and right:
+        return root          # p and q found on different sides
+    return left if left else right</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="java" hidden>
+      <span class="code-label is-good">Java</span>
+      <pre class="code-block"><code>TreeNode lowestCommonAncestor(TreeNode root, TreeNode p, TreeNode q) {
+    if (root == null || root == p || root == q) return root;
+    TreeNode left = lowestCommonAncestor(root.left, p, q);
+    TreeNode right = lowestCommonAncestor(root.right, p, q);
+    if (left != null &amp;&amp; right != null) return root;   // found on different sides
+    return left != null ? left : right;
+}</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="js" hidden>
+      <span class="code-label is-good">JavaScript</span>
+      <pre class="code-block"><code>function lowestCommonAncestor(root, p, q) {
+  if (root === null || root === p || root === q) return root;
+  const left = lowestCommonAncestor(root.left, p, q);
+  const right = lowestCommonAncestor(root.right, p, q);
+  if (left && right) return root;   // found on different sides
+  return left ? left : right;
+}</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="cpp" hidden>
+      <span class="code-label is-good">C++</span>
+      <pre class="code-block"><code>TreeNode* lowestCommonAncestor(TreeNode* root, TreeNode* p, TreeNode* q) {
+    if (root == nullptr || root == p || root == q) return root;
+    TreeNode* left = lowestCommonAncestor(root-&gt;left, p, q);
+    TreeNode* right = lowestCommonAncestor(root-&gt;right, p, q);
+    if (left != nullptr &amp;&amp; right != nullptr) return root;   // found on different sides
+    return left != nullptr ? left : right;
+}</code></pre>
+    </div>
+  </div>
+
+  <p>Both problems share the same recursive shape: a base case at <code class="inline-code">null</code> (or a leaf), a recursive call into each child, and a combining step that decides what to return based on what came back from both sides. That combining step is the actual pattern — for LCA it's "did both sides find something," for path sum it's "did the remaining target reach zero exactly at a leaf." Each is O(n) time, since every node is visited at most once, and O(h) space for the call stack, same as every traversal in this unit.</p>
+
+  <div class="box why">
+    <span class="box-label">Why it matters here</span>
+    A large share of tree interview questions are variations on "recurse into both children, then combine their results" — diameter, balanced-tree checking, maximum path sum, and subtree-matching problems all reuse this exact shape with a different combining rule. Once this pattern is recognized as one idea rather than a list of unrelated problems, most new tree questions become "what do I return, and how do I combine two of them" instead of "where do I even start."
+  </div>
+
+  <h2>Check your recall</h2>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. In the LCA solution, what does it mean when both the left and right recursive calls return a non-null result?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Both p and q were found on the same side.</button>
+      <button class="quiz-choice" data-correct="true">p and q were found on different sides, so the current node is their lowest common ancestor.</button>
+      <button class="quiz-choice" data-correct="false">The tree is not a valid binary search tree.</button>
+      <button class="quiz-choice" data-correct="false">Neither p nor q exists in the tree.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>If p and q were on the same side, that side's recursive call alone would already return their ancestor.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. How does the path sum problem track progress as it recurses toward a leaf?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">By counting the total number of nodes visited so far.</button>
+      <button class="quiz-choice" data-correct="true">By subtracting each node's value from the remaining target as it descends.</button>
+      <button class="quiz-choice" data-correct="false">By sorting all path values before checking the sum.</button>
+      <button class="quiz-choice" data-correct="false">By storing every possible path in a separate array first.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Checking whether the remaining target hits exactly zero at a leaf avoids having to sum a whole path after the fact.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. What shared recursive shape do LCA and path sum both follow?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Both require sorting the tree's values first.</button>
+      <button class="quiz-choice" data-correct="true">A base case, a recursive call into each child, and a step that combines what both children returned.</button>
+      <button class="quiz-choice" data-correct="false">Both require an explicit queue instead of recursion.</button>
+      <button class="quiz-choice" data-correct="false">Neither one actually needs to visit every node.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>This combining-results shape generalizes to many other tree problems beyond just these two.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="ancestor">
+    <p class="quiz-prompt">4. Fill in the blank: the deepest node that has both target nodes somewhere in its subtrees is called their lowest common ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>LCA is the standard abbreviation for this term.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="combining">
+    <p class="quiz-prompt">5. Fill in the blank: the step where a node's recursive results from its left and right children are merged into a single answer is the ___ step.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>This is the part of the pattern that actually changes from problem to problem.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p><a href="https://leetcode.com/explore/">LeetCode's own Explore pattern tracks</a> group LCA and path-sum-style problems together under "tree recursion with combined results," alongside close variants worth comparing once these two are solid.</p>
+
+  <div class="box">
+    <span class="box-label">Practice on LeetCode</span>
+    <a href="https://leetcode.com/problems/lowest-common-ancestor-of-a-binary-tree/">LeetCode #236 — Lowest Common Ancestor of a Binary Tree</a> and <a href="https://leetcode.com/problems/path-sum/">#112 — Path Sum</a>. That closes Unit 4 — solve both unassisted before moving on.
+  </div>
+
+  <p class="ask-teacher">Wondering how the "combine both children's results" idea extends to a problem like finding a tree's diameter? Ask your teacher — it's the same shape with a different thing being combined. That closes Unit 4: Trees. Next: heaps, and the structure that keeps a running "smallest" or "largest" available in O(log n).</p>
+
+  <footer class="lesson-footer">STEM+ · Computer Programming 2+ · Lesson 14</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  STEMPlus.mountTabs(document.getElementById('lca-tabs'), 'data-tab', 'data-panel');
+});
+</script>

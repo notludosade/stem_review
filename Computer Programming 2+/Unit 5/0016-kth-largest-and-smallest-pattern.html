@@ -1,0 +1,155 @@
+<title>Lesson 16: The Kth Largest / Smallest Pattern — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<script src="../../assets/interactive.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Computer Programming 2+ · Lesson 16</span>
+  <h1>The Kth Largest / Smallest Pattern</h1>
+  <p class="subtitle">Sorting the whole array to find one value is doing far more work than the question actually asked for.</p>
+  <p class="nav-links"><a href="0015-heap-fundamentals.html">← Lesson 15</a> <a href="0017-merging-with-a-heap-top-k-frequent.html">Lesson 17 →</a> <a href="../index.html">Contents</a> <a href="../reference/glossary.html">Glossary →</a></p>
+
+  <p>Problem: find the kth largest element in an unsorted array. Sorting the whole array first solves it in O(n log n), but that computes the full order of every element when only one position actually matters. A heap gets there in O(n log k) — and when k is small relative to n, that's a real, measurable improvement, not just a constant-factor tweak.</p>
+
+  <div class="box">
+    <span class="box-label">The idea</span>
+    Maintain a min-heap capped at size k. Push every element in; whenever the heap grows past size k, pop the smallest — discarding it, since it can't possibly be among the k largest once k larger elements are already being tracked. After processing everything, the heap's minimum (its top) is exactly the kth largest element overall.
+  </div>
+
+  <div id="kth-tabs">
+    <div class="fm-tabs">
+      <button class="fm-tab is-active" data-tab="py">Python</button>
+      <button class="fm-tab" data-tab="java">Java</button>
+      <button class="fm-tab" data-tab="js">JavaScript</button>
+      <button class="fm-tab" data-tab="cpp">C++</button>
+    </div>
+    <div class="fm-panel" data-panel="py">
+      <span class="code-label is-good">Python</span>
+      <pre class="code-block"><code>import heapq
+
+def find_kth_largest(nums, k):
+    heap = []
+    for num in nums:
+        heapq.heappush(heap, num)
+        if len(heap) &gt; k:
+            heapq.heappop(heap)     # discard the smallest tracked value
+    return heap[0]                   # the minimum of the k largest is the kth largest</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="java" hidden>
+      <span class="code-label is-good">Java</span>
+      <pre class="code-block"><code>int findKthLargest(int[] nums, int k) {
+    PriorityQueue&lt;Integer&gt; heap = new PriorityQueue&lt;&gt;();   // min-heap
+    for (int num : nums) {
+        heap.offer(num);
+        if (heap.size() &gt; k) heap.poll();   // discard the smallest tracked value
+    }
+    return heap.peek();
+}</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="js" hidden>
+      <span class="code-label is-good">JavaScript</span>
+      <pre class="code-block"><code>// Reuses the MinHeap class introduced in Lesson 15
+function findKthLargest(nums, k) {
+  const heap = new MinHeap();
+  for (const num of nums) {
+    heap.push(num);
+    if (heap.data.length &gt; k) heap.pop();   // discard the smallest tracked value
+  }
+  return heap.data[0];
+}</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="cpp" hidden>
+      <span class="code-label is-good">C++</span>
+      <pre class="code-block"><code>int findKthLargest(std::vector&lt;int&gt;&amp; nums, int k) {
+    std::priority_queue&lt;int, std::vector&lt;int&gt;, std::greater&lt;int&gt;&gt; heap;
+    for (int num : nums) {
+        heap.push(num);
+        if (heap.size() &gt; k) heap.pop();   // discard the smallest tracked value
+    }
+    return heap.top();
+}</code></pre>
+    </div>
+  </div>
+
+  <p>Each of the n elements triggers at most one push and one pop, and because the heap never holds more than k + 1 elements, every one of those operations costs O(log k) instead of O(log n). Total: O(n log k). When k is a small constant (find the 3rd largest, say) this is effectively O(n) — dramatically better than sorting everything just to read off one position.</p>
+
+  <div class="box why">
+    <span class="box-label">Why it matters here</span>
+    "Find the kth largest/smallest" and its close cousins — "find the k closest points," "find the k most frequent elements" (Lesson 17) — are among the most frequently asked interview questions specifically because they test whether a heap is reached for automatically instead of a full sort. There's also a quickselect approach that averages O(n) time by partitioning like quicksort, at the cost of worse worst-case behavior and no ability to process the array as a stream — worth knowing exists, but the heap approach here is the more broadly reusable skill.
+  </div>
+
+  <h2>Check your recall</h2>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. Why is a min-heap used to find the kth <em>largest</em> element, rather than a max-heap?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">A max-heap cannot store more than one element at a time.</button>
+      <button class="quiz-choice" data-correct="true">The heap's minimum, among the k largest values seen, is exactly the boundary value being searched for.</button>
+      <button class="quiz-choice" data-correct="false">Min-heaps are always faster than max-heaps in every language.</button>
+      <button class="quiz-choice" data-correct="false">It doesn't matter which one is used — the result would be identical either way.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Once the heap holds exactly the k largest values seen so far, its smallest member is the kth largest overall.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. What is the overall time complexity of the heap-based approach?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">O(n log n), the same as sorting the whole array.</button>
+      <button class="quiz-choice" data-correct="true">O(n log k), since the heap never grows past size k.</button>
+      <button class="quiz-choice" data-correct="false">O(n), regardless of the value of k.</button>
+      <button class="quiz-choice" data-correct="false">O(k log n), since only k elements are ever pushed.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>All n elements are processed, but each push/pop costs only O(log k) since the heap is capped at size k.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why does capping the heap at size k make each individual push or pop cheaper?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">It doesn't — heap operation cost never depends on the heap's size.</button>
+      <button class="quiz-choice" data-correct="true">A heap operation's cost is proportional to the heap's own height, which stays O(log k) instead of O(log n).</button>
+      <button class="quiz-choice" data-correct="false">Capping the heap turns every operation into O(1).</button>
+      <button class="quiz-choice" data-correct="false">It only affects the very first push, not subsequent ones.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Heap push/pop cost is O(height), and a heap capped at size k has height O(log k) rather than O(log n).</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="smallest">
+    <p class="quiz-prompt">4. Fill in the blank: whenever the heap grows past size k, the ___ value currently in the heap is popped and discarded.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>It's safe to discard, since k values known to be larger are already being tracked.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="quickselect">
+    <p class="quiz-prompt">5. Fill in the blank: an alternative approach that averages O(n) time by partitioning the array like quicksort is called ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>It trades a better average case for a worse worst case and the inability to handle a data stream, unlike the heap approach.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p><a href="https://neetcode.io/roadmap">NeetCode's Roadmap</a> places kth-largest problems directly in its heap section, immediately after heap fundamentals — confirming this as the pattern's canonical first application.</p>
+
+  <div class="box">
+    <span class="box-label">Practice on LeetCode</span>
+    <a href="https://leetcode.com/problems/kth-largest-element-in-an-array/">LeetCode #215 — Kth Largest Element in an Array</a>. Implement the heap approach here first, then look up quickselect as a follow-up once this one is solid.
+  </div>
+
+  <p class="ask-teacher">Wondering how quickselect's partitioning step actually works, and why its worst case is worse than the heap approach's? Ask your teacher — it's a natural extension once quicksort itself is familiar. Next: applying this same "bounded heap" instinct to a problem about frequency instead of raw value.</p>
+
+  <footer class="lesson-footer">STEM+ · Computer Programming 2+ · Lesson 16</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  STEMPlus.mountTabs(document.getElementById('kth-tabs'), 'data-tab', 'data-panel');
+});
+</script>

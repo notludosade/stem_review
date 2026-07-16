@@ -1,0 +1,158 @@
+<title>Lesson 28: 2D DP — Grids &amp; Edit Distance — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<script src="../../assets/interactive.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Computer Programming 2+ · Lesson 28</span>
+  <h1>2D DP: Grids &amp; Edit Distance</h1>
+  <p class="subtitle">When the answer at one position depends on two directions of "previous" instead of one, the dp array grows a second dimension.</p>
+  <p class="nav-links"><a href="0027-1d-dp-house-robber-and-maximum-subarray.html">← Lesson 27</a> <a href="0029-knapsack-patterns-partition-equal-subset-sum.html">Lesson 29 →</a> <a href="../index.html">Contents</a> <a href="../reference/glossary.html">Glossary →</a></p>
+
+  <p>Problem: a robot sits at the top-left corner of an m×n grid and can only move right or down. How many distinct paths reach the bottom-right corner? Each cell can only be reached from the cell directly above it or the cell directly to its left, so <code class="inline-code">paths(r, c) = paths(r - 1, c) + paths(r, c - 1)</code> — Lesson 26's Climbing Stairs recurrence, just indexed by two coordinates instead of one.</p>
+
+  <div class="box">
+    <span class="box-label">The idea</span>
+    Build a 2D <code class="inline-code">dp</code> table the same size as the grid. The entire first row and first column are base cases equal to 1 — there's exactly one way to reach any cell along the top or left edge (a straight line of moves). Every other cell is the sum of the cell above and the cell to its left, filled in row by row.
+  </div>
+
+  <div id="grid-tabs">
+    <div class="fm-tabs">
+      <button class="fm-tab is-active" data-tab="py">Python</button>
+      <button class="fm-tab" data-tab="java">Java</button>
+      <button class="fm-tab" data-tab="js">JavaScript</button>
+      <button class="fm-tab" data-tab="cpp">C++</button>
+    </div>
+    <div class="fm-panel" data-panel="py">
+      <span class="code-label is-good">Python</span>
+      <pre class="code-block"><code>def unique_paths(m, n):
+    dp = [[1] * n for _ in range(m)]    # top row and left column are all base cases: 1
+    for r in range(1, m):
+        for c in range(1, n):
+            dp[r][c] = dp[r - 1][c] + dp[r][c - 1]   # from above, or from the left
+    return dp[m - 1][n - 1]</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="java" hidden>
+      <span class="code-label is-good">Java</span>
+      <pre class="code-block"><code>int uniquePaths(int m, int n) {
+    int[][] dp = new int[m][n];
+    for (int r = 0; r &lt; m; r++) dp[r][0] = 1;   // left column: one straight-down path
+    for (int c = 0; c &lt; n; c++) dp[0][c] = 1;   // top row: one straight-right path
+    for (int r = 1; r &lt; m; r++) {
+        for (int c = 1; c &lt; n; c++) {
+            dp[r][c] = dp[r - 1][c] + dp[r][c - 1];   // from above, or from the left
+        }
+    }
+    return dp[m - 1][n - 1];
+}</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="js" hidden>
+      <span class="code-label is-good">JavaScript</span>
+      <pre class="code-block"><code>function uniquePaths(m, n) {
+  const dp = Array.from({ length: m }, () =&gt; new Array(n).fill(1));   // top row and left column: 1
+  for (let r = 1; r &lt; m; r++) {
+    for (let c = 1; c &lt; n; c++) {
+      dp[r][c] = dp[r - 1][c] + dp[r][c - 1];   // from above, or from the left
+    }
+  }
+  return dp[m - 1][n - 1];
+}</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="cpp" hidden>
+      <span class="code-label is-good">C++</span>
+      <pre class="code-block"><code>int uniquePaths(int m, int n) {
+    std::vector&lt;std::vector&lt;int&gt;&gt; dp(m, std::vector&lt;int&gt;(n, 1));   // top row and left column: 1
+    for (int r = 1; r &lt; m; r++) {
+        for (int c = 1; c &lt; n; c++) {
+            dp[r][c] = dp[r - 1][c] + dp[r][c - 1];   // from above, or from the left
+        }
+    }
+    return dp[m - 1][n - 1];
+}</code></pre>
+    </div>
+  </div>
+
+  <p>Filling every one of the m×n cells costs O(1) work each, for O(m · n) time and space overall — and since each row only ever reads the row directly above it, this can be compressed to a single 1D array of length n, updated in place, the same space-compression idea from Lesson 26 applied to a second dimension.</p>
+
+  <p>Edit Distance (LeetCode #72) extends this same grid shape to two strings instead of one grid: given words <code class="inline-code">word1</code> and <code class="inline-code">word2</code>, find the minimum number of insertions, deletions, or substitutions to turn one into the other. Build a <code class="inline-code">dp</code> table where <code class="inline-code">dp[i][j]</code> is the edit distance between the first i characters of <code class="inline-code">word1</code> and the first j characters of <code class="inline-code">word2</code>. When the characters at positions i and j match, no edit is needed there: <code class="inline-code">dp[i][j] = dp[i - 1][j - 1]</code>. When they don't match, the answer is 1 plus the best of the three possible edits: <code class="inline-code">dp[i][j] = 1 + min(dp[i-1][j], dp[i][j-1], dp[i-1][j-1])</code> — deleting from word1, inserting into word1, or substituting — each corresponding to moving through the grid from a different neighboring cell. The base cases along row 0 and column 0 are simply the number of insertions or deletions needed to build up from nothing.</p>
+
+  <div class="box why">
+    <span class="box-label">Why it matters here</span>
+    Both problems fill a 2D table where each cell depends only on cells directly above, to the left, or diagonally above-left — the same "look at a small fixed set of neighbors" idea from Unique Paths, just with a three-way minimum instead of a two-way sum. Once a problem's state naturally needs two indices to describe (a position in a grid, or a pair of positions in two different strings), the recurrence almost always reduces to "this cell from a small set of neighboring cells," and the table can be filled in the same row-by-row order every time.
+  </div>
+
+  <h2>Check your recall</h2>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. Why are the entire top row and left column of the Unique Paths table set to 1?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because those cells are never actually reached by the robot.</button>
+      <button class="quiz-choice" data-correct="true">Because there's exactly one way to reach any edge cell: a straight line of moves in one direction.</button>
+      <button class="quiz-choice" data-correct="false">Because 1 is always the correct answer for any grid size.</button>
+      <button class="quiz-choice" data-correct="false">Because the grid always contains obstacles along its border.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>An edge cell can only be reached by moving entirely in one direction, since the other direction would go off the grid.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. In Edit Distance, what happens when the characters at the current positions in both words already match?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">An edit is always still required at that position.</button>
+      <button class="quiz-choice" data-correct="true">No edit is needed there, so the answer equals the diagonal cell's value directly.</button>
+      <button class="quiz-choice" data-correct="false">The entire table must be recomputed from scratch.</button>
+      <button class="quiz-choice" data-correct="false">Both words must be reversed before continuing.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Matching characters carry no cost, so the value simply comes from having already solved the smaller prefix pair.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. What do the three neighboring cells (up, left, diagonal) represent when characters don't match in Edit Distance?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Three completely unrelated subproblems with no connection to the current one.</button>
+      <button class="quiz-choice" data-correct="true">A deletion, an insertion, and a substitution — the three possible single edits.</button>
+      <button class="quiz-choice" data-correct="false">The lengths of the two original words.</button>
+      <button class="quiz-choice" data-correct="false">Three different sorting orders for the words.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Each direction in the table corresponds to one specific type of edit operation.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="two">
+    <p class="quiz-prompt">4. Fill in the blank: 2D DP is used when a problem's state naturally needs ___ indices to describe, rather than just one.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A grid position or a pair of string prefixes are both naturally described by two coordinates.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="compression">
+    <p class="quiz-prompt">5. Fill in the blank: since each row of the Unique Paths table only reads the row directly above it, the table can be space-___ down to a single 1D array.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>This is the same idea introduced in Lesson 26 for 1D DP, applied to a second dimension here.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p><a href="https://cp-algorithms.com/dynamic_programming/intro-to-dp.html">Algorithms for Competitive Programming</a> extends its DP introduction directly into two-dimensional recurrences, including grid-path and string-alignment problems like these.</p>
+
+  <div class="box">
+    <span class="box-label">Practice on LeetCode</span>
+    <a href="https://leetcode.com/problems/unique-paths/">LeetCode #62 — Unique Paths</a> and <a href="https://leetcode.com/problems/edit-distance/">#72 — Edit Distance</a>. Draw the full dp table by hand for a small example of each before writing any code.
+  </div>
+
+  <p class="ask-teacher">Wondering how Unique Paths changes once some grid cells are blocked obstacles the robot can't pass through? Ask your teacher — it's the same table with one extra check per cell. Next: a 2D-shaped recurrence where the second dimension isn't a position at all, but a running capacity.</p>
+
+  <footer class="lesson-footer">STEM+ · Computer Programming 2+ · Lesson 28</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  STEMPlus.mountTabs(document.getElementById('grid-tabs'), 'data-tab', 'data-panel');
+});
+</script>

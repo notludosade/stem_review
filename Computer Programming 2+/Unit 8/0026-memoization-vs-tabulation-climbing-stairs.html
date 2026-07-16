@@ -1,0 +1,203 @@
+<title>Lesson 26: Memoization vs. Tabulation — Climbing Stairs — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<script src="../../assets/interactive.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Computer Programming 2+ · Lesson 26</span>
+  <h1>Memoization vs. Tabulation: Climbing Stairs</h1>
+  <p class="subtitle">Recursion that stops repeating itself, by remembering answers it's already computed — the entire idea behind dynamic programming.</p>
+  <p class="nav-links"><a href="../Unit%207/0025-backtracking-on-grids-word-search.html">← Lesson 25</a> <a href="0027-1d-dp-house-robber-and-maximum-subarray.html">Lesson 27 →</a> <a href="../index.html">Contents</a> <a href="../reference/glossary.html">Glossary →</a></p>
+
+  <p>Problem: climbing a staircase of n steps, taking either 1 or 2 steps at a time, how many distinct ways are there to reach the top? Writing the direct recursion — <code class="inline-code">ways(n) = ways(n - 1) + ways(n - 2)</code>, since the last move was either a 1-step or a 2-step — gives a correct but painfully slow solution: it recomputes <code class="inline-code">ways(5)</code>, say, dozens of times across different branches of the same call tree. <strong>Dynamic programming</strong> is exactly this: recursion with <strong>overlapping subproblems</strong>, solved once and remembered instead of recomputed.</p>
+
+  <div class="box">
+    <span class="box-label">The idea</span>
+    A problem qualifies for DP when it has <strong>overlapping subproblems</strong> (the same smaller inputs get solved repeatedly) and <strong>optimal substructure</strong> (the answer to the whole problem can be built directly from answers to its smaller pieces). Two equivalent ways to exploit this: <strong>memoization</strong> (top-down) keeps the natural recursion but caches each result the first time it's computed; <strong>tabulation</strong> (bottom-up) builds an array of answers iteratively, starting from the base cases and working up to n, with no recursion or call stack at all.
+  </div>
+
+  <div id="stairs-tabs">
+    <div class="fm-tabs">
+      <button class="fm-tab is-active" data-tab="py">Python</button>
+      <button class="fm-tab" data-tab="java">Java</button>
+      <button class="fm-tab" data-tab="js">JavaScript</button>
+      <button class="fm-tab" data-tab="cpp">C++</button>
+    </div>
+    <div class="fm-panel" data-panel="py">
+      <span class="code-label is-good">Python</span>
+      <pre class="code-block"><code># Top-down: memoization
+def climb_stairs_memo(n, cache={}):
+    if n &lt;= 2:
+        return n
+    if n in cache:
+        return cache[n]                 # already solved this subproblem
+    cache[n] = climb_stairs_memo(n - 1, cache) + climb_stairs_memo(n - 2, cache)
+    return cache[n]
+
+# Bottom-up: tabulation
+def climb_stairs_tab(n):
+    if n &lt;= 2:
+        return n
+    dp = [0] * (n + 1)
+    dp[1], dp[2] = 1, 2
+    for i in range(3, n + 1):
+        dp[i] = dp[i - 1] + dp[i - 2]   # build upward from the base cases
+    return dp[n]</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="java" hidden>
+      <span class="code-label is-good">Java</span>
+      <pre class="code-block"><code>// Top-down: memoization
+Map&lt;Integer, Integer&gt; cache = new HashMap&lt;&gt;();
+
+int climbStairsMemo(int n) {
+    if (n &lt;= 2) return n;
+    if (cache.containsKey(n)) return cache.get(n);   // already solved this subproblem
+    int result = climbStairsMemo(n - 1) + climbStairsMemo(n - 2);
+    cache.put(n, result);
+    return result;
+}
+
+// Bottom-up: tabulation
+int climbStairsTab(int n) {
+    if (n &lt;= 2) return n;
+    int[] dp = new int[n + 1];
+    dp[1] = 1;
+    dp[2] = 2;
+    for (int i = 3; i &lt;= n; i++) {
+        dp[i] = dp[i - 1] + dp[i - 2];   // build upward from the base cases
+    }
+    return dp[n];
+}</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="js" hidden>
+      <span class="code-label is-good">JavaScript</span>
+      <pre class="code-block"><code>// Top-down: memoization
+function climbStairsMemo(n, cache = new Map()) {
+  if (n &lt;= 2) return n;
+  if (cache.has(n)) return cache.get(n);   // already solved this subproblem
+  const result = climbStairsMemo(n - 1, cache) + climbStairsMemo(n - 2, cache);
+  cache.set(n, result);
+  return result;
+}
+
+// Bottom-up: tabulation
+function climbStairsTab(n) {
+  if (n &lt;= 2) return n;
+  const dp = new Array(n + 1).fill(0);
+  dp[1] = 1;
+  dp[2] = 2;
+  for (let i = 3; i &lt;= n; i++) {
+    dp[i] = dp[i - 1] + dp[i - 2];   // build upward from the base cases
+  }
+  return dp[n];
+}</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="cpp" hidden>
+      <span class="code-label is-good">C++</span>
+      <pre class="code-block"><code>// Top-down: memoization
+std::unordered_map&lt;int, int&gt; cache;
+
+int climbStairsMemo(int n) {
+    if (n &lt;= 2) return n;
+    if (cache.count(n)) return cache[n];   // already solved this subproblem
+    int result = climbStairsMemo(n - 1) + climbStairsMemo(n - 2);
+    cache[n] = result;
+    return result;
+}
+
+// Bottom-up: tabulation
+int climbStairsTab(int n) {
+    if (n &lt;= 2) return n;
+    std::vector&lt;int&gt; dp(n + 1);
+    dp[1] = 1;
+    dp[2] = 2;
+    for (int i = 3; i &lt;= n; i++) {
+        dp[i] = dp[i - 1] + dp[i - 2];   // build upward from the base cases
+    }
+    return dp[n];
+}</code></pre>
+    </div>
+  </div>
+
+  <p>Both versions run in O(n) time and O(n) space — a dramatic improvement over the uncached recursion's O(2ⁿ), since each of the n subproblems is now solved exactly once instead of exponentially many times. Tabulation here can go further: since <code class="inline-code">dp[i]</code> only ever depends on the previous two values, the entire array can be replaced with two variables, dropping space to O(1) — an optimization worth knowing exists, though the full array is usually written first for clarity.</p>
+
+  <div class="box why">
+    <span class="box-label">Why it matters here</span>
+    Climbing Stairs is secretly the Fibonacci sequence, and Fibonacci is the smallest possible example of what every DP problem in this unit will look like: a recurrence relating the answer for n to answers for smaller values, with those smaller answers reused often enough that caching them changes the runtime class entirely. Recognizing "this recursion keeps solving the same smaller input" is the signal to reach for memoization or tabulation — the same signal that will apply to every remaining lesson in this unit.
+  </div>
+
+  <h2>Check your recall</h2>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What makes a problem a good candidate for dynamic programming?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">It can be solved using only a single loop with no recursion at all.</button>
+      <button class="quiz-choice" data-correct="true">It has overlapping subproblems and optimal substructure.</button>
+      <button class="quiz-choice" data-correct="false">Its input is always already sorted.</button>
+      <button class="quiz-choice" data-correct="false">It never requires a base case to be defined.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Overlapping subproblems means caching pays off; optimal substructure means the full answer can be built from smaller ones.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. What is the key difference between memoization and tabulation?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Memoization always produces a wrong answer for large inputs.</button>
+      <button class="quiz-choice" data-correct="true">Memoization caches results within the natural top-down recursion; tabulation builds results bottom-up iteratively.</button>
+      <button class="quiz-choice" data-correct="false">Tabulation cannot be used for any counting problem.</button>
+      <button class="quiz-choice" data-correct="false">Memoization requires sorting the input first.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Both compute the same answers, just in the opposite order and with different mechanisms for reuse.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why is the uncached recursive version of Climbing Stairs so much slower?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Recursion is always slower than any loop, regardless of the problem.</button>
+      <button class="quiz-choice" data-correct="true">The same smaller subproblems get recomputed from scratch many times across different branches.</button>
+      <button class="quiz-choice" data-correct="false">It uses more memory than any iterative solution ever could.</button>
+      <button class="quiz-choice" data-correct="false">It cannot correctly compute the answer for large values of n.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Without caching, the call tree branches into roughly 2ⁿ calls, most of them solving inputs already solved elsewhere.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="overlapping">
+    <p class="quiz-prompt">4. Fill in the blank: subproblems that get solved more than once across a recursion's call tree are called ___ subproblems.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>This is one of the two properties (along with optimal substructure) that make a problem suitable for DP.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="tabulation">
+    <p class="quiz-prompt">5. Fill in the blank: building an array of answers iteratively from the base cases upward, with no recursion, is called ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>This is the bottom-up counterpart to top-down memoization.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p><a href="https://cp-algorithms.com/dynamic_programming/intro-to-dp.html">Algorithms for Competitive Programming</a>'s introduction to DP covers memoization and tabulation side by side, including how to recognize a recurrence in an unfamiliar problem.</p>
+
+  <div class="box">
+    <span class="box-label">Practice on LeetCode</span>
+    <a href="https://leetcode.com/problems/climbing-stairs/">LeetCode #70 — Climbing Stairs</a>. Implement both the memoized and tabulated versions, then the O(1)-space variant, before moving on.
+  </div>
+
+  <p class="ask-teacher">Wondering how to reduce the tabulated array down to just two variables, given that only the previous two values are ever needed? Ask your teacher — it's a small but common DP optimization called space compression. Next: applying this same recurrence idea to problems where the choice at each step isn't just "1 step or 2."</p>
+
+  <footer class="lesson-footer">STEM+ · Computer Programming 2+ · Lesson 26</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  STEMPlus.mountTabs(document.getElementById('stairs-tabs'), 'data-tab', 'data-panel');
+});
+</script>

@@ -1,0 +1,142 @@
+<title>Lesson 2: Big-O in Practice — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Computer Programming 2+ · Lesson 2</span>
+  <h1>Big-O in Practice: Time and Space Together</h1>
+  <p class="subtitle">Computer Programming 2 introduced Big-O in isolation. Interviews and contests both expect you to read it off unfamiliar code on sight — and to weigh it against memory, not just speed.</p>
+  <p class="nav-links"><a href="0001-brute-force-to-optimal-two-sum.html">← Lesson 1</a> <a href="0003-a-framework-for-new-problems.html">Lesson 3 →</a> <a href="../index.html">Contents</a> <a href="../reference/glossary.html">Glossary →</a></p>
+
+  <p>Reading complexity by inspection comes down to a small number of rules, applied consistently.</p>
+
+  <div class="box">
+    <span class="box-label">Rule 1 — sequential loops add, nested loops multiply</span>
+    Two separate loops over <code class="inline-code">n</code> items, one after the other, cost O(n) + O(n) = O(n). A loop <em>inside</em> another loop, each running <code class="inline-code">n</code> times, costs O(n) × O(n) = O(n²).
+  </div>
+
+  <div class="box">
+    <span class="box-label">Rule 2 — only the fastest-growing term survives</span>
+    O(n² + n) is written as O(n²) — as n grows large, the n² term dominates so completely that the n term becomes irrelevant. Constants drop too: O(2n) is just O(n).
+  </div>
+
+  <p>Recursive calls follow the same logic, just less visibly. A recursive function that makes <strong>one</strong> call per level, doing O(1) work besides the call, costs O(depth) — same as a loop. But naive recursive Fibonacci (from CP2's Unit 4) makes <strong>two</strong> calls per level, and those branches don't share work: that's roughly O(2ⁿ), which is why memoizing it mattered.</p>
+
+  <p>Space complexity uses the identical rules, but counts <em>memory</em> instead of <em>steps</em> — including memory a recursive call stack quietly uses. A recursive function with no extra data structures can still be O(n) in space, because each pending call sits on the call stack until it returns.</p>
+
+  <div id="space-example">
+    <div class="fm-tabs">
+      <button class="fm-tab is-active" data-tab="py">Python</button>
+      <button class="fm-tab" data-tab="java">Java</button>
+      <button class="fm-tab" data-tab="js">JavaScript</button>
+      <button class="fm-tab" data-tab="cpp">C++</button>
+    </div>
+    <div class="fm-panel" data-panel="py">
+      <span class="code-label">Python · O(n) time, O(n) space</span>
+      <pre class="code-block"><code>def sum_to(n):
+    if n == 0:
+        return 0
+    return n + sum_to(n - 1)  # n pending calls sit on the stack</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="java" hidden>
+      <span class="code-label">Java · O(n) time, O(n) space</span>
+      <pre class="code-block"><code>int sumTo(int n) {
+    if (n == 0) return 0;
+    return n + sumTo(n - 1); // n pending calls sit on the stack
+}</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="js" hidden>
+      <span class="code-label">JavaScript · O(n) time, O(n) space</span>
+      <pre class="code-block"><code>function sumTo(n) {
+  if (n === 0) return 0;
+  return n + sumTo(n - 1); // n pending calls sit on the stack
+}</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="cpp" hidden>
+      <span class="code-label">C++ · O(n) time, O(n) space</span>
+      <pre class="code-block"><code>int sumTo(int n) {
+    if (n == 0) return 0;
+    return n + sumTo(n - 1); // n pending calls sit on the stack
+}</code></pre>
+    </div>
+  </div>
+
+  <p>Rewriting the same function as a loop keeps O(n) time but drops space to O(1) — no call stack growth, just one running total. That's the space-time relationship this whole course leans on constantly: <strong>the same problem often has more than one correct complexity profile, and the right one depends on which resource is actually scarce.</strong> Lesson 1's hash map is the mirror image — it spent O(n) space to buy back time.</p>
+
+  <div class="box why">
+    <span class="box-label">The competitive-programming reflex</span>
+    Contest problems publish constraints for exactly this reason: if n ≤ 20, an O(2ⁿ) brute force is expected to pass. If n ≤ 10⁵, only roughly O(n log n) or better will finish in time. If n ≤ 10⁹, even O(n) is too slow — the intended solution is O(log n) or O(1). Reading the constraint line first, before writing any code, tells you what complexity you're being asked to hit.
+  </div>
+
+  <p>One more idea worth knowing by name: <strong>amortized</strong> complexity. Appending to a dynamic array (Python's <code class="inline-code">list</code>, Java's <code class="inline-code">ArrayList</code>, C++'s <code class="inline-code">vector</code>) is usually O(1), but occasionally the array is full and has to be resized and copied — O(n) for that one call. Averaged over many appends, the cost still works out to O(1) per append; that average is what "amortized O(1)" means, and it's why these structures are treated as constant-time in practice.</p>
+
+  <h2>Check your recall</h2>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What is the combined time complexity of two separate, sequential loops over n items each?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">O(n²), because there are two loops.</button>
+      <button class="quiz-choice" data-correct="true">O(n), because sequential costs add rather than multiply.</button>
+      <button class="quiz-choice" data-correct="false">O(1), because loops don't affect complexity.</button>
+      <button class="quiz-choice" data-correct="false">O(log n), because the loops run independently.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>O(n) + O(n) simplifies to O(n) — only nested loops multiply.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why can a recursive function with no extra arrays still use O(n) space?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Recursive functions never use extra space.</button>
+      <button class="quiz-choice" data-correct="true">Each pending recursive call sits on the call stack until it returns.</button>
+      <button class="quiz-choice" data-correct="false">Recursion always duplicates the entire input array.</button>
+      <button class="quiz-choice" data-correct="false">Space complexity only applies to loops, not recursion.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The call stack itself is memory — n pending calls means O(n) stack space, even with no other data structure in sight.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. If a contest problem states n can be as large as 10⁹, what does that constraint signal about the required time complexity?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Any complexity works, since constraints don't matter for timing.</button>
+      <button class="quiz-choice" data-correct="false">An O(n²) solution is expected to pass comfortably.</button>
+      <button class="quiz-choice" data-correct="true">Even O(n) is likely too slow — something like O(log n) or O(1) is expected.</button>
+      <button class="quiz-choice" data-correct="false">Only recursive solutions can possibly pass.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>At n = 10⁹, even a single O(n) pass can be too slow within typical time limits — the constraint is a direct hint about intended complexity.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="amortized">
+    <p class="quiz-prompt">4. Fill in the blank: the technique of averaging an occasional expensive operation (like a dynamic array resize) over many cheap ones is called ___ analysis.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>It's why dynamic-array append is treated as O(1) even though any single call might occasionally be O(n).</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="constraints">
+    <p class="quiz-prompt">5. Fill in the blank: the input-size limits stated in a problem, which hint at the time complexity a correct solution needs, are called the problem's ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Reading these first, before writing code, is a core competitive-programming habit.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>The <a href="https://www.bigocheatsheet.com/">Big-O Cheat Sheet</a> is a fast, single-page cross-check for the time and space complexity of common structures and sorts — worth bookmarking for the rest of this course.</p>
+
+  <p class="ask-teacher">Curious why some languages' dynamic arrays double in size on resize instead of growing by a fixed amount? Ask your teacher — the choice is exactly what keeps the resize amortized. Next: turning all of this into a repeatable process for approaching a problem you've never seen before.</p>
+
+  <footer class="lesson-footer">STEM+ · Computer Programming 2+ · Lesson 2</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  STEMPlus.mountTabs(document.getElementById('space-example'), 'data-tab', 'data-panel');
+});
+</script>

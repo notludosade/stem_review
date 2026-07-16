@@ -1,0 +1,224 @@
+<title>Lesson 1: From Brute Force to Optimal — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<script src="../../assets/interactive.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Computer Programming 2+ · Lesson 1</span>
+  <h1>From Brute Force to Optimal</h1>
+  <p class="subtitle">Computer Programming 2 gave you the data structures. This course is about the habit of reaching for the right one under pressure — starting with the single most-cited interview problem there is.</p>
+  <p class="nav-links"><a href="0002-big-o-in-practice-time-and-space.html">Lesson 2 →</a> <a href="../index.html">Contents</a> <a href="../reference/glossary.html">Glossary →</a></p>
+
+  <p>This course assumes Computer Programming 1 and Computer Programming 2 are both already complete — it builds directly on the data structures (stacks, queues, linked lists, hash maps), recursion, and Big-O basics from CP2's Unit 3 and Unit 5, and doesn't re-teach them. Two things are new here. First, every pattern lesson closes with a <strong>Practice on LeetCode</strong> section, citing real, named problems from the external site — a deliberate break from earlier STEM+ courses, since the whole point of this one is performance on that platform and in timed interviews and contests. Second, the goal throughout isn't memorizing solutions — it's recognizing which <strong>pattern</strong> a new, unseen problem is asking for.</p>
+
+  <p>Start with <strong>Two Sum</strong>: given an array of integers and a target, return the indices of the two numbers that add up to the target. Assume exactly one valid answer exists.</p>
+
+  <div class="box">
+    <span class="box-label">Problem</span>
+    Given <code class="inline-code">nums = [2, 7, 11, 15]</code> and <code class="inline-code">target = 9</code>, return <code class="inline-code">[0, 1]</code>, because <code class="inline-code">nums[0] + nums[1] == 9</code>.
+  </div>
+
+  <p>The obvious approach: for every number, check every <em>other</em> number, looking for a pair that sums to the target. This is <strong>brute force</strong> — correct, and the natural first thing to reach for, but worth timing precisely before assuming it's good enough.</p>
+
+  <div id="twosum-brute-tabs">
+    <div class="fm-tabs">
+      <button class="fm-tab is-active" data-tab="py">Python</button>
+      <button class="fm-tab" data-tab="java">Java</button>
+      <button class="fm-tab" data-tab="js">JavaScript</button>
+      <button class="fm-tab" data-tab="cpp">C++</button>
+    </div>
+    <div class="fm-panel" data-panel="py">
+      <span class="code-label is-bad">Python · Brute force</span>
+      <pre class="code-block"><code>def two_sum(nums, target):
+    for i in range(len(nums)):
+        for j in range(i + 1, len(nums)):
+            if nums[i] + nums[j] == target:
+                return [i, j]</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="java" hidden>
+      <span class="code-label is-bad">Java · Brute force</span>
+      <pre class="code-block"><code>int[] twoSum(int[] nums, int target) {
+    for (int i = 0; i &lt; nums.length; i++) {
+        for (int j = i + 1; j &lt; nums.length; j++) {
+            if (nums[i] + nums[j] == target) {
+                return new int[] { i, j };
+            }
+        }
+    }
+    return null;
+}</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="js" hidden>
+      <span class="code-label is-bad">JavaScript · Brute force</span>
+      <pre class="code-block"><code>function twoSum(nums, target) {
+  for (let i = 0; i &lt; nums.length; i++) {
+    for (let j = i + 1; j &lt; nums.length; j++) {
+      if (nums[i] + nums[j] === target) {
+        return [i, j];
+      }
+    }
+  }
+}</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="cpp" hidden>
+      <span class="code-label is-bad">C++ · Brute force</span>
+      <pre class="code-block"><code>std::vector&lt;int&gt; twoSum(std::vector&lt;int&gt;&amp; nums, int target) {
+    for (int i = 0; i &lt; nums.size(); i++) {
+        for (int j = i + 1; j &lt; nums.size(); j++) {
+            if (nums[i] + nums[j] == target) {
+                return {i, j};
+            }
+        }
+    }
+    return {};
+}</code></pre>
+    </div>
+  </div>
+
+  <p>Two nested loops over <code class="inline-code">n</code> elements means roughly <code class="inline-code">n²</code> comparisons in the worst case — fine for a handful of numbers, but with 100,000 numbers that's on the order of 10 billion checks. That's the <strong>bottleneck</strong>: repeatedly re-scanning the array to ask "have I seen the number I need?"</p>
+
+  <p>A hash map answers that exact question in roughly one step. Instead of searching, walk the array once, and for each number ask "have I already stored the complement I need?" — checking and inserting as you go.</p>
+
+  <div id="twosum-opt-tabs">
+    <div class="fm-tabs">
+      <button class="fm-tab is-active" data-tab="py">Python</button>
+      <button class="fm-tab" data-tab="java">Java</button>
+      <button class="fm-tab" data-tab="js">JavaScript</button>
+      <button class="fm-tab" data-tab="cpp">C++</button>
+    </div>
+    <div class="fm-panel" data-panel="py">
+      <span class="code-label is-good">Python · Optimized</span>
+      <pre class="code-block"><code>def two_sum(nums, target):
+    seen = {}  # value -> index
+    for i, n in enumerate(nums):
+        complement = target - n
+        if complement in seen:
+            return [seen[complement], i]
+        seen[n] = i</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="java" hidden>
+      <span class="code-label is-good">Java · Optimized</span>
+      <pre class="code-block"><code>int[] twoSum(int[] nums, int target) {
+    Map&lt;Integer, Integer&gt; seen = new HashMap&lt;&gt;();
+    for (int i = 0; i &lt; nums.length; i++) {
+        int complement = target - nums[i];
+        if (seen.containsKey(complement)) {
+            return new int[] { seen.get(complement), i };
+        }
+        seen.put(nums[i], i);
+    }
+    return null;
+}</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="js" hidden>
+      <span class="code-label is-good">JavaScript · Optimized</span>
+      <pre class="code-block"><code>function twoSum(nums, target) {
+  const seen = new Map();
+  for (let i = 0; i &lt; nums.length; i++) {
+    const complement = target - nums[i];
+    if (seen.has(complement)) {
+      return [seen.get(complement), i];
+    }
+    seen.set(nums[i], i);
+  }
+}</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="cpp" hidden>
+      <span class="code-label is-good">C++ · Optimized</span>
+      <pre class="code-block"><code>std::vector&lt;int&gt; twoSum(std::vector&lt;int&gt;&amp; nums, int target) {
+    std::unordered_map&lt;int, int&gt; seen;
+    for (int i = 0; i &lt; nums.size(); i++) {
+        int complement = target - nums[i];
+        if (seen.count(complement)) {
+            return {seen[complement], i};
+        }
+        seen[nums[i]] = i;
+    }
+    return {};
+}</code></pre>
+    </div>
+  </div>
+
+  <p>One pass, one hash map — average O(n) time instead of O(n²), at the cost of O(n) extra space to store what's been seen. That trade is the recurring theme of this entire course: <strong>optimal usually means spending memory to avoid repeated work.</strong></p>
+
+  <div class="box why">
+    <span class="box-label">Why it matters here</span>
+    Whether the goal is a technical interview or a timed contest, nobody wants to watch you write the nested loop and stop there. The move that actually gets noticed — by an interviewer or a judge's time limit — is naming the bottleneck out loud and reaching for the structure that removes it. Two Sum is the smallest possible example of a habit this whole course is built to install.
+  </div>
+
+  <h2>Check your recall</h2>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What is the time complexity of the brute-force Two Sum solution?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">O(n), because it only loops once.</button>
+      <button class="quiz-choice" data-correct="true">O(n²), because of the nested loop over pairs.</button>
+      <button class="quiz-choice" data-correct="false">O(log n), because it searches by halves.</button>
+      <button class="quiz-choice" data-correct="false">O(1), because it only checks one pair.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Every element is compared against every other element, giving roughly n × n comparisons in the worst case.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. What question does the hash map answer in roughly one step, replacing repeated scanning?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Is this array already sorted?</button>
+      <button class="quiz-choice" data-correct="true">Have I already seen the complement this number needs?</button>
+      <button class="quiz-choice" data-correct="false">What is the largest number in the array?</button>
+      <button class="quiz-choice" data-correct="false">How many total numbers are in the array?</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Storing each value as it's seen turns "search the rest of the array" into "look it up."</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. What does the optimized solution trade to bring the time complexity down?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Correctness — it only works on sorted arrays.</button>
+      <button class="quiz-choice" data-correct="false">Readability — it requires far more lines of code.</button>
+      <button class="quiz-choice" data-correct="true">Space — it stores extra data in a hash map.</button>
+      <button class="quiz-choice" data-correct="false">Nothing — there is no trade-off at all.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The hash map costs O(n) extra memory, in exchange for average O(n) instead of O(n²) time.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="bottleneck">
+    <p class="quiz-prompt">4. Fill in the blank: the repeated, avoidable work a brute-force solution does — the thing an optimization removes — is called the ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Naming the bottleneck precisely is what points you toward the right structure to remove it.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="complement">
+    <p class="quiz-prompt">5. Fill in the blank: for a number n and a target t, the value t − n that Two Sum looks up in the hash map is called the ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>It's the value that would complete the pair, which is exactly what gets checked against "seen" values.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p><a href="https://neetcode.io/roadmap">NeetCode's Roadmap</a> places Two Sum first for exactly this reason — it's the smallest complete example of the brute-force-to-hash-map optimization that recurs across dozens of later, harder problems.</p>
+
+  <div class="box">
+    <span class="box-label">Practice on LeetCode</span>
+    <a href="https://leetcode.com/problems/two-sum/">LeetCode #1 — Two Sum</a>. Solve it unassisted with the hash-map approach above before moving on — Unit 2 extends this same "have I seen what I need?" instinct into two-pointer and sliding-window form.
+  </div>
+
+  <p class="ask-teacher">Wondering why the hash map has to store values <em>before</em> checking them, not after? Ask your teacher — the order matters for one specific edge case. Next: making the time/space trade-off precise enough to reason about by inspection, not just by feel.</p>
+
+  <footer class="lesson-footer">STEM+ · Computer Programming 2+ · Lesson 1</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  STEMPlus.mountTabs(document.getElementById('twosum-brute-tabs'), 'data-tab', 'data-panel');
+  STEMPlus.mountTabs(document.getElementById('twosum-opt-tabs'), 'data-tab', 'data-panel');
+});
+</script>

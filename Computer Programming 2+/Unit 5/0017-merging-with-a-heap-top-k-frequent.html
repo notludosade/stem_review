@@ -1,0 +1,209 @@
+<title>Lesson 17: Merging with a Heap — Top K Frequent Elements — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<script src="../../assets/interactive.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Computer Programming 2+ · Lesson 17</span>
+  <h1>Merging with a Heap: Top K Frequent Elements</h1>
+  <p class="subtitle">Closing this unit by merging two separate techniques — CP2's hash map and Lesson 16's bounded heap — into one solution.</p>
+  <p class="nav-links"><a href="0016-kth-largest-and-smallest-pattern.html">← Lesson 16</a> <a href="../index.html">Contents</a> <a href="../reference/glossary.html">Glossary →</a></p>
+
+  <p>Problem: given an array of integers, return the k most frequent values. This isn't a new pattern so much as two already-known ones merged together: count each value's frequency with a hash map (Computer Programming 2's Unit 3), then apply Lesson 16's exact bounded-heap trick — except keyed by frequency instead of by raw value.</p>
+
+  <div class="box">
+    <span class="box-label">The idea</span>
+    Build a hash map from value to frequency in one O(n) pass. Then maintain a min-heap capped at size k, holding (value, frequency) pairs ordered by frequency — pushing every pair in, and popping the lowest-frequency pair whenever the heap exceeds size k. What remains is exactly the k most frequent values.
+  </div>
+
+  <div id="topk-tabs">
+    <div class="fm-tabs">
+      <button class="fm-tab is-active" data-tab="py">Python</button>
+      <button class="fm-tab" data-tab="java">Java</button>
+      <button class="fm-tab" data-tab="js">JavaScript</button>
+      <button class="fm-tab" data-tab="cpp">C++</button>
+    </div>
+    <div class="fm-panel" data-panel="py">
+      <span class="code-label is-good">Python</span>
+      <pre class="code-block"><code>import heapq
+from collections import Counter
+
+def top_k_frequent(nums, k):
+    counts = Counter(nums)
+    heap = []
+    for num, freq in counts.items():
+        heapq.heappush(heap, (freq, num))   # ordered by frequency first
+        if len(heap) &gt; k:
+            heapq.heappop(heap)               # discard the lowest-frequency pair
+    return [num for freq, num in heap]</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="java" hidden>
+      <span class="code-label is-good">Java</span>
+      <pre class="code-block"><code>List&lt;Integer&gt; topKFrequent(int[] nums, int k) {
+    Map&lt;Integer, Integer&gt; counts = new HashMap&lt;&gt;();
+    for (int num : nums) counts.merge(num, 1, Integer::sum);
+
+    PriorityQueue&lt;int[]&gt; heap = new PriorityQueue&lt;&gt;((a, b) -&gt; a[1] - b[1]);   // min-heap by frequency
+    for (Map.Entry&lt;Integer, Integer&gt; entry : counts.entrySet()) {
+        heap.offer(new int[] { entry.getKey(), entry.getValue() });
+        if (heap.size() &gt; k) heap.poll();   // discard the lowest-frequency pair
+    }
+    List&lt;Integer&gt; result = new ArrayList&lt;&gt;();
+    for (int[] pair : heap) result.add(pair[0]);
+    return result;
+}</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="js" hidden>
+      <span class="code-label is-good">JavaScript</span>
+      <pre class="code-block"><code>// Lesson 15's MinHeap, extended with a comparator so it can be keyed by frequency
+class MinHeap {
+  constructor(compare) { this.data = []; this.compare = compare; }
+  push(val) {
+    this.data.push(val);
+    let i = this.data.length - 1;
+    while (i &gt; 0) {
+      const parent = Math.floor((i - 1) / 2);
+      if (this.compare(this.data[parent], this.data[i]) &lt;= 0) break;
+      [this.data[parent], this.data[i]] = [this.data[i], this.data[parent]];
+      i = parent;
+    }
+  }
+  pop() {
+    const top = this.data[0];
+    const last = this.data.pop();
+    if (this.data.length &gt; 0) {
+      this.data[0] = last;
+      let i = 0;
+      while (true) {
+        const l = 2 * i + 1, r = 2 * i + 2;
+        let smallest = i;
+        if (l &lt; this.data.length &amp;&amp; this.compare(this.data[l], this.data[smallest]) &lt; 0) smallest = l;
+        if (r &lt; this.data.length &amp;&amp; this.compare(this.data[r], this.data[smallest]) &lt; 0) smallest = r;
+        if (smallest === i) break;
+        [this.data[i], this.data[smallest]] = [this.data[smallest], this.data[i]];
+        i = smallest;
+      }
+    }
+    return top;
+  }
+}
+
+function topKFrequent(nums, k) {
+  const counts = new Map();
+  for (const num of nums) counts.set(num, (counts.get(num) || 0) + 1);
+
+  const heap = new MinHeap((a, b) =&gt; a[1] - b[1]);   // compare by frequency
+  for (const pair of counts) {
+    heap.push(pair);
+    if (heap.data.length &gt; k) heap.pop();
+  }
+  return heap.data.map(([num]) =&gt; num);
+}</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="cpp" hidden>
+      <span class="code-label is-good">C++</span>
+      <pre class="code-block"><code>std::vector&lt;int&gt; topKFrequent(std::vector&lt;int&gt;&amp; nums, int k) {
+    std::unordered_map&lt;int, int&gt; counts;
+    for (int num : nums) counts[num]++;
+
+    auto compare = [](const std::pair&lt;int,int&gt;&amp; a, const std::pair&lt;int,int&gt;&amp; b) {
+        return a.second &gt; b.second;   // min-heap by frequency
+    };
+    std::priority_queue&lt;std::pair&lt;int,int&gt;, std::vector&lt;std::pair&lt;int,int&gt;&gt;, decltype(compare)&gt; heap(compare);
+
+    for (const auto&amp; entry : counts) {
+        heap.push(entry);
+        if (heap.size() &gt; k) heap.pop();   // discard the lowest-frequency pair
+    }
+    std::vector&lt;int&gt; result;
+    while (!heap.empty()) {
+        result.push_back(heap.top().first);
+        heap.pop();
+    }
+    return result;
+}</code></pre>
+    </div>
+  </div>
+
+  <p>Counting takes O(n). With <code class="inline-code">u</code> unique values, maintaining the bounded heap costs O(u log k), for a total of O(n + u log k) — and since <code class="inline-code">u ≤ n</code>, this is never worse than O(n log k). A completely different approach, bucket sort by frequency, reaches O(n) overall by exploiting the fact that frequency can never exceed the array's length — worth knowing exists, though the heap approach here generalizes to far more problems than this one specific trick does.</p>
+
+  <div class="box why">
+    <span class="box-label">Why it matters here</span>
+    Almost no real interview or contest problem arrives as a single clean pattern — it's usually two or three earlier ideas, applied together, in a shape not seen exactly before. This lesson deliberately closes Unit 5 on that note: the hash map wasn't reinvented, and the bounded heap wasn't reinvented — recognizing where each one still applies, and combining them, is the actual skill being built across this entire course.
+  </div>
+
+  <h2>Check your recall</h2>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What two previously learned techniques does this lesson's solution combine?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Binary search and a sliding window.</button>
+      <button class="quiz-choice" data-correct="true">A hash map for counting frequencies, and Lesson 16's bounded min-heap.</button>
+      <button class="quiz-choice" data-correct="false">A binary search tree and depth-first traversal.</button>
+      <button class="quiz-choice" data-correct="false">Two pointers and recursion.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Counting frequencies is a plain hash map problem; keeping only the top k by that count is exactly Lesson 16's pattern, keyed differently.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. In this problem, what is the heap ordered by, instead of the raw value itself?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">The value's position in the original array.</button>
+      <button class="quiz-choice" data-correct="true">Each value's frequency of occurrence.</button>
+      <button class="quiz-choice" data-correct="false">The alphabetical order of the value as a string.</button>
+      <button class="quiz-choice" data-correct="false">Whether the value is even or odd.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The heap tracks which values occur most often, not which values are numerically largest.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. What is the overall time complexity of the hash map plus bounded heap approach?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">O(n²), since every pair of elements must be compared for frequency.</button>
+      <button class="quiz-choice" data-correct="true">O(n + u log k), where u is the number of unique values, never worse than O(n log k).</button>
+      <button class="quiz-choice" data-correct="false">O(k), independent of the array's size entirely.</button>
+      <button class="quiz-choice" data-correct="false">O(log n), since only the heap operations matter.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Counting costs O(n); maintaining the heap costs O(log k) per unique value, of which there are at most n.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="frequency">
+    <p class="quiz-prompt">4. Fill in the blank: in this lesson's heap, pairs are ordered by ___ rather than by the raw value.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>This is the one change from Lesson 16's kth-largest pattern — everything else about the bounded-heap trick stays the same.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="bucket">
+    <p class="quiz-prompt">5. Fill in the blank: an alternative O(n) approach exploits the fact that frequency is bounded by array length, using ___ sort.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>This groups values into buckets indexed by their frequency count, avoiding the heap entirely.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p><a href="https://leetcode.com/explore/">LeetCode's own Explore pattern tracks</a> group top-k-frequent problems under both "heap" and "hash table," which is itself the point — this problem sits at the intersection of two patterns, not squarely inside just one.</p>
+
+  <div class="box">
+    <span class="box-label">Practice on LeetCode</span>
+    <a href="https://leetcode.com/problems/top-k-frequent-elements/">LeetCode #347 — Top K Frequent Elements</a>. That closes Unit 5 — implement the hash map plus bounded heap version from scratch before looking up bucket sort.
+  </div>
+
+  <p class="ask-teacher">Wondering how bucket sort by frequency actually works, given that frequency counts aren't sortable values in the usual sense? Ask your teacher — it's a clean O(n) technique once the indexing trick clicks. That closes Unit 5: Heaps &amp; Priority Queues. Next: graphs, and the traversal ideas from trees generalized to structures that aren't trees at all.</p>
+
+  <footer class="lesson-footer">STEM+ · Computer Programming 2+ · Lesson 17</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  STEMPlus.mountTabs(document.getElementById('topk-tabs'), 'data-tab', 'data-panel');
+});
+</script>

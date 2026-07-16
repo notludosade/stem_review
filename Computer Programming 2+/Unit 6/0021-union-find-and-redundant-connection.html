@@ -1,0 +1,214 @@
+<title>Lesson 21: Union-Find &amp; Redundant Connection — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<script src="../../assets/interactive.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Computer Programming 2+ · Lesson 21</span>
+  <h1>Union-Find &amp; Redundant Connection</h1>
+  <p class="subtitle">Some connectivity questions don't need a traversal at all — just a structure that answers "are these two already connected?" in near constant time.</p>
+  <p class="nav-links"><a href="0020-topological-sort-and-course-scheduling.html">← Lesson 20</a> <a href="0022-dijkstras-algorithm-and-network-delay-time.html">Lesson 22 →</a> <a href="../index.html">Contents</a> <a href="../reference/glossary.html">Glossary →</a></p>
+
+  <p>Problem: a graph started as a tree (n nodes, n − 1 edges, no cycles) and one extra edge was added, creating exactly one cycle. Given the edges in the order they were added, find the one edge that — if removed — restores the tree. Re-running DFS from scratch after every single edge would work, but it's wasteful. <strong>Union-Find</strong> (also called Disjoint Set Union) answers "are these two nodes already connected?" without any traversal at all.</p>
+
+  <div class="box">
+    <span class="box-label">The idea</span>
+    Every node starts as its own separate group, tracked by a <code class="inline-code">parent</code> array where each node initially points to itself. <strong>find(x)</strong> follows parent pointers up to the group's root. <strong>union(x, y)</strong> finds both roots and links one under the other. Process edges one at a time: if <code class="inline-code">union</code> ever discovers both endpoints already share a root, that edge connects two nodes already connected — it's the redundant one.
+  </div>
+
+  <div id="uf-tabs">
+    <div class="fm-tabs">
+      <button class="fm-tab is-active" data-tab="py">Python</button>
+      <button class="fm-tab" data-tab="java">Java</button>
+      <button class="fm-tab" data-tab="js">JavaScript</button>
+      <button class="fm-tab" data-tab="cpp">C++</button>
+    </div>
+    <div class="fm-panel" data-panel="py">
+      <span class="code-label is-good">Python</span>
+      <pre class="code-block"><code>def find_redundant_connection(edges):
+    parent = list(range(len(edges) + 1))
+
+    def find(x):
+        while parent[x] != x:
+            parent[x] = parent[parent[x]]   # path compression: shorten the chain
+            x = parent[x]
+        return x
+
+    def union(x, y):
+        root_x, root_y = find(x), find(y)
+        if root_x == root_y:
+            return False        # already connected: this edge creates the cycle
+        parent[root_x] = root_y
+        return True
+
+    for u, v in edges:
+        if not union(u, v):
+            return [u, v]</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="java" hidden>
+      <span class="code-label is-good">Java</span>
+      <pre class="code-block"><code>int[] parent;
+
+int find(int x) {
+    while (parent[x] != x) {
+        parent[x] = parent[parent[x]];   // path compression: shorten the chain
+        x = parent[x];
+    }
+    return x;
+}
+
+boolean union(int x, int y) {
+    int rootX = find(x), rootY = find(y);
+    if (rootX == rootY) return false;    // already connected: this edge creates the cycle
+    parent[rootX] = rootY;
+    return true;
+}
+
+int[] findRedundantConnection(int[][] edges) {
+    parent = new int[edges.length + 1];
+    for (int i = 0; i &lt; parent.length; i++) parent[i] = i;
+
+    for (int[] edge : edges) {
+        if (!union(edge[0], edge[1])) return edge;
+    }
+    return new int[0];
+}</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="js" hidden>
+      <span class="code-label is-good">JavaScript</span>
+      <pre class="code-block"><code>function findRedundantConnection(edges) {
+  const parent = Array.from({ length: edges.length + 1 }, (_, i) =&gt; i);
+
+  function find(x) {
+    while (parent[x] !== x) {
+      parent[x] = parent[parent[x]];   // path compression: shorten the chain
+      x = parent[x];
+    }
+    return x;
+  }
+
+  function union(x, y) {
+    const rootX = find(x), rootY = find(y);
+    if (rootX === rootY) return false;   // already connected: this edge creates the cycle
+    parent[rootX] = rootY;
+    return true;
+  }
+
+  for (const [u, v] of edges) {
+    if (!union(u, v)) return [u, v];
+  }
+}</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="cpp" hidden>
+      <span class="code-label is-good">C++</span>
+      <pre class="code-block"><code>std::vector&lt;int&gt; parent;
+
+int find(int x) {
+    while (parent[x] != x) {
+        parent[x] = parent[parent[x]];   // path compression: shorten the chain
+        x = parent[x];
+    }
+    return x;
+}
+
+bool unite(int x, int y) {
+    int rootX = find(x), rootY = find(y);
+    if (rootX == rootY) return false;    // already connected: this edge creates the cycle
+    parent[rootX] = rootY;
+    return true;
+}
+
+std::vector&lt;int&gt; findRedundantConnection(std::vector&lt;std::vector&lt;int&gt;&gt;&amp; edges) {
+    parent.resize(edges.size() + 1);
+    for (int i = 0; i &lt; (int)parent.size(); i++) parent[i] = i;
+
+    for (auto&amp; edge : edges) {
+        if (!unite(edge[0], edge[1])) return edge;
+    }
+    return {};
+}</code></pre>
+    </div>
+  </div>
+
+  <p><strong>Path compression</strong> — making every visited node point directly at the root during <code class="inline-code">find</code> — keeps the parent chains flat, so both <code class="inline-code">find</code> and <code class="inline-code">union</code> run in nearly O(1) time in practice (technically O(α(n)), where α is the inverse Ackermann function — for any input size that could ever exist, α(n) ≤ 4). Processing all edges is then O(n · α(n)), effectively linear.</p>
+
+  <div class="box why">
+    <span class="box-label">Why it matters here</span>
+    Union-Find solves an entire category of problems DFS/BFS could also solve, but far more efficiently when the real question is repeated "are these connected yet?" checks rather than a one-time full traversal — detecting cycles while building a graph edge by edge, counting connected components, or checking whether a sequence of union operations ever merges two specific groups. Recognizing "this is fundamentally a connectivity question, asked repeatedly" is the signal to reach for Union-Find instead of re-traversing from scratch each time.
+  </div>
+
+  <h2>Check your recall</h2>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What question does Union-Find answer without running a traversal?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">What is the shortest path between two nodes?</button>
+      <button class="quiz-choice" data-correct="true">Are two given nodes already in the same connected group?</button>
+      <button class="quiz-choice" data-correct="false">What is the total number of edges in the graph?</button>
+      <button class="quiz-choice" data-correct="false">Is the graph's structure a valid binary tree?</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Union-Find tracks group membership directly, so this check doesn't require walking the graph at all.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. In this problem, how is the redundant edge identified?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">It is always the very first edge given in the list.</button>
+      <button class="quiz-choice" data-correct="true">It is the first edge whose two endpoints already share the same root when union is attempted.</button>
+      <button class="quiz-choice" data-correct="false">It is whichever edge connects the two nodes with the highest values.</button>
+      <button class="quiz-choice" data-correct="false">It must be found by sorting all edges by weight first.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>If both endpoints are already connected before this edge is added, this edge is the one creating the cycle.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. What does path compression accomplish inside find?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">It removes nodes from the structure entirely once visited.</button>
+      <button class="quiz-choice" data-correct="true">It flattens the parent chain so future find calls on those nodes are nearly instant.</button>
+      <button class="quiz-choice" data-correct="false">It sorts every node by its group size.</button>
+      <button class="quiz-choice" data-correct="false">It merges every group in the structure into one.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>By repointing visited nodes straight at the root, later lookups skip the intermediate steps entirely.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="root">
+    <p class="quiz-prompt">4. Fill in the blank: two nodes are in the same group exactly when find returns the same ___ for both.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Every node in a group eventually points, directly or indirectly, to this single shared node.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="compression">
+    <p class="quiz-prompt">5. Fill in the blank: path ___ is the optimization that keeps Union-Find's operations close to constant time.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Without it, parent chains could grow long and each find would cost more than nearly-constant time.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p><a href="https://cp-algorithms.com/data_structures/disjoint_set_union.html">Algorithms for Competitive Programming</a>'s Disjoint Set Union article covers path compression and union by rank/size in full detail, including the inverse-Ackermann complexity proof.</p>
+
+  <div class="box">
+    <span class="box-label">Practice on LeetCode</span>
+    <a href="https://leetcode.com/problems/redundant-connection/">LeetCode #684 — Redundant Connection</a>. Try tracing the parent array by hand on a small edge list before trusting the code.
+  </div>
+
+  <p class="ask-teacher">Wondering what "union by rank" adds on top of path compression, and why the two together give the inverse-Ackermann bound? Ask your teacher — it's a small addition with an outsized effect on performance. Next: what happens once edges stop being equal and start carrying a cost.</p>
+
+  <footer class="lesson-footer">STEM+ · Computer Programming 2+ · Lesson 21</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  STEMPlus.mountTabs(document.getElementById('uf-tabs'), 'data-tab', 'data-panel');
+});
+</script>

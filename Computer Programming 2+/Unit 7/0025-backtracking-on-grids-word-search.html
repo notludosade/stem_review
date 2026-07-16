@@ -1,0 +1,216 @@
+<title>Lesson 25: Backtracking on Grids — Word Search — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<script src="../../assets/interactive.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Computer Programming 2+ · Lesson 25</span>
+  <h1>Backtracking on Grids: Word Search</h1>
+  <p class="subtitle">Closing this unit where it started: backtracking is still DFS with a visited check, now searching for one specific path instead of counting every region.</p>
+  <p class="nav-links"><a href="0024-combination-sum-and-combinations-under-constraints.html">← Lesson 24</a> <a href="../index.html">Contents</a> <a href="../reference/glossary.html">Glossary →</a></p>
+
+  <p>Problem: given a grid of letters and a target word, determine whether the word can be traced by moving to horizontally or vertically adjacent cells, using each cell at most once. This is Lesson 18's island-counting DFS again, but instead of exploring everywhere reachable, the recursion follows one specific target — the next required letter — and gives up the instant a cell doesn't match.</p>
+
+  <div class="box">
+    <span class="box-label">The idea</span>
+    Try starting the search from every cell. At each step, check that the current cell matches the next required letter and hasn't been used yet in this attempt; if not, that branch fails immediately. If it matches, mark the cell visited (choose), recurse into all four neighbors looking for the next letter (explore), then unmark it (unchoose) — because a cell used on one attempted path might be needed again on a different one, unlike the sunk land cells in Lesson 18 that never needed to be restored.
+  </div>
+
+  <div id="wordsearch-tabs">
+    <div class="fm-tabs">
+      <button class="fm-tab is-active" data-tab="py">Python</button>
+      <button class="fm-tab" data-tab="java">Java</button>
+      <button class="fm-tab" data-tab="js">JavaScript</button>
+      <button class="fm-tab" data-tab="cpp">C++</button>
+    </div>
+    <div class="fm-panel" data-panel="py">
+      <span class="code-label is-good">Python</span>
+      <pre class="code-block"><code>def exist(board, word):
+    rows, cols = len(board), len(board[0])
+
+    def backtrack(r, c, i):
+        if i == len(word):
+            return True                 # every letter matched
+        if (r &lt; 0 or r &gt;= rows or c &lt; 0 or c &gt;= cols
+                or board[r][c] != word[i]):
+            return False                 # out of bounds or wrong letter: fail this branch
+
+        temp = board[r][c]
+        board[r][c] = '#'                # choose: mark visited for this attempt
+        found = (backtrack(r + 1, c, i + 1) or backtrack(r - 1, c, i + 1) or
+                 backtrack(r, c + 1, i + 1) or backtrack(r, c - 1, i + 1))
+        board[r][c] = temp               # unchoose: restore for other attempts
+        return found
+
+    for r in range(rows):
+        for c in range(cols):
+            if backtrack(r, c, 0):
+                return True
+    return False</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="java" hidden>
+      <span class="code-label is-good">Java</span>
+      <pre class="code-block"><code>boolean exist(char[][] board, String word) {
+    int rows = board.length, cols = board[0].length;
+    for (int r = 0; r &lt; rows; r++) {
+        for (int c = 0; c &lt; cols; c++) {
+            if (backtrack(board, word, r, c, 0)) return true;
+        }
+    }
+    return false;
+}
+
+boolean backtrack(char[][] board, String word, int r, int c, int i) {
+    if (i == word.length()) return true;             // every letter matched
+    if (r &lt; 0 || r &gt;= board.length || c &lt; 0 || c &gt;= board[0].length
+            || board[r][c] != word.charAt(i)) return false;   // out of bounds or wrong letter: fail
+
+    char temp = board[r][c];
+    board[r][c] = '#';                 // choose: mark visited for this attempt
+    boolean found = backtrack(board, word, r + 1, c, i + 1)
+                 || backtrack(board, word, r - 1, c, i + 1)
+                 || backtrack(board, word, r, c + 1, i + 1)
+                 || backtrack(board, word, r, c - 1, i + 1);
+    board[r][c] = temp;                // unchoose: restore for other attempts
+    return found;
+}</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="js" hidden>
+      <span class="code-label is-good">JavaScript</span>
+      <pre class="code-block"><code>function exist(board, word) {
+  const rows = board.length, cols = board[0].length;
+
+  function backtrack(r, c, i) {
+    if (i === word.length) return true;               // every letter matched
+    if (r &lt; 0 || r &gt;= rows || c &lt; 0 || c &gt;= cols || board[r][c] !== word[i]) {
+      return false;                                     // out of bounds or wrong letter: fail
+    }
+
+    const temp = board[r][c];
+    board[r][c] = '#';                 // choose: mark visited for this attempt
+    const found = backtrack(r + 1, c, i + 1) || backtrack(r - 1, c, i + 1) ||
+                  backtrack(r, c + 1, i + 1) || backtrack(r, c - 1, i + 1);
+    board[r][c] = temp;                // unchoose: restore for other attempts
+    return found;
+  }
+
+  for (let r = 0; r &lt; rows; r++) {
+    for (let c = 0; c &lt; cols; c++) {
+      if (backtrack(r, c, 0)) return true;
+    }
+  }
+  return false;
+}</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="cpp" hidden>
+      <span class="code-label is-good">C++</span>
+      <pre class="code-block"><code>bool backtrack(std::vector&lt;std::vector&lt;char&gt;&gt;&amp; board, const std::string&amp; word, int r, int c, int i) {
+    if (i == (int)word.size()) return true;             // every letter matched
+    int rows = board.size(), cols = board[0].size();
+    if (r &lt; 0 || r &gt;= rows || c &lt; 0 || c &gt;= cols || board[r][c] != word[i]) {
+        return false;                                     // out of bounds or wrong letter: fail
+    }
+
+    char temp = board[r][c];
+    board[r][c] = '#';                 // choose: mark visited for this attempt
+    bool found = backtrack(board, word, r + 1, c, i + 1) ||
+                 backtrack(board, word, r - 1, c, i + 1) ||
+                 backtrack(board, word, r, c + 1, i + 1) ||
+                 backtrack(board, word, r, c - 1, i + 1);
+    board[r][c] = temp;                // unchoose: restore for other attempts
+    return found;
+}
+
+bool exist(std::vector&lt;std::vector&lt;char&gt;&gt;&amp; board, std::string word) {
+    for (int r = 0; r &lt; (int)board.size(); r++) {
+        for (int c = 0; c &lt; (int)board[0].size(); c++) {
+            if (backtrack(board, word, r, c, 0)) return true;
+        }
+    }
+    return false;
+}</code></pre>
+    </div>
+  </div>
+
+  <p>Worst case, this explores up to 4^L paths from each of the grid's rows·cols starting cells, where L is the word's length — exponential, but bounded tightly by L in practice since a wrong letter prunes a branch immediately. The temporary <code class="inline-code">'#'</code> marker plays the same role as Lesson 18's sunk land cells, except it must be restored afterward, since a cell ruled out on one starting attempt may still be perfectly valid on the next.</p>
+
+  <div class="box why">
+    <span class="box-label">Why it matters here</span>
+    This closes the unit on the same note it opened with in Lesson 18: backtracking is DFS with a visited marker, plus the choose-explore-unchoose discipline from Lesson 23 to make that marker temporary rather than permanent. Grid backtracking (word search, N-Queens, Sudoku solvers) always follows this shape — mark a cell as used, recurse into its neighbors, then release it, so the same board can be reused across every attempted path.
+  </div>
+
+  <h2>Check your recall</h2>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. Why must a visited cell be un-marked after backtracking, unlike Lesson 18's sunk land cells?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because letters cannot be stored using the same board array.</button>
+      <button class="quiz-choice" data-correct="true">Because a cell ruled out on one attempted path may still be needed on a different path.</button>
+      <button class="quiz-choice" data-correct="false">Because Word Search never actually needs a visited check.</button>
+      <button class="quiz-choice" data-correct="false">Because the board is regenerated before each starting cell is tried.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Lesson 18 counted every reachable region once; Word Search searches for one specific path per attempt, so failed attempts must not affect later ones.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. What causes a branch of this search to fail immediately?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Reaching the last cell in the grid.</button>
+      <button class="quiz-choice" data-correct="true">The current cell being out of bounds, already used, or not matching the required letter.</button>
+      <button class="quiz-choice" data-correct="false">The word being longer than five letters.</button>
+      <button class="quiz-choice" data-correct="false">Starting the search from a corner cell.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Any one of these conditions means this path cannot possibly complete the word, so recursion stops there.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. What does the index i track during the recursion?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">The total number of cells visited across all attempts.</button>
+      <button class="quiz-choice" data-correct="true">Which letter of the target word must match the current cell.</button>
+      <button class="quiz-choice" data-correct="false">The row number of the starting cell.</button>
+      <button class="quiz-choice" data-correct="false">How many starting cells remain to be tried.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Reaching i equal to the word's length means every letter has already been matched in order.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="unchoose">
+    <p class="quiz-prompt">4. Fill in the blank: restoring a cell's original letter after exploring its neighbors is the ___ step from Lesson 23's template.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Without this step, a cell ruled out early would stay unusable for every later attempt too.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="exponential">
+    <p class="quiz-prompt">5. Fill in the blank: in the worst case, this search's runtime is ___ in the word's length, though pruning keeps it fast in practice.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Up to 4 directions are tried at each of the word's L letters, giving roughly 4^L work per starting cell.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p><a href="https://cp-algorithms.com/">Algorithms for Competitive Programming</a>'s brute-force search material discusses grid-based backtracking alongside classic constraint-satisfaction problems like N-Queens.</p>
+
+  <div class="box">
+    <span class="box-label">Practice on LeetCode</span>
+    <a href="https://leetcode.com/problems/word-search/">LeetCode #79 — Word Search</a>. That closes Unit 7 — as a stretch exercise once this is solid, try <a href="https://leetcode.com/problems/n-queens/">#51 — N-Queens</a>, a harder grid-backtracking problem with a very different constraint to prune on.
+  </div>
+
+  <p class="ask-teacher">Wondering how N-Queens' column/diagonal constraints translate into a prune, given that there's no "target word" to match against there? Ask your teacher — the same choose-explore-unchoose shape still applies, just with a different validity check. That closes Unit 7: Backtracking. Next: recursion that stops repeating itself, by remembering answers it's already computed.</p>
+
+  <footer class="lesson-footer">STEM+ · Computer Programming 2+ · Lesson 25</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  STEMPlus.mountTabs(document.getElementById('wordsearch-tabs'), 'data-tab', 'data-panel');
+});
+</script>
