@@ -1,0 +1,124 @@
+<meta charset="UTF-8">
+<title>Lesson 30: Partitions and Upper and Lower Sums — STEM+</title>
+<link rel="stylesheet" href="../../../assets/style.css">
+<script src="../../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Real Analysis A · Unit 6 · Lesson 30</span>
+  <h1>Partitions and Upper and Lower Sums</h1>
+  <p class="subtitle">Before the integral can be a number, it needs bracketing sums that squeeze it from above and below — built from nothing but sup and inf.</p>
+  <p class="nav-links"><a href="../Unit%205/0029-applications-of-the-mean-value-theorem.html" class="nav-prev">← Unit 5, Lesson 29</a> <a href="0031-the-riemann-integral.html" class="nav-next">Lesson 31 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>AP Calc BC introduced Riemann sums as left/right/midpoint rectangle approximations, and the definite integral as their limit "as the number of rectangles goes to infinity" — informally. Unit 6 replaces that limit with a rigorous construction, built entirely from tools already in hand: bounded sets, sup, and inf (Unit 1).</p>
+
+  <div class="box">
+    <span class="box-label">Definition — Partition</span>
+    A <strong>partition</strong> P of [a, b] is a finite set of points a = x₀ &lt; x₁ &lt; ⋯ &lt; xₙ = b. It divides [a,b] into subintervals [x<sub>i−1</sub>, x<sub>i</sub>] for i = 1, …, n.
+  </div>
+
+  <div class="box">
+    <span class="box-label">Definition — Upper and Lower Sums</span>
+    Let f be bounded on [a, b] and P = {x₀, …, xₙ} a partition. Let M<sub>i</sub> = sup{f(x) : x ∈ [x<sub>i−1</sub>, x<sub>i</sub>]} and m<sub>i</sub> = inf{f(x) : x ∈ [x<sub>i−1</sub>, x<sub>i</sub>]} (both exist by the Completeness Axiom, Unit 1, since f is bounded on each subinterval). Define
+    <span class="expr-block">U(f, P) = Σ<sub>i=1</sub><sup>n</sup> M<sub>i</sub>(x<sub>i</sub> − x<sub>i−1</sub>) &nbsp;&nbsp; L(f, P) = Σ<sub>i=1</sub><sup>n</sup> m<sub>i</sub>(x<sub>i</sub> − x<sub>i−1</sub>)</span>
+  </div>
+  <div class="box why">
+    <span class="box-label">Why sup and inf, not a chosen sample point</span>
+    AP Calc BC's Riemann sums picked one sample point per subinterval (left endpoint, right endpoint, midpoint) and got a different number each time. Using the sup and inf of f over each subinterval instead removes that arbitrary choice: M<sub>i</sub> and m<sub>i</sub> are the largest and smallest values <em>any</em> sample point in that subinterval could produce, so U(f,P) and L(f,P) bracket every possible Riemann sum for that partition from above and below.
+  </div>
+
+  <div class="svg-wrap">
+    <svg class="figure" viewBox="0 0 400 180" role="img" aria-label="Diagram showing a curve with lower sum rectangles inscribed below it and upper sum rectangles circumscribed above it over four subintervals">
+      <line x1="30" y1="150" x2="380" y2="150" stroke="currentColor" stroke-width="1.5"/>
+      <path d="M 50 120 Q 120 40 200 70 T 350 30" stroke="currentColor" stroke-width="2" fill="none"/>
+      <rect x="50" y="105" width="75" height="45" fill="none" stroke="currentColor" stroke-width="1" stroke-dasharray="3 2"/>
+      <rect x="125" y="70" width="75" height="80" fill="none" stroke="currentColor" stroke-width="1" stroke-dasharray="3 2"/>
+      <rect x="200" y="65" width="75" height="85" fill="none" stroke="currentColor" stroke-width="1" stroke-dasharray="3 2"/>
+      <rect x="275" y="32" width="75" height="118" fill="none" stroke="currentColor" stroke-width="1" stroke-dasharray="3 2"/>
+      <text x="205" y="168" font-size="12" text-anchor="middle" fill="currentColor">lower sum: inscribed rectangles (dashed) touch the curve from below</text>
+    </svg>
+  </div>
+
+  <h2>How refining a partition affects the sums</h2>
+  <div class="box">
+    <span class="box-label">Lemma — Refinement</span>
+    If P′ is a <strong>refinement</strong> of P (P′ ⊇ P, i.e. P′ adds more points), then L(f, P) ≤ L(f, P′) ≤ U(f, P′) ≤ U(f, P).
+  </div>
+  <div class="box">
+    <span class="box-label">Proof sketch</span>
+    It suffices to check adding one point y to a single subinterval [x<sub>i−1</sub>, x<sub>i</sub>], splitting it into [x<sub>i−1</sub>, y] and [y, x<sub>i</sub>]. The inf of f over each smaller piece is ≥ the inf over the whole piece [x<sub>i−1</sub>,x<sub>i</sub>] (inf over a smaller set is never smaller), so the lower sum can only increase or stay the same. Symmetrically, the sup over each smaller piece is ≤ the sup over the whole piece, so the upper sum can only decrease or stay the same. L(f,P′) ≤ U(f,P′) always holds since each m<sub>i</sub> ≤ M<sub>i</sub>. Repeating one point at a time extends this to any refinement. ∎
+  </div>
+
+  <div class="box">
+    <span class="box-label">Corollary — Any Lower Sum ≤ Any Upper Sum</span>
+    For <em>any</em> two partitions P₁, P₂ of [a,b] (not necessarily one refining the other), L(f, P₁) ≤ U(f, P₂).
+  </div>
+  <div class="box why">
+    <span class="box-label">Why this needs the common refinement trick</span>
+    P₁ and P₂ may be entirely unrelated partitions, so the Refinement Lemma doesn't directly compare them. But P = P₁ ∪ P₂ (the <strong>common refinement</strong>) refines both. So L(f,P₁) ≤ L(f,P) ≤ U(f,P) ≤ U(f,P₂), chaining the Refinement Lemma twice. This corollary is exactly what will let Lesson 31 define the integral as the number squeezed between every lower sum and every upper sum at once.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What guarantees that M<sub>i</sub> and m<sub>i</sub> exist for each subinterval?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">The Intermediate Value Theorem.</button>
+      <button class="quiz-choice" data-correct="true">The Completeness Axiom (Unit 1), since f is bounded on each subinterval and every bounded nonempty set has a sup and inf.</button>
+      <button class="quiz-choice" data-correct="false">The Mean Value Theorem.</button>
+      <button class="quiz-choice" data-correct="false">The Bolzano-Weierstrass Theorem.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Completeness (Unit 1) is exactly what guarantees sup and inf exist for any bounded set — the foundation the whole upper/lower sum construction rests on.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why do upper and lower sums avoid the arbitrariness of AP Calc BC's left/right/midpoint Riemann sums?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">They don't — they still require picking a sample point.</button>
+      <button class="quiz-choice" data-correct="true">M<sub>i</sub> and m<sub>i</sub> are the largest and smallest values any sample point could give on that subinterval, so they bracket every possible Riemann sum rather than picking just one.</button>
+      <button class="quiz-choice" data-correct="false">Because they only work for continuous functions.</button>
+      <button class="quiz-choice" data-correct="false">Because they always give the same numeric value regardless of partition.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Using sup and inf sidesteps the sample-point choice entirely, since they represent the extremes any choice could produce.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why does comparing L(f,P₁) and U(f,P₂) for two unrelated partitions require a common refinement?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">It doesn't — the Refinement Lemma applies directly to any two partitions.</button>
+      <button class="quiz-choice" data-correct="true">The Refinement Lemma only compares a partition to one that refines it, so P₁ ∪ P₂ is needed as a common refinement of both, chaining the lemma twice.</button>
+      <button class="quiz-choice" data-correct="false">Because P₁ and P₂ must have the same number of points.</button>
+      <button class="quiz-choice" data-correct="false">Because upper and lower sums are never comparable.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The common refinement P₁ ∪ P₂ is what bridges two otherwise-unrelated partitions, via two applications of the Refinement Lemma.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="refinement">
+    <p class="quiz-prompt">4. Fill in the blank: a partition P′ that contains all the points of P (and possibly more) is called a ___ of P.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Refinement is the term for a partition with extra points added, central to the Refinement Lemma.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="common refinement">
+    <p class="quiz-prompt">5. Fill in the blank: comparing two unrelated partitions P₁ and P₂ requires taking their ___, P₁ ∪ P₂.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Common refinement is the trick that lets any two partitions be compared via the Refinement Lemma.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: Abbott's <em>Understanding Analysis</em>, Section 7.2, defines partitions and upper/lower sums and proves the Refinement Lemma in full.</p>
+
+  <p class="ask-teacher">Stuck on anything above, or want to work through the common-refinement argument with concrete numbers? Ask your teacher — that's what I'm here for. Next up: defining the Riemann integral itself, as the number squeezed between every lower and every upper sum.</p>
+
+  <footer class="lesson-footer">STEM+ · Real Analysis A · Lesson 30 of the course sequence</footer>
+</div>

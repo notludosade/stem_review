@@ -1,0 +1,139 @@
+<meta charset="UTF-8">
+<title>Lesson 12: Structural and Behavioral Patterns — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Software Engineering · Unit 4 · Lesson 12</span>
+  <h1>Structural and Behavioral Patterns: Adapter, Observer, Strategy</h1>
+  <p class="subtitle">Making incompatible interfaces work together, reacting to change, and swapping behavior without rewriting callers.</p>
+  <p class="nav-links"><a href="0011-creational-patterns-factory-and-singleton.html" class="nav-prev">← Lesson 11</a> <a href="0013-when-not-to-use-a-pattern.html" class="nav-next">Lesson 13 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Lesson 11 covered patterns about creating objects. This lesson covers one <strong>structural</strong> pattern (about how objects are composed together) and two <strong>behavioral</strong> patterns (about how objects communicate and share responsibility).</p>
+
+  <h2>Adapter: making incompatible interfaces work together</h2>
+  <div class="box why">
+    <span class="box-label">Why Adapter exists</span>
+    An <strong>Adapter</strong> wraps an existing class with a different interface, translating calls so it can be used where a specific, different interface is expected — without modifying the original class. It's the same idea as a physical power adapter: it doesn't change what's on either end, it just translates between two incompatible shapes.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Example</span>
+    <pre class="code-block"><code>class LegacyLogger:
+    def write_log(self, msg):
+        print(f"LOG: {msg}")
+
+class LoggerAdapter:
+    def __init__(self, legacy_logger):
+        self._legacy = legacy_logger
+    def log(self, message):  # the interface new code expects
+        self._legacy.write_log(message)</code></pre>
+    New code calls <span class="inline-code">.log(message)</span>, the interface it expects, without ever needing to know the underlying logger only understands <span class="inline-code">.write_log(msg)</span>. The old class is used entirely unmodified.
+  </div>
+
+  <h2>Observer: reacting automatically to change</h2>
+  <div class="box">
+    <span class="box-label">One subject, many automatically-notified observers</span>
+    The <strong>Observer</strong> pattern lets a "subject" object maintain a list of dependent "observers," and automatically notify all of them whenever its own state changes — without the subject needing to know any specifics about what each observer actually does in response.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Example</span>
+    A <span class="inline-code">StockPrice</span> object changes value, and three unrelated observers registered to it — a chart that redraws, a mobile push notification, and a logging service — each get notified automatically. <span class="inline-code">StockPrice</span> doesn't know or care that three specific things happen in response; it just announces "I changed," and each observer decides its own reaction independently.
+  </div>
+
+  <h2>Strategy: swapping behavior without rewriting callers</h2>
+  <div class="box">
+    <span class="box-label">Making an algorithm swappable</span>
+    The <strong>Strategy</strong> pattern defines a family of interchangeable algorithms behind one shared interface, so the code that uses one can switch between them without any changes to itself.
+  </div>
+
+  <span class="code-label is-bad">Hardcoded branching</span>
+  <pre class="code-block code-bad"><code>def calculate_shipping(order, method):
+    if method == "standard":
+        return order.weight * 0.5
+    elif method == "express":
+        return order.weight * 1.5 + 10
+    elif method == "overnight":
+        return order.weight * 3 + 25</code></pre>
+  <span class="code-label is-good">Strategy pattern</span>
+  <pre class="code-block code-good"><code>class StandardShipping:
+    def calculate(self, order):
+        return order.weight * 0.5
+
+class ExpressShipping:
+    def calculate(self, order):
+        return order.weight * 1.5 + 10
+
+def calculate_shipping(order, strategy):
+    return strategy.calculate(order)  # any strategy works here</code></pre>
+  <div class="box why">
+    <span class="box-label">Why this is better than a branching function</span>
+    Adding a new shipping method with the branching version means editing a growing function and risking every existing branch. With Strategy, adding a new method means adding a new small class — the calling code, <span class="inline-code">calculate_shipping()</span>, never has to change at all.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What does an Adapter pattern do?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">It guarantees only one instance of a class can exist.</button>
+      <button class="quiz-choice" data-correct="true">It wraps an existing class to translate its interface into one that different calling code expects, without modifying the original.</button>
+      <button class="quiz-choice" data-correct="false">It automatically notifies a list of dependents whenever an object changes.</button>
+      <button class="quiz-choice" data-correct="false">It centralizes decision logic for which object to construct.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Adapter is specifically about translating between two incompatible interfaces without changing the original class.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. In the Observer pattern, what does the subject need to know about its observers?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">The subject must know every specific action each observer will take in response.</button>
+      <button class="quiz-choice" data-correct="true">Nothing specific — it just notifies them of a change and each observer decides its own reaction independently.</button>
+      <button class="quiz-choice" data-correct="false">The subject must be rewritten every time a new observer is added.</button>
+      <button class="quiz-choice" data-correct="false">Observers must be created using a Factory before they can register.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Observer decouples the subject entirely from what each observer actually does in response to a notification.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why is the Strategy pattern preferable to a large if/elif chain for interchangeable algorithms?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because if/elif chains are not supported in most programming languages.</button>
+      <button class="quiz-choice" data-correct="true">Because adding a new algorithm means adding a new small class, without touching or risking the existing calling code.</button>
+      <button class="quiz-choice" data-correct="false">Because Strategy always runs faster at execution time than a conditional branch.</button>
+      <button class="quiz-choice" data-correct="false">Because Strategy eliminates the need for any automated tests.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Strategy isolates each algorithm into its own class, so the calling code and other algorithms stay untouched when one is added.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="adapter">
+    <p class="quiz-prompt">4. Fill in the blank: an ___ wraps an existing class so it matches an interface different calling code expects, without modifying the original.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Adapter is the pattern named for exactly this translation role, like a physical power adapter.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="observer">
+    <p class="quiz-prompt">5. Fill in the blank: the ___ pattern lets a subject automatically notify a list of registered dependents whenever its own state changes.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Observer is the behavioral pattern built around one subject broadcasting change to many independent observers.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: Refactoring Guru's <a href="https://refactoring.guru/design-patterns/observer">"Observer"</a> page covers this pattern with diagrams and real-world examples across multiple languages.</p>
+
+  <p class="ask-teacher">Stuck on anything above, or want help identifying which of these three patterns fits a problem you're facing? Ask your teacher — that's what I'm here for. Next up: when not to use a pattern.</p>
+
+  <footer class="lesson-footer">STEM+ · Software Engineering · Lesson 12 of the course sequence</footer>
+</div>

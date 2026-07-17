@@ -1,0 +1,116 @@
+<meta charset="UTF-8">
+<title>Lesson 9: Limit Laws for Sequences — STEM+</title>
+<link rel="stylesheet" href="../../../assets/style.css">
+<script src="../../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Real Analysis A · Unit 2 · Lesson 9</span>
+  <h1>Limit Laws for Sequences</h1>
+  <p class="subtitle">Prove sum, product, and quotient rules once, from the definition — then never write an epsilon-N proof for a combined sequence again.</p>
+  <p class="nav-links"><a href="0008-proving-limits-directly-from-the-definition.html" class="nav-prev">← Lesson 8</a> <a href="0010-monotone-sequences-and-the-monotone-convergence-theorem.html" class="nav-next">Lesson 10 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Lesson 8's technique works, but writing a fresh epsilon-N proof for every new sequence — especially a sequence built out of simpler ones by adding or multiplying — would get unmanageable fast. This lesson proves the rules once, so from here on, combined limits can be computed algebraically instead.</p>
+
+  <h2>The sum rule</h2>
+  <div class="box">
+    <span class="box-label">Theorem — Algebraic Limit Theorem (Sum)</span>
+    If lim aₙ = A and lim bₙ = B, then lim (aₙ + bₙ) = A + B.
+  </div>
+  <div class="box">
+    <span class="box-label">Proof</span>
+    Let ε &gt; 0. Since lim aₙ = A, there exists N₁ such that |aₙ − A| &lt; ε/2 for all n &gt; N₁ (apply the definition with ε/2 in place of ε — a valid choice, since ε/2 is still positive). Since lim bₙ = B, there exists N₂ such that |bₙ − B| &lt; ε/2 for all n &gt; N₂. Let N = max(N₁, N₂). For any n &gt; N, both bounds hold simultaneously, so by the triangle inequality (Unit 1, Lesson 3): |(aₙ + bₙ) − (A + B)| = |(aₙ − A) + (bₙ − B)| ≤ |aₙ − A| + |bₙ − B| &lt; ε/2 + ε/2 = ε. So lim (aₙ + bₙ) = A + B. ∎
+  </div>
+  <div class="box why">
+    <span class="box-label">Why split ε into ε/2 and ε/2</span>
+    Two separate error sources (aₙ's distance from A, and bₙ's distance from B) both need to be controlled at once, and the triangle inequality is what lets their individual errors add up rather than compound. Budgeting ε/2 to each piece in advance guarantees the total, once added, lands exactly at the ε the proof needs — this "splitting the error budget" trick reappears constantly whenever a proof needs to control more than one quantity simultaneously.
+  </div>
+
+  <h2>The product rule</h2>
+  <div class="box">
+    <span class="box-label">Theorem — Algebraic Limit Theorem (Product)</span>
+    If lim aₙ = A and lim bₙ = B, then lim (aₙ bₙ) = AB.
+  </div>
+  <div class="box">
+    <span class="box-label">Proof sketch</span>
+    Write aₙbₙ − AB = aₙbₙ − aₙB + aₙB − AB = aₙ(bₙ − B) + B(aₙ − A). Since (aₙ) converges, it's bounded (a convergent sequence's terms can't run off to infinity — a fact proved directly from the definition), say |aₙ| ≤ M for all n. Then |aₙbₙ − AB| ≤ |aₙ||bₙ − B| + |B||aₙ − A| ≤ M|bₙ − B| + |B||aₙ − A|. Both |bₙ − B| and |aₙ − A| can be made arbitrarily small (by the individual limit definitions), and M and |B| are fixed constants — so the whole right-hand side can be forced below any ε using the same split-budget technique as the sum rule. ∎
+  </div>
+  <div class="box why">
+    <span class="box-label">Why "convergent implies bounded" was needed here</span>
+    Without a bound M on |aₙ|, the term |aₙ||bₙ − B| couldn't be controlled — an unbounded aₙ could blow up even a tiny |bₙ − B|. This is the first place in the course where boundedness of a sequence (not just convergence) does real work, foreshadowing Lesson 12's Bolzano-Weierstrass Theorem, where boundedness is the entire hypothesis.
+  </div>
+
+  <h2>Quotient rule, and using the laws together</h2>
+  <div class="box">
+    <span class="box-label">Theorem — Algebraic Limit Theorem (Quotient)</span>
+    If lim aₙ = A, lim bₙ = B, and B ≠ 0 (with bₙ ≠ 0 for all n), then lim (aₙ/bₙ) = A/B.
+  </div>
+  <div class="box example">
+    <span class="box-label">Worked Example</span>
+    Compute lim ((3n² + 2n)/(n² + 1)) using the laws directly instead of an epsilon-N proof: divide numerator and denominator by n², giving (3 + 2/n)/(1 + 1/n²). Since lim (2/n) = 0 and lim (1/n²) = 0 (both provable the same way as Lesson 8's 1/n → 0), the sum rule gives numerator → 3 and denominator → 1, and the quotient rule (with B = 1 ≠ 0) gives the whole expression → 3/1 = 3.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. In the sum rule's proof, why was ε split into ε/2 and ε/2 rather than used directly for both aₙ and bₙ?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because ε/2 is always a rational number.</button>
+      <button class="quiz-choice" data-correct="true">So that when the two individual errors are added via the triangle inequality, the total comes out to exactly ε, not 2ε.</button>
+      <button class="quiz-choice" data-correct="false">Because the definition of a limit requires ε to be even.</button>
+      <button class="quiz-choice" data-correct="false">It wasn't necessary — any split would fail to work.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Budgeting ε/2 to each piece means their sum, bounded by the triangle inequality, lands at exactly ε — the proof's target.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why did the product rule's proof need the fact that a convergent sequence is bounded?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">It didn't — boundedness played no role in the proof.</button>
+      <button class="quiz-choice" data-correct="true">Without a fixed bound M on |aₙ|, the term |aₙ||bₙ − B| couldn't be controlled no matter how small |bₙ − B| became.</button>
+      <button class="quiz-choice" data-correct="false">Because unbounded sequences cannot be multiplied together.</button>
+      <button class="quiz-choice" data-correct="false">Because B must be bounded, not aₙ.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The bound M on |aₙ| is exactly what lets M|bₙ − B| be forced small — without it, that term could grow without limit.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. In the worked example computing lim ((3n² + 2n)/(n² + 1)), what was the purpose of dividing numerator and denominator by n²?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">To make the expression undefined.</button>
+      <button class="quiz-choice" data-correct="true">To rewrite the expression in terms of pieces (like 2/n and 1/n²) already known to converge to 0, so the sum and quotient rules could be applied directly.</button>
+      <button class="quiz-choice" data-correct="false">Because the quotient rule only applies to expressions already in lowest terms.</button>
+      <button class="quiz-choice" data-correct="false">To prove that n² converges to a finite limit.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Rewriting in terms of known-convergent pieces is exactly what lets the algebraic limit laws replace a full epsilon-N proof.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="bounded">
+    <p class="quiz-prompt">4. Fill in the blank: the product rule's proof relies on the fact that a convergent sequence is always ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Boundedness of convergent sequences is the fact that makes the product rule's proof work, and it resurfaces directly in the Bolzano-Weierstrass Theorem.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="triangle inequality|triangle">
+    <p class="quiz-prompt">5. Fill in the blank: the sum rule's proof combines the two individual error bounds using the ___ inequality from Unit 1.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The triangle inequality is exactly what lets |(aₙ − A) + (bₙ − B)| be bounded by the sum of the two individual error terms.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: Abbott's <em>Understanding Analysis</em>, Section 2.3, proves all four algebraic limit laws (sum, product, quotient, and scalar multiple) in full, including the "convergent implies bounded" lemma used in the product rule.</p>
+
+  <p class="ask-teacher">Stuck on anything above, or want to see the full proof that a convergent sequence is bounded? Ask your teacher — that's what I'm here for. Next up: monotone sequences and the theorem that guarantees convergence without ever naming a limit in advance.</p>
+
+  <footer class="lesson-footer">STEM+ · Real Analysis A · Lesson 9 of the course sequence</footer>
+</div>

@@ -1,0 +1,112 @@
+<meta charset="UTF-8">
+<title>Lesson 7: Why We Test: Confidence, Not Perfection — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Software Engineering · Unit 3 · Lesson 7</span>
+  <h1>Why We Test: Confidence, Not Perfection</h1>
+  <p class="subtitle">Tests don't prove a program is correct — they prove it hasn't broken in the specific ways you checked.</p>
+  <p class="nav-links"><a href="../Unit%202/0006-merging-conflicts-and-pull-requests.html" class="nav-prev">← Unit 2, Lesson 6</a> <a href="0008-unit-integration-tests-and-the-testing-pyramid.html" class="nav-next">Lesson 8 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Unit 1 named testing as an SDLC phase; Unit 2 gave you the tool (Git and pull requests) for merging changes safely. This lesson answers a more basic question: why do professional teams write automated tests at all, when the code either works or it doesn't?</p>
+
+  <h2>Manual checking doesn't scale</h2>
+  <div class="box why">
+    <span class="box-label">Why "I ran it once and it worked" isn't enough at team scale</span>
+    When one person writes and immediately runs a small script, manually checking the output is fine. Once a codebase has hundreds of functions modified by dozens of engineers over years, manually re-checking that every existing feature still works after every single change becomes physically impossible — there simply isn't enough human time. <strong>Automated tests</strong> are code that checks other code, and unlike a human, they can re-run thousands of checks in seconds, every time anything changes.
+  </div>
+
+  <h2>What a passing test suite actually proves</h2>
+  <div class="box why">
+    <span class="box-label">Why "all tests pass" doesn't mean "the program is correct"</span>
+    This is the single most important, most commonly misunderstood idea in testing: a test suite can only prove the program behaves correctly for the specific cases it checks. It says nothing about inputs nobody thought to test. A green test suite means "we haven't broken anything we already knew to check for" — a real and valuable guarantee, but a fundamentally different claim than "this program is provably correct."
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Example</span>
+    A function that divides two numbers might have tests for <span class="inline-code">divide(10, 2)</span> and <span class="inline-code">divide(9, 3)</span>, both passing. If nobody wrote a test for <span class="inline-code">divide(5, 0)</span>, the test suite says nothing about what happens on that input — the suite passing gives real confidence about the cases it covers, and zero information about the case it doesn't.
+  </div>
+
+  <h2>Regression: the problem tests solve better than anything else</h2>
+  <div class="box">
+    <span class="box-label">A regression is an old feature breaking from a new change</span>
+    The single most common thing automated tests catch in practice isn't a bug in brand-new code — it's a <strong>regression</strong>: a change made for an unrelated reason that accidentally breaks something that used to work. Without a test suite, a regression is often invisible until a user reports it in production. With one, the exact test that used to pass now fails, immediately, before the change is even merged.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Example</span>
+    An engineer refactors how discount codes are calculated to support a new promotion type. The refactor is correct for the new promotion — but it silently breaks free-shipping codes, a completely unrelated feature that happened to share the same function. A test written months earlier for free-shipping codes catches this immediately; without it, the break wouldn't surface until a customer complained.
+  </div>
+
+  <h2>Confidence to change code, not just confidence it works today</h2>
+  <div class="box why">
+    <span class="box-label">Why this connects to the maintenance phase from Unit 1</span>
+    Unit 1 established that most of a system's cost is in maintenance — years of engineers changing code they didn't originally write. A solid test suite is what makes changing that code safe: an engineer can modify a function, run the tests, and immediately know whether anything they didn't intend to touch broke. Without tests, every change to old code is a leap of faith; with them, it's a checked, reversible step.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What does a fully passing test suite actually prove about a program?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">That the program is mathematically proven correct for all possible inputs.</button>
+      <button class="quiz-choice" data-correct="true">That the program behaves correctly for the specific cases the tests check.</button>
+      <button class="quiz-choice" data-correct="false">That the program contains no bugs of any kind.</button>
+      <button class="quiz-choice" data-correct="false">That the program will never need to be tested again.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Tests only speak to the cases they actually check — an untested input could still fail even with a fully green suite.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. What is a regression?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">A brand-new feature that was never implemented correctly to begin with.</button>
+      <button class="quiz-choice" data-correct="true">A previously working feature that breaks as an unintended side effect of an unrelated change.</button>
+      <button class="quiz-choice" data-correct="false">A requirement that gets removed from the project on purpose.</button>
+      <button class="quiz-choice" data-correct="false">Any test that fails for the very first time it's ever run.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A regression is specifically something that used to work breaking due to a change made for a different reason.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why does manual checking fail to scale as a codebase and team grow?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because manual checking was never accurate even for a single person.</button>
+      <button class="quiz-choice" data-correct="true">Because re-checking every existing feature by hand after every change becomes physically impossible at real team scale.</button>
+      <button class="quiz-choice" data-correct="false">Because manual checking is illegal in professional software development.</button>
+      <button class="quiz-choice" data-correct="false">Because automated tests are required by most programming languages' compilers.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The sheer volume of features and changes at team scale is what makes automation necessary, not a flaw in manual checking itself at small scale.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="regression">
+    <p class="quiz-prompt">4. Fill in the blank: a ___ is a previously working feature breaking as a side effect of an unrelated change — the most common thing test suites catch in practice.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Regressions are exactly the kind of silent, unrelated breakage that automated tests are best positioned to catch.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="confidence">
+    <p class="quiz-prompt">5. Fill in the blank: tests give engineers the ___ to change old code safely, since they immediately reveal whether an unrelated change broke something.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Confidence, not proof of perfection, is the actual value tests provide — this is the lesson's core theme.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: Martin Fowler's <a href="https://martinfowler.com/bliki/TestCoverage.html">"Test Coverage"</a> makes the same point in more depth — that passing tests and code being provably correct are two different, often-confused claims.</p>
+
+  <p class="ask-teacher">Stuck on anything above, or want help thinking through what to test in something you're building? Ask your teacher — that's what I'm here for. Next up: unit tests, integration tests, and the testing pyramid.</p>
+
+  <footer class="lesson-footer">STEM+ · Software Engineering · Lesson 7 of the course sequence</footer>
+</div>

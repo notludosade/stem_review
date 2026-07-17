@@ -1,0 +1,132 @@
+<meta charset="UTF-8">
+<title>Lesson 21: Capstone — Tracing a Feature from Ticket to Production — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Software Engineering · Unit 7 · Lesson 21</span>
+  <h1>Capstone — Tracing a Feature from Ticket to Production</h1>
+  <p class="subtitle">Following one feature through every practice in this course, from a backlog ticket to a merged, deployed change.</p>
+  <p class="nav-links"><a href="0020-agile-frameworks-scrum-and-kanban.html" class="nav-prev">← Lesson 20</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Every unit in this course covered one piece of professional software engineering in isolation. In practice, they all operate together, continuously, on the same piece of work. This closing lesson traces one feature — "let users apply a promo code at checkout" — through every stage, naming which unit's practice is active at each step.</p>
+
+  <h2>1. The ticket enters the backlog</h2>
+  <div class="box">
+    <span class="box-label">Requirements (Unit 1) meet the agile board (Unit 7)</span>
+    A product manager writes a ticket: "Users can apply a promo code at checkout." As written, this is exactly the vague requirement Lesson 3 warned about — it needs acceptance criteria before an engineer should start: what happens with an invalid code? Can codes stack? Is there an expiration? The team clarifies these before the ticket is considered ready, and it's prioritized into the current sprint (Lesson 20) alongside the rest of the backlog.
+  </div>
+
+  <h2>2. A branch is created</h2>
+  <div class="box">
+    <span class="box-label">Version control (Unit 2)</span>
+    An engineer creates a branch, <span class="inline-code">feature-promo-codes</span>, off <span class="inline-code">main</span> — an instant, lightweight pointer per Lesson 5, isolating this work from everyone else's in-progress changes.
+  </div>
+
+  <h2>3. Design decisions get made</h2>
+  <div class="box">
+    <span class="box-label">Patterns and architecture (Units 4 and 5)</span>
+    The engineer notices the checkout system already has a Strategy pattern (Lesson 12) for shipping-cost calculation, and reuses that same shape for discount calculation, rather than hardcoding a branching if/elif chain. They also confirm this fits within the existing monolith's checkout module (Lesson 15) without needing a new service — no architectural decision is being made here, just an implementation choice within the existing structure.
+  </div>
+
+  <h2>4. Tests are written first</h2>
+  <div class="box">
+    <span class="box-label">Test-driven development (Unit 3)</span>
+    Following the red-green-refactor cycle from Lesson 9, the engineer writes a failing test for a valid promo code, then the minimum code to pass it, then a failing test for an expired code, and so on — building up the feature through the same testing pyramid (Lesson 8) of mostly-unit, some-integration tests, verifying real interaction with the order database.
+  </div>
+
+  <h2>5. A deliberate shortcut gets named</h2>
+  <div class="box">
+    <span class="box-label">Technical debt (Unit 5)</span>
+    Stacking multiple promo codes turns out to be significantly more complex than expected, and isn't actually required by the ticket's acceptance criteria. The engineer deliberately scopes it out, and — per Lesson 17 — writes a comment and a follow-up ticket naming the shortcut explicitly, rather than letting it become an accidental gap nobody remembers deciding on.
+  </div>
+
+  <h2>6. A pull request is opened</h2>
+  <div class="box">
+    <span class="box-label">Pull requests and code review (Units 2 and 6)</span>
+    The engineer opens a pull request (Lesson 6). A teammate reviews it: one blocking comment (a missing null check on an edge case), and two nits (a naming preference) clearly marked as optional, per Lesson 19's severity distinction. The engineer addresses the blocking issue, explains their reasoning on one nit instead of silently complying, and pushes an update to the same branch.
+  </div>
+
+  <h2>7. The branch merges</h2>
+  <div class="box">
+    <span class="box-label">Merging (Unit 2)</span>
+    After approval, the branch merges into <span class="inline-code">main</span>. Since another engineer's unrelated change touched a nearby line in the same file, Git flags a merge conflict (Lesson 6) — resolved in minutes because the two changes are conceptually unrelated and easy to tell apart.
+  </div>
+
+  <h2>8. It deploys, and the sprint reflects on it</h2>
+  <div class="box">
+    <span class="box-label">Deployment (Unit 1) and the retrospective (Unit 7)</span>
+    The change deploys to production as part of the SDLC's deployment phase (Lesson 2). At the end of the sprint, the team's retrospective surfaces that the promo-code ticket took longer than estimated because the requirements weren't fully clarified upfront — direct, lived confirmation of Lesson 3's warning that ambiguity caught late costs more than ambiguity caught early.
+  </div>
+
+  <h2>What this traces out</h2>
+  <div class="box why">
+    <span class="box-label">Why no single unit was sufficient on its own</span>
+    Every practice in this course showed up in service of a single, ordinary feature: clear requirements, safe parallel work, deliberate design choices, tests written before the code, an explicit rather than accidental shortcut, reviewed and discussed rather than silently merged, and a process that reflects on itself afterward. None of these practices is optional flourish — each one is answering a specific, real failure mode that shows up the moment code is built by more than one person, over more than a few weeks. That is the entire difference this course opened with, back in Lesson 1, between writing correct code and engineering software.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. Why did the promo-code ticket need acceptance criteria clarified before an engineer started work on it?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because acceptance criteria are only required for tickets involving payments.</button>
+      <button class="quiz-choice" data-correct="true">Because "users can apply a promo code" was vague, and ambiguity caught before implementation is far cheaper than ambiguity caught later.</button>
+      <button class="quiz-choice" data-correct="false">Because the product manager was not allowed to write tickets without engineering approval.</button>
+      <button class="quiz-choice" data-correct="false">Because acceptance criteria are a purely legal requirement with no engineering value.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>This directly reflects Lesson 3's core point: vague requirements get progressively more expensive to fix the later they're caught.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why did the engineer write a follow-up ticket explicitly naming the decision to skip stacked promo codes, rather than just leaving it out silently?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because unimplemented features are illegal to ship without a matching ticket.</button>
+      <button class="quiz-choice" data-correct="true">To make the shortcut a deliberate, tracked decision rather than accidental technical debt nobody remembers choosing.</button>
+      <button class="quiz-choice" data-correct="false">Because the testing framework requires a ticket reference for every test.</button>
+      <button class="quiz-choice" data-correct="false">Because code review tools automatically reject pull requests without linked tickets.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>This is Lesson 17's deliberate-versus-accidental debt distinction, applied directly.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. What was the actual root cause the sprint retrospective surfaced for why the ticket took longer than estimated?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">The engineer assigned to the ticket lacked sufficient programming skill.</button>
+      <button class="quiz-choice" data-correct="true">The requirements weren't fully clarified upfront, confirming the cost of ambiguity caught late rather than early.</button>
+      <button class="quiz-choice" data-correct="false">The version control system was down for part of the sprint.</button>
+      <button class="quiz-choice" data-correct="false">The team failed to write a Kanban board for the sprint.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The retrospective traced the delay back to Lesson 3's exact warning about the cost of unclear requirements.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="deliberate">
+    <p class="quiz-prompt">4. Fill in the blank: naming a shortcut explicitly, with a follow-up ticket, turns it into ___ technical debt instead of an accidental gap nobody remembers.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Deliberate debt is the tracked, chosen kind Lesson 17 distinguished from accidental debt.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="engineering">
+    <p class="quiz-prompt">5. Fill in the blank: tracing one ordinary feature through every unit's practice is what separates writing correct code from software ___ — the distinction this course opened with in Lesson 1.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>This closing lesson exists specifically to show all of Lesson 1's abstract distinction playing out concretely, together, on one feature.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Revisit any of this course's earlier "Go to the source" links whenever a step above feels unfamiliar — Pro Git for version control, the Gang of Four and Refactoring Guru for patterns, Martin Fowler's site for architecture and technical debt, Google's engineering practices for review, and the Scrum Guide for agile process.</p>
+
+  <p class="ask-teacher">Stuck on anything above, or want to talk through how a feature you've actually built maps onto these same steps? Ask your teacher — that's what I'm here for. This is the final lesson in Software Engineering — congratulations on completing the course.</p>
+
+  <footer class="lesson-footer">STEM+ · Software Engineering · Lesson 21 of the course sequence</footer>
+</div>

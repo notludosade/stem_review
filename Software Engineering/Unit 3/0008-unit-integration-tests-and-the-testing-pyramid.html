@@ -1,0 +1,113 @@
+<meta charset="UTF-8">
+<title>Lesson 8: Unit Tests, Integration Tests, and the Testing Pyramid — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Software Engineering · Unit 3 · Lesson 8</span>
+  <h1>Unit Tests, Integration Tests, and the Testing Pyramid</h1>
+  <p class="subtitle">Why most of a test suite should be small and fast, with fewer, slower tests checking how pieces work together.</p>
+  <p class="nav-links"><a href="0007-why-we-test-confidence-not-perfection.html" class="nav-prev">← Lesson 7</a> <a href="0009-test-driven-development-and-testable-code.html" class="nav-next">Lesson 9 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Lesson 7 established why tests exist. Not all tests are the same kind of check, though — they operate at different scopes, with different costs. This lesson covers the two most common categories, and the shape a healthy test suite should actually have across them.</p>
+
+  <h2>Unit tests: one small piece, in isolation</h2>
+  <div class="box">
+    <span class="box-label">A unit test checks one function or class, on its own</span>
+    A <strong>unit test</strong> verifies a single, small piece of code — typically one function or method — in isolation from the rest of the system. Anything that piece depends on (a database, a network call, another class) is typically replaced with a fake stand-in so the test only measures the one piece of logic being checked.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Example</span>
+    <pre class="code-block"><code>def test_calculate_discount_applies_percentage():
+    assert calculate_discount(price=100, percent=20) == 80</code></pre>
+    This test checks exactly one function, with no database, no network, and no other part of the system involved. It runs in milliseconds and, if it fails, points at almost exactly one place to look.
+  </div>
+
+  <h2>Integration tests: do the pieces work together?</h2>
+  <div class="box">
+    <span class="box-label">An integration test checks multiple real pieces working together</span>
+    An <strong>integration test</strong> verifies that several components — often including real infrastructure like a database or an external API — work correctly together, not in isolation. It answers a question a unit test can't: does the wiring between pieces, each individually correct, actually work when combined?
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Example</span>
+    A unit test can confirm <span class="inline-code">calculate_discount()</span> works correctly on its own. An integration test instead places a real order through the actual checkout flow — hitting a real (test) database — and confirms the final charged amount reflects the discount correctly. It's slower and touches more of the system, but it catches a category of bug (like a wrong parameter passed between two individually-correct functions) that isolated unit tests structurally cannot.
+  </div>
+
+  <h2>The testing pyramid: why most tests should be unit tests</h2>
+  <div class="box why">
+    <span class="box-label">Why the balance between the two matters, not just having both</span>
+    The <strong>testing pyramid</strong> describes the recommended shape of a healthy test suite: many fast, cheap unit tests forming a wide base, and a much smaller number of slower, more expensive integration tests above them. Unit tests are fast and isolate failures precisely, so a team can afford thousands of them; integration tests are slower and touch more moving parts (a database, a network), so having too many makes the whole suite slow and unreliable without adding proportional value.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why an inverted pyramid is a common, costly mistake</span>
+    A team that writes mostly integration tests and few unit tests ends up with a test suite that's slow to run, flaky (failing for reasons unrelated to the actual code, like a database timing hiccup), and unhelpful when it fails, since a failure in a test touching ten components doesn't say which one broke. The pyramid shape isn't a stylistic preference — it's what keeps a large test suite fast enough and precise enough to actually be run constantly, which is the entire point of Lesson 7's argument.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What distinguishes a unit test from an integration test?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Unit tests are only used for user interface code, integration tests only for backend code.</button>
+      <button class="quiz-choice" data-correct="true">A unit test checks one small piece in isolation; an integration test checks multiple real pieces working together.</button>
+      <button class="quiz-choice" data-correct="false">Unit tests are written by junior engineers, integration tests by senior engineers.</button>
+      <button class="quiz-choice" data-correct="false">There is no real difference — the terms are interchangeable.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Scope of what's being checked is the actual distinction — isolated single-piece versus multiple real pieces combined.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why should a healthy test suite have far more unit tests than integration tests?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because integration tests are always wrong and shouldn't be trusted.</button>
+      <button class="quiz-choice" data-correct="true">Because unit tests are fast and isolate failures precisely, while too many slow, complex integration tests make the whole suite slow and flaky.</button>
+      <button class="quiz-choice" data-correct="false">Because integration tests are illegal to run in most CI systems.</button>
+      <button class="quiz-choice" data-correct="false">Because unit tests are the only kind of test that can ever catch a real bug.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The pyramid shape balances speed and precision (unit tests) against realistic end-to-end coverage (fewer integration tests).</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. What kind of bug can an integration test catch that an isolated unit test structurally cannot?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">A typo inside a single function's own logic.</button>
+      <button class="quiz-choice" data-correct="true">A wrong parameter or miscommunication between two individually-correct components combined together.</button>
+      <button class="quiz-choice" data-correct="false">A syntax error that prevents the code from compiling at all.</button>
+      <button class="quiz-choice" data-correct="false">A missing semicolon in the source code.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Unit tests isolate one piece, so bugs in how correctly-working pieces interact are exactly what only an integration test can reveal.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="pyramid">
+    <p class="quiz-prompt">4. Fill in the blank: the testing ___ describes a healthy test suite as many fast unit tests at the base, with far fewer, slower integration tests above them.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The pyramid shape reflects the tradeoff between a test's speed/precision and its realism.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="flaky">
+    <p class="quiz-prompt">5. Fill in the blank: a test that fails intermittently for reasons unrelated to the actual code being tested — like a timing hiccup — is called ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Flaky tests are a specific, costly failure mode that's more common the more infrastructure a test touches.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: Martin Fowler's <a href="https://martinfowler.com/bliki/TestPyramid.html">"TestPyramid"</a> is the original, widely-cited source for this exact model of test suite shape.</p>
+
+  <p class="ask-teacher">Stuck on anything above, or want help sorting your own tests into unit vs. integration? Ask your teacher — that's what I'm here for. Next up: test-driven development and writing testable code.</p>
+
+  <footer class="lesson-footer">STEM+ · Software Engineering · Lesson 8 of the course sequence</footer>
+</div>

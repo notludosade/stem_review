@@ -1,0 +1,127 @@
+<meta charset="UTF-8">
+<title>Lesson 16: Coupling, Cohesion, and Separation of Concerns — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Software Engineering · Unit 5 · Lesson 16</span>
+  <h1>Coupling, Cohesion, and Separation of Concerns</h1>
+  <p class="subtitle">The two properties that predict how painful a codebase is to change, and the principle that keeps both in check.</p>
+  <p class="nav-links"><a href="0015-monoliths-vs-microservices.html" class="nav-prev">← Lesson 15</a> <a href="0017-technical-debt-borrowing-against-the-future.html" class="nav-next">Lesson 17 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Lesson 15 promised that Lesson 16 would explain what makes a monolith "well-structured" rather than just one large tangle of code. Two properties — coupling and cohesion — largely determine that, regardless of whether a system is a monolith or split into microservices.</p>
+
+  <h2>Coupling: how entangled two components are</h2>
+  <div class="box why">
+    <span class="box-label">Why low coupling is the goal</span>
+    <strong>Coupling</strong> measures how much one component depends on the internal details of another. High coupling means changing one component frequently forces changes in another, unrelated-seeming one too — exactly the kind of hidden dependency Unit 4's Singleton discussion warned about. Low coupling means components can be changed, tested, and understood largely on their own.
+  </div>
+
+  <span class="code-label is-bad">Tightly coupled</span>
+  <pre class="code-block code-bad"><code>class OrderProcessor:
+    def process(self, order):
+        db = MySQLDatabase("prod-server", "orders_db")
+        db.execute(f"UPDATE inventory SET qty=qty-1 WHERE id={order.item_id}")
+        # OrderProcessor now knows MySQL syntax, the server address,
+        # and the exact schema of the inventory table</code></pre>
+  <span class="code-label is-good">Loosely coupled</span>
+  <pre class="code-block code-good"><code>class OrderProcessor:
+    def __init__(self, inventory):
+        self._inventory = inventory
+    def process(self, order):
+        self._inventory.decrement(order.item_id)
+        # OrderProcessor only knows "inventory can decrement an item" —
+        # nothing about how, or what database is behind it</code></pre>
+  <div class="box">
+    <span class="box-label">Why the second version is better</span>
+    Changing the database technology, or testing <span class="inline-code">OrderProcessor</span> with a fake inventory (Unit 3's testability discussion again), no longer requires touching <span class="inline-code">OrderProcessor</span> at all — it only knows about a small, stable interface, not the implementation behind it.
+  </div>
+
+  <h2>Cohesion: whether a component does one clear job</h2>
+  <div class="box why">
+    <span class="box-label">Why high cohesion is the goal</span>
+    <strong>Cohesion</strong> measures how closely the responsibilities inside a single component relate to each other. A highly cohesive class does one clear job, with all its pieces working toward that same purpose. A low-cohesion class bundles unrelated responsibilities together, which makes it harder to name, harder to understand, and more likely that an unrelated change forces you to touch it anyway.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Example</span>
+    A <span class="inline-code">UserManager</span> class that handles authentication, sends marketing emails, and generates PDF invoices has low cohesion — those three responsibilities have nothing to do with each other, and a change to invoice formatting risks breaking authentication code that happens to live in the same class. Splitting it into <span class="inline-code">Authenticator</span>, <span class="inline-code">EmailSender</span>, and <span class="inline-code">InvoiceGenerator</span> gives each class one clear, cohesive job.
+  </div>
+
+  <h2>Separation of concerns: the principle behind both</h2>
+  <div class="box why">
+    <span class="box-label">Why this is the unifying idea</span>
+    <strong>Separation of concerns</strong> is the broader design principle that low coupling and high cohesion both serve: each part of a system should be responsible for one distinct concern, with clear boundaries between concerns. Coupling and cohesion are the two measurable signals that tell you whether separation of concerns is actually being achieved — high cohesion means each piece has one job, low coupling means the pieces don't secretly depend on each other's internals to do it.
+  </div>
+
+  <h2>Why this connects back to Unit 5's whole thread</h2>
+  <div class="box">
+    <span class="box-label">This is what "well-structured" means at every scale</span>
+    A monolith with high coupling and low cohesion is genuinely painful to work in, regardless of it technically being "just one codebase" — while a well-separated monolith, with clear internal boundaries, can stay maintainable far longer than Lesson 15 might suggest, and is also what makes splitting it into microservices later (if a real constraint ever demands it) tractable instead of a total rewrite.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What does high coupling between two components mean?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">The two components run in the same process for better performance.</button>
+      <button class="quiz-choice" data-correct="true">One component depends heavily on the internal details of the other, so changing one often forces changes in the other.</button>
+      <button class="quiz-choice" data-correct="false">The two components were written by the same engineer.</button>
+      <button class="quiz-choice" data-correct="false">The two components share the exact same class name.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>High coupling means changes ripple between components because one depends on the other's internal details, not just its interface.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. What does low cohesion inside a single class look like?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">The class has too many unit tests written for it.</button>
+      <button class="quiz-choice" data-correct="true">The class bundles unrelated responsibilities together, like authentication and PDF generation in one place.</button>
+      <button class="quiz-choice" data-correct="false">The class has too few lines of code to be useful.</button>
+      <button class="quiz-choice" data-correct="false">The class depends on too many external libraries.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Low cohesion is specifically about unrelated responsibilities being bundled into one place instead of each piece having one clear job.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. How do coupling and cohesion relate to the broader principle of separation of concerns?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">They are unrelated principles that happen to share this lesson.</button>
+      <button class="quiz-choice" data-correct="true">Low coupling and high cohesion are the two measurable signals that tell you whether separation of concerns is actually being achieved.</button>
+      <button class="quiz-choice" data-correct="false">Coupling only matters for microservices, cohesion only matters for monoliths.</button>
+      <button class="quiz-choice" data-correct="false">Separation of concerns replaces the need to think about coupling or cohesion at all.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Coupling and cohesion are the concrete, checkable signals underneath the broader separation-of-concerns principle.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="coupling">
+    <p class="quiz-prompt">4. Fill in the blank: ___ measures how much one component depends on another's internal details, rather than just a small, stable interface.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Coupling is the term for how entangled two components' internal details are with each other.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="cohesion">
+    <p class="quiz-prompt">5. Fill in the blank: high ___ means a component's responsibilities all clearly relate to one single, well-defined purpose.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Cohesion measures how tightly a component's own internal responsibilities relate to each other.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: Martin Fowler's <a href="https://martinfowler.com/ieeeSoftware/coupling.pdf">"Reduce Coupling and Increase Cohesion"</a> covers both properties in depth with concrete refactoring examples.</p>
+
+  <p class="ask-teacher">Stuck on anything above, or want help spotting a low-cohesion class in your own codebase? Ask your teacher — that's what I'm here for. Next up: technical debt — borrowing against the future.</p>
+
+  <footer class="lesson-footer">STEM+ · Software Engineering · Lesson 16 of the course sequence</footer>
+</div>

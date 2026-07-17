@@ -1,0 +1,115 @@
+<meta charset="UTF-8">
+<title>Lesson 15: Monoliths vs. Microservices — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Software Engineering · Unit 5 · Lesson 15</span>
+  <h1>Monoliths vs. Microservices</h1>
+  <p class="subtitle">One deployable system versus many independent services — and why neither is a universal upgrade over the other.</p>
+  <p class="nav-links"><a href="0014-what-software-architecture-actually-means.html" class="nav-prev">← Lesson 14</a> <a href="0016-coupling-cohesion-and-separation-of-concerns.html" class="nav-next">Lesson 16 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Lesson 14 established that architecture serves a system's real constraints. The monolith-versus-microservices choice is the most cited example of exactly that trade-off in modern practice — and one of the most commonly misjudged, since microservices are often reached for as a default "best practice" rather than a fit for a specific situation.</p>
+
+  <h2>Monolith: one codebase, one deployable unit</h2>
+  <div class="box">
+    <span class="box-label">What a monolith is</span>
+    A <strong>monolithic</strong> architecture builds an entire application as a single, unified codebase, deployed and run as one unit. Every part of the system runs in the same process and can call other parts directly, as ordinary function calls.
+  </div>
+  <div class="box why">
+    <span class="box-label">Why monoliths are usually the right starting point</span>
+    A monolith is simpler to develop, test, and deploy: one codebase to check out, one thing to run locally, no network calls between components to reason about or fail. For a new product, especially with a small team and requirements that are still actively changing, this simplicity is a genuine advantage, not just a lack of ambition — most successful large systems, including many now run as microservices, started as monoliths.
+  </div>
+
+  <h2>Microservices: many small, independently deployable services</h2>
+  <div class="box">
+    <span class="box-label">What microservices are</span>
+    A <strong>microservices</strong> architecture splits a system into multiple small, independent services, each responsible for one specific piece of functionality, communicating over a network (commonly via HTTP or message queues) rather than as direct in-process function calls.
+  </div>
+  <div class="box why">
+    <span class="box-label">Why large organizations adopt microservices</span>
+    Independent services can be developed, tested, deployed, and scaled separately by separate teams — a real advantage once an organization has grown large enough that many teams working in one shared monolith start blocking each other, or once one specific part of the system needs to scale independently from the rest.
+  </div>
+
+  <h2>The real cost of microservices</h2>
+  <div class="box why">
+    <span class="box-label">Why microservices aren't a free upgrade</span>
+    Splitting a system into services introduces real, non-optional complexity: network calls can fail in ways in-process function calls never do, data that used to live in one place is now spread across multiple services with no single shared database, and testing (Unit 3) needs meaningfully more integration-level coverage to verify services still work correctly together. None of this complexity disappears — it's traded for the independence benefit, and for a small team or an early-stage product, that trade is very often a net loss, not a win.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Example</span>
+    A five-person startup splits its product into twelve microservices from day one, expecting to "scale like a big tech company." Instead, the team spends most of its time debugging network failures between services and keeping a dozen separate deployments in sync — complexity a monolith would never have introduced, for a system that, at five people, has no actual scaling or team-independence problem yet to solve.
+  </div>
+
+  <h2>The actual decision framework</h2>
+  <div class="box">
+    <span class="box-label">Ask the constraint question, not the trend question</span>
+    Per Lesson 14, the right question is never "which is more modern" — it's which specific constraints this system actually has right now: is more than one team genuinely blocking on the same shared codebase? Does one specific part of the system have a scaling need wildly different from the rest? If neither is true yet, a monolith remains the simpler, usually correct choice — and per Unit 4's YAGNI principle, a well-structured monolith (Lesson 16 covers exactly what "well-structured" means) can often be split into services later, once a real constraint actually appears.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What fundamentally distinguishes a microservices architecture from a monolith?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Microservices are always written in a different programming language than monoliths.</button>
+      <button class="quiz-choice" data-correct="true">Microservices split a system into small, independently deployable services communicating over a network, rather than one unified codebase in one process.</button>
+      <button class="quiz-choice" data-correct="false">Microservices don't require any automated testing.</button>
+      <button class="quiz-choice" data-correct="false">Monoliths can only be used for very small, unimportant projects.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Independent deployability and network-based communication between separate services is the core structural difference.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why is a monolith often the right starting point for a new product with a small team?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because monoliths are always faster to execute at runtime than microservices.</button>
+      <button class="quiz-choice" data-correct="true">Because it's simpler to develop, test, and deploy as one unit, with no network calls between components to reason about.</button>
+      <button class="quiz-choice" data-correct="false">Because microservices are illegal for companies with fewer than 50 employees.</button>
+      <button class="quiz-choice" data-correct="false">Because monoliths never need to be tested.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Simplicity of development and deployment is the concrete advantage a monolith offers a small, early-stage team.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. According to the lesson, what should actually drive the choice between a monolith and microservices?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Whichever approach is currently more popular in the industry.</button>
+      <button class="quiz-choice" data-correct="true">Whether the system currently has real constraints — like multiple teams blocking on shared code, or one part needing to scale independently.</button>
+      <button class="quiz-choice" data-correct="false">The personal preference of whichever engineer joined the team most recently.</button>
+      <button class="quiz-choice" data-correct="false">Whichever approach uses fewer total files.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Real, current constraints — not trend or popularity — should drive this specific architectural trade-off.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="monolith">
+    <p class="quiz-prompt">4. Fill in the blank: a ___ builds an entire application as a single, unified codebase deployed and run as one unit.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Monolith is the term for this single-codebase, single-deployment architectural style.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="network">
+    <p class="quiz-prompt">5. Fill in the blank: microservices communicate over a ___ instead of as direct in-process function calls, which introduces new failure modes a monolith never has.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Network calls between services can fail in ways an in-process function call structurally cannot.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: Martin Fowler's <a href="https://martinfowler.com/bliki/MonolithFirst.html">"MonolithFirst"</a> is the widely-cited practitioner argument for starting with a monolith and splitting into services only once a real need appears.</p>
+
+  <p class="ask-teacher">Stuck on anything above, or want help thinking through which architecture actually fits a project you have in mind? Ask your teacher — that's what I'm here for. Next up: coupling, cohesion, and separation of concerns.</p>
+
+  <footer class="lesson-footer">STEM+ · Software Engineering · Lesson 15 of the course sequence</footer>
+</div>

@@ -1,0 +1,101 @@
+<meta charset="UTF-8">
+<title>Lesson 14: What Software Architecture Actually Means — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Software Engineering · Unit 5 · Lesson 14</span>
+  <h1>What Software Architecture Actually Means</h1>
+  <p class="subtitle">The high-level structural decisions that are expensive to change later, and why they deserve more upfront care than the rest.</p>
+  <p class="nav-links"><a href="../Unit%204/0013-when-not-to-use-a-pattern.html" class="nav-prev">← Unit 4, Lesson 13</a> <a href="0015-monoliths-vs-microservices.html" class="nav-next">Lesson 15 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Unit 4 covered patterns — decisions about the shape of individual classes and small groups of them. <strong>Software architecture</strong> operates one level up: the high-level structural decisions about how a whole system is organized, decisions that are dramatically more expensive to change once made.</p>
+
+  <h2>What makes a decision "architectural"</h2>
+  <div class="box why">
+    <span class="box-label">Why some decisions are architectural and most aren't</span>
+    Most decisions an engineer makes day to day — naming a variable, choosing between two ways to loop over a list — are cheap to change later, usually a small, local edit. An <strong>architectural decision</strong> is one that's expensive and disruptive to reverse once a system is built around it: how the system is split into major components, how those components communicate, and what technology each layer depends on. The defining test isn't how important a decision feels — it's how expensive it would be to undo.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Example</span>
+    Choosing whether a function returns a list or a generator is a normal, cheap-to-reverse implementation decision. Choosing whether a system's components communicate by calling each other's functions directly in the same process, or by sending messages over a network as separate services, is architectural — reversing it later means touching nearly every part of the system, not a single function.
+  </div>
+
+  <h2>Why architecture deserves more upfront care</h2>
+  <div class="box why">
+    <span class="box-label">Why "we'll fix it later" doesn't apply the same way here</span>
+    Lesson 13's YAGNI principle argued against overbuilding flexibility speculatively — and that advice still holds for most decisions. Architecture is the deliberate exception: because these specific decisions are so expensive to reverse, they're worth genuinely more upfront analysis than an ordinary implementation choice, precisely because "add it later, cheaply, with tests" — the safety net Lesson 13 relied on — doesn't apply nearly as well once a system's fundamental structure is already built around a different assumption.
+  </div>
+
+  <h2>Architecture serves the system's actual constraints</h2>
+  <div class="box">
+    <span class="box-label">There is no universally "best" architecture</span>
+    Architectural decisions exist to serve specific, real constraints a system faces — expected scale, team size, how independently different parts need to be developed and deployed, reliability requirements. A structure that's exactly right for one system's constraints can be actively wrong for another's, which is why the next lesson, comparing monoliths and microservices, frames the choice entirely around trade-offs rather than picking a universal winner.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What is the defining test for whether a decision counts as "architectural"?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Whether the decision was made by the most senior engineer on the team.</button>
+      <button class="quiz-choice" data-correct="true">How expensive and disruptive it would be to reverse once the system is built around it.</button>
+      <button class="quiz-choice" data-correct="false">Whether the decision involves more than 100 lines of code.</button>
+      <button class="quiz-choice" data-correct="false">Whether the decision is documented in a formal specification.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Cost of reversal, not perceived importance or code volume, is what actually distinguishes an architectural decision.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why does YAGNI's "add it later" advice apply less cleanly to architectural decisions than to most other decisions?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because YAGNI was never intended to apply to any part of software engineering.</button>
+      <button class="quiz-choice" data-correct="true">Because architectural decisions are so expensive to reverse that the safety-net refactor Lesson 13 relied on doesn't apply nearly as well.</button>
+      <button class="quiz-choice" data-correct="false">Because architecture decisions are always made before any code exists, so YAGNI is irrelevant by definition.</button>
+      <button class="quiz-choice" data-correct="false">Because architectural decisions are legally required to be finalized before writing any tests.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The high reversal cost is exactly why architecture gets more upfront deliberation than an ordinary implementation choice.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why is there no single "best" software architecture that fits every system?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because architecture is a matter of personal taste with no real technical consequences.</button>
+      <button class="quiz-choice" data-correct="true">Because architectural decisions exist to serve a specific system's real constraints, and those constraints differ system to system.</button>
+      <button class="quiz-choice" data-correct="false">Because no two programming languages support the same architectural styles.</button>
+      <button class="quiz-choice" data-correct="false">Because architecture only matters for systems with more than a million users.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Scale, team size, and reliability needs vary by system, which is exactly why architecture is a trade-off decision, not a universal best-practice checklist.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="reverse">
+    <p class="quiz-prompt">4. Fill in the blank: an architectural decision is one that would be expensive and disruptive to ___ once the system is already built around it.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Reversal cost is the defining test for whether a decision is architectural.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="constraints">
+    <p class="quiz-prompt">5. Fill in the blank: architectural decisions should be chosen to serve a system's actual ___ — scale, team size, reliability needs — not a universally "correct" structure.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Real constraints, not universal best practices, are what should actually drive an architectural choice.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: Martin Fowler's <a href="https://martinfowler.com/architecture/">"Software Architecture Guide"</a> covers this same expensive-to-reverse framing as one of the field's most cited practitioner sources.</p>
+
+  <p class="ask-teacher">Stuck on anything above, or want help identifying which decisions in your own project are actually architectural? Ask your teacher — that's what I'm here for. Next up: monoliths vs. microservices.</p>
+
+  <footer class="lesson-footer">STEM+ · Software Engineering · Lesson 14 of the course sequence</footer>
+</div>

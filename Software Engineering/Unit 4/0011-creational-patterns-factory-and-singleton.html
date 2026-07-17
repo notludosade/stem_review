@@ -1,0 +1,123 @@
+<meta charset="UTF-8">
+<title>Lesson 11: Creational Patterns: Factory and Singleton — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Software Engineering · Unit 4 · Lesson 11</span>
+  <h1>Creational Patterns: Factory and Singleton</h1>
+  <p class="subtitle">Two patterns for controlling how objects get created — and why Singleton is more often misused than needed.</p>
+  <p class="nav-links"><a href="0010-why-design-patterns-exist.html" class="nav-prev">← Lesson 10</a> <a href="0012-structural-and-behavioral-patterns.html" class="nav-next">Lesson 12 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Lesson 10 introduced patterns as a shared vocabulary. This lesson covers the first category: <strong>creational patterns</strong>, which deal with controlling how and when objects get created, rather than leaving object creation scattered and duplicated throughout a codebase.</p>
+
+  <h2>Factory: centralizing object creation logic</h2>
+  <div class="box why">
+    <span class="box-label">Why creating objects directly, everywhere, becomes a problem</span>
+    When object creation involves a decision (which subclass to create, based on some condition) and that logic is copy-pasted at every place an object is needed, changing the decision later means hunting down and updating every copy. A <strong>Factory</strong> centralizes that decision in one place: callers ask the factory for an object and get back the right kind, without needing to know or duplicate the decision logic themselves.
+  </div>
+
+  <span class="code-label is-bad">Creation logic scattered everywhere</span>
+  <pre class="code-block code-bad"><code>if payment_type == "credit_card":
+    processor = CreditCardProcessor()
+elif payment_type == "paypal":
+    processor = PayPalProcessor()
+elif payment_type == "crypto":
+    processor = CryptoProcessor()
+# ...this same block copy-pasted in five other files</code></pre>
+  <span class="code-label is-good">Centralized in a Factory</span>
+  <pre class="code-block code-good"><code>def create_payment_processor(payment_type):
+    processors = {
+        "credit_card": CreditCardProcessor,
+        "paypal": PayPalProcessor,
+        "crypto": CryptoProcessor,
+    }
+    return processors[payment_type]()
+
+processor = create_payment_processor(payment_type)</code></pre>
+  <div class="box">
+    <span class="box-label">Why this is better</span>
+    Adding a new payment type now means changing one function in one place, instead of finding and updating every scattered copy of the decision — exactly the kind of change-safety Unit 3's testable-code discussion was also pointing at.
+  </div>
+
+  <h2>Singleton: guaranteeing exactly one instance</h2>
+  <div class="box">
+    <span class="box-label">What Singleton actually guarantees</span>
+    A <strong>Singleton</strong> ensures a class has exactly one instance across the entire program, and provides one global point of access to it — commonly used for things like a single shared configuration object or a single connection pool.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why Singleton is the most misused pattern in this unit</span>
+    Singleton is frequently reached for whenever a class "should probably only exist once" — but the global, shared access point it provides makes code harder to test (Unit 3's Lesson 9 covered exactly this: hidden global dependencies are hard to substitute with fakes) and can hide surprising coupling between unrelated parts of a system that secretly share the same global state. Many experienced engineers now recommend passing a single shared instance explicitly as a parameter (called <strong>dependency injection</strong>) over using an actual Singleton, specifically to avoid that hidden global.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Example</span>
+    A global <span class="inline-code">Logger</span> singleton seems harmless, until a test wants to check what got logged during one specific function call — it has no clean way to isolate its own logger instance from every other test running in the same process, since they all silently share the exact same global singleton.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What specific problem does a Factory pattern solve?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">It guarantees a class can only ever have one instance.</button>
+      <button class="quiz-choice" data-correct="true">It centralizes object-creation decision logic in one place instead of duplicating it everywhere an object is needed.</button>
+      <button class="quiz-choice" data-correct="false">It automatically writes unit tests for every object it creates.</button>
+      <button class="quiz-choice" data-correct="false">It converts a class into an abstract interface.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A Factory's whole purpose is centralizing "which object to create" logic in one maintainable place.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. What does a Singleton guarantee?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">That a class can never be instantiated at all.</button>
+      <button class="quiz-choice" data-correct="true">That a class has exactly one instance across the whole program, accessible from a single global point.</button>
+      <button class="quiz-choice" data-correct="false">That a class's constructor runs faster than normal.</button>
+      <button class="quiz-choice" data-correct="false">That a class automatically becomes thread-safe.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Exactly one instance, globally accessible, is the specific guarantee Singleton provides.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why do many experienced engineers avoid Singleton in favor of passing a shared instance explicitly (dependency injection)?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because Singleton is slower to run than passing parameters explicitly.</button>
+      <button class="quiz-choice" data-correct="true">Because Singleton's hidden global access makes code harder to test and can hide surprising coupling between unrelated components.</button>
+      <button class="quiz-choice" data-correct="false">Because Singleton is not supported in most modern programming languages.</button>
+      <button class="quiz-choice" data-correct="false">Because Singleton requires significantly more code to implement than a Factory.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The hidden-dependency problem connects directly back to Unit 3's testability discussion — global state is hard to fake in a test.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="factory">
+    <p class="quiz-prompt">4. Fill in the blank: a ___ centralizes object-creation decision logic so callers don't need to know or duplicate it themselves.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Factory is the creational pattern specifically about centralizing creation decisions.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="injection">
+    <p class="quiz-prompt">5. Fill in the blank: dependency ___ — explicitly passing a shared instance as a parameter — is often preferred over Singleton, since it avoids hidden global state.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Dependency injection makes a shared dependency explicit and swappable, unlike Singleton's hidden global access point.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: Refactoring Guru's <a href="https://refactoring.guru/design-patterns/singleton">"Singleton"</a> page covers both the pattern's intent and the exact drawbacks that make it controversial in modern practice.</p>
+
+  <p class="ask-teacher">Stuck on anything above, or want help deciding whether a Factory or Singleton actually fits something you're building? Ask your teacher — that's what I'm here for. Next up: structural and behavioral patterns — Adapter, Observer, and Strategy.</p>
+
+  <footer class="lesson-footer">STEM+ · Software Engineering · Lesson 11 of the course sequence</footer>
+</div>

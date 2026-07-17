@@ -1,0 +1,124 @@
+<meta charset="UTF-8">
+<title>Lesson 31: The Riemann Integral — STEM+</title>
+<link rel="stylesheet" href="../../../assets/style.css">
+<script src="../../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Real Analysis A · Unit 6 · Lesson 31</span>
+  <h1>The Riemann Integral</h1>
+  <p class="subtitle">The definite integral, defined at last as a single squeezed number — and a clean test for when that squeeze actually pins one down.</p>
+  <p class="nav-links"><a href="0030-partitions-and-upper-and-lower-sums.html" class="nav-prev">← Lesson 30</a> <a href="0032-properties-of-the-integral.html" class="nav-next">Lesson 32 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Lesson 30's corollary showed every lower sum is ≤ every upper sum. That means the set of all lower sums is bounded above (by any upper sum) and the set of all upper sums is bounded below (by any lower sum) — so both have a sup and inf, by Completeness (Unit 1). This lesson uses those two numbers to define the integral.</p>
+
+  <div class="box">
+    <span class="box-label">Definition — Upper and Lower Integrals</span>
+    Let f be bounded on [a,b]. The <strong>upper integral</strong> is <span class="expr">U(f) = inf{U(f,P) : P a partition of [a,b]}</span>, and the <strong>lower integral</strong> is <span class="expr">L(f) = sup{L(f,P) : P a partition of [a,b]}</span>.
+  </div>
+  <div class="box">
+    <span class="box-label">Fact</span>
+    L(f) ≤ U(f) always (an immediate consequence of Lesson 30's corollary: since every lower sum is ≤ every upper sum, the sup of the lower sums is ≤ the inf of the upper sums).
+  </div>
+
+  <div class="box">
+    <span class="box-label">Definition — Riemann Integrability</span>
+    f is <strong>Riemann integrable</strong> on [a,b] if L(f) = U(f). In that case, the <strong>Riemann integral</strong> is defined as <span class="expr">∫<sub>a</sub><sup>b</sup> f = L(f) = U(f)</span>.
+  </div>
+  <div class="box why">
+    <span class="box-label">Why this matches the AP Calc BC picture</span>
+    L(f) is the best possible lower bound achievable by inscribed rectangles, and U(f) is the best possible upper bound achievable by circumscribed rectangles. When these two "best squeezes" meet at the same number, that shared number is unambiguously "the area under the curve" — no matter which sample points, partitions, or limiting process would have been used informally.
+  </div>
+
+  <h2>A workable test for integrability</h2>
+  <div class="box">
+    <span class="box-label">Theorem — Cauchy Criterion for Integrability</span>
+    f (bounded on [a,b]) is Riemann integrable if and only if for every ε &gt; 0, there exists a partition P such that U(f,P) − L(f,P) &lt; ε.
+  </div>
+  <div class="box">
+    <span class="box-label">Proof sketch</span>
+    (⇐) If such P exists for every ε, then U(f) − L(f) ≤ U(f,P) − L(f,P) &lt; ε for every ε &gt; 0, forcing U(f) − L(f) = 0. (⇒) If L(f) = U(f), then since U(f) is an inf, some P₁ has U(f,P₁) &lt; U(f) + ε/2; since L(f) is a sup, some P₂ has L(f,P₂) &gt; L(f) − ε/2. Let P = P₁ ∪ P₂ (common refinement, Lesson 30). Then U(f,P) − L(f,P) ≤ U(f,P₁) − L(f,P₂) &lt; (U(f)+ε/2) − (L(f)−ε/2) = ε (using L(f)=U(f)). ∎
+  </div>
+  <div class="box why">
+    <span class="box-label">Why this criterion is the one actually used in practice</span>
+    Directly computing U(f) and L(f) as a sup/inf over <em>all</em> partitions is unwieldy. The Cauchy Criterion instead asks only for <em>one</em> good-enough partition per ε — a direct parallel to Unit 2's Cauchy sequences, where you never needed the limit itself, just eventual closeness of terms to each other. Here, "closeness" means the upper and lower sums for a single partition are close to each other.
+  </div>
+
+  <h2>Continuous functions are integrable</h2>
+  <div class="box">
+    <span class="box-label">Theorem</span>
+    If f is continuous on [a,b], then f is Riemann integrable on [a,b].
+  </div>
+  <div class="box">
+    <span class="box-label">Proof</span>
+    Since f is continuous on the compact set [a,b], f is uniformly continuous (Unit 4, Lesson 24). Given ε &gt; 0, uniform continuity gives δ &gt; 0 such that |x − y| &lt; δ implies |f(x) − f(y)| &lt; ε/(b−a). Choose a partition P with every subinterval of length &lt; δ. On each subinterval [x<sub>i−1</sub>,x<sub>i</sub>], the Extreme Value Theorem (Unit 4, Lesson 23) guarantees f attains its sup M<sub>i</sub> and inf m<sub>i</sub> at points within that subinterval, so those two points are within δ of each other, giving M<sub>i</sub> − m<sub>i</sub> &lt; ε/(b−a). Then U(f,P) − L(f,P) = Σ(M<sub>i</sub>−m<sub>i</sub>)(x<sub>i</sub>−x<sub>i−1</sub>) &lt; [ε/(b−a)]·Σ(x<sub>i</sub>−x<sub>i−1</sub>) = [ε/(b−a)]·(b−a) = ε. By the Cauchy Criterion, f is integrable. ∎
+  </div>
+  <div class="box why">
+    <span class="box-label">Why this proof needed uniform, not just ordinary, continuity</span>
+    A single δ had to work for <em>every</em> subinterval of the partition simultaneously — exactly the "one δ serves the whole domain" guarantee uniform continuity provides and ordinary continuity does not (Unit 4, Lesson 24). This is precisely why that lesson's extra work, proving continuous-on-compact implies uniformly continuous, pays off here.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. When is a bounded function f Riemann integrable on [a,b]?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Whenever f is bounded, with no further condition.</button>
+      <button class="quiz-choice" data-correct="true">When the upper integral U(f) equals the lower integral L(f).</button>
+      <button class="quiz-choice" data-correct="false">Whenever f is monotone.</button>
+      <button class="quiz-choice" data-correct="false">Whenever a single partition gives U(f,P) = L(f,P) exactly.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Integrability means the sup of all lower sums and the inf of all upper sums coincide at a single shared value.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. What does the Cauchy Criterion for Integrability let you avoid computing directly?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">The value of f at any point.</button>
+      <button class="quiz-choice" data-correct="true">The sup and inf over the set of all partitions — instead, it suffices to exhibit one partition making U(f,P) − L(f,P) arbitrarily small.</button>
+      <button class="quiz-choice" data-correct="false">The length of the interval [a,b].</button>
+      <button class="quiz-choice" data-correct="false">Whether f is bounded.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The criterion trades a hard sup/inf-over-all-partitions computation for finding just one sufficiently fine partition per ε.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why does the continuous-implies-integrable proof specifically need uniform continuity rather than ordinary continuity?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">It doesn't — ordinary continuity would work identically.</button>
+      <button class="quiz-choice" data-correct="true">A single δ must control the oscillation of f on every subinterval of the partition at once, which is exactly what uniform continuity (and not ordinary continuity) guarantees.</button>
+      <button class="quiz-choice" data-correct="false">Because continuous functions are never bounded.</button>
+      <button class="quiz-choice" data-correct="false">Because uniform continuity implies f is a polynomial.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Uniform continuity's one-δ-fits-all-of-[a,b] guarantee is exactly what lets a single partition control every subinterval's oscillation simultaneously.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="Cauchy Criterion|Cauchy">
+    <p class="quiz-prompt">4. Fill in the blank: the ___ for Integrability tests integrability via a single partition with small U(f,P) − L(f,P), rather than computing sup/inf over all partitions.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Cauchy Criterion is the practical test proved and used in this lesson.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="uniformly continuous|uniform continuity">
+    <p class="quiz-prompt">5. Fill in the blank: continuous functions on [a,b] are integrable because continuity on a compact set upgrades to ___, giving one δ that works across the whole partition.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Uniform continuity, from Unit 4 Lesson 24, is the exact property that makes the integrability proof go through.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: Abbott's <em>Understanding Analysis</em>, Section 7.2, defines the Riemann integral and proves the Cauchy Criterion and continuous-implies-integrable theorem in full.</p>
+
+  <p class="ask-teacher">Stuck on anything above, or want to see a bounded-but-not-integrable example, like Dirichlet's function from Unit 4? Ask your teacher — that's what I'm here for. Next up: the algebraic properties of the integral — linearity, additivity, and monotonicity.</p>
+
+  <footer class="lesson-footer">STEM+ · Real Analysis A · Lesson 31 of the course sequence</footer>
+</div>

@@ -1,0 +1,122 @@
+<meta charset="UTF-8">
+<title>Lesson 13: When Not to Use a Pattern — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Software Engineering · Unit 4 · Lesson 13</span>
+  <h1>When Not to Use a Pattern</h1>
+  <p class="subtitle">Overengineering, YAGNI, and why forcing a pattern onto a simple problem often makes it worse, not better.</p>
+  <p class="nav-links"><a href="0012-structural-and-behavioral-patterns.html" class="nav-prev">← Lesson 12</a> <a href="../Unit%205/0014-what-software-architecture-actually-means.html" class="nav-next">Unit 5, Lesson 14 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Lesson 10 warned that patterns are a vocabulary, not a rulebook. This lesson makes that warning concrete: applying a pattern where the underlying problem doesn't actually exist is a common, real mistake — and one that experienced engineers specifically watch for, in themselves as much as in others.</p>
+
+  <h2>Overengineering: solving a problem you don't have yet</h2>
+  <div class="box why">
+    <span class="box-label">Why "it might need this later" is a trap</span>
+    <strong>Overengineering</strong> means building more flexibility, abstraction, or generality than a problem currently requires, usually justified by "we might need this later." The trouble is that "later" is a guess — and the guess is very often wrong, leaving behind extra complexity that every future engineer has to read, understand, and maintain, in service of a flexibility need that may never actually arrive.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Example</span>
+    <span class="inline-code">calculate_shipping()</span> from Lesson 12 has exactly one shipping method in the entire product, with no plan to add more. Building a full Strategy pattern with an interface and a class per method, for one single method, adds indirection with no present benefit — a plain function is simpler, equally correct, and easier for the next engineer to read.
+  </div>
+
+  <h2>YAGNI: "You Aren't Gonna Need It"</h2>
+  <div class="box">
+    <span class="box-label">A guiding principle against speculative generality</span>
+    <strong>YAGNI</strong> is a shorthand principle from Extreme Programming: don't build capability for a requirement you don't have yet, even if you're fairly confident you'll need it eventually. Build the simplest thing that satisfies today's actual requirement, and add the pattern later, when (and if) the second concrete case that needs it actually shows up.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why "add it later" is usually cheaper than it sounds</span>
+    Engineers often overbuild flexibility because they assume refactoring later will be expensive or risky. But Unit 3 already gave you the tool that makes "later" safe: a solid test suite. Turning a plain function into a Strategy pattern once a second real shipping method actually appears is a small, test-covered refactor — not a rewrite — which removes most of the justification for building the abstraction speculatively, before it's needed.
+  </div>
+
+  <h2>A pattern applied where the problem doesn't exist</h2>
+  <span class="code-label is-bad">Singleton for a value that isn't actually shared or scarce</span>
+  <pre class="code-block code-bad"><code>class MathConstants:
+    _instance = None
+    def __new__(cls):
+        if cls._instance is None:
+            cls._instance = super().__new__(cls)
+        return cls._instance
+    PI = 3.14159</code></pre>
+  <span class="code-label is-good">Just a constant</span>
+  <pre class="code-block code-good"><code>PI = 3.14159</code></pre>
+  <div class="box">
+    <span class="box-label">Why the plain version wins here</span>
+    Singleton exists to control access to a shared, often stateful or expensive resource. A math constant is neither shared state nor expensive to create — wrapping it in a Singleton adds real complexity (as seen in Lesson 11's testing concerns) to solve a problem that was never actually present.
+  </div>
+
+  <h2>The actual skill: recognizing the problem before reaching for the name</h2>
+  <div class="box why">
+    <span class="box-label">Why experienced engineers start from the problem, not the pattern</span>
+    A common junior mistake is to learn a pattern and then look for places to use it. The more reliable approach, and the one experienced engineers actually use, is the reverse: notice a real, current problem (duplicated creation logic, a class doing too many unrelated jobs, a family of interchangeable algorithms), and only then recognize which pattern — if any — actually fits. The pattern should follow from the problem, never the other way around.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What is overengineering, as defined in this lesson?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Writing code that runs slower than necessary.</button>
+      <button class="quiz-choice" data-correct="true">Building more flexibility or abstraction than a problem currently requires, usually justified by "we might need this later."</button>
+      <button class="quiz-choice" data-correct="false">Using too many comments to explain simple code.</button>
+      <button class="quiz-choice" data-correct="false">Writing automated tests for code that doesn't need them.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Overengineering is specifically about building for a speculative future need rather than the actual current requirement.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. What does the YAGNI principle recommend?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Build every feature you can reasonably predict you'll need eventually, right now.</button>
+      <button class="quiz-choice" data-correct="true">Build the simplest thing that satisfies today's actual requirement, and add flexibility later if a real second case appears.</button>
+      <button class="quiz-choice" data-correct="false">Never refactor code once it has been written and deployed.</button>
+      <button class="quiz-choice" data-correct="false">Always use a design pattern from the Gang of Four catalog for every class.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>YAGNI is "You Aren't Gonna Need It" — don't build for a speculative future requirement you don't actually have yet.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why does a solid test suite (Unit 3) make it safer to skip a pattern now and add it later?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because tests eliminate the need to ever refactor code at all.</button>
+      <button class="quiz-choice" data-correct="true">Because tests make a later refactor into the pattern a small, checked change rather than a risky rewrite.</button>
+      <button class="quiz-choice" data-correct="false">Because tests automatically insert design patterns into code for you.</button>
+      <button class="quiz-choice" data-correct="false">Because tests remove the need to define acceptance criteria first.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A test suite is what turns "add the abstraction later" from a risky gamble into a safe, incremental step.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="yagni">
+    <p class="quiz-prompt">4. Fill in the blank: ___ ("You Aren't Gonna Need It") is the principle against building capability for a requirement you don't have yet.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>YAGNI is the specific, named shorthand for this exact discipline from Extreme Programming.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="problem">
+    <p class="quiz-prompt">5. Fill in the blank: experienced engineers start from a real, current ___ and only then ask which pattern fits — never the reverse.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Starting from the pattern and searching for a place to use it is the exact mistake this lesson warns against.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: Martin Fowler's <a href="https://martinfowler.com/bliki/Yagni.html">"Yagni"</a> is the original, widely-cited explanation of this principle and the reasoning behind it.</p>
+
+  <p class="ask-teacher">Stuck on anything above, or want a second opinion on whether a pattern actually fits something you're building? Ask your teacher — that's what I'm here for. Next up: what software architecture actually means, starting Unit 5.</p>
+
+  <footer class="lesson-footer">STEM+ · Software Engineering · Lesson 13 of the course sequence</footer>
+</div>

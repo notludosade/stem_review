@@ -1,0 +1,104 @@
+<meta charset="UTF-8">
+<title>Lesson 33: The Fundamental Theorem of Calculus — STEM+</title>
+<link rel="stylesheet" href="../../../assets/style.css">
+<script src="../../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Real Analysis A · Unit 6 · Lesson 33</span>
+  <h1>The Fundamental Theorem of Calculus</h1>
+  <p class="subtitle">Differentiation and integration, proved — at last, rigorously — to be inverse operations.</p>
+  <p class="nav-links"><a href="0032-properties-of-the-integral.html" class="nav-prev">← Lesson 32</a> <a href="0034-capstone-from-axioms-to-the-fundamental-theorem.html" class="nav-next">Lesson 34 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Everything in this course has been building toward this lesson. Unit 5's derivative and this unit's integral were built entirely independently — one from epsilon-delta limits of difference quotients, the other from sup/inf of upper and lower sums. This lesson proves they are inverse operations, the single fact AP Calc BC was named after.</p>
+
+  <div class="box">
+    <span class="box-label">Theorem — FTC, Part 1</span>
+    Let f be continuous on [a,b]. Define F(x) = ∫<sub>a</sub><sup>x</sup> f for x ∈ [a,b] (well-defined, since f continuous on [a,x] implies f integrable there, Lesson 31). Then F is differentiable on [a,b], with <span class="expr">F′(x) = f(x)</span> for every x.
+  </div>
+  <div class="box">
+    <span class="box-label">Proof</span>
+    Fix x ∈ [a,b]. For h ≠ 0 small, (F(x+h) − F(x))/h = (1/h)∫<sub>x</sub><sup>x+h</sup> f (by additivity, Lesson 32). Since f is continuous at x, given ε &gt; 0 there is δ &gt; 0 with |f(t) − f(x)| &lt; ε for |t−x| &lt; δ. For 0 &lt; |h| &lt; δ: |(1/h)∫<sub>x</sub><sup>x+h</sup> f − f(x)| = |(1/h)∫<sub>x</sub><sup>x+h</sup> (f(t) − f(x)) dt| ≤ (1/|h|)·ε·|h| = ε (using the bound corollary from Lesson 32 on the integral of f(t)−f(x), which is bounded by ε in absolute value on this stretch). So (F(x+h)−F(x))/h → f(x) as h → 0, meaning F′(x) = f(x). ∎
+  </div>
+  <div class="box why">
+    <span class="box-label">Why continuity of f at x is exactly what's needed</span>
+    The whole estimate hinges on f(t) staying within ε of f(x) for t near x — precisely the epsilon-delta statement of continuity (Unit 4, Lesson 20), applied here to control the average value of f over a shrinking interval around x, rather than the value of f at a single point.
+  </div>
+
+  <div class="box">
+    <span class="box-label">Theorem — FTC, Part 2 (Evaluation)</span>
+    Let f be continuous on [a,b], and let G be <em>any</em> antiderivative of f on [a,b] (i.e. G′ = f). Then <span class="expr">∫<sub>a</sub><sup>b</sup> f = G(b) − G(a)</span>.
+  </div>
+  <div class="box">
+    <span class="box-label">Proof</span>
+    Let F(x) = ∫<sub>a</sub><sup>x</sup> f, as in Part 1, so F′ = f = G′ on [a,b]. Then (F − G)′ = 0 everywhere on [a,b], so by Unit 5, Lesson 29's corollary (zero derivative implies constant), F − G = k for some constant k. Evaluating at x = a: F(a) − G(a) = k, and F(a) = ∫<sub>a</sub><sup>a</sup> f = 0 (an empty interval), so k = −G(a). At x = b: F(b) − G(b) = k = −G(a), so F(b) = G(b) − G(a). Since F(b) = ∫<sub>a</sub><sup>b</sup> f, this gives ∫<sub>a</sub><sup>b</sup> f = G(b) − G(a). ∎
+  </div>
+  <div class="box why">
+    <span class="box-label">Why Unit 5's corollary is the linchpin of Part 2</span>
+    Part 2 reduces entirely to Part 1 plus one fact from Unit 5: that a zero derivative forces a function to be constant. Without that corollary, there would be no way to conclude F and G (which merely share a derivative) are related by anything more specific than "both are antiderivatives of f" — the corollary is what pins their difference down to a single constant, letting a value at one point (x = a) fix it everywhere.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What does FTC Part 1 establish?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">That every function has an antiderivative.</button>
+      <button class="quiz-choice" data-correct="true">That F(x) = ∫ₐˣ f is differentiable with F′(x) = f(x), when f is continuous.</button>
+      <button class="quiz-choice" data-correct="false">That ∫ₐᵇ f = G(b) − G(a) for any antiderivative G.</button>
+      <button class="quiz-choice" data-correct="false">That f must be bounded.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Part 1 shows differentiating the "integral so far" function F recovers f exactly — differentiation undoes integration.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. In Part 1's proof, what role does continuity of f at x play?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">It shows F is bounded.</button>
+      <button class="quiz-choice" data-correct="true">It guarantees f(t) stays within ε of f(x) for t near x, which controls the average value of f over [x, x+h] and forces the difference quotient toward f(x).</button>
+      <button class="quiz-choice" data-correct="false">It shows f is monotone.</button>
+      <button class="quiz-choice" data-correct="false">It has no role — the proof works for any bounded f.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Continuity is exactly the epsilon-delta guarantee that lets the average of f over a shrinking window converge to f(x) itself.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why does FTC Part 2's proof need Unit 5's "zero derivative implies constant" corollary?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">It doesn't — Part 2 follows from Part 1 alone with no other tools.</button>
+      <button class="quiz-choice" data-correct="true">F and G share the same derivative f, and only that corollary can conclude F − G is a single constant, which then gets pinned down using F(a) = 0.</button>
+      <button class="quiz-choice" data-correct="false">Because G must equal F exactly.</button>
+      <button class="quiz-choice" data-correct="false">Because f must be a polynomial.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Two functions sharing a derivative only differ by a constant thanks to that Unit 5 corollary — the exact fact that lets Part 2's evaluation formula fall out.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="antiderivative">
+    <p class="quiz-prompt">4. Fill in the blank: FTC Part 2 says the integral of f equals G(b) − G(a) for any ___ G of f.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Antiderivative is the term for any function whose derivative is f — the object FTC Part 2's evaluation formula uses.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="inverse">
+    <p class="quiz-prompt">5. Fill in the blank: the Fundamental Theorem of Calculus shows differentiation and integration are ___ operations of one another.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Inverse is the relationship FTC establishes — the central insight of the entire theorem.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: Abbott's <em>Understanding Analysis</em>, Section 7.4, proves both parts of the Fundamental Theorem of Calculus in full.</p>
+
+  <p class="ask-teacher">Stuck on anything above, or want to see why FTC Part 1 can fail if f is merely integrable but not continuous? Ask your teacher — that's what I'm here for. Next up: the capstone lesson, tracing the full logical chain from the field axioms all the way to this theorem.</p>
+
+  <footer class="lesson-footer">STEM+ · Real Analysis A · Lesson 33 of the course sequence</footer>
+</div>

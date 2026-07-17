@@ -1,0 +1,129 @@
+<meta charset="UTF-8">
+<title>Lesson 9: Test-Driven Development and Writing Testable Code — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Software Engineering · Unit 3 · Lesson 9</span>
+  <h1>Test-Driven Development and Writing Testable Code</h1>
+  <p class="subtitle">Red, green, refactor — and why code that's hard to test is usually a sign of a deeper design problem.</p>
+  <p class="nav-links"><a href="0008-unit-integration-tests-and-the-testing-pyramid.html" class="nav-prev">← Lesson 8</a> <a href="../Unit%204/0010-why-design-patterns-exist.html" class="nav-next">Unit 4, Lesson 10 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Lessons 7 and 8 covered why tests exist and what kinds there are. This lesson covers a specific practice for writing them — <strong>test-driven development</strong> — and a more general idea that follows from it: how a piece of code is designed directly affects how easy it is to test.</p>
+
+  <h2>Test-driven development: red, green, refactor</h2>
+  <div class="box">
+    <span class="box-label">Writing the test before the code it tests</span>
+    <strong>Test-driven development (TDD)</strong> reverses the usual order: instead of writing code and then a test for it, you write a failing test first, for behavior that doesn't exist yet, then write the minimum code to make it pass. The cycle has three steps, repeated continuously: <strong>red</strong> (write a test that fails, since the feature doesn't exist yet), <strong>green</strong> (write the simplest code that makes it pass), <strong>refactor</strong> (clean up the code without changing its behavior, using the now-passing test as a safety net).
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Example</span>
+    <pre class="code-block"><code># Red: write this test first — it fails, calculate_discount doesn't exist yet
+def test_calculate_discount_applies_percentage():
+    assert calculate_discount(price=100, percent=20) == 80
+
+# Green: write just enough code to pass
+def calculate_discount(price, percent):
+    return price - (price * percent / 100)
+
+# Refactor: now safe to clean up, the test catches any regression
+def calculate_discount(price, percent):
+    return price * (1 - percent / 100)</code></pre>
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why writing the test first changes anything</span>
+    Writing the test first forces you to define exactly what "correct" means for a piece of code before you're tempted to write code that matches whatever behavior happens to fall out of the implementation. It also guarantees the test actually works — a test written after the code can accidentally pass even when it isn't checking anything meaningful, since it was shaped to match code that already exists.
+  </div>
+
+  <h2>Testable code is usually just well-designed code</h2>
+  <div class="box why">
+    <span class="box-label">Why "hard to test" is a design smell, not just a testing inconvenience</span>
+    A function that's difficult to write a test for is very often difficult for a deeper reason: it does too many things at once, depends on hidden global state, or can't be used without a real database and network connection close at hand. Testability and good design point at the same underlying property — small, focused pieces of code with clear, explicit dependencies are both easier to test <em>and</em> easier for a human to understand.
+  </div>
+
+  <span class="code-label is-bad">Hard to test</span>
+  <pre class="code-block code-bad"><code>def process_order(order_id):
+    order = db.query(f"SELECT * FROM orders WHERE id={order_id}")
+    total = order.price * 1.08  # hardcoded tax rate
+    send_email(order.customer_email, f"Total: {total}")
+    return total</code></pre>
+  <span class="code-label is-good">Testable</span>
+  <pre class="code-block code-good"><code>def calculate_total(price, tax_rate=0.08):
+    return price * (1 + tax_rate)
+
+def process_order(order, db, mailer):
+    total = calculate_total(order.price)
+    mailer.send(order.customer_email, f"Total: {total}")
+    return total</code></pre>
+  <div class="box">
+    <span class="box-label">Why the second version is easier to test</span>
+    <span class="inline-code">calculate_total()</span> can be tested with a plain number, no database or email service required. The dependencies in <span class="inline-code">process_order()</span> (<span class="inline-code">db</span>, <span class="inline-code">mailer</span>) are now explicit parameters instead of hidden global calls, so a test can pass in fakes for both — a structural change that makes the code both testable and easier to read.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What is the correct order of the TDD cycle?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Refactor, then write the code, then write a test for it.</button>
+      <button class="quiz-choice" data-correct="true">Write a failing test (red), write the minimum code to pass it (green), then clean up (refactor).</button>
+      <button class="quiz-choice" data-correct="false">Write the full implementation, then write a matching test, then delete the test.</button>
+      <button class="quiz-choice" data-correct="false">Write all tests for the entire project before writing any code at all.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Red-green-refactor is the specific repeated cycle: fail first, pass minimally, then improve with the test as a safety net.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why might a test written after the code already exists be less trustworthy than one written first?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Tests written after the code always run slower.</button>
+      <button class="quiz-choice" data-correct="true">It can accidentally pass without checking anything meaningful, since it was shaped to match code that already exists.</button>
+      <button class="quiz-choice" data-correct="false">Tests written after the code are not allowed to use assertions.</button>
+      <button class="quiz-choice" data-correct="false">There's no real difference in trustworthiness either way.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Writing the test first forces you to define correctness independently of whatever the implementation happens to already do.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why is code that's hard to test often considered poorly designed, not just inconvenient to test?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because testability and design quality are completely unrelated properties.</button>
+      <button class="quiz-choice" data-correct="true">Because the same traits that make code hard to test — hidden dependencies, doing too many things at once — also make it hard to understand and maintain.</button>
+      <button class="quiz-choice" data-correct="false">Because only code written in certain programming languages can be tested at all.</button>
+      <button class="quiz-choice" data-correct="false">Because testing frameworks refuse to run on poorly formatted code.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Testability and good design share the same root cause: small, focused pieces with explicit, visible dependencies.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="red">
+    <p class="quiz-prompt">4. Fill in the blank: the first step of the TDD cycle is ___ — writing a test that fails because the feature doesn't exist yet.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Red is the failing-test step that starts every cycle of test-driven development.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="dependencies">
+    <p class="quiz-prompt">5. Fill in the blank: making a function's ___ explicit parameters, instead of hidden global calls, is what makes it possible to substitute fakes during a test.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Explicit, passed-in dependencies are what let a test swap in a fake database or mailer without touching real infrastructure.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: Martin Fowler's <a href="https://martinfowler.com/bliki/TestDrivenDevelopment.html">"TestDrivenDevelopment"</a> covers the red-green-refactor cycle and its design implications from one of its most cited practitioner sources.</p>
+
+  <p class="ask-teacher">Stuck on anything above, or want help refactoring a hard-to-test function of your own? Ask your teacher — that's what I'm here for. Next up: why design patterns exist, starting Unit 4.</p>
+
+  <footer class="lesson-footer">STEM+ · Software Engineering · Lesson 9 of the course sequence</footer>
+</div>

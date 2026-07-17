@@ -1,0 +1,124 @@
+<meta charset="UTF-8">
+<title>Lesson 5: Commits, Branches, and the Git Mental Model — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Software Engineering · Unit 2 · Lesson 5</span>
+  <h1>Commits, Branches, and the Git Mental Model</h1>
+  <p class="subtitle">Git tracks snapshots, not differences — and a branch is just a movable pointer, not a copy.</p>
+  <p class="nav-links"><a href="0004-why-version-control-exists.html" class="nav-prev">← Lesson 4</a> <a href="0006-merging-conflicts-and-pull-requests.html" class="nav-next">Lesson 6 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Lesson 4 established why version control exists. This lesson covers Git's actual internal model — the picture that makes commands like <span class="inline-code">commit</span>, <span class="inline-code">branch</span>, and <span class="inline-code">checkout</span> make sense, instead of feeling like memorized incantations.</p>
+
+  <h2>A commit is a snapshot, not a diff</h2>
+  <div class="box why">
+    <span class="box-label">Why this is the single most important mental model in Git</span>
+    A common misconception is that Git stores a list of line-by-line changes, like a stack of patches. It doesn't. Every <strong>commit</strong> is a complete snapshot of the entire project at that moment (Git is smart enough to only store what actually changed internally, but the model you should reason with is: every commit is a full picture of the project). Each commit also stores a pointer to its parent commit, which is what turns the whole set of commits into a chain — a project's history.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Example</span>
+    <pre class="code-block"><code>git add README.md
+git commit -m "Add setup instructions to README"</code></pre>
+    This doesn't record "3 lines were added to README.md." It records a full snapshot of every tracked file in the project at that instant, tagged with that commit message, with a pointer back to whatever commit came right before it.
+  </div>
+
+  <h2>A branch is a movable pointer, not a copy</h2>
+  <div class="box why">
+    <span class="box-label">Why branches are cheap and instant in Git</span>
+    A <strong>branch</strong> is often pictured as a full duplicate of the codebase, which makes creating one feel like it should be slow and heavy. It isn't. A branch is just a lightweight, movable label pointing at one specific commit. Creating a branch instantly costs almost nothing, because there's nothing to copy — just a new pointer, right where you already are.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Example</span>
+    <pre class="code-block"><code>git branch feature-login
+git checkout feature-login
+# equivalent to: git checkout -b feature-login</code></pre>
+    After this, <span class="inline-code">feature-login</span> and the branch you started from point at the exact same commit. As soon as you make a new commit while on <span class="inline-code">feature-login</span>, only that branch's pointer moves forward to the new commit — the original branch's pointer stays exactly where it was.
+  </div>
+
+  <h2>HEAD: where you currently are</h2>
+  <div class="box">
+    <span class="box-label">HEAD is a pointer to your current branch</span>
+    <span class="inline-code">HEAD</span> is Git's name for "whatever commit you're currently looking at." Normally it points at a branch, which in turn points at a commit — so when you commit, HEAD's branch moves forward, and HEAD moves with it. Switching branches with <span class="inline-code">checkout</span> or <span class="inline-code">switch</span> just repoints HEAD at a different branch.
+  </div>
+
+  <h2>Writing commits that are actually useful later</h2>
+  <div class="box why">
+    <span class="box-label">Why commit messages are documentation, not a formality</span>
+    A commit message is read far more often than it's written — by teammates during code review, and by you, months later, trying to understand why a change was made. A commit that only describes <em>what</em> changed wastes the one place in the history built specifically to record <em>why</em>.
+  </div>
+  <span class="code-label is-bad">Uninformative</span>
+  <pre class="code-block code-bad"><code>fix bug</code></pre>
+  <span class="code-label is-good">Informative</span>
+  <pre class="code-block code-good"><code>Fix null pointer when cart is empty at checkout
+
+Checkout assumed cart.items was always non-empty; guard
+against the empty case and show an empty-cart message instead.</code></pre>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What does a single Git commit actually store?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Only the specific lines that changed since the previous commit.</button>
+      <button class="quiz-choice" data-correct="true">A complete snapshot of the entire project at that moment, with a pointer to its parent commit.</button>
+      <button class="quiz-choice" data-correct="false">A full duplicate copy of the entire repository folder.</button>
+      <button class="quiz-choice" data-correct="false">Only the file names that were modified, without their content.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Git's model is a full snapshot per commit (even though it's stored efficiently internally), chained together by parent pointers.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why is creating a new Git branch nearly instant, regardless of project size?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because Git compresses the entire project before creating a branch.</button>
+      <button class="quiz-choice" data-correct="true">Because a branch is just a lightweight pointer to a commit, not a copy of the project.</button>
+      <button class="quiz-choice" data-correct="false">Because branches are only allowed on projects under a certain file size.</button>
+      <button class="quiz-choice" data-correct="false">Because Git creates branches asynchronously in the background.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Since a branch is just a pointer, creating one requires no copying — just a new label placed at the current commit.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. What does HEAD represent in Git?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">The very first commit ever made in the repository.</button>
+      <button class="quiz-choice" data-correct="true">A pointer to whatever branch (and therefore commit) you're currently on.</button>
+      <button class="quiz-choice" data-correct="false">The most recently deleted branch.</button>
+      <button class="quiz-choice" data-correct="false">A list of every branch that currently exists in the repository.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>HEAD tracks your current position in the project's history, typically by pointing at your current branch.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="snapshot">
+    <p class="quiz-prompt">4. Fill in the blank: the correct mental model for a Git commit is a full ___ of the project at that moment, not a list of line-by-line changes.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Thinking in snapshots, not diffs, is what makes the rest of Git's behavior make sense.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="why">
+    <p class="quiz-prompt">5. Fill in the blank: a good commit message documents ___ a change was made, since the code itself already shows what changed.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The diff already shows what changed; a useful commit message adds the reasoning a diff can't show on its own.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: the Pro Git book's chapter on <a href="https://git-scm.com/book/en/v2/Git-Branching-Branches-in-a-Nutshell">"Branches in a Nutshell"</a> covers this same pointer-based model with diagrams straight from Git's official documentation.</p>
+
+  <p class="ask-teacher">Stuck on anything above, or want help visualizing your own project's commit history? Ask your teacher — that's what I'm here for. Next up: merging, conflicts, and pull requests.</p>
+
+  <footer class="lesson-footer">STEM+ · Software Engineering · Lesson 5 of the course sequence</footer>
+</div>

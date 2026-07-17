@@ -1,0 +1,113 @@
+<meta charset="UTF-8">
+<title>Lesson 13: Cauchy Sequences — STEM+</title>
+<link rel="stylesheet" href="../../../assets/style.css">
+<script src="../../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Real Analysis A · Unit 2 · Lesson 13</span>
+  <h1>Cauchy Sequences</h1>
+  <p class="subtitle">A way to test for convergence using only the sequence's own terms — no candidate limit required, ever.</p>
+  <p class="nav-links"><a href="0012-the-bolzano-weierstrass-theorem.html" class="nav-prev">← Lesson 12</a> <a href="../Unit%203/0014-open-and-closed-sets.html" class="nav-next">Unit 3, Lesson 14 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Every convergence proof so far — even the Monotone Convergence Theorem — eventually needed to name a specific candidate limit (even if, as in Lesson 10, that candidate was supplied automatically as a supremum). Cauchy sequences give a test for convergence that never mentions a limit at all — phrased entirely in terms of how the sequence's own terms behave relative to each other.</p>
+
+  <div class="box">
+    <span class="box-label">Definition — Cauchy Sequence</span>
+    A sequence (aₙ) is <strong>Cauchy</strong> if: for every ε &gt; 0, there exists N such that |aₘ − aₙ| &lt; ε for all m, n &gt; N.
+  </div>
+  <p>Compare this to Lesson 7's convergence definition directly: instead of every term eventually landing near a fixed L, every <em>pair</em> of terms (past some point) eventually lands near <em>each other</em>. No L appears anywhere in the definition.</p>
+
+  <h2>Convergent implies Cauchy</h2>
+  <div class="box">
+    <span class="box-label">Theorem</span>
+    Every convergent sequence is Cauchy.
+  </div>
+  <div class="box">
+    <span class="box-label">Proof</span>
+    Suppose lim aₙ = L. Let ε &gt; 0. There exists N such that |aₙ − L| &lt; ε/2 for all n &gt; N. Then for any m, n &gt; N: |aₘ − aₙ| = |(aₘ − L) + (L − aₙ)| ≤ |aₘ − L| + |aₙ − L| &lt; ε/2 + ε/2 = ε (using the triangle inequality, exactly as in Lesson 9's sum rule). So (aₙ) is Cauchy. ∎
+  </div>
+
+  <h2>The converse — and why it's the genuinely hard direction</h2>
+  <div class="box">
+    <span class="box-label">Theorem — Cauchy Criterion</span>
+    Every Cauchy sequence of real numbers converges (to some real number).
+  </div>
+  <div class="box">
+    <span class="box-label">Proof</span>
+    Let (aₙ) be Cauchy. <em>Step 1 — Cauchy implies bounded:</em> taking ε = 1 in the Cauchy definition gives some N with |aₘ − aₙ| &lt; 1 for all m, n &gt; N; in particular |aₙ − a_{N+1}| &lt; 1 for all n &gt; N, so all terms past N are trapped in an interval of width 2 around a_{N+1} — and there are only finitely many terms before that, which are automatically bounded too. So (aₙ) is bounded. <em>Step 2 — apply Bolzano-Weierstrass:</em> since (aₙ) is bounded, Lesson 12 guarantees a convergent subsequence (a<sub>nₖ</sub>) → x for some real x. <em>Step 3 — the whole sequence follows the subsequence:</em> let ε &gt; 0. Since (aₙ) is Cauchy, there is N with |aₘ − aₙ| &lt; ε/2 for all m, n &gt; N. Since a<sub>nₖ</sub> → x, there is K such that |a<sub>nₖ</sub> − x| &lt; ε/2 for all k &gt; K, and nₖ &gt; N for k large enough (since nₖ → ∞). Fix such a k. Then for any n &gt; N: |aₙ − x| ≤ |aₙ − a<sub>nₖ</sub>| + |a<sub>nₖ</sub> − x| &lt; ε/2 + ε/2 = ε. So lim aₙ = x. ∎
+  </div>
+  <div class="box why">
+    <span class="box-label">Why this direction needed both completeness and Bolzano-Weierstrass</span>
+    "Cauchy implies convergent" is exactly where the whole unit's machinery pays off at once: boundedness (Step 1) feeds Bolzano-Weierstrass (Step 2, itself built on completeness via nested intervals), which produces a convergent subsequence that the full Cauchy sequence is then shown to chase down (Step 3). This theorem is false over ℚ alone — a Cauchy sequence of rationals (like Lesson 1's √2 approximations, which are Cauchy) can fail to converge to a rational number. So the Cauchy Criterion, like the Monotone Convergence Theorem, is really completeness in disguise.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Why this test is useful in practice</span>
+    The Cauchy Criterion lets you prove a sequence converges — very usefully, when it arises as a series' partial sums or a recursively-defined sequence — by checking only that its own terms bunch together, without ever having to guess or construct the limit itself first. This is often far easier than finding an explicit L to test against.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What is distinctive about the Cauchy sequence definition, compared to the ordinary convergence definition?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">It requires the sequence to be monotone.</button>
+      <button class="quiz-choice" data-correct="true">It never mentions a candidate limit L — only how far apart pairs of terms are from each other.</button>
+      <button class="quiz-choice" data-correct="false">It only applies to sequences of rational numbers.</button>
+      <button class="quiz-choice" data-correct="false">It requires knowing the limit in advance, just like ordinary convergence.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The defining feature of the Cauchy condition is comparing terms to each other, never to an external candidate limit.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. In the proof that Cauchy implies convergent, what was step 1 used to establish?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">That the sequence is monotone.</button>
+      <button class="quiz-choice" data-correct="true">That the sequence is bounded, which is required before Bolzano-Weierstrass can be applied.</button>
+      <button class="quiz-choice" data-correct="false">That the sequence's limit is rational.</button>
+      <button class="quiz-choice" data-correct="false">That the sequence has only finitely many terms.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Boundedness is exactly the missing ingredient Bolzano-Weierstrass needs — step 1 supplies it directly from the Cauchy condition.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why does the fact that a Cauchy sequence of rationals can fail to converge in ℚ matter for this lesson?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">It shows the Cauchy Criterion is false in general.</button>
+      <button class="quiz-choice" data-correct="true">It shows the Cauchy Criterion genuinely depends on completeness — it holds in ℝ specifically because ℝ, unlike ℚ, has no gaps for the limit to fall through.</button>
+      <button class="quiz-choice" data-correct="false">It proves that every Cauchy sequence must consist of irrational numbers.</button>
+      <button class="quiz-choice" data-correct="false">It has no bearing on the Cauchy Criterion at all.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>This is the same gap from Unit 1 resurfacing — the Cauchy Criterion is another theorem that is, at its core, a restatement of completeness.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="Cauchy">
+    <p class="quiz-prompt">4. Fill in the blank: a sequence where |aₘ − aₙ| can be made arbitrarily small for all sufficiently large m and n is called a ___ sequence.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Cauchy is the term for this self-referential closeness condition, defined without any mention of a limit.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="Bolzano-Weierstrass">
+    <p class="quiz-prompt">5. Fill in the blank: the proof that every Cauchy sequence converges relies on the ___ Theorem to extract a convergent subsequence once boundedness is established.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Bolzano-Weierstrass is the theorem from Lesson 12 that turns "bounded" into "has a convergent subsequence," the pivotal middle step.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: Abbott's <em>Understanding Analysis</em>, Section 2.6, proves the Cauchy Criterion in full using the same bounded → Bolzano-Weierstrass → subsequence-chases-sequence structure as above.</p>
+
+  <p class="ask-teacher">Stuck on anything above, or want to see why a Cauchy sequence of rationals can fail to converge within ℚ, worked out concretely? Ask your teacher — that's what I'm here for. That closes out Unit 2 — Unit 3 turns to the topology of the real line: open sets, closed sets, and compactness.</p>
+
+  <footer class="lesson-footer">STEM+ · Real Analysis A · Lesson 13 of the course sequence</footer>
+</div>

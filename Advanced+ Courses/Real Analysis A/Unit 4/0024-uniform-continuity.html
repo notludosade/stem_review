@@ -1,0 +1,108 @@
+<meta charset="UTF-8">
+<title>Lesson 24: Uniform Continuity — STEM+</title>
+<link rel="stylesheet" href="../../../assets/style.css">
+<script src="../../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Real Analysis A · Unit 4 · Lesson 24</span>
+  <h1>Uniform Continuity</h1>
+  <p class="subtitle">The closing lesson of Unit 4: a single δ that works everywhere at once — and why compactness is again exactly what makes that possible.</p>
+  <p class="nav-links"><a href="0023-the-extreme-value-theorem.html" class="nav-prev">← Lesson 23</a> <a href="../Unit%205/0025-the-derivative-as-a-rigorous-limit.html" class="nav-next">Unit 5, Lesson 25 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Lesson 20's continuity is a pointwise property — δ is allowed to depend on both ε and the point a. This closing lesson of Unit 4 asks when a single δ can be made to work at every point simultaneously, and shows compactness is again the deciding factor — setting up Unit 6's construction of the Riemann integral, which depends on exactly this property.</p>
+
+  <h2>The definition</h2>
+  <div class="box">
+    <span class="box-label">Definition — Uniform Continuity</span>
+    f is <strong>uniformly continuous</strong> on a set A if: for every ε &gt; 0, there exists δ &gt; 0 such that for all x, y ∈ A, |x − y| &lt; δ implies |f(x) − f(y)| &lt; ε.
+  </div>
+  <div class="box why">
+    <span class="box-label">Why "uniform" is the operative word</span>
+    Compare to Lesson 20's ordinary continuity: there, δ is chosen after both ε <em>and</em> a point a are fixed, so different points can demand different δ's. Here, one δ must work for every pair of points in A at once — the same tolerance, uniformly, everywhere. Every uniformly continuous function is continuous (immediate from the definitions), but the converse can fail, as the next example shows.
+  </div>
+
+  <h2>A continuous function that is not uniformly continuous</h2>
+  <div class="box example">
+    <span class="box-label">Example</span>
+    f(x) = 1/x is continuous on (0, 1) but not uniformly continuous there. Intuitively: near x = 0, the function's slope grows without bound, so keeping outputs within a fixed ε forces δ to shrink as x → 0 — no single δ can work near 0 and also further out. Concretely, for x = 1/n and y = 1/(n+1) (both in (0,1)), |x − y| = 1/(n(n+1)) → 0, yet |f(x) − f(y)| = |n − (n+1)| = 1 always — so no δ can force the outputs within, say, ε = 1/2 for pairs this close together as n grows.
+  </div>
+
+  <h2>The theorem: compactness forces uniformity</h2>
+  <div class="box">
+    <span class="box-label">Theorem</span>
+    If f is continuous on a compact set K, then f is uniformly continuous on K.
+  </div>
+  <div class="box">
+    <span class="box-label">Proof sketch</span>
+    Suppose not: then there is some ε &gt; 0 such that for every δ = 1/n, there exist xₙ, yₙ ∈ K with |xₙ − yₙ| &lt; 1/n but |f(xₙ) − f(yₙ)| ≥ ε. Since K is compact, (xₙ) has a subsequence x<sub>nₖ</sub> → c ∈ K. Since |x<sub>nₖ</sub> − y<sub>nₖ</sub>| &lt; 1/nₖ → 0, the corresponding y<sub>nₖ</sub> → c as well (squeezed toward the same limit). By continuity of f at c, both f(x<sub>nₖ</sub>) → f(c) and f(y<sub>nₖ</sub>) → f(c), so |f(x<sub>nₖ</sub>) − f(y<sub>nₖ</sub>)| → 0 — contradicting |f(xₙ) − f(yₙ)| ≥ ε for every n, including these. So f must be uniformly continuous on K. ∎
+  </div>
+  <div class="box why">
+    <span class="box-label">Why (0,1) failing to be compact is exactly what 1/x exploits</span>
+    1/x's counterexample sequences xₙ = 1/n, yₙ = 1/(n+1) converge to 0 — which is not in (0,1). On a compact set, this escape route is closed off: the proof's contradiction depends entirely on the limit point c staying inside K, which compactness guarantees and (0,1)'s missing endpoint does not.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What is the key difference between ordinary continuity and uniform continuity?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Uniform continuity only applies to polynomials.</button>
+      <button class="quiz-choice" data-correct="true">In uniform continuity, a single δ must work for every pair of points in the set at once, rather than being allowed to depend on the specific point.</button>
+      <button class="quiz-choice" data-correct="false">Ordinary continuity requires a smaller δ than uniform continuity.</button>
+      <button class="quiz-choice" data-correct="false">There is no difference — the two definitions are identical.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Uniformity means one δ serves the whole set simultaneously, not chosen separately at each point as in ordinary continuity.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why is f(x) = 1/x not uniformly continuous on (0, 1)?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because 1/x is discontinuous on (0,1).</button>
+      <button class="quiz-choice" data-correct="true">Points like 1/n and 1/(n+1) get arbitrarily close together while their images stay a fixed distance apart, so no single δ can work near 0.</button>
+      <button class="quiz-choice" data-correct="false">Because (0,1) is unbounded.</button>
+      <button class="quiz-choice" data-correct="false">Because 1/x is not defined at any point of (0,1).</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The unbounded steepness of 1/x near 0 is exactly what defeats any single uniform δ.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. In the theorem's proof, what role does compactness of K play in reaching the contradiction?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">It guarantees f is differentiable on K.</button>
+      <button class="quiz-choice" data-correct="true">It guarantees the sequence xₙ has a subsequence converging to a point c still inside K, which is what lets continuity at c be applied.</button>
+      <button class="quiz-choice" data-correct="false">It guarantees K contains only finitely many points.</button>
+      <button class="quiz-choice" data-correct="false">It guarantees f is monotone on K.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Compactness's guarantee that the limit stays inside K is exactly what 1/x's counterexample on (0,1) is missing.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="uniformly continuous|uniform">
+    <p class="quiz-prompt">4. Fill in the blank: a function where a single δ (given ε) works for every pair of points in the domain at once is called ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Uniformly continuous is the term this lesson defines, contrasted with the pointwise flavor of ordinary continuity.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="compact">
+    <p class="quiz-prompt">5. Fill in the blank: the theorem proved in this lesson shows that continuity on a ___ set automatically upgrades to uniform continuity.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Compactness is once again the deciding structural property, exactly as it was in the Extreme Value Theorem.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: Abbott's <em>Understanding Analysis</em>, Section 4.4, proves that continuity on a compact set implies uniform continuity, using this same subsequence-based contradiction.</p>
+
+  <p class="ask-teacher">Stuck on anything above, or want to see why uniform continuity is exactly the property Unit 6 needs to construct the Riemann integral? Ask your teacher — that's what I'm here for. That closes out Unit 4 — Unit 5 turns to differentiation, starting with the derivative defined rigorously as a limit.</p>
+
+  <footer class="lesson-footer">STEM+ · Real Analysis A · Lesson 24 of the course sequence</footer>
+</div>

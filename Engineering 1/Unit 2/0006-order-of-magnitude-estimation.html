@@ -1,0 +1,108 @@
+<meta charset="UTF-8">
+<title>Lesson 6: Order-of-Magnitude Estimation — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Engineering 1 · Unit 2 · Lesson 6</span>
+  <h1>Order-of-Magnitude Estimation</h1>
+  <p class="subtitle">Fermi problems: getting a usably-close answer in minutes, before spending a day computing an exact one.</p>
+  <p class="nav-links"><a href="0005-significant-figures-precision-vs-accuracy.html" class="nav-prev">← Lesson 5</a> <a href="../Unit%203/0007-forces-vectors-and-free-body-diagrams.html" class="nav-next">Unit 3, Lesson 7 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Before an engineer commits real time to an exact calculation, a quick sanity-check estimate tells them roughly what answer to expect — and immediately flags a later result that's wildly off. This lesson covers how to build that estimate.</p>
+
+  <h2>What a Fermi problem is</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    A <strong>Fermi problem</strong> is a question with no readily available exact data, answered by breaking it into a chain of roughly-estimated quantities that multiply or divide together — named for physicist Enrico Fermi, known for producing surprisingly good estimates this way on the spot.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Example</span>
+    How many piano tuners are there in Chicago? You don't know this number, and there's no quick way to look it up. But you can estimate: Chicago's population (~2.7 million) → households (~1 million, at ~2.7 people/household) → pianos (~1 in 20 households, ~50,000 pianos) → tunings per year (~once/year, so ~50,000 tunings/year) → tuner capacity (~4 tunings/day × 250 working days ≈ 1,000 tunings/year per tuner) → tuners needed (50,000 ÷ 1,000 = ~50 tuners). The real number is in this same ballpark — not because any single estimate was exact, but because the chain of reasonable guesses converges near the truth.
+  </div>
+
+  <h2>Why the errors don't compound the way you'd expect</h2>
+  <p>Each individual guess in that chain could easily be off by a factor of 2 in either direction. You might expect five guesses each off by 2× to compound into an answer off by 32×. In practice, overestimates and underestimates tend to partially cancel, because they're independent guesses rather than all-biased-the-same-direction errors — so the final answer is typically within a factor of 3-10 of the true value, which is exactly the precision an order-of-magnitude estimate is meant to deliver.</p>
+
+  <div class="box why">
+    <span class="box-label">Why "order of magnitude" is the right bar</span>
+    An order-of-magnitude estimate only aims to get the right power of 10 — is the answer closer to 50, 500, or 5,000? That's a much lower, much more achievable bar than an exact answer, and it's often all you need to catch a gross error or sanity-check a later precise calculation.
+  </div>
+
+  <h2>Rounding to one significant figure is a feature, not sloppiness</h2>
+  <p>Fermi estimation deliberately uses rounded, one-significant-figure numbers (like "about 3 million" instead of "2,746,388") at every step. This isn't laziness — carrying false precision through a chain of guesses would be misleading, since the underlying guesses were never that precise in the first place.</p>
+
+  <div class="box example">
+    <span class="box-label">Example</span>
+    Estimate how many liters of gasoline a mid-size car uses in a year. Typical distance: ~15,000 km/year. Typical fuel economy: ~10 km/liter. 15,000 ÷ 10 = 1,500 liters/year. Both inputs were rounded to one significant figure — the answer is meant to be "around 1,500," not treated as exact.
+  </div>
+
+  <h2>Where this fits in the design process</h2>
+  <p>Recall the design process from Unit 1: estimation is a fast, cheap way to sanity-check a design direction before investing in a detailed prototype. If a rough estimate says a proposed battery would need to weigh 200 kg to meet a requirement, that's worth knowing in the first five minutes — not after a week of detailed circuit design.</p>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What is a Fermi problem?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">A problem with an exact, well-documented numerical answer.</button>
+      <button class="quiz-choice" data-correct="true">A question with no readily available exact data, estimated by chaining together rough guesses.</button>
+      <button class="quiz-choice" data-correct="false">A problem that can only be solved using calculus.</button>
+      <button class="quiz-choice" data-correct="false">A type of problem specific to nuclear physics.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Fermi problems break an unknown quantity into a chain of estimable sub-quantities that multiply or divide together to approximate the answer.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why doesn't a chain of five individually-uncertain guesses typically compound into a wildly wrong final answer?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because each guess is actually exact, not uncertain.</button>
+      <button class="quiz-choice" data-correct="true">Because overestimates and underestimates in independent guesses tend to partially cancel out.</button>
+      <button class="quiz-choice" data-correct="false">Because Fermi problems only ever use one estimated quantity.</button>
+      <button class="quiz-choice" data-correct="false">Because the errors are corrected by rounding at the very end.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Independent errors in different directions tend to offset one another, keeping the final estimate within a factor of about 3-10 of the true value rather than compounding multiplicatively.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why does Fermi estimation deliberately round every input to one significant figure?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because more precise numbers are always unavailable.</button>
+      <button class="quiz-choice" data-correct="true">Because carrying false precision through a chain of rough guesses would be misleading.</button>
+      <button class="quiz-choice" data-correct="false">Because rounding always produces a more accurate result.</button>
+      <button class="quiz-choice" data-correct="false">Because calculators cannot handle numbers with more digits.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Since the underlying guesses were never precisely known, reporting more digits than that would falsely imply a precision the estimate doesn't have.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="magnitude|order of magnitude">
+    <p class="quiz-prompt">4. Fill in the blank: an "order of ___" estimate only aims to identify the right power of 10, not an exact value.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Getting within the right power of 10 — is it closer to 50, 500, or 5,000 — is a far lower, far more achievable bar than exact precision.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="fermi">
+    <p class="quiz-prompt">5. Fill in the blank: this style of chained-estimate problem is named after the physicist Enrico ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Fermi was known for producing surprisingly accurate on-the-spot estimates this way, and the technique carries his name.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: <a href="https://www.youtube.com/@RealEngineering">Real Engineering's videos</a> frequently open with a back-of-the-envelope estimate before diving into a detailed engineering explanation — a good model to imitate.</p>
+
+  <p class="ask-teacher">Stuck on anything above, or want to try a Fermi problem of your own? Ask your teacher — that's what I'm here for. Next up: forces, vectors, and the free-body diagram — the first real tool of statics.</p>
+
+  <footer class="lesson-footer">STEM+ · Engineering 1 · Lesson 6 of the course sequence</footer>
+</div>

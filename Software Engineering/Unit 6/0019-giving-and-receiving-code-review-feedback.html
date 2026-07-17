@@ -1,0 +1,116 @@
+<meta charset="UTF-8">
+<title>Lesson 19: Giving and Receiving Code Review Feedback — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Software Engineering · Unit 6 · Lesson 19</span>
+  <h1>Giving and Receiving Code Review Feedback</h1>
+  <p class="subtitle">Blocking issues versus nits, and how to leave a comment that improves the code without stalling the team.</p>
+  <p class="nav-links"><a href="0018-what-code-review-is-actually-for.html" class="nav-prev">← Lesson 18</a> <a href="../Unit%207/0020-agile-frameworks-scrum-and-kanban.html" class="nav-next">Unit 7, Lesson 20 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Lesson 18 covered why code review matters. This lesson covers the practical skill of actually doing it well — a skill distinct from writing good code, and one that's rarely taught directly even though nearly every professional engineer practices it daily.</p>
+
+  <h2>Not every comment carries the same weight</h2>
+  <div class="box">
+    <span class="box-label">Blocking issues</span>
+    A genuine problem that must be fixed before the change can merge: a bug, a missed requirement, a real design flaw. These should be labeled unambiguously so the author knows the pull request can't merge until addressed.
+  </div>
+  <div class="box">
+    <span class="box-label">Nits</span>
+    Small, optional suggestions — a naming preference, a minor style choice — that improve the code but aren't worth blocking the merge over. Reviewers who mark these clearly as nits (many teams literally prefix the comment with "nit:") let the author use judgment about whether to act on them, without stalling the whole change.
+  </div>
+  <div class="box why">
+    <span class="box-label">Why conflating the two is a common, costly mistake</span>
+    A reviewer who treats every comment as equally mandatory — insisting a variable be renamed with the same urgency as fixing a real bug — trains authors to either dread review or start ignoring it, since there's no way to tell what actually matters. Distinguishing severity is what keeps review fast without making it toothless.
+  </div>
+
+  <h2>Giving feedback: focused on the code, not the person</h2>
+  <span class="code-label is-bad">Person-directed</span>
+  <pre class="code-block code-bad"><code>"You clearly didn't think about concurrent access here."</code></pre>
+  <span class="code-label is-good">Work-directed</span>
+  <pre class="code-block code-good"><code>"This increments the counter without a lock — two concurrent
+requests could both read the same value before either writes it back.
+Worth adding a lock here, or is there a reason concurrent access
+isn't a concern for this endpoint?"</code></pre>
+  <div class="box why">
+    <span class="box-label">Why the work-directed version is more effective, not just more polite</span>
+    This is the same distinction Career Applied Engineering's feedback lesson covers for professional feedback generally: naming the specific, observable problem, and asking a genuine question rather than asserting a judgment about the author, gets a better response and is more likely to be actually correct — sometimes there really is a reason, and the question leaves room for the author to explain it instead of just being told they were wrong.
+  </div>
+
+  <h2>Receiving feedback: defensiveness is the biggest failure mode</h2>
+  <div class="box why">
+    <span class="box-label">Why a reviewer's comment isn't a verdict on your competence</span>
+    A comment on a pull request is a check on the code, not a referendum on the author's skill — treating every comment as a personal criticism (or, just as damaging, treating it as an unquestionable command to blindly obey) both work against the actual goal of review, which is producing correct, maintainable code. The most effective response to a review comment is the same posture as receiving any professional feedback: assume good intent, engage with the specific claim, and push back with reasoning if you genuinely disagree — silently complying with something you think is wrong helps nobody.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Example</span>
+    A reviewer leaves a nit suggesting a different variable name. Instead of silently renaming it without a second thought, or getting defensive, the author replies: "I named it that way to match the field name in the API response — happy to change it if you feel strongly, but wanted to explain the reasoning." This is neither blind compliance nor defensiveness — it's exactly the kind of engaged, reasoned exchange review is supposed to produce.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. Why should reviewers distinguish blocking issues from nits?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because nits are not allowed to be mentioned in a professional code review at all.</button>
+      <button class="quiz-choice" data-correct="true">Because treating every comment as equally mandatory trains authors to dread or ignore review, undermining its usefulness.</button>
+      <button class="quiz-choice" data-correct="false">Because blocking issues can only be raised by the most senior engineer on the team.</button>
+      <button class="quiz-choice" data-correct="false">Because most code review tools automatically hide comments marked as nits.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Clear severity signals keep review fast and meaningful, rather than either paralyzing or being ignored entirely.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. What makes work-directed feedback ("this code does X, which could cause Y") more effective than person-directed feedback ("you didn't think about X")?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Work-directed feedback is always shorter to write.</button>
+      <button class="quiz-choice" data-correct="true">It names the specific, observable problem and leaves room for the author to explain, rather than asserting a judgment about their competence.</button>
+      <button class="quiz-choice" data-correct="false">Work-directed feedback never requires the author to make any changes.</button>
+      <button class="quiz-choice" data-correct="false">Person-directed feedback is technically more accurate but socially unacceptable.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Focusing on the specific code behavior, and asking rather than asserting, produces a better and more accurate response.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. What is the recommended response to receiving a code review comment you genuinely disagree with?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Silently comply without responding, to avoid any conflict.</button>
+      <button class="quiz-choice" data-correct="true">Assume good intent, engage with the specific claim, and push back with reasoning if you disagree.</button>
+      <button class="quiz-choice" data-correct="false">Escalate immediately to a manager before responding to the reviewer directly.</button>
+      <button class="quiz-choice" data-correct="false">Ignore the comment entirely and merge the change anyway.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Neither blind compliance nor defensiveness serves the goal of review — engaged, reasoned disagreement does.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="nit">
+    <p class="quiz-prompt">4. Fill in the blank: many teams literally prefix an optional, non-blocking suggestion with "___:" so the author knows it isn't mandatory.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>"Nit:" is the common convention marking a comment as a minor, optional suggestion.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="defensiveness">
+    <p class="quiz-prompt">5. Fill in the blank: treating a review comment as a personal attack instead of a check on the code is a form of ___, which this lesson names as the biggest failure mode in receiving feedback.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Defensiveness is the specific failure mode named — reacting to a comment on the code as if it were a judgment on the author.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: Google's <a href="https://google.github.io/eng-practices/review/reviewer/comments.html">"How to Write Code Review Comments"</a> covers this exact severity-labeling and tone guidance from one of the industry's most cited public review standards.</p>
+
+  <p class="ask-teacher">Stuck on anything above, or want help drafting a tricky code review comment you're unsure how to phrase? Ask your teacher — that's what I'm here for. Next up: agile frameworks — Scrum and Kanban, starting Unit 7.</p>
+
+  <footer class="lesson-footer">STEM+ · Software Engineering · Lesson 19 of the course sequence</footer>
+</div>

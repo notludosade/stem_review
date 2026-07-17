@@ -1,0 +1,117 @@
+<meta charset="UTF-8">
+<title>Lesson 6: Merging, Conflicts, and Pull Requests — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Software Engineering · Unit 2 · Lesson 6</span>
+  <h1>Merging, Conflicts, and Pull Requests</h1>
+  <p class="subtitle">What a merge conflict actually is, and how a pull request turns a branch into a reviewed, mergeable change.</p>
+  <p class="nav-links"><a href="0005-commits-branches-and-the-git-mental-model.html" class="nav-prev">← Lesson 5</a> <a href="../Unit%203/0007-why-we-test-confidence-not-perfection.html" class="nav-next">Unit 3, Lesson 7 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Lesson 5 covered how branches let engineers work in parallel. Eventually, that work has to come back together. This lesson covers <strong>merging</strong> — how Git combines two branches' histories — and <strong>pull requests</strong>, the workflow that wraps a merge in review before it happens.</p>
+
+  <h2>What a merge actually does</h2>
+  <div class="box">
+    <span class="box-label">Merging combines two branches' histories into one</span>
+    A merge takes the changes made on one branch and integrates them into another. If the two branches touched entirely different parts of the code, Git combines them automatically — this is the overwhelmingly common case. A new merge commit is created with two parents, recording that two lines of history rejoined at that point.
+  </div>
+
+  <h2>Merge conflicts: when Git can't decide for you</h2>
+  <div class="box why">
+    <span class="box-label">Why conflicts happen, and why they're actually a safety feature</span>
+    A <strong>merge conflict</strong> occurs specifically when two branches changed the exact same lines of the exact same file in different ways. Git has no way to know which version — or what combination — is correct, so instead of silently guessing (and possibly discarding someone's work), it stops and asks a human to decide. This is the direct payoff of Lesson 4's core complaint about file-copy "versioning": Git refuses to silently overwrite anyone's changes.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Example</span>
+    <pre class="code-block"><code>&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD
+return price * 1.08;  // 8% tax
+=======
+return price * 1.0725;  // updated tax rate
+&gt;&gt;&gt;&gt;&gt;&gt;&gt; feature-tax-update</code></pre>
+    Two branches both changed the same tax calculation line differently. Git marks both versions directly in the file with these conflict markers and waits — the engineer resolving the conflict deletes the markers, keeps (or combines) the correct code, and commits the result to finish the merge.
+  </div>
+
+  <h2>Pull requests: review before merge</h2>
+  <div class="box why">
+    <span class="box-label">Why teams don't just merge branches directly</span>
+    A <strong>pull request</strong> (sometimes called a merge request) is a request to merge one branch into another, opened on a platform like GitHub or GitLab, that shows the full diff of proposed changes and lets other engineers comment, request changes, or approve before the merge actually happens. Almost every professional team requires this step — Unit 6 covers the review process itself in depth, but the mechanical point here is that a pull request is what turns "I finished a branch" into "the team has actually looked at this before it joins the main codebase."
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Example</span>
+    An engineer finishes the <span class="inline-code">feature-login</span> branch from Lesson 5 and opens a pull request to merge it into <span class="inline-code">main</span>. A teammate reviews the diff, leaves a comment asking why a specific edge case isn't handled, the engineer pushes a fix to the same branch (which automatically updates the open pull request), and only after approval does the actual merge happen.
+  </div>
+
+  <h2>Why this whole workflow matters at team scale</h2>
+  <div class="box why">
+    <span class="box-label">Why merging and pull requests are the mechanical backbone of team collaboration</span>
+    Everything Unit 1 said about software being built by teams, over years, ultimately routes through this exact mechanism: engineers branch off to work in isolation, merge conflicts are Git's way of forcing a human decision only when it's genuinely needed, and pull requests add a human review step before any of it reaches the shared codebase. Nearly every collaborative workflow in professional software engineering is some variation on this same pattern.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. When does a merge conflict actually occur?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Any time two branches are merged together, regardless of what changed.</button>
+      <button class="quiz-choice" data-correct="true">When two branches changed the exact same lines of the exact same file in different ways.</button>
+      <button class="quiz-choice" data-correct="false">Only when a branch is merged into main specifically, never between two feature branches.</button>
+      <button class="quiz-choice" data-correct="false">Whenever a commit message is missing.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>If the two branches touched different lines, Git merges automatically; a conflict only arises on genuinely overlapping edits.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why does Git stop and ask a human to resolve a merge conflict instead of picking a version automatically?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because Git is incapable of merging any files automatically.</button>
+      <button class="quiz-choice" data-correct="true">Because it has no way to know which conflicting version (or combination) is correct, and refuses to silently discard either one.</button>
+      <button class="quiz-choice" data-correct="false">Because merge conflicts are a bug in Git that hasn't been fixed yet.</button>
+      <button class="quiz-choice" data-correct="false">Because only the most senior engineer on a team is allowed to merge branches.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>This is the direct payoff of version control's core promise from Lesson 4: never silently overwrite someone's work.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. What does a pull request add on top of a plain merge?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">It makes the merge happen automatically without any human involvement.</button>
+      <button class="quiz-choice" data-correct="true">A review step where teammates can see the diff, comment, and approve before the merge actually happens.</button>
+      <button class="quiz-choice" data-correct="false">It permanently deletes the source branch's history once opened.</button>
+      <button class="quiz-choice" data-correct="false">It encrypts the branch's contents until the merge is approved.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A pull request is fundamentally a review gate placed in front of a merge, not a different way of merging.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="conflict">
+    <p class="quiz-prompt">4. Fill in the blank: a merge ___ happens when two branches changed the same lines of the same file differently, forcing a human decision.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>This is the specific term for Git's refusal to silently choose between two genuinely competing edits.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="review">
+    <p class="quiz-prompt">5. Fill in the blank: pull requests exist to add a ___ step before a branch's changes join the shared codebase.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Review is the entire point of a pull request — it's covered in full depth in Unit 6.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: the Pro Git book's chapter on <a href="https://git-scm.com/book/en/v2/Git-Branching-Basic-Branching-and-Merging">basic branching and merging</a> walks through resolving a real merge conflict step by step.</p>
+
+  <p class="ask-teacher">Stuck on anything above, or want help resolving a real merge conflict you've run into? Ask your teacher — that's what I'm here for. Next up: why we test software, starting Unit 3.</p>
+
+  <footer class="lesson-footer">STEM+ · Software Engineering · Lesson 6 of the course sequence</footer>
+</div>
