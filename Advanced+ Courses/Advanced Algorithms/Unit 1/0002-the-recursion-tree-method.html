@@ -1,0 +1,104 @@
+<meta charset="UTF-8">
+<title>Lesson 2: The Recursion Tree Method — STEM+</title>
+<link rel="stylesheet" href="../../../assets/style.css">
+<script src="../../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Advanced Algorithms · Unit 1 · Lesson 2</span>
+  <h1>The Recursion Tree Method</h1>
+  <p class="subtitle">Before the Master Theorem gives you a formula, learn to solve a recurrence by drawing it out — because the formula only covers recurrences with a specific shape, and the tree method is what you fall back on when it doesn't.</p>
+  <p class="nav-links"><a href="0001-asymptotic-notation-formally.html" class="nav-prev">← Lesson 1</a> <a href="0003-the-master-theorem.html" class="nav-next">Lesson 3 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>A recursive algorithm's runtime is described by a recurrence: an equation like T(n) = 2T(n/2) + n, meaning "the work on an input of size n equals the work of the recursive calls, plus the work done outside them." CP2 introduced recursion as a way to write code; this course needs to answer a sharper question — given a recurrence, what closed-form function of n does it solve to? The recursion tree method answers that by literally drawing the recursion as a tree, one level per recursive call, and summing the work level by level.</p>
+
+  <h2>Building the tree</h2>
+  <div class="box">
+    <span class="box-label">Method</span>
+    For T(n) = a·T(n/b) + f(n): draw a root labeled with the non-recursive work f(n) at size n. Give it a children, each a subproblem of size n/b, each labeled with its own non-recursive work f(n/b). Recurse: each of those has a children of size n/b², and so on, until subproblems hit the base case. Sum the labels level by level, then sum across all levels to get T(n).
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Worked example — T(n) = 2T(n/2) + n</span>
+    Level 0 (root): 1 node, work n. Level 1: 2 nodes, each of size n/2, each doing n/2 work — total n. Level 2: 4 nodes, each of size n/4, each doing n/4 work — total n. Every level does exactly n total work, regardless of depth. The tree has log₂n levels (since size n/2ᵏ hits 1 when k = log₂n), so total work is n · log₂n = Θ(n log n) — this is exactly merge sort's recurrence, and it's no accident the tree method reproduces the answer you already know.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Worked example — T(n) = T(n/2) + n (uneven split from the balanced case)</span>
+    Only one child per node this time. Level 0: work n. Level 1: 1 node of size n/2, work n/2. Level 2: work n/4. The per-level work is a geometric series n + n/2 + n/4 + ... which sums to 2n — dominated entirely by the root. T(n) = Θ(n). The lesson here generalizes: when per-level work <em>shrinks</em> geometrically going down the tree, the root dominates and the answer is just Θ(f(n)).
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why the per-level total is the pattern to watch</span>
+    The recursion tree method's real insight isn't the tree itself — it's noticing whether the total work per level stays constant, grows, or shrinks as you go deeper. Constant per level (times log n levels) gives Θ(f(n) log n). Work concentrated at the leaves (a children growing faster than the shrinkage in f) gives a total dominated by the leaf level. Work concentrated at the root (shrinking geometrically) gives Θ(f(n)). This three-way split is exactly the intuition the Master Theorem in the next lesson turns into a formula.
+  </div>
+
+  <div class="box">
+    <span class="box-label">Worked example — an uneven recurrence the Master Theorem can't touch</span>
+    T(n) = T(n/3) + T(2n/3) + n has two differently-sized subproblems, so it isn't even in the a·T(n/b) + f(n) form the Master Theorem requires. The tree method still works: every level's leaves sum their sizes to at most n (since n/3 + 2n/3 = n, and this holds recursively down every root-to-leaf path), so every level does at most n total work. The tree's depth is uneven — the all-n/3 path reaches the base case in log₃n levels, the all-2n/3 path takes log_{3/2}n levels, which is longer — so the total is bounded by n times the longest path length, giving T(n) = O(n log n). This is exactly why the tree method is the fallback: it handles shapes the formula was never built for.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. In the recursion tree for T(n) = 2T(n/2) + n, why is every level's total work the same?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because the tree only has one level in this recurrence.</button>
+      <button class="quiz-choice" data-correct="true">Because the number of nodes doubles each level while the work per node halves, so the product stays fixed at n.</button>
+      <button class="quiz-choice" data-correct="false">Because recursion trees always have equal work at every level by definition.</button>
+      <button class="quiz-choice" data-correct="false">Because the base case is reached after exactly one level.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>a=2 doubles the node count each level while each node's subproblem size halves, so per-node work halving exactly cancels the doubling in node count.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. For T(n) = T(n/2) + n, why does the root dominate the total instead of the leaves?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because there's only one leaf in this recursion tree.</button>
+      <button class="quiz-choice" data-correct="true">Because per-level work shrinks geometrically going down the tree, so the sum converges to a constant multiple of the root's work.</button>
+      <button class="quiz-choice" data-correct="false">Because the recurrence has no non-recursive work term.</button>
+      <button class="quiz-choice" data-correct="false">Because a = 1 means the tree has infinite depth.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A single child per node with halving size means each level's work is half the previous level's, so the geometric series is dominated by its first (root) term.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why can't T(n) = T(n/3) + T(2n/3) + n be solved directly with the Master Theorem?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because it has a non-recursive work term of n.</button>
+      <button class="quiz-choice" data-correct="true">Because its two recursive calls split the input into differently-sized pieces, not the single uniform a·T(n/b) shape the theorem requires.</button>
+      <button class="quiz-choice" data-correct="false">Because it's already Θ(n log n) and needs no further analysis.</button>
+      <button class="quiz-choice" data-correct="false">Because the Master Theorem only applies to recurrences with exactly one recursive call.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The Master Theorem's form assumes every subproblem has the identical size n/b; unevenly-sized subproblems fall outside that form entirely, which is exactly when you fall back to the tree method.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="level|levels">
+    <p class="quiz-prompt">4. Fill in the blank: the recursion tree method's key move is summing the non-recursive work ___ by ___, then adding across all of them.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Summing level by level, then across levels, is exactly what turns a recursive definition into a closed-form total.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="geometric|geometric series">
+    <p class="quiz-prompt">5. Fill in the blank: when per-level work shrinks going down the tree, it forms a ___ series whose sum is dominated by its first term — the root.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A shrinking geometric series converges to a constant multiple of its largest (first) term, which is why the root's work dominates the whole recurrence in that case.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: CLRS, Chapter 4, "Divide-and-Conquer," Section 4.4, "The recursion-tree method for solving recurrences," works through several more examples with full trees drawn out.</p>
+
+  <p class="ask-teacher">Want to check your own tree diagram for a recurrence you're stuck on? Ask your teacher — that's what I'm here for. Next up: the Master Theorem, a direct formula for exactly the shape of recurrence this lesson's trees kept solving to the same three patterns.</p>
+
+  <footer class="lesson-footer">STEM+ · Advanced Algorithms · Lesson 2 of the course sequence</footer>
+</div>

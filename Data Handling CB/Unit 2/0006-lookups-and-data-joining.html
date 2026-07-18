@@ -1,0 +1,111 @@
+<meta charset="UTF-8">
+<title>Lesson 6: Lookups and Data Joining in Spreadsheets — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Data Handling: CB · Unit 2 · Lesson 6</span>
+  <h1>Lookups and Data Joining in Spreadsheets</h1>
+  <p class="subtitle">Real data rarely lives in one table. This lesson teaches the spreadsheet functions that pull matching information from a second table — the same operation Unit 3 will teach again, in a different tool, called a join.</p>
+  <p class="nav-links"><a href="0005-core-spreadsheet-functions.html" class="nav-prev">← Lesson 5</a> <a href="0007-pivot-tables.html" class="nav-next">Lesson 7 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Suppose you have an orders sheet with a customer ID in every row, and a separate customers sheet with each customer's name and region next to their ID. To add the customer's name to the orders sheet, you need to look up each order's customer ID in the customers sheet and pull back the matching name. That's a lookup.</p>
+
+  <h2>VLOOKUP</h2>
+  <div class="box">
+    <span class="box-label">Function</span>
+    <code>=VLOOKUP(lookup_value, table_array, col_index, [FALSE])</code> searches for <code>lookup_value</code> in the <em>first column</em> of <code>table_array</code>, then returns the value from <code>col_index</code> columns over in that same row. Example: <code>=VLOOKUP(A2, Customers!A:C, 2, FALSE)</code> looks up the customer ID in cell A2 within the Customers sheet's column A, and returns the matching value from column B (the 2nd column of the range). The final <code>FALSE</code> argument requests an exact match — leaving it off risks a wrong, approximate match.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">VLOOKUP's real limitation</span>
+    VLOOKUP only searches the <em>first</em> column of its range and can only look rightward from there. If the ID you're searching by isn't in the leftmost column of the lookup table, VLOOKUP simply can't find it — you'd have to rearrange the source sheet, which isn't always possible or safe.
+  </div>
+
+  <h2>INDEX-MATCH</h2>
+  <div class="box">
+    <span class="box-label">Functions</span>
+    <code>=MATCH(lookup_value, lookup_array, 0)</code> returns the <em>position</em> of a value within a range (the <code>0</code> requests an exact match). <code>=INDEX(array, row_num)</code> returns the value at a given position within a range. Combined — <code>=INDEX(Customers!B:B, MATCH(A2, Customers!A:A, 0))</code> — this finds where the ID matches in column A, then returns the corresponding value from column B, regardless of which side of which column A is on. INDEX-MATCH fixes VLOOKUP's directionality limitation at the cost of being two functions instead of one.
+  </div>
+
+  <h2>XLOOKUP</h2>
+  <div class="box">
+    <span class="box-label">Function</span>
+    <code>=XLOOKUP(lookup_value, lookup_array, return_array)</code> — e.g. <code>=XLOOKUP(A2, Customers!A:A, Customers!B:B)</code> — is a newer function (available in current Excel and Google Sheets) that does what INDEX-MATCH does in one call, searches in either direction, and defaults to an exact match without needing an extra argument. Where available, it's generally the cleanest choice; VLOOKUP and INDEX-MATCH remain essential to recognize since they appear constantly in existing spreadsheets you didn't build yourself.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Worked example: joining two tables by a shared key</span>
+    Orders sheet: column A = Customer ID, column B = Order Total. Customers sheet: column A = Customer ID, column B = Customer Name, column C = Region. To add the customer's region onto each order row: <code>=XLOOKUP(A2, Customers!A:A, Customers!C:C)</code> in a new column C of the Orders sheet, then copy down. Every order row now carries its customer's region, pulled from a completely separate table — matched purely by the shared Customer ID column that exists in both.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">This is the same operation as a SQL join</span>
+    What just happened — combining two tables by matching a shared key column — is exactly what Unit 3 will call a <strong>join</strong>, done in a database instead of a spreadsheet. The shared Customer ID plays the same role a lookup key plays here. Lesson 11 will return to this exact orders/customers example when introducing SQL's <code>JOIN</code> syntax — same underlying operation, different tool, worth recognizing as the same idea rather than two unrelated skills.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What is VLOOKUP's main limitation compared to INDEX-MATCH or XLOOKUP?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">VLOOKUP cannot perform exact matches, only approximate ones.</button>
+      <button class="quiz-choice" data-correct="true">VLOOKUP can only search the first column of its range and look rightward, so it fails if the search key isn't in the leftmost column.</button>
+      <button class="quiz-choice" data-correct="false">VLOOKUP only works within a single sheet and cannot reference another sheet.</button>
+      <button class="quiz-choice" data-correct="false">VLOOKUP cannot return text values, only numbers.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>VLOOKUP's rightward-only, leftmost-column search is exactly the constraint INDEX-MATCH and XLOOKUP were built to remove.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. In INDEX-MATCH, what does the MATCH function return?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">The final value to be displayed in the result cell.</button>
+      <button class="quiz-choice" data-correct="true">The position of a matching value within a range, which INDEX then uses to retrieve the actual value.</button>
+      <button class="quiz-choice" data-correct="false">A TRUE/FALSE value indicating whether any match exists.</button>
+      <button class="quiz-choice" data-correct="false">The column letter where a match was found.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>MATCH only finds the position; INDEX is what actually pulls the value from that position in a different range.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why is joining two spreadsheet tables with a lookup function described as "the same operation" as a SQL join?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because spreadsheets and SQL databases use identical function names for every operation.</button>
+      <button class="quiz-choice" data-correct="true">Because both combine two tables by matching rows on a shared key column, just using different tools and syntax to do it.</button>
+      <button class="quiz-choice" data-correct="false">Because SQL joins and spreadsheet lookups both require the tables to be physically merged into one file first.</button>
+      <button class="quiz-choice" data-correct="false">Because a SQL join and a lookup produce different results from the same input data.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The underlying idea — match rows across two tables using a shared key — is identical; only the tool and syntax differ, which is exactly why Lesson 11 revisits this same example.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="XLOOKUP">
+    <p class="quiz-prompt">4. Fill in the blank: the newer function that combines INDEX-MATCH's flexibility into a single call, searching in either direction with an exact match by default, is called ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>XLOOKUP was designed specifically to remove VLOOKUP's directionality limit without needing two nested functions.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="join">
+    <p class="quiz-prompt">5. Fill in the blank: the SQL term (introduced in Unit 3) for combining two tables by matching rows on a shared key column, the same operation a spreadsheet lookup performs, is called a ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A join is the database term for exactly the same table-combining idea a lookup function performs in a spreadsheet.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: Google's Sheets help page on VLOOKUP, INDEX/MATCH, and XLOOKUP (support.google.com/docs) walks through each function with live examples.</p>
+
+  <p class="ask-teacher">Have two real tables you need to combine and aren't sure which lookup function fits? Ask your teacher — that's what I'm here for. Next up: pivot tables — summarizing large tables into quick cross-tabulated answers.</p>
+
+  <footer class="lesson-footer">STEM+ · Data Handling: CB · Lesson 6 of the course sequence</footer>
+</div>

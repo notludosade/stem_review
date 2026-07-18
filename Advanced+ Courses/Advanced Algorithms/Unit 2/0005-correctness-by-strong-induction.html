@@ -1,0 +1,104 @@
+<meta charset="UTF-8">
+<title>Lesson 5: Correctness by Strong Induction — STEM+</title>
+<link rel="stylesheet" href="../../../assets/style.css">
+<script src="../../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Advanced Algorithms · Unit 2 · Lesson 5</span>
+  <h1>Correctness by Strong Induction</h1>
+  <p class="subtitle">Unit 1 built the tools to analyze how fast a recursive algorithm runs. This lesson builds the tool to prove it's actually correct — every divide-and-conquer proof in this unit is the same three-step induction argument wearing a different problem.</p>
+  <p class="nav-links"><a href="../Unit%201/0004-amortized-analysis.html" class="nav-prev">← Lesson 4</a> <a href="0006-counting-inversions-and-merge-sort.html" class="nav-next">Lesson 6 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>CP2 taught recursion by tracing call stacks until the pattern felt intuitive — trust that the recursive call does its job, and build the current level's answer on top of it. That "trust the recursive call" move is not a leap of faith; it's an application of strong induction, and making it explicit is what turns "this seems to work on my test cases" into "this is provably correct on every input." Every divide-and-conquer algorithm in this unit gets the same treatment: a base case, an inductive hypothesis, and an inductive step that combines subproblem solutions correctly.</p>
+
+  <h2>The three-part structure</h2>
+  <div class="box">
+    <span class="box-label">Method — proving a recursive algorithm correct</span>
+    1. <strong>Base case</strong>: show the algorithm is correct on the smallest input(s) it handles directly (no recursive call). 2. <strong>Inductive hypothesis</strong>: assume the algorithm is correct on every input strictly smaller than n (this is <em>strong</em> induction — you get to assume correctness for all smaller sizes, not just n−1). 3. <strong>Inductive step</strong>: show that, given correct answers to the subproblems (by the hypothesis), the algorithm's combine step produces a correct answer for size n.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why strong induction, not ordinary induction</span>
+    Ordinary induction assumes correctness only for n−1 to prove n. Divide-and-conquer algorithms typically split n into pieces like n/2, which is not n−1 for any n &gt; 2 — so the inductive hypothesis needs to cover <em>every</em> smaller size at once, which is exactly what strong induction (also called complete induction) provides. Every recursive algorithm whose recursive calls aren't on "one less" needs this stronger form.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Worked proof — binary search is correct</span>
+    Claim: binary search on a sorted array correctly finds target t, or correctly reports it's absent. <strong>Base case</strong>: array of size 0 — correctly reports absent (nothing to find). Array of size 1 — correctly compares the single element to t. <strong>Inductive hypothesis</strong>: binary search is correct on every array of size &lt; n. <strong>Inductive step</strong>: on an array of size n, compare t to the middle element m. If t = m, done correctly. If t &lt; m, the recursive call searches the left half — a strictly smaller array — and by the hypothesis returns a correct answer for it; sortedness guarantees t cannot be in the right half, so the left half's correct answer is the whole answer. Symmetric for t &gt; m. Every case is covered, so by strong induction, binary search is correct for all n.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Worked proof — merge sort is correct (correctness only; runtime is Unit 1's Master Theorem)</span>
+    <strong>Base case</strong>: array of size 0 or 1 is trivially already sorted. <strong>Inductive hypothesis</strong>: merge sort correctly sorts every array of size &lt; n. <strong>Inductive step</strong>: on size n, split into two halves, each of size &lt; n; by the hypothesis, the recursive calls return each half correctly sorted. The remaining question is whether the merge step correctly combines two sorted arrays into one sorted array — a separate, non-recursive claim, proved directly: merge repeatedly takes the smaller of the two current front elements, so at every step the output so far is sorted and no smaller remaining element is skipped over. Since both the recursive calls (by hypothesis) and the merge step (by direct proof) are correct, size n is correct.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why the "combine step" needs its own separate proof</span>
+    Strong induction only discharges the recursive calls — it says nothing about whether the non-recursive glue code is correct. Merge sort's proof above needed a second, ordinary (non-inductive) argument that the merge step itself is correct. This is the recurring shape of every divide-and-conquer correctness proof in this unit: induction handles "trust the subproblems," and a separate direct argument handles "the combine step is correct given trustworthy subproblem answers." Skipping the second part is the most common gap in an otherwise induction-shaped proof.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. Why does proving a divide-and-conquer algorithm correct typically require strong induction rather than ordinary induction?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because divide-and-conquer algorithms never have a well-defined base case.</button>
+      <button class="quiz-choice" data-correct="true">Because the recursive calls are usually on a fraction of n (like n/2), not on n−1, so the hypothesis must cover every smaller size at once.</button>
+      <button class="quiz-choice" data-correct="false">Because strong induction is required whenever a proof involves an array.</button>
+      <button class="quiz-choice" data-correct="false">Because ordinary induction cannot be used to prove anything about algorithms.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Ordinary induction's single "assume n−1" step doesn't cover a jump straight to n/2, so the hypothesis needs to hold for all smaller sizes simultaneously — exactly what strong induction provides.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. In the merge sort correctness proof, what does the inductive hypothesis get to assume, and what does it leave unproven?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">It assumes the merge step is correct and leaves the recursive calls unproven.</button>
+      <button class="quiz-choice" data-correct="true">It assumes both recursive halves come back correctly sorted, but says nothing about whether the merge step itself correctly combines them.</button>
+      <button class="quiz-choice" data-correct="false">It assumes the whole array is already sorted before the algorithm runs.</button>
+      <button class="quiz-choice" data-correct="false">It assumes the array has an even number of elements.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Strong induction only discharges the recursive calls; the merge step is non-recursive glue code that needs its own separate, direct correctness argument.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. What is the most common gap in an otherwise induction-shaped correctness proof for a divide-and-conquer algorithm?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Forgetting to state the recurrence for the algorithm's runtime.</button>
+      <button class="quiz-choice" data-correct="true">Proving the recursive calls correct by induction, but never separately arguing that the combine step is correct.</button>
+      <button class="quiz-choice" data-correct="false">Using strong induction when ordinary induction would have sufficed.</button>
+      <button class="quiz-choice" data-correct="false">Failing to specify which sorting algorithm is being analyzed.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Induction covers "trust the subproblems"; it says nothing about whether the code that stitches subproblem answers together is itself correct, which needs a separate direct proof.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="base case|base">
+    <p class="quiz-prompt">4. Fill in the blank: every correctness induction needs a ___ case proven directly, with no recursive call to lean on.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Without a directly-proven base case, the whole induction has nothing to anchor to, no matter how correct the inductive step is.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="combine|merge">
+    <p class="quiz-prompt">5. Fill in the blank: strong induction proves the recursive calls trustworthy, but the ___ step that stitches subproblem answers together always needs its own direct argument.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The non-recursive glue code — merging two sorted halves, for instance — sits outside what the inductive hypothesis covers and must be proven correct on its own terms.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: Kleinberg &amp; Tardos, <em>Algorithm Design</em>, Chapter 2.3, "Analyzing a Recursive Algorithm," and Chapter 5 introduction, walk through the induction pattern this lesson formalized with several more worked proofs.</p>
+
+  <p class="ask-teacher">Stuck proving your own recursive algorithm correct? Ask your teacher — that's what I'm here for. Next up: using this exact proof pattern on a genuinely nontrivial combine step — counting inversions with a modified merge sort.</p>
+
+  <footer class="lesson-footer">STEM+ · Advanced Algorithms · Lesson 5 of the course sequence</footer>
+</div>

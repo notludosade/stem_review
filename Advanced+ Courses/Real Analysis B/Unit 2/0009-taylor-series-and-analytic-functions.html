@@ -1,0 +1,120 @@
+<meta charset="UTF-8">
+<title>Lesson 9: Taylor Series and Analytic Functions — STEM+</title>
+<link rel="stylesheet" href="../../../assets/style.css">
+<script src="../../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Real Analysis B · Unit 2 · Lesson 9</span>
+  <h1>Taylor Series and Analytic Functions</h1>
+  <p class="subtitle">Lesson 8 showed a power series's coefficients are forced to be its Taylor coefficients. This lesson runs the construction the other way — starting from an infinitely differentiable function, and asking honestly whether its Taylor series converges back to it.</p>
+  <p class="nav-links"><a href="0008-term-by-term-differentiation-and-integration.html" class="nav-prev">← Lesson 8</a> <a href="0010-where-taylor-series-fail.html" class="nav-next">Lesson 10 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>If f is a power series around c, Lesson 8 proved its coefficients must be aₖ = f<sup>(k)</sup>(c)/k!. Nothing in that argument required f to have started as a power series — it only used that f was infinitely differentiable at c. So the following construction makes sense for <em>any</em> C^∞ function, whether or not we know yet that it equals a power series.</p>
+
+  <div class="box">
+    <span class="box-label">Definition — Taylor Series</span>
+    If f is infinitely differentiable at c, its <strong>Taylor series centered at c</strong> is Σ<sub>k=0</sub><sup>∞</sup> [f<sup>(k)</sup>(c)/k!]·(x − c)ᵏ. The Taylor series can always be written down from f's derivatives at c alone — it says nothing yet about whether the series converges, or whether it converges to f(x).
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why "always exists" is weaker than it sounds</span>
+    Being C^∞ at a single point c is a strong hypothesis, but it only pins down the coefficients — it doesn't force the resulting series to have positive radius of convergence, and even if it does converge on some interval, nothing so far says the sum equals f(x) rather than something else entirely. Both failures are genuinely possible; Lesson 10 exhibits one of them. This lesson isolates the condition under which neither failure happens.
+  </div>
+
+  <div class="box">
+    <span class="box-label">Definition — Analytic</span>
+    f is <strong>analytic at c</strong> if there is some r &gt; 0 such that f(x) equals its Taylor series centered at c for every x ∈ (c − r, c + r). f is <strong>analytic on an interval</strong> if it is analytic at every point of that interval.
+  </div>
+
+  <p>To test whether f actually equals its Taylor series, compare f to the series' partial sums — the degree-n Taylor polynomials Pₙ(x) = Σ<sub>k=0</sub><sup>n</sup> [f<sup>(k)</sup>(c)/k!]·(x−c)ᵏ — and track the gap Rₙ(x) = f(x) − Pₙ(x).</p>
+
+  <div class="box">
+    <span class="box-label">Theorem — Taylor's Theorem with Lagrange Remainder</span>
+    Suppose f is (n+1)-times differentiable on an interval containing c and x. Then Rₙ(x) = f(x) − Pₙ(x) = f<sup>(n+1)</sup>(ξ)/(n+1)!·(x − c)ⁿ⁺¹ for some ξ strictly between c and x.
+  </div>
+
+  <div class="box">
+    <span class="box-label">Proof sketch</span>
+    Fix x ≠ c and define g(t) = f(x) − Σ<sub>k=0</sub><sup>n</sup> [f<sup>(k)</sup>(t)/k!]·(x−t)ᵏ − M·(x−t)ⁿ⁺¹, choosing the constant M so that g(c) = 0 (possible since the bracketed sum is a fixed number once M is chosen). By construction g(x) = 0 as well (every term in the sum vanishes at t = x, since (x−t)ᵏ = 0 for k ≥ 1, leaving f(x) − f(x) = 0, and the M-term also vanishes). Since g(c) = g(x) = 0, Rolle's Theorem (Real Analysis A) gives some ξ between c and x with g′(ξ) = 0. Differentiating g(t) in t, every term in the sum telescopes except the last, leaving g′(t) = −f<sup>(n+1)</sup>(t)/n!·(x−t)ⁿ + M·(n+1)·(x−t)ⁿ. Setting g′(ξ) = 0 and solving gives M = f<sup>(n+1)</sup>(ξ)/(n+1)!. Since M was defined so that g(c) = 0 forces f(x) − Pₙ(x) = M·(x−c)ⁿ⁺¹, substituting M gives exactly Rₙ(x) = f<sup>(n+1)</sup>(ξ)/(n+1)!·(x−c)ⁿ⁺¹. ∎
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why this is the right tool for testing analyticity</span>
+    f(x) equals its Taylor series at x precisely when Rₙ(x) → 0 as n → ∞ — that's just the definition of the partial sums Pₙ(x) converging to f(x). Taylor's Theorem hands us a formula for Rₙ(x) built entirely from a single higher derivative at some (unknown, but existing) point ξ — turning "does the series converge to f?" into "can the derivatives of f be bounded well enough to force this one term to 0?".
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Example: eˣ is analytic on all of ℝ</span>
+    Every derivative of eˣ is eˣ itself. Fix any x and let c = 0. On the interval between 0 and x, |eᵗ| ≤ e<sup>|x|</sup> =: B, a bound independent of n. So |Rₙ(x)| = |eᵗ/(n+1)!·xⁿ⁺¹| ≤ B·|x|ⁿ⁺¹/(n+1)! for the relevant ξ. Since |x|ⁿ⁺¹/(n+1)! → 0 as n → ∞ (factorial growth eventually beats any fixed exponential — the same fact that gave Σxⁿ/n! radius R = ∞ in Lesson 6), Rₙ(x) → 0. So eˣ equals its own Taylor series Σxⁿ/n! everywhere: eˣ is analytic on all of ℝ, and Lesson 6's mystery series is now fully identified.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Example: sin(x) is analytic on all of ℝ</span>
+    Every derivative of sin(x) is ± sin(x) or ± cos(x), so |f<sup>(n+1)</sup>(ξ)| ≤ 1 for every n and every ξ. So |Rₙ(x)| ≤ |x|ⁿ⁺¹/(n+1)! → 0 exactly as above, with an even simpler bound (B = 1, valid for every x at once). sin(x) equals its Taylor series Σ(−1)ᵏx²ᵏ⁺¹/(2k+1)! everywhere.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What does it mean for f to be analytic at c?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">That f is continuous at c</button>
+      <button class="quiz-choice" data-correct="true">That f equals its own Taylor series centered at c on some interval (c−r, c+r)</button>
+      <button class="quiz-choice" data-correct="false">That f has a Taylor series, regardless of whether the series converges to f</button>
+      <button class="quiz-choice" data-correct="false">That f is a polynomial</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Analyticity is the stronger condition: the Taylor series must actually converge back to f itself on some interval, not merely exist.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. What does Taylor's Theorem with Lagrange Remainder give a formula for?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">The radius of convergence of the Taylor series</button>
+      <button class="quiz-choice" data-correct="true">The gap Rₙ(x) = f(x) − Pₙ(x), in terms of the (n+1)-th derivative at some point ξ between c and x</button>
+      <button class="quiz-choice" data-correct="false">The exact value of f(x) with no error term</button>
+      <button class="quiz-choice" data-correct="false">The coefficients aₖ directly, without reference to derivatives</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The Lagrange remainder formula expresses the error between f and its degree-n Taylor polynomial using a single unknown intermediate point ξ.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why does the bound on Rₙ(x) for eˣ and sin(x) force Rₙ(x) → 0?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because eˣ and sin(x) are both bounded functions</button>
+      <button class="quiz-choice" data-correct="true">Because the bound has the form B·|x|ⁿ⁺¹/(n+1)!, and factorial growth in the denominator eventually beats any fixed exponential in the numerator</button>
+      <button class="quiz-choice" data-correct="false">Because ξ can always be taken equal to c</button>
+      <button class="quiz-choice" data-correct="false">Because the Weierstrass M-Test applies directly to Rₙ</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The same factorial-beats-exponential fact from Lesson 6's R = ∞ example forces the remainder bound to 0 for any fixed x.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="rolle">
+    <p class="quiz-prompt">4. Fill in the blank: the proof of Taylor's Theorem constructs an auxiliary function g with g(c) = g(x) = 0, then applies ___'s Theorem from Real Analysis A.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Rolle's Theorem supplies the point ξ where g′(ξ) = 0, which the proof then solves for the remainder formula.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="remainder">
+    <p class="quiz-prompt">5. Fill in the blank: f is analytic at c exactly when the ___ term Rₙ(x) = f(x) − Pₙ(x) goes to 0 as n → ∞.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Rₙ(x) → 0 is precisely the statement that the Taylor polynomials converge to f(x), i.e. that f equals its Taylor series there.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: Abbott's <em>Understanding Analysis</em>, Section 6.6, proves Taylor's Theorem with Lagrange remainder and works through the eˣ and sin(x) analyticity arguments in full.</p>
+
+  <p class="ask-teacher">Stuck on why the auxiliary function g in the proof needs exactly that mix of terms? Ask your teacher — that's what I'm here for. Next up: a C^∞ function whose Taylor series converges everywhere — just not to the function itself.</p>
+
+  <footer class="lesson-footer">STEM+ · Real Analysis B · Lesson 9 of the course sequence</footer>
+</div>

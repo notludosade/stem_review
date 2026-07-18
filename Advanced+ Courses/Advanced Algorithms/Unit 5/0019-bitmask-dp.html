@@ -1,0 +1,120 @@
+<meta charset="UTF-8">
+<title>Lesson 19: Bitmask DP (TSP) — STEM+</title>
+<link rel="stylesheet" href="../../../assets/style.css">
+<script src="../../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Advanced Algorithms · Unit 5 · Lesson 19</span>
+  <h1>Bitmask DP: The Traveling Salesman Problem</h1>
+  <p class="subtitle">Some DP states aren't a position or an index — they're an entire subset of items visited so far, encoded as the bits of an integer. This turns a problem with no known polynomial solution into one solvable in exponential-but-far-better-than-brute-force time.</p>
+  <p class="nav-links"><a href="0018-dp-on-trees.html" class="nav-prev">← Lesson 18</a> <a href="0020-matrix-chain-multiplication.html" class="nav-next">Lesson 20 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>The <strong>traveling salesman problem</strong> (TSP): given n cities and the distance between every pair, find the shortest tour that visits every city exactly once and returns to the start. Brute force tries all (n−1)! orderings — utterly infeasible past roughly n=12. TSP is one of Unit 8's canonical NP-hard problems (no known polynomial algorithm exists, and Lesson 32 will show precisely why, via reduction), but that doesn't mean brute force is the only alternative — <strong>bitmask DP</strong> solves it exactly in Θ(n²·2ⁿ), a large improvement over Θ(n!) even though it's still exponential.</p>
+
+  <h2>The state — a subset encoded as bits</h2>
+  <div class="box">
+    <span class="box-label">Setup</span>
+    Represent "which cities have been visited so far" as an n-bit integer mask, where bit i is 1 if city i has been visited. There are 2ⁿ possible masks — one per subset of cities. Define dp[mask][j] = the minimum cost to start at city 0, visit exactly the set of cities in mask, and end at city j (where j must itself be a member of mask).
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why bits, specifically</span>
+    A subset of up to ~20 cities has exponentially many possible values, but each one maps to a unique integer 0 through 2ⁿ−1 via its bit pattern — so "the state is a subset" becomes "the state is an array index," letting an ordinary array (not a hash map or tree) store dp[mask][j] directly. Bitwise operations then make manipulating subsets fast: mask | (1&lt;&lt;k) adds city k to the set, mask &amp; (1&lt;&lt;k) checks membership, both in O(1), which is exactly the per-transition speed the recurrence below depends on.
+  </div>
+
+  <div class="box">
+    <span class="box-label">Recurrence</span>
+    dp[mask][j] = min over every city i in mask, i≠j, of ( dp[mask without j][i] + dist(i, j) ). In words: to end at j having visited exactly this set, some other city i in the set (other than j) must have been visited immediately before j — so consider every candidate "previous city" i, and take the best. Base case: dp[{0}][0] = 0 (start at city 0, having visited only city 0, at cost 0). Final answer: min over all j≠0 of ( dp[full mask][j] + dist(j, 0) ) — every city visited, ending at j, plus the trip back to the start.
+  </div>
+
+  <div class="box">
+    <span class="box-label">Algorithm</span>
+<pre class="code-block"><code>function tsp(dist, n):
+    dp = array indexed by [mask][j], initialized to infinity
+    dp[1][0] = 0                                  // mask=1 means only city 0 visited
+    for mask in 1..(2^n - 1):
+        for j in 0..n-1:
+            if (mask & (1 << j)) == 0: continue    // j not in this mask, skip
+            if dp[mask][j] == infinity: continue
+            for k in 0..n-1:
+                if (mask & (1 << k)) != 0: continue // k already visited, skip
+                newMask = mask | (1 << k)
+                dp[newMask][k] = min(dp[newMask][k], dp[mask][j] + dist(j, k))
+    return min over j of (dp[(1<<n)-1][j] + dist(j, 0))</code></pre>
+  </div>
+
+  <div class="box">
+    <span class="box-label">Runtime</span>
+    Θ(n²·2ⁿ): 2ⁿ masks, each with n choices of j and (in the transition) n choices of k, giving n² work per mask. For n=20, that's roughly 20²·2²⁰ ≈ 4×10⁸ — large, but computable, versus 19! ≈ 1.2×10¹⁷ for brute force. This is the concrete difference between "exponential" and "factorial" growth that makes bitmask DP the standard approach for TSP up to a few dozen cities.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why this doesn't contradict TSP being NP-hard</span>
+    Θ(n²·2ⁿ) is still exponential in n — it's an improvement in the constant inside the exponent (2ⁿ instead of n!), not a polynomial-time algorithm. TSP being NP-hard (Unit 8) means no polynomial-time algorithm is known (or, under the standard complexity-theoretic assumption P≠NP, believed to exist) — bitmask DP is the best known <em>exact</em> approach for moderate n, not a refutation of NP-hardness.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What does dp[mask][j] represent in the bitmask DP formulation of TSP?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">The total number of cities in the graph.</button>
+      <button class="quiz-choice" data-correct="true">The minimum cost of a tour starting at city 0, visiting exactly the cities in mask, and ending at city j.</button>
+      <button class="quiz-choice" data-correct="false">The shortest distance between any two cities in the graph.</button>
+      <button class="quiz-choice" data-correct="false">The number of distinct tours that visit every city.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The pair (mask, j) fully specifies both which cities have been visited and where the partial tour currently ends, which is exactly the information the recurrence needs.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why does representing a subset of cities as a bitmask make this DP practical?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because bitmasks eliminate the need to consider every possible ending city.</button>
+      <button class="quiz-choice" data-correct="true">Because each subset maps to a unique integer, letting dp[mask][j] be stored in an ordinary array with O(1) membership and update operations via bitwise ops.</button>
+      <button class="quiz-choice" data-correct="false">Because bitmasks reduce the total number of subsets from 2^n down to n.</button>
+      <button class="quiz-choice" data-correct="false">Because bitmasks are required to compute distances between cities.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The array-indexable, O(1)-updatable nature of bitmask-encoded subsets is exactly what makes the DP's transitions fast.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why doesn't bitmask DP's Θ(n²·2ⁿ) runtime contradict TSP's classification as NP-hard?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because Θ(n²·2ⁿ) is actually a polynomial-time bound.</button>
+      <button class="quiz-choice" data-correct="true">Because Θ(n²·2ⁿ) is still exponential in n — it improves the constant inside the exponent compared to brute force, but is not a polynomial-time algorithm.</button>
+      <button class="quiz-choice" data-correct="false">Because bitmask DP only works on graphs with fewer than 4 cities.</button>
+      <button class="quiz-choice" data-correct="false">Because NP-hardness has nothing to do with runtime at all.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>2ⁿ is exponential regardless of the polynomial factor n² multiplying it, so this remains consistent with no known polynomial-time solution existing.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="bitmask|bit mask">
+    <p class="quiz-prompt">4. Fill in the blank: encoding "which cities have been visited" as a ___ lets a subset be represented as a single integer with O(1) membership and update checks.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>This encoding is the entire technique's namesake and its core enabling idea.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="exponential">
+    <p class="quiz-prompt">5. Fill in the blank: bitmask DP's Θ(n²·2ⁿ) runtime is still ___ in n, just with a smaller base than the n! of brute force.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>2ⁿ growth is exponential, just with a dramatically smaller base than the factorial growth of brute-force enumeration.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: <a href="https://cp-algorithms.com/graph/profile-dynamics.html">CP-Algorithms, "Dynamic programming on broken profile"</a> covers bitmask DP broadly, and CLRS's exercises in Chapter 15 sketch the TSP formulation used here.</p>
+
+  <p class="ask-teacher">Want to trace dp[mask][j] by hand for a 4-city instance? Ask your teacher — that's what I'm here for. Next up: matrix chain multiplication, an interval-based DP that decides the cheapest way to parenthesize a chain of matrix products.</p>
+
+  <footer class="lesson-footer">STEM+ · Advanced Algorithms · Lesson 19 of the course sequence</footer>
+</div>

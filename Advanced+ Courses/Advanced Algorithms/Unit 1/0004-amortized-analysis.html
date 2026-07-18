@@ -1,0 +1,119 @@
+<meta charset="UTF-8">
+<title>Lesson 4: Amortized Analysis — STEM+</title>
+<link rel="stylesheet" href="../../../assets/style.css">
+<script src="../../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Advanced Algorithms · Unit 1 · Lesson 4</span>
+  <h1>Amortized Analysis</h1>
+  <p class="subtitle">A dynamic array's push is "O(1)" — except for the occasional resize, which is O(n). This lesson makes precise what "occasional" buys you, with three methods that all answer the same question: what's the true average cost per operation over a long sequence?</p>
+  <p class="nav-links"><a href="0003-the-master-theorem.html" class="nav-prev">← Lesson 3</a> <a href="../Unit%202/0005-correctness-by-strong-induction.html" class="nav-next">Lesson 5 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Worst-case analysis asks "what's the most expensive this operation can ever be?" — a fair question, but sometimes a misleading one. A dynamic array's push is O(1) almost every time and O(n) on the rare occasion it must resize; reporting "O(n) worst case" for every push is technically true but wildly pessimistic about a sequence of many pushes. Amortized analysis answers a different, often more useful question: over a sequence of n operations, what's the average cost per operation, guaranteed — not on average over random inputs, but guaranteed for every possible sequence.</p>
+
+  <h2>The running example: a dynamic array that doubles</h2>
+  <div class="box">
+    <span class="box-label">Setup</span>
+    A dynamic array starts with capacity 1. Each push either fits in the current capacity (cost 1) or, if full, allocates a new array of double the capacity, copies every existing element over, then inserts (cost = old size + 1). The question: over n pushes starting from empty, what is the total cost, and therefore the amortized cost per push?
+  </div>
+
+  <h2>Method 1: aggregate analysis</h2>
+  <div class="box">
+    <span class="box-label">Method</span>
+    Sum the total cost of all n operations directly, then divide by n. Resizes happen when the array holds 1, 2, 4, 8, ..., 2^(k-1) elements — i.e. at most log₂n times. The k-th resize costs about 2^(k-1) (copying the existing elements). Total resize cost is 1+2+4+...+n/2 &lt; n (geometric series). Adding the n unit-cost pushes themselves, total cost &lt; n + n = 2n. Amortized cost per push = 2n/n = O(1).
+  </div>
+  <div class="box why">
+    <span class="box-label">Why aggregate analysis is the simplest and most limited method</span>
+    Aggregate analysis directly answers the question with no bookkeeping overhead — but it only produces one number, the average, and gives no way to reason about intermediate points in the sequence or to prove a per-operation credit invariant that later analysis (like proving an amortized bound holds even under interleaved operation types) might need. The next two methods rebuild the same O(1) answer with machinery that generalizes further.
+  </div>
+
+  <h2>Method 2: the accounting method</h2>
+  <div class="box">
+    <span class="box-label">Method</span>
+    Charge each operation an <em>amortized cost</em> that may differ from its actual cost, such that the sum of amortized costs is always ≥ the sum of actual costs. The difference accumulates as <strong>credit</strong> stored on data structure elements, which future expensive operations draw down instead of being charged their true cost.
+  </div>
+  <div class="box example">
+    <span class="box-label">Applying it to the dynamic array</span>
+    Charge every push an amortized cost of 3, regardless of whether it resizes. A push that doesn't resize costs 1 actually, banking 2 credit on the newly inserted element. When a resize happens at size m (doubling from m to 2m), it must copy all m existing elements — but the m/2 elements added since the last resize each still hold their banked 2 credit, contributing m credit, exactly enough to pay for copying all m elements (2 credit pays to move 2 elements' worth of copying, roughly — the accounting is arranged so the banked credit from the newest half of the array exactly covers the whole copy). Since every operation is charged a flat 3, and the invariant "credit never goes negative" holds by this bookkeeping, the amortized cost per push is O(1) — matching aggregate analysis, but now with an explicit invariant (credit ≥ 0) that a proof can point to directly.
+  </div>
+
+  <h2>Method 3: the potential method</h2>
+  <div class="box">
+    <span class="box-label">Method</span>
+    Define a potential function Φ mapping the data structure's state to a nonnegative real number, with Φ(initial state) = 0. The amortized cost of an operation is defined as ĉᵢ = cᵢ + Φ(after) − Φ(before), where cᵢ is the actual cost. Because the Φ terms telescope across a sequence of operations, ∑ĉᵢ = ∑cᵢ + Φ(final) − Φ(initial) ≥ ∑cᵢ (since Φ(final) ≥ 0 = Φ(initial)) — so a bound on amortized cost is automatically a valid bound on total actual cost.
+  </div>
+  <div class="box example">
+    <span class="box-label">Applying it to the dynamic array</span>
+    Define Φ = 2·(size) − capacity. Right after a resize, size = capacity/2, so Φ = 2·(capacity/2) − capacity = 0 — potential resets to its minimum. Just before the next resize, size = capacity, so Φ = 2·capacity − capacity = capacity — potential has grown to exactly cover the upcoming copy cost. For a non-resizing push: cᵢ=1, and Φ increases by 2 (size goes up by 1, contributing +2 to Φ, capacity unchanged), so ĉᵢ = 1 + 2 = 3. For a resizing push at size m: cᵢ = m+1 (copy m elements, insert 1), Φ(before) = 2m − m = m, Φ(after) = 2(m+1) − 2m = 2, so ĉᵢ = (m+1) + (2 − m) = 3. Both cases give the same amortized cost, ĉᵢ = 3 = O(1) — proving the O(1) bound holds for <em>every individual operation</em>, not just the sequence average, which is exactly what aggregate analysis alone couldn't give you.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why the potential method is the one this course leans on later</span>
+    The potential method's per-operation guarantee — not just a sequence average — is exactly what's needed to analyze data structures where operations interleave unpredictably, like Union-Find with path compression (Unit 6), where you can't assume a fixed pattern of operations to sum over in advance. Whenever this course needs to prove an amortized bound for a structure under arbitrary interleavings of its operations, it reaches for a potential function.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What question does amortized analysis answer that plain worst-case analysis doesn't?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">What is the best-case cost of a single operation, assuming favorable input?</button>
+      <button class="quiz-choice" data-correct="true">What is the guaranteed average cost per operation over any sequence of operations, not just the single most expensive one?</button>
+      <button class="quiz-choice" data-correct="false">What is the expected cost assuming random, uniformly distributed inputs?</button>
+      <button class="quiz-choice" data-correct="false">What is the cost of an operation measured only in extra memory used?</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Amortized analysis bounds the average cost per operation guaranteed over any sequence — a worst-case-over-sequences guarantee, not a probabilistic one.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. In the accounting method for the dynamic array, what does "credit" on an element represent?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">The number of times that element has been read since insertion.</button>
+      <button class="quiz-choice" data-correct="true">Overpayment collected from a cheap operation, banked to help pay for a future expensive operation.</button>
+      <button class="quiz-choice" data-correct="false">A count of how many other elements depend on it.</button>
+      <button class="quiz-choice" data-correct="false">The memory address offset of the element within the array.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Charging more than the actual cost on cheap operations banks the surplus as credit, which is drawn down exactly when an expensive operation (a resize) needs to pay for work beyond its own charged amount.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why does the potential method's telescoping sum guarantee that a bound on amortized cost implies a bound on total actual cost?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because Φ is always exactly equal to the actual cost of each operation.</button>
+      <button class="quiz-choice" data-correct="true">Because ∑ĉᵢ = ∑cᵢ + Φ(final) − Φ(initial), and Φ(final) ≥ 0 = Φ(initial) makes the amortized sum an upper bound on the actual sum.</button>
+      <button class="quiz-choice" data-correct="false">Because Φ must be recomputed from scratch after every single operation.</button>
+      <button class="quiz-choice" data-correct="false">Because the potential method only applies when there are no resize operations at all.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The intermediate Φ terms cancel in the sum, leaving only the boundary terms — and since potential can't go negative, the amortized total never undershoots the true total.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="potential|potential function">
+    <p class="quiz-prompt">4. Fill in the blank: the ___ method defines ĉᵢ = cᵢ + Φ(after) − Φ(before), giving a per-operation amortized bound rather than just a sequence-wide average.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The potential method is the one of the three that certifies each individual operation's amortized cost, which is why later structures with unpredictable operation interleavings (like Union-Find) rely on it.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="doubling|double">
+    <p class="quiz-prompt">5. Fill in the blank: a dynamic array achieves O(1) amortized push specifically because its capacity grows by ___ rather than by a fixed increment each resize.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Doubling makes resizes exponentially rarer as the array grows, which is exactly what keeps the total resize cost linear in n instead of quadratic — a fixed increment would force a resize (and a full copy) every constant number of pushes.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: CLRS, Chapter 17, "Amortized Analysis," covers all three methods (aggregate, accounting, potential) with the dynamic-table example worked in full detail, plus a stack-with-multipop example this lesson didn't cover.</p>
+
+  <p class="ask-teacher">Want to try the potential method on a data structure of your own? Ask your teacher — that's what I'm here for. This closes Unit 1. Next up: Unit 2, divide and conquer — starting with how to actually prove a recursive algorithm correct, not just analyze its runtime.</p>
+
+  <footer class="lesson-footer">STEM+ · Advanced Algorithms · Lesson 4 of the course sequence</footer>
+</div>

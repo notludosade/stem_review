@@ -1,0 +1,114 @@
+<meta charset="UTF-8">
+<title>Lesson 21: The Inverse and Implicit Function Theorems — STEM+</title>
+<link rel="stylesheet" href="../../../assets/style.css">
+<script src="../../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Real Analysis B · Unit 4 · Lesson 21</span>
+  <h1>The Inverse and Implicit Function Theorems</h1>
+  <p class="subtitle">Single-variable calculus says a function with nonzero derivative is locally invertible. This capstone lesson generalizes that fact with the Jacobian in place of the derivative — and shows implicit differentiation, a technique from prerequisite calculus, was quietly leaning on it the whole time.</p>
+  <p class="nav-links"><a href="0020-clairauts-theorem-and-higher-order-partials.html" class="nav-prev">← Lesson 20</a> <a href="../Unit%205/0022-why-riemann-integration-breaks-down.html" class="nav-next">Unit 5, Lesson 22 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <div class="box why">
+    <span class="box-label">Why this starts from a single-variable fact</span>
+    From single-variable calculus: if f is C¹ near a and f'(a) ≠ 0, then f is invertible on some interval around a, its inverse is differentiable, and (f⁻¹)'(f(a)) = 1/f'(a). The condition f'(a) ≠ 0 is a 1×1 matrix being invertible. The Inverse Function Theorem below is exactly this fact with "matrix invertible" replacing "nonzero."
+  </div>
+
+  <div class="box">
+    <span class="box-label">Theorem (stated) — The Inverse Function Theorem</span>
+    Let f: ℝⁿ → ℝⁿ be C¹ (all partial derivatives exist and are continuous) in a neighborhood of a, and suppose Df(a) is an invertible matrix. Then there is a neighborhood U of a and a neighborhood V of f(a) such that f: U → V is a bijection, its inverse f⁻¹: V → U is also C¹, and D(f⁻¹)(f(a)) = [Df(a)]⁻¹.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why this theorem is only stated, not proved, here</span>
+    Its proof genuinely needs a tool this course hasn't built: the Contraction Mapping (Banach Fixed Point) Theorem, used to construct the local inverse as the fixed point of an iterative scheme, followed by an estimate showing that fixed point varies continuously (in fact C¹) with the input. This is a substantial, self-contained piece of machinery — proved in full in the source reading below — genuinely beyond what's practical to build from scratch in one lesson.
+  </div>
+
+  <div class="box">
+    <span class="box-label">Theorem — The Implicit Function Theorem (a special case, derived from the Inverse Function Theorem)</span>
+    Let F: ℝ² → ℝ be C¹ near (a,b), with F(a,b) = 0 and ∂F/∂y(a,b) ≠ 0. Then there is an interval around a and a C¹ function g defined on it, with g(a) = b, such that F(x, g(x)) = 0 for all x in that interval, and
+    <br><br>
+    g'(x) = − [∂F/∂x(x,g(x))] / [∂F/∂y(x,g(x))].
+  </div>
+
+  <div class="box">
+    <span class="box-label">Proof (assuming the Inverse Function Theorem)</span>
+    Define Φ: ℝ² → ℝ² by Φ(x,y) = (x, F(x,y)). Its Jacobian is DΦ(x,y) = [[1, 0], [∂F/∂x, ∂F/∂y]], with determinant ∂F/∂y — nonzero at (a,b) by hypothesis, so DΦ(a,b) is invertible. Since F is C¹, so is Φ. By the Inverse Function Theorem, Φ has a C¹ local inverse Φ⁻¹ near Φ(a,b) = (a, 0).
+    <br><br>
+    Because Φ never changes its first coordinate, Φ⁻¹ can't either: Φ⁻¹(x, z) = (x, g(x, z)) for some C¹ function g. Define g(x) = g(x, 0). Then Φ(x, g(x)) = Φ(Φ⁻¹(x,0)) = (x, 0), and by the definition of Φ, this says (x, F(x, g(x))) = (x, 0) — so F(x, g(x)) = 0 for every x near a, with g(a) = b since Φ(a,b) = (a,0) means Φ⁻¹(a,0) = (a,b). Since Φ⁻¹ is C¹, so is g.
+    <br><br>
+    For the derivative formula, differentiate F(x, g(x)) = 0 with respect to x using the Chain Rule (Lesson 19), treating x ↦ (x, g(x)) as a map into ℝ²: ∂F/∂x(x,g(x))·1 + ∂F/∂y(x,g(x))·g'(x) = 0. Since ∂F/∂y(a,b) ≠ 0 (and by continuity, ∂F/∂y(x,g(x)) ≠ 0 for x near a), solving gives g'(x) = −∂F/∂x(x,g(x)) / ∂F/∂y(x,g(x)). ∎
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why this is a satisfying place to end the unit</span>
+    Implicit differentiation — treating y as a function of x inside an equation F(x,y) = 0 and differentiating both sides — is a computational technique from prerequisite calculus. The proof above shows exactly why it's valid: F(x,y)=0 genuinely does define y as a C¹ function of x near any point where ∂F/∂y ≠ 0, and the formula g'(x) = −Fₓ/F_y is not a trick but a direct consequence of the chain rule applied to that function's existence. A technique used without proof before this course now has one, built from the Inverse Function Theorem and Lesson 19's chain rule together.
+  </div>
+
+  <p>Unit 4 in one line: partial derivatives alone can be misleading, but once a single linear map (the total derivative, represented by the Jacobian) captures every direction at once, differentiability in several variables recovers continuity, a chain rule, a theory of higher-order derivatives, and — where the Jacobian is invertible — local invertibility, exactly as in one variable.</p>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What does the Inverse Function Theorem require of Df(a)?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">That it be the zero matrix</button>
+      <button class="quiz-choice" data-correct="true">That it be invertible</button>
+      <button class="quiz-choice" data-correct="false">That it be symmetric</button>
+      <button class="quiz-choice" data-correct="false">That it have determinant exactly 1</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>An invertible Jacobian at a is the direct generalization of a nonzero derivative in one variable.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. How is the Implicit Function Theorem derived from the Inverse Function Theorem in this lesson?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">By applying Clairaut's Theorem to F directly</button>
+      <button class="quiz-choice" data-correct="true">By constructing Φ(x,y) = (x, F(x,y)), inverting it, and reading off g from the second coordinate of Φ⁻¹</button>
+      <button class="quiz-choice" data-correct="false">By assuming F is a polynomial</button>
+      <button class="quiz-choice" data-correct="false">By taking F to be linear</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Φ's first coordinate is forced to stay x, so its local inverse's second coordinate function, evaluated at z=0, is exactly the implicit function g.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Where does the formula g'(x) = −Fₓ/F_y come from?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Clairaut's Theorem applied to F</button>
+      <button class="quiz-choice" data-correct="true">Differentiating F(x,g(x)) = 0 with the chain rule and solving for g'(x)</button>
+      <button class="quiz-choice" data-correct="false">The Mean Value Theorem applied to g</button>
+      <button class="quiz-choice" data-correct="false">The definition of the Jacobian determinant</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The chain rule applied to F(x,g(x))=0 gives Fₓ + F_y·g'(x) = 0, which rearranges directly to the implicit differentiation formula.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="invertible">
+    <p class="quiz-prompt">4. Fill in the blank: the Inverse Function Theorem's key hypothesis is that the Jacobian matrix be ___ at the point.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>An invertible Jacobian is exactly what's needed to guarantee a local inverse exists.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="implicit">
+    <p class="quiz-prompt">5. Fill in the blank: the technique of differentiating an equation F(x,y)=0 to find dy/dx, now justified by this lesson's theorem, is called ___ differentiation.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Implicit differentiation is the prerequisite-calculus technique that the Implicit Function Theorem rigorously justifies.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next unit: Rudin's <em>Principles of Mathematical Analysis</em>, Chapter 9, proves the Inverse Function Theorem in full via the Contraction Mapping Theorem, and derives the Implicit Function Theorem in general form (for F: ℝⁿ⁺ᵐ → ℝᵐ).</p>
+
+  <p class="ask-teacher">Stuck on why Φ's first coordinate staying fixed at x is exactly what makes the construction work? Ask your teacher — that's what I'm here for. That closes Unit 4 — Unit 5 leaves differentiation behind and asks a much older question freshly: what does it mean for a set to have "length," precisely enough to fix a genuine gap in the Riemann integral?</p>
+
+  <footer class="lesson-footer">STEM+ · Real Analysis B · Lesson 21 of the course sequence</footer>
+</div>

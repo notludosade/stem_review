@@ -1,0 +1,100 @@
+<meta charset="UTF-8">
+<title>Lesson 13: Subqueries and CTEs — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Data Handling: CB · Unit 3 · Lesson 13</span>
+  <h1>Subqueries and CTEs</h1>
+  <p class="subtitle">Some questions need the answer to one query before you can even write the next one. Subqueries and CTEs are how SQL builds a query out of smaller queries, closing out this unit's core toolkit.</p>
+  <p class="nav-links"><a href="0012-aggregation.html" class="nav-prev">← Lesson 12</a> <a href="../Unit%204/0014-descriptive-statistics.html" class="nav-next">Lesson 14 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Consider: "which customers placed an order with a total above the overall average order total?" You need the overall average first, then compare each customer's orders against it — one query nested inside another.</p>
+
+  <h2>Subqueries</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    A <strong>subquery</strong> is a query nested inside another query, usually in parentheses. <code>SELECT name FROM orders WHERE order_total > (SELECT AVG(order_total) FROM orders);</code> — the parenthesized inner query computes one number (the overall average), and the outer query then filters against it. Subqueries can also appear in place of a table, in the <code>FROM</code> clause, when you need to query the result of another query.
+  </div>
+
+  <h2>Common Table Expressions (CTEs)</h2>
+  <div class="box">
+    <span class="box-label">Syntax</span>
+    <code>WITH regional_totals AS (SELECT region, SUM(order_total) AS total FROM orders GROUP BY region) SELECT * FROM regional_totals WHERE total > 10000;</code> — a <strong>CTE</strong>, introduced with <code>WITH</code>, names a subquery's result (<code>regional_totals</code>) so the main query can refer to it like a regular table. Functionally, a CTE and an equivalent subquery-in-FROM often produce the identical result — the difference is readability: naming the intermediate result and giving it a plain-English label makes a multi-step query easy to read top to bottom, rather than parsing inward through nested parentheses.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why CTEs are usually preferred once a query has more than one step</span>
+    A deeply nested subquery — a subquery inside a subquery inside a subquery — becomes difficult to read in the same way Lesson 5's deeply nested IF statements did: correct, but hard to verify by eye and easy to break with one misplaced parenthesis. A CTE breaks a multi-step calculation into named, sequential pieces, each independently readable, closely mirroring how you'd actually explain the logic out loud: "first compute regional totals, then filter to the big ones."
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Worked example: a query built from Unit 3's whole toolkit</span>
+    <code>WITH customer_spend AS (SELECT customers.region, SUM(orders.order_total) AS total_spend FROM orders INNER JOIN customers ON orders.customer_id = customers.customer_id GROUP BY customers.region) SELECT region, total_spend FROM customer_spend WHERE total_spend > (SELECT AVG(total_spend) FROM customer_spend);</code> — a CTE joins and groups to get each region's total spend, then the outer query keeps only regions spending above the average of those regional totals, using a subquery to compute that average. This single query uses JOIN (Lesson 11), GROUP BY (Lesson 12), a CTE, and a subquery together.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What is a subquery?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">A query that runs on a completely separate database from the main query.</button>
+      <button class="quiz-choice" data-correct="true">A query nested inside another query, whose result the outer query uses — e.g. as a value to compare against or a table to select from.</button>
+      <button class="quiz-choice" data-correct="false">A query that can only ever return a single row and column, never more.</button>
+      <button class="quiz-choice" data-correct="false">A shorthand name for any query that uses GROUP BY.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A subquery's defining trait is being nested inside another query, with the outer query consuming its result.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. What is the main practical benefit of a CTE (WITH clause) over an equivalent nested subquery?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">CTEs always execute faster than any subquery, regardless of the database engine.</button>
+      <button class="quiz-choice" data-correct="true">CTEs name the intermediate result, letting a multi-step query be read top to bottom like a sequence of labeled steps, rather than parsed inward through nested parentheses.</button>
+      <button class="quiz-choice" data-correct="false">CTEs can access data a subquery is fundamentally incapable of reaching.</button>
+      <button class="quiz-choice" data-correct="false">CTEs eliminate the need for a FROM clause in the outer query.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The functional result is often identical — the real win is readability from naming each step.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why are deeply nested subqueries compared to Lesson 5's deeply nested IF statements?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because both use identical syntax across spreadsheets and SQL.</button>
+      <button class="quiz-choice" data-correct="true">Because both can be technically correct while becoming hard to read and easy to break with one misplaced parenthesis as nesting depth grows.</button>
+      <button class="quiz-choice" data-correct="false">Because both are always faster to write than any named-step alternative.</button>
+      <button class="quiz-choice" data-correct="false">Because neither one can ever produce a correct result once nested more than once.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Both are readability/fragility concerns at depth, not correctness limits — which is why both lessons point toward a more legible alternative (lookup tables, CTEs) once nesting grows.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="CTE">
+    <p class="quiz-prompt">4. Fill in the blank: a named, reusable subquery result introduced with a WITH clause is called a ___ (an abbreviation for Common Table Expression).</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>CTE is the standard abbreviation for a WITH-clause-defined, named intermediate query result.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="WITH">
+    <p class="quiz-prompt">5. Fill in the blank: the SQL keyword used to introduce a Common Table Expression is ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>WITH is the keyword that opens a CTE definition before the main query that uses it.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: the Mode Analytics SQL Tutorial (mode.com/sql-tutorial), "Subqueries" and "CTEs," covers both with interactive practice queries building on the same GROUP BY material.</p>
+
+  <p class="ask-teacher">Have a multi-step question you're trying to answer with one query? Ask your teacher — that's what I'm here for. Next up: Unit 4 shifts from extracting data to interpreting it — starting with descriptive statistics.</p>
+
+  <footer class="lesson-footer">STEM+ · Data Handling: CB · Lesson 13 of the course sequence</footer>
+</div>

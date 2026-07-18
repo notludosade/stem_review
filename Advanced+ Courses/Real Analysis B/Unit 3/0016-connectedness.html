@@ -1,0 +1,134 @@
+<meta charset="UTF-8">
+<title>Lesson 16: Connectedness — STEM+</title>
+<link rel="stylesheet" href="../../../assets/style.css">
+<script src="../../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Real Analysis B · Unit 3 · Lesson 16</span>
+  <h1>Connectedness</h1>
+  <p class="subtitle">Real Analysis A defined connectedness with closures and proved it means "interval" — for ℝ only. This lesson generalizes the definition, resolves a fact Lesson 12 deliberately left open, and proves the theorem that makes the Intermediate Value Theorem an instance of something much bigger.</p>
+  <p class="nav-links"><a href="0015-compactness.html" class="nav-prev">← Lesson 15</a> <a href="../Unit%204/0017-partial-derivatives-and-multivariable-functions.html" class="nav-next">Unit 4, Lesson 17 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <div class="box">
+    <span class="box-label">Definition — Separated Sets, Connected</span>
+    Two nonempty sets A, B ⊆ X are <strong>separated</strong> if Ā ∩ B = ∅ and A ∩ B̄ = ∅, using the closure of Lesson 12. A set E ⊆ X is <strong>connected</strong> if it cannot be written as E = A ∪ B for nonempty separated sets A, B; otherwise E is <strong>disconnected</strong>.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why these definitions transfer unchanged</span>
+    This is exactly Real Analysis A's definition (Unit 3, Lesson 18), with Ē now Lesson 12's general closure instead of the closure of a subset of ℝ. Nothing in the definition of separation or connectedness ever used ℝ's order or algebra — only closure, which Lesson 12 already built for any metric space.
+  </div>
+
+  <div class="box">
+    <span class="box-label">Theorem — The Clopen Characterization of Disconnection</span>
+    A metric space X is disconnected if and only if X has a nonempty proper subset that is clopen (both open and closed).
+  </div>
+
+  <div class="box">
+    <span class="box-label">Proof</span>
+    (⇒) Suppose X = A ∪ B for nonempty separated A, B. First, A ∩ B = ∅: if x ∈ A ∩ B, then x ∈ B ⊆ B̄, so x ∈ A ∩ B̄, contradicting separation. Now, Ā ∩ B = ∅ and Ā ⊆ X = A ∪ B together force Ā ⊆ A; combined with the general fact A ⊆ Ā, this gives Ā = A, so A is closed. By the identical argument, B̄ = B, so B is closed. Since A ∩ B = ∅ and A ∪ B = X, B = X\A — so A, being closed with a closed complement, is also open. A is a nonempty, proper (since B is nonempty), clopen subset of X.
+    <br><br>
+    (⇐) Suppose U is a nonempty, proper, clopen subset of X. Let A = U and B = X\U. Since U is closed, Ā = U, so Ā ∩ B = U ∩ (X\U) = ∅. Since U is open, X\U is closed, so B̄ = B = X\U, giving A ∩ B̄ = U ∩ (X\U) = ∅. So A and B are separated, both nonempty (U is proper and nonempty), with A ∪ B = X. X is disconnected. ∎
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why this resolves what Lesson 12 flagged</span>
+    Lesson 12's discrete-metric example noted every subset is clopen, and promised that clopen sets were "exactly the obstruction to a metric space being connected." This theorem makes that precise: a space is disconnected exactly when it owns a clopen set that is neither ∅ nor the whole space.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Example: the discrete metric is always disconnected</span>
+    Let X carry the discrete metric (Lesson 11) with at least two points. Pick any point x ∈ X; {x} is clopen (Lesson 12: every subset of a discrete space is clopen), nonempty, and proper (since X has another point). By the theorem, X is disconnected. This matches intuition — a discrete space has no "gap-free" structure to hold it together at all.
+  </div>
+
+  <div class="box">
+    <span class="box-label">Theorem — Continuous Images of Connected Sets Are Connected</span>
+    If f: X → Y is continuous and X is connected, then f(X) is connected.
+  </div>
+
+  <div class="box">
+    <span class="box-label">Proof</span>
+    Suppose toward contradiction that f(X) is disconnected: f(X) = A ∪ B for nonempty separated A, B ⊆ Y. Let U = f⁻¹(A) and V = f⁻¹(B). Since A ∩ B = ∅ and A ∪ B = f(X), U and V partition X: disjoint, and U ∪ V = X. Both are nonempty, since A, B ⊆ f(X) are nonempty.
+    <br><br>
+    <em>Claim: Ū ∩ V = ∅.</em> Let x ∈ V, so f(x) ∈ B. Since Ā ∩ B = ∅, f(x) ∉ Ā — meaning some ball B(f(x), ε) contains no point of A (otherwise every ball around f(x) would meet A, making f(x) a limit point of A or a member of A, landing it in Ā). By continuity of f at x, some δ &gt; 0 gives f(B(x,δ)) ⊆ B(f(x),ε). Since B(f(x),ε) ∩ A = ∅, no point of B(x,δ) maps into A — so B(x,δ) ∩ U = ∅. Thus x is not a limit point of U, and x ∉ U (since x ∈ V and U ∩ V = ∅), so x ∉ Ū. As x ∈ V was arbitrary, Ū ∩ V = ∅.
+    <br><br>
+    By the symmetric argument (swap A ↔ B, U ↔ V), U ∩ V̄ = ∅. So U and V are separated, nonempty, with U ∪ V = X — meaning X is disconnected. This contradicts the hypothesis. So f(X) must be connected. ∎
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why this theorem was worth waiting for</span>
+    Real Analysis A's Lesson 18 stated that "continuous functions preserve connectedness" as a fact to be proved "once continuity is defined" in full generality — and flagged this as the missing piece behind the Intermediate Value Theorem's "no gaps" intuition. Lesson 14's ε–δ definition of continuity in a metric space is exactly what this proof needed; the theorem above is that promise, kept.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Corollary: the Intermediate Value Theorem, recovered</span>
+    Let f: [a,b] → ℝ be continuous. Real Analysis A's characterization theorem (Unit 3, Lesson 18) says [a,b] is connected, since it's an interval. By the theorem just proved, f([a,b]) is therefore connected in ℝ. By that same characterization theorem applied again — this time to the image — a connected subset of ℝ is an interval. So f([a,b]) is an interval containing f(a) and f(b): every value between them is attained. That is exactly the Intermediate Value Theorem, now seen as one instance of "continuous images of connected sets are connected," a fact with nothing special to do with ℝ at all.
+  </div>
+
+  <p>Unit 3 in one line: replace |x−y| with an abstract distance d, and open sets, convergence, continuity, compactness, and connectedness all survive intact — with completeness the one property that genuinely depends on which space you're in, and "closed and bounded implies compact" the one shortcut that depends on being in ℝⁿ specifically.</p>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. According to the Clopen Characterization theorem, when is a metric space disconnected?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">When it is unbounded</button>
+      <button class="quiz-choice" data-correct="true">When it has a nonempty, proper subset that is both open and closed</button>
+      <button class="quiz-choice" data-correct="false">When it is not complete</button>
+      <button class="quiz-choice" data-correct="false">When it carries the discrete metric only</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A nonempty proper clopen subset is exactly the witness that splits the space into two separated pieces.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why is every discrete metric space with two or more points disconnected?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because the discrete metric fails the triangle inequality</button>
+      <button class="quiz-choice" data-correct="true">Because any single point forms a nonempty, proper, clopen subset, since every subset of a discrete space is clopen</button>
+      <button class="quiz-choice" data-correct="false">Because discrete spaces are never complete</button>
+      <button class="quiz-choice" data-correct="false">Because discrete spaces have no open sets</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Lesson 12 showed every subset of a discrete space is clopen; picking any single point gives a proper, nonempty, clopen witness to disconnection.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. In the proof that continuous images of connected sets are connected, what tool produces the ball B(x,δ) with B(x,δ) ∩ U = ∅?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">The Heine-Borel theorem</button>
+      <button class="quiz-choice" data-correct="true">The ε–δ definition of continuity, applied to the ball B(f(x),ε) that misses A</button>
+      <button class="quiz-choice" data-correct="false">The completeness of X</button>
+      <button class="quiz-choice" data-correct="false">The discrete metric</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Continuity at x turns the ball around f(x) that misses A into a ball around x that misses U = f⁻¹(A).</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="clopen">
+    <p class="quiz-prompt">4. Fill in the blank: a set that is both open and closed is called ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Clopen sets are exactly the obstruction to connectedness, per this lesson's characterization theorem.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="connected">
+    <p class="quiz-prompt">5. Fill in the blank: the Intermediate Value Theorem is recovered as the special case of "continuous images of ___ sets are ___" applied to an interval (same word both blanks).</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Connected is the property preserved by continuous images, and intervals are exactly the connected subsets of ℝ.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next unit: Rudin's <em>Principles of Mathematical Analysis</em>, Chapter 2, covers connectedness in general metric spaces and its preservation under continuous maps.</p>
+
+  <p class="ask-teacher">Stuck on why the clopen theorem needed both directions proved separately? Ask your teacher — that's what I'm here for. That closes Unit 3 — Unit 4 leaves single-variable analysis behind for good, starting with functions of several variables and why partial derivatives alone aren't enough to generalize differentiability.</p>
+
+  <footer class="lesson-footer">STEM+ · Real Analysis B · Lesson 16 of the course sequence</footer>
+</div>

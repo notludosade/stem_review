@@ -1,0 +1,147 @@
+<meta charset="UTF-8">
+<title>Lesson 26: Measurable Functions — STEM+</title>
+<link rel="stylesheet" href="../../../assets/style.css">
+<script src="../../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Real Analysis B · Unit 5 · Lesson 26</span>
+  <h1>Measurable Functions</h1>
+  <p class="subtitle">Sets are only half the story. This capstone lesson names the functions the new integral will act on — and proves the exact structural gap that broke Riemann integration in Lesson 22 no longer exists.</p>
+  <p class="nav-links"><a href="0025-countable-additivity-and-measure-zero-sets.html" class="nav-prev">← Lesson 25</a> <a href="../Unit%206/0027-the-lebesgue-integral-of-simple-functions.html" class="nav-next">Unit 6, Lesson 27 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <div class="box">
+    <span class="box-label">Definition — Measurable Function</span>
+    f: ℝ → ℝ is <strong>(Lebesgue) measurable</strong> if {x : f(x) &gt; c} is a measurable set for every c ∈ ℝ.
+  </div>
+
+  <div class="box">
+    <span class="box-label">Theorem — Equivalent Characterizations</span>
+    For f: ℝ → ℝ, the following are equivalent: (i) {f&gt;c} measurable for every c; (ii) {f≥c} measurable for every c; (iii) {f&lt;c} measurable for every c; (iv) {f≤c} measurable for every c.
+  </div>
+
+  <div class="box">
+    <span class="box-label">Proof</span>
+    (i) ⟺ (iv): {f≤c} = {f&gt;c}ᶜ, measurable exactly when {f&gt;c} is (closure under complements). (ii) ⟺ (iii): identically, {f&lt;c} = {f≥c}ᶜ.
+    <br><br>
+    (i) ⟹ (ii): {f≥c} = ⋂ₙ₌₁^∞ {f &gt; c − 1/n} (if f(x)≥c, then f(x)&gt;c−1/n for every n; conversely if f(x)&gt;c−1/n for every n, then f(x)≥c by letting n→∞). A countable intersection of measurable sets is measurable (De Morgan's law plus closure under complements and countable unions), so {f≥c} is measurable.
+    <br><br>
+    (ii) ⟹ (i): {f&gt;c} = ⋃ₙ₌₁^∞ {f ≥ c + 1/n}, a countable union of measurable sets, hence measurable. ∎
+  </div>
+
+  <div class="box">
+    <span class="box-label">Theorem — Continuous Functions Are Measurable</span>
+    If f: ℝ → ℝ is continuous, then f is measurable.
+  </div>
+
+  <div class="box">
+    <span class="box-label">Proof</span>
+    {f&gt;c} = f⁻¹((c,∞)) is open, since f is continuous and (c,∞) is open. Every open subset of ℝ is a countable union of open intervals, and every open interval is measurable (Lesson 24), so every open set is measurable by closure under countable unions. Hence {f&gt;c} is measurable for every c, so f is measurable. ∎
+  </div>
+
+  <div class="box">
+    <span class="box-label">Theorem — Sums of Measurable Functions Are Measurable</span>
+    If f, g: ℝ → ℝ are measurable, then f + g is measurable.
+  </div>
+
+  <div class="box">
+    <span class="box-label">Proof</span>
+    {f+g &gt; c} = ⋃_{r∈ℚ} ({f&gt;r} ∩ {g&gt;c−r}). If f(x)+g(x) &gt; c, then f(x) &gt; c − g(x), and by density of ℚ (Real Analysis A, Unit 1, Lesson 6) some rational r lies strictly between c−g(x) and f(x), giving f(x) &gt; r and g(x) &gt; c−r. Conversely, if f(x)&gt;r and g(x)&gt;c−r for some rational r, adding gives f(x)+g(x) &gt; c. So the two sets are equal. The right side is a countable union (indexed by ℚ, which is countable) of measurable sets ({f&gt;r} and {g&gt;c−r} measurable, so their intersection is too), hence measurable. So {f+g&gt;c} is measurable for every c, and f+g is measurable. ∎
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why ℚ makes an uncountable-looking union countable</span>
+    Written naively, "some real number strictly between c−g(x) and f(x)" ranges over an uncountable set of candidates. Density of ℚ (first proved in Real Analysis A, Unit 1) guarantees a <em>rational</em> witness always exists, and restricting the union to r ∈ ℚ shrinks it to a countable union — exactly what closure under countable unions can handle. Products, maxima, and minima of measurable functions are measurable by similar, if less elegant, arguments; the source reading below works them out in full.
+  </div>
+
+  <div class="box">
+    <span class="box-label">Lemma — Countable Sups and Infs of Measurable Functions Are Measurable</span>
+    If f₁, f₂, f₃, … are measurable, then sup_n fₙ and inf_n fₙ are measurable.
+  </div>
+
+  <div class="box">
+    <span class="box-label">Proof</span>
+    {sup_n fₙ &gt; c} = ⋃ₙ{fₙ&gt;c}: if sup_n fₙ(x) &gt; c, some fₙ(x) &gt; c (otherwise every fₙ(x) ≤ c, forcing the sup ≤ c); conversely if fₙ(x) &gt; c for some n, the sup is at least that large. The right side is a countable union of measurable sets, hence measurable, so sup_n fₙ is measurable. Symmetrically, {inf_n fₙ &lt; c} = ⋃ₙ{fₙ&lt;c}, giving inf_n fₙ measurable. ∎
+  </div>
+
+  <div class="box">
+    <span class="box-label">Theorem — Pointwise Limits of Measurable Functions Are Measurable</span>
+    If f₁, f₂, f₃, … are measurable and fₙ(x) → f(x) for every x, then f is measurable.
+  </div>
+
+  <div class="box">
+    <span class="box-label">Proof</span>
+    Define gₖ = sup_{n≥k} fₙ, measurable for each k by the lemma above. Then limsup_n fₙ = inf_k gₖ, measurable by the lemma applied again, this time to the countable family {gₖ}. Since fₙ(x) → f(x) for every x, the limit exists and equals the limsup: f(x) = limₙfₙ(x) = limsup_n fₙ(x) for every x. So f = inf_k gₖ, measurable. ∎
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why this is the theorem Lesson 22 was missing</span>
+    Lesson 22's sharpest warning was that a pointwise limit of Riemann integrable functions (each fₙ integrable with integral 0) could fail to be Riemann integrable at all — Dirichlet's function itself was the limit, and Riemann's framework simply couldn't see it. This theorem proves the exact structural fix: a pointwise limit of <em>measurable</em> functions is always measurable. Since Dirichlet's function is itself measurable (it's ⋃ₙ{fₙ&gt;c}-buildable directly, or simply because {f&gt;c} is either ∅, ℚ, or ℝ for every c, all measurable), the limit process that broke Riemann integration causes no damage here. Unit 6 builds the integral for which this measurability is exactly the right hypothesis.
+  </div>
+
+  <p>Unit 5 in one line: outer measure gives every subset of ℝ a notion of size, the Carathéodory criterion isolates exactly the measurable sets on which that size is countably additive, and measurable functions — including every pointwise limit of measurable functions — are exactly the functions built to be integrated against that measure.</p>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What does it mean for f to be measurable?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">f is continuous everywhere</button>
+      <button class="quiz-choice" data-correct="true">{x : f(x) &gt; c} is a measurable set for every c ∈ ℝ</button>
+      <button class="quiz-choice" data-correct="false">f is bounded</button>
+      <button class="quiz-choice" data-correct="false">f has measure zero</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Measurability of every superlevel set {f>c} is the defining condition, equivalent to the same for ≥, <, or ≤.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why are continuous functions measurable?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because continuous functions are bounded</button>
+      <button class="quiz-choice" data-correct="true">Because {f&gt;c} is the preimage of an open set under a continuous function, hence open, hence measurable</button>
+      <button class="quiz-choice" data-correct="false">Because continuous functions are countable</button>
+      <button class="quiz-choice" data-correct="false">Because continuous functions have measure-zero graphs</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Continuity makes every {f>c} open, and every open set is measurable as a countable union of open intervals.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. What does the pointwise-limit theorem in this lesson repair, compared to Lesson 22?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">It makes every function continuous</button>
+      <button class="quiz-choice" data-correct="true">It guarantees a pointwise limit of measurable functions stays measurable, unlike Riemann integrability</button>
+      <button class="quiz-choice" data-correct="false">It makes ℚ uncountable</button>
+      <button class="quiz-choice" data-correct="false">It removes the need for outer measure</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Lesson 22's fₙ example showed Riemann integrability can vanish in a pointwise limit; measurability, by contrast, is always preserved.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="rational">
+    <p class="quiz-prompt">4. Fill in the blank: the proof that f+g is measurable writes {f+g&gt;c} as a union indexed by ___ numbers r, using density of ℚ.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Restricting to rational r turns what looks like an uncountable union into a countable one, which measurability can handle.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="limsup">
+    <p class="quiz-prompt">5. Fill in the blank: when fₙ(x) → f(x) for every x, f equals the ___ of the sequence fₙ, which is built from countable sups and infs.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The limsup, built as inf_k(sup_{n≥k}fₙ), equals the ordinary limit whenever the limit exists, and is measurable by the sup/inf lemma.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next unit: Royden and Fitzpatrick's <em>Real Analysis</em>, Chapter 3, develops measurable functions further, including the products, maxima, and minima left as exercises here.</p>
+
+  <p class="ask-teacher">Stuck on why measurability, unlike Riemann integrability, survives pointwise limits? Ask your teacher — that's what I'm here for. That closes Unit 5 — Unit 6 finally builds the integral itself, starting from the simplest measurable functions and working up to functions no Riemann sum could ever integrate.</p>
+
+  <footer class="lesson-footer">STEM+ · Real Analysis B · Lesson 26 of the course sequence</footer>
+</div>

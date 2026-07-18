@@ -1,0 +1,123 @@
+<meta charset="UTF-8">
+<title>Lesson 10: Kruskal's & Prim's Algorithms — STEM+</title>
+<link rel="stylesheet" href="../../../assets/style.css">
+<script src="../../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Advanced Algorithms · Unit 3 · Lesson 10</span>
+  <h1>Kruskal's &amp; Prim's Algorithms</h1>
+  <p class="subtitle">Two greedy algorithms that look nothing alike — one grows a forest by cheapest edge globally, the other grows a single tree by cheapest edge locally — both provably build a minimum spanning tree.</p>
+  <p class="nav-links"><a href="0009-exchange-arguments.html" class="nav-prev">← Lesson 9</a> <a href="0011-the-cut-property.html" class="nav-next">Lesson 11 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>CP2+'s Unit 6 covered Union-Find as a data structure (Lesson 21, "Union-Find &amp; Redundant Connection") without proving anything about its amortized cost — that proof is Unit 6 of this course. Here, Union-Find gets used as a tool inside a genuinely different problem: given a connected, weighted, undirected graph, find a <strong>minimum spanning tree</strong> (MST) — a subset of edges connecting all vertices with no cycles, of minimum total weight. Two classic greedy algorithms solve it, and this lesson's job is to state both precisely; the next lesson proves both correct at once with a single unifying theorem.</p>
+
+  <h2>Kruskal's algorithm — global greedy over edges</h2>
+  <div class="box">
+    <span class="box-label">Algorithm</span>
+<pre class="code-block"><code>function kruskal(graph):
+    sort all edges by weight, ascending
+    initialize Union-Find with each vertex in its own set
+    mst = []
+    for (u, v, weight) in sorted edges:
+        if find(u) != find(v):        // adding this edge creates no cycle
+            union(u, v)
+            append (u, v, weight) to mst
+    return mst</code></pre>
+  </div>
+  <div class="box why">
+    <span class="box-label">Why Union-Find is exactly the right tool here</span>
+    Kruskal's algorithm needs to answer one repeated question: would adding this edge create a cycle? Two vertices already in the same connected component would form a cycle if joined again; two vertices in different components never would. That's exactly the "same set or different sets" query Union-Find answers in (amortized, per Unit 6) near-constant time — without it, checking for a cycle after each candidate edge would require a full graph traversal, costing Θ(V+E) per check instead of near Θ(1).
+  </div>
+
+  <h2>Prim's algorithm — local greedy from a growing tree</h2>
+  <div class="box">
+    <span class="box-label">Algorithm</span>
+<pre class="code-block"><code>function prim(graph, start):
+    visited = {start}
+    mst = []
+    while visited does not cover all vertices:
+        find the minimum-weight edge (u, v) with u in visited, v not in visited
+        add (u, v) to mst
+        add v to visited
+    return mst</code></pre>
+  </div>
+  <div class="box why">
+    <span class="box-label">Why Prim's needs a priority queue, and where it echoes CP2+</span>
+    Prim's repeated "find the minimum-weight edge crossing the visited boundary" is structurally the same operation Dijkstra's algorithm performs when it repeatedly extracts the closest unvisited vertex (CP2+ Lesson 22, "Dijkstra's Algorithm &amp; Network Delay Time") — both maintain a priority queue of candidate edges/distances and repeatedly extract the minimum. The difference is what each algorithm optimizes: Dijkstra tracks cumulative distance from a fixed source; Prim tracks a single edge's own weight, with no accumulation at all. Recognizing this shared "grow a frontier via a priority queue" shape is exactly the kind of structural pattern-matching CP2+ trained and this course now formalizes with a proof.
+  </div>
+
+  <div class="box">
+    <span class="box-label">Runtime</span>
+    Kruskal's: sorting all E edges costs Θ(E log E); each of the E Union-Find operations costs amortized near-Θ(1) (proved in Unit 6), for total Θ(E log E). Prim's, implemented with a binary heap priority queue: each of the V vertex extractions costs O(log V), and each of the E edges may trigger one heap update at O(log V), for total O(E log V). Both are close to Θ(E log V) in practice — the choice between them in practice usually comes down to graph density (Kruskal's favors sparse graphs; Prim's with a heap favors denser ones) rather than a fundamental asymptotic gap.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Why they can produce different-looking MSTs on the same graph</span>
+    If a graph has ties in edge weight, Kruskal's and Prim's may build genuinely different trees (both minimum-weight overall, but different in which edges appear) depending on tie-breaking order. This is expected, not a bug: a minimum spanning tree need not be unique whenever edge weights repeat — only its <em>total weight</em> is guaranteed identical across every valid MST, a fact the next lesson's cut property makes precise.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. Why does Kruskal's algorithm use Union-Find instead of a full graph traversal to check for cycles?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because Union-Find is required to sort the edges by weight.</button>
+      <button class="quiz-choice" data-correct="true">Because Union-Find answers "are these two vertices already connected?" in near-constant amortized time, versus a full traversal costing Θ(V+E) per check.</button>
+      <button class="quiz-choice" data-correct="false">Because a full graph traversal cannot detect cycles at all.</button>
+      <button class="quiz-choice" data-correct="false">Because Union-Find guarantees the resulting tree has minimum total weight by itself.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Union-Find's near-Θ(1) same-set query is exactly what a repeated cycle-check needs — a full traversal would work but be far more expensive to repeat on every candidate edge.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. What structural feature does Prim's algorithm share with Dijkstra's algorithm?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Both algorithms require the graph to be a tree before they start.</button>
+      <button class="quiz-choice" data-correct="true">Both repeatedly extract a minimum from a priority queue to grow a frontier, one vertex at a time.</button>
+      <button class="quiz-choice" data-correct="false">Both algorithms ignore edge weights entirely.</button>
+      <button class="quiz-choice" data-correct="false">Both algorithms require Union-Find to detect cycles.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The shared shape is a priority-queue-driven frontier expansion; the difference is what quantity is minimized (single edge weight for Prim's, cumulative path distance for Dijkstra's).</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why can Kruskal's and Prim's produce different-looking spanning trees on the same graph, and why isn't that a contradiction?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">It is a contradiction — at least one of the two algorithms must be implemented incorrectly.</button>
+      <button class="quiz-choice" data-correct="true">When edge weights tie, multiple different trees can share the same minimum total weight, so different tie-breaking can select different (equally optimal) edge sets.</button>
+      <button class="quiz-choice" data-correct="false">Because only one of the two algorithms actually guarantees a spanning tree.</button>
+      <button class="quiz-choice" data-correct="false">Because Prim's algorithm ignores some vertices in disconnected graphs.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>An MST is only guaranteed unique in total weight, not in exact edge set, whenever ties in edge weight exist — both algorithms are correct even when they disagree on which edges to include.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="cycle|cycles">
+    <p class="quiz-prompt">4. Fill in the blank: Kruskal's algorithm only skips an edge when adding it would create a ___ , which Union-Find detects via a same-set query.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Two vertices already in the same Union-Find set are already connected, so joining them again would close a cycle rather than extend the tree.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="priority queue|heap">
+    <p class="quiz-prompt">5. Fill in the blank: Prim's algorithm relies on a ___ to efficiently find the minimum-weight edge crossing the visited/unvisited boundary at each step.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A priority queue (typically a binary heap) is what makes repeated minimum-edge extraction efficient, echoing the exact structure Dijkstra's algorithm uses for its own repeated minimum-distance extraction.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: CLRS, Chapter 21, "Minimum Spanning Trees," Sections 21.1–21.2, presents both algorithms with full pseudocode and complexity analysis.</p>
+
+  <p class="ask-teacher">Want to trace both algorithms on the same small weighted graph and compare? Ask your teacher — that's what I'm here for. Next up: the cut property, the single theorem that proves both Kruskal's and Prim's correct at once.</p>
+
+  <footer class="lesson-footer">STEM+ · Advanced Algorithms · Lesson 10 of the course sequence</footer>
+</div>

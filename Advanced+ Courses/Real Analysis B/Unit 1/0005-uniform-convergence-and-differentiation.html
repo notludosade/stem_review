@@ -1,0 +1,107 @@
+<meta charset="UTF-8">
+<title>Lesson 5: Uniform Convergence and Differentiation — STEM+</title>
+<link rel="stylesheet" href="../../../assets/style.css">
+<script src="../../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Real Analysis B · Unit 1 · Lesson 5</span>
+  <h1>Uniform Convergence and Differentiation</h1>
+  <p class="subtitle">Continuity and integration both survived a uniform limit for free. Differentiation is the exception — and the reason why closes out this unit.</p>
+  <p class="nav-links"><a href="0004-uniform-convergence-and-integration.html" class="nav-prev">← Lesson 4</a> <a href="../Unit%202/0006-radius-and-interval-of-convergence.html" class="nav-next">Lesson 6 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Lessons 3 and 4 both had the same shape: fₙ → f uniformly, plus some property of each fₙ, guarantees f inherits that property (and, for integrals, that the limiting values converge too). It's tempting to guess differentiation works the same way. It doesn't — and the counterexample shows exactly why.</p>
+
+  <div class="box example">
+    <span class="box-label">Counterexample: uniform convergence of fₙ says nothing about fₙ′</span>
+    Let fₙ(x) = sin(nx)/√n. Since |fₙ(x) − 0| = |sin(nx)|/√n ≤ 1/√n for every x, and 1/√n → 0, (fₙ) converges uniformly to f = 0 on all of ℝ. But fₙ′(x) = √n·cos(nx), which oscillates with amplitude √n → ∞ — it doesn't converge at any x (except where cos(nx) = 0 infinitely often by coincidence). So fₙ → f = 0 uniformly, yet (fₙ′) doesn't converge to f′ = 0 — it doesn't converge at all.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why differentiation breaks the pattern of Lessons 3 and 4</span>
+    Continuity and integration are both "averaging" operations — they only ever look at values of a function nearby or across an interval, so a uniformly small difference in function values directly bounds the difference in the property. Differentiation is the opposite: it depends on the <em>rate of change</em>, which can be wildly different even when two functions are everywhere close together. Dividing by √n in the counterexample kept the function's amplitude going to 0, but multiplying by the same √n when differentiating sin(nx) sent the derivative's amplitude to infinity — closeness in fₙ carries no information about closeness in fₙ′.
+  </div>
+
+  <p>The fix is to stop asking about fₙ directly, and instead impose uniform convergence on the derivatives themselves.</p>
+
+  <div class="box">
+    <span class="box-label">Theorem — The Differentiable Limit Theorem</span>
+    Let (fₙ) be a sequence of differentiable functions on [a, b] such that (fₙ′) converges uniformly on [a, b] to some function g. If (fₙ(x₀)) converges for at least one point x₀ ∈ [a, b], then (fₙ) converges uniformly on [a, b] to a differentiable function f, and f′ = g.
+  </div>
+
+  <div class="box">
+    <span class="box-label">Proof sketch</span>
+    <em>Step 1 — (fₙ) converges uniformly.</em> Apply the Mean Value Theorem to fₙ − fₘ on the interval between any x ∈ [a,b] and x₀: (fₙ−fₘ)(x) − (fₙ−fₘ)(x₀) = (fₙ′−fₘ′)(c)·(x−x₀) for some c between x and x₀. Rearranging and bounding, |fₙ(x) − fₘ(x)| ≤ |fₙ(x₀) − fₘ(x₀)| + (b−a)·sup|fₙ′ − fₘ′|. As m, n → ∞, the first term → 0 (since (fₙ(x₀)) converges, hence is Cauchy) and the second → 0 (since (fₙ′) converges uniformly, hence is uniformly Cauchy) — and this bound holds for every x at once. By the Uniform Cauchy Criterion (Lesson 2), (fₙ) converges uniformly to some f.
+    <br><br>
+    <em>Step 2 — f′ = g.</em> Fix x ∈ [a,b] and consider the difference quotients φₙ(t) = (fₙ(t) − fₙ(x))/(t − x) for t ≠ x. A second Mean-Value-Theorem argument, structurally identical to Step 1, shows (φₙ) converges uniformly in t to φ(t) = (f(t) − f(x))/(t − x). Since each φₙ(t) → fₙ′(x) as t → x, and this convergence is uniform in n, the order of the two limits (t → x and n → ∞) can be swapped — the same kind of interchange justified by uniform convergence in Lesson 3. Swapping gives f′(x) = lim<sub>t→x</sub> φ(t) = lim<sub>n→∞</sub> fₙ′(x) = g(x). ∎
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Example: a scaling that satisfies the theorem's hypothesis</span>
+    Let fₙ(x) = x + sin(nx)/n² on [0, 1]. Then fₙ′(x) = 1 + cos(nx)/n, and sup<sub>x</sub>|cos(nx)/n| ≤ 1/n → 0, so (fₙ′) converges uniformly to g(x) = 1. Also fₙ(0) = 0 for every n, so the theorem's single-point hypothesis holds trivially at x₀ = 0. The theorem now guarantees (fₙ) converges uniformly to some differentiable f with f′ = 1. Direct inspection confirms it: fₙ(x) → x uniformly (since |sin(nx)/n²| ≤ 1/n² → 0), so f(x) = x and indeed f′(x) = 1 = g(x) — contrast the healthy 1/n² scaling here with the earlier 1/√n scaling, which was too weak to tame the derivative.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What does the fₙ(x) = sin(nx)/√n example show?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">That uniform convergence always implies convergence of the derivatives</button>
+      <button class="quiz-choice" data-correct="true">That fₙ → f uniformly does not guarantee (fₙ′) converges to f′, or converges at all</button>
+      <button class="quiz-choice" data-correct="false">That sin(nx) is not differentiable</button>
+      <button class="quiz-choice" data-correct="false">That every uniformly convergent sequence has a bounded derivative sequence</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>fₙ = sin(nx)/√n → 0 uniformly, but fₙ′ = √n·cos(nx) has amplitude growing without bound, so it doesn't converge at all.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. What does the Differentiable Limit Theorem require to converge uniformly?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">The original sequence (fₙ), with no condition on (fₙ′)</button>
+      <button class="quiz-choice" data-correct="true">The derivative sequence (fₙ′), plus convergence of (fₙ) at just one point</button>
+      <button class="quiz-choice" data-correct="false">Both (fₙ) and (fₙ′) independently, with no relation required between them</button>
+      <button class="quiz-choice" data-correct="false">Neither — the theorem has no convergence hypotheses</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The theorem's hypothesis is on the derivatives (uniform convergence) plus convergence of the original sequence at a single point — from which full uniform convergence of (fₙ) is derived, not assumed.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. In the Step 1 proof, what does the Mean Value Theorem relate?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">The values of fₙ and fₘ at x₀ only</button>
+      <button class="quiz-choice" data-correct="true">The difference fₙ(x) − fₘ(x) to the difference fₙ(x₀) − fₘ(x₀) plus a term involving fₙ′ − fₘ′ at some point between x and x₀</button>
+      <button class="quiz-choice" data-correct="false">The integral of fₙ over [a,b]</button>
+      <button class="quiz-choice" data-correct="false">The continuity of fₙ at x₀ only</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The Mean Value Theorem applied to fₙ − fₘ links the difference at any x back to the difference at x₀, plus a derivative term evaluated at some intermediate point.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="derivatives">
+    <p class="quiz-prompt">4. Fill in the blank: the Differentiable Limit Theorem requires uniform convergence of the sequence of ___, not the original functions.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Uniform convergence must be imposed on (fₙ′), since uniform convergence of (fₙ) itself gives no information about the derivatives.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="one|single">
+    <p class="quiz-prompt">5. Fill in the blank: the theorem only requires (fₙ(x₀)) to converge at ___ point x₀, not the whole sequence (fₙ), to conclude uniform convergence of (fₙ) overall.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A single point of convergence, combined with uniform convergence of the derivatives, is enough to force uniform convergence of the entire sequence via the Mean Value Theorem bound.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: Abbott's <em>Understanding Analysis</em>, Section 6.3, proves the Differentiable Limit Theorem in full, including both steps of the Mean Value Theorem argument sketched above.</p>
+
+  <p class="ask-teacher">Stuck on why swapping the two limits in Step 2 needs uniform convergence to justify? Ask your teacher — that's what I'm here for. Next up: power series — where uniform convergence turns out to hold automatically on any compact piece of the domain, making all of this unit's machinery available for free.</p>
+
+  <footer class="lesson-footer">STEM+ · Real Analysis B · Lesson 5 of the course sequence</footer>
+</div>

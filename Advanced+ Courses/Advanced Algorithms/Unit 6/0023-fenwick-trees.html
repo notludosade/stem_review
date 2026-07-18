@@ -1,0 +1,118 @@
+<meta charset="UTF-8">
+<title>Lesson 23: Fenwick Trees — STEM+</title>
+<link rel="stylesheet" href="../../../assets/style.css">
+<script src="../../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Advanced Algorithms · Unit 6 · Lesson 23</span>
+  <h1>Fenwick Trees (Binary Indexed Trees)</h1>
+  <p class="subtitle">Segment trees solve range-sum-with-updates in general. When the only aggregate needed is <em>sum</em>, a Fenwick tree solves the same problem with a smaller, simpler structure — built entirely from a bit trick on the index itself.</p>
+  <p class="nav-links"><a href="0022-segment-trees.html" class="nav-prev">← Lesson 22</a> <a href="0024-avl-rotations.html" class="nav-next">Lesson 24 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Lesson 22's segment tree solves prefix-sum-with-updates (and range-min, range-max, and more) using an explicit binary tree with 2n−1 nodes. A <strong>Fenwick tree</strong> (also called a <strong>binary indexed tree</strong>, or BIT) solves the narrower but extremely common case — prefix sums with point updates — using only an n-element array and no explicit tree structure at all. The "tree" is implicit, encoded entirely in how array indices relate to each other via their binary representations.</p>
+
+  <h2>The key idea — indices encode implicit ranges</h2>
+  <div class="box">
+    <span class="box-label">Setup</span>
+    A Fenwick tree over an array of size n is itself just an array tree[1..n] (1-indexed — this matters for the bit trick below). Each tree[i] stores the sum of a specific range of the original array, ending at index i, whose length is determined by the lowest set bit of i: tree[i] covers the range (i − lowbit(i), i], where lowbit(i) = i &amp; (−i) extracts the lowest set bit of i as a number (e.g. lowbit(12) = lowbit(0b1100) = 0b0100 = 4, so tree[12] covers indices 9 through 12).
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why lowbit(i) = i &amp; (−i) works</span>
+    In two's-complement representation, −i is the bitwise NOT of i plus 1. Flipping every bit and adding 1 turns every trailing zero of i into a trailing zero of −i too, but flips the lowest set bit and everything above it — so i &amp; (−i) cancels every bit except that lowest set bit, leaving exactly it. This single expression is what lets both prefix-sum queries and point updates be implemented as simple loops that repeatedly add or subtract lowbit(i), with no recursion and no explicit child/parent pointers to store or follow.
+  </div>
+
+  <div class="box">
+    <span class="box-label">Prefix sum query — O(log n)</span>
+<pre class="code-block"><code>function prefixSum(i):                 // sum of arr[1..i]
+    sum = 0
+    while i > 0:
+        sum += tree[i]
+        i -= lowbit(i)                 // jump to the range just before this one
+    return sum</code></pre>
+    Range sum query(l, r) = prefixSum(r) − prefixSum(l − 1), same as with ordinary prefix sums — the only difference from a plain array of prefix sums is that updates no longer cost Θ(n).
+  </div>
+
+  <div class="box">
+    <span class="box-label">Point update — O(log n)</span>
+<pre class="code-block"><code>function update(i, delta):             // add delta to arr[i]
+    while i <= n:
+        tree[i] += delta
+        i += lowbit(i)                 // advance to the next range that includes i</code></pre>
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why both loops terminate in Θ(log n) steps</span>
+    Each step of the query loop strips the lowest set bit of i entirely (i −= lowbit(i) always clears that bit), so after at most log₂(n) steps i reaches 0 — the number of set bits in i's binary representation bounds the loop. Each step of the update loop adds lowbit(i), which increases i's value but is also bounded by log₂(n) iterations before exceeding n, by a similar bit-level argument. Both bounds trace directly back to the same lowbit trick, which is why a Fenwick tree needs no explicit tree traversal to hit the same Θ(log n) bound a segment tree gets from tree depth.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Why "Fenwick" beats "segment tree" here — and when it doesn't</span>
+    For pure prefix-sum-with-point-update problems, a Fenwick tree is preferred over a segment tree: roughly half the memory (n integers instead of ~2n tree nodes), a handful of lines of iterative code instead of recursive build/query/update functions, and in practice a smaller constant factor. But a Fenwick tree only naturally handles associative, invertible operations like sum (subtraction undoes addition) — it does not extend to range-min or range-max the way a segment tree does, since there's no way to "undo" a min. When the aggregate is min or max, or the problem needs range updates (not just point updates), reach for the segment tree from Lesson 22 instead.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What does tree[i] store in a Fenwick tree?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">The sum of the entire array up to index n.</button>
+      <button class="quiz-choice" data-correct="true">The sum of a specific range ending at i, whose length is determined by lowbit(i).</button>
+      <button class="quiz-choice" data-correct="false">The single value arr[i], with no aggregation at all.</button>
+      <button class="quiz-choice" data-correct="false">The index of i's parent in an explicit binary tree structure.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Each tree[i]'s range length is exactly lowbit(i), which is what lets the query and update loops navigate without any explicit tree pointers.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why does the expression i &amp; (−i) isolate the lowest set bit of i?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because subtraction in binary always clears every bit except the highest one.</button>
+      <button class="quiz-choice" data-correct="true">Because two's-complement negation flips all bits and adds 1, which preserves i's trailing zeros but flips its lowest set bit and everything above — so ANDing with the original cancels everything except that lowest set bit.</button>
+      <button class="quiz-choice" data-correct="false">Because −i is always exactly equal to i in binary representation.</button>
+      <button class="quiz-choice" data-correct="false">It doesn't reliably isolate the lowest set bit; it only works for even numbers.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The two's-complement negation mechanism is exactly what makes i &amp; (-i) a reliable lowest-set-bit extractor for any positive integer.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. When should a segment tree be preferred over a Fenwick tree, even though the Fenwick tree is smaller and simpler?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Whenever the array is very small, since Fenwick trees only work on large arrays.</button>
+      <button class="quiz-choice" data-correct="true">When the aggregate is non-invertible (like min or max) or range updates (not just point updates) are needed, since Fenwick trees rely on the operation being invertible.</button>
+      <button class="quiz-choice" data-correct="false">Never — a Fenwick tree can always be substituted for a segment tree with no loss of functionality.</button>
+      <button class="quiz-choice" data-correct="false">Only when the array contains negative numbers.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The Fenwick tree's simplicity comes at the cost of only supporting invertible, associative operations like sum — min and max don't fit that requirement.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="lowbit|lowest set bit">
+    <p class="quiz-prompt">4. Fill in the blank: both the query and update loops of a Fenwick tree work by repeatedly adding or subtracting the ___ of the current index.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>This single bit-level operation is what drives navigation through the implicit tree structure without any explicit pointers.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="invertible">
+    <p class="quiz-prompt">5. Fill in the blank: a Fenwick tree only naturally supports operations that are associative and ___ , such as sum — not operations like min or max that can't be "undone."</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Invertibility (subtraction undoing addition) is exactly what a range-sum query via two prefix sums relies on.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: <a href="https://cp-algorithms.com/data_structures/fenwick.html">CP-Algorithms, "Fenwick Tree"</a> covers the lowbit derivation and several extensions (range updates with point queries, and vice versa) in more depth.</p>
+
+  <p class="ask-teacher">Want to trace prefixSum and update by hand on an 8-element array, watching exactly which tree[i] entries get touched? Ask your teacher — that's what I'm here for. Next up: AVL rotations, where a binary search tree maintains logarithmic height automatically after every insertion and deletion.</p>
+
+  <footer class="lesson-footer">STEM+ · Advanced Algorithms · Lesson 23 of the course sequence</footer>
+</div>

@@ -1,0 +1,115 @@
+<meta charset="UTF-8">
+<title>Lesson 30: P vs. NP &amp; Polynomial-Time Reductions — STEM+</title>
+<link rel="stylesheet" href="../../../assets/style.css">
+<script src="../../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Advanced Algorithms · Unit 8 · Lesson 30</span>
+  <h1>P vs. NP &amp; Polynomial-Time Reductions</h1>
+  <p class="subtitle">Every algorithm in this course so far ran in polynomial time. This unit asks the question those algorithms all quietly avoided: are there problems where no polynomial-time algorithm exists at all — or is even believed to?</p>
+  <p class="nav-links"><a href="../Unit%207/0029-suffix-arrays-first-look.html" class="nav-prev">← Lesson 29</a> <a href="0031-np-completeness-and-cook-levin.html" class="nav-next">Lesson 31 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Every algorithm this course has built — sorting, shortest paths, max-flow, string matching, segment trees — runs in time polynomial in its input size, and that has always been treated as the mark of "efficiently solvable." This unit studies problems where no polynomial-time algorithm is known, and asks whether that's a gap in human cleverness or a genuine mathematical wall. The tool for making that question precise is the <strong>polynomial-time reduction</strong>: a way of proving one problem is "at least as hard as" another, without solving either.</p>
+
+  <h2>Two classes of decision problem</h2>
+  <div class="box">
+    <span class="box-label">P — polynomial time</span>
+    P is the class of decision problems (yes/no questions) solvable by some algorithm running in O(nᵏ) time for a constant k, where n is the input size. Every problem this course solved efficiently — is this graph connected, what's the shortest path, does this pattern occur in this text — is in P: an explicit polynomial-time algorithm was given for each.
+  </div>
+
+  <div class="box">
+    <span class="box-label">NP — nondeterministic polynomial time</span>
+    NP is the class of decision problems where, whenever the answer is "yes," there exists a <strong>certificate</strong> (a piece of evidence) that can be <em>verified</em> in polynomial time — even if no one knows how to <em>find</em> that certificate quickly. For example: "does this graph have a Hamiltonian cycle?" has no known polynomial-time algorithm to answer, but if the answer is yes, a proposed cycle is a certificate that's trivial to check in O(n) time (walk it, confirm every edge exists and every vertex appears exactly once).
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why P ⊆ NP</span>
+    Every problem in P is also in NP: if a decision problem can be solved outright in polynomial time, then "verifying" a yes-answer can simply ignore whatever certificate is offered and re-solve the problem from scratch in the same polynomial time. The open question that gives this unit its name is whether the containment goes the other way too — whether every problem whose yes-answers are efficiently <em>checkable</em> is also efficiently <em>solvable</em>. This is the P vs. NP problem, one of the seven Clay Millennium Prize problems, unresolved since it was first posed in the 1970s.
+  </div>
+
+  <h2>Polynomial-time reductions — comparing hardness without solving anything</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    Problem A reduces to problem B in polynomial time (written A ≤ₚ B) if there is a polynomial-time algorithm that transforms any instance of A into an instance of B, such that the transformed instance is a "yes" for B exactly when the original instance was a "yes" for A. Critically, the reduction only transforms the <em>input</em> — it never actually solves A or B.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why a reduction transfers hardness, not easiness</span>
+    If A ≤ₚ B, then a polynomial-time algorithm for B immediately gives one for A: transform the A-instance into a B-instance (polynomial time), solve it with B's algorithm, and return that answer. Reading this contrapositively is the entire point of this unit: if A is known to have <em>no</em> polynomial-time algorithm, then B can't have one either — because if it did, chaining it after the reduction would give A one too, a contradiction. A ≤ₚ B says "B is at least as hard as A," which is exactly the tool needed to prove one problem is hard by relating it to another already known to be hard.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Worked example — Independent Set ≤ₚ Vertex Cover</span>
+    Independent Set: does graph G=(V,E) have a set of k vertices, no two adjacent? Vertex Cover: does G have a set of k vertices touching every edge? The reduction: given (G, k) for Independent Set, output (G, |V|−k) for Vertex Cover — same graph, transformed integer. This is correct because S is an independent set of G exactly when V∖S is a vertex cover of G (no edge has both endpoints in S means every edge has at least one endpoint in V∖S, and vice versa). The transformation is O(1) — it doesn't even touch the graph, only the number k — so Independent Set ≤ₚ Vertex Cover: an efficient algorithm for one immediately gives one for the other.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why this course cares about reductions specifically</span>
+    A reduction is a completely different proof tool than anything used in earlier units. Units 1–7 proved <em>upper bounds</em> — "this algorithm solves this problem in this much time." A reduction proves a <em>relative</em> claim — "this problem is at least as hard as that one" — without ever exhibiting an algorithm at all. Lesson 31 uses exactly this tool, at scale, to show that an enormous number of natural problems (scheduling, packing, satisfiability, routing) are all, in a precise sense, exactly as hard as each other.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What does it mean for a decision problem to be in NP?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">It means no algorithm can ever solve the problem, even given unlimited time.</button>
+      <button class="quiz-choice" data-correct="true">Whenever the answer is "yes," there is a certificate that can be verified in polynomial time, even if none is known to be found quickly.</button>
+      <button class="quiz-choice" data-correct="false">It means the problem has already been proven to have no polynomial-time algorithm.</button>
+      <button class="quiz-choice" data-correct="false">It means the problem can only be solved using randomized algorithms.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>NP is about efficient verifiability of a yes-answer's certificate, not about how the answer itself is found.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why does P ⊆ NP hold?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because every NP problem has already been proven solvable in polynomial time.</button>
+      <button class="quiz-choice" data-correct="true">Because a problem solvable outright in polynomial time can be "verified" by ignoring any offered certificate and just re-solving it from scratch in that same polynomial time.</button>
+      <button class="quiz-choice" data-correct="false">Because P and NP are defined to be identical by convention.</button>
+      <button class="quiz-choice" data-correct="false">Because NP problems are always harder to state than P problems.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Solvability in polynomial time trivially implies verifiability in polynomial time, which is exactly the containment direction that's settled.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. If A ≤ₚ B, and A is known to have no polynomial-time algorithm, what can be concluded about B?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">B must be solvable in polynomial time, since the reduction itself is efficient.</button>
+      <button class="quiz-choice" data-correct="true">B can't have a polynomial-time algorithm either — if it did, chaining it after the reduction would solve A in polynomial time too, a contradiction.</button>
+      <button class="quiz-choice" data-correct="false">Nothing — A ≤ₚ B says nothing about B's difficulty relative to A.</button>
+      <button class="quiz-choice" data-correct="false">B must be a strictly smaller problem than A in every case.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>This contrapositive reading is the entire mechanism by which reductions transfer known hardness from one problem onto another.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="certificate">
+    <p class="quiz-prompt">4. Fill in the blank: a problem is in NP if every "yes" instance has a ___ that can be checked in polynomial time, even when finding one isn't known to be efficient.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The certificate is the piece of evidence a verifier checks; NP membership is entirely about this checking step being fast.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="reduction">
+    <p class="quiz-prompt">5. Fill in the blank: a polynomial-time ___ transforms instances of one problem into instances of another, preserving the yes/no answer, without solving either problem directly.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The reduction is purely a transformation of input, which is exactly what lets it transfer hardness between problems.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: CLRS, Chapter 34.1–34.2, "Polynomial time" and "Polynomial-time verification," gives the formal definitions of P and NP and several worked reductions beyond the one shown here.</p>
+
+  <p class="ask-teacher">Want to work through why Vertex Cover ≤ₚ Independent Set also holds (the same reduction, run in reverse), or try reducing a different pair of problems yourself? Ask your teacher — that's what I'm here for. Next up: NP-completeness — the precise sense in which some NP problems are the hardest problems in the entire class.</p>
+
+  <footer class="lesson-footer">STEM+ · Advanced Algorithms · Lesson 30 of the course sequence</footer>
+</div>

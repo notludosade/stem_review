@@ -1,0 +1,100 @@
+<meta charset="UTF-8">
+<title>Lesson 21: Deduplication & Standardization — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Data Handling: CB · Unit 5 · Lesson 21</span>
+  <h1>Deduplication & Standardization</h1>
+  <p class="subtitle">Lesson 3 flagged consistency as a data quality dimension; Lesson 8 showed dropdowns preventing new inconsistency going forward. This lesson is about cleaning up the inconsistency and duplication that already exists in data you didn't collect that carefully.</p>
+  <p class="nav-links"><a href="0020-outliers.html" class="nav-prev">← Lesson 20</a> <a href="0022-from-raw-to-analysis-ready.html" class="nav-next">Lesson 22 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Lesson 3's inconsistency example was "USA" vs. "United States" vs. "U.S." all meaning the same country. Lesson 8 showed how a dropdown list stops that from happening in newly entered data. This lesson is about the data that already has the problem — often merged from multiple sources that each had their own conventions.</p>
+
+  <h2>Duplicate records</h2>
+  <div class="box">
+    <span class="box-label">Exact vs. fuzzy duplicates</span>
+    An <strong>exact duplicate</strong> is a row that is a byte-for-byte match of another — the easy case, found by checking whether every field matches (or checking a unique ID column, when one exists). A <strong>fuzzy duplicate</strong> is a row referring to the same real-world entity but recorded slightly differently — "Jon Smith, 555-0142" and "Jonathan Smith, (555) 012-0142" might be the same customer entered twice, with a typo and a formatting difference. Fuzzy duplicates can't be found with a simple equality check; they require deciding on a matching rule (e.g. same phone number after removing formatting, or same name plus same address) and accepting that some matches will be judgment calls.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why duplicates quietly break more than they look like they should</span>
+    A duplicated customer row doesn't just take up extra space — it double-counts that customer in every count, sum, and average computed afterward (Lesson 14's mean, Lesson 12's SQL aggregation), and if the duplicate has slightly different values in some fields (an updated address in one copy but not the other), a JOIN (Lesson 11) against that table can silently produce two rows of output for what should be one match. The two problems compound: duplicate detection has to happen before aggregation and joining, not after, or the downstream numbers are wrong in a way that no formula will flag as an error.
+  </div>
+
+  <h2>Standardization</h2>
+  <div class="box">
+    <span class="box-label">Common standardization tasks</span>
+    <strong>Case</strong> (forcing "Smith" and "smith" to match), <strong>whitespace</strong> (trimming leading/trailing spaces that make "Ohio" and "Ohio " look different to an exact match), <strong>formatting</strong> (unifying phone numbers, dates, and currency into one consistent format), and <strong>category values</strong> (mapping "USA"/"United States"/"U.S." to one canonical value — precisely the Lesson 3 example, resolved after the fact rather than prevented at entry like Lesson 8's dropdown).
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Worked example</span>
+    A merged customer list from two systems has "NY", "N.Y.", and "New York" all appearing in a state column, plus two rows for "Maria Garcia" at the same address with phone numbers "555-201-4488" and "5552014488" (identical once formatting is stripped). Standardization maps all three state spellings to one canonical code ("NY"); deduplication treats the two Maria Garcia rows as a fuzzy duplicate once phone-number formatting is stripped and compared, and merges them into one record, keeping whichever field values are most complete or most recent.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What distinguishes a fuzzy duplicate from an exact duplicate?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">A fuzzy duplicate always has a different unique ID column value.</button>
+      <button class="quiz-choice" data-correct="true">A fuzzy duplicate refers to the same real-world entity but is recorded with slight differences (typos, formatting), so it can't be found with a simple equality check the way an exact duplicate can.</button>
+      <button class="quiz-choice" data-correct="false">A fuzzy duplicate is a row that appears in a database but never in a spreadsheet.</button>
+      <button class="quiz-choice" data-correct="false">A fuzzy duplicate is any row containing a missing value.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Fuzzy duplicates require a matching rule and judgment, unlike exact duplicates, which a plain equality check finds.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why should duplicate detection happen before aggregation (Lesson 12) or joining (Lesson 11), not after?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because SQL's GROUP BY and JOIN operations automatically remove duplicates on their own.</button>
+      <button class="quiz-choice" data-correct="true">Because a duplicate row double-counts in any downstream count, sum, or average, and can cause a JOIN to silently produce extra matching rows — errors that won't be flagged by the formulas themselves.</button>
+      <button class="quiz-choice" data-correct="false">Because duplicates can only be detected once a query has already returned its final result.</button>
+      <button class="quiz-choice" data-correct="false">Because aggregation functions like SUM and COUNT cannot run on tables containing any duplicate rows.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Duplicates distort every calculation performed afterward, silently and without any error being raised.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. How does resolving "USA" / "United States" / "U.S." into one canonical value after the fact (standardization) differ from Lesson 8's dropdown-list approach?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">They accomplish entirely unrelated goals with no overlap.</button>
+      <button class="quiz-choice" data-correct="true">Standardization cleans up inconsistency that already exists in collected data, while a dropdown list prevents that same inconsistency from being entered in the first place — prevention versus cleanup, applied to the same underlying problem.</button>
+      <button class="quiz-choice" data-correct="false">Standardization can only be applied to numeric columns, never text columns like country names.</button>
+      <button class="quiz-choice" data-correct="false">A dropdown list is only useful after data has already been standardized.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Both address the same inconsistency problem from Lesson 3, at two different points — before entry (Lesson 8) and after the fact (this lesson).</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="standardization">
+    <p class="quiz-prompt">4. Fill in the blank: unifying case, whitespace, formatting, and category values into one consistent form across a dataset is called ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Standardization is the umbrella term for these consistency-fixing tasks.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="fuzzy duplicate|fuzzy duplicates">
+    <p class="quiz-prompt">5. Fill in the blank: two records referring to the same real-world entity but recorded with typos or formatting differences (e.g. "Jon Smith" vs. "Jonathan Smith" at the same phone number) are an example of a ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Fuzzy duplicates require a matching rule to detect, unlike exact byte-for-byte duplicates.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: the Google Data Analytics Certificate's "Data Cleaning" module (coursera.org) covers deduplication and standardization as core steps in a data-cleaning workflow.</p>
+
+  <p class="ask-teacher">Have a dataset merged from multiple sources with suspected duplicates or inconsistent values? Ask your teacher — that's what I'm here for. Next up: pulling everything in this unit together into one complete cleaning workflow.</p>
+
+  <footer class="lesson-footer">STEM+ · Data Handling: CB · Lesson 21 of the course sequence</footer>
+</div>

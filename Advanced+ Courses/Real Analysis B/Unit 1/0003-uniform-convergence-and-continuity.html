@@ -1,0 +1,112 @@
+<meta charset="UTF-8">
+<title>Lesson 3: Uniform Convergence and Continuity — STEM+</title>
+<link rel="stylesheet" href="../../../assets/style.css">
+<script src="../../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Real Analysis B · Unit 1 · Lesson 3</span>
+  <h1>Uniform Convergence and Continuity</h1>
+  <p class="subtitle">The whole reason to care about uniform convergence: it's exactly strong enough to guarantee the limit of continuous functions is itself continuous.</p>
+  <p class="nav-links"><a href="0002-the-weierstrass-m-test.html" class="nav-prev">← Lesson 2</a> <a href="0004-uniform-convergence-and-integration.html" class="nav-next">Lesson 4 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Lesson 1 showed pointwise convergence alone can turn a sequence of continuous functions into a discontinuous limit. This lesson proves the payoff for the stronger hypothesis: uniform convergence rules that out completely.</p>
+
+  <div class="box">
+    <span class="box-label">Theorem — Uniform Limit of Continuous Functions</span>
+    Suppose fₙ → f uniformly on S, and each fₙ is continuous at x₀ ∈ S. Then f is continuous at x₀.
+  </div>
+
+  <div class="box">
+    <span class="box-label">Proof</span>
+    Fix ε &gt; 0. By uniform convergence, choose N such that n ≥ N implies |fₙ(x) − f(x)| &lt; ε/3 for <em>every</em> x ∈ S — this single N works everywhere, which is exactly what uniform (rather than pointwise) convergence supplies. Fix any such n ≥ N. Since fₙ is continuous at x₀, choose δ &gt; 0 such that |x − x₀| &lt; δ implies |fₙ(x) − fₙ(x₀)| &lt; ε/3. Now for any x ∈ S with |x − x₀| &lt; δ:
+    <br><br>
+    |f(x) − f(x₀)| ≤ |f(x) − fₙ(x)| + |fₙ(x) − fₙ(x₀)| + |fₙ(x₀) − f(x₀)| &lt; ε/3 + ε/3 + ε/3 = ε.
+    <br><br>
+    The first and third terms are each below ε/3 by the uniform-convergence choice of n, applied at the two specific points x and x₀; the middle term is below ε/3 by fₙ's continuity at x₀. So f is continuous at x₀. ∎
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why uniformity is exactly what the first and third terms need</span>
+    Both |f(x) − fₙ(x)| and |fₙ(x₀) − f(x₀)| must be small <em>at the same fixed n</em> — one bound at the arbitrary nearby point x, the other at the fixed point x₀. Uniform convergence supplies a single N that works at every point of S, so one choice of n handles both simultaneously. Pointwise convergence alone would only guarantee an N for x₀ specifically; there would be no guarantee that same n makes |f(x) − fₙ(x)| small too, since x ranges over a whole neighborhood of x₀, each point with potentially its own required N.
+  </div>
+
+  <div class="box">
+    <span class="box-label">Corollary — A Discontinuity Test for Non-Uniform Convergence</span>
+    If (fₙ) is a sequence of continuous functions converging pointwise to a discontinuous f, then the convergence cannot be uniform. (This is the contrapositive of the theorem above.)
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Example: revisiting fₙ(x) = xⁿ on [0, 1]</span>
+    Each fₙ(x) = xⁿ is continuous, and (Lesson 1) the pointwise limit is f(x) = 0 on [0,1) with f(1) = 1 — discontinuous at x = 1. By the corollary, this alone proves the convergence is not uniform on [0, 1], without needing the direct supremum computation from Lesson 1. The corollary is often the fastest way to rule out uniform convergence.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Example: Σ sin(nx)/n² is continuous on all of ℝ</span>
+    Lesson 2's M-test showed Σ sin(nx)/n² converges uniformly on ℝ. Each partial sum sₙ(x) = Σ<sub>k=1</sub><sup>n</sup> sin(kx)/k² is a finite sum of continuous functions, hence continuous. By this lesson's theorem, the uniform limit — the full sum s(x) = Σ<sub>k=1</sub><sup>∞</sup> sin(kx)/k² — is therefore continuous on all of ℝ, even though it's an infinite sum with no elementary closed form.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What does the theorem guarantee, given fₙ → f uniformly and each fₙ continuous at x₀?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">That fₙ = f for n large enough</button>
+      <button class="quiz-choice" data-correct="true">That f is continuous at x₀</button>
+      <button class="quiz-choice" data-correct="false">That f is differentiable at x₀</button>
+      <button class="quiz-choice" data-correct="false">That fₙ converges pointwise but not uniformly</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Uniform convergence of continuous functions is exactly strong enough to guarantee the limit function is continuous.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. In the ε/3 proof, why must the same n work for both |f(x) − fₙ(x)| and |fₙ(x₀) − f(x₀)|?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">It doesn't need to — any two different n's work fine</button>
+      <button class="quiz-choice" data-correct="true">Because both bounds are needed simultaneously in the triangle inequality chain, and uniform convergence's single N guarantees one n handles every point at once</button>
+      <button class="quiz-choice" data-correct="false">Because fₙ(x₀) always equals f(x₀) exactly</button>
+      <button class="quiz-choice" data-correct="false">Because continuity requires x = x₀</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Uniform convergence's N works at every point of S, so a single fixed n bounds the error at both x and x₀ at once — pointwise convergence would not guarantee this.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. What does the corollary let you conclude about fₙ(x) = xⁿ on [0, 1]?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">That it converges uniformly, since each fₙ is continuous</button>
+      <button class="quiz-choice" data-correct="true">That it cannot converge uniformly, since the pointwise limit is discontinuous at x = 1</button>
+      <button class="quiz-choice" data-correct="false">That it does not converge pointwise</button>
+      <button class="quiz-choice" data-correct="false">That the corollary cannot be applied to polynomials</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Since every xⁿ is continuous but the pointwise limit is discontinuous at 1, the corollary rules out uniform convergence immediately.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="continuous">
+    <p class="quiz-prompt">4. Fill in the blank: if fₙ → f uniformly and each fₙ is continuous, then f is guaranteed to be ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Uniform convergence of continuous functions guarantees the limit function is continuous.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="discontinuous">
+    <p class="quiz-prompt">5. Fill in the blank: if a sequence of continuous functions converges pointwise to a ___ limit, the convergence cannot be uniform.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>This is the contrapositive discontinuity test: a discontinuous pointwise limit of continuous functions rules out uniform convergence.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: Abbott's <em>Understanding Analysis</em>, Section 6.2, Theorem 6.2.6, proves this continuity-preservation result in full.</p>
+
+  <p class="ask-teacher">Stuck on why the ε/3 split needs exactly three terms in the triangle inequality? Ask your teacher — that's what I'm here for. Next up: whether uniform convergence also lets you swap a limit and an integral.</p>
+
+  <footer class="lesson-footer">STEM+ · Real Analysis B · Lesson 3 of the course sequence</footer>
+</div>

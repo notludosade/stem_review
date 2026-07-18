@@ -1,0 +1,123 @@
+<meta charset="UTF-8">
+<title>Lesson 33: Capstone — A Full Data Handling Pipeline — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Data Handling: CB · Unit 8 · Lesson 33</span>
+  <h1>Capstone: A Full Data Handling Pipeline</h1>
+  <p class="subtitle">Every unit in this course taught one stage of a single pipeline: raw, messy, real-world data going in one end, and a trustworthy, honestly-told finding coming out the other. This lesson walks that whole pipeline, start to finish, on one dataset.</p>
+  <p class="nav-links"><a href="0032-the-data-case-study-interview.html" class="nav-prev">← Lesson 32</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Take a single scenario: a mid-size retailer wants to know why customer churn rose last quarter, using a messy export of customer records, support tickets, and purchase history. Below is that one dataset, carried through every unit of this course in order.</p>
+
+  <div class="box">
+    <span class="box-label">Unit 1 (Lessons 1-4) — What Counts as Data</span>
+    Before touching the export, the first questions are the ones Unit 1 taught: what actually counts as usable data here (a free-text support-ticket comment counts, but so does a timestamp), where each piece came from (Lesson 2 — a customer-service export, a point-of-sale system, a signup form — each with its own collection method and possible sampling bias), how good it actually is across Lesson 3's four dimensions (accuracy, completeness, consistency, timeliness), and whether it belongs in a spreadsheet or a proper relational database (Lesson 4) given its size and structure. This churn dataset, spanning three source systems, is exactly the case Lesson 4 said outgrows a spreadsheet.
+  </div>
+
+  <div class="box">
+    <span class="box-label">Unit 2 (Lessons 5-8) — Spreadsheet Foundations</span>
+    Before the data ever reaches a database, a first look happens in a spreadsheet: core functions (Lesson 5) to get quick counts and sums, VLOOKUP-style joining (Lesson 6) to pull a customer's plan tier alongside their ticket history, a pivot table (Lesson 7) to get an early rough cut of churn rate by region, and — looking back at how the signup form itself was built — Lesson 8's data validation, which determines whether the "country" field here is already clean or needs the standardization Unit 5 will require.
+  </div>
+
+  <div class="box">
+    <span class="box-label">Unit 3 (Lessons 9-13) — The Relational Model and SQL</span>
+    Once the dataset outgrows the spreadsheet, it moves into the relational structure of Lesson 9: separate customers, tickets, and purchases tables linked by keys. SELECT and WHERE (Lesson 10) pull just the last quarter's records; JOINs (Lesson 11) reunite a customer's ticket history with their purchase history across tables; GROUP BY aggregation (Lesson 12) rolls individual purchases up into a per-customer churn flag; and a CTE (Lesson 13) breaks the resulting multi-step query into named, readable pieces — the same querying backbone every later stage in this pipeline depends on.
+  </div>
+
+  <div class="box">
+    <span class="box-label">Unit 4 (Lessons 14-18) — Making Sense of the Numbers</span>
+    With clean query results in hand, Unit 4's statistics answer "so what." Descriptive statistics (Lesson 14) and distributions (Lesson 15) characterize typical churn rate and its spread. A scatter plot suggesting churned customers filed more support tickets raises exactly Lesson 16's warning: correlation is not causation until confounders are ruled out — maybe both are driven by a third factor, like product downtime. Lesson 17's confidence interval puts honest error bars on the churn-rate estimate itself. And Lesson 18's regression quantifies how strongly ticket count predicts churn, once the confounder check has been done.
+  </div>
+
+  <div class="box">
+    <span class="box-label">Unit 5 (Lessons 19-22) — Cleaning the Data</span>
+    None of Unit 4's numbers mean anything until Unit 5's cleaning has actually happened — and in this pipeline, it happens as its own explicit stage, not an afterthought. Lesson 19's missing-data framework flags which customer records have a genuinely missing signup date versus a sentinel "01/01/1900"; Lesson 20's IQR rule catches a customer logged with 40,000 support tickets as a data-entry error, not a genuine outlier; Lesson 21 deduplicates the same customer appearing twice under "NY" and "New York"; and Lesson 22's workflow order — standardize, then deduplicate, then handle missing data, then check outliers — together with a written cleaning log recording each judgment call, is what actually makes this dataset the analysis-ready input Unit 4's statistics assumed it already had.
+  </div>
+
+  <div class="box">
+    <span class="box-label">Unit 6 (Lessons 23-26) — Visualizing and Telling the Story</span>
+    With a trustworthy churn number in hand, Unit 6 turns it into something a stakeholder can act on: Lesson 23 picks a line chart for the churn trend and a scatter plot for the ticket-count relationship, not a pie chart; Lesson 24's honesty check confirms the y-axis isn't truncated and that the Unit 5 cleaning decisions (that data-entry-error outlier, those imputed missing values) are disclosed rather than silently smoothed over; Lesson 25 builds a one-takeaway board-level chart alongside a full-detail version for the analytics team; and Lesson 26 wraps the finding in a Context→Finding→Implication story that names the confounder check from Lesson 16 explicitly, rather than implying a causal claim the data can't support.
+  </div>
+
+  <div class="box">
+    <span class="box-label">Unit 7 (Lessons 27-29) — Handling It Responsibly</span>
+    Because this dataset contains real customers, Unit 7 applies throughout, not just at the end: Lesson 27's anonymization removes and generalizes direct and indirect identifiers before the churn analysis is shared outside the immediate team; Lesson 28's bias check asks whether the support-ticket data underrepresents customers who don't use the English-language support channel, which could make the churn model quietly worse for them; and Lesson 29's governance map determines whether this customer data falls under GDPR or CCPA obligations before anything is stored or exported further.
+  </div>
+
+  <div class="box">
+    <span class="box-label">Unit 8 (Lessons 30-32) — Doing This for a Living</span>
+    This whole walkthrough is, in miniature, exactly the kind of project Lesson 30 mapped to the Data Analyst role, Lesson 31 said belongs in a portfolio with its cleaning log and reasoning made visible rather than just its final chart, and Lesson 32 said should be presentable out loud in a case-study interview — clarifying questions first, confounders checked, conclusions stated with appropriate honesty about what the data can and can't support.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">The one thread running through all eight units</span>
+    Every unit in this course, underneath its specific technique, was teaching the same discipline: a judgment call made along the way is only trustworthy if it's made deliberately and stays visible to whoever looks at the result later. That's what Lesson 3's data-quality dimensions were checking for, what Lesson 22's cleaning log records, what Lesson 24 said a chart must disclose rather than silently absorb, what Lesson 16's confounder check demands before a causal claim, what Lesson 28's bias audit surfaces at every pipeline stage, and what Lesson 31 said a portfolio must show instead of hiding. Raw data does not become a trustworthy finding through any single clever technique — it becomes trustworthy because every decision made on the way from raw to reported was a deliberate, disclosed one, not an invisible one.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. In the churn-analysis walkthrough, why does Unit 5's cleaning stage need to happen before Unit 4's statistics can be trusted?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">It doesn't — statistics can be computed correctly on raw, uncleaned data with no difference in outcome.</button>
+      <button class="quiz-choice" data-correct="true">Because uncorrected data-entry errors, duplicate records, and unhandled missing values (Lessons 19-21) would distort the descriptive statistics and regression built on top of them.</button>
+      <button class="quiz-choice" data-correct="false">Because Unit 4 cannot be performed at all on data drawn from a relational database.</button>
+      <button class="quiz-choice" data-correct="false">Because cleaning is only relevant to visualization, not to statistics.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Cleaning (Unit 5) is what makes the input to Unit 4's statistics trustworthy in the first place.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why does Lesson 26's data story explicitly name the confounder check from Lesson 16, rather than just stating the correlation found?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because confounders are irrelevant once a chart has been made.</button>
+      <button class="quiz-choice" data-correct="true">Because narrating a correlation without acknowledging ruled-out confounders risks implying a causal claim the data doesn't actually support.</button>
+      <button class="quiz-choice" data-correct="false">Because Lesson 16 is only about spreadsheet functions, unrelated to storytelling.</button>
+      <button class="quiz-choice" data-correct="false">Because every correlation is automatically also a causal relationship.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Naming the confounder check keeps the story honest about what the correlation does and doesn't establish.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. According to this capstone's closing argument, what single discipline underlies every unit in this course?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Memorizing as many SQL functions and chart types as possible.</button>
+      <button class="quiz-choice" data-correct="true">Making every judgment call along the pipeline — from cleaning to charting to bias-checking — deliberately and keeping it visible to anyone who later reviews the result.</button>
+      <button class="quiz-choice" data-correct="false">Producing the most visually impressive final chart possible, regardless of process.</button>
+      <button class="quiz-choice" data-correct="false">Avoiding the use of statistics wherever possible in favor of pure visualization.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Deliberate, disclosed judgment calls — not any single technique — is the thread tying every unit together.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="cleaning log">
+    <p class="quiz-prompt">4. Fill in the blank: the written record of cleaning judgment calls, first introduced in Lesson 22 and cited again in Lessons 24 and 31, is called a ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The cleaning log is the artifact that makes cleaning decisions checkable throughout the rest of the pipeline.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="confounding variable|confounder">
+    <p class="quiz-prompt">5. Fill in the blank: before concluding that support tickets cause churn rather than merely correlating with it, the pipeline must rule out a ___ — such as product downtime driving both.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Ruling out confounders, from Lesson 16, is what separates a supportable causal claim from a merely correlational one.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Revisit this course's glossary for a consolidated view of every term across all eight units, and the "Go to the source" links in Lessons 16, 22, and 28 for the deepest individual dives into confounders, cleaning practice, and bias.</p>
+
+  <p class="ask-teacher">Want to walk through your own messy dataset using this exact eight-stage pipeline? Ask your teacher — that's what I'm here for. This closes Data Handling: CB — from recognizing what counts as data, through spreadsheets, SQL, statistics, cleaning, honest visualization, and responsible handling, to a career built on doing all of it deliberately and visibly.</p>
+
+  <footer class="lesson-footer">STEM+ · Data Handling: CB · Lesson 33 of the course sequence — end of course</footer>
+</div>

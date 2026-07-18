@@ -1,0 +1,146 @@
+<meta charset="UTF-8">
+<title>Lesson 23: Outer Measure on the Real Line — STEM+</title>
+<link rel="stylesheet" href="../../../assets/style.css">
+<script src="../../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Real Analysis B · Unit 5 · Lesson 23</span>
+  <h1>Outer Measure on the Real Line</h1>
+  <p class="subtitle">Lesson 22 asked for a notion of "size" general enough to assign ℚ a length of zero. This lesson builds the first candidate — outer measure — and proves it does exactly that, while still agreeing with ordinary length on intervals.</p>
+  <p class="nav-links"><a href="0022-why-riemann-integration-breaks-down.html" class="nav-prev">← Lesson 22</a> <a href="0024-measurable-sets-and-sigma-algebras.html" class="nav-next">Lesson 24 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <div class="box">
+    <span class="box-label">Definition — Outer Measure</span>
+    For A ⊆ ℝ, the <strong>(Lebesgue) outer measure</strong> of A is
+    <br><br>
+    m*(A) = inf { Σₙ ℓ(Iₙ) : A ⊆ ⋃ₙ Iₙ, each Iₙ an open interval },
+    <br><br>
+    the infimum taken over all countable covers of A by open intervals, where ℓ((a,b)) = b − a.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why "cover by open intervals" is the right starting point</span>
+    Every subset of ℝ, however strange, can be covered by countably many open intervals (the whole real line is one such cover). Taking the infimum of total cover length over all such covers is the most direct way to ask "how much room does A need," without presupposing anything about A's structure in advance.
+  </div>
+
+  <div class="box">
+    <span class="box-label">Theorem — Basic Properties of Outer Measure</span>
+    (a) m*(∅) = 0. (b) Monotonicity: A ⊆ B ⟹ m*(A) ≤ m*(B). (c) Countable Subadditivity: m*(⋃ₙ Aₙ) ≤ Σₙ m*(Aₙ), for any countable collection of sets Aₙ ⊆ ℝ.
+  </div>
+
+  <div class="box">
+    <span class="box-label">Proof</span>
+    (a) For any ε &gt; 0, ∅ ⊆ (0, ε), a cover of total length ε; since ε was arbitrary, m*(∅) = 0.
+    <br><br>
+    (b) Any countable cover of B by open intervals is also a cover of A (since A ⊆ B), so the infimum defining m*(A) is taken over at least as many covers as the infimum defining m*(B) — hence m*(A) ≤ m*(B).
+    <br><br>
+    (c) Fix ε &gt; 0. For each n, choose a countable cover {Iₙ,ₖ}ₖ of Aₙ by open intervals with Σₖ ℓ(Iₙ,ₖ) &lt; m*(Aₙ) + ε/2ⁿ (possible since m*(Aₙ) is an infimum). The combined collection {Iₙ,ₖ}ₙ,ₖ is countable (a countable union of countable collections) and covers ⋃ₙ Aₙ, with total length Σₙ Σₖ ℓ(Iₙ,ₖ) &lt; Σₙ [m*(Aₙ) + ε/2ⁿ] = Σₙ m*(Aₙ) + ε. So m*(⋃ₙ Aₙ) &lt; Σₙ m*(Aₙ) + ε for every ε &gt; 0, hence m*(⋃ₙ Aₙ) ≤ Σₙ m*(Aₙ). ∎
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why the ε/2ⁿ split is worth noticing</span>
+    Splitting a single ε-budget across countably many pieces so the n-th piece gets ε/2ⁿ (total Σε/2ⁿ = ε) is a recurring trick anywhere a countable family of individually-controllable approximations needs to be combined into one — the same shape of argument used for series estimates earlier in analysis.
+  </div>
+
+  <div class="box">
+    <span class="box-label">Theorem — Outer Measure Agrees with Length on Intervals</span>
+    m*([a,b]) = b − a.
+  </div>
+
+  <div class="box">
+    <span class="box-label">Proof</span>
+    <em>m*([a,b]) ≤ b − a:</em> for any ε &gt; 0, [a,b] ⊆ (a−ε, b+ε), a single-interval cover of length b−a+2ε. Since ε was arbitrary, m*([a,b]) ≤ b − a.
+    <br><br>
+    <em>m*([a,b]) ≥ b − a:</em> let {Iₙ} be any countable cover of [a,b] by open intervals. Since [a,b] is compact (closed and bounded, hence compact by the generalized Heine–Borel theorem, Unit 3 Lesson 15), finitely many of the Iₙ already cover [a,b]; it suffices to show any <em>finite</em> cover of [a,b] by open intervals I₁,…,I_k has Σᵢℓ(Iᵢ) ≥ b−a. Starting from a ∈ [a,b], pick an interval I_{j₁} = (c₁,d₁) containing a; if d₁ &gt; b, then ℓ(I_{j₁}) &gt; b−a and the finite sum already exceeds b−a. Otherwise d₁ ∈ [a,b], so some other interval I_{j₂}=(c₂,d₂) among the remaining ones must contain d₁ (the cover covers [a,b], and d₁ is in it), with c₂ &lt; d₁ &lt; d₂. Continuing this chain — each new interval's left endpoint below the previous interval's right endpoint, and each new right endpoint strictly larger than the last (since there are only k intervals, the process must terminate) — the chain reaches an interval I_{jₘ} with dₘ &gt; b, since [a,b] is covered and the chain's right endpoints strictly increase each step. Summing ℓ(I_{jᵢ}) = dᵢ − cᵢ along the chain telescopes (each cᵢ₊₁ &lt; dᵢ) to at least dₘ − c₁ &gt; b − a. Since the full sum over all k intervals is at least this chain's sum, Σᵢℓ(Iᵢ) ≥ b − a. Combined with countable subadditivity applied to the original cover, m*([a,b]) ≥ b − a. The full bookkeeping of the chaining argument is in the source reading below. ∎
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why Unit 3's Heine-Borel theorem resurfaces here</span>
+    The generalized Heine-Borel theorem (Unit 3, Lesson 15) — closed and bounded subsets of ℝⁿ are exactly the compact ones — is precisely what reduces "every countable cover has total length ≥ b−a" down to "every <em>finite</em> cover does," which is the only version the chaining argument above can handle. Without compactness, an infinite cover could in principle use infinitely many arbitrarily short intervals to sneak under any fixed budget — compactness rules this out.
+  </div>
+
+  <div class="box">
+    <span class="box-label">Corollary — Countable Sets Have Outer Measure Zero</span>
+    If A ⊆ ℝ is countable, then m*(A) = 0. In particular, m*(ℚ) = 0.
+  </div>
+
+  <div class="box">
+    <span class="box-label">Proof</span>
+    Enumerate A = {x₁, x₂, x₃, …} (finite sets are handled the same way with the list truncated). For ε &gt; 0, cover xₙ by the interval Iₙ = (xₙ − ε/2ⁿ⁺¹, xₙ + ε/2ⁿ⁺¹), of length ε/2ⁿ. Then A ⊆ ⋃ₙ Iₙ with Σₙ ℓ(Iₙ) = Σₙ ε/2ⁿ = ε. Since ε was arbitrary, m*(A) = 0. ∎
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why this directly answers Lesson 22</span>
+    m*(ℚ) = 0 is exactly the fact Lesson 22 asked for: a rigorous sense in which ℚ, despite being dense, has "zero length." Dirichlet's function is 1 exactly on a set of outer measure zero — the beginning of why it should be integrable with integral 0 once integration is rebuilt around measure, in Unit 6.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why not every set gets a well-behaved outer measure</span>
+    Outer measure is defined for every subset of ℝ, but it turns out <em>not</em> to be countably additive on all of them — there exist sets (Vitali sets, built using the Axiom of Choice by collecting one representative from each coset of ℚ acting on [0,1] by translation) for which m* fails to add up correctly over disjoint pieces. This is exactly why Lesson 24 doesn't stop here, and instead isolates a specific collection of "measurable" sets on which outer measure behaves the way a genuine notion of length should.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. How is m*(A) defined?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">The largest interval contained in A</button>
+      <button class="quiz-choice" data-correct="true">The infimum of total lengths of countable covers of A by open intervals</button>
+      <button class="quiz-choice" data-correct="false">The number of points in A</button>
+      <button class="quiz-choice" data-correct="false">The supremum of lengths of intervals contained in A</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Outer measure takes the best (smallest total length) countable cover of A by open intervals.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. What makes the "≥" direction of m*([a,b]) = b−a harder than the "≤" direction?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">It requires [a,b] to be countable</button>
+      <button class="quiz-choice" data-correct="true">It requires reducing to finite covers via compactness (Heine-Borel), then chaining overlapping intervals</button>
+      <button class="quiz-choice" data-correct="false">It requires the Axiom of Choice</button>
+      <button class="quiz-choice" data-correct="false">It requires ℚ to be dense in [a,b]</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Compactness reduces the problem to finite covers, where a chaining argument along overlapping intervals gives the needed length bound.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why does countable subadditivity's proof split ε as ε/2ⁿ across the sets Aₙ?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">To guarantee each Aₙ is an interval</button>
+      <button class="quiz-choice" data-correct="true">So the total slack Σε/2ⁿ across infinitely many sets still sums to just ε</button>
+      <button class="quiz-choice" data-correct="false">To make m*(Aₙ) exactly zero</button>
+      <button class="quiz-choice" data-correct="false">To ensure the Aₙ are disjoint</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Geometric-series budgeting lets countably many individual slack allowances add up to a single controllable total.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="subadditivity">
+    <p class="quiz-prompt">4. Fill in the blank: the property m*(⋃ₙAₙ) ≤ Σₙm*(Aₙ) is called countable ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Subadditivity is the standard name for this inequality-only version of additivity.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="zero">
+    <p class="quiz-prompt">5. Fill in the blank: every countable subset of ℝ, including ℚ, has outer measure ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Covering each of countably many points by an exponentially shrinking interval forces total outer measure zero.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: Royden and Fitzpatrick's <em>Real Analysis</em>, Chapter 2, proves these outer measure properties in full, including the complete interval-chaining argument and the Vitali set construction.</p>
+
+  <p class="ask-teacher">Stuck on why compactness is exactly what rules out an infinite cover "sneaking under budget"? Ask your teacher — that's what I'm here for. Next up: which sets are "measurable" — the special collection on which outer measure becomes a genuine, countably additive measure.</p>
+
+  <footer class="lesson-footer">STEM+ · Real Analysis B · Lesson 23 of the course sequence</footer>
+</div>

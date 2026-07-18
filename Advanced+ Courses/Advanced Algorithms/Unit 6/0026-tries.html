@@ -1,0 +1,125 @@
+<meta charset="UTF-8">
+<title>Lesson 26: Tries — STEM+</title>
+<link rel="stylesheet" href="../../../assets/style.css">
+<script src="../../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Advanced Algorithms · Unit 6 · Lesson 26</span>
+  <h1>Tries</h1>
+  <p class="subtitle">Storing a set of strings in a hash set answers "is this string present?" but nothing about shared prefixes. A trie restructures storage entirely around prefixes, making prefix queries as fast as membership queries.</p>
+  <p class="nav-links"><a href="0025-disjoint-set-union-proved.html" class="nav-prev">← Lesson 25</a> <a href="../Unit%207/0027-kmp.html" class="nav-next">Lesson 27 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Given a set of strings, a hash set answers "is s present?" in expected O(|s|) time — but "how many strings in the set start with prefix p?" or "what's the longest common prefix of two strings in the set?" require scanning every string, since a hash set stores no relationship between similar strings at all. A <strong>trie</strong> (from re<em>trie</em>val, usually pronounced "try") is a tree where each edge represents one character, so every path from the root spells out a prefix — making prefix-based queries as fast as membership queries, both O(|s|), independent of how many strings are stored.</p>
+
+  <h2>The structure</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    A trie is a rooted tree where each node has up to |Σ| children (one per alphabet character), and each edge is labeled with a single character. The root represents the empty prefix. A node reached by following the path spelling out string s represents the prefix s; a boolean flag at that node marks whether s is itself a complete word in the set (not just a prefix of a longer one). Any two strings sharing a common prefix share the same path through the tree for that prefix's length — the prefix is stored exactly once, no matter how many strings extend it.
+  </div>
+
+  <div class="box">
+    <span class="box-label">Insert and search — O(|s|)</span>
+<pre class="code-block"><code>function insert(root, s):
+    node = root
+    for ch in s:
+        if ch not in node.children:
+            node.children[ch] = new TrieNode()
+        node = node.children[ch]
+    node.isWord = true
+
+function search(root, s):                  // is s itself a complete word?
+    node = root
+    for ch in s:
+        if ch not in node.children: return false
+        node = node.children[ch]
+    return node.isWord
+
+function startsWith(root, p):               // does any word start with prefix p?
+    node = root
+    for ch in p:
+        if ch not in node.children: return false
+        node = node.children[ch]
+    return true                             // reached the end of p; some word extends it</code></pre>
+    All three operations do a constant amount of work per character, so each costs O(|s|) (or O(|p|)) — entirely independent of how many other strings are stored in the trie.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why this beats a hash set for prefix queries specifically</span>
+    A hash set treats every string as an opaque, indivisible key — two strings that share every character except the last are stored completely independently, with no structural relationship a query could exploit. A trie's entire organizing principle is shared prefixes, so startsWith(p) only ever needs to walk |p| edges from the root, regardless of whether 1 or 1,000,000 strings extend that prefix — the count of matching words is implicitly represented by however much subtree hangs below that node, not scanned one by one.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Worked example</span>
+    Inserting "cat", "car", "card", and "dog" into an empty trie: "cat" and "car" share the path c→a, then diverge at t vs r; "card" extends the "car" path with one more edge, d; "dog" starts a completely separate path from the root, since it shares no prefix with the others. A query startsWith("ca") walks 2 edges (c, a) and returns true, having touched a shared node that "cat", "car", and "card" all pass through — one O(2) walk, correctly reflecting three matching words, with no per-word cost at all.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">The space/time trade-off</span>
+    A trie's per-character node cost (up to |Σ| children per node) means it can use more memory than a hash set storing the same strings, especially when the alphabet is large (say, full Unicode) and prefixes are rarely shared. This is a genuine trade-off, not a strict improvement: reach for a trie specifically when prefix-based queries (autocomplete, longest-common-prefix, counting words with a given prefix) are actually needed, and a hash set otherwise — the same "match the tool to the actual query pattern" judgment that chose between a segment tree and a Fenwick tree (Lesson 23) based on which aggregate operation is really required.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What does a path from the root to a node in a trie represent?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">The total number of words stored in the trie.</button>
+      <button class="quiz-choice" data-correct="true">A prefix, spelled out one character per edge along the path.</button>
+      <button class="quiz-choice" data-correct="false">A hash value computed from the full string.</button>
+      <button class="quiz-choice" data-correct="false">A single complete word, regardless of which node the path ends at.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Every path from the root spells out a prefix; whether that prefix is also a complete word is tracked separately by a flag at the node.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why can a trie answer "does any word start with prefix p?" in O(|p|) time, regardless of how many words are stored?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because tries only ever store a single word at a time.</button>
+      <button class="quiz-choice" data-correct="true">Because the query only needs to walk |p| edges from the root, and the existence of a path itself confirms some stored word extends that prefix.</button>
+      <button class="quiz-choice" data-correct="false">Because every trie precomputes and caches the answer to every possible prefix query in advance.</button>
+      <button class="quiz-choice" data-correct="false">Because tries sort all stored words alphabetically before answering any query.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The walk length depends only on the prefix's own length, never on the number of words sharing or extending it.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. When should a hash set be preferred over a trie for storing a set of strings?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Whenever the strings are very short.</button>
+      <button class="quiz-choice" data-correct="true">When prefix-based queries (autocomplete, prefix counting) aren't actually needed, since a trie's per-character node overhead can cost more memory than a hash set for the same strings.</button>
+      <button class="quiz-choice" data-correct="false">Never — a trie strictly dominates a hash set for every use case.</button>
+      <button class="quiz-choice" data-correct="false">Only when the alphabet has exactly 26 characters.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The choice between the two comes down to whether prefix structure is actually part of the query workload, not raw performance on plain membership queries alone.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="prefix|prefixes">
+    <p class="quiz-prompt">4. Fill in the blank: a trie's entire organizing principle is shared ___ — strings that begin the same way share the same path through the tree for however long they agree.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Shared prefixes sharing tree structure is exactly what lets prefix queries avoid scanning every stored string individually.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="isWord|is word">
+    <p class="quiz-prompt">5. Fill in the blank: since every node represents some prefix, a boolean flag such as ___ is needed at each node to distinguish "this prefix is also a complete stored word" from "this is merely a prefix of a longer word."</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Without this flag, search couldn't distinguish a stored word from a mere prefix that happens to be reachable, since every node along any inserted string's path is a valid prefix regardless.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: <a href="https://cp-algorithms.com/string/trie.html">CP-Algorithms, "Trie"</a> covers this structure along with several extensions (counting words with a given prefix, storing additional per-node data) beyond what's needed here.</p>
+
+  <p class="ask-teacher">Want to trace inserting a handful of related words by hand and see exactly where the tree branches? Ask your teacher — that's what I'm here for. This closes Unit 6. Next up: Unit 7, string algorithms — starting with pattern matching in linear time.</p>
+
+  <footer class="lesson-footer">STEM+ · Advanced Algorithms · Lesson 26 of the course sequence</footer>
+</div>

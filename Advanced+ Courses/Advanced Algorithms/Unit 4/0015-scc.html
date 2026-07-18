@@ -1,0 +1,129 @@
+<meta charset="UTF-8">
+<title>Lesson 15: Strongly Connected Components — STEM+</title>
+<link rel="stylesheet" href="../../../assets/style.css">
+<script src="../../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Advanced Algorithms · Unit 4 · Lesson 15</span>
+  <h1>Strongly Connected Components: Kosaraju's &amp; Tarjan's</h1>
+  <p class="subtitle">Two entirely different-looking algorithms — one runs DFS twice on the graph and its reverse, the other runs DFS once and tracks a clever stack invariant — both partition a directed graph into its maximal mutually-reachable clusters.</p>
+  <p class="nav-links"><a href="0014-floyd-warshall.html" class="nav-prev">← Lesson 14</a> <a href="0016-ford-fulkerson.html" class="nav-next">Lesson 16 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>CP2+'s Lesson 18 ("Representing Graphs &amp; DFS") taught depth-first search as a traversal tool. A <strong>strongly connected component</strong> (SCC) of a directed graph is a maximal set of vertices where every vertex can reach every other vertex in the set via directed edges. Finding all SCCs is a genuinely different problem from ordinary traversal — reachability in a directed graph isn't symmetric, so "connected" from Lesson 18's undirected framing doesn't directly apply. Two classical algorithms solve it, both built entirely from DFS, in ways that reveal a different subtlety about directed reachability each.</p>
+
+  <h2>Kosaraju's algorithm — DFS twice, once on the reverse graph</h2>
+  <div class="box">
+    <span class="box-label">Algorithm</span>
+<pre class="code-block"><code>function kosaraju(graph):
+    // pass 1: DFS on the original graph, recording finish order
+    finishOrder = []
+    for each unvisited vertex v:
+        dfs(graph, v, marking visited, appending v to finishOrder on finish)
+
+    reversedGraph = reverse every edge in graph
+
+    // pass 2: DFS on the reversed graph, in decreasing finish-time order
+    components = []
+    for v in reverse(finishOrder):
+        if v not yet visited in this pass:
+            component = dfs(reversedGraph, v, marking visited)
+            append component to components
+    return components</code></pre>
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why reversing the graph and using finish order works</span>
+    If u and v are in the same SCC, they can reach each other in both the original graph and its reverse (reversing all edges preserves mutual reachability within a component, though it can destroy reachability between different components). Processing vertices in decreasing order of first-pass finish time guarantees that when the second-pass DFS starts from a vertex v, it can only reach vertices in v's own SCC or in components that come strictly "after" it in a partial order over SCCs — never bleeding into a different, not-yet-fully-explored component. This exploits a fact from CP2+'s topological-sort lesson (Lesson 20, "Topological Sort &amp; Course Scheduling"): finish-time ordering from a first DFS pass encodes a valid dependency order, here applied to components rather than individual vertices.
+  </div>
+
+  <div class="box">
+    <span class="box-label">Runtime</span>
+    Θ(V+E): two full DFS passes, each linear, plus Θ(V+E) to build the reversed graph.
+  </div>
+
+  <h2>Tarjan's algorithm — one DFS pass with a low-link value</h2>
+  <div class="box">
+    <span class="box-label">Key idea</span>
+    Tarjan's algorithm runs a single DFS, maintaining for each vertex v two numbers: disc[v] (the order v was first discovered) and low[v] (the smallest disc value reachable from v's DFS subtree, including via at most one back-edge to an ancestor still on the current DFS stack). A vertex v is the "root" of an SCC exactly when low[v] = disc[v] — meaning nothing in v's subtree can reach back above v. When such a root is found, every vertex still on an explicit stack down to and including v forms one complete SCC, and can be popped off together.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why Tarjan's needs only one DFS pass, while Kosaraju's needs two</span>
+    Kosaraju's uses two full passes because it needs a decreasing-finish-time visiting order — the first pass's only job is to compute that order, information a single, uninterrupted DFS doesn't produce until the very end. Tarjan's algorithm instead tracks the low-link value <em>incrementally as the DFS unwinds</em>, so it can identify each completed SCC the moment its root vertex finishes, without needing a full second pass. This is the same kind of trade — do more per-step bookkeeping instead of a second whole pass — that Lesson 4's amortized analysis techniques are built to formally justify (the low-link bookkeeping adds only O(1) work per vertex/edge, not asymptotically more).
+  </div>
+
+  <div class="box">
+    <span class="box-label">Runtime</span>
+    Θ(V+E): a single DFS pass, with O(1) extra bookkeeping per vertex and edge.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Why both are worth knowing, not just the faster one</span>
+    Both run in the same Θ(V+E) asymptotic time — Tarjan's isn't asymptotically faster, just a single pass instead of two, which matters for constant-factor performance and for cases where building an explicit reversed graph is inconvenient (e.g., implicit or streamed graphs). Kosaraju's, in exchange, is considerably easier to state and prove correct from first principles, which is exactly why it's presented first here.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What does it mean for a set of vertices to form a strongly connected component?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Every vertex in the set has the same out-degree.</button>
+      <button class="quiz-choice" data-correct="true">Every vertex in the set can reach every other vertex in the set via directed edges, and the set is maximal with that property.</button>
+      <button class="quiz-choice" data-correct="false">The set contains no cycles at all.</button>
+      <button class="quiz-choice" data-correct="false">The set forms a spanning tree of the whole graph.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Mutual reachability, at maximal scope, is exactly the defining property of a strongly connected component.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why does Kosaraju's algorithm run its second DFS pass on the reversed graph, in decreasing finish-time order from the first pass?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Reversing the graph is only done to make the algorithm run faster, with no correctness role.</button>
+      <button class="quiz-choice" data-correct="true">Because that ordering guarantees each second-pass DFS run stays confined to exactly one SCC, never leaking into a different, not-yet-explored component.</button>
+      <button class="quiz-choice" data-correct="false">Because decreasing finish-time order is required to make DFS run at all.</button>
+      <button class="quiz-choice" data-correct="false">Because the reversed graph always has fewer edges than the original.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The finish-time ordering encodes a dependency order between components, which is exactly what keeps each second-pass DFS run contained to a single SCC.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. In Tarjan's algorithm, what does low[v] = disc[v] signal?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">That v has no outgoing edges at all.</button>
+      <button class="quiz-choice" data-correct="true">That v is the root of a strongly connected component — nothing in v's DFS subtree can reach back above v.</button>
+      <button class="quiz-choice" data-correct="false">That v was the very first vertex visited in the entire DFS.</button>
+      <button class="quiz-choice" data-correct="false">That v belongs to every strongly connected component in the graph.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>This equality is the precise moment an SCC is complete and can be popped off the explicit stack as one unit.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="low-link|low link">
+    <p class="quiz-prompt">4. Fill in the blank: Tarjan's algorithm tracks, for each vertex, a ___ value — the smallest discovery time reachable from its DFS subtree via at most one back-edge.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The low-link value is the core piece of bookkeeping that lets Tarjan's algorithm detect SCC roots in a single DFS pass.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="reverse|reversed">
+    <p class="quiz-prompt">5. Fill in the blank: Kosaraju's algorithm performs its second DFS pass on the ___ graph, with every edge direction flipped from the original.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Building this reversed graph is what allows finish-time order from the first pass to correctly delineate each component in the second.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: CLRS, Chapter 22, Section 22.5, "Strongly connected components," presents Kosaraju's algorithm (there attributed within the standard DFS framework) with a full correctness proof.</p>
+
+  <p class="ask-teacher">Want to trace both algorithms on the same small directed graph and confirm they produce the same components? Ask your teacher — that's what I'm here for. Next up: Ford-Fulkerson, the algorithm behind maximum flow in a network.</p>
+
+  <footer class="lesson-footer">STEM+ · Advanced Algorithms · Lesson 15 of the course sequence</footer>
+</div>

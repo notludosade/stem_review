@@ -1,0 +1,119 @@
+<meta charset="UTF-8">
+<title>Lesson 7: Median of Medians — STEM+</title>
+<link rel="stylesheet" href="../../../assets/style.css">
+<script src="../../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Advanced Algorithms · Unit 2 · Lesson 7</span>
+  <h1>Median of Medians</h1>
+  <p class="subtitle">Quickselect finds the k-th smallest element in expected O(n) time, but a bad pivot makes it O(n²) in the worst case. Median-of-medians fixes that by spending extra work choosing a pivot that's provably good — worst-case O(n), not just expected.</p>
+  <p class="nav-links"><a href="0006-counting-inversions-and-merge-sort.html" class="nav-prev">← Lesson 6</a> <a href="0008-strassens-algorithm.html" class="nav-next">Lesson 8 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Finding the k-th smallest element of an unsorted array (the <strong>selection problem</strong>) can be done in Θ(n log n) by sorting first, but that's more work than necessary — you don't need the whole order, just one position in it. Quickselect (a close relative of quicksort) partitions around a random pivot and recurses into only the side containing the k-th element, giving expected O(n) time. But like quicksort, an adversarial or unlucky sequence of pivots makes quickselect degrade to Θ(n²). This lesson builds an algorithm that chooses its pivot deliberately, guaranteeing Θ(n) worst-case — at the cost of a cleverer, more expensive-looking pivot selection step that turns out not to hurt the asymptotics at all.</p>
+
+  <h2>The algorithm</h2>
+  <div class="box">
+    <span class="box-label">Algorithm — median of medians (select)</span>
+<pre class="code-block"><code>function select(arr, k):
+    if length(arr) &lt;= 5:
+        return k-th smallest of arr by direct sort
+    // 1. Divide into groups of 5, find each group's median
+    groups = partition arr into ceil(n/5) groups of 5 (last group may be smaller)
+    medians = [median of each group, found by direct sort of that group of &le;5]
+    // 2. Recursively find the median of the medians — this is the pivot
+    pivot = select(medians, length(medians)/2)
+    // 3. Partition arr around pivot, then recurse into the correct side
+    (less, equal, greater) = partition arr around pivot
+    if k &lt; length(less):
+        return select(less, k)
+    else if k &lt; length(less) + length(equal):
+        return pivot
+    else:
+        return select(greater, k - length(less) - length(equal))</code></pre>
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why groups of exactly 5</span>
+    Groups of 5 are the smallest odd group size that makes the following guarantee work out to a favorable constant (shown below): at least roughly 3/10 of all elements are provably ≤ the pivot, and at least roughly 3/10 are provably ≥ it — guaranteeing the partition step never recurses into more than about 7/10 of the array. Groups of 3 give a guarantee too weak to produce a shrinking recurrence at all; groups of 7 or more work but add unnecessary overhead in the direct-sort step. 5 is the sweet spot the original 1973 paper (Blum, Floyd, Pratt, Rivest, Tarjan) landed on.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Proving at least 3n/10 elements are ≤ the pivot</span>
+    Consider the ⌈n/5⌉ group medians. By construction, the pivot is the median of these medians, so at least half of the group medians (roughly ⌈n/5⌉/2) are ≤ pivot. For each such group, since its median is ≤ pivot, at least 2 more elements in that same group of 5 (the two below its own median) are also ≤ its median, hence ≤ pivot. So each of those groups contributes at least 3 elements (the median plus 2 below it) that are ≤ pivot. Multiplying: at least 3 · (⌈n/5⌉/2) ≈ 3n/10 elements of the whole array are ≤ pivot. The symmetric argument gives at least 3n/10 elements ≥ pivot.
+  </div>
+
+  <div class="box">
+    <span class="box-label">Runtime — solving the recurrence</span>
+    The 3n/10 guarantee means the partition step recurses into at most n − 3n/10 = 7n/10 elements. The full recurrence has two recursive calls: T(n) ≤ T(n/5) [finding the median of medians] + T(7n/10) [recursing into the larger side] + Θ(n) [group medians, partitioning]. This doesn't fit the Master Theorem's single-branching-factor form (Lesson 2's territory, not Lesson 3's) — solve it by guessing T(n) ≤ cn and verifying by substitution: T(n) ≤ c(n/5) + c(7n/10) + Θ(n) = c(9n/10) + Θ(n). Since 9/10 &lt; 1, the coefficient on n shrinks each substitution, and the Θ(n) term can be absorbed into a large-enough c — confirming T(n) = O(n). Worst-case linear time, with no randomness required anywhere in the argument.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why this matters beyond selection itself</span>
+    Median-of-medians is this course's first example of a technique that trades a small constant-factor overhead (the extra pass to compute group medians) for a worst-case guarantee that a simpler algorithm (quickselect) can only offer in expectation. That trade — accept more work per step, in exchange for eliminating an adversarial worst case — recurs throughout the rest of this course, most visibly when balanced trees (Unit 6) trade rebalancing overhead for a worst-case height guarantee that an unbalanced binary search tree cannot offer.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What guarantee does median-of-medians provide that plain quickselect (random pivot) does not?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">It guarantees the array ends up fully sorted as a side effect.</button>
+      <button class="quiz-choice" data-correct="true">It guarantees Θ(n) worst-case time, not just expected time over random pivot choices.</button>
+      <button class="quiz-choice" data-correct="false">It guarantees the algorithm never needs to partition the array.</button>
+      <button class="quiz-choice" data-correct="false">It guarantees the pivot is always exactly the true median.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Quickselect's O(n) is only an expectation over random pivots; median-of-medians deliberately chooses a provably good pivot, eliminating the adversarial worst case entirely.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why does each group with a median ≤ pivot contribute at least 3 elements (not just 1) that are ≤ pivot?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because every group happens to have exactly 3 elements below its median.</button>
+      <button class="quiz-choice" data-correct="true">Because the group's median itself is ≤ pivot, and the 2 elements below that median within the same group of 5 are therefore also ≤ pivot.</button>
+      <button class="quiz-choice" data-correct="false">Because 3 is the number of recursive calls the algorithm makes per group.</button>
+      <button class="quiz-choice" data-correct="false">Because groups are required to be sorted in advance before the algorithm starts.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Within a group of 5, the two elements below the group's own median are automatically ≤ that median, and hence ≤ pivot whenever the group's median itself is ≤ pivot — giving 3 elements per such group, not just the median alone.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why can't the recurrence T(n) = T(n/5) + T(7n/10) + Θ(n) be solved directly with the Master Theorem?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because it has a Θ(n) non-recursive term, which the Master Theorem cannot handle.</button>
+      <button class="quiz-choice" data-correct="true">Because it has two recursive calls of different sizes (n/5 and 7n/10), not the single uniform a·T(n/b) shape the theorem requires.</button>
+      <button class="quiz-choice" data-correct="false">Because the coefficients 1/5 and 7/10 do not sum to 1.</button>
+      <button class="quiz-choice" data-correct="false">Because median-of-medians has no recursive structure at all.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Just like the T(n/3)+T(2n/3)+n example from Lesson 2, unevenly-sized recursive calls fall outside the Master Theorem's form — here solved instead by guess-and-verify substitution.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="five|5">
+    <p class="quiz-prompt">4. Fill in the blank: median-of-medians divides the array into groups of ___, the smallest odd size that makes the 3n/10 guarantee work out favorably.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Groups of 5 are the classic choice from the original Blum-Floyd-Pratt-Rivest-Tarjan paper, balancing a strong-enough guarantee against the overhead of directly sorting each group.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="worst-case|worst case">
+    <p class="quiz-prompt">5. Fill in the blank: paying extra work up front to choose a provably good pivot is a trade that recurs throughout this course whenever a technique eliminates an adversarial ___ scenario.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>This same trade-off — more constant work now, in exchange for a guaranteed bound instead of only an expected one — reappears explicitly when balanced trees are covered in Unit 6.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: CLRS, Chapter 9, "Medians and Order Statistics," Section 9.3, "Selection in worst-case linear time," is the canonical presentation of this exact algorithm and its proof.</p>
+
+  <p class="ask-teacher">Want to trace through the partitioning by hand on a small array? Ask your teacher — that's what I'm here for. Next up: Strassen's algorithm, which beats the schoolbook approach to matrix multiplication with a divide-and-conquer trick that trades one multiplication for extra additions.</p>
+
+  <footer class="lesson-footer">STEM+ · Advanced Algorithms · Lesson 7 of the course sequence</footer>
+</div>

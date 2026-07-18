@@ -1,0 +1,100 @@
+<meta charset="UTF-8">
+<title>Lesson 20: Outliers — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Data Handling: CB · Unit 5 · Lesson 20</span>
+  <h1>Outliers</h1>
+  <p class="subtitle">Lesson 14 showed the mean bending toward one CEO's $2M salary. This lesson is about the values that cause that bending in the first place — how to find them, and the harder question of what to do once you have.</p>
+  <p class="nav-links"><a href="0019-handling-missing-data.html" class="nav-prev">← Lesson 19</a> <a href="0021-deduplication-and-standardization.html" class="nav-next">Lesson 21 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>An <strong>outlier</strong> is a value that lies unusually far from the rest of a dataset. Lesson 14's CEO salary was an outlier by definition — but notice that "unusually far" is doing a lot of work in that sentence, and pinning it down precisely is the first real task.</p>
+
+  <h2>Detecting outliers</h2>
+  <div class="box">
+    <span class="box-label">Two common rules</span>
+    <strong>IQR rule</strong>: using Lesson 14's interquartile range (IQR = Q3 − Q1), flag any value below Q1 − 1.5×IQR or above Q3 + 1.5×IQR as an outlier — a rule built on the spread measure that, unlike range, resists distortion by extreme values in the first place. <strong>Standard-deviation rule</strong>: flag any value more than roughly 2 or 3 standard deviations from the mean — this works well for roughly normal distributions (Lesson 15) but is less reliable on skewed data, since a skewed distribution's own mean and standard deviation are already pulled by the same extreme values you're trying to detect.
+  </div>
+
+  <h2>Outlier or error?</h2>
+  <div class="box why">
+    <span class="box-label">Why the very first question is never "should I remove this?"</span>
+    An extreme value has two very different possible origins: it might be a data-entry or measurement error (a height recorded as "512" instead of "5'12\""... actually "5.12" meant as feet-inches, or a age of "999"), or it might be a genuine, correctly recorded extreme value (a real CEO's real $2M salary, a real once-in-a-decade weather event). These demand opposite treatment. An error should be corrected or removed — it isn't real information. A genuine extreme value is real information, and removing it just because it's inconvenient for a calculation is a way of quietly changing what question you're actually answering (see the worked example below). The detection rules above only flag "unusual" — they cannot tell you which of the two you're looking at. That judgment call requires looking at the specific data point in context, not just running a formula.
+  </div>
+
+  <div class="box">
+    <span class="box-label">What to do once you've judged which kind it is</span>
+    If it's an error and the true value is knowable, correct it. If it's an error and the true value isn't recoverable, treat it like Lesson 19's missing data (delete or impute). If it's a genuine extreme value, keep it in the full dataset, but consider reporting a robust summary statistic alongside the mean (Lesson 14's median, or a trimmed mean that discards a fixed percentage from each end) so a reader isn't misled by one data point's outsized pull — and never silently drop a real value just because it makes the average look worse.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Worked example</span>
+    A company's per-employee training-hours dataset includes one entry of "4,000 hours" in a year — impossible for one employee (that's more hours than exist in a year at typical working schedules), almost certainly a data-entry error (likely minutes, not hours, or a decimal-point slip). This should be corrected or flagged, not left in an average. Contrast: the same dataset's highest *real* value, a training-intensive new hire who logged 400 hours, is unusual but plausible — it stays in the dataset, though the summary might report the median alongside the mean so that one number doesn't overstate the "typical" employee's training load.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. Using the IQR rule, a value is flagged as an outlier when it falls below or above what threshold?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">More than 1 standard deviation from the mean.</button>
+      <button class="quiz-choice" data-correct="false">Exactly at the minimum or maximum value in the dataset.</button>
+      <button class="quiz-choice" data-correct="true">Below Q1 − 1.5×IQR or above Q3 + 1.5×IQR.</button>
+      <button class="quiz-choice" data-correct="false">More than twice the median value.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The 1.5×IQR rule builds directly on the interquartile range from Lesson 14, a spread measure that resists distortion by extreme values.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why is the very first question about a detected outlier never simply "should I remove this?"</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because outliers can never be legitimately removed from any dataset under any circumstance.</button>
+      <button class="quiz-choice" data-correct="true">Because an outlier could be either a data-entry error (not real information) or a genuine extreme value (real information), and these two cases demand opposite treatment — the detection rule alone can't tell you which one you have.</button>
+      <button class="quiz-choice" data-correct="false">Because removing an outlier always requires rerunning the entire IQR calculation from scratch.</button>
+      <button class="quiz-choice" data-correct="false">Because outliers only ever occur in normally distributed data.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Distinguishing error from genuine extreme value is a judgment call requiring context, not something the detection formula itself resolves.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why is the standard-deviation rule for outlier detection less reliable on a skewed distribution (Lesson 15) than on a roughly normal one?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because standard deviation cannot be calculated at all for skewed data.</button>
+      <button class="quiz-choice" data-correct="true">Because a skewed distribution's own mean and standard deviation are already pulled by the extreme values in its tail, making the resulting threshold less trustworthy for flagging those same values.</button>
+      <button class="quiz-choice" data-correct="false">Because skewed distributions never contain any genuine outliers.</button>
+      <button class="quiz-choice" data-correct="false">Because the standard-deviation rule only works on categorical data, never numeric data.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The IQR rule is generally preferred for skewed data precisely because quartile-based spread resists this same distortion.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="IQR|interquartile range">
+    <p class="quiz-prompt">4. Fill in the blank: the outlier-detection method that flags values beyond 1.5 times the ___ below Q1 or above Q3 is generally preferred for skewed data.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The IQR rule resists the same distortion that skew introduces into the mean and standard deviation.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="trimmed mean">
+    <p class="quiz-prompt">5. Fill in the blank: an average computed after discarding a fixed percentage of the most extreme values from each end of the sorted data is called a ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A trimmed mean is a robust alternative summary statistic that reduces (without fully removing) the influence of extreme values.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: the Google Data Analytics Certificate's "Data Cleaning" module (coursera.org) covers outlier detection using the same IQR-based rule taught here.</p>
+
+  <p class="ask-teacher">Have a dataset with a value you're unsure is an error or a genuine extreme case? Ask your teacher — that's what I'm here for. Next up: a different kind of data-quality problem — duplicate and inconsistent records.</p>
+
+  <footer class="lesson-footer">STEM+ · Data Handling: CB · Lesson 20 of the course sequence</footer>
+</div>

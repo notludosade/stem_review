@@ -1,0 +1,165 @@
+<meta charset="UTF-8">
+<title>Lesson 29: The Monotone Convergence Theorem — STEM+</title>
+<link rel="stylesheet" href="../../../assets/style.css">
+<script src="../../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Real Analysis B · Unit 6 · Lesson 29</span>
+  <h1>The Monotone Convergence Theorem</h1>
+  <p class="subtitle">Lesson 28 needed exactly one missing tool twice: to prove general additivity of the integral, and to finish comparing Lebesgue's integral with Riemann's. This lesson proves that tool, then spends it on both debts at once.</p>
+  <p class="nav-links"><a href="0028-the-lebesgue-integral-and-comparison-with-riemann.html" class="nav-prev">← Lesson 28</a> <a href="0030-the-dominated-convergence-theorem.html" class="nav-next">Lesson 30 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <div class="box">
+    <span class="box-label">Theorem — Monotone Convergence Theorem (MCT)</span>
+    Let f₁ ≤ f₂ ≤ f₃ ≤ ⋯ be nonnegative measurable functions with fₙ(x) → f(x) for every x. Then f is measurable and
+    <br><br>
+    limₙ→∞ ∫fₙ dm = ∫f dm.
+  </div>
+
+  <div class="box">
+    <span class="box-label">Proof</span>
+    f is measurable as a pointwise limit of measurable functions (Lesson 26). Since fₙ ≤ fₙ₊₁ ≤ f for every n, monotonicity of the integral (Lesson 27) gives ∫fₙdm ≤ ∫fₙ₊₁dm ≤ ∫fdm, so {∫fₙdm} is an increasing sequence of extended reals bounded above by ∫fdm. Hence L := limₙ∫fₙdm exists (possibly +∞) and L ≤ ∫fdm.
+    <br><br>
+    For the reverse inequality, fix a simple function φ with 0 ≤ φ ≤ f, and fix a constant c ∈ (0,1). Let Eₙ = {x : fₙ(x) ≥ c·φ(x)}. Each Eₙ is measurable, and Eₙ ⊆ Eₙ₊₁ since fₙ ≤ fₙ₊₁.
+    <br><br>
+    <strong>Claim: ⋃ₙEₙ is the whole domain.</strong> Fix x. If φ(x) = 0, then fₙ(x) ≥ 0 = c·φ(x) for every n, so x ∈ E₁. If φ(x) &gt; 0, then since c &lt; 1, c·φ(x) &lt; φ(x) ≤ f(x); since fₙ(x) → f(x), eventually fₙ(x) &gt; c·φ(x), so x ∈ Eₙ for some n.
+    <br><br>
+    Now for each n: ∫fₙdm ≥ ∫_{Eₙ}fₙdm ≥ ∫_{Eₙ}(c·φ)dm = c·∫_{Eₙ}φdm (the middle inequality since fₙ ≥ c·φ on Eₙ by definition; the first since Eₙ is a subset of the whole domain and fₙ≥0 elsewhere). Writing φ = Σᵢaᵢχ_{Fᵢ} in canonical form, ∫_{Eₙ}φdm = Σᵢaᵢm(Fᵢ∩Eₙ), and since Eₙ increases to the whole domain, Fᵢ∩Eₙ increases to Fᵢ, so m(Fᵢ∩Eₙ) → m(Fᵢ) by Continuity from Below (Lesson 25). Hence ∫_{Eₙ}φdm → ∫φdm as n → ∞.
+    <br><br>
+    Taking n → ∞ in ∫fₙdm ≥ c·∫_{Eₙ}φdm gives L ≥ c·∫φdm. This holds for every c ∈ (0,1), so letting c → 1 gives L ≥ ∫φdm. This holds for every simple φ ≤ f, so taking the supremum over φ gives L ≥ ∫fdm.
+    <br><br>
+    Combined with L ≤ ∫fdm from the first paragraph, L = ∫fdm. ∎
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why c &lt; 1, not c = 1</span>
+    Taking c = 1 directly would only guarantee fₙ(x) ≥ φ(x) in the limit, not for any finite n — the claim that ⋃Eₙ covers the domain genuinely needs strict inequality c·φ(x) &lt; f(x) to force fₙ(x) past that threshold after finitely many steps. Proving the bound for every c &lt; 1 and then sending c → 1 is what lets the strict slack do its job without weakening the final conclusion.
+  </div>
+
+  <div class="box">
+    <span class="box-label">Lemma (stated) — Dyadic Simple Approximation</span>
+    Every nonnegative measurable f is the pointwise limit of an increasing sequence of nonnegative simple functions φₙ ↗ f, defined by φₙ(x) = k/2ⁿ when k/2ⁿ ≤ f(x) &lt; (k+1)/2ⁿ for 0 ≤ k &lt; n·2ⁿ, and φₙ(x) = n when f(x) ≥ n.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why this construction is only stated, not verified line by line</span>
+    Checking φₙ ≤ φₙ₊₁ and φₙ(x) → f(x) is routine index-chasing — each dyadic interval at level n splits into two at level n+1, so refining n can only raise the truncated value or hold it fixed, and the truncation error shrinks like 1/2ⁿ. The idea (approximate f by rounding down to the nearest multiple of 1/2ⁿ, capped at n) is the only part worth carrying forward; the verification is in the source reading below.
+  </div>
+
+  <div class="box">
+    <span class="box-label">Corollary — Additivity for Nonnegative Measurable Functions</span>
+    If f, g ≥ 0 are measurable, then ∫(f+g)dm = ∫fdm + ∫gdm.
+  </div>
+
+  <div class="box">
+    <span class="box-label">Proof</span>
+    Let φₙ ↗ f and ψₙ ↗ g be dyadic simple approximations as above. Then φₙ+ψₙ is simple, and φₙ+ψₙ ↗ f+g pointwise (a sum of increasing sequences increases, and pointwise limits add). By MCT applied three times — to φₙ, to ψₙ, and to φₙ+ψₙ:
+    <br><br>
+    ∫(f+g)dm = limₙ∫(φₙ+ψₙ)dm = limₙ[∫φₙdm + ∫ψₙdm] = limₙ∫φₙdm + limₙ∫ψₙdm = ∫fdm + ∫gdm,
+    <br><br>
+    using simple-function linearity (Lesson 27) for the middle step. ∎
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why this is the fact Lesson 28 flagged as missing</span>
+    Lesson 28's Domain-Partition Additivity Lemma split one function over a partition of the domain — elementary, needing only simple-function bookkeeping. This corollary combines two <em>different</em> functions over the same domain, and there was no way around approximating both by increasing simple sequences and passing a limit through the integral — exactly what MCT supplies.
+  </div>
+
+  <div class="box">
+    <span class="box-label">Lemma — A Nonnegative Function with Zero Integral Is Zero Almost Everywhere</span>
+    If h ≥ 0 is measurable and ∫hdm = 0, then h = 0 a.e.
+  </div>
+
+  <div class="box">
+    <span class="box-label">Proof</span>
+    Let Sₙ = {x : h(x) ≥ 1/n}. Then (1/n)χ_{Sₙ} ≤ h, so by monotonicity, (1/n)m(Sₙ) ≤ ∫hdm = 0, forcing m(Sₙ) = 0 for every n. Since {h &gt; 0} = ⋃ₙSₙ, a countable union of null sets, {h&gt;0} is null (Lesson 25). So h = 0 outside a measure-zero set, i.e., a.e. ∎
+  </div>
+
+  <div class="box">
+    <span class="box-label">Corollary — Completing the Riemann-Lebesgue Comparison (Lesson 28)</span>
+    If f is Riemann integrable on [a,b], then f is Lebesgue integrable on [a,b] with ∫_a^bf(x)dx = ∫_{[a,b]}f dm.
+  </div>
+
+  <div class="box">
+    <span class="box-label">Proof</span>
+    Since f is Riemann integrable, I := ∫_a^bf(x)dx = sup_PL(f,P) = inf_PU(f,P). Choose a sequence of partitions Pₙ, each refining Pₙ₋₁, with L(f,Pₙ) → I and U(f,Pₙ) → I (possible by definition of sup and inf, taking common refinements to arrange a single nested sequence achieving both limits at once). Let φₙ be the step function equal to inf f on each subinterval of Pₙ, and ψₙ equal to sup f on each subinterval; both are simple, with ∫φₙdm = L(f,Pₙ) and ∫ψₙdm = U(f,Pₙ) exactly, since m of an interval is its length (Lesson 23).
+    <br><br>
+    Refining a partition can only raise each subinterval's infimum and lower its supremum, so φₙ ≤ φₙ₊₁ ≤ f ≤ ψₙ₊₁ ≤ ψₙ pointwise. Since f is bounded (Riemann integrability implies boundedness), φₙ − φ₁ is an increasing sequence of nonnegative measurable functions, so MCT applies: φₙ − φ₁ ↗ g − φ₁ for some measurable g, i.e., φₙ ↗ g pointwise, with ∫φₙdm → ∫gdm, so ∫gdm = limL(f,Pₙ) = I.
+    <br><br>
+    Symmetrically, −ψₙ is increasing (since ψₙ is decreasing) and bounded, so MCT applied to −ψₙ + ψ₁ gives −ψₙ ↗ −h for some measurable h, i.e., ψₙ ↘ h pointwise, with ∫ψₙdm → ∫hdm, so ∫hdm = limU(f,Pₙ) = I.
+    <br><br>
+    Since φₙ ≤ f ≤ ψₙ for every n, taking limits gives g ≤ f ≤ h. And ∫(h−g)dm = ∫hdm − ∫gdm = I − I = 0 (using the additivity corollary above, since h−g ≥ 0). By the lemma above, h − g = 0 a.e., so g = h a.e., forcing g = f = h a.e. (since g≤f≤h forces f to be sandwiched to equal both). A function equal a.e. to the measurable function g is itself measurable (it differs from g only on a null set, which is measurable), so f is measurable, hence Lebesgue integrable on [a,b] (bounded on a finite-measure set, Lesson 28), and
+    <br><br>
+    ∫_{[a,b]}f dm = ∫_{[a,b]}g dm = I = ∫_a^bf(x)dx. ∎
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why this closes Lesson 28's debt in full</span>
+    Lesson 28 could show a Riemann integrable f is bounded, hence Lebesgue integrable — but proving the two integral <em>values</em> agree needed exactly the limit-interchange MCT supplies, applied once to the increasing lower step functions directly and once to the decreasing upper step functions via negation. Both debts flagged last lesson — general additivity, and the Riemann comparison — are now fully repaid by the same theorem.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What does the Monotone Convergence Theorem conclude?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">That every measurable function is simple</button>
+      <button class="quiz-choice" data-correct="true">That for fₙ ↗ f nonnegative and measurable, lim∫fₙdm = ∫fdm</button>
+      <button class="quiz-choice" data-correct="false">That every sequence of functions converges pointwise</button>
+      <button class="quiz-choice" data-correct="false">That Riemann and Lebesgue integrals never agree</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>MCT lets the limit pass inside the integral for increasing sequences of nonnegative measurable functions.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why does the proof use c &lt; 1 rather than c = 1 when defining Eₙ = {fₙ ≥ cφ}?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because φ must be strictly positive</button>
+      <button class="quiz-choice" data-correct="true">Because strict slack (cφ(x) &lt; f(x)) is what forces fₙ(x) past the threshold after finitely many steps</button>
+      <button class="quiz-choice" data-correct="false">Because c = 1 would make Eₙ empty</button>
+      <button class="quiz-choice" data-correct="false">Because monotonicity fails at c = 1</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Only strict inequality guarantees the covering claim ⋃Eₙ = domain; c is then sent to 1 afterward.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. How does the proof handle the decreasing sequence ψₙ (upper step functions) using only MCT?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">By proving a separate theorem for decreasing sequences</button>
+      <button class="quiz-choice" data-correct="true">By applying MCT to −ψₙ, which is increasing, then negating the result</button>
+      <button class="quiz-choice" data-correct="false">By ignoring ψₙ entirely</button>
+      <button class="quiz-choice" data-correct="false">By assuming ψₙ is simple in the limit</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Negating a decreasing sequence turns it into an increasing one MCT can act on directly.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="dyadic">
+    <p class="quiz-prompt">4. Fill in the blank: general additivity for nonnegative measurable functions is proved using ___ simple approximations, then MCT three times.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Rounding down to multiples of 1/2ⁿ, capped at n, is the dyadic approximation construction.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="zero">
+    <p class="quiz-prompt">5. Fill in the blank: a nonnegative measurable function with ∫hdm = 0 must equal ___ almost everywhere.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The sets {h≥1/n} must all be null, and their union is {h>0}, forcing h=0 outside a null set.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: Royden and Fitzpatrick's <em>Real Analysis</em>, Chapter 4, proves the dyadic simple approximation lemma in full and develops further corollaries of the Monotone Convergence Theorem.</p>
+
+  <p class="ask-teacher">Stuck on why negating a decreasing sequence sidesteps the need for a whole new theorem? Ask your teacher — that's what I'm here for. Next up: the Dominated Convergence Theorem — what happens when a sequence of functions converges without being monotonic at all.</p>
+
+  <footer class="lesson-footer">STEM+ · Real Analysis B · Lesson 29 of the course sequence</footer>
+</div>

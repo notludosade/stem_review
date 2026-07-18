@@ -1,0 +1,94 @@
+<meta charset="UTF-8">
+<title>Lesson 22: From Raw to Analysis-Ready — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Data Handling: CB · Unit 5 · Lesson 22</span>
+  <h1>From Raw to Analysis-Ready</h1>
+  <p class="subtitle">Missing values, outliers, duplicates, inconsistency — Lessons 19 through 21 handled each in isolation. This lesson closes Unit 5 by putting them in order, as one workflow, and by making the case for writing every decision down.</p>
+  <p class="nav-links"><a href="0021-deduplication-and-standardization.html" class="nav-prev">← Lesson 21</a> <a href="../Unit%206/0023-choosing-the-right-chart.html" class="nav-next">Lesson 23 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>A dataset that has been checked for missing values, outliers, and duplicates, and standardized for consistency, is often called <strong>analysis-ready</strong>. Getting there isn't one step — it's a short sequence, and the order matters more than it might seem.</p>
+
+  <h2>A working order</h2>
+  <div class="box">
+    <span class="box-label">Suggested sequence</span>
+    <strong>1. Standardize first</strong> (Lesson 21) — fix case, whitespace, formatting, and category values before anything else, since a value like "N/A" typed inconsistently can otherwise slip past a missing-data check that's looking for a true blank. <strong>2. Deduplicate</strong> (Lesson 21) — remove exact and fuzzy duplicates before any counting or aggregation happens, since duplicates distort the very numbers you'd use to spot outliers. <strong>3. Handle missing data</strong> (Lesson 19) — decide, field by field, whether to delete, impute, or flag, using the MCAR/MAR/MNAR judgment from that lesson. <strong>4. Check for outliers</strong> (Lesson 20) — apply the IQR rule, then judge each flagged value as error or genuine extreme case. This order isn't arbitrary: each step makes the next one more trustworthy, because it removes a source of noise that could otherwise disguise or mimic the problem the next step is looking for.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why every decision in this workflow needs to be written down</span>
+    Every step above involves a judgment call — which rows counted as fuzzy duplicates, which missing values were imputed versus dropped, which flagged outliers were kept as genuine. None of these calls are automatic or objectively "correct" in the way a SQL query's result is; two careful analysts could reasonably make different calls on the same messy dataset. If those decisions aren't recorded, the final "clean" numbers look exactly as authoritative as if no judgment had been involved at all — and anyone downstream (including future-you) has no way to know what was decided, question it, or reproduce it. A short data-cleaning log — what was changed, why, and what rule was used — is what turns a cleaned dataset back into something someone else can trust and check, rather than a black box that happens to look tidy.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Worked example: one dataset, start to finish</span>
+    A raw customer export has: state values spelled three different ways, two rows for the same customer with a formatting difference in phone number, 4% of rows missing an email address, and one row listing "50,000 orders" for a single customer in a year. Working the sequence: standardize state spellings to one code; deduplicate the two customer rows into one; for missing emails, check whether they're concentrated in one signup channel (MAR) before deciding to flag rather than drop; for the 50,000-orders row, apply the IQR rule, confirm it's implausible for any real customer, and correct or remove it as a likely data-entry error rather than a genuine extreme value. Each decision — and the rule behind it — gets one line in a cleaning log before the dataset is called ready.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. Why does standardization (Lesson 21) generally come before checking for missing data (Lesson 19) in this workflow?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because standardization always takes less time to perform than a missing-data check.</button>
+      <button class="quiz-choice" data-correct="true">Because an inconsistently typed placeholder (like "N/A" in several different forms) could slip past a missing-data check looking only for true blanks, unless it's standardized first.</button>
+      <button class="quiz-choice" data-correct="false">Because missing data can only be detected in already-deduplicated datasets.</button>
+      <button class="quiz-choice" data-correct="false">Because SQL requires all values to be standardized before any query can run.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Standardizing first ensures sentinel-style placeholders are recognizable as missing, rather than looking like valid but inconsistent data.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why does deduplication generally happen before checking for outliers in this workflow?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because outlier detection is impossible to perform on any dataset containing duplicate rows.</button>
+      <button class="quiz-choice" data-correct="true">Because duplicate rows distort counts and aggregates, which could disguise or mimic the very patterns an outlier check is trying to detect.</button>
+      <button class="quiz-choice" data-correct="false">Because outliers can only be duplicated values, never unique ones.</button>
+      <button class="quiz-choice" data-correct="false">Because the IQR rule requires an odd number of rows in the dataset.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Removing duplicates first keeps the counts and spread measures used for outlier detection trustworthy.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why does a cleaned dataset need a record of the judgment calls made during cleaning (a cleaning log)?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because a cleaning log is legally required for every dataset regardless of its use.</button>
+      <button class="quiz-choice" data-correct="true">Because cleaning decisions (which duplicates matched, which missing values were imputed, which outliers were kept) are judgment calls, not objectively determined facts, and without a record, a "clean" dataset looks just as authoritative whether or not sound judgment was actually used.</button>
+      <button class="quiz-choice" data-correct="false">Because a cleaning log automatically corrects any remaining errors in the dataset.</button>
+      <button class="quiz-choice" data-correct="false">Because SQL queries cannot run against a dataset that lacks a documented cleaning log.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Recording the reasoning behind each judgment call is what lets someone else trust, question, or reproduce the cleaning process.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="analysis-ready">
+    <p class="quiz-prompt">4. Fill in the blank: a dataset that has been checked for missing values, outliers, and duplicates, and standardized for consistency, is commonly described as ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Analysis-ready is the term for data that has passed through this full cleaning sequence.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="cleaning log">
+    <p class="quiz-prompt">5. Fill in the blank: a short written record of what was changed during data cleaning, why, and what rule was used, is called a ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A cleaning log is what makes cleaning judgment calls checkable and reproducible by someone else.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: the Google Data Analytics Certificate's "Data Cleaning" module (coursera.org) presents a similar end-to-end cleaning workflow and the case for documenting each step.</p>
+
+  <p class="ask-teacher">Have a messy dataset you'd like to walk through this exact sequence on? Ask your teacher — that's what I'm here for. Next up: Unit 6 turns from preparing data to presenting it — starting with how to choose the right chart.</p>
+
+  <footer class="lesson-footer">STEM+ · Data Handling: CB · Lesson 22 of the course sequence</footer>
+</div>

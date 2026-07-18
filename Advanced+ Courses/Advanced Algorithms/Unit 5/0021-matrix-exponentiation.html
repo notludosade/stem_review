@@ -1,0 +1,113 @@
+<meta charset="UTF-8">
+<title>Lesson 21: Matrix Exponentiation — STEM+</title>
+<link rel="stylesheet" href="../../../assets/style.css">
+<script src="../../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Advanced Algorithms · Unit 5 · Lesson 21</span>
+  <h1>Matrix Exponentiation</h1>
+  <p class="subtitle">Computing the nth Fibonacci number the ordinary DP way takes Θ(n) steps. Recasting the recurrence as a matrix power and using repeated squaring computes it in Θ(log n) — a technique that generalizes to any linear recurrence.</p>
+  <p class="nav-links"><a href="0020-matrix-chain-multiplication.html" class="nav-prev">← Lesson 20</a> <a href="../Unit%206/0022-segment-trees.html" class="nav-next">Lesson 22 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>The ordinary Fibonacci DP (F(n) = F(n−1) + F(n−2)) computes F(n) in Θ(n) time and O(1) space if only the last two values are kept. That's already efficient — but for very large n (say, n up to 10¹⁸, as competitive-programming problems sometimes demand), even Θ(n) is too slow. <strong>Matrix exponentiation</strong> recasts the linear recurrence as repeated matrix multiplication, then applies fast exponentiation (the same repeated-squaring idea behind computing xⁿ in Θ(log n) multiplications instead of n) to compute F(n) in Θ(log n) matrix multiplications.
+
+  <h2>Recasting the recurrence as a matrix</h2>
+  <div class="box">
+    <span class="box-label">The key transformation</span>
+    Define the vector [F(n), F(n−1)]ᵀ. Observe: [F(n+1), F(n)]ᵀ = [[1,1],[1,0]] · [F(n), F(n−1)]ᵀ (multiplying out: F(n+1) = 1·F(n) + 1·F(n−1), and F(n) = 1·F(n) + 0·F(n−1) — both correct by definition). Call M = [[1,1],[1,0]]. Applying M repeatedly: [F(n+1), F(n)]ᵀ = Mⁿ · [F(1), F(0)]ᵀ. So computing F(n) reduces entirely to computing Mⁿ, a single 2×2 matrix raised to the nth power.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why fast exponentiation applies directly to matrices</span>
+    Fast exponentiation for computing xⁿ relies only on associativity of multiplication: x⁸ = ((x²)²)², computed with 3 multiplications instead of 7, by repeatedly squaring and combining based on n's binary representation. Matrix multiplication is associative (Lesson 20 depended on exactly this fact), so the identical squaring trick applies unchanged: Mⁿ can be computed with O(log n) matrix multiplications, each costing O(1) for a fixed 2×2 size (or O(k³) for a general k×k matrix, still independent of n).
+  </div>
+
+  <div class="box">
+    <span class="box-label">Algorithm</span>
+<pre class="code-block"><code>function matrixPower(M, n):
+    if n == 0: return identity matrix
+    if n is odd: return M * matrixPower(M, n - 1)
+    half = matrixPower(M, n / 2)
+    return half * half
+
+function fibonacci(n):
+    M = [[1,1],[1,0]]
+    result = matrixPower(M, n)
+    return result[0][1]        // extracts F(n) from M^n</code></pre>
+  </div>
+
+  <div class="box">
+    <span class="box-label">Runtime</span>
+    Θ(log n) matrix multiplications, each O(1) for the fixed 2×2 Fibonacci matrix — total Θ(log n), an exponential improvement over the already-linear Θ(n) DP, meaningful once n is astronomically large (n=10¹⁸ takes roughly 60 matrix multiplications instead of 10¹⁸ additions).
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why this generalizes beyond Fibonacci</span>
+    Any linear recurrence of fixed order — a(n) = c₁a(n−1) + c₂a(n−2) + ... + cₖa(n−k) for fixed constants cᵢ — can be encoded the same way: a k×k companion matrix whose repeated multiplication advances the recurrence by one step each time, then fast-exponentiated exactly as here. This is the same "find the right algebraic recasting, then apply a general-purpose fast technique" move Strassen's algorithm (Lesson 8) made for matrix multiplication itself — recognizing that a problem is secretly an instance of "compute Mⁿ" is often the harder half of applying this technique.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What matrix M satisfies [F(n+1), F(n)]ᵀ = M · [F(n), F(n−1)]ᵀ for the Fibonacci recurrence?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">The identity matrix [[1,0],[0,1]].</button>
+      <button class="quiz-choice" data-correct="true">[[1,1],[1,0]], since multiplying it out gives F(n+1) = F(n)+F(n−1) and F(n) = F(n), matching the recurrence exactly.</button>
+      <button class="quiz-choice" data-correct="false">A matrix that depends on the specific value of n.</button>
+      <button class="quiz-choice" data-correct="false">[[0,1],[1,1]], which computes F(n−1) instead of F(n+1).</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Multiplying [[1,1],[1,0]] by [F(n),F(n-1)]^T reproduces exactly the Fibonacci recurrence in the top entry and an identity carry-over in the bottom.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why does fast exponentiation (repeated squaring) apply just as well to matrices as to ordinary numbers?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">It doesn't — matrix exponentiation requires an entirely different technique.</button>
+      <button class="quiz-choice" data-correct="true">Because repeated squaring only relies on associativity of multiplication, which matrix multiplication satisfies just as ordinary number multiplication does.</button>
+      <button class="quiz-choice" data-correct="false">Because all matrices commute under multiplication, just like real numbers.</button>
+      <button class="quiz-choice" data-correct="false">Because matrices can always be reduced to single numbers before exponentiating.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Associativity — not commutativity, which matrices generally lack — is the only property repeated squaring actually needs.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. What is the runtime of computing F(n) via matrix exponentiation, and why is it an improvement over the ordinary Fibonacci DP?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Θ(n), identical to the ordinary DP, but using less memory.</button>
+      <button class="quiz-choice" data-correct="true">Θ(log n) matrix multiplications, since repeated squaring computes Mⁿ in a logarithmic number of steps rather than the DP's linear number of additions.</button>
+      <button class="quiz-choice" data-correct="false">Θ(n²), since matrix multiplication itself is more expensive than scalar addition.</button>
+      <button class="quiz-choice" data-correct="false">Θ(1), since matrix exponentiation removes the need for any recurrence at all.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Repeated squaring's logarithmic step count is what makes this an exponential improvement over the already-linear ordinary DP, mattering for extremely large n.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="associativity|associative">
+    <p class="quiz-prompt">4. Fill in the blank: repeated squaring works for matrices because matrix multiplication satisfies ___ , the only property the technique actually depends on.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Associativity is what allows grouping repeated multiplications into halves for the squaring trick, regardless of whether the operands are numbers or matrices.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="companion matrix|companion">
+    <p class="quiz-prompt">5. Fill in the blank: any fixed-order linear recurrence can be advanced one step at a time by multiplying by a fixed ___ matrix, generalizing the Fibonacci-specific M used in this lesson.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The companion matrix is the general-purpose construction that extends this specific 2x2 Fibonacci trick to any fixed-order linear recurrence.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: <a href="https://cp-algorithms.com/algebra/binary-exp.html">CP-Algorithms, "Binary Exponentiation"</a> covers fast exponentiation in full generality, including the matrix case used here.</p>
+
+  <p class="ask-teacher">Want to derive the companion matrix for a different linear recurrence, like a(n) = 2a(n−1) + 3a(n−2)? Ask your teacher — that's what I'm here for. This closes Unit 5. Next up: Unit 6, advanced data structures — starting with segment trees, which answer range queries and updates in logarithmic time.</p>
+
+  <footer class="lesson-footer">STEM+ · Advanced Algorithms · Lesson 21 of the course sequence</footer>
+</div>

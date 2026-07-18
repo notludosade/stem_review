@@ -1,0 +1,104 @@
+<meta charset="UTF-8">
+<title>Lesson 17: Max-Flow Min-Cut — STEM+</title>
+<link rel="stylesheet" href="../../../assets/style.css">
+<script src="../../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Advanced Algorithms · Unit 4 · Lesson 17</span>
+  <h1>Max-Flow Min-Cut</h1>
+  <p class="subtitle">The maximum flow through a network exactly equals the minimum-capacity cut separating source from sink — a theorem that both proves Ford-Fulkerson correct and gives a second, completely different lens for the same number.</p>
+  <p class="nav-links"><a href="0016-ford-fulkerson.html" class="nav-prev">← Lesson 16</a> <a href="../Unit%205/0018-dp-on-trees.html" class="nav-next">Lesson 18 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Lesson 16 left one question unanswered: how do we know Ford-Fulkerson's algorithm — stop when no augmenting path exists — actually reaches the <em>maximum</em> possible flow, rather than just some locally-stuck value? The answer is one of the cleanest duality theorems in algorithms: max-flow equals min-cut, exactly. This closes Unit 4 by tying graph algorithms back to the cut concept Unit 3 introduced for MSTs (Lesson 11) — the same word, "cut," now doing a related but distinct job.</p>
+
+  <h2>Cuts in a flow network</h2>
+  <div class="box">
+    <span class="box-label">Definition — s-t cut</span>
+    An s-t cut is a partition of the vertices into sets S (containing source s) and T (containing sink t, T = V−S). Its <strong>capacity</strong> is the sum of capacities of all edges going <em>from</em> S <em>to</em> T (edges from T to S don't count toward the cut's capacity). Every unit of flow from s to t must cross from S to T somewhere, so the total flow value can never exceed any cut's capacity — this direction (flow ≤ any cut) is immediate; the theorem's real content is that equality is achievable.
+  </div>
+
+  <div class="box">
+    <span class="box-label">Theorem — max-flow min-cut</span>
+    The maximum flow value from s to t equals the minimum capacity over all s-t cuts.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Proof — via Ford-Fulkerson's stopping condition</span>
+    Run Ford-Fulkerson until no augmenting path exists in the residual graph G<sub>f</sub>. Let S be the set of vertices reachable from s in G<sub>f</sub> at that point, and T = V−S (t ∉ S, since if t were reachable, an augmenting path would still exist, contradicting termination). Consider the cut (S, T): for every original edge (u,v) with u∈S, v∈T, it must be saturated (f(u,v) = c(u,v)) — otherwise its residual forward edge would still have capacity, making v reachable from S, contradicting v∈T. Similarly, for every edge (v,u) with v∈T, u∈S, its flow must be exactly 0 — otherwise a residual backward edge (u,v) would exist, again making v reachable from S. So the net flow crossing this specific cut equals exactly its capacity: full capacity forward, zero flow backward. Since flow value always equals net flow across any cut (a consequence of conservation at every vertex other than s, t), the current flow value equals this cut's capacity exactly. Combined with flow ≤ every cut's capacity (shown above), this flow is simultaneously a valid flow and equal to some cut's capacity — so it must be maximum, and that cut must be minimum.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Reading a min-cut off Lesson 16's worked example</span>
+    In Lesson 16's network (S→A cap 10, S→B cap 10, A→B cap 1, A→T cap 10, B→T cap 10), the max flow found was 20. The cut S = {s}, T = {A, B, t} has capacity c(S→A) + c(S→B) = 10+10 = 20 — matching the max flow exactly, confirming it's a minimum cut (and, since flow can never exceed any cut, no cut can have capacity below 20 either).
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why this theorem matters beyond confirming Ford-Fulkerson's correctness</span>
+    Max-flow min-cut turns a huge range of "what's the bottleneck" questions — network reliability, bipartite matching capacity, project selection with dependencies — into flow problems, because whatever real-world quantity a min-cut represents (fewest links whose failure disconnects a network, minimum resources to block all paths) can now be computed by running a flow algorithm instead of reasoning about cuts directly. This duality — one problem, two completely different-looking optimal-value characterizations — is a recurring theme this course will meet again in Unit 8's discussion of LP duality's cousin, the approximation-algorithm bounds of Lesson 33.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What does the capacity of an s-t cut (S, T) count?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">The total capacity of every edge in the entire graph.</button>
+      <button class="quiz-choice" data-correct="true">The sum of capacities of edges going from S to T only — edges from T back to S are not counted.</button>
+      <button class="quiz-choice" data-correct="false">The number of vertices in S.</button>
+      <button class="quiz-choice" data-correct="false">The shortest path distance from s to t.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Only forward-crossing edges (S to T) count toward a cut's capacity, since those are the edges any s-to-t flow must actually pass through.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. In the max-flow min-cut proof, why must every original edge from S to T be saturated once Ford-Fulkerson terminates?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because all edges in a flow network are always saturated by definition.</button>
+      <button class="quiz-choice" data-correct="true">Because if it weren't saturated, its residual forward edge would still have leftover capacity, making the T-side vertex reachable from S — contradicting T's definition as unreachable.</button>
+      <button class="quiz-choice" data-correct="false">Because S and T must contain the same number of vertices.</button>
+      <button class="quiz-choice" data-correct="false">Because Ford-Fulkerson always saturates edges in the order they were added to the graph.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>S is defined as exactly the vertices reachable from s in the final residual graph, so any unsaturated forward edge would extend that reachable set, which is a contradiction.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. What is the key insight max-flow min-cut provides beyond just proving Ford-Fulkerson correct?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">That every flow network has exactly one possible cut.</button>
+      <button class="quiz-choice" data-correct="true">Many real-world "what's the bottleneck" problems can be solved by computing max flow, since a min-cut's capacity gives a second characterization of the same optimal value.</button>
+      <button class="quiz-choice" data-correct="false">That flow networks can only be solved when all capacities are equal.</button>
+      <button class="quiz-choice" data-correct="false">That cuts are only relevant to spanning tree problems, not flow problems.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The duality between max flow and min cut is what makes flow algorithms broadly applicable to bottleneck-style problems beyond literal network flow.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="saturated|saturate">
+    <p class="quiz-prompt">4. Fill in the blank: at Ford-Fulkerson's termination, every original edge crossing the found cut from S to T must be ___ , meaning its flow equals its full capacity.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A saturated edge has no leftover residual capacity, which is exactly the condition consistent with the far endpoint being unreachable.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="reachable">
+    <p class="quiz-prompt">5. Fill in the blank: in the max-flow min-cut proof, set S is defined as exactly the vertices ___ from s in the final residual graph, once no augmenting path remains.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Reachability in the final residual graph is exactly what defines the specific cut used to complete the proof.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: CLRS, Chapter 26, Section 26.2, "The Ford-Fulkerson method," subsection "Max-flow min-cut theorem," gives the full formal proof this lesson summarizes.</p>
+
+  <p class="ask-teacher">Want to find the min-cut for a network of your own design and verify it matches the max flow? Ask your teacher — that's what I'm here for. This closes Unit 4. Next up: Unit 5, advanced dynamic programming — starting with DP on trees, where the recursive structure of the problem matches the recursive structure of a tree itself.</p>
+
+  <footer class="lesson-footer">STEM+ · Advanced Algorithms · Lesson 17 of the course sequence</footer>
+</div>

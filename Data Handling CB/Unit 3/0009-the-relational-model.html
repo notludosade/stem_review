@@ -1,0 +1,106 @@
+<meta charset="UTF-8">
+<title>Lesson 9: The Relational Model — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Data Handling: CB · Unit 3 · Lesson 9</span>
+  <h1>The Relational Model</h1>
+  <p class="subtitle">Before writing a single SQL query, you need the mental model a relational database is built on: tables, keys, and the rule that lets many small tables stand in for one big, redundant one.</p>
+  <p class="nav-links"><a href="../Unit%202/0008-data-validation-and-clean-input.html" class="nav-prev">← Lesson 8</a> <a href="0010-select-where-and-filtering.html" class="nav-next">Lesson 10 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Lesson 4 introduced databases as the tool for large, multi-user, rule-enforced data. This lesson opens the hood: a <strong>relational database</strong> organizes data into multiple linked tables rather than one giant sheet — and that linking is the entire point of the design.</p>
+
+  <h2>Tables, rows, and columns — again, but stricter</h2>
+  <div class="box">
+    <span class="box-label">Definitions</span>
+    A relational database is made of <strong>tables</strong> (also called relations). Each table has a fixed set of <strong>columns</strong> (fields, each with a declared data type — number, text, date) and any number of <strong>rows</strong> (records). Unlike a spreadsheet, a database table enforces its column types strictly: a "quantity" column declared as a number will reject an attempt to insert the text "unknown."
+  </div>
+
+  <h2>Primary keys</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    A <strong>primary key</strong> is a column (or combination of columns) that uniquely identifies each row in a table — no two rows can share the same primary key value, and it can't be blank. A Customers table's primary key is typically a Customer ID; no two customers share an ID, and every customer has one.
+  </div>
+
+  <h2>Foreign keys and why data is split across tables</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    A <strong>foreign key</strong> is a column in one table that refers to a primary key in another table, linking the two. An Orders table doesn't repeat a customer's full name and address on every single order row — it stores just the Customer ID as a foreign key, pointing back to one row in a separate Customers table.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why splitting data this way is the whole point</span>
+    If every order row repeated the customer's full name, email, and address directly, updating one customer's email would mean finding and editing every order row they've ever placed — miss one, and the data becomes inconsistent (recall Lesson 3's consistency dimension), with two different emails on file for the same real customer. Storing customer details once, in one Customers row, and referencing it everywhere else by ID (a foreign key) means an update happens in exactly one place. This splitting-to-avoid-repetition principle is called <strong>normalization</strong>, and it's the core reason relational databases are organized into many small linked tables instead of one wide one.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Worked example</span>
+    A Customers table: Customer ID (primary key), Name, Region. An Orders table: Order ID (primary key), Customer ID (foreign key, referencing Customers), Order Total, Order Date. Order row 4471 doesn't contain "Ada Lovelace" anywhere — it contains Customer ID 102, and looking up 102 in the Customers table is what gets you the name. This is precisely the spreadsheet lookup from Lesson 6, formalized as the database's actual storage structure rather than something you compute after the fact.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What must be true of a table's primary key?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">It must always be a text column, never a number.</button>
+      <button class="quiz-choice" data-correct="true">It must uniquely identify each row — no two rows share the same value, and it's never blank.</button>
+      <button class="quiz-choice" data-correct="false">It must reference a column in a different table.</button>
+      <button class="quiz-choice" data-correct="false">It must be the first column listed in the table.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Uniqueness and non-blankness are what make a primary key usable as a reliable row identifier — that's what a foreign key elsewhere ends up pointing to.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. What problem does storing a Customer ID (a foreign key) in the Orders table, instead of repeating the customer's full name and address on every order row, solve?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">It makes the Orders table take up more storage space than repeating the details.</button>
+      <button class="quiz-choice" data-correct="true">It means updating a customer's details only requires changing one row in the Customers table, rather than every order row that customer has ever placed.</button>
+      <button class="quiz-choice" data-correct="false">It prevents the Orders table from having a primary key of its own.</button>
+      <button class="quiz-choice" data-correct="false">It removes the need for the Customers table to have a primary key.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Storing details once and referencing them by key is exactly what prevents the update-consistency problem of repeated data.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. What is the relationship between a foreign key in one table and a primary key in another?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">They are unrelated concepts that happen to share similar names.</button>
+      <button class="quiz-choice" data-correct="true">A foreign key is a column that refers to a primary key in a different table, linking a row in one table to a row in the other.</button>
+      <button class="quiz-choice" data-correct="false">A foreign key must always have the exact same name as the primary key it references.</button>
+      <button class="quiz-choice" data-correct="false">A foreign key uniquely identifies rows within its own table, just like a primary key.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The foreign key's whole purpose is pointing at another table's primary key, creating the link between the two tables.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="normalization">
+    <p class="quiz-prompt">4. Fill in the blank: the principle of splitting data into multiple linked tables to avoid repeating the same information, so any fact is stored in exactly one place, is called ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Normalization is the design principle behind splitting a database into many small tables linked by keys rather than one repetitive wide table.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="foreign key">
+    <p class="quiz-prompt">5. Fill in the blank: a column in one table that refers to the primary key of a different table, creating a link between the two, is called a ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The foreign key is the mechanism that links tables together without repeating data across them.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: the PostgreSQL documentation's tutorial section (postgresql.org/docs/current/tutorial.html), "Concepts," gives the standard treatment of tables, keys, and relations used across virtually all relational databases.</p>
+
+  <p class="ask-teacher">Have a real dataset you want to sketch out as normalized tables with keys? Ask your teacher — that's what I'm here for. Next up: actually asking questions of a table with SQL's SELECT and WHERE.</p>
+
+  <footer class="lesson-footer">STEM+ · Data Handling: CB · Lesson 9 of the course sequence</footer>
+</div>

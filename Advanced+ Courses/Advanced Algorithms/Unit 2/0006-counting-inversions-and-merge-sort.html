@@ -1,0 +1,124 @@
+<meta charset="UTF-8">
+<title>Lesson 6: Counting Inversions & Merge Sort — STEM+</title>
+<link rel="stylesheet" href="../../../assets/style.css">
+<script src="../../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Advanced Algorithms · Unit 2 · Lesson 6</span>
+  <h1>Counting Inversions &amp; Merge Sort</h1>
+  <p class="subtitle">A classic divide-and-conquer trick: piggyback a second computation on top of merge sort's existing structure, for free, because the merge step already does the comparisons you need.</p>
+  <p class="nav-links"><a href="0005-correctness-by-strong-induction.html" class="nav-prev">← Lesson 5</a> <a href="0007-median-of-medians.html" class="nav-next">Lesson 7 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>An <strong>inversion</strong> in an array is a pair of indices i &lt; j where arr[i] &gt; arr[j] — a pair that's "out of order" relative to each other. Counting inversions measures how far an array is from sorted (a sorted array has zero; a reverse-sorted array has the maximum, n(n−1)/2). The brute-force approach checks every pair in Θ(n²). This lesson derives an O(n log n) algorithm by noticing that merge sort's merge step already discovers every inversion that crosses the midpoint, as a side effect of the comparisons it does anyway.</p>
+
+  <h2>The key observation</h2>
+  <div class="box">
+    <span class="box-label">Observation</span>
+    Split the array into a left half L and right half R. Every inversion is one of three kinds: both indices in L, both in R, or one in each. The first two kinds are exactly the inversions counted by recursively solving the subproblems on L and R. The third kind — cross-inversions — are exactly what the merge step can detect, because merging L and R together requires comparing elements across the two halves in the first place.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">How merge detects a cross-inversion</span>
+    During the merge of two already-sorted halves L and R, maintain pointers i (into L) and j (into R). At each step, if L[i] ≤ R[j], output L[i] and advance i — no inversion, since L[i] is correctly placed before R[j]. But if R[j] &lt; L[i], output R[j] and advance j — and here's the count: since L is sorted, every remaining element from L[i] onward is also &gt; R[j], meaning R[j] forms a cross-inversion with <em>all</em> of L[i], L[i+1], ..., L[end] at once. Add (length of L − i) to the inversion count right at that moment, and move on. Every cross-inversion gets counted exactly once, with no extra comparisons beyond what merge was already doing.
+  </div>
+
+  <div class="box">
+    <span class="box-label">Algorithm — count-and-sort</span>
+<pre class="code-block"><code><span class="code-comment">// Returns (sorted array, inversion count) for arr</span>
+function countInversions(arr):
+    if length(arr) &lt;= 1:
+        return (arr, 0)
+    mid = length(arr) / 2
+    (L, countL) = countInversions(arr[0:mid])
+    (R, countR) = countInversions(arr[mid:end])
+    (merged, crossCount) = mergeAndCount(L, R)
+    return (merged, countL + countR + crossCount)
+
+<span class="code-comment">// Merges two sorted arrays, counting cross-inversions</span>
+function mergeAndCount(L, R):
+    result = [], i = 0, j = 0, crossCount = 0
+    while i &lt; length(L) and j &lt; length(R):
+        if L[i] &lt;= R[j]:
+            append L[i] to result; i += 1
+        else:
+            append R[j] to result; j += 1
+            crossCount += (length(L) - i)   <span class="code-comment">// R[j] inverts with all remaining L[i..]</span>
+    append remaining elements of L and R to result
+    return (result, crossCount)</code></pre>
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why this is correct — reusing Lesson 5's proof shape</span>
+    Base case (length ≤ 1): zero inversions, trivially correct. Inductive hypothesis: countInversions correctly counts inversions for any array shorter than n. Inductive step: the recursive calls on L and R correctly count all within-L and within-R inversions by hypothesis; the separate direct argument above shows mergeAndCount correctly counts every cross-inversion exactly once. Since every inversion is within-L, within-R, or cross, and all three are accounted for, countL + countR + crossCount is the total. This is exactly Lesson 5's two-part shape: induction for the recursive calls, a direct proof for the combine step.
+  </div>
+
+  <div class="box">
+    <span class="box-label">Runtime — Unit 1's tools, reapplied</span>
+    mergeAndCount does O(1) extra work per comparison beyond ordinary merge, so it's still Θ(n) at each level. The recurrence is T(n) = 2T(n/2) + Θ(n) — identical to merge sort's own recurrence from Unit 1. By the Master Theorem (Case 2, a=2, b=2, n^(log_b a)=n=f(n)), T(n) = Θ(n log n) — an exponential improvement over the Θ(n²) brute force, obtained by noticing a computation was already implicit in a comparison the algorithm was doing anyway.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. Why are cross-inversions the only kind not already handled by the recursive calls on L and R?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because cross-inversions are rarer than within-half inversions.</button>
+      <button class="quiz-choice" data-correct="true">Because the recursive calls only ever compare indices within the same half, so a pair with one index in each half is never examined by them.</button>
+      <button class="quiz-choice" data-correct="false">Because cross-inversions require a third recursive call on the whole array.</button>
+      <button class="quiz-choice" data-correct="false">Because merge sort does not use recursion for cross-inversions.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Recursion on L only ever compares indices inside L, and likewise for R, so any pair straddling both halves is structurally outside what either recursive call could ever detect.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. When R[j] &lt; L[i] during the merge step, why does it form an inversion with every remaining element of L from index i onward?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because L is not actually sorted at this point in the algorithm.</button>
+      <button class="quiz-choice" data-correct="true">Because L is sorted, so every element from L[i] onward is ≥ L[i] &gt; R[j], and R[j] appears later in the original array than every one of them.</button>
+      <button class="quiz-choice" data-correct="false">Because R always contains exactly one inversion per merge call.</button>
+      <button class="quiz-choice" data-correct="false">Because the algorithm double-counts every comparison by design.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Sortedness of L guarantees every element from L[i] onward is at least as large as L[i], which is already larger than R[j] — and since R[j]'s original index is to the right of the whole R-half but its value is smaller, each such pair is a genuine inversion.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why does the inversion-counting algorithm have the same Θ(n log n) runtime as ordinary merge sort?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because counting inversions requires no additional work at all over plain merging.</button>
+      <button class="quiz-choice" data-correct="true">Because the extra bookkeeping per comparison is O(1), leaving the recurrence identical to merge sort's T(n) = 2T(n/2) + Θ(n).</button>
+      <button class="quiz-choice" data-correct="false">Because inversion counting uses a completely different recurrence with a larger branching factor.</button>
+      <button class="quiz-choice" data-correct="false">Because the algorithm skips the recursive calls when no inversions are present.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Adding a constant-time increment per merge comparison doesn't change the recurrence's asymptotic shape, so the Master Theorem gives the identical Θ(n log n) result as plain merge sort.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="cross|cross-inversions">
+    <p class="quiz-prompt">4. Fill in the blank: every inversion is within-L, within-R, or ___ — and the merge step is exactly what detects the third kind.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>This three-way partition of all possible inversions is exactly what makes the recursive-plus-merge structure complete: nothing falls outside these three categories.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="sorted">
+    <p class="quiz-prompt">5. Fill in the blank: the cross-inversion counting trick only works because L is already ___ by the time the merge step runs on it, letting one comparison stand in for many.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Sortedness is what licenses jumping straight to "all remaining elements of L are also greater than R[j]" instead of checking each one individually.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: Kleinberg &amp; Tardos, <em>Algorithm Design</em>, Section 5.3, "Counting Inversions," is the original source for this exact technique, with a worked numerical example.</p>
+
+  <p class="ask-teacher">Curious what other computations can piggyback on an existing divide-and-conquer structure? Ask your teacher — that's what I'm here for. Next up: median of medians, an algorithm that finds an order statistic in linear time by choosing its pivot with unusual care.</p>
+
+  <footer class="lesson-footer">STEM+ · Advanced Algorithms · Lesson 6 of the course sequence</footer>
+</div>

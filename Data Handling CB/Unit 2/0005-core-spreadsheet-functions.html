@@ -1,0 +1,112 @@
+<meta charset="UTF-8">
+<title>Lesson 5: Core Spreadsheet Functions — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Data Handling: CB · Unit 2 · Lesson 5</span>
+  <h1>Core Spreadsheet Functions</h1>
+  <p class="subtitle">A handful of functions, used well, cover most day-to-day spreadsheet work. This lesson builds the core set — and the one habit (absolute vs. relative references) that determines whether they survive being copied across a sheet.</p>
+  <p class="nav-links"><a href="../Unit%201/0004-databases-vs-spreadsheets-vs-files.html" class="nav-prev">← Lesson 4</a> <a href="0006-lookups-and-data-joining.html" class="nav-next">Lesson 6 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Lesson 4 placed spreadsheets as the right tool for small, interactive, single-analyst work. This lesson starts actually using one — the functions that turn a spreadsheet from a grid of typed numbers into something that computes.</p>
+
+  <h2>The core aggregate functions</h2>
+  <div class="box">
+    <span class="box-label">Functions</span>
+    <code>=SUM(range)</code> adds every number in a range. <code>=AVERAGE(range)</code> computes the arithmetic mean. <code>=COUNT(range)</code> counts numeric cells in a range; <code>=COUNTA(range)</code> counts non-empty cells of any type. <code>=MAX(range)</code> / <code>=MIN(range)</code> return the largest/smallest value. Every one of these ignores blank cells rather than treating them as zero — a detail that matters once Unit 5 discusses missing data.
+  </div>
+
+  <h2>Conditional versions: COUNTIF, SUMIF, and their multi-condition forms</h2>
+  <div class="box">
+    <span class="box-label">Functions</span>
+    <code>=COUNTIF(range, criteria)</code> counts only cells matching a condition, e.g. <code>=COUNTIF(A2:A100, "Completed")</code>. <code>=SUMIF(range, criteria, sum_range)</code> sums a different column, but only for rows where <code>range</code> matches <code>criteria</code>, e.g. <code>=SUMIF(B2:B100, "West", C2:C100)</code> sums column C only for rows where column B is "West". <code>=COUNTIFS</code> and <code>=SUMIFS</code> extend this to multiple conditions at once — e.g. sum revenue where region is "West" <em>and</em> month is "January".
+  </div>
+
+  <h2>IF and nested logic</h2>
+  <div class="box">
+    <span class="box-label">Function</span>
+    <code>=IF(condition, value_if_true, value_if_false)</code> — e.g. <code>=IF(B2&gt;100, "High", "Low")</code>. IF statements can be nested, but more than one or two levels of nesting usually signals it's time for a lookup table instead (Lesson 6) — a long chain of nested IFs is hard to read and easy to break with one misplaced parenthesis.
+  </div>
+
+  <h2>Absolute vs. relative references</h2>
+  <div class="box">
+    <span class="box-label">The distinction</span>
+    A <strong>relative reference</strong> (e.g. <code>A2</code>) shifts automatically when a formula is copied to a new cell — copying <code>=A2*2</code> from row 2 to row 3 becomes <code>=A3*2</code>. An <strong>absolute reference</strong> (e.g. <code>$A$2</code>, with dollar signs locking the row and/or column) stays fixed no matter where the formula is copied. A <strong>mixed reference</strong> locks only the row or only the column (<code>A$2</code> or <code>$A2</code>).
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why this is the single most common source of spreadsheet bugs</span>
+    A formula like <code>=C2/$C$10</code> (each row's value divided by a fixed total in cell C10) works perfectly in row 2 — but if the dollar signs are missing (<code>=C2/C10</code>) and the formula is copied down to row 3, the denominator silently shifts to C11, an empty or wrong cell, and every row below the first quietly computes a wrong answer with no error message. Because spreadsheets don't raise an error for this — the formula still "runs," it just references the wrong cell — this bug is invisible unless you specifically check. The habit worth building: before copying any formula across multiple cells, ask which parts of each reference should move with it and which parts should stay fixed, and lock the fixed ones with <code>$</code>.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Worked example</span>
+    A sheet has monthly sales in B2:B13 and a fixed annual target in D1. To compute each month's percent of the annual target: <code>=B2/$D$1</code> in C2, then copy down to C13. Without the <code>$</code> signs, C3 would compute <code>=B3/D2</code> — dividing by an empty cell instead of the target.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What is the difference between COUNT and COUNTA?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">COUNT counts every cell in a range; COUNTA only counts cells matching a specific criteria.</button>
+      <button class="quiz-choice" data-correct="true">COUNT counts only numeric cells; COUNTA counts any non-empty cell regardless of type.</button>
+      <button class="quiz-choice" data-correct="false">COUNT and COUNTA are identical functions with different names.</button>
+      <button class="quiz-choice" data-correct="false">COUNT works on rows; COUNTA works on columns.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>COUNT is restricted to numeric values; COUNTA counts any cell holding something, numeric or not.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. What happens if a formula like <code>=C2/C10</code> (no dollar signs) is copied from row 2 down to row 3?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">The spreadsheet raises an error, since C10 was meant to stay fixed.</button>
+      <button class="quiz-choice" data-correct="true">Both references shift by one row, so the copied formula becomes =C3/C11 — silently referencing the wrong denominator with no error shown.</button>
+      <button class="quiz-choice" data-correct="false">The formula automatically keeps referencing C10 in every copied row.</button>
+      <button class="quiz-choice" data-correct="false">The formula stops recalculating entirely once copied.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Relative references shift with the copy silently — no error is raised, which is exactly why this bug is so easy to miss.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. When should nested IF statements typically be replaced with a lookup table instead?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Nested IFs should never be used under any circumstances.</button>
+      <button class="quiz-choice" data-correct="true">Once nesting goes more than one or two levels deep, since it becomes hard to read and easy to break with a misplaced parenthesis.</button>
+      <button class="quiz-choice" data-correct="false">Only when working with purely numeric data, never text.</button>
+      <button class="quiz-choice" data-correct="false">Nested IFs and lookup tables always produce different results, so they aren't interchangeable.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Deep IF nesting is a readability and fragility signal, not a hard technical limit — which is exactly why Lesson 6 introduces lookups as the more maintainable alternative.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="SUMIF">
+    <p class="quiz-prompt">4. Fill in the blank: the function that sums values in one column only for rows where a different column matches a given condition is ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>SUMIF takes a condition range, a criteria, and a separate range to actually sum — letting you filter and aggregate in one step.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="absolute">
+    <p class="quiz-prompt">5. Fill in the blank: a reference like $A$2, which stays fixed no matter where the formula containing it is copied, is called an ___ reference.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The dollar signs lock the row and/or column, keeping the reference fixed under copying — the opposite of a relative reference's automatic shift.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: Google's Sheets function list (support.google.com/docs) and Microsoft's Excel function reference (support.microsoft.com) both document every function above in full, with the exact same behavior across both major spreadsheet products.</p>
+
+  <p class="ask-teacher">Have a specific formula that isn't behaving as expected? Ask your teacher — that's what I'm here for. Next up: lookups — how to pull matching data from a second table, the spreadsheet equivalent of a database join.</p>
+
+  <footer class="lesson-footer">STEM+ · Data Handling: CB · Lesson 5 of the course sequence</footer>
+</div>

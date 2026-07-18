@@ -1,0 +1,106 @@
+<meta charset="UTF-8">
+<title>Lesson 12: Aggregation — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Data Handling: CB · Unit 3 · Lesson 12</span>
+  <h1>Aggregation</h1>
+  <p class="subtitle">GROUP BY is SQL's pivot table: it collapses many rows into one summary row per group, and pairs with aggregate functions to answer "total by category" questions directly in the database.</p>
+  <p class="nav-links"><a href="0011-joins.html" class="nav-prev">← Lesson 11</a> <a href="0013-subqueries-and-ctes.html" class="nav-next">Lesson 13 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Unit 2's Lesson 7 built a pivot table to answer "total sales by region" without writing per-region formulas. SQL answers the same class of question with <code>GROUP BY</code>.</p>
+
+  <h2>Aggregate functions</h2>
+  <div class="box">
+    <span class="box-label">Functions</span>
+    <code>COUNT(column)</code> counts non-null values (or <code>COUNT(*)</code> counts rows regardless of nulls). <code>SUM(column)</code>, <code>AVG(column)</code>, <code>MIN(column)</code>, <code>MAX(column)</code> — the same operations as Unit 2's spreadsheet functions, applied to a query result instead of a spreadsheet range.
+  </div>
+
+  <h2>GROUP BY</h2>
+  <div class="box">
+    <span class="box-label">Syntax</span>
+    <code>SELECT region, SUM(order_total) FROM orders GROUP BY region;</code> collapses the orders table into one row per distinct region, with <code>SUM(order_total)</code> computed within each group. Every column in <code>SELECT</code> that isn't itself an aggregate function must appear in <code>GROUP BY</code> — SQL needs to know which column defines the groups, since it can't display an individual order_id next to a summed total that spans many orders.
+  </div>
+
+  <h2>HAVING: filtering groups, not rows</h2>
+  <div class="box">
+    <span class="box-label">Syntax</span>
+    <code>SELECT region, SUM(order_total) AS total FROM orders GROUP BY region HAVING SUM(order_total) &gt; 10000;</code> — <code>HAVING</code> filters <em>after</em> grouping, on the aggregated value itself, e.g. "only show regions whose total exceeds $10,000." <code>WHERE</code> can't do this, because <code>WHERE</code> filters individual rows before grouping happens — it has no access to a group's summed total, since that total doesn't exist yet at the point WHERE is applied.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why WHERE and HAVING aren't interchangeable</span>
+    This follows directly from Lesson 10's query execution order: <code>WHERE</code> filters raw rows before grouping; <code>GROUP BY</code> then collapses the surviving rows into groups and computes aggregates; <code>HAVING</code> filters those already-computed group results. Trying to write <code>WHERE SUM(order_total) &gt; 10000</code> fails, because at the point WHERE runs, no sum has been computed yet — there's nothing to compare.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Worked example combining JOIN, GROUP BY, and HAVING</span>
+    <code>SELECT customers.region, COUNT(*) AS order_count, SUM(orders.order_total) AS total_revenue FROM orders INNER JOIN customers ON orders.customer_id = customers.customer_id WHERE orders.order_total &gt; 0 GROUP BY customers.region HAVING COUNT(*) &gt; 5;</code> — join orders to customers to get each order's region, keep only orders with a positive total, group by region, count orders and sum revenue per region, then keep only regions with more than 5 qualifying orders.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What does <code>GROUP BY region</code> do to a query's results?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">It sorts rows alphabetically by region without changing the row count.</button>
+      <button class="quiz-choice" data-correct="true">It collapses the rows into one summary row per distinct region value, with any aggregate function computed within each group.</button>
+      <button class="quiz-choice" data-correct="false">It filters out all rows except those from a single specified region.</button>
+      <button class="quiz-choice" data-correct="false">It duplicates each row once per aggregate function used.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>GROUP BY's defining behavior is collapsing many rows into one row per distinct group value.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why can't WHERE be used to filter on a condition like "SUM(order_total) &gt; 10000"?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because WHERE can only be used with text columns, not numeric ones.</button>
+      <button class="quiz-choice" data-correct="true">Because WHERE filters individual rows before grouping happens, and the summed total doesn't exist yet at that point in the query's evaluation.</button>
+      <button class="quiz-choice" data-correct="false">Because WHERE and HAVING are simply two different names for the exact same clause.</button>
+      <button class="quiz-choice" data-correct="false">Because SUM can only be used inside a SELECT clause, never in any filtering clause.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>WHERE runs before grouping/aggregation, so it has nothing to compare an aggregate value against yet — that's exactly what HAVING is for.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. What is the rule for which columns can appear in SELECT alongside a GROUP BY clause?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Any column may appear, regardless of whether it's in GROUP BY or wrapped in an aggregate function.</button>
+      <button class="quiz-choice" data-correct="true">Every non-aggregate column in SELECT must also appear in GROUP BY, since SQL needs to know which column defines each group.</button>
+      <button class="quiz-choice" data-correct="false">Only aggregate functions are allowed in SELECT once GROUP BY is used — no plain columns at all.</button>
+      <button class="quiz-choice" data-correct="false">GROUP BY has no effect on which columns are valid in SELECT.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Non-aggregate columns must be part of the grouping, or SQL has no consistent single value to display for that column within a collapsed group.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="HAVING">
+    <p class="quiz-prompt">4. Fill in the blank: the clause used to filter grouped results based on an aggregate value, applied after GROUP BY, is ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>HAVING is specifically for filtering on aggregate results, unlike WHERE which filters raw rows before grouping.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="GROUP BY">
+    <p class="quiz-prompt">5. Fill in the blank: the SQL clause that collapses rows into one summary row per distinct value of a chosen column is ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>GROUP BY is the clause responsible for defining the groups that aggregate functions then compute over.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: the Mode Analytics SQL Tutorial (mode.com/sql-tutorial), "GROUP BY" and "HAVING," covers this exact material with interactive practice queries.</p>
+
+  <p class="ask-teacher">Have a real joined dataset you'd like to summarize with GROUP BY? Ask your teacher — that's what I'm here for. Next up: subqueries and CTEs — building queries out of smaller queries.</p>
+
+  <footer class="lesson-footer">STEM+ · Data Handling: CB · Lesson 12 of the course sequence</footer>
+</div>

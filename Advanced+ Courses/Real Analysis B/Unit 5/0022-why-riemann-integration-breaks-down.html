@@ -1,0 +1,119 @@
+<meta charset="UTF-8">
+<title>Lesson 22: Why Riemann Integration Breaks Down — STEM+</title>
+<link rel="stylesheet" href="../../../assets/style.css">
+<script src="../../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Real Analysis B · Unit 5 · Lesson 22</span>
+  <h1>Why Riemann Integration Breaks Down</h1>
+  <p class="subtitle">Real Analysis A already flagged one bounded function the Riemann integral can't handle. This lesson diagnoses exactly why, and shows the damage is worse than one bad example — even a limit of perfectly well-behaved functions can escape integrability entirely.</p>
+  <p class="nav-links"><a href="../Unit%204/0021-the-inverse-and-implicit-function-theorems.html" class="nav-prev">← Lesson 21</a> <a href="0023-outer-measure-on-the-real-line.html" class="nav-next">Lesson 23 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <div class="box why">
+    <span class="box-label">Why this starts by revisiting Dirichlet's function</span>
+    Real Analysis A's Unit 6 (Lesson 31) flagged Dirichlet's function — f(x) = 1 for x rational, 0 for x irrational — as "a bounded-but-not-integrable example," without proving it in full. This lesson proves it, and asks what exactly goes wrong.
+  </div>
+
+  <div class="box">
+    <span class="box-label">Theorem — Dirichlet's Function Is Not Riemann Integrable on [0,1]</span>
+    Let f(x) = 1 if x ∈ ℚ, 0 if x ∉ ℚ. For every partition P of [0,1], U(f,P) = 1 and L(f,P) = 0.
+  </div>
+
+  <div class="box">
+    <span class="box-label">Proof</span>
+    Every subinterval of every partition of [0,1], no matter how small, contains both a rational number (density of ℚ) and an irrational number (density of the irrationals). So on every subinterval, sup f = 1 and inf f = 0. Then U(f,P) = Σ(1)·Δxᵢ = 1 (the sum of all subinterval lengths), and L(f,P) = Σ(0)·Δxᵢ = 0, for every partition P whatsoever. Since U(f,P) − L(f,P) = 1 for every P, the Cauchy Criterion for integrability (Real Analysis A, Unit 6) can never be satisfied for any ε &lt; 1 — f is not Riemann integrable. ∎
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why this happens: the diagnosis</span>
+    The problem isn't that f takes extreme or unbounded values — it only ever takes the values 0 and 1. The problem is that ℚ, the set where f = 1, is <em>dense</em> — spread into every subinterval no matter how small — even though ℚ is countable and intuitively ought to occupy "zero length" within [0,1]. The Riemann integral only ever examines a function through sup and inf on intervals, and that lens cannot distinguish "a dense set that should have zero total length" from "genuinely occupying an interval's worth of space." Fixing this requires a way to directly measure the size of a set like ℚ — the subject of the rest of this unit.
+  </div>
+
+  <p>The damage from this gap is not confined to one exotic function. The next example shows integrability itself can vanish in the limit.</p>
+
+  <div class="box example">
+    <span class="box-label">Example: a limit of integrable functions that isn't integrable</span>
+    Enumerate ℚ ∩ [0,1] as q₁, q₂, q₃, … (possible since ℚ is countable). Define fₙ(x) = 1 if x ∈ {q₁,…,qₙ}, and 0 otherwise — the indicator of the first n rationals in the list.
+    <br><br>
+    <em>Each fₙ is Riemann integrable, with ∫₀¹ fₙ = 0.</em> Given ε &gt; 0, build a partition with tiny subintervals of total width less than ε surrounding each of the n points q₁,…,qₙ, and the rest of [0,1] left as remaining subintervals. On the tiny subintervals, sup fₙ ≤ 1; everywhere else, since every remaining subinterval still contains an irrational (in fact almost every point of it is irrational), inf fₙ = 0, and sup fₙ = 0 as well unless it happens to still contain one of the finitely many marked points — refine further so it doesn't. This gives U(fₙ,P) ≤ 1·(width of tiny intervals) &lt; ε, and L(fₙ,P) = 0. Since U − L can be made smaller than any ε, fₙ is integrable, and squeezing between 0 and ε forces ∫₀¹ fₙ = 0.
+    <br><br>
+    <em>fₙ → f pointwise</em>, where f is Dirichlet's function. If x is irrational, fₙ(x) = 0 = f(x) for every n. If x = qₖ for some k, then fₙ(x) = 1 = f(x) for every n ≥ k. So fₙ(x) → f(x) for every x ∈ [0,1].
+    <br><br>
+    Yet f itself is not Riemann integrable, by the theorem above.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why this example is the real warning</span>
+    Every fₙ here is about as well-behaved as a function can be — bounded, integrable, with integral exactly 0 — and the sequence converges everywhere, pointwise, to a specific limit. Yet that limit function is not Riemann integrable at all. Integrability itself fails to survive a pointwise limit. Since limits are the basic currency of analysis, an integral that can lose integrability this easily is a serious structural gap, not a curiosity about one strange function.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Lebesgue's idea, previewed</span>
+    Riemann's integral chops up the <em>domain</em> into small intervals and asks how f behaves on each piece. Lebesgue's integral, built over the rest of this unit and the next, instead chops up the <em>range</em> of f into small pieces and asks how much of the domain — measured directly, by a notion of size general enough to correctly assign ℚ a size of zero — maps into each piece. Building that notion of size precisely is the task of the next three lessons.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. Why is U(f,P) = 1 and L(f,P) = 0 for every partition P, for Dirichlet's function?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because f is unbounded on [0,1]</button>
+      <button class="quiz-choice" data-correct="true">Because every subinterval, however small, contains both a rational and an irrational number</button>
+      <button class="quiz-choice" data-correct="false">Because [0,1] is not compact</button>
+      <button class="quiz-choice" data-correct="false">Because f is discontinuous only at finitely many points</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Density of both ℚ and its complement in every subinterval forces sup f = 1 and inf f = 0 there, no matter how the partition is chosen.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. What does the fₙ example demonstrate?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">That every pointwise limit of integrable functions is integrable</button>
+      <button class="quiz-choice" data-correct="true">That a pointwise limit of Riemann integrable functions can fail to be Riemann integrable at all</button>
+      <button class="quiz-choice" data-correct="false">That Dirichlet's function is actually Riemann integrable</button>
+      <button class="quiz-choice" data-correct="false">That ℚ is uncountable</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Each fₙ is integrable with integral 0, and fₙ → f pointwise, yet the Dirichlet function limit f is not Riemann integrable.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. What is Lebesgue's proposed fix, previewed in this lesson?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Only integrate continuous functions</button>
+      <button class="quiz-choice" data-correct="true">Directly measure the size of sets like ℚ, and partition the range of f rather than the domain</button>
+      <button class="quiz-choice" data-correct="false">Restrict integration to bounded intervals only</button>
+      <button class="quiz-choice" data-correct="false">Replace pointwise limits with uniform limits everywhere</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Assigning a genuine notion of size (measure) to sets, then chopping up the range instead of the domain, is the core idea Lebesgue's integral is built on.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="dense">
+    <p class="quiz-prompt">4. Fill in the blank: ℚ being ___ in every subinterval is exactly why Dirichlet's function has U(f,P)=1 and L(f,P)=0 always.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Density of the rationals (and irrationals) in every subinterval is exactly the phenomenon Riemann sums cannot see past.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="measure">
+    <p class="quiz-prompt">5. Fill in the blank: fixing the gap in Riemann integration requires a genuine notion of ___ for sets, general enough to assign ℚ a value of zero.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Measure is exactly the notion of size this unit builds, precise enough to handle dense countable sets correctly.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: Royden and Fitzpatrick's <em>Real Analysis</em>, Chapter 3, opens with these exact deficiencies of the Riemann integral as motivation for Lebesgue measure.</p>
+
+  <p class="ask-teacher">Stuck on why the fₙ example is more damning than Dirichlet's function alone? Ask your teacher — that's what I'm here for. Next up: outer measure — the first attempt at assigning a size to every subset of ℝ.</p>
+
+  <footer class="lesson-footer">STEM+ · Real Analysis B · Lesson 22 of the course sequence</footer>
+</div>

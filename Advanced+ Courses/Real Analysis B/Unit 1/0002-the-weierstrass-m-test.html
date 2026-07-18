@@ -1,0 +1,108 @@
+<meta charset="UTF-8">
+<title>Lesson 2: The Weierstrass M-Test — STEM+</title>
+<link rel="stylesheet" href="../../../assets/style.css">
+<script src="../../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Real Analysis B · Unit 1 · Lesson 2</span>
+  <h1>The Weierstrass M-Test</h1>
+  <p class="subtitle">Checking sup|fₙ(x) − f(x)| → 0 by hand is often hopeless for an infinite series of functions. The M-test turns that check into a single ordinary series of numbers.</p>
+  <p class="nav-links"><a href="0001-pointwise-vs-uniform-convergence.html" class="nav-prev">← Lesson 1</a> <a href="0003-uniform-convergence-and-continuity.html" class="nav-next">Lesson 3 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>For a <strong>series</strong> of functions g₁(x) + g₂(x) + g₃(x) + …, "converges uniformly" means the sequence of partial sums sₙ(x) = g₁(x) + … + gₙ(x) converges uniformly to some sum function s(x). Computing sup<sub>x</sub>|sₙ(x) − s(x)| directly is often intractable — but there's a sufficient condition that reduces the whole question to an ordinary series of numbers.</p>
+
+  <div class="box">
+    <span class="box-label">The Uniform Cauchy Criterion</span>
+    A sequence of functions (fₙ) converges uniformly on S if and only if, for every ε &gt; 0, there exists N such that m, n ≥ N implies sup<sub>x∈S</sub> |fₙ(x) − fₘ(x)| &lt; ε. This is exactly the Cauchy criterion for sequences (Real Analysis A, Lesson 13), with the absolute value replaced by a supremum over the whole domain.
+  </div>
+
+  <div class="box">
+    <span class="box-label">Theorem — The Weierstrass M-Test</span>
+    Let (gₙ) be a sequence of functions on S, and suppose there exist numbers Mₙ ≥ 0 with |gₙ(x)| ≤ Mₙ for every x ∈ S and every n. If the series ΣMₙ converges, then the series Σgₙ(x) converges uniformly (and absolutely, at every x) on S.
+  </div>
+
+  <div class="box">
+    <span class="box-label">Proof</span>
+    Let sₙ(x) = g₁(x) + … + gₙ(x). For n &gt; m, |sₙ(x) − sₘ(x)| = |g<sub>m+1</sub>(x) + … + gₙ(x)| ≤ |g<sub>m+1</sub>(x)| + … + |gₙ(x)| ≤ M<sub>m+1</sub> + … + Mₙ, by the triangle inequality and the hypothesis |gₖ(x)| ≤ Mₖ. Since ΣMₙ converges, its partial sums form a Cauchy sequence of numbers (Real Analysis A, Cauchy criterion for series), so M<sub>m+1</sub> + … + Mₙ → 0 as m, n → ∞ — and crucially, this bound does not depend on x. So given ε &gt; 0, the same N that makes the number-series tail small works for every x ∈ S at once: |sₙ(x) − sₘ(x)| &lt; ε for all x, all m, n ≥ N. By the Uniform Cauchy Criterion, (sₙ) converges uniformly. ∎
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why the bound Mₙ being independent of x is the whole trick</span>
+    The proof never mentions x except to bound |gₙ(x)| from above by a single number Mₙ that works for every x. Once that's done, the entire rest of the argument is a statement about the number-series ΣMₙ — no x in sight. Any uniformity in the number-series' convergence transfers automatically to uniformity in x, precisely because the bound never depended on which x was chosen. This is why the M-test converts a hard-to-check uniform statement into an easy-to-check ordinary one.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Example: Σ sin(nx)/n² converges uniformly on all of ℝ</span>
+    Let gₙ(x) = sin(nx)/n². Since |sin(nx)| ≤ 1 for every real x and every n, |gₙ(x)| ≤ 1/n² = Mₙ for every x ∈ ℝ. The series ΣMₙ = Σ1/n² is a convergent p-series (p = 2 &gt; 1, Real Analysis A). By the M-test, Σ sin(nx)/n² converges uniformly on all of ℝ — a single argument covering the entire real line at once, with no case-by-case analysis of x needed.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Example: where the M-test doesn't apply</span>
+    For gₙ(x) = xⁿ on S = [0, 1), the tightest possible bound is Mₙ = sup<sub>x∈[0,1)</sub>|xⁿ| = 1 for every n (approached as x → 1⁻). Since ΣMₙ = Σ1 diverges, the M-test simply gives no information here — it does not prove non-uniform convergence, it just fails to prove uniform convergence. (Lesson 1 already showed this series's underlying sequence isn't uniformly convergent on [0,1) by a separate, direct argument.)
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What does the Weierstrass M-test require to conclude Σgₙ(x) converges uniformly?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">That each gₙ is continuous</button>
+      <button class="quiz-choice" data-correct="true">Bounds |gₙ(x)| ≤ Mₙ, independent of x, such that ΣMₙ converges</button>
+      <button class="quiz-choice" data-correct="false">That every gₙ is a polynomial</button>
+      <button class="quiz-choice" data-correct="false">That the domain S is a closed interval</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The M-test needs an x-independent bound Mₙ on each term, with ΣMₙ itself a convergent series of numbers.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why does the bound Mₙ need to be independent of x for the proof to work?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">It doesn't — any bound, even one depending on x, works equally well</button>
+      <button class="quiz-choice" data-correct="true">Because only an x-independent bound lets the same N (from the number-series ΣMₙ being Cauchy) work for every x simultaneously</button>
+      <button class="quiz-choice" data-correct="false">Because x-dependent bounds always diverge</button>
+      <button class="quiz-choice" data-correct="false">Because gₙ would not be measurable otherwise</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>An x-independent bound is exactly what converts a statement that must hold uniformly in x into a plain statement about a number series.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why does the M-test fail to apply to Σxⁿ on [0, 1)?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because xⁿ is not continuous</button>
+      <button class="quiz-choice" data-correct="true">Because the tightest x-independent bound is Mₙ = 1 for every n, and Σ1 diverges</button>
+      <button class="quiz-choice" data-correct="false">Because [0, 1) contains irrational numbers</button>
+      <button class="quiz-choice" data-correct="false">Because the M-test only applies to trigonometric series</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Since sup of xⁿ on [0,1) is 1, the best possible Mₙ is 1, and Σ1 diverges, so the M-test's hypothesis is simply not met here.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="cauchy">
+    <p class="quiz-prompt">4. Fill in the blank: the Uniform ___ Criterion says (fₙ) converges uniformly iff sup|fₙ(x) − fₘ(x)| → 0 as m, n → ∞.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The Uniform Cauchy Criterion is the direct analogue of the ordinary Cauchy criterion, with the supremum making the closeness uniform in x.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="m-test|m test">
+    <p class="quiz-prompt">5. Fill in the blank: the Weierstrass ___ reduces proving uniform convergence of a function series to checking convergence of an ordinary number series ΣMₙ.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The M-test is named for Weierstrass and works by bounding each term with an x-independent Mₙ.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: Abbott's <em>Understanding Analysis</em>, Section 6.4, proves the Weierstrass M-test and applies it to several series, including trigonometric series like the one above.</p>
+
+  <p class="ask-teacher">Stuck on why an x-dependent bound wouldn't work in the proof? Ask your teacher — that's what I'm here for. Next up: what uniform convergence actually buys — a limit function that inherits continuity from the sequence.</p>
+
+  <footer class="lesson-footer">STEM+ · Real Analysis B · Lesson 2 of the course sequence</footer>
+</div>

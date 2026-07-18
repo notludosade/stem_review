@@ -1,0 +1,109 @@
+<meta charset="UTF-8">
+<title>Lesson 8: Strassen's Algorithm — STEM+</title>
+<link rel="stylesheet" href="../../../assets/style.css">
+<script src="../../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Advanced Algorithms · Unit 2 · Lesson 8</span>
+  <h1>Strassen's Algorithm</h1>
+  <p class="subtitle">The schoolbook way to multiply two n×n matrices is Θ(n³). Strassen's algorithm shows that's not optimal — by trading one of eight recursive multiplications for extra additions, it gets the exponent below 3 entirely.</p>
+  <p class="nav-links"><a href="0007-median-of-medians.html" class="nav-prev">← Lesson 7</a> <a href="../Unit%203/0009-exchange-arguments.html" class="nav-next">Lesson 9 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Multiplying two n×n matrices the ordinary way — each entry of the output is a dot product of a row and a column — costs Θ(n³): n² output entries, each requiring Θ(n) multiply-adds. A natural divide-and-conquer idea is to split each matrix into four (n/2)×(n/2) blocks and recurse; a block-matrix multiply naively needs 8 recursive multiplications of half-size matrices plus O(n²) additions to combine them. But T(n) = 8T(n/2) + Θ(n²) solves (by the Master Theorem, Case 1, since n^(log₂8) = n³ dominates n²) to Θ(n³) — no improvement at all. Strassen's insight was to restructure the arithmetic so only <em>seven</em> recursive multiplications are needed instead of eight, at the cost of more additions — and that one fewer multiplication changes the exponent.</p>
+
+  <h2>The seven products</h2>
+  <div class="box">
+    <span class="box-label">Setup</span>
+    Split A and B into (n/2)×(n/2) blocks: A = [[A₁₁,A₁₂],[A₂₁,A₂₂]], B = [[B₁₁,B₁₂],[B₂₁,B₂₂]]. Strassen defines seven products, each combining blocks with additions/subtractions before a single recursive multiply:
+    <br>M₁ = (A₁₁+A₂₂)(B₁₁+B₂₂)　M₂ = (A₂₁+A₂₂)B₁₁　M₃ = A₁₁(B₁₂−B₂₂)
+    <br>M₄ = A₂₂(B₂₁−B₁₁)　M₅ = (A₁₁+A₁₂)B₂₂　M₆ = (A₂₁−A₁₁)(B₁₁+B₁₂)
+    <br>M₇ = (A₁₂−A₂₂)(B₂₁+B₂₂)
+  </div>
+
+  <div class="box">
+    <span class="box-label">Recombining into the output blocks</span>
+    The four quadrants of C = AB are recovered purely from additions and subtractions of the seven M's — no further multiplications:
+    <br>C₁₁ = M₁+M₄−M₅+M₇　C₁₂ = M₃+M₅
+    <br>C₂₁ = M₂+M₄　C₂₂ = M₁−M₂+M₃+M₆
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why this is correct (not obvious by inspection)</span>
+    Verifying C₁₁ = M₁+M₄−M₅+M₇ actually equals A₁₁B₁₁+A₁₂B₂₁ (the true top-left block of AB) is pure algebra: expand every Mᵢ in the sum, and every cross term cancels except exactly A₁₁B₁₁+A₁₂B₂₁. For example, M₁ contributes A₁₁B₁₁+A₁₁B₂₂+A₂₂B₁₁+A₂₂B₂₂; M₄ contributes A₂₂B₂₁−A₂₂B₁₁; M₅ contributes −A₁₁B₂₂−A₁₂B₂₂; M₇ contributes A₁₂B₂₁+A₁₂B₂₂−A₂₂B₂₁−A₂₂B₂₂. Summing these four rows, every term other than A₁₁B₁₁ and A₁₂B₂₁ cancels in pairs. The other three quadrants check out the same way — this cancellation is the entire content of the "trick," discovered by Strassen in 1969 through exactly this kind of algebraic search for a 7-multiplication scheme.
+  </div>
+
+  <div class="box">
+    <span class="box-label">Runtime</span>
+    Each Mᵢ needs one (n/2)×(n/2) recursive multiplication plus O(n²) additions to prepare its inputs; recombining into C needs another O(n²) additions. The recurrence is T(n) = 7T(n/2) + Θ(n²). By the Master Theorem: n^(log₂7) ≈ n^2.807, and f(n)=n² is polynomially smaller (Case 1), so T(n) = Θ(n^(log₂7)) ≈ Θ(n^2.807) — asymptotically faster than the schoolbook Θ(n³), purely from cutting one multiplication out of eight.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why this matters beyond matrix multiplication itself</span>
+    Strassen's algorithm is this course's clearest illustration that the "obvious" complexity of a problem (here, Θ(n³), which held unchallenged since antiquity) is not necessarily its true complexity — a nonobvious algebraic rearrangement can beat it. This is exactly the mindset Unit 8's P vs. NP material depends on in reverse: before declaring a problem "genuinely hard," you have to rule out that some Strassen-style trick doesn't already solve it faster. (In practice, Strassen's algorithm is used only for very large matrices, since its overhead and worse numerical stability make the schoolbook method faster for small n — asymptotically better is not the same as always better, a distinction worth remembering before defaulting to a fancier algorithm.)
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. Why does the naive 8-multiplication block recursion fail to improve on schoolbook Θ(n³) matrix multiplication?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because block matrices cannot be multiplied recursively at all.</button>
+      <button class="quiz-choice" data-correct="true">Because T(n) = 8T(n/2) + Θ(n²) still solves to Θ(n³) by the Master Theorem, since n^(log₂8) = n³ dominates the Θ(n²) combine step.</button>
+      <button class="quiz-choice" data-correct="false">Because 8 recursive calls always exceed the Master Theorem's case limits.</button>
+      <button class="quiz-choice" data-correct="false">Because block multiplication produces an incorrect result for the naive recursion.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>With a=8, b=2, n^(log_b a) = n³ exactly matches schoolbook's exponent, so the naive block recursion offers no asymptotic improvement at all — the whole point of Strassen's trick is cutting the multiplication count to 7.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. What is the essential trade Strassen's algorithm makes to go from 8 multiplications to 7?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">It skips computing one quadrant of the output matrix entirely.</button>
+      <button class="quiz-choice" data-correct="true">It does more additions and subtractions preparing the seven products' inputs and recombining outputs, in exchange for one fewer recursive multiplication.</button>
+      <button class="quiz-choice" data-correct="false">It requires the input matrices to already be sparse.</button>
+      <button class="quiz-choice" data-correct="false">It replaces recursion with an iterative loop over all matrix entries.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Since multiplications are the exponential cost driver in the recurrence and additions are only Θ(n²) per level regardless of count, trading extra additions for one fewer multiplication is a strict asymptotic win.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why is Strassen's algorithm rarely used for small matrices in practice, despite its better asymptotic exponent?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because it produces incorrect results for matrices smaller than some threshold.</button>
+      <button class="quiz-choice" data-correct="true">Because its constant-factor overhead and worse numerical stability outweigh the asymptotic advantage until n is large.</button>
+      <button class="quiz-choice" data-correct="false">Because it cannot be implemented for matrices with non-power-of-2 dimensions.</button>
+      <button class="quiz-choice" data-correct="false">Because it requires matrices to be symmetric.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A better asymptotic exponent only wins once n is large enough for the growth-rate advantage to outweigh constant-factor overhead — small-n performance and asymptotic performance are genuinely different questions.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="seven|7">
+    <p class="quiz-prompt">4. Fill in the blank: Strassen's algorithm restructures block matrix multiplication to use only ___ recursive multiplications instead of the naive eight.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Cutting from 8 to 7 multiplications changes the recurrence's exponent from log₂8=3 down to log₂7≈2.807.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="cancel|cancellation">
+    <p class="quiz-prompt">5. Fill in the blank: verifying that the seven products recombine correctly into AB is pure algebra — every cross term must ___ except the ones matching the true output block.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Expanding all seven Mᵢ definitions and summing them for each output quadrant leaves only the correct terms once every other term cancels in pairs.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: CLRS, Chapter 4, Section 4.2, "Strassen's algorithm for matrix multiplication," gives the full derivation and a worked numerical example with concrete 2×2 blocks.</p>
+
+  <p class="ask-teacher">Want to verify one of the other three output quadrants by hand? Ask your teacher — that's what I'm here for. This closes Unit 2. Next up: Unit 3, greedy algorithms — starting with the exchange argument, the proof technique that justifies a greedy choice instead of just trusting it looks locally optimal.</p>
+
+  <footer class="lesson-footer">STEM+ · Advanced Algorithms · Lesson 8 of the course sequence</footer>
+</div>

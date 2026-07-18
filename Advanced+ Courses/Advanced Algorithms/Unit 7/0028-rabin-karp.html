@@ -1,0 +1,119 @@
+<meta charset="UTF-8">
+<title>Lesson 28: Rabin-Karp & Rolling Hashes — STEM+</title>
+<link rel="stylesheet" href="../../../assets/style.css">
+<script src="../../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Advanced Algorithms · Unit 7 · Lesson 28</span>
+  <h1>Rabin-Karp &amp; Rolling Hashes</h1>
+  <p class="subtitle">KMP avoids redundant comparisons by exploiting the pattern's own structure. Rabin-Karp takes a completely different approach: hash every window of the text, and only bother comparing characters when hashes collide.</p>
+  <p class="nav-links"><a href="0027-kmp.html" class="nav-prev">← Lesson 27</a> <a href="0029-suffix-arrays-first-look.html" class="nav-next">Lesson 29 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>KMP (Lesson 27) solves substring search by never re-examining a text character, using structural information from the pattern itself. <strong>Rabin-Karp</strong> solves the same problem with an entirely different idea: compute a hash of the pattern, compute a hash of every length-m window of the text, and only fall back to an actual character comparison when two hashes match. The technique hinges on a <strong>rolling hash</strong> — a hash function that can be updated from one window to the next in O(1), rather than recomputed from scratch.</p>
+
+  <h2>The rolling hash</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    Treat a string s[0..m−1] as a number in some base b (typically a prime near the alphabet size), where hash(s) = (s[0]·bᵐ⁻¹ + s[1]·bᵐ⁻² + ... + s[m−1]·b⁰) mod q, for some large prime modulus q (to keep values bounded and reduce collisions). This is exactly a polynomial evaluated at b, treating each character's code as a coefficient.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why this specific formula supports O(1) updates</span>
+    Sliding the window one position to the right — dropping s[0] and adding a new character c at the end — can be expressed algebraically: newHash = ((hash − s[0]·bᵐ⁻¹)·b + c) mod q. Subtracting s[0]·bᵐ⁻¹ removes the departing character's contribution (it was the highest-order term); multiplying by b shifts every remaining term up one power of b, matching their new positions in the window; adding c inserts the new character at the lowest-order position. Every step is O(1) arithmetic (modular subtraction, multiplication, addition), so the hash for the next window is computed directly from the previous one — no re-scanning of the window's characters at all.
+  </div>
+
+  <div class="box">
+    <span class="box-label">Algorithm</span>
+<pre class="code-block"><code>function rabinKarp(text, pattern):
+    n, m = |text|, |pattern|
+    patternHash = hash(pattern)
+    windowHash = hash(text[0..m-1])
+    bM = b^(m-1) mod q                      // precomputed once
+    for i in 0..n-m:
+        if windowHash == patternHash:
+            if text[i..i+m-1] == pattern:   // verify: hashes can collide
+                report match at position i
+        if i < n - m:
+            windowHash = ((windowHash - text[i]*bM) * b + text[i+m]) mod q</code></pre>
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why the verification step is non-negotiable</span>
+    Two different strings can hash to the same value — a <strong>collision</strong> — since the hash compresses an m-character string into a single number modulo q, an inherently lossy operation. Skipping verification and trusting a hash match alone would silently produce false positives. With q chosen large enough (and ideally randomized per run, to defend against an adversarial input crafted to force collisions), collisions are rare in practice, so verification is cheap on average — but it is still required for correctness, not merely a defensive nicety.
+  </div>
+
+  <div class="box">
+    <span class="box-label">Runtime</span>
+    Average case Θ(n+m): each window's hash update is O(1), and verification (O(m)) is only triggered on a hash match, which is rare with a good modulus. Worst case (many or adversarial collisions) degrades to Θ(nm), identical to the naive approach — a real risk that motivates KMP's guaranteed-linear alternative whenever worst-case time matters, not just average case.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Where rolling hashes go beyond single-pattern search</span>
+    The same rolling-hash idea generalizes past "find one pattern": comparing rolling hashes of many substrings supports finding the longest common substring between two strings, checking whether two large chunks of text are identical without a full character comparison, or (combined with binary search on substring length) efficiently finding the longest repeated substring within a single text — problems where KMP's pattern-specific failure function doesn't directly apply, but a hash-based comparison does.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What makes a hash function "rolling" in the Rabin-Karp sense?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">It produces a different hash value every time it's called on the same input.</button>
+      <button class="quiz-choice" data-correct="true">It can be updated from one window's hash to the next window's hash in O(1), without rescanning the window's characters.</button>
+      <button class="quiz-choice" data-correct="false">It only works on strings of even length.</button>
+      <button class="quiz-choice" data-correct="false">It sorts every window's characters before hashing them.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The O(1) incremental update — dropping the outgoing character's contribution and shifting in the incoming one — is exactly what "rolling" refers to.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why must Rabin-Karp verify a match with an actual character comparison even after a hash match?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because hash values are never actually computed correctly by the rolling update.</button>
+      <button class="quiz-choice" data-correct="true">Because different strings can collide to the same hash value, so a hash match alone doesn't guarantee the underlying strings are actually equal.</button>
+      <button class="quiz-choice" data-correct="false">Because verification is only a stylistic convention with no effect on correctness.</button>
+      <button class="quiz-choice" data-correct="false">Because the modulus q must always be re-derived from the text before any comparison is trusted.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Hashing is a lossy compression of the string, so collisions are always possible in principle, making direct verification necessary for correctness.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why can Rabin-Karp degrade to Θ(nm) in the worst case, matching the naive algorithm?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because the rolling hash update itself sometimes costs O(m) instead of O(1).</button>
+      <button class="quiz-choice" data-correct="true">Because if many (or adversarially crafted) windows collide with the pattern's hash, every one of them triggers an O(m) verification, adding up across all n windows.</button>
+      <button class="quiz-choice" data-correct="false">Because Rabin-Karp cannot process texts longer than the pattern itself.</button>
+      <button class="quiz-choice" data-correct="false">Because the modulus q must always be recomputed for every window.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Frequent collisions force frequent full verifications, which is exactly what erases the average-case speed advantage over the naive approach.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="collision">
+    <p class="quiz-prompt">4. Fill in the blank: a ___ occurs when two different strings hash to the same value, which is why Rabin-Karp must verify any hash match with a direct character comparison.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>This is the fundamental risk any hash-based comparison carries, since compressing a string into a bounded-size number is necessarily lossy.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="O(1)|constant">
+    <p class="quiz-prompt">5. Fill in the blank: the entire point of a rolling hash is that sliding the window by one position updates the hash in ___ time, rather than recomputing it from scratch over all m characters.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>This constant-time incremental update is what makes hashing every window of the text affordable at all.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: CLRS, Chapter 32.2, "The Rabin-Karp algorithm," and <a href="https://cp-algorithms.com/string/string-hashing.html">CP-Algorithms, "String Hashing"</a> cover the modulus/collision trade-offs in more depth than fits here.</p>
+
+  <p class="ask-teacher">Want to work through why a small or non-prime modulus makes collisions much more likely, with a concrete adversarial example? Ask your teacher — that's what I'm here for. Next up: suffix arrays, a structure that supports many pattern queries against the same text far faster than repeating KMP or Rabin-Karp from scratch each time.</p>
+
+  <footer class="lesson-footer">STEM+ · Advanced Algorithms · Lesson 28 of the course sequence</footer>
+</div>

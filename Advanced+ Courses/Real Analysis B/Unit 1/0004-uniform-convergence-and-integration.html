@@ -1,0 +1,108 @@
+<meta charset="UTF-8">
+<title>Lesson 4: Uniform Convergence and Integration — STEM+</title>
+<link rel="stylesheet" href="../../../assets/style.css">
+<script src="../../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Real Analysis B · Unit 1 · Lesson 4</span>
+  <h1>Uniform Convergence and Integration</h1>
+  <p class="subtitle">Continuity survived a uniform limit. Integrability does too — and uniform convergence is exactly the hypothesis that lets a limit and an integral be swapped.</p>
+  <p class="nav-links"><a href="0003-uniform-convergence-and-continuity.html" class="nav-prev">← Lesson 3</a> <a href="0005-uniform-convergence-and-differentiation.html" class="nav-next">Lesson 5 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Given fₙ → f, when is lim<sub>n→∞</sub> ∫ₐᵇ fₙ = ∫ₐᵇ (lim<sub>n→∞</sub> fₙ) = ∫ₐᵇ f? This "interchange of limit and integral" is not automatic — but uniform convergence is exactly strong enough to guarantee it, and to guarantee the limit function is even integrable in the first place.</p>
+
+  <div class="box">
+    <span class="box-label">Theorem — Uniform Convergence and the Riemann Integral</span>
+    Suppose fₙ → f uniformly on [a, b], and each fₙ is Riemann integrable on [a, b]. Then f is Riemann integrable on [a, b], and ∫ₐᵇ f = lim<sub>n→∞</sub> ∫ₐᵇ fₙ.
+  </div>
+
+  <div class="box">
+    <span class="box-label">Proof — f is integrable</span>
+    Fix ε &gt; 0. By uniform convergence, choose N such that n ≥ N implies |fₙ(x) − f(x)| &lt; ε/(4(b−a)) for every x ∈ [a, b]. Fix such an n. Since fₙ is integrable, the Cauchy Criterion for Integrability (Real Analysis A, Lesson 31) gives a partition P with U(fₙ, P) − L(fₙ, P) &lt; ε/2. Because f is within ε/(4(b−a)) of fₙ everywhere, on every subinterval of P the supremum of f is at most ε/(4(b−a)) above the supremum of fₙ, and the infimum of f is at most ε/(4(b−a)) below the infimum of fₙ. Summing over all subintervals of total length (b−a): U(f, P) ≤ U(fₙ, P) + ε/4 and L(f, P) ≥ L(fₙ, P) − ε/4. So U(f, P) − L(f, P) ≤ [U(fₙ, P) − L(fₙ, P)] + ε/2 &lt; ε/2 + ε/2 = ε. By the Cauchy Criterion, f is integrable. ∎
+  </div>
+
+  <div class="box">
+    <span class="box-label">Proof — the integrals converge</span>
+    |∫ₐᵇ f − ∫ₐᵇ fₙ| = |∫ₐᵇ (f − fₙ)| ≤ ∫ₐᵇ |f − fₙ| ≤ (b − a) · sup<sub>x∈[a,b]</sub> |f(x) − fₙ(x)|, using the standard bound that an integral is at most (length of interval) × (bound on the integrand). Since fₙ → f uniformly, the right-hand side → 0 as n → ∞, forcing ∫ₐᵇ fₙ → ∫ₐᵇ f. ∎
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why uniformity, not just pointwise convergence, drives both halves</span>
+    Both proofs hinge on a single bound on |fₙ(x) − f(x)| that holds at <em>every</em> x ∈ [a,b] simultaneously — used to bound the whole interval's worth of upper/lower sums in the first proof, and the whole integral in the second. A pointwise bound, potentially different at every x, could not be summed or integrated into a single small number the way a uniform bound can. This is the same shape of argument as Lesson 3's continuity proof: uniform convergence supplies one number that controls the entire domain at once.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Example: integrating Σ sin(nx)/n² term by term</span>
+    Lesson 2 showed s(x) = Σ<sub>k=1</sub><sup>∞</sup> sin(kx)/k² is a uniform limit of its partial sums sₙ(x) = Σ<sub>k=1</sub><sup>n</sup> sin(kx)/k² on ℝ, and Lesson 3 showed s is continuous (hence integrable) on any [a,b]. By this theorem, ∫ₐᵇ s(x) dx = lim<sub>n→∞</sub> ∫ₐᵇ sₙ(x) dx = lim<sub>n→∞</sub> Σ<sub>k=1</sub><sup>n</sup> ∫ₐᵇ sin(kx)/k² dx — the integral of the infinite sum equals the infinite sum of the integrals, term by term, justified entirely by uniform convergence.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why pointwise convergence isn't enough for this theorem</span>
+    A classic counterexample (beyond this course's scope to construct in full) is a "moving bump" sequence: fₙ is a triangular spike of height n and width 2/n centered near 0, so that fₙ(x) → 0 pointwise everywhere, yet ∫₀¹ fₙ = 1 for every n (the spike's area stays fixed at 1 as its width shrinks and height grows to compensate). Here lim ∫fₙ = 1 ≠ 0 = ∫(lim fₙ). The convergence is pointwise but not uniform — the height of the spike, growing without bound, is exactly the obstruction to a single N working across the whole domain — and the interchange of limit and integral genuinely fails.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. If fₙ → f uniformly on [a,b] and each fₙ is Riemann integrable, what does the theorem guarantee?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Only that f is integrable, not that the integrals converge</button>
+      <button class="quiz-choice" data-correct="true">That f is integrable and ∫f = lim ∫fₙ</button>
+      <button class="quiz-choice" data-correct="false">That f is differentiable</button>
+      <button class="quiz-choice" data-correct="false">That fₙ = f for n sufficiently large</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Uniform convergence of integrable functions guarantees both integrability of the limit and convergence of the integrals to the limit's integral.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. In the proof that f is integrable, what role does the uniform bound |fₙ(x) − f(x)| &lt; ε/(4(b−a)) play?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">It shows fₙ is discontinuous</button>
+      <button class="quiz-choice" data-correct="true">It bounds how much U(f,P) and L(f,P) can differ from U(fₙ,P) and L(fₙ,P), letting fₙ's small upper-lower gap transfer to f</button>
+      <button class="quiz-choice" data-correct="false">It proves f is a polynomial</button>
+      <button class="quiz-choice" data-correct="false">It shows the partition P must have infinitely many points</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The uniform bound controls U(f,P)−L(f,P) in terms of U(fₙ,P)−L(fₙ,P), which is already small by the Cauchy Criterion applied to fₙ.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. What does the "moving bump" example show?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">That uniform convergence never allows swapping limits and integrals</button>
+      <button class="quiz-choice" data-correct="true">That pointwise (non-uniform) convergence to 0 can coexist with integrals that never approach 0</button>
+      <button class="quiz-choice" data-correct="false">That every pointwise limit is automatically integrable</button>
+      <button class="quiz-choice" data-correct="false">That the Riemann integral is not well-defined for spike functions</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The moving bump converges to 0 pointwise but keeps constant integral 1, showing the theorem's uniform-convergence hypothesis genuinely cannot be weakened to pointwise.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="uniform">
+    <p class="quiz-prompt">4. Fill in the blank: swapping a limit and an integral, term by term, is justified when the convergence of the sequence or series is ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Uniform convergence is exactly the hypothesis this theorem needs to justify interchanging the limit and the integral.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="integrable">
+    <p class="quiz-prompt">5. Fill in the blank: a uniform limit of Riemann ___ functions on [a,b] is itself Riemann integrable on [a,b].</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The theorem's first half guarantees integrability of the limit, not just convergence of integrals.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: Abbott's <em>Understanding Analysis</em>, Section 6.2, proves this interchange theorem and constructs the moving-bump counterexample in full.</p>
+
+  <p class="ask-teacher">Stuck on why the moving-bump sequence isn't uniformly convergent even though it goes pointwise to 0? Ask your teacher — that's what I'm here for. Next up: whether the same interchange works for derivatives — and why it's far more delicate than integration.</p>
+
+  <footer class="lesson-footer">STEM+ · Real Analysis B · Lesson 4 of the course sequence</footer>
+</div>

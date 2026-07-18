@@ -1,0 +1,110 @@
+<meta charset="UTF-8">
+<title>Lesson 19: The Jacobian and the Chain Rule — STEM+</title>
+<link rel="stylesheet" href="../../../assets/style.css">
+<script src="../../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Real Analysis B · Unit 4 · Lesson 19</span>
+  <h1>The Jacobian and the Chain Rule</h1>
+  <p class="subtitle">Once differentiability means "best linear approximation," composing two differentiable functions should compose their linear approximations — and it does, exactly, as a matrix product.</p>
+  <p class="nav-links"><a href="0018-the-total-derivative.html" class="nav-prev">← Lesson 18</a> <a href="0020-clairauts-theorem-and-higher-order-partials.html" class="nav-next">Lesson 20 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <div class="box">
+    <span class="box-label">Theorem — The Multivariable Chain Rule</span>
+    Let g: ℝⁿ → ℝᵐ be differentiable at a, and let f: ℝᵐ → ℝᵏ be differentiable at g(a). Then f∘g is differentiable at a, and
+    <br><br>
+    D(f∘g)(a) = Df(g(a)) · Dg(a),
+    <br><br>
+    a product of a k×m matrix and an m×n matrix, giving the k×n Jacobian of f∘g.
+  </div>
+
+  <div class="box">
+    <span class="box-label">Proof</span>
+    Write b = g(a), L = Dg(a), M = Df(b). By differentiability of g at a and f at b: g(a+h) = g(a) + Lh + |h|·ε₁(h), and f(b+k) = f(b) + Mk + |k|·ε₂(k), where ε₁(h) → 0 as h → 0 and ε₂(k) → 0 as k → 0.
+    <br><br>
+    Let k = k(h) = g(a+h) − g(a) = Lh + |h|·ε₁(h), so k(h) → 0 as h → 0 (g is differentiable, hence continuous at a, by Lesson 18). Then
+    <br><br>
+    f(g(a+h)) = f(b + k(h)) = f(b) + M·k(h) + |k(h)|·ε₂(k(h)) = f(b) + M(Lh + |h|ε₁(h)) + |k(h)|·ε₂(k(h)).
+    <br><br>
+    So f(g(a+h)) − f(g(a)) − MLh = M(|h|ε₁(h)) + |k(h)|·ε₂(k(h)). Dividing by |h|: the first term's norm is bounded by |M|·|ε₁(h)| → 0. For the second term, |k(h)|/|h| ≤ |L| + |ε₁(h)|, a bounded quantity as h → 0, while ε₂(k(h)) → 0 since k(h) → 0 — so this term also vanishes relative to |h|. Hence [f(g(a+h)) − f(g(a)) − MLh] / |h| → 0, meaning f∘g is differentiable at a with total derivative ML = Df(g(a))Dg(a). ∎
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why n = m = k = 1 recovers single-variable calculus</span>
+    When every space involved is ℝ, the Jacobian "matrices" Df(g(a)) and Dg(a) are 1×1 — ordinary numbers f'(g(a)) and g'(a) — and matrix multiplication is ordinary multiplication. The theorem above becomes (f∘g)'(a) = f'(g(a))·g'(a): the single-variable chain rule, now understood as the special case of composing linear approximations in one dimension.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Example: computing a Jacobian product</span>
+    Let g(r,θ) = (r cos θ, r sin θ) (polar to Cartesian), and let f(x,y) = x² + y². Then
+    <br><br>
+    Dg(r,θ) = [[cos θ, −r sin θ], [sin θ, r cos θ]], and Df(x,y) = [2x, 2y] (a 1×2 row matrix).
+    <br><br>
+    At a point (r,θ), Df(g(r,θ)) = [2r cos θ, 2r sin θ]. The chain rule gives D(f∘g)(r,θ) = Df(g(r,θ))·Dg(r,θ) = [2r cos²θ + 2r sin²θ, −2r² sin θ cos θ + 2r² sin θ cos θ] = [2r, 0] — matching the direct computation that f(g(r,θ)) = r², whose partial derivative with respect to r is 2r and with respect to θ is 0.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What does the Multivariable Chain Rule say D(f∘g)(a) equals?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Df(a) + Dg(a)</button>
+      <button class="quiz-choice" data-correct="true">The matrix product Df(g(a)) · Dg(a)</button>
+      <button class="quiz-choice" data-correct="false">Df(a) · Dg(g(a))</button>
+      <button class="quiz-choice" data-correct="false">The determinant of Dg(a)</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The Jacobian of the outer function, evaluated at g(a), is multiplied by the Jacobian of the inner function at a — order matters, since matrix multiplication is not commutative.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. In the proof, why does |k(h)|/|h| stay bounded as h → 0?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because f is continuous</button>
+      <button class="quiz-choice" data-correct="true">Because k(h) = Lh + |h|ε₁(h), so |k(h)|/|h| ≤ |L| + |ε₁(h)|, and ε₁(h) → 0</button>
+      <button class="quiz-choice" data-correct="false">Because g is linear</button>
+      <button class="quiz-choice" data-correct="false">Because the Jacobian of f is the identity matrix</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>This bound is exactly what's needed so that ε₂(k(h)), which vanishes as k(h)→0, still forces the whole second error term to vanish relative to |h|.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. What does the chain rule reduce to when n = m = k = 1?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">(f∘g)'(a) = f'(a) + g'(a)</button>
+      <button class="quiz-choice" data-correct="true">(f∘g)'(a) = f'(g(a)) · g'(a), the ordinary single-variable chain rule</button>
+      <button class="quiz-choice" data-correct="false">(f∘g)'(a) = f'(g'(a))</button>
+      <button class="quiz-choice" data-correct="false">(f∘g)'(a) is undefined in one dimension</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>In one dimension, the Jacobian matrices are just numbers, and matrix multiplication becomes ordinary multiplication — recovering the familiar chain rule exactly.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="jacobian">
+    <p class="quiz-prompt">4. Fill in the blank: the matrix representing Df(a) via the partial derivatives is called the ___ matrix.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Jacobian is the standard name for this matrix of partial derivatives.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="chain">
+    <p class="quiz-prompt">5. Fill in the blank: D(f∘g)(a) = Df(g(a))·Dg(a) is the multivariable ___ rule.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>This is the chain rule, generalized to composition of differentiable maps between Euclidean spaces.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: Rudin's <em>Principles of Mathematical Analysis</em>, Chapter 9, proves the multivariable chain rule and works through further Jacobian examples.</p>
+
+  <p class="ask-teacher">Stuck on why the two error terms in the proof each vanish relative to |h| for different reasons? Ask your teacher — that's what I'm here for. Next up: second-order partial derivatives, and whether the order of differentiation ever matters.</p>
+
+  <footer class="lesson-footer">STEM+ · Real Analysis B · Lesson 19 of the course sequence</footer>
+</div>

@@ -1,0 +1,118 @@
+<meta charset="UTF-8">
+<title>Lesson 12: Huffman Coding — STEM+</title>
+<link rel="stylesheet" href="../../../assets/style.css">
+<script src="../../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Advanced Algorithms · Unit 3 · Lesson 12</span>
+  <h1>Huffman Coding</h1>
+  <p class="subtitle">A greedy algorithm for building the shortest possible prefix-free binary code for a set of symbols with known frequencies — proved optimal with the same exchange-argument machinery as interval scheduling and MSTs.</p>
+  <p class="nav-links"><a href="0011-the-cut-property.html" class="nav-prev">← Lesson 11</a> <a href="../Unit%204/0013-bellman-ford.html" class="nav-next">Lesson 13 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Fixed-length encoding gives every symbol the same number of bits, regardless of how often it appears. If some symbols are far more common than others, a <strong>prefix-free code</strong> (no codeword is a prefix of another, so a bitstream can be decoded unambiguously without delimiters) that assigns shorter codewords to more frequent symbols can compress the total encoding significantly. Huffman coding builds an optimal such code, greedily, by repeatedly merging the two least-frequent symbols into a combined node — and it closes this unit by applying the exact exchange-argument proof pattern from Lessons 9 and 11 to a genuinely different kind of problem.</p>
+
+  <h2>The algorithm</h2>
+  <div class="box">
+    <span class="box-label">Algorithm</span>
+<pre class="code-block"><code>function huffman(symbols, frequencies):
+    create a leaf node for each symbol, with its frequency, inserted into a min-priority queue
+    while priority queue has more than one node:
+        left = extract-min(queue)
+        right = extract-min(queue)
+        merged = new internal node with weight = left.weight + right.weight
+        merged.left = left, merged.right = right
+        insert merged into queue
+    return the single remaining node as the root of the code tree
+    // codeword for each symbol = path from root to its leaf (0 = left, 1 = right)</code></pre>
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Worked example</span>
+    Symbols A:5, B:9, C:12, D:13, E:16, F:45 (frequencies). Merge the two smallest, A(5)+B(9)=14. Queue now: 14, C:12, D:13, E:16, F:45. Merge two smallest: C(12)+D(13)=25. Queue: 14, 25, E:16, F:45. Merge two smallest: 14+E(16)=30. Queue: 25, 30, F:45. Merge: 25+30=55. Queue: 55, F:45. Merge: 55+45=100 — done. Tracing paths from the root gives F (the most frequent symbol) a 1-bit code, while A and B (the least frequent) get 4-bit codes — exactly the frequency-weighted trade-off the algorithm is designed to produce.
+  </div>
+
+  <div class="box">
+    <span class="box-label">Theorem — Huffman coding produces an optimal prefix-free code</span>
+    Among all prefix-free binary codes for a given symbol/frequency set, the Huffman tree minimizes the total encoded length ∑(frequency(s) · depth(s)) over all symbols s.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Proof sketch — exchange argument, again</span>
+    Key lemma: in <em>some</em> optimal code tree, the two least-frequent symbols are siblings at the maximum depth. Proof: take any optimal tree; if the two least-frequent symbols x, y are not already siblings at max depth, find whichever symbols <em>are</em> at max depth (call them p, q) and swap: exchange x with p and y with q in the tree. Since x, y have the smallest frequencies and p, q were already at the deepest level (depth ≥ depth of x, y in the original tree), this swap cannot increase the total weighted depth — an exchange-argument step identical in spirit to Lesson 9's interval-scheduling swap. Repeating (or directly constructing) this shows some optimal tree has x, y as deepest siblings — exactly the pair Huffman's algorithm merges first. Once merged into a single node of combined weight, the remaining problem is identical in structure to the original but with one fewer symbol — an inductive step (Lesson 5's strong induction, reapplied) completes the argument: if merging the two smallest is optimal for n symbols assuming it's optimal for n−1, it's optimal for all n.
+  </div>
+
+  <div class="box">
+    <span class="box-label">Runtime</span>
+    n−1 merges, each doing two extract-min and one insert on a binary heap of size O(n), giving Θ(n log n) total — dominated by the priority queue operations, the same building block Prim's algorithm (Lesson 10) relies on for its own frontier extraction.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why this closes the unit</span>
+    Three different-looking problems — interval scheduling, minimum spanning trees, optimal prefix codes — turned out to share the exact same proof technique: assume an optimal solution differs from greedy's, exhibit a specific non-worsening swap, and conclude by induction that greedy matches optimal. Recognizing "this is a greedy problem" is a CP2+-level pattern-matching skill; recognizing "this greedy problem can be proven correct with an exchange argument, and here's the specific swap" is the rigor this unit adds on top of it.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. Why does Huffman's algorithm merge the two <em>least</em>-frequent symbols first, rather than the two most-frequent?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because merging the most-frequent symbols first would create an invalid tree structure.</button>
+      <button class="quiz-choice" data-correct="true">Because the least-frequent symbols end up deepest in the tree (longest codewords), and merging them first is what places them there, minimizing their contribution to total weighted depth relative to alternatives.</button>
+      <button class="quiz-choice" data-correct="false">Because frequency order has no effect on the resulting code's total length.</button>
+      <button class="quiz-choice" data-correct="false">Because the priority queue only supports extracting the two smallest elements at once.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Rare symbols should get the longest codewords since they contribute least to the total encoded length per extra bit; merging the two smallest first is exactly what pushes them deepest in the resulting tree.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. What does the key lemma in Huffman's correctness proof establish?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">That every prefix-free code must have exactly two symbols.</button>
+      <button class="quiz-choice" data-correct="true">That some optimal code tree has the two least-frequent symbols as siblings at the maximum depth.</button>
+      <button class="quiz-choice" data-correct="false">That Huffman's algorithm always produces a perfectly balanced binary tree.</button>
+      <button class="quiz-choice" data-correct="false">That the total encoded length is independent of the tree's shape.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>This lemma is exactly what licenses Huffman's first greedy move — merging the two least-frequent symbols — as consistent with some optimal solution.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. After the key lemma, what completes Huffman's correctness proof?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">A direct computation checking every possible tree shape exhaustively.</button>
+      <button class="quiz-choice" data-correct="true">An inductive step: once the two smallest symbols are merged into one node, the remaining problem has the identical structure with one fewer symbol, so induction on the symbol count finishes the argument.</button>
+      <button class="quiz-choice" data-correct="false">A separate proof that priority queues always return the correct minimum.</button>
+      <button class="quiz-choice" data-correct="false">Nothing further is needed — the key lemma alone fully proves optimality.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The lemma justifies the first merge; strong induction (Lesson 5) on the shrinking symbol set is what extends that single-step justification into a proof for all n.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="prefix-free|prefix free">
+    <p class="quiz-prompt">4. Fill in the blank: Huffman coding builds a ___ code, meaning no codeword is ever a prefix of another, allowing unambiguous decoding without delimiters.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The prefix-free property is exactly what a binary tree's leaf-only-codeword structure guarantees, since no leaf's root-path can be a prefix of another leaf's root-path.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="priority queue|heap">
+    <p class="quiz-prompt">5. Fill in the blank: Huffman's Θ(n log n) runtime comes from repeated extract-min and insert operations on a ___ , the same structure Prim's algorithm relies on.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Both algorithms lean on the same O(log n)-per-operation priority queue machinery, just applied to different quantities (edge weight for Prim's, merged node weight for Huffman's).</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: CLRS, Chapter 15 (in the dynamic programming chapter's closing section), "Huffman codes," gives the full construction, correctness proof, and a worked example with a complete code table.</p>
+
+  <p class="ask-teacher">Want to build the Huffman tree for your own set of symbol frequencies and check the resulting codeword lengths? Ask your teacher — that's what I'm here for. This closes Unit 3. Next up: Unit 4, advanced graph algorithms — starting with Bellman-Ford, which handles negative edge weights that break Dijkstra's algorithm entirely.</p>
+
+  <footer class="lesson-footer">STEM+ · Advanced Algorithms · Lesson 12 of the course sequence</footer>
+</div>

@@ -1,0 +1,118 @@
+<meta charset="UTF-8">
+<title>Lesson 34: Capstone — From Asymptotic Notation to Intractability — STEM+</title>
+<link rel="stylesheet" href="../../../assets/style.css">
+<script src="../../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Advanced Algorithms · Unit 8 · Lesson 34</span>
+  <h1>Capstone — From Asymptotic Notation to Intractability</h1>
+  <p class="subtitle">The whole course, traced as one dependency chain: how a rigorous language for runtime, applied relentlessly across data structures, graphs, and strings, eventually meets problems where no efficient algorithm is believed to exist at all.</p>
+  <p class="nav-links"><a href="0033-approximation-algorithms.html" class="nav-prev">← Lesson 33</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>This closing lesson adds no new theorems. Instead, it retraces the entire logical chain built across 34 lessons — showing how the same handful of proof techniques (exchange arguments, potential functions, reductions) reappear across data structures, graphs, dynamic programming, and strings, and how the course's final unit uses those same techniques to explain why some problems resist efficient solutions altogether.</p>
+
+  <h2>The dependency chain</h2>
+
+  <div class="box">
+    <span class="box-label">Unit 1 — Algorithm Analysis, Rigorously</span>
+    Asymptotic notation (Lesson 1) gives the formal language — O, Ω, Θ — for comparing algorithms precisely; the recursion tree method (Lesson 2) and the Master Theorem (Lesson 3) turn recurrence relations into closed-form bounds mechanically. Amortized analysis via the potential method (Lesson 4) handles structures whose worst-case-per-operation bound is misleadingly pessimistic — introducing a potential-function technique this course reuses twice more, in Lesson 25's Union-Find proof and Lesson 27's KMP argument, and forward-referencing Union-Find itself before that structure had even been introduced.
+  </div>
+  <div class="box">
+    <span class="box-label">Unit 2 — Divide and Conquer</span>
+    Correctness by strong induction (Lesson 5) formalizes exactly what "trust the recursive calls" requires proving; counting inversions via merge sort (Lesson 6) is the first concrete payoff, beating brute force's Θ(n²) with Θ(n log n). Median of medians (Lesson 7) achieves guaranteed linear-time selection through a carefully chosen recursive pivot, and Strassen's algorithm (Lesson 8) shows even matrix multiplication's textbook exponent isn't the last word — closing the unit on the theme that "divide and conquer" is a design pattern, not a single algorithm.
+  </div>
+  <div class="box">
+    <span class="box-label">Unit 3 — Greedy Algorithms &amp; MSTs</span>
+    Exchange arguments (Lesson 9) supply the proof technique for greedy correctness — showing any optimal solution can be transformed into the greedy one without increasing cost. Kruskal's and Prim's algorithms (Lesson 10) build minimum spanning trees greedily, leaning on Union-Find's "near-constant time" without yet proving it; the cut property (Lesson 11) supplies the actual theorem both algorithms depend on, and Huffman coding (Lesson 12) applies the same exchange-argument idea to optimal prefix codes, closing the unit.
+  </div>
+  <div class="box">
+    <span class="box-label">Unit 4 — Advanced Graph Algorithms</span>
+    Bellman-Ford (Lesson 13) handles negative edge weights where a simple shortest-path algorithm cannot; Floyd-Warshall (Lesson 14) solves all-pairs shortest paths via dynamic programming. Kosaraju's and Tarjan's algorithms (Lesson 15) find strongly connected components, with Tarjan's low-link bookkeeping explicitly echoing Unit 1's amortized-analysis vocabulary. Ford-Fulkerson (Lesson 16) computes maximum flow via augmenting paths, and max-flow min-cut (Lesson 17) proves the two values are exactly equal — a duality later echoed, in weakened one-sided form, by Unit 8's LP-relaxation bound.
+  </div>
+  <div class="box">
+    <span class="box-label">Unit 5 — Advanced Dynamic Programming</span>
+    DP on trees (Lesson 18) extends dynamic programming beyond linear or grid-shaped subproblems to tree-shaped recursion. Bitmask DP (Lesson 19) solves the traveling salesman problem exactly in Θ(n²·2ⁿ) — a real improvement over brute force, but still exponential, flagging TSP's NP-hardness as a claim the course would need to justify precisely later. Matrix chain multiplication (Lesson 20) finds optimal parenthesization, and matrix exponentiation (Lesson 21) computes linear recurrences like Fibonacci in O(log n) — its exponential-growth argument echoed directly in Lesson 24's AVL height-bound proof.
+  </div>
+  <div class="box">
+    <span class="box-label">Unit 6 — Advanced Data Structures</span>
+    Segment trees (Lesson 22) and Fenwick trees (Lesson 23) both answer range queries efficiently, trading generality for simplicity. AVL rotations (Lesson 24) keep binary search trees balanced via a provable height bound. Disjoint Set Union, Proved (Lesson 25) is the unit's hinge lesson: it finally pays off Unit 3's and Unit 4's deferred "near-constant time" claims about Union-Find, using an induction argument explicitly parallel to Lesson 24's, and closes the loop on Lesson 4's, Lesson 10's, and Lesson 15's forward-references all at once. Tries (Lesson 26) close the unit by specializing storage entirely around shared string prefixes.
+  </div>
+  <div class="box">
+    <span class="box-label">Unit 7 — String Algorithms</span>
+    KMP (Lesson 27) achieves linear-time pattern matching via a precomputed failure function, its amortized argument explicitly echoing Lesson 25's potential-based accounting. Rabin-Karp (Lesson 28) solves the same problem with an entirely different tool, rolling hashes, trading a guaranteed bound for average-case speed. Suffix arrays (Lesson 29) close the unit by preprocessing a text once to answer any number of future pattern queries fast — the same "pay once upfront, save on every repeated query" trade-off Lesson 22's segment tree first introduced.
+  </div>
+  <div class="box">
+    <span class="box-label">Unit 8 — Complexity &amp; Intractability</span>
+    P vs. NP and polynomial-time reductions (Lesson 30) give the vocabulary for comparing problem difficulty without solving anything outright. The Cook-Levin theorem (Lesson 31) proves SAT is NP-complete directly from the definition of NP — the seed every later NP-completeness proof in the field builds from. Common NP-complete problems (Lesson 32) chain outward by reduction — Independent Set, Vertex Cover "for free" by transitivity, Hamiltonian Cycle, and finally TSP itself — closing Lesson 19's nine-lesson-old deferred claim. Approximation algorithms (Lesson 33) close the course by asking what provable guarantee survives when exactness is believed impossible, using an LP-relaxation bound that is, explicitly, max-flow min-cut's duality argument (Lesson 17) wearing a one-sided disguise.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why this chain is the actual point of the course</span>
+    This course could have been organized as eight unrelated toolboxes — sorting here, graphs there, strings somewhere else. Instead, three proof techniques recur relentlessly across every unit, in different costumes: <em>exchange arguments</em> (Unit 3's greedy correctness, reappearing in Huffman coding), <em>potential functions</em> (Unit 1's amortized analysis, reappearing exactly in Lesson 25's Union-Find proof and Lesson 27's KMP argument), and <em>reductions</em> (Lesson 30's formal definition, but really the same "prove hardness by relating one problem to another" instinct Unit 8 built its entire final act on). The course's deepest claim isn't any single algorithm — it's that these three techniques are the actual toolkit for reasoning about algorithms rigorously, whether the goal is proving something runs fast (Units 1–7) or proving nothing can (Unit 8).
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What proof technique underlies both Unit 3's greedy correctness arguments and Lesson 25's Union-Find rank-bound theorem, even though they concern completely different problems?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Brute-force enumeration of every possible case.</button>
+      <button class="quiz-choice" data-correct="true">An inductive/exchange-style argument — Unit 3 exchanges elements of a hypothetical optimal solution without increasing cost, while Lesson 25 inducts on rank to lower-bound node count; both build a guarantee step by step rather than checking every case.</button>
+      <button class="quiz-choice" data-correct="false">Randomized sampling of the input.</button>
+      <button class="quiz-choice" data-correct="false">Dynamic programming over all subproblems.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Both arguments build their guarantee incrementally — by exchange or by induction — rather than exhaustively checking cases, which is the shared thread across otherwise unrelated problems.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. What long-standing forward-reference, first raised in Unit 1, does Lesson 25 (Unit 6) finally resolve?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">The exact runtime of Strassen's matrix multiplication algorithm.</button>
+      <button class="quiz-choice" data-correct="true">Union-Find's "near-constant amortized time" claim, first flagged by Lesson 4's potential-method discussion and leaned on again by Kruskal's algorithm (Lesson 10) and Tarjan's SCC algorithm (Lesson 15) before ever being proved.</button>
+      <button class="quiz-choice" data-correct="false">Whether P equals NP.</button>
+      <button class="quiz-choice" data-correct="false">The correctness of the Master Theorem.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Lesson 4 introduced the potential method and flagged Union-Find as a future application; Lessons 10 and 15 both leaned on its efficiency before Lesson 25 finally proved it.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. How does Unit 8's use of reductions relate to the max-flow min-cut duality from Unit 4?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">They are unrelated techniques that happen to appear in the same course.</button>
+      <button class="quiz-choice" data-correct="true">Both certify a bound on one problem's optimal value using a second, differently-structured problem — max-flow min-cut proves an exact equality, while Lesson 33's LP relaxation proves only a one-sided bound, but both are the same "certify via a second structure" idea.</button>
+      <button class="quiz-choice" data-correct="false">Reductions replace the need for max-flow min-cut entirely.</button>
+      <button class="quiz-choice" data-correct="false">Max-flow min-cut is itself an example of an NP-completeness reduction.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Lesson 33 explicitly frames LP relaxation's bound as max-flow min-cut's duality argument in weakened, one-sided form.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="reduction|reductions">
+    <p class="quiz-prompt">4. Fill in the blank: Lesson 19's deferred claim that TSP is NP-hard is finally justified in Lesson 32 via a polynomial-time ___ from Hamiltonian Cycle.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The Hamiltonian-Cycle-to-TSP reduction is exactly the precise justification Lesson 19 deferred nine lessons earlier.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="potential|potential function">
+    <p class="quiz-prompt">5. Fill in the blank: Lesson 4's amortized analysis, Lesson 25's Union-Find proof, and Lesson 27's KMP argument all share the same underlying ___ method, even though they concern arrays, trees, and strings respectively.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The potential method is the single recurring technique tying together three otherwise unrelated amortized-analysis arguments across the course.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this to consolidate the whole course: CLRS (Cormen, Leiserson, Rivest, Stein), <em>Introduction to Algorithms</em>, covers essentially every algorithm and proof technique cited across all eight units in full rigor, and CP-Algorithms (cp-algorithms.com), cited throughout Units 4–7, remains the fastest reference for re-deriving any specific algorithm's implementation details.</p>
+
+  <p class="ask-teacher">Stuck on anything above, or want to talk through which single proof technique in this course surprised you most, now that you can see the whole chain at once? Ask your teacher — that's what I'm here for. This closes Advanced Algorithms — from a rigorous language for runtime, through greedy, graph, DP, data-structure, and string algorithms, to the proof that some problems provably resist efficient exact solutions at all.</p>
+
+  <footer class="lesson-footer">STEM+ · Advanced Algorithms · Lesson 34 of the course sequence — end of course</footer>
+</div>

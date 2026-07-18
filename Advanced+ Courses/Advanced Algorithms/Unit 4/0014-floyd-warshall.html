@@ -1,0 +1,118 @@
+<meta charset="UTF-8">
+<title>Lesson 14: Floyd-Warshall — STEM+</title>
+<link rel="stylesheet" href="../../../assets/style.css">
+<script src="../../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Advanced Algorithms · Unit 4 · Lesson 14</span>
+  <h1>Floyd-Warshall</h1>
+  <p class="subtitle">Running Bellman-Ford from every vertex would solve all-pairs shortest paths in Θ(V²E). Floyd-Warshall does it in Θ(V³) with a three-line dynamic program — by asking a single, elegant question about intermediate vertices.</p>
+  <p class="nav-links"><a href="0013-bellman-ford.html" class="nav-prev">← Lesson 13</a> <a href="0015-scc.html" class="nav-next">Lesson 15 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Bellman-Ford (Lesson 13) solves single-source shortest paths. If you need shortest paths between <em>every</em> pair of vertices, one option is running Bellman-Ford once per source, for Θ(V) · Θ(VE) = Θ(V²E) total. Floyd-Warshall instead directly computes all-pairs shortest paths with a dynamic program indexed by which intermediate vertices are allowed — a different DP shape than any CP2+ covered, and one that generalizes cleanly regardless of edge sign, as long as no negative cycle exists.</p>
+
+  <h2>The key idea — restricting which vertices a path may pass through</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    Let dist<sub>k</sub>(i, j) be the length of the shortest path from i to j that uses only vertices {1, ..., k} as intermediate stops (i and j themselves are always allowed as endpoints, regardless of k). dist<sub>0</sub>(i, j) is just the direct edge weight (i, j), or infinity if no edge exists (0 if i = j).
+  </div>
+
+  <div class="box why">
+    <span class="box-label">The recurrence</span>
+    dist<sub>k</sub>(i, j) = min( dist<sub>k−1</sub>(i, j), dist<sub>k−1</sub>(i, k) + dist<sub>k−1</sub>(k, j) ). In words: the best path using intermediates up to k either doesn't use vertex k at all (first term, unchanged from k−1), or it does use k exactly once as a stopover (second term — go from i to k, then k to j, each using only intermediates up to k−1, since a shortest path never needs to visit vertex k twice). This is the same "combine two subproblems, don't repeat" logic Lesson 6 used for merge sort — but here the subproblem parameter is "which vertices are allowed," not "which array half."
+  </div>
+
+  <h2>The algorithm</h2>
+  <div class="box">
+    <span class="box-label">Algorithm</span>
+<pre class="code-block"><code>function floydWarshall(graph):
+    dist = V x V matrix, dist[i][j] = weight(i, j) if edge exists, 0 if i == j, else infinity
+    for k in 1..V:
+        for i in 1..V:
+            for j in 1..V:
+                if dist[i][k] + dist[k][j] < dist[i][j]:
+                    dist[i][j] = dist[i][k] + dist[k][j]
+    // after the loop, dist[i][j] = true shortest path from i to j for all pairs
+    return dist</code></pre>
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why the loop order (k outermost) is not arbitrary</span>
+    The recurrence for dist<sub>k</sub> depends only on dist<sub>k−1</sub> values — so by the time the algorithm processes a given k in the outer loop, every dist[i][j] entry in the matrix already holds dist<sub>k−1</sub>(i,j), exactly what the recurrence needs. Because the update dist[i][k] + dist[k][j] < dist[i][j] only ever reads row k and column k (never overwrites them during the same k-iteration in a way that corrupts itself — dist[k][k] never improves below 0 absent a negative cycle), the matrix can be updated in place without a separate previous-iteration copy, which is what makes the algorithm's actual code even simpler than the recurrence suggests.
+  </div>
+
+  <div class="box">
+    <span class="box-label">Runtime and when to prefer it over repeated Bellman-Ford</span>
+    Three nested loops over V vertices: Θ(V³), beating Θ(V²E) whenever E is asymptotically larger than V (i.e., in dense graphs, where E approaches V²). For sparse graphs, running Bellman-Ford from every source can actually be faster — the right choice depends on graph density, the same kind of trade-off Lesson 10 flagged between Kruskal's and Prim's.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Negative cycle detection, again</span>
+    Exactly as with Bellman-Ford, if dist[i][i] becomes negative for any vertex i after the algorithm runs, that means there's a negative-weight cycle reachable from and back to i — the diagonal of the final matrix is the negative-cycle check for Floyd-Warshall, just as the extra relaxation pass was for Bellman-Ford.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What does dist<sub>k</sub>(i, j) represent in Floyd-Warshall's dynamic program?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">The number of edges on the shortest path from i to j.</button>
+      <button class="quiz-choice" data-correct="true">The length of the shortest path from i to j that only uses vertices 1 through k as intermediate stops.</button>
+      <button class="quiz-choice" data-correct="false">The total weight of every edge incident to vertex k.</button>
+      <button class="quiz-choice" data-correct="false">The shortest path from vertex k to every other vertex.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The subproblem parameter is which intermediate vertices are allowed, not a source vertex or an edge count.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why must the recurrence's outer loop iterate over k (the allowed-intermediate-vertex limit) before i and j?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Loop order doesn't matter; any nesting produces the same result.</button>
+      <button class="quiz-choice" data-correct="true">Because computing dist_k correctly requires dist_(k-1) values to already be finalized, so the algorithm must fully process each k before moving to the next.</button>
+      <button class="quiz-choice" data-correct="false">Because k must always be the smallest-indexed vertex in the graph.</button>
+      <button class="quiz-choice" data-correct="false">Because i and j are undefined until k has been assigned a value.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Each dist_k layer depends entirely on the previous layer's values, so k must be the outermost loop to guarantee correctness.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. When is Floyd-Warshall preferable to running Bellman-Ford once per source vertex?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Only when the graph has no edges at all.</button>
+      <button class="quiz-choice" data-correct="true">When the graph is dense (E close to V²), since Θ(V³) then beats Θ(V²E).</button>
+      <button class="quiz-choice" data-correct="false">Never — repeated Bellman-Ford is always asymptotically faster.</button>
+      <button class="quiz-choice" data-correct="false">Only when every edge weight is guaranteed non-negative.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The comparison is purely about graph density: Θ(V³) versus Θ(V²E), so density determines which is asymptotically better.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="intermediate|intermediate vertex|intermediate vertices">
+    <p class="quiz-prompt">4. Fill in the blank: Floyd-Warshall's dynamic program is indexed by which vertices are allowed as ___ stops along a path, rather than by source vertex.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>This is the defining idea that makes Floyd-Warshall's DP shape different from any single-source shortest-path algorithm.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="diagonal">
+    <p class="quiz-prompt">5. Fill in the blank: after Floyd-Warshall finishes, a negative value on the ___ of the distance matrix (dist[i][i] &lt; 0) indicates a negative-weight cycle reachable from vertex i.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>dist[i][i] should always be exactly 0 in a graph with no negative cycle, so any negative value there is the tell-tale sign of one.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: CLRS, Chapter 25, Section 25.2, "The Floyd-Warshall algorithm," gives the full derivation of the recurrence and a worked example matrix.</p>
+
+  <p class="ask-teacher">Want to trace the dist matrix through all V iterations of k on a small 4-vertex graph? Ask your teacher — that's what I'm here for. Next up: strongly connected components — Kosaraju's and Tarjan's algorithms, which find every maximal set of mutually-reachable vertices in a directed graph.</p>
+
+  <footer class="lesson-footer">STEM+ · Advanced Algorithms · Lesson 14 of the course sequence</footer>
+</div>

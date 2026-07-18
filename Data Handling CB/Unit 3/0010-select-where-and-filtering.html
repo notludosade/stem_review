@@ -1,0 +1,107 @@
+<meta charset="UTF-8">
+<title>Lesson 10: SELECT, WHERE, and Filtering — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Data Handling: CB · Unit 3 · Lesson 10</span>
+  <h1>SELECT, WHERE, and Filtering</h1>
+  <p class="subtitle">SQL — Structured Query Language — is how you actually ask a database a question. This lesson covers the two clauses that answer "which columns" and "which rows": SELECT and WHERE.</p>
+  <p class="nav-links"><a href="0009-the-relational-model.html" class="nav-prev">← Lesson 9</a> <a href="0011-joins.html" class="nav-next">Lesson 11 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Every SQL query used in this course runs against standard, portable SQL — the same core syntax works essentially unchanged across PostgreSQL, MySQL, SQLite, and most other relational databases.</p>
+
+  <h2>SELECT: choosing columns</h2>
+  <div class="box">
+    <span class="box-label">Syntax</span>
+    <code>SELECT column1, column2 FROM table_name;</code> returns the named columns from every row of the table. <code>SELECT * FROM table_name;</code> returns every column. Example: <code>SELECT name, region FROM customers;</code> returns just the name and region columns, from every row in the customers table.
+  </div>
+
+  <h2>WHERE: filtering rows</h2>
+  <div class="box">
+    <span class="box-label">Syntax</span>
+    <code>SELECT columns FROM table_name WHERE condition;</code> returns only rows matching <code>condition</code>. Example: <code>SELECT name FROM customers WHERE region = 'West';</code> returns names only for customers in the West region. Conditions can use <code>=</code>, <code>&lt;&gt;</code> (not equal), <code>&lt;</code>, <code>&gt;</code>, <code>&lt;=</code>, <code>&gt;=</code>, and can be combined with <code>AND</code> / <code>OR</code>: <code>WHERE region = 'West' AND order_total &gt; 100</code>.
+  </div>
+
+  <h2>ORDER BY and LIMIT</h2>
+  <div class="box">
+    <span class="box-label">Syntax</span>
+    <code>ORDER BY column</code> sorts the results (add <code>DESC</code> for descending; ascending is the default). <code>LIMIT n</code> returns only the first <code>n</code> rows. Example: <code>SELECT name, order_total FROM orders ORDER BY order_total DESC LIMIT 5;</code> returns the 5 highest order totals, largest first.
+  </div>
+
+  <h2>Query execution order (conceptually)</h2>
+  <div class="box why">
+    <span class="box-label">Why the clause order in a query doesn't match the order SQL evaluates it</span>
+    A query is written <code>SELECT ... FROM ... WHERE ... ORDER BY ...</code>, but SQL doesn't evaluate it top to bottom. Conceptually, it first figures out <code>FROM</code> (which table), then applies <code>WHERE</code> (filtering rows), and only then applies <code>SELECT</code> (choosing which columns of the surviving rows to show), with <code>ORDER BY</code> and <code>LIMIT</code> applied last, after filtering. This is why a condition in <code>WHERE</code> can reference a column that isn't even listed in <code>SELECT</code> — filtering happens on the full row, before column selection narrows what's displayed.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Worked example</span>
+    <code>SELECT name, order_total FROM orders WHERE region = 'West' AND order_total &gt; 200 ORDER BY order_total DESC LIMIT 3;</code> — reading it in evaluation order: start with the orders table, keep only rows where region is West and order_total exceeds 200, then show just the name and order_total columns of those surviving rows, sorted largest-total-first, keeping only the top 3.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What is the difference between what SELECT and WHERE each control in a query?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">SELECT filters which rows appear; WHERE chooses which columns appear.</button>
+      <button class="quiz-choice" data-correct="true">SELECT chooses which columns to display; WHERE filters which rows are included based on a condition.</button>
+      <button class="quiz-choice" data-correct="false">SELECT and WHERE do the exact same thing and are interchangeable.</button>
+      <button class="quiz-choice" data-correct="false">SELECT sorts the results; WHERE limits how many rows are returned.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Column choice (SELECT) and row filtering (WHERE) are two separate, independent jobs in a query.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why can a WHERE condition reference a column that isn't listed in the SELECT clause at all?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because WHERE and SELECT operate on entirely different, unrelated tables.</button>
+      <button class="quiz-choice" data-correct="true">Because conceptually, WHERE filters full rows from the table before SELECT narrows down which columns of those surviving rows to display.</button>
+      <button class="quiz-choice" data-correct="false">Because SQL automatically adds every WHERE column into the output regardless of SELECT.</button>
+      <button class="quiz-choice" data-correct="false">It can't — every WHERE column must also appear in SELECT.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Filtering happens against the full row before column selection narrows the display, which is exactly why WHERE isn't limited to SELECT's chosen columns.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. What does <code>ORDER BY order_total DESC LIMIT 3</code> return?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">The first 3 rows in the table's original, unsorted order.</button>
+      <button class="quiz-choice" data-correct="true">The 3 rows with the highest order_total values, sorted largest first.</button>
+      <button class="quiz-choice" data-correct="false">The 3 rows with the lowest order_total values.</button>
+      <button class="quiz-choice" data-correct="false">Every row, sorted by order_total, with no limit actually applied.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>DESC sorts largest to smallest, and LIMIT 3 keeps only the first 3 of that sorted result.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="WHERE">
+    <p class="quiz-prompt">4. Fill in the blank: the SQL clause used to filter which rows are returned based on a condition is ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>WHERE is the clause that restricts a query's results to rows matching a specific condition.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="LIMIT">
+    <p class="quiz-prompt">5. Fill in the blank: the SQL clause used to restrict a query's results to only the first n rows is ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>LIMIT caps the number of rows returned, typically paired with ORDER BY to get a meaningful "top N" result.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: the Mode Analytics SQL Tutorial (mode.com/sql-tutorial), "SELECT statements," is a hands-on, browser-based tutorial covering exactly this material with a live query editor.</p>
+
+  <p class="ask-teacher">Have a real table you'd like to write a filtering query against? Ask your teacher — that's what I'm here for. Next up: combining data across multiple tables with SQL's JOIN — the database version of the spreadsheet lookup from Lesson 6.</p>
+
+  <footer class="lesson-footer">STEM+ · Data Handling: CB · Lesson 10 of the course sequence</footer>
+</div>

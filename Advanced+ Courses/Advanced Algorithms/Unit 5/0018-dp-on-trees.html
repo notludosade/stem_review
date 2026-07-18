@@ -1,0 +1,118 @@
+<meta charset="UTF-8">
+<title>Lesson 18: DP on Trees — STEM+</title>
+<link rel="stylesheet" href="../../../assets/style.css">
+<script src="../../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Advanced Algorithms · Unit 5 · Lesson 18</span>
+  <h1>DP on Trees</h1>
+  <p class="subtitle">CP2+'s DP lessons solved problems over sequences and grids. When the underlying structure is a tree instead, the recurrence changes shape — each subproblem combines results from a variable number of children rather than looking back one or two fixed positions.</p>
+  <p class="nav-links"><a href="../Unit%204/0017-max-flow-min-cut.html" class="nav-prev">← Lesson 17</a> <a href="0019-bitmask-dp.html" class="nav-next">Lesson 19 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>CP2+'s Lessons 26–30 covered dynamic programming over sequences (strings, arrays) and grids, where each state typically depends on one or two neighboring states (i−1, or i−1 and j−1). <strong>DP on trees</strong> keeps the same core idea — define a state, express it recursively in terms of smaller substates, memoize — but the recursion structure is dictated by the tree itself: a node's answer depends on combining the answers of all its children, an arity that varies node to node.</p>
+
+  <h2>The canonical problem — maximum weight independent set on a tree</h2>
+  <div class="box">
+    <span class="box-label">Problem</span>
+    Given a tree with a weight on each vertex, select a subset of vertices with no two adjacent (an independent set) maximizing total weight.
+  </div>
+
+  <div class="box">
+    <span class="box-label">The state — two values per node</span>
+    For each vertex v, define: include(v) = maximum weight achievable in v's subtree if v <em>is</em> selected; exclude(v) = maximum weight achievable in v's subtree if v is <em>not</em> selected. Recurrence: include(v) = weight(v) + Σ exclude(c) over all children c (if v is picked, no child can be picked, since they're adjacent to v); exclude(v) = Σ max(include(c), exclude(c)) over all children c (if v isn't picked, each child is free to be picked or not, independently). The answer for the whole tree is max(include(root), exclude(root)).
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why two states per node, not one</span>
+    A single "best answer for this subtree" value isn't enough to combine correctly at the parent level, because whether v's own answer used v or not changes what's legal for v's parent to do. This is the tree-DP analogue of a pattern CP2+'s DP lessons also used — carrying extra state (like "last action taken") to make a locally-optimal-looking combination actually valid — except here the extra state is forced by the tree's adjacency structure rather than a sequence position.
+  </div>
+
+  <div class="box">
+    <span class="box-label">Algorithm — post-order traversal</span>
+<pre class="code-block"><code>function treeDP(v, parent):
+    includeSum = weight(v)
+    excludeSum = 0
+    for each child c of v (c != parent):
+        treeDP(c, v)                      // recurse first: children before parent
+        includeSum += exclude[c]
+        excludeSum += max(include[c], exclude[c])
+    include[v] = includeSum
+    exclude[v] = excludeSum</code></pre>
+    The recursive call on every child must complete before v's own include/exclude can be computed — a direct consequence of the recurrence depending on children's values, forcing a post-order (children-before-parent) traversal.
+  </div>
+
+  <div class="box">
+    <span class="box-label">Runtime</span>
+    Θ(V): each vertex is visited exactly once, and the work at each vertex (excluding recursive calls) is proportional to its number of children, so total work across all vertices sums to Θ(V) (each edge contributes O(1) work exactly once).
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why this generalizes beyond one problem</span>
+    The include/exclude pattern here is one instance of a broader technique: whenever a tree problem's answer at a node depends on some property of its children's answers (count, max, sum, or a small combination of these), a post-order DP with a handful of values per node solves it in Θ(V) — this shape reappears constantly in competitive programming (tree diameter, minimum vertex cover on trees, counting subtrees with a given property) with only the combination rule at each node changing.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. Why does DP on trees typically need a post-order traversal rather than a pre-order one?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Post-order traversal is simply faster to implement in code.</button>
+      <button class="quiz-choice" data-correct="true">Because a node's DP values are computed from its children's DP values, so every child must be fully processed before the parent can be computed.</button>
+      <button class="quiz-choice" data-correct="false">Because pre-order traversal cannot visit every vertex in a tree.</button>
+      <button class="quiz-choice" data-correct="false">Because post-order traversal uses less memory than any other traversal order.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The recurrence's dependency direction (parent needs child values) is what forces children to be resolved before their parent.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. In the maximum weight independent set on trees problem, why does each node need two DP values (include and exclude) instead of one?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because trees always require exactly double the DP states of sequences.</button>
+      <button class="quiz-choice" data-correct="true">Because whether a node was selected changes what's legal for its parent, so a single "best value" per subtree would lose information the parent's recurrence needs.</button>
+      <button class="quiz-choice" data-correct="false">Because every tree has exactly two children per node.</button>
+      <button class="quiz-choice" data-correct="false">Because one value is needed for weighted trees and one for unweighted trees.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Carrying whether the node itself was included is what lets the parent correctly decide whether picking itself would create an adjacency conflict.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. What is the runtime of the maximum weight independent set DP on a tree with V vertices, and why?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Θ(V²), since every pair of vertices must be compared.</button>
+      <button class="quiz-choice" data-correct="true">Θ(V), since each vertex is visited once and the total work across all vertices (proportional to each vertex's child count) sums to the number of edges plus vertices.</button>
+      <button class="quiz-choice" data-correct="false">Θ(V log V), matching a comparison-based sort.</button>
+      <button class="quiz-choice" data-correct="false">Θ(2^V), since every subset of vertices must be checked.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Each vertex and edge contributes only constant work exactly once, giving a linear total.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="post-order|postorder">
+    <p class="quiz-prompt">4. Fill in the blank: DP on trees generally requires a ___ traversal, resolving every child's values before computing its parent's.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Children-before-parent ordering is exactly what post-order traversal guarantees.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="adjacent|adjacency">
+    <p class="quiz-prompt">5. Fill in the blank: in an independent set, no two selected vertices may be ___ , which is why picking a node forces every one of its children to be excluded.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The adjacency restriction is the defining rule of an independent set and is exactly what the include(v) recurrence encodes.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: CP-Algorithms, <a href="https://cp-algorithms.com/graph/tree_serialization.html">"Tree DP" articles under Graphs</a>, and USACO Guide's <a href="https://usaco.guide/gold/dp-trees">"Introduction to Tree DP"</a> page cover this exact pattern with several classic variants.</p>
+
+  <p class="ask-teacher">Want to work out the DP for tree diameter (longest path between any two vertices) using this same include/exclude-style approach? Ask your teacher — that's what I'm here for. Next up: bitmask DP, where the "state" itself is a subset encoded as a binary number, applied to the traveling salesman problem.</p>
+
+  <footer class="lesson-footer">STEM+ · Advanced Algorithms · Lesson 18 of the course sequence</footer>
+</div>

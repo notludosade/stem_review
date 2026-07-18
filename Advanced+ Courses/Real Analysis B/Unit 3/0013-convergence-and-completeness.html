@@ -1,0 +1,135 @@
+<meta charset="UTF-8">
+<title>Lesson 13: Convergence and Completeness — STEM+</title>
+<link rel="stylesheet" href="../../../assets/style.css">
+<script src="../../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Real Analysis B · Unit 3 · Lesson 13</span>
+  <h1>Convergence and Completeness</h1>
+  <p class="subtitle">Sequences and Cauchy sequences carry over to any metric space unchanged. Whether every Cauchy sequence actually converges, though, depends entirely on the space — and the answer for C[a,b] turns out to already be sitting in Unit 1.</p>
+  <p class="nav-links"><a href="0012-open-and-closed-sets.html" class="nav-prev">← Lesson 12</a> <a href="0014-continuity-in-metric-spaces.html" class="nav-next">Lesson 14 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <div class="box">
+    <span class="box-label">Definition — Convergence</span>
+    A sequence (xₙ) in (X, d) <strong>converges</strong> to x ∈ X if d(xₙ, x) → 0 as n → ∞, i.e. for every ε &gt; 0 there is N such that n ≥ N implies d(xₙ, x) &lt; ε.
+  </div>
+
+  <div class="box">
+    <span class="box-label">Definition — Cauchy Sequence</span>
+    A sequence (xₙ) in (X, d) is <strong>Cauchy</strong> if for every ε &gt; 0 there is N such that m, n ≥ N implies d(xₘ, xₙ) &lt; ε.
+  </div>
+
+  <div class="box">
+    <span class="box-label">Theorem — Convergent Implies Cauchy</span>
+    Every convergent sequence in a metric space is Cauchy.
+  </div>
+
+  <div class="box">
+    <span class="box-label">Proof</span>
+    Suppose xₙ → x. Given ε &gt; 0, choose N so that n ≥ N implies d(xₙ, x) &lt; ε/2. Then for m, n ≥ N, the triangle inequality gives d(xₘ, xₙ) ≤ d(xₘ, x) + d(x, xₙ) &lt; ε/2 + ε/2 = ε. ∎
+  </div>
+
+  <div class="box">
+    <span class="box-label">Definition — Complete Metric Space</span>
+    A metric space (X, d) is <strong>complete</strong> if every Cauchy sequence in X converges to some point of X.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why the converse of the theorem is the interesting question</span>
+    Every convergent sequence is Cauchy, in <em>any</em> metric space — that direction is free. Whether every Cauchy sequence converges is not free at all; it's a genuine property some spaces have and others lack, and it's exactly what "complete" names.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Example: ℝ is complete, ℚ is not</span>
+    ℝ with d(x,y) = |x−y| is complete — this is precisely the Cauchy Criterion for sequences from Real Analysis A. But ℚ with the same formula for d is a perfectly good metric space that is <em>not</em> complete: let xₙ be the truncation of √2's decimal expansion to n digits. Each xₙ ∈ ℚ, and (xₙ) is Cauchy (consecutive truncations get arbitrarily close), but the sequence converges to √2 in ℝ — a number not in ℚ at all. There is no rational number the sequence converges to, so (xₙ) is a Cauchy sequence in ℚ with no limit in ℚ.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why this matters</span>
+    Completeness is not automatic just because a space "looks like" ℝ — ℚ sits inside ℝ with the identical distance formula, yet fails to be complete. Completeness depends on the space having no such "missing points" for its own Cauchy sequences to converge to.
+  </div>
+
+  <div class="box">
+    <span class="box-label">Theorem — (C[a,b], d<sub>sup</sub>) Is Complete</span>
+    The metric space C[a,b] with d(f,g) = sup<sub>x∈[a,b]</sub>|f(x) − g(x)| (Lesson 11) is complete: every Cauchy sequence of continuous functions converges, in this metric, to a continuous function.
+  </div>
+
+  <div class="box">
+    <span class="box-label">Proof</span>
+    Let (fₙ) be Cauchy in (C[a,b], d). For each fixed x ∈ [a,b], |fₙ(x) − fₘ(x)| ≤ d(fₙ, fₘ) → 0 as m,n → ∞, so (fₙ(x)) is a Cauchy sequence of real numbers — hence converges, since ℝ is complete. Define f(x) to be this limit, for each x.
+    <br><br>
+    <em>The convergence fₙ → f is uniform.</em> Given ε &gt; 0, choose N so that d(fₙ, fₘ) &lt; ε/2 for all m, n ≥ N — meaning |fₙ(x) − fₘ(x)| &lt; ε/2 for every x ∈ [a,b] simultaneously. Fix n ≥ N and x, and let m → ∞: |fₙ(x) − fₘ(x)| → |fₙ(x) − f(x)|, so |fₙ(x) − f(x)| ≤ ε/2 &lt; ε. Since N did not depend on x, this bound holds for every x ∈ [a,b] at once: sup<sub>x</sub>|fₙ(x) − f(x)| ≤ ε/2 for all n ≥ N. That is exactly fₙ → f uniformly.
+    <br><br>
+    Since each fₙ is continuous and fₙ → f uniformly, f is continuous (Unit 1, Lesson 3) — so f ∈ C[a,b]. And d(fₙ, f) → 0 is precisely uniform convergence, so fₙ → f in this metric space. Every Cauchy sequence converges: (C[a,b], d) is complete. ∎
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why this theorem is Unit 1 in disguise</span>
+    Strip away the metric-space language and this proof is doing exactly two things Unit 1 already established: completeness of ℝ turns a Cauchy sequence of numbers fₙ(x) into a pointwise limit, and the Uniform Limit of Continuous Functions theorem (Unit 1, Lesson 3) turns that pointwise limit into a continuous function once the convergence is shown to be uniform. Completeness of a function space and continuity surviving a uniform limit are, at bottom, the same fact viewed from two different vantage points.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What does the Theorem "Convergent Implies Cauchy" require of the metric space?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">That the space be complete</button>
+      <button class="quiz-choice" data-correct="true">Nothing beyond the metric axioms — it holds in every metric space</button>
+      <button class="quiz-choice" data-correct="false">That X = ℝ specifically</button>
+      <button class="quiz-choice" data-correct="false">That the sequence be bounded</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The proof only uses the triangle inequality and the definition of convergence, so it holds in any metric space, complete or not.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why is ℚ (with the usual absolute-value metric) not complete?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because ℚ has no Cauchy sequences at all</button>
+      <button class="quiz-choice" data-correct="true">Because some Cauchy sequences in ℚ (e.g. truncations of √2) have no limit within ℚ itself</button>
+      <button class="quiz-choice" data-correct="false">Because the triangle inequality fails on ℚ</button>
+      <button class="quiz-choice" data-correct="false">Because ℚ is not a metric space</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The √2-truncation sequence is Cauchy in ℚ but converges only to an irrational number, which lies outside ℚ.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. What two facts does the proof that (C[a,b], d_sup) is complete combine?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">The Weierstrass M-Test and the Bolzano-Weierstrass Theorem</button>
+      <button class="quiz-choice" data-correct="true">Completeness of ℝ (for pointwise limits) and the Uniform Limit of Continuous Functions theorem (Unit 1, Lesson 3)</button>
+      <button class="quiz-choice" data-correct="false">The discrete metric and Taylor's Theorem</button>
+      <button class="quiz-choice" data-correct="false">The radius of convergence theorem and term-by-term integration</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Completeness of ℝ produces the pointwise limit f, and Unit 1's continuity theorem upgrades that (once uniformity is shown) to f being continuous.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="cauchy">
+    <p class="quiz-prompt">4. Fill in the blank: a sequence where d(xₘ,xₙ) can be made arbitrarily small for all sufficiently large m,n is called a ___ sequence.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>This is the definition of a Cauchy sequence, generalized verbatim from Real Analysis A to any metric space.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="complete">
+    <p class="quiz-prompt">5. Fill in the blank: a metric space where every Cauchy sequence converges to a point of the space is called ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Completeness is exactly the property that Cauchy sequences never "fall through a gap" in the space.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: Rudin's <em>Principles of Mathematical Analysis</em>, Chapter 3, covers Cauchy sequences and completeness in general metric spaces, including the completeness of C[a,b] under the sup metric.</p>
+
+  <p class="ask-teacher">Stuck on why completeness of C[a,b] is really just Unit 1's continuity theorem wearing different notation? Ask your teacher — that's what I'm here for. Next up: continuity itself, redefined with balls and neighborhoods instead of |x−y| and ε–δ.</p>
+
+  <footer class="lesson-footer">STEM+ · Real Analysis B · Lesson 13 of the course sequence</footer>
+</div>

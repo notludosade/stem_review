@@ -1,0 +1,153 @@
+<meta charset="UTF-8">
+<title>Lesson 25: Countable Additivity and Measure-Zero Sets — STEM+</title>
+<link rel="stylesheet" href="../../../assets/style.css">
+<script src="../../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Real Analysis B · Unit 5 · Lesson 25</span>
+  <h1>Countable Additivity and Measure-Zero Sets</h1>
+  <p class="subtitle">Lesson 24 isolated the measurable sets. This lesson proves what makes them worth isolating: on this collection, outer measure becomes genuinely, countably additive — and the language of "almost everywhere" falls directly out of it.</p>
+  <p class="nav-links"><a href="0024-measurable-sets-and-sigma-algebras.html" class="nav-prev">← Lesson 24</a> <a href="0026-measurable-functions.html" class="nav-next">Lesson 26 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <div class="box why">
+    <span class="box-label">Why measure gets its own name from here on</span>
+    For a measurable set E, write m(E) = m*(E) — the same outer measure computation, just restricted to the collection where it behaves well. From this lesson on, m is called (Lebesgue) <strong>measure</strong>, reserving m* for outer measure on arbitrary, possibly non-measurable sets.
+  </div>
+
+  <div class="box">
+    <span class="box-label">Lemma — Finite Additivity</span>
+    If E and F are measurable and disjoint, then m(E∪F) = m(E) + m(F).
+  </div>
+
+  <div class="box">
+    <span class="box-label">Proof</span>
+    E∪F is measurable (Lesson 24). Apply the Carathéodory criterion for E, using the test set A = E∪F itself: m*(E∪F) = m*((E∪F)∩E) + m*((E∪F)\E). Since E, F are disjoint, (E∪F)∩E = E and (E∪F)\E = F. So m(E∪F) = m*(E∪F) = m(E) + m(F). ∎
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why choosing A = E∪F is the trick</span>
+    The Carathéodory criterion holds for every test set A — choosing A to be exactly the union under study turns the abstract splitting condition into precisely the additivity statement being sought, with nothing left over.
+  </div>
+
+  <p>By induction, finite additivity extends immediately to any finite collection of pairwise disjoint measurable sets: m(E₁∪⋯∪Eₙ) = m(E₁) + ⋯ + m(Eₙ).</p>
+
+  <div class="box">
+    <span class="box-label">Theorem — Countable Additivity</span>
+    If E₁, E₂, E₃, … are measurable and pairwise disjoint, then ⋃ₙEₙ is measurable and m(⋃ₙEₙ) = Σₙm(Eₙ).
+  </div>
+
+  <div class="box">
+    <span class="box-label">Proof</span>
+    Measurability of ⋃ₙEₙ and the inequality m(⋃ₙEₙ) ≤ Σₙm(Eₙ) both follow from countable subadditivity (Lesson 23), which holds for arbitrary sets. For the reverse inequality: fix N. By finite additivity, m(⋃ₙ₌₁ᴺEₙ) = Σₙ₌₁ᴺm(Eₙ). Since ⋃ₙ₌₁ᴺEₙ ⊆ ⋃ₙEₙ, monotonicity gives m(⋃ₙEₙ) ≥ m(⋃ₙ₌₁ᴺEₙ) = Σₙ₌₁ᴺm(Eₙ). This holds for every N, so letting N → ∞, m(⋃ₙEₙ) ≥ Σₙ₌₁^∞m(Eₙ). Combined with the inequality from subadditivity, m(⋃ₙEₙ) = Σₙm(Eₙ). ∎
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why disjointness is not optional here</span>
+    Without disjointness, overlapping sets would have their shared parts counted once on the left (as part of the union) but potentially many times on the right (once per set containing them) — countable additivity would simply be false. Countable subadditivity (Lesson 23) is what remains true without disjointness; countable additivity is the strictly stronger fact that holds only once overlaps are ruled out.
+  </div>
+
+  <div class="box">
+    <span class="box-label">Corollary — Continuity from Below</span>
+    If E₁ ⊆ E₂ ⊆ E₃ ⊆ ⋯ are measurable sets, then m(⋃ₙEₙ) = limₙ→∞ m(Eₙ).
+  </div>
+
+  <div class="box">
+    <span class="box-label">Proof</span>
+    Disjointify: let F₁ = E₁ and Fₙ = Eₙ\Eₙ₋₁ for n ≥ 2. Each Fₙ is measurable (an intersection of measurable sets, since Eₙ∩Eₙ₋₁ᶜ = (Eₙᶜ∪Eₙ₋₁)ᶜ is measurable by closure under complements and unions), and the Fₙ are pairwise disjoint by construction. Telescoping, ⋃ₙ₌₁ᴺFₙ = Eₙ for every N, and ⋃ₙFₙ = ⋃ₙEₙ. By countable additivity, m(⋃ₙEₙ) = m(⋃ₙFₙ) = Σₙ₌₁^∞m(Fₙ) = limₙ→∞ Σₙ₌₁ᴺm(Fₙ) = limₙ→∞ m(⋃ₙ₌₁ᴺFₙ) = limₙ→∞ m(Eₙ), using finite additivity for the second-to-last step. ∎
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why disjointification resurfaces here</span>
+    Lesson 24 deferred the proof that measurable sets are closed under arbitrary countable unions, noting it needs replacing a sequence of sets with an equivalent disjoint one. The F₁, F₂, … construction above is exactly that technique, now made concrete in a setting where it pays off immediately.
+  </div>
+
+  <div class="box">
+    <span class="box-label">Definition — Measure-Zero (Null) Sets</span>
+    A measurable set N is a <strong>measure-zero set</strong> (or <strong>null set</strong>) if m(N) = 0.
+  </div>
+
+  <div class="box">
+    <span class="box-label">Corollary — Countable Unions of Null Sets Are Null</span>
+    If N₁, N₂, … are measurable with m(Nₙ) = 0 for every n, then m(⋃ₙNₙ) = 0.
+  </div>
+
+  <div class="box">
+    <span class="box-label">Proof</span>
+    By countable subadditivity, m(⋃ₙNₙ) ≤ Σₙm(Nₙ) = Σₙ0 = 0. Since measure is never negative, m(⋃ₙNₙ) = 0. ∎
+  </div>
+
+  <div class="box">
+    <span class="box-label">Definition — Almost Everywhere</span>
+    A property P(x) is said to hold <strong>almost everywhere</strong> (a.e.) on a set S if {x ∈ S : P(x) fails} is a measure-zero set.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why this finally closes the loop from Lesson 22</span>
+    Dirichlet's function f equals 0 everywhere except on ℚ, and m(ℚ) = 0 (Lesson 23). So f = 0 <em>almost everywhere</em> on [0,1]. Lesson 22 asked for a framework rich enough to treat f as "essentially zero" despite being nonzero on a dense set — "almost everywhere" is exactly that framework, precise and now fully justified. Unit 6 builds an integral for which a function equal to 0 a.e. integrates to exactly 0, resolving Lesson 22's opening problem completely.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What choice of test set makes the finite additivity proof work?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">A = ∅</button>
+      <button class="quiz-choice" data-correct="true">A = E∪F, the union itself</button>
+      <button class="quiz-choice" data-correct="false">A = ℝ</button>
+      <button class="quiz-choice" data-correct="false">A = E∩F</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Testing the criterion against the union itself turns the abstract splitting condition directly into the additivity equation.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. How is the "≥" half of countable additivity's proof obtained?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Directly from countable subadditivity</button>
+      <button class="quiz-choice" data-correct="true">From finite additivity applied to the first N sets, plus monotonicity, letting N → ∞</button>
+      <button class="quiz-choice" data-correct="false">From the Heine-Borel theorem</button>
+      <button class="quiz-choice" data-correct="false">From the Vitali set construction</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Finite additivity gives the sum for any first N sets, and monotonicity lets that bound pass to the full countable union as N grows.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why does a countable union of measure-zero sets have measure zero?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">It requires countable additivity and disjointness</button>
+      <button class="quiz-choice" data-correct="true">Countable subadditivity alone bounds it above by a sum of zeros</button>
+      <button class="quiz-choice" data-correct="false">It follows from the Carathéodory criterion applied to ∅</button>
+      <button class="quiz-choice" data-correct="false">It requires the sets to be intervals</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Subadditivity alone, without needing disjointness, already forces the union's measure to be at most a sum of zeros.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="disjoint">
+    <p class="quiz-prompt">4. Fill in the blank: countable additivity requires the sets Eₙ to be pairwise ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Without disjointness, overlapping regions would be overcounted on the right-hand side of the additivity equation.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="everywhere">
+    <p class="quiz-prompt">5. Fill in the blank: a property that fails only on a measure-zero set is said to hold almost ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Almost everywhere is the standard term for a property holding outside a set of measure zero.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: Royden and Fitzpatrick's <em>Real Analysis</em>, Chapter 2, covers countable additivity, continuity of measure, and the almost-everywhere convention in full generality.</p>
+
+  <p class="ask-teacher">Stuck on why disjointification is exactly what closure under countable unions needed back in Lesson 24? Ask your teacher — that's what I'm here for. Next up: measurable functions — which functions are well-behaved enough for the integral this unit has been building toward.</p>
+
+  <footer class="lesson-footer">STEM+ · Real Analysis B · Lesson 25 of the course sequence</footer>
+</div>

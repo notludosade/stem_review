@@ -1,0 +1,100 @@
+<meta charset="UTF-8">
+<title>Lesson 11: Joins — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Data Handling: CB · Unit 3 · Lesson 11</span>
+  <h1>Joins</h1>
+  <p class="subtitle">Lesson 9 explained why data lives in separate, linked tables. This lesson is how you put it back together in a query — the SQL JOIN, doing in one keyword what Lesson 6's spreadsheet lookups did with VLOOKUP or XLOOKUP.</p>
+  <p class="nav-links"><a href="0010-select-where-and-filtering.html" class="nav-prev">← Lesson 10</a> <a href="0012-aggregation.html" class="nav-next">Lesson 12 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Recall Unit 2, Lesson 6: an Orders sheet and a Customers sheet, linked by a shared Customer ID, combined with <code>XLOOKUP</code> to pull each order's customer name and region. A relational database stores that exact same split — Lesson 9's Orders and Customers tables, linked by Customer ID as a foreign key. A JOIN is how SQL recombines them.</p>
+
+  <h2>INNER JOIN</h2>
+  <div class="box">
+    <span class="box-label">Syntax</span>
+    <code>SELECT orders.order_id, customers.name FROM orders INNER JOIN customers ON orders.customer_id = customers.customer_id;</code> — this matches each row in <code>orders</code> to the row in <code>customers</code> where the ON condition holds, and returns one combined row per match. An <strong>INNER JOIN</strong> (the default kind, and by far the most common) only returns rows where a match exists in <em>both</em> tables — an order with a customer_id that doesn't exist in the customers table would be silently excluded entirely.
+  </div>
+
+  <h2>LEFT JOIN</h2>
+  <div class="box">
+    <span class="box-label">Syntax</span>
+    <code>SELECT orders.order_id, customers.name FROM orders LEFT JOIN customers ON orders.customer_id = customers.customer_id;</code> — a <strong>LEFT JOIN</strong> keeps every row from the left table (<code>orders</code>) regardless of whether a match exists in the right table, filling in <code>NULL</code> (SQL's "no value" marker) for the right table's columns when no match is found. This matters whenever you specifically want to know about unmatched rows — e.g. finding orders whose customer_id doesn't correspond to any real customer, a data-quality problem Lesson 3's validity dimension would flag.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why choosing INNER vs. LEFT changes your answer, not just your syntax</span>
+    If you want "total revenue per customer, only counting customers who have actually ordered," INNER JOIN is correct — customers with zero orders simply shouldn't appear. If you want "every customer, including ones with zero orders, showing 0 or blank where they haven't ordered," you need LEFT JOIN from the customers side. Using the wrong one doesn't cause an error — it silently drops or silently includes rows, producing a technically-successful query with the wrong answer. This is the SQL equivalent of Lesson 5's absolute-reference bug: no error is raised, so the mistake is only caught by checking the result against what you expected.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Worked example</span>
+    Orders table: order_id, customer_id, order_total. Customers table: customer_id, name, region. <code>SELECT customers.region, orders.order_total FROM orders INNER JOIN customers ON orders.customer_id = customers.customer_id WHERE orders.order_total &gt; 100;</code> — this joins the two tables on the shared customer_id, then filters to only orders over 100, returning each qualifying order's total alongside its customer's region — the same combined view Lesson 6 built with XLOOKUP, now expressed as one SQL query.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What does an INNER JOIN do with a row that has no matching row in the other table?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">It includes the row with NULL filled in for the other table's columns.</button>
+      <button class="quiz-choice" data-correct="true">It excludes that row entirely from the result.</button>
+      <button class="quiz-choice" data-correct="false">It raises an error and stops the query.</button>
+      <button class="quiz-choice" data-correct="false">It duplicates the row once for every row in the other table.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>INNER JOIN only returns rows where a match exists on both sides — unmatched rows are dropped silently, no error raised.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why would you specifically choose a LEFT JOIN over an INNER JOIN?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">LEFT JOIN always runs faster than INNER JOIN, regardless of the data.</button>
+      <button class="quiz-choice" data-correct="true">When you need to keep every row from the left table even when no match exists in the right table — e.g. to see customers with zero orders, or orders with invalid customer_ids.</button>
+      <button class="quiz-choice" data-correct="false">LEFT JOIN is required whenever more than two tables are involved.</button>
+      <button class="quiz-choice" data-correct="false">LEFT JOIN and INNER JOIN always return identical results, so the choice doesn't matter.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>LEFT JOIN's whole purpose is preserving unmatched left-side rows, which is exactly what INNER JOIN discards.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why is choosing the wrong join type (INNER vs. LEFT) described as similar to Lesson 5's absolute-reference bug?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because both mistakes cause the query or spreadsheet to fail with a visible error message.</button>
+      <button class="quiz-choice" data-correct="true">Because both mistakes run successfully with no error shown, but silently produce a technically-valid, wrong answer that's only caught by checking the result.</button>
+      <button class="quiz-choice" data-correct="false">Because both mistakes only affect text columns, never numeric ones.</button>
+      <button class="quiz-choice" data-correct="false">Because SQL and spreadsheets use the exact same syntax for joins and references.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Both are silent-failure bugs — the tool doesn't complain, it just quietly computes something other than what was intended.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="INNER JOIN">
+    <p class="quiz-prompt">4. Fill in the blank: the join type that returns only rows where a match exists in both tables is called an ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>INNER JOIN is the default, most common join, keeping only rows matched on both sides.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="NULL">
+    <p class="quiz-prompt">5. Fill in the blank: in a LEFT JOIN, when no matching row exists in the right table, SQL fills the right table's columns with ___, its marker for "no value."</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>NULL is SQL's representation of "no value here," distinct from zero or an empty string.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: the Mode Analytics SQL Tutorial (mode.com/sql-tutorial), "SQL JOINs," covers INNER, LEFT, RIGHT, and FULL joins with interactive practice queries.</p>
+
+  <p class="ask-teacher">Have two real tables you'd like to practice joining? Ask your teacher — that's what I'm here for. Next up: summarizing joined or filtered data with SQL's aggregate functions and GROUP BY.</p>
+
+  <footer class="lesson-footer">STEM+ · Data Handling: CB · Lesson 11 of the course sequence</footer>
+</div>

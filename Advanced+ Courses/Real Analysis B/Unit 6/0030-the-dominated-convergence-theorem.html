@@ -1,0 +1,136 @@
+<meta charset="UTF-8">
+<title>Lesson 30: The Dominated Convergence Theorem — STEM+</title>
+<link rel="stylesheet" href="../../../assets/style.css">
+<script src="../../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Real Analysis B · Unit 6 · Lesson 30</span>
+  <h1>The Dominated Convergence Theorem</h1>
+  <p class="subtitle">MCT needed monotonicity. This lesson drops that requirement entirely — replacing it with a single dominating integrable function — and finally builds, in full, the counterexample Lesson 4 called "beyond this course's scope."</p>
+  <p class="nav-links"><a href="0029-the-monotone-convergence-theorem.html" class="nav-prev">← Lesson 29</a> <a href="0031-capstone-from-riemann-to-lebesgue.html" class="nav-next">Lesson 31 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <div class="box example">
+    <span class="box-label">Example — the moving bump, finally constructed</span>
+    Let fₙ = n·χ_{(0,1/n)}. For every fixed x &gt; 0, once n &gt; 1/x the interval (0,1/n) no longer contains x, so fₙ(x) = 0 eventually; and fₙ(0) = 0 always. So fₙ → 0 pointwise everywhere. Yet ∫fₙdm = n·m((0,1/n)) = n·(1/n) = 1 for every single n. So lim∫fₙdm = 1 ≠ 0 = ∫(lim fₙ)dm.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why this is Lesson 4's promise kept</span>
+    Lesson 4 (Unit 1) needed a "moving bump" — height growing, width shrinking, area fixed — to show pointwise convergence alone can't justify swapping a limit with an integral, and called its full construction "beyond this course's scope" at the time, since Riemann integration had no simple language for it. Here, the same idea is a two-line computation: a rectangle of height n and width 1/n has area 1 regardless of n, and Lebesgue measure computes that area exactly. The obstruction is visible immediately: fₙ is not dominated by any single integrable function, since sup_n fₙ(x) grows like 1/x near 0, and ∫₀¹(1/x)dx diverges.
+  </div>
+
+  <div class="box">
+    <span class="box-label">Lemma — Fatou's Lemma</span>
+    If f₁, f₂, f₃, … ≥ 0 are measurable, then ∫(liminf_n fₙ)dm ≤ liminf_n ∫fₙdm.
+  </div>
+
+  <div class="box">
+    <span class="box-label">Proof</span>
+    Let gₖ = inf_{n≥k}fₙ, measurable and nonnegative (Lesson 26), and increasing in k (a larger k takes an infimum over fewer terms). By definition, gₖ → liminf_n fₙ pointwise, so MCT gives ∫(liminf_nfₙ)dm = limₖ∫gₖdm.
+    <br><br>
+    For every n ≥ k, gₖ ≤ fₙ (gₖ is an infimum including the fₙ term), so ∫gₖdm ≤ ∫fₙdm by monotonicity, for every n ≥ k. Taking the infimum over n≥k on the right: ∫gₖdm ≤ inf_{n≥k}∫fₙdm. Letting k → ∞: limₖ∫gₖdm ≤ limₖ(inf_{n≥k}∫fₙdm) = liminf_n∫fₙdm.
+    <br><br>
+    Combining, ∫(liminf_nfₙ)dm ≤ liminf_n∫fₙdm. ∎
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why Fatou's Lemma is only an inequality</span>
+    The moving bump above shows equality can genuinely fail: liminf_nfₙ = 0 (the limit exists and is 0), so ∫(liminf fₙ)dm = 0, while liminf_n∫fₙdm = 1. Fatou's Lemma says the integral of the liminf can never <em>exceed</em> the liminf of the integrals — mass can disappear in the limit (as it does here, escaping to a shrinking sliver near 0), but it can never appear from nowhere.
+  </div>
+
+  <div class="box">
+    <span class="box-label">Theorem — Dominated Convergence Theorem (DCT)</span>
+    Let f₁, f₂, f₃, … be measurable with fₙ(x) → f(x) for every x, and suppose there is an integrable g ≥ 0 (∫gdm &lt; ∞) with |fₙ(x)| ≤ g(x) for every n and every x. Then f is integrable and
+    <br><br>
+    limₙ→∞ ∫fₙdm = ∫f dm.
+  </div>
+
+  <div class="box">
+    <span class="box-label">Proof</span>
+    Since |fₙ| ≤ g for every n and fₙ → f, taking the limit gives |f| ≤ g, so ∫|f|dm ≤ ∫gdm &lt; ∞ and f is integrable (Lesson 28).
+    <br><br>
+    Both g+fₙ ≥ 0 and g−fₙ ≥ 0 (from |fₙ|≤g), so Fatou's Lemma applies to each. Applying it to g+fₙ, whose pointwise limit is g+f:
+    <br><br>
+    ∫(g+f)dm ≤ liminf_n∫(g+fₙ)dm.
+    <br><br>
+    By additivity (Lesson 29), ∫(g+f)dm = ∫gdm+∫fdm and ∫(g+fₙ)dm = ∫gdm+∫fₙdm, so this reads ∫gdm+∫fdm ≤ ∫gdm + liminf_n∫fₙdm. Since ∫gdm &lt; ∞, it cancels from both sides: ∫fdm ≤ liminf_n∫fₙdm.
+    <br><br>
+    Applying Fatou's Lemma to g−fₙ, whose pointwise limit is g−f:
+    <br><br>
+    ∫(g−f)dm ≤ liminf_n∫(g−fₙ)dm = ∫gdm − limsup_n∫fₙdm,
+    <br><br>
+    using liminf(−aₙ) = −limsup(aₙ). Since ∫(g−f)dm = ∫gdm−∫fdm, canceling ∫gdm gives −∫fdm ≤ −limsup_n∫fₙdm, i.e., limsup_n∫fₙdm ≤ ∫fdm.
+    <br><br>
+    Combining both bounds: limsup_n∫fₙdm ≤ ∫fdm ≤ liminf_n∫fₙdm. Since liminf ≤ limsup always, all three quantities are equal, so lim_n∫fₙdm exists and equals ∫fdm. ∎
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why domination is exactly what the moving bump lacked</span>
+    DCT's hypothesis needs one fixed integrable g bounding every fₙ at once. For the moving bump, any such g would have to satisfy g(x) ≥ sup_nfₙ(x) for every x, and sup_nfₙ(x) is unbounded as x→0⁺ (some fₙ hits height n right next to 0, for every n) — no integrable function can dominate a family whose peaks grow without bound as their supports shrink. Domination is precisely the hypothesis that rules out mass silently escaping to a single point, which is exactly the failure mode Fatou's Lemma leaves open and DCT closes off.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What does the moving-bump example fₙ = n·χ_{(0,1/n)} demonstrate?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">That every pointwise limit preserves the integral</button>
+      <button class="quiz-choice" data-correct="true">That fₙ → 0 pointwise while ∫fₙdm stays fixed at 1, so the limit and integral cannot be swapped without extra hypotheses</button>
+      <button class="quiz-choice" data-correct="false">That Lebesgue measure of an interval can be negative</button>
+      <button class="quiz-choice" data-correct="false">That MCT applies to any sequence of functions</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The bump's height and shrinking width conspire to keep area fixed at 1 even as the sequence converges pointwise to 0.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. How does Fatou's Lemma's proof use the Monotone Convergence Theorem?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">It doesn't — Fatou's Lemma is independent of MCT</button>
+      <button class="quiz-choice" data-correct="true">By defining gₖ = inf_{n≥k}fₙ, an increasing sequence converging to liminf fₙ, and applying MCT to it directly</button>
+      <button class="quiz-choice" data-correct="false">By applying MCT to fₙ itself, assuming it's increasing</button>
+      <button class="quiz-choice" data-correct="false">By citing the Riemann-Lebesgue comparison theorem</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The infimum-from-n-onward sequence gₖ is always increasing, regardless of whether fₙ itself is, letting MCT apply unconditionally.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why can't any integrable function dominate the moving bump sequence?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because fₙ is not measurable</button>
+      <button class="quiz-choice" data-correct="true">Because sup_nfₙ(x) grows without bound as x→0⁺, and no integrable function can bound peaks that grow as their supports shrink toward a point</button>
+      <button class="quiz-choice" data-correct="false">Because the domain (0,1) has infinite measure</button>
+      <button class="quiz-choice" data-correct="false">Because fₙ is not simple</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The pointwise supremum of the family blows up near 0, which is exactly what domination by a single integrable function rules out.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="fatou">
+    <p class="quiz-prompt">4. Fill in the blank: the Dominated Convergence Theorem is proved by applying ___'s Lemma to both g+fₙ and g−fₙ.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Fatou's Lemma applied twice, once to each combination, sandwiches limsup and liminf of the integrals between the same two bounds.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="dominates">
+    <p class="quiz-prompt">5. Fill in the blank: the hypothesis |fₙ| ≤ g for a fixed integrable g is called requiring g to hold, or ___, the sequence.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>g "dominates" every fₙ at once, which is where the theorem's name comes from.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: Royden and Fitzpatrick's <em>Real Analysis</em>, Chapter 4, proves Fatou's Lemma and the Dominated Convergence Theorem in the same order as above, with further applications to differentiating under the integral sign.</p>
+
+  <p class="ask-teacher">Stuck on why Fatou's Lemma is only ever an inequality, never automatically an equality? Ask your teacher — that's what I'm here for. Next up: the capstone — tracing the entire course's dependency chain from uniform convergence to the Lebesgue integral.</p>
+
+  <footer class="lesson-footer">STEM+ · Real Analysis B · Lesson 30 of the course sequence</footer>
+</div>

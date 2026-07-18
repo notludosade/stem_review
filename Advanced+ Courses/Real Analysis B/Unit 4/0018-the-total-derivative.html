@@ -1,0 +1,135 @@
+<meta charset="UTF-8">
+<title>Lesson 18: The Total Derivative — STEM+</title>
+<link rel="stylesheet" href="../../../assets/style.css">
+<script src="../../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Real Analysis B · Unit 4 · Lesson 18</span>
+  <h1>The Total Derivative</h1>
+  <p class="subtitle">Lesson 17 showed partial derivatives can miss a function's behavior entirely. This lesson defines the notion that doesn't: differentiability as the existence of a single best linear approximation, sensitive to every direction at once.</p>
+  <p class="nav-links"><a href="0017-partial-derivatives-and-multivariable-functions.html" class="nav-prev">← Lesson 17</a> <a href="0019-the-jacobian-and-the-chain-rule.html" class="nav-next">Lesson 19 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <div class="box">
+    <span class="box-label">Definition — (Total) Differentiability</span>
+    Let f: ℝⁿ → ℝᵐ and a ∈ ℝⁿ. f is <strong>differentiable at a</strong> if there exists a linear map L: ℝⁿ → ℝᵐ such that
+    <br><br>
+    lim<sub>h→0</sub> |f(a+h) − f(a) − Lh| / |h| = 0.
+    <br><br>
+    Such an L, when it exists, is unique, and is called the <strong>total derivative</strong> of f at a, written Df(a).
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why this is the right definition</span>
+    Rewriting the limit condition as f(a+h) = f(a) + Df(a)h + o(|h|), the total derivative is exactly the linear map making f(a) + Df(a)h the best possible linear approximation to f near a — with an error that vanishes faster than |h| itself, in <em>every</em> direction h simultaneously, not just the n coordinate directions a partial derivative probes. This is precisely what Lesson 17's counterexample was missing.
+  </div>
+
+  <div class="box">
+    <span class="box-label">Theorem — Differentiable Implies Continuous</span>
+    If f is differentiable at a, then f is continuous at a.
+  </div>
+
+  <div class="box">
+    <span class="box-label">Proof</span>
+    Since Df(a) is linear on ℝⁿ (finite-dimensional), it is bounded: |Df(a)h| ≤ M|h| for some constant M and all h. By the triangle inequality, |f(a+h) − f(a)| ≤ |Df(a)h| + |f(a+h) − f(a) − Df(a)h| ≤ M|h| + |h|·ε(h), where ε(h) → 0 as h → 0 by the definition of differentiability. As h → 0, both terms on the right vanish, so f(a+h) → f(a). ∎
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why this restores what Lesson 17 lost</span>
+    Total differentiability succeeds exactly where mere existence of partial derivatives failed: it forces continuity, just as in the single-variable case. The xy/(x²+y²) example of Lesson 17 is therefore <em>not</em> totally differentiable at the origin, even though both its partial derivatives exist there — partial derivatives existing is strictly weaker than total differentiability.
+  </div>
+
+  <div class="box">
+    <span class="box-label">Theorem — Differentiability Implies All Partials Exist, Given by the Jacobian</span>
+    If f: ℝⁿ → ℝᵐ is differentiable at a, then every partial derivative ∂fᵢ/∂xⱼ(a) exists, and Df(a) is the m×n matrix [∂fᵢ/∂xⱼ(a)] — the <strong>Jacobian matrix</strong> — acting by matrix multiplication.
+  </div>
+
+  <div class="box">
+    <span class="box-label">Proof</span>
+    Apply the defining limit with h = t·eⱼ for small real t: |f(a+t·eⱼ) − f(a) − t·Df(a)eⱼ| / |t| → 0 as t → 0. Looking at the i-th component, this forces [fᵢ(a+t·eⱼ) − fᵢ(a)]/t → [Df(a)eⱼ]ᵢ as t → 0 — exactly the statement that ∂fᵢ/∂xⱼ(a) exists and equals the i-th entry of Df(a)eⱼ, the j-th column of the matrix representing Df(a). Since this holds for every i, j, the matrix of Df(a) is precisely [∂fᵢ/∂xⱼ(a)]. ∎
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why the converse of this theorem is false — and what fixes it</span>
+    Lesson 17's example shows partials can exist with no total derivative present at all, so this theorem's implication only runs one way. The standard repair is a sufficient condition rather than a full converse:
+  </div>
+
+  <div class="box">
+    <span class="box-label">Theorem (stated) — C¹ Implies Differentiable</span>
+    If all partial derivatives of f exist in a neighborhood of a and are continuous at a, then f is differentiable at a.
+  </div>
+
+  <div class="box">
+    <span class="box-label">Proof sketch</span>
+    Write the increment f(a+h) − f(a) as a telescoping sum of n single-variable increments, changing one coordinate at a time: f(a₁+h₁,…,aₙ+hₙ) − f(a) is a sum of terms each differing in exactly one coordinate. Apply the single-variable Mean Value Theorem to each term, producing an intermediate point where the corresponding partial derivative is evaluated exactly. Because each partial derivative is continuous at a, replacing these intermediate evaluations with ∂f/∂xⱼ(a) itself introduces an error that shrinks faster than |h| — which is exactly the o(|h|) condition differentiability requires, with Df(a) equal to the Jacobian matrix of continuous partials. The full accounting of the error terms is in the source reading below.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Example</span>
+    f(x,y) = x²y has ∂f/∂x = 2xy and ∂f/∂y = x², both polynomials, hence continuous everywhere. By the theorem above, f is differentiable at every point of ℝ², with Df(a,b) given by the 1×2 Jacobian matrix [2ab, a²].
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What does the definition of total differentiability require?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">That every partial derivative be zero at a</button>
+      <button class="quiz-choice" data-correct="true">A linear map L such that f(a+h) − f(a) − Lh vanishes faster than |h| as h → 0</button>
+      <button class="quiz-choice" data-correct="false">That f be bounded near a</button>
+      <button class="quiz-choice" data-correct="false">That f be defined on all of ℝⁿ</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>This little-o error condition is exactly what makes L the best possible linear approximation near a.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. What does total differentiability guarantee that mere existence of partial derivatives does not?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">That the Jacobian matrix is invertible</button>
+      <button class="quiz-choice" data-correct="true">That f is continuous at the point</button>
+      <button class="quiz-choice" data-correct="false">That f is a polynomial</button>
+      <button class="quiz-choice" data-correct="false">That the mixed partials are equal</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Differentiability implies continuity, exactly restoring the property Lesson 17's example showed partials alone couldn't guarantee.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. What sufficient condition guarantees a function is (totally) differentiable at a?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">The function is bounded near a</button>
+      <button class="quiz-choice" data-correct="true">All partial derivatives exist in a neighborhood of a and are continuous at a</button>
+      <button class="quiz-choice" data-correct="false">a is a limit point of the domain</button>
+      <button class="quiz-choice" data-correct="false">f is defined by a single formula</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>This is the C¹ implies differentiable theorem, proved via the Mean Value Theorem applied coordinate by coordinate.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="linear">
+    <p class="quiz-prompt">4. Fill in the blank: the total derivative Df(a), when it exists, is a ___ map from ℝⁿ to ℝᵐ.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Df(a) is required to be linear — that's what makes it the best linear approximation to f near a.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="jacobian">
+    <p class="quiz-prompt">5. Fill in the blank: when f is differentiable at a, Df(a) is represented by the ___ matrix of partial derivatives.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The Jacobian matrix [∂fᵢ/∂xⱼ(a)] is exactly the matrix representation of the total derivative.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: Rudin's <em>Principles of Mathematical Analysis</em>, Chapter 9, defines total differentiability and proves both the differentiable-implies-partials theorem and the C¹-implies-differentiable theorem in full.</p>
+
+  <p class="ask-teacher">Stuck on why continuity of the partials is what lets the Mean Value Theorem's error terms be swapped for ∂f/∂xⱼ(a) itself? Ask your teacher — that's what I'm here for. Next up: the Jacobian matrix as an object in its own right, and the chain rule for composing differentiable maps.</p>
+
+  <footer class="lesson-footer">STEM+ · Real Analysis B · Lesson 18 of the course sequence</footer>
+</div>

@@ -1,0 +1,132 @@
+<meta charset="UTF-8">
+<title>Lesson 27: Knuth-Morris-Pratt — STEM+</title>
+<link rel="stylesheet" href="../../../assets/style.css">
+<script src="../../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Advanced Algorithms · Unit 7 · Lesson 27</span>
+  <h1>Knuth-Morris-Pratt (KMP)</h1>
+  <p class="subtitle">Naive substring search re-scans from scratch after every mismatch, costing Θ(nm) in the worst case. KMP precomputes exactly how much of a partial match can be reused after a mismatch, bringing search down to Θ(n+m).</p>
+  <p class="nav-links"><a href="../Unit%206/0026-tries.html" class="nav-prev">← Lesson 26</a> <a href="0028-rabin-karp.html" class="nav-next">Lesson 28 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>The substring search problem: given a text of length n and a pattern of length m, find every position where the pattern occurs in the text. The naive approach tries every starting position i in the text, comparing the pattern character-by-character against text[i..i+m−1], giving up and moving to i+1 on the first mismatch. Worst case (e.g. text "aaaaaaaaab" against pattern "aaab"), this touches Θ(m) characters at nearly every one of Θ(n) starting positions, for Θ(nm) total. <strong>Knuth-Morris-Pratt</strong> (KMP) exploits a simple observation the naive approach throws away: when a mismatch happens partway through a match, the characters already matched tell you something about the text — enough to skip ahead without ever re-examining a text character already looked at.</p>
+
+  <h2>The failure function — the pattern's self-knowledge</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    For a pattern P of length m, define the failure function (also called the LPS array, for "longest proper prefix which is also a suffix") lps[i] = the length of the longest proper prefix of P[0..i] that is also a suffix of P[0..i], for each i from 0 to m−1. ("Proper" means not the entire string P[0..i] itself.) For example, for P = "ababd": lps[0]=0 (single character, no proper prefix), lps[1]=0 ("ab" — no proper prefix equals a suffix), lps[2]=1 ("aba" — prefix "a" equals suffix "a"), lps[3]=2 ("abab" — prefix "ab" equals suffix "ab"), lps[4]=0 ("ababd" — the mismatch on "d" resets it).
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why lps tells you exactly how far to fall back after a mismatch</span>
+    Suppose the pattern has matched the text up through P[0..i−1] (i characters matched) and then mismatches at P[i]. Those i matched characters are also, right now, sitting in the text — meaning the text currently contains P[0..i−1] at this position. If P[0..i−1] has a proper prefix of length lps[i−1] that's also its own suffix, then that same substring of length lps[i-1] must also be sitting at the end of the just-matched text region — so it's safe to resume comparing from P[lps[i−1]] against the same text position, without rechecking any earlier text character. Falling back by exactly lps[i−1] (rather than restarting from P[0] against the very next text position, as the naive approach does) is what avoids ever re-examining a text character once it's been looked at.
+  </div>
+
+  <div class="box">
+    <span class="box-label">Building the failure function — O(m)</span>
+<pre class="code-block"><code>function buildLPS(P):
+    lps = array of length |P|, lps[0] = 0
+    len = 0                          // length of current matching prefix/suffix
+    i = 1
+    while i < |P|:
+        if P[i] == P[len]:
+            len += 1
+            lps[i] = len
+            i += 1
+        elif len > 0:
+            len = lps[len - 1]        // fall back within the pattern itself
+        else:
+            lps[i] = 0
+            i += 1
+    return lps</code></pre>
+  </div>
+
+  <div class="box">
+    <span class="box-label">Searching with the failure function — O(n)</span>
+<pre class="code-block"><code>function kmpSearch(text, pattern):
+    lps = buildLPS(pattern)
+    i = 0                             // index into text
+    j = 0                             // index into pattern
+    while i < |text|:
+        if text[i] == pattern[j]:
+            i += 1
+            j += 1
+            if j == |pattern|:
+                report match at position i - j
+                j = lps[j - 1]        // continue searching for overlapping matches
+        elif j > 0:
+            j = lps[j - 1]            // fall back, i never decreases
+        else:
+            i += 1</code></pre>
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why the search loop is Θ(n), not Θ(nm) — an amortized argument</span>
+    The index i into the text only ever increases, never decreases — every branch of the loop either advances i, or (on a fallback) leaves i unchanged while only j decreases. Since j can increase at most n times total across the whole run (bounded by how many times i advances) and each fallback strictly decreases j, the total number of fallback steps across the entire search is bounded by the total number of times j was ever incremented — an argument with the same flavor as Lesson 25's potential-based accounting, treating j's value as a budget that fallbacks can only spend down, never overdraw beyond what advances had built up. This gives Θ(n) total for the search, plus Θ(m) to build the failure function, for Θ(n+m) overall.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What does lps[i] represent for a pattern P?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">The number of times character P[i] appears anywhere in the pattern.</button>
+      <button class="quiz-choice" data-correct="true">The length of the longest proper prefix of P[0..i] that is also a suffix of P[0..i].</button>
+      <button class="quiz-choice" data-correct="false">The position in the text where the pattern was last found.</button>
+      <button class="quiz-choice" data-correct="false">The total length of the pattern minus i.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>This prefix-that-is-also-a-suffix length is exactly what tells KMP how much of a partial match can be safely reused after a mismatch.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why can KMP fall back to P[lps[i−1]] after a mismatch instead of restarting the pattern from P[0]?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because KMP always assumes the mismatch was caused by a typo in the text.</button>
+      <button class="quiz-choice" data-correct="true">Because the already-matched text region provably contains, as its own suffix, the same substring that lps identifies as a reusable prefix of the pattern — so resuming from that point re-uses information instead of discarding it.</button>
+      <button class="quiz-choice" data-correct="false">Because the pattern is always guaranteed to appear starting at the very next text position.</button>
+      <button class="quiz-choice" data-correct="false">Because KMP recomputes the entire failure function after every mismatch.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The matched text region already contains a known prefix-as-suffix relationship, which is precisely what the failure function was built to exploit.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why does the KMP search loop run in Θ(n) total, rather than Θ(nm) like the naive approach?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because KMP only ever checks each text character once and never falls back at all.</button>
+      <button class="quiz-choice" data-correct="true">Because the text index i never decreases, and the total number of fallback steps (which only decrease j) is bounded by the total number of times j was ever incremented, which is itself bounded by how many times i advanced.</button>
+      <button class="quiz-choice" data-correct="false">Because KMP first sorts the text before searching, eliminating redundant comparisons.</button>
+      <button class="quiz-choice" data-correct="false">Because the pattern is always assumed to be shorter than the text by a fixed amount.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>This is an amortized argument: i's monotonic advance bounds the total "budget" that fallback steps (which only move j) can ever draw down.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="failure function|lps|failure">
+    <p class="quiz-prompt">4. Fill in the blank: KMP precomputes a ___ over the pattern itself, describing how much of a partial match can be reused after any possible mismatch position.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>This precomputed structure is the entire mechanism that lets KMP avoid ever re-examining a text character.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="n+m|m+n">
+    <p class="quiz-prompt">5. Fill in the blank: KMP's total runtime, including building the failure function and searching the text, is Θ(___), a large improvement over the naive Θ(nm) worst case.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Θ(m) to build the failure function plus Θ(n) to search gives the combined linear bound.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: CLRS, Chapter 32.4, "The Knuth-Morris-Pratt algorithm," gives the full derivation and correctness proof, and <a href="https://cp-algorithms.com/string/prefix-function.html">CP-Algorithms, "Prefix function"</a> covers the same failure function with several additional applications.</p>
+
+  <p class="ask-teacher">Want to trace buildLPS and kmpSearch by hand on a small pattern like "abab" against a longer text? Ask your teacher — that's what I'm here for. Next up: Rabin-Karp, which solves the same problem with a completely different tool — rolling hashes.</p>
+
+  <footer class="lesson-footer">STEM+ · Advanced Algorithms · Lesson 27 of the course sequence</footer>
+</div>

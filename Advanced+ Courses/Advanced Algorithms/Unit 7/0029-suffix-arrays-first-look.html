@@ -1,0 +1,112 @@
+<meta charset="UTF-8">
+<title>Lesson 29: Suffix Arrays, First Look — STEM+</title>
+<link rel="stylesheet" href="../../../assets/style.css">
+<script src="../../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Advanced Algorithms · Unit 7 · Lesson 29</span>
+  <h1>Suffix Arrays, First Look</h1>
+  <p class="subtitle">KMP and Rabin-Karp both answer one query — where does this one pattern occur? — against a text they scan fresh each time. A suffix array preprocesses the text once, then answers any pattern query against it in O(m log n).</p>
+  <p class="nav-links"><a href="0028-rabin-karp.html" class="nav-prev">← Lesson 28</a> <a href="../Unit%208/0030-p-vs-np.html" class="nav-next">Lesson 30 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Both KMP (Lesson 27) and Rabin-Karp (Lesson 28) answer "does pattern P occur in text T?" by scanning T once per query, at Θ(n+m) each. If the same text T is queried against hundreds or thousands of different patterns — a genuinely common situation (a search engine's index, a genome being queried against many candidate gene sequences) — repeating a full Θ(n) scan every time is wasteful. A <strong>suffix array</strong> preprocesses T once into a sorted structure that then answers any single pattern query in O(m log n), independent of n beyond that one-time preprocessing cost.</p>
+
+  <h2>The structure</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    The suffix array of a string T (length n) is an array SA[0..n−1] of the integers 0..n−1, permuted so that T's suffixes, starting at each of those positions, appear in sorted (lexicographic) order. That is, T[SA[0]..], T[SA[1]..], ..., T[SA[n−1]..] is the list of all n suffixes of T, sorted alphabetically. SA itself stores only the starting positions, not the suffix strings — those are implicit, recoverable from T and a starting index.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Worked example</span>
+    For T = "banana" (append a sentinel character smaller than everything, conventionally "$", giving "banana$"), the 7 suffixes are: "banana$" (0), "anana$" (1), "nana$" (2), "ana$" (3), "na$" (4), "a$" (5), "$" (6). Sorted alphabetically: "$" (6), "a$" (5), "ana$" (3), "anana$" (1), "banana$" (0), "na$" (4), "nana$" (2). So SA = [6, 5, 3, 1, 0, 4, 2].
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why a sorted array of suffixes answers pattern queries</span>
+    Every occurrence of pattern P in T is, by definition, the start of some suffix of T that begins with P. Since SA sorts every suffix alphabetically, every suffix starting with P occupies one contiguous block within SA (identical to how every word starting with a given prefix sits contiguously in a sorted dictionary) — so finding all occurrences of P reduces to binary search for the boundaries of that block, comparing P against the suffix at SA[mid] at each step. Each comparison costs O(m) (comparing P against up to m characters of a suffix), and binary search takes O(log n) steps, giving O(m log n) total per query — no re-scan of the whole text required.
+  </div>
+
+  <div class="box">
+    <span class="box-label">Binary search using the suffix array</span>
+<pre class="code-block"><code>function search(T, SA, P):
+    lo, hi = 0, |SA|
+    while lo < hi:                              // find leftmost suffix >= P
+        mid = (lo + hi) / 2
+        if suffixAt(T, SA[mid]) < P: lo = mid + 1
+        else: hi = mid
+    // lo is now the first index whose suffix could start with P;
+    // a second, mirrored binary search finds the right boundary,
+    // and every SA[i] between the two boundaries is a match position</code></pre>
+  </div>
+
+  <div class="box why">
+    <span class="box-label">The cost this defers to preprocessing</span>
+    Building a suffix array by sorting all n suffixes with a naive comparison sort costs O(n² log n) (each of O(n log n) comparisons costs up to O(n) to compare two suffixes character by character) — expensive, but paid only <em>once</em> per text, not once per query. (Faster O(n log n) and even O(n) construction algorithms exist, using techniques beyond this lesson's scope — cited below — but even the naive construction already pays off once enough pattern queries are asked against the same fixed text.) This is the same "pay more upfront, save on every repeated query" trade-off Lesson 22's segment tree makes relative to re-scanning an array from scratch on every range query.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What does a suffix array SA[0..n−1] store?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">The actual suffix strings themselves, stored in sorted order.</button>
+      <button class="quiz-choice" data-correct="true">The starting positions of T's suffixes, permuted so the suffixes they point to appear in sorted (lexicographic) order.</button>
+      <button class="quiz-choice" data-correct="false">The hash of every substring of T, indexed by starting position.</button>
+      <button class="quiz-choice" data-correct="false">The failure function values for every prefix of T.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>SA stores integer starting positions only; the suffixes themselves stay implicit, recoverable from T plus a position.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why do all occurrences of a pattern P in T correspond to a single contiguous block within the suffix array?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because the suffix array is always sorted by suffix length, not alphabetically.</button>
+      <button class="quiz-choice" data-correct="true">Because every suffix starting with P sorts adjacently to every other suffix starting with P, the same way every word sharing a prefix sits together in a sorted dictionary.</button>
+      <button class="quiz-choice" data-correct="false">Because P can only occur once in any string T.</button>
+      <button class="quiz-choice" data-correct="false">Because the suffix array groups suffixes by their starting position instead of their content.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Lexicographic sorting groups every suffix sharing a given prefix into one contiguous run, exactly what makes binary search for the block's boundaries valid.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why is a suffix array preferred over repeating KMP or Rabin-Karp when many different patterns will be searched against the same fixed text?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because KMP and Rabin-Karp cannot correctly find every occurrence of a pattern.</button>
+      <button class="quiz-choice" data-correct="true">Because the suffix array pays a one-time preprocessing cost, after which each pattern query costs only O(m log n) instead of a fresh O(n+m) scan of the whole text.</button>
+      <button class="quiz-choice" data-correct="false">Because suffix arrays use less memory than the original text itself.</button>
+      <button class="quiz-choice" data-correct="false">Because KMP and Rabin-Karp only work on texts shorter than 100 characters.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Amortizing a one-time preprocessing cost across many queries is exactly the trade-off that makes suffix arrays worthwhile when query count is high.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="suffix array">
+    <p class="quiz-prompt">4. Fill in the blank: a ___ stores the starting positions of every suffix of a text, sorted so that the suffixes they reference appear in lexicographic order.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>This is the structure's defining property and the source of its name.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="binary search">
+    <p class="quiz-prompt">5. Fill in the blank: once a suffix array is built, a pattern query finds all matches by performing a ___ over the sorted suffixes to locate the contiguous block starting with the pattern.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Binary search over the sorted array is what turns the query cost into O(m log n) instead of a linear rescan.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: <a href="https://cp-algorithms.com/string/suffix-array.html">CP-Algorithms, "Suffix Array"</a> covers both the naive construction shown here and the faster O(n log n) prefix-doubling construction this lesson didn't have room for.</p>
+
+  <p class="ask-teacher">Want to build the suffix array for a word of your choice by hand and trace a binary-search pattern query against it? Ask your teacher — that's what I'm here for. This closes Unit 7. Next up: Unit 8, computational complexity — what makes some problems provably harder than others, starting with P vs. NP.</p>
+
+  <footer class="lesson-footer">STEM+ · Advanced Algorithms · Lesson 29 of the course sequence</footer>
+</div>

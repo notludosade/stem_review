@@ -1,0 +1,113 @@
+<meta charset="UTF-8">
+<title>Lesson 11: Metric Spaces — Definitions and Examples — STEM+</title>
+<link rel="stylesheet" href="../../../assets/style.css">
+<script src="../../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Real Analysis B · Unit 3 · Lesson 11</span>
+  <h1>Metric Spaces: Definitions and Examples</h1>
+  <p class="subtitle">Real Analysis A did everything with |x − y|. This unit asks what actually made those arguments work — and the answer turns out to need almost nothing about ℝ at all.</p>
+  <p class="nav-links"><a href="../Unit%202/0010-where-taylor-series-fail.html" class="nav-prev">← Lesson 10</a> <a href="0012-open-and-closed-sets.html" class="nav-next">Lesson 12 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Every ε–δ argument in Real Analysis A used |x − y| as "the distance between x and y" — but it only ever used three facts about that quantity: it's never negative (and only 0 when x = y), it doesn't care about order (|x−y| = |y−x|), and it satisfies the triangle inequality. This lesson isolates exactly those three facts and studies any set equipped with a function that has them.</p>
+
+  <div class="box">
+    <span class="box-label">Definition — Metric Space</span>
+    A <strong>metric</strong> on a set X is a function d: X × X → ℝ satisfying, for all x, y, z ∈ X: (1) <em>positivity</em>: d(x,y) ≥ 0, with d(x,y) = 0 if and only if x = y; (2) <em>symmetry</em>: d(x,y) = d(y,x); (3) <em>triangle inequality</em>: d(x,z) ≤ d(x,y) + d(y,z). The pair (X, d) is called a <strong>metric space</strong>.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why this is exactly the right generalization</span>
+    Nothing here mentions order, addition, or any algebraic structure on X at all — only the three properties an ε–δ argument actually consumes. Any proof from Real Analysis A that manipulated |x − y| using only positivity, symmetry, and the triangle inequality (which is most of them) carries over to any metric space verbatim, with d(x,y) in place of |x − y|. The rest of this unit will confirm this directly: convergence, continuity, and compactness all get redefined using d alone.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Example 1: ℝ with the absolute value metric</span>
+    d(x,y) = |x − y| on X = ℝ is a metric — this is precisely Real Analysis A's setting, now viewed as one example among many rather than the only possible one.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Example 2: the discrete metric</span>
+    On <em>any</em> set X whatsoever — no structure required, not even a notion of "number" — define d(x,y) = 0 if x = y, and d(x,y) = 1 if x ≠ y. Positivity and symmetry are immediate. For the triangle inequality: if x = z, the left side is 0 and the inequality holds trivially; if x ≠ z, the left side is 1, and the right side d(x,y) + d(y,z) is at least 1 (since y can't equal both x and z when x ≠ z, at least one term is 1). This is a genuine metric on any set — X could be a set of colors, or of prime numbers, or of anything at all.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why the discrete metric matters</span>
+    It shows metric spaces are a strictly broader idea than "subsets of ℝ or ℝⁿ with the usual distance." A metric is any function satisfying the three axioms — the set X itself carries no built-in geometry. Everything geometric in a metric space comes entirely from d.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Example 3: C[a,b] with the sup metric</span>
+    Let X = C[a,b], the set of continuous functions on [a,b]. Define d(f,g) = sup<sub>x∈[a,b]</sub>|f(x) − g(x)| (finite, since a continuous function on [a,b] is bounded). Positivity and symmetry are immediate from the same properties of the absolute value. For the triangle inequality: |f(x) − h(x)| ≤ |f(x) − g(x)| + |g(x) − h(x)| ≤ d(f,g) + d(g,h) for every x ∈ [a,b], so taking the supremum over x on the left gives d(f,h) ≤ d(f,g) + d(g,h).
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why this example is the whole point of the unit</span>
+    d(fₙ, f) = sup<sub>x</sub>|fₙ(x) − f(x)| is exactly the quantity Unit 1 required to go to 0 for uniform convergence. In other words: fₙ → f uniformly on [a,b] means exactly fₙ → f in the metric space (C[a,b], d). Uniform convergence was never a special new idea — it was ordinary convergence, in a metric space whose points are entire functions rather than numbers. This unit will make that identification precise once "convergence in a metric space" is defined in Lesson 13.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. Why does d(x,y) = (x − y)² fail to be a metric on ℝ?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">It fails positivity, since (x−y)² can be negative</button>
+      <button class="quiz-choice" data-correct="false">It fails symmetry, since (x−y)² ≠ (y−x)²</button>
+      <button class="quiz-choice" data-correct="true">It fails the triangle inequality (e.g. d(0,2)=4 exceeds d(0,1)+d(1,2)=1+1=2)</button>
+      <button class="quiz-choice" data-correct="false">It is not actually a function of x and y</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>(x−y)² is always non-negative and symmetric, but the specific numbers 0, 1, 2 show the triangle inequality genuinely fails.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. What does the discrete metric demonstrate about metric spaces in general?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">That every metric space must be a subset of ℝⁿ</button>
+      <button class="quiz-choice" data-correct="true">That a metric can be defined on any set at all, with no algebraic or order structure required</button>
+      <button class="quiz-choice" data-correct="false">That distances in a metric space must always be 0 or 1</button>
+      <button class="quiz-choice" data-correct="false">That every set has exactly one possible metric</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The discrete metric is defined on an arbitrary set with no assumed structure, showing the three axioms are all a metric space genuinely requires.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. What does the sup metric d(f,g) on C[a,b] connect back to?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">The Bolzano-Weierstrass Theorem from Real Analysis A</button>
+      <button class="quiz-choice" data-correct="true">Uniform convergence from Unit 1 — d(fₙ,f) → 0 is exactly the definition of fₙ → f uniformly</button>
+      <button class="quiz-choice" data-correct="false">The discrete metric's triangle inequality argument</button>
+      <button class="quiz-choice" data-correct="false">The radius of convergence of a power series</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The sup metric's distance is literally the same quantity Unit 1 required to shrink to 0 for uniform convergence, reframing it as ordinary convergence in a function space.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="triangle">
+    <p class="quiz-prompt">4. Fill in the blank: d(x,z) ≤ d(x,y) + d(y,z) is called the ___ inequality.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>This is the triangle inequality, the third of the three metric axioms.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="discrete">
+    <p class="quiz-prompt">5. Fill in the blank: the ___ metric assigns distance 0 to a point from itself and 1 to any two distinct points, and is defined on any set whatsoever.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The discrete metric is the standard name for this simplest possible metric on an arbitrary set.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: Rudin's <em>Principles of Mathematical Analysis</em>, Chapter 2 ("Basic Topology"), opens with the metric space axioms and these same families of examples.</p>
+
+  <p class="ask-teacher">Stuck on why the triangle inequality is the axiom that does most of the real work? Ask your teacher — that's what I'm here for. Next up: open and closed sets — the basic topological vocabulary a metric makes possible, with no reference to numbers at all.</p>
+
+  <footer class="lesson-footer">STEM+ · Real Analysis B · Lesson 11 of the course sequence</footer>
+</div>

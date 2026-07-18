@@ -1,0 +1,100 @@
+<meta charset="UTF-8">
+<title>Lesson 27: PII & Anonymization — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Data Handling: CB · Unit 7 · Lesson 27</span>
+  <h1>PII & Anonymization</h1>
+  <p class="subtitle">Every unit so far has treated data as neutral rows and columns. Behind many of those rows are real people, and this unit is about the responsibilities that come with that — starting with recognizing what actually identifies someone.</p>
+  <p class="nav-links"><a href="../Unit%206/0026-telling-a-data-story.html" class="nav-prev">← Lesson 26</a> <a href="0028-bias-in-data-and-analysis.html" class="nav-next">Lesson 28 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p><strong>Personally Identifiable Information (PII)</strong> is any data that can identify a specific individual, either on its own or combined with other data. Handling it responsibly starts with recognizing that "combined with other data" clause — it's where most real-world anonymization mistakes happen.</p>
+
+  <h2>Direct vs. indirect identifiers</h2>
+  <div class="box">
+    <span class="box-label">Two categories</span>
+    A <strong>direct identifier</strong> points to one specific person on its own: name, Social Security number, email address, phone number. An <strong>indirect identifier</strong> (sometimes called a quasi-identifier) doesn't identify anyone alone, but can narrow a large population down to one person when combined with a few others: ZIP code, birth date, and gender together, for instance, have been shown to uniquely identify the majority of the U.S. population, even though none of the three alone identifies anyone.
+  </div>
+
+  <h2>Anonymization techniques</h2>
+  <div class="box">
+    <span class="box-label">Common approaches</span>
+    <strong>Removal</strong> — deleting direct identifiers entirely. <strong>Masking</strong> — replacing part of a value (showing only the last four digits of an account number). <strong>Aggregation</strong> — reporting only group-level statistics (Lesson 12's GROUP BY) rather than individual rows, so no single row is exposed at all. <strong>Generalization</strong> — reducing precision, e.g. replacing an exact birth date with a birth year, or an exact address with a ZIP code, specifically to weaken the indirect-identifier combinations above.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why removing the obvious direct identifiers is often not enough</span>
+    A dataset with names removed but ZIP code, birth date, and gender left intact can still be re-identified, sometimes with high accuracy, by cross-referencing against other public records (like voter registration lists) — a well-documented finding from real re-identification research. This is the anonymization equivalent of a JOIN (Lesson 11): if the "anonymized" data still shares indirect identifiers with some other dataset, joining the two can reconstruct exactly the identity that removal was meant to protect. True anonymization has to consider what other data sources exist in the world, not just what was deleted from this one file.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Worked example</span>
+    A hospital releases a "de-identified" research dataset with patient names removed, but retains exact birth date, ZIP code, and gender for each patient. A researcher cross-references this against a publicly available voter registration database (which does include names alongside those same three fields) and re-identifies a majority of the patients. The fix: generalize birth date to birth year and ZIP code to the first three digits only, which sharply reduces how many people any one combination of values could match.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What distinguishes an indirect identifier (quasi-identifier) from a direct identifier?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Indirect identifiers can never appear in the same dataset as direct identifiers.</button>
+      <button class="quiz-choice" data-correct="true">An indirect identifier doesn't identify someone on its own, but can narrow a population down to one specific person when combined with a few other indirect identifiers.</button>
+      <button class="quiz-choice" data-correct="false">Indirect identifiers only apply to numeric data, never text data.</button>
+      <button class="quiz-choice" data-correct="false">A direct identifier is any value that appears more than once in a dataset.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>ZIP code, birth date, and gender are each individually non-identifying, but combined can uniquely identify a person.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why can a dataset with names removed still fail to protect patient identities, as in the hospital worked example?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because removing a direct identifier always makes re-identification completely impossible.</button>
+      <button class="quiz-choice" data-correct="true">Because remaining indirect identifiers (ZIP code, birth date, gender) can be cross-referenced against another public dataset containing the same fields alongside names, effectively re-identifying individuals.</button>
+      <button class="quiz-choice" data-correct="false">Because hospital data can never be legally anonymized under any circumstances.</button>
+      <button class="quiz-choice" data-correct="false">Because voter registration databases contain medical information directly.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Re-identification through cross-referencing indirect identifiers is exactly why removal of direct identifiers alone is often insufficient.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. How does generalization (e.g. replacing an exact birth date with a birth year) help prevent re-identification?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">It deletes the birth date field from the dataset entirely.</button>
+      <button class="quiz-choice" data-correct="true">It reduces precision so that any given combination of values matches many more people, weakening the indirect-identifier combinations that could otherwise narrow a population down to one person.</button>
+      <button class="quiz-choice" data-correct="false">It replaces the birth date with a randomly generated, entirely fictional value.</button>
+      <button class="quiz-choice" data-correct="false">It has no effect on re-identification risk, only on file size.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Generalization keeps the field usable for analysis while making it match far more people, reducing identification risk.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="PII|personally identifiable information">
+    <p class="quiz-prompt">4. Fill in the blank: any data that can identify a specific individual, alone or combined with other data, is called ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>PII is the umbrella term this whole lesson is organized around.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="generalization">
+    <p class="quiz-prompt">5. Fill in the blank: the anonymization technique of reducing precision, such as replacing an exact address with only a ZIP code, is called ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Generalization specifically targets the precision of a field, distinct from removal or masking.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: the U.S. Department of Health and Human Services' overview of HIPAA's Safe Harbor de-identification standard (hhs.gov) lists the specific fields required for generalization or removal in health data.</p>
+
+  <p class="ask-teacher">Have a dataset you're considering sharing or publishing and want a second opinion on its re-identification risk? Ask your teacher — that's what I'm here for. Next up: how bias enters data and analysis, and what to do about it.</p>
+
+  <footer class="lesson-footer">STEM+ · Data Handling: CB · Lesson 27 of the course sequence</footer>
+</div>

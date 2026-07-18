@@ -1,0 +1,120 @@
+<meta charset="UTF-8">
+<title>Lesson 13: Bellman-Ford — STEM+</title>
+<link rel="stylesheet" href="../../../assets/style.css">
+<script src="../../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Advanced Algorithms · Unit 4 · Lesson 13</span>
+  <h1>Bellman-Ford</h1>
+  <p class="subtitle">Dijkstra's algorithm breaks the instant an edge weight goes negative. Bellman-Ford handles negative weights correctly — and, as a side effect, can detect a negative cycle that would make "shortest path" meaningless in the first place.</p>
+  <p class="nav-links"><a href="../Unit%203/0012-huffman-coding.html" class="nav-prev">← Lesson 12</a> <a href="0014-floyd-warshall.html" class="nav-next">Lesson 14 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>CP2+'s Lesson 22 ("Dijkstra's Algorithm &amp; Network Delay Time") taught single-source shortest paths under one unstated assumption: every edge weight is non-negative. Dijkstra's greedy step — always finalize the closest unvisited vertex — relies on that assumption; once an edge can be negative, a vertex "finalized" as closest so far can later turn out to have a cheaper path through an edge that looked worse at the time. Bellman-Ford drops the non-negativity assumption entirely, at the cost of a slower runtime, and gains something Dijkstra's can't even express: a way to detect when "shortest path" doesn't have a well-defined answer at all.</p>
+
+  <h2>Why Dijkstra's breaks with negative weights</h2>
+  <div class="box why">
+    <span class="box-label">Counterexample</span>
+    Vertices S, A, B. Edges: S→A weight 1, S→B weight 4, A→B weight −3. Dijkstra's finalizes A first (distance 1, smaller than B's 4), then finalizes B using the direct S→B edge (distance 4), since A is already "done" and Dijkstra's never revisits finalized vertices. But the true shortest S→B path is S→A→B, with cost 1+(−3) = −2, far less than 4. Dijkstra's greedy finalization step assumed no edge could make an already-finalized vertex's neighbors even cheaper — negative weights break exactly that assumption.
+  </div>
+
+  <h2>The algorithm</h2>
+  <div class="box">
+    <span class="box-label">Algorithm</span>
+<pre class="code-block"><code>function bellmanFord(graph, source):
+    dist[source] = 0, dist[v] = infinity for all other v
+    repeat (|V| - 1) times:
+        for each edge (u, v, weight) in graph:
+            if dist[u] + weight < dist[v]:
+                dist[v] = dist[u] + weight     // relax the edge
+    // one extra pass to detect negative cycles
+    for each edge (u, v, weight) in graph:
+        if dist[u] + weight < dist[v]:
+            report "negative-weight cycle reachable from source"
+    return dist</code></pre>
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why exactly |V|−1 rounds of relaxation</span>
+    Any shortest path in a graph with no negative cycle visits at most |V|−1 distinct edges (a shortest path never repeats a vertex, since removing a repeated-vertex loop of non-negative-or-not total weight — wait, more precisely: with no negative cycle, a shortest path is never improved by revisiting a vertex, so it has at most |V|−1 edges). Each full pass over all edges guarantees that the true shortest path to some vertex gets "one more edge correct" — after k passes, every shortest path using at most k edges is guaranteed correctly computed. After |V|−1 passes, every shortest path (which uses at most |V|−1 edges) is correct, by induction on path length.
+  </div>
+
+  <div class="box">
+    <span class="box-label">Detecting negative cycles</span>
+    If a graph has a reachable negative-weight cycle, "shortest path" is undefined — you could loop the cycle forever, driving the cost to −∞. After |V|−1 rounds have already stabilized every simple-path distance, one more full pass that <em>still</em> finds an edge to relax is only possible if some path is using more than |V|−1 edges to improve — which can only happen by looping a negative cycle. That's exactly the extra check in the algorithm's last step.
+  </div>
+
+  <div class="box">
+    <span class="box-label">Runtime</span>
+    Θ(V·E): |V|−1 rounds, each scanning all E edges. This is asymptotically worse than Dijkstra's Θ(E log V) with a heap, which is the price paid for correctness under negative weights — there is no known algorithm that handles arbitrary negative edges as fast as Dijkstra's handles non-negative ones.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why this connects forward to Unit 4's flow algorithms</span>
+    Ford-Fulkerson (Lesson 16) reasons about "augmenting paths" in a residual graph that can contain negative-weight-like backward edges in spirit — the relaxation-based thinking Bellman-Ford introduces here (repeatedly improving a distance estimate until it stabilizes) reappears as the underlying mental model for why flow algorithms terminate and are correct.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. Why does Dijkstra's algorithm give the wrong answer on a graph with a negative edge weight?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because Dijkstra's algorithm cannot process graphs with more than one edge.</button>
+      <button class="quiz-choice" data-correct="true">Because it finalizes vertices greedily and never revisits them, but a negative edge can make an already-finalized vertex's neighbor cheaper than assumed.</button>
+      <button class="quiz-choice" data-correct="false">Because negative weights make the priority queue throw an error.</button>
+      <button class="quiz-choice" data-correct="false">Because Dijkstra's algorithm only works on undirected graphs.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Dijkstra's correctness depends on the invariant that once a vertex is finalized, no cheaper path to it can appear later — negative edges directly violate that invariant.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why does Bellman-Ford run exactly |V|−1 rounds of edge relaxation?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because |V|−1 is an arbitrary safety margin with no proof behind it.</button>
+      <button class="quiz-choice" data-correct="true">Because any shortest path (with no negative cycle) uses at most |V|−1 edges, and each round guarantees paths of one more edge are computed correctly.</button>
+      <button class="quiz-choice" data-correct="false">Because the graph is assumed to have exactly |V|−1 edges.</button>
+      <button class="quiz-choice" data-correct="false">Because it matches the number of rounds Dijkstra's algorithm uses.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The inductive guarantee — after k rounds, all shortest paths of at most k edges are correct — is exactly what caps the needed rounds at |V|−1.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. How does Bellman-Ford detect a negative-weight cycle?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">By checking if any single edge weight is negative before running at all.</button>
+      <button class="quiz-choice" data-correct="true">By running one extra relaxation pass after the |V|−1 rounds — if any edge can still be relaxed, a negative cycle must be reachable.</button>
+      <button class="quiz-choice" data-correct="false">By counting the total number of edges in the graph.</button>
+      <button class="quiz-choice" data-correct="false">Bellman-Ford cannot detect negative cycles; it only fails silently.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Since |V|−1 rounds already stabilize every simple-path distance, any further improvement is only possible through a path that loops a negative cycle.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="relax|relaxation">
+    <p class="quiz-prompt">4. Fill in the blank: each round of Bellman-Ford scans every edge and attempts to ___ it, updating a distance estimate if a cheaper path is found.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Edge relaxation is the single repeated operation the whole algorithm is built from.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="negative cycle|negative-weight cycle">
+    <p class="quiz-prompt">5. Fill in the blank: if a graph contains a reachable ___ , shortest path is undefined, since looping it repeatedly drives the cost toward negative infinity.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A negative cycle makes "shortest path" meaningless, which is exactly the condition Bellman-Ford's final pass is built to detect.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: CLRS, Chapter 22, Section 22.1, "The Bellman-Ford algorithm," gives the full correctness proof and pseudocode.</p>
+
+  <p class="ask-teacher">Want to trace Bellman-Ford by hand on a small graph with one negative edge? Ask your teacher — that's what I'm here for. Next up: Floyd-Warshall, which solves shortest paths between <em>every</em> pair of vertices at once, using a completely different technique — dynamic programming over intermediate vertices.</p>
+
+  <footer class="lesson-footer">STEM+ · Advanced Algorithms · Lesson 13 of the course sequence</footer>
+</div>

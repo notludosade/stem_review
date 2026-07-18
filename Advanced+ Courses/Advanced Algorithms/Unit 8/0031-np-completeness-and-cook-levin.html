@@ -1,0 +1,115 @@
+<meta charset="UTF-8">
+<title>Lesson 31: NP-Completeness &amp; the Cook-Levin Theorem — STEM+</title>
+<link rel="stylesheet" href="../../../assets/style.css">
+<script src="../../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Advanced Algorithms · Unit 8 · Lesson 31</span>
+  <h1>NP-Completeness &amp; the Cook-Levin Theorem</h1>
+  <p class="subtitle">Lesson 30 showed reductions transfer hardness between two problems. This lesson asks: is there a problem so general that every problem in NP reduces to it? Cook and Levin proved yes — and named the first one.</p>
+  <p class="nav-links"><a href="0030-p-vs-np.html" class="nav-prev">← Lesson 30</a> <a href="0032-common-np-complete-problems.html" class="nav-next">Lesson 32 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Lesson 30's Independent Set ≤ₚ Vertex Cover reduction relates exactly two problems. This lesson asks a far more ambitious question: is there a single problem that every problem in NP reduces to — a problem that is, in a precise sense, at least as hard as all of NP simultaneously? In 1971, Stephen Cook (and independently, Leonid Levin) answered yes, and identified the first such problem: Boolean satisfiability.</p>
+
+  <h2>NP-hard and NP-complete</h2>
+  <div class="box">
+    <span class="box-label">Definitions</span>
+    A problem B is <strong>NP-hard</strong> if every problem A in NP satisfies A ≤ₚ B — every NP problem reduces to it. A problem is <strong>NP-complete</strong> if it is both NP-hard <em>and</em> itself in NP. NP-complete problems are exactly the hardest problems within NP: they're at least as hard as every other NP problem, while still being NP problems themselves (their yes-instances have polynomial-time-checkable certificates).
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why NP-complete problems are equivalent to each other</span>
+    If B and C are both NP-complete, then B ≤ₚ C and C ≤ₚ B both hold (each is NP-hard, so every NP problem — including the other — reduces to it). This means a polynomial-time algorithm for any single NP-complete problem would immediately give a polynomial-time algorithm for <em>every</em> problem in NP, resolving P vs. NP outright. Every NP-complete problem is, in this precise sense, exactly as hard as every other one.
+  </div>
+
+  <h2>Boolean satisfiability — the first NP-complete problem</h2>
+  <div class="box">
+    <span class="box-label">SAT</span>
+    Given a Boolean formula built from variables, AND (∧), OR (∨), and NOT (¬) — for example (x₁ ∨ ¬x₂) ∧ (x₂ ∨ x₃) — does some assignment of true/false to each variable make the whole formula evaluate to true? SAT is clearly in NP: a satisfying assignment is a certificate, and plugging it in and evaluating the formula is polynomial time.
+  </div>
+
+  <div class="box">
+    <span class="box-label">Theorem (Cook, 1971; Levin, 1973)</span>
+    SAT is NP-complete.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why this proof looks nothing like a reduction between two named problems</span>
+    Proving SAT is NP-hard means showing <em>every</em> problem in NP reduces to it — not one specific problem, but the entire infinite class at once. Cook and Levin's proof works directly from the definition of NP itself: any NP problem has, by definition, a polynomial-time verifier — an algorithm (formally, a Turing machine) that checks a certificate in polynomial time. The proof mechanically encodes that verifier's entire computation — every step, every possible memory configuration, at every time slice up to its polynomial time bound — as one gigantic Boolean formula, built so that the formula is satisfiable exactly when some certificate makes the verifier accept. This is a one-time, foundational construction: it doesn't reduce SAT from some other named problem, it reduces the abstract notion of "any NP verifier's computation" into SAT directly.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why Cook-Levin is the seed every later NP-completeness proof depends on</span>
+    Once SAT is confirmed NP-hard by this direct construction, proving any <em>other</em> problem X is NP-hard no longer requires repeating that machine-simulation argument. It suffices to show SAT ≤ₚ X (or, by the transitivity of reductions, that some already-confirmed-NP-complete problem reduces to X) — a much simpler proof technique, comparable in spirit to Lesson 30's Independent Set/Vertex Cover reduction. This is exactly why Cook-Levin is described as "the seed": every NP-completeness proof since 1971 chains back to it, directly or through a few intermediate reductions, rather than re-deriving hardness from the definition of NP from scratch.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">3-SAT — the form most reductions actually start from</span>
+    3-SAT restricts SAT to formulas in conjunctive normal form with exactly 3 literals per clause, e.g. (x₁ ∨ ¬x₂ ∨ x₃) ∧ (¬x₁ ∨ x₂ ∨ x₄). A short reduction (SAT ≤ₚ 3-SAT, via a standard clause-splitting transformation, omitted here for space) shows 3-SAT is exactly as hard as general SAT — so most textbook NP-completeness proofs, including Lesson 32's, reduce from 3-SAT rather than unrestricted SAT, since its rigid per-clause structure is easier to encode into other problems' instances.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What distinguishes "NP-hard" from "NP-complete"?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">NP-hard problems are always solvable in polynomial time; NP-complete ones never are.</button>
+      <button class="quiz-choice" data-correct="true">NP-hard means every NP problem reduces to it; NP-complete additionally requires the problem itself to be in NP.</button>
+      <button class="quiz-choice" data-correct="false">There is no difference — the two terms describe exactly the same set of problems.</button>
+      <button class="quiz-choice" data-correct="false">NP-complete problems have no certificates; NP-hard problems always do.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>NP-hardness is purely about being a reduction target for all of NP; NP-completeness adds the requirement of also belonging to NP.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why does the Cook-Levin proof of SAT's NP-hardness look different from a reduction like Lesson 30's Independent Set ≤ₚ Vertex Cover?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because Cook-Levin doesn't actually prove anything about SAT's difficulty.</button>
+      <button class="quiz-choice" data-correct="true">Because it must show every problem in NP reduces to SAT at once, by encoding an arbitrary polynomial-time verifier's entire computation directly as a Boolean formula, rather than reducing from one specific named problem.</button>
+      <button class="quiz-choice" data-correct="false">Because Cook-Levin only applies to graph problems, not Boolean formulas.</button>
+      <button class="quiz-choice" data-correct="false">Because Cook-Levin uses randomized algorithms instead of reductions.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Cook-Levin reduces the entire abstract class of NP verifiers into SAT directly, which is why it needed a fundamentally different argument than a reduction between two specific problems.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why is Cook-Levin described as "the seed" that later NP-completeness proofs depend on?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because every later proof must re-derive the Turing-machine simulation argument from scratch.</button>
+      <button class="quiz-choice" data-correct="true">Because once SAT is confirmed NP-hard, proving a new problem NP-hard only requires reducing SAT (or another confirmed NP-complete problem) to it — a much simpler argument than simulating an arbitrary verifier's computation.</button>
+      <button class="quiz-choice" data-correct="false">Because Cook-Levin proves P equals NP outright.</button>
+      <button class="quiz-choice" data-correct="false">Because SAT is the only NP-complete problem that will ever be discovered.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Chaining reductions back to SAT is exactly what spares every later proof from repeating Cook-Levin's foundational machine-simulation argument.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="satisfiability|SAT">
+    <p class="quiz-prompt">4. Fill in the blank: the Cook-Levin theorem proves that Boolean ___ was the first problem shown to be NP-complete.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>SAT (Boolean satisfiability) is the problem Cook and Levin proved NP-complete, founding the entire theory of NP-completeness.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="3-SAT">
+    <p class="quiz-prompt">5. Fill in the blank: most textbook NP-completeness proofs reduce from ___ rather than unrestricted SAT, since its rigid three-literals-per-clause structure is easier to encode into other problems.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>3-SAT's fixed clause width makes it the more convenient starting point for most reductions, despite being equally hard as general SAT.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: CLRS, Chapter 34.3–34.4, "NP-completeness" and "NP-completeness proofs," covers the Cook-Levin construction in full detail, and Sipser's <em>Introduction to the Theory of Computation</em>, Chapter 7, gives the same proof from a formal-Turing-machine perspective.</p>
+
+  <p class="ask-teacher">Want to talk through why the Cook-Levin construction has to encode an entire computation history, not just a single step, into the formula? Ask your teacher — that's what I'm here for. Next up: a tour of common NP-complete problems, each shown hard by a short reduction from SAT or 3-SAT rather than from scratch.</p>
+
+  <footer class="lesson-footer">STEM+ · Advanced Algorithms · Lesson 31 of the course sequence</footer>
+</div>

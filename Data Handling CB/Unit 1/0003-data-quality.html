@@ -1,0 +1,94 @@
+<meta charset="UTF-8">
+<title>Lesson 3: Data Quality — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Data Handling: CB · Unit 1 · Lesson 3</span>
+  <h1>Data Quality</h1>
+  <p class="subtitle">"Garbage in, garbage out" isn't a cliché — it's the single most common reason a technically correct analysis reaches a wrong conclusion. This lesson gives you a checklist for judging whether a dataset is good enough to trust.</p>
+  <p class="nav-links"><a href="0002-where-data-comes-from.html" class="nav-prev">← Lesson 2</a> <a href="0004-databases-vs-spreadsheets-vs-files.html" class="nav-next">Lesson 4 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Lesson 2 asked where data comes from. This lesson asks a related but distinct question: regardless of source, is this specific dataset actually fit to answer the question in front of you? A dataset can come from a perfectly sound collection method and still be low quality — full of typos, gaps, and inconsistencies picked up during storage, transfer, or manual entry.</p>
+
+  <h2>Five dimensions of data quality</h2>
+  <div class="box">
+    <span class="box-label">Definitions</span>
+    <strong>Accuracy</strong> — does the data correctly reflect reality? (A recorded age of 200 is inaccurate.) <strong>Completeness</strong> — are there gaps, missing fields, or missing records? <strong>Consistency</strong> — does the same fact appear the same way everywhere? (One row says "USA," another says "United States" — same fact, inconsistent representation.) <strong>Timeliness</strong> — is the data current enough for the question being asked? (Last year's inventory counts won't answer "what's in stock right now.") <strong>Validity</strong> — does the data conform to the format and rules it's supposed to? (A "state" field containing a phone number is invalid, regardless of whether it's accurate anywhere else.)
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why these are separate dimensions, not one "good/bad" label</span>
+    A dataset can score well on one dimension and poorly on another, and knowing which one is broken determines the fix. A sales dataset might be perfectly accurate and complete, but inconsistent (dates stored as "1/5/24" in some rows and "2024-01-05" in others) — that's a formatting fix, not a data-recollection problem. A dataset might be consistent and valid but not timely — every value is well-formed and was accurate when collected, but it's a year stale. Treating "data quality" as a single yes/no question hides which specific problem you actually have, and Unit 5's cleaning lessons are organized around exactly this breakdown: missing data addresses completeness, deduplication and standardization address consistency, and so on.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Same number, different quality problems</span>
+    A "revenue" column showing <code>$0</code> for a given month could mean: the store was genuinely closed that month (accurate), the data wasn't recorded yet (incomplete — should be blank, not zero), or a system error logged zero instead of the real figure (inaccurate). The number alone can't tell you which — you have to know the data's context to tell a true zero from a missing value wearing a zero's clothing. This exact ambiguity is why Unit 5 treats "how missing data was recorded" as a first question, not an afterthought.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. A dataset has "USA" in some rows and "United States" in others for the same country. Which data quality dimension does this violate?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Accuracy — both values are factually wrong.</button>
+      <button class="quiz-choice" data-correct="true">Consistency — the same fact is represented in more than one way.</button>
+      <button class="quiz-choice" data-correct="false">Timeliness — the country data is out of date.</button>
+      <button class="quiz-choice" data-correct="false">Completeness — one of the two values is missing.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Both representations are factually accurate — the problem is that the same real-world fact doesn't look the same everywhere in the data.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why is it useful to separate data quality into distinct dimensions (accuracy, completeness, consistency, timeliness, validity) rather than one overall "good/bad" judgment?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because only one dimension can ever be a problem in any given dataset.</button>
+      <button class="quiz-choice" data-correct="true">Because a dataset can score well on some dimensions and poorly on others, and knowing which specific dimension is broken determines the correct fix.</button>
+      <button class="quiz-choice" data-correct="false">Because a single "good/bad" label is always sufficient for deciding whether to use a dataset.</button>
+      <button class="quiz-choice" data-correct="false">Because the five dimensions always move together — if one is bad, all of them are bad.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Different quality problems need different fixes — a formatting fix for inconsistency looks nothing like a fix for stale, untimely data.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why can't a "$0" revenue value be interpreted correctly without additional context?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because zero is never a valid revenue value in any dataset.</button>
+      <button class="quiz-choice" data-correct="true">Because a recorded zero could mean genuinely no revenue, a not-yet-recorded value, or a system error — and the number alone doesn't distinguish between them.</button>
+      <button class="quiz-choice" data-correct="false">Because revenue values are always stored as text, not numbers, so zero is ambiguous.</button>
+      <button class="quiz-choice" data-correct="false">Because "$0" always indicates a formatting error, never a real value.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The same numeric value can arise from genuinely different underlying situations, which is exactly why missing-data handling requires context, not just the raw number.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="validity">
+    <p class="quiz-prompt">4. Fill in the blank: the data quality dimension that asks whether a value conforms to the expected format or rules for its field (e.g. a phone number appearing in a "state" field) is called ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Validity is about conforming to expected format/rules, independent of whether the value happens to be accurate elsewhere.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="timeliness">
+    <p class="quiz-prompt">5. Fill in the blank: the data quality dimension that asks whether data is current enough to answer the question at hand (e.g. last year's inventory counts for a "what's in stock right now" question) is called ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Timeliness is independent of accuracy — a value can be perfectly accurate for when it was recorded and still be too stale to use now.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: the Google Data Analytics Certificate's "Data Cleaning" module (available via coursera.org) covers this same five-dimension data quality framework with real workplace examples.</p>
+
+  <p class="ask-teacher">Want to run through the five dimensions against a real dataset you're working with to spot which one is the actual problem? Ask your teacher — that's what I'm here for. Next up: choosing the right tool — spreadsheet, database, or plain file — for the data you're holding.</p>
+
+  <footer class="lesson-footer">STEM+ · Data Handling: CB · Lesson 3 of the course sequence</footer>
+</div>

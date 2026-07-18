@@ -1,0 +1,117 @@
+<meta charset="UTF-8">
+<title>Lesson 3: The Master Theorem — STEM+</title>
+<link rel="stylesheet" href="../../../assets/style.css">
+<script src="../../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Advanced Algorithms · Unit 1 · Lesson 3</span>
+  <h1>The Master Theorem</h1>
+  <p class="subtitle">The last lesson kept solving different recurrences to the same three patterns by hand. The Master Theorem is the formula that names those three patterns and tells you which one applies without drawing a single tree.</p>
+  <p class="nav-links"><a href="0002-the-recursion-tree-method.html" class="nav-prev">← Lesson 2</a> <a href="0004-amortized-analysis.html" class="nav-next">Lesson 4 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Every recurrence in the last lesson had the form T(n) = a·T(n/b) + f(n), and every tree resolved into one of three outcomes: work dominated by the leaves, work spread evenly across all Θ(log n) levels, or work dominated by the root. The Master Theorem is exactly that trichotomy, stated as a comparison between f(n) and n^(log_b a) — the size of the last level of the tree, if it were doing no work-per-node shrinkage at all.</p>
+
+  <h2>The statement</h2>
+  <div class="box">
+    <span class="box-label">Theorem — Master Theorem</span>
+    For T(n) = a·T(n/b) + f(n) with a ≥ 1, b &gt; 1, let n^(log_b a) be the "watershed" function. Then:
+    <br>· <strong>Case 1</strong>: if f(n) = O(n^(log_b a − ε)) for some ε &gt; 0, then T(n) = Θ(n^(log_b a)). (Leaves dominate.)
+    <br>· <strong>Case 2</strong>: if f(n) = Θ(n^(log_b a)), then T(n) = Θ(n^(log_b a) · log n). (Every level contributes equally.)
+    <br>· <strong>Case 3</strong>: if f(n) = Ω(n^(log_b a + ε)) for some ε &gt; 0, <em>and</em> the regularity condition a·f(n/b) ≤ c·f(n) holds for some c &lt; 1 and large n, then T(n) = Θ(f(n)). (Root dominates.)
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why n^(log_b a) is the number to compare against</span>
+    n^(log_b a) is exactly the leaf count of the recursion tree — a full tree of branching factor a and depth log_b n has a^(log_b n) = n^(log_b a) leaves (a change-of-base identity). Comparing f(n) against this quantity is exactly asking: does the non-recursive work at each level grow slower, equal to, or faster than the rate at which leaves are accumulating? That's precisely the three-way split the recursion tree method uncovered by hand.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Applying it — merge sort's recurrence</span>
+    T(n) = 2T(n/2) + n: a=2, b=2, so n^(log_b a) = n^(log₂2) = n¹ = n. Compare f(n)=n against n: they're equal, i.e. f(n) = Θ(n^(log_b a)). That's Case 2, giving T(n) = Θ(n log n) — matching the tree-method answer from the previous lesson exactly, but now derived in one line.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Applying it — binary search's recurrence</span>
+    T(n) = T(n/2) + O(1): a=1, b=2, so n^(log_b a) = n⁰ = 1. Compare f(n)=O(1) against 1: they match, so Case 2 applies, giving T(n) = Θ(1 · log n) = Θ(log n) — the familiar bound, now with a formal derivation rather than an appeal to "halving each time."
+  </div>
+
+  <div class="box">
+    <span class="box-label">Worked example — Case 1</span>
+    T(n) = 4T(n/2) + n: a=4, b=2, n^(log_b a) = n^(log₂4) = n². Compare f(n)=n against n²: n = O(n^(2−ε)) for ε=1, so Case 1 applies. T(n) = Θ(n²) — the leaves alone account for the total, and the linear work done at internal nodes is asymptotically irrelevant.
+  </div>
+
+  <div class="box">
+    <span class="box-label">Worked example — Case 3</span>
+    T(n) = 2T(n/2) + n²: a=2, b=2, n^(log_b a) = n. Compare f(n)=n² against n: n² = Ω(n^(1+ε)) for ε=1, and the regularity condition holds since 2·(n/2)² = n²/2 ≤ (1/2)·n². Case 3 applies: T(n) = Θ(n²) — the root's own work already swamps everything the recursion contributes.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why the theorem doesn't cover every recurrence</span>
+    The three cases have a genuine gap: f(n) must be <em>polynomially</em> larger or smaller than n^(log_b a), not just asymptotically larger or smaller by any margin. T(n) = 2T(n/2) + n log n falls exactly between Case 2 and Case 3 — f(n) = n log n is asymptotically larger than n^(log_b a) = n but not polynomially larger (n log n / n = log n → ∞, but no fixed ε makes n log n = Ω(n^(1+ε))). The Master Theorem is silent here; only the recursion tree method from the previous lesson (or the more general Akra-Bazzi method, beyond this course's scope) resolves it. That's the gap the previous lesson's fallback exists to fill.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What does n^(log_b a) represent in the recursion tree for T(n) = a·T(n/b) + f(n)?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">The total number of levels in the recursion tree.</button>
+      <button class="quiz-choice" data-correct="true">The number of leaves in the full recursion tree.</button>
+      <button class="quiz-choice" data-correct="false">The runtime of a single recursive call at the root.</button>
+      <button class="quiz-choice" data-correct="false">The base case input size.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A tree with branching factor a and depth log_b n has a^(log_b n) leaves, which equals n^(log_b a) by a change-of-base identity.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. T(n) = 4T(n/2) + n falls into which Master Theorem case, and why?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Case 2, since f(n) equals n^(log_b a).</button>
+      <button class="quiz-choice" data-correct="true">Case 1, since f(n)=n grows polynomially slower than n^(log_b a)=n².</button>
+      <button class="quiz-choice" data-correct="false">Case 3, since f(n) dominates the recursive work.</button>
+      <button class="quiz-choice" data-correct="false">No case applies, since a &gt; b makes the recurrence invalid.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>n^(log_b a) = n^(log₂4) = n², and n is polynomially smaller than n² (by ε=1), placing it squarely in Case 1 — the leaves dominate.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why does T(n) = 2T(n/2) + n log n fall outside all three Master Theorem cases?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because a and b are not both integers.</button>
+      <button class="quiz-choice" data-correct="true">Because n log n is asymptotically larger than n^(log_b a)=n, but not by a polynomial factor for any fixed ε.</button>
+      <button class="quiz-choice" data-correct="false">Because f(n) must always be a polynomial for the theorem to apply at all.</button>
+      <button class="quiz-choice" data-correct="false">Because this recurrence has no valid recursion tree.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The gap between Case 2 and Case 3 requires a genuine polynomial separation (n^(log_b a + ε)); a merely logarithmic factor like log n falls through that gap entirely.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="regularity|regularity condition">
+    <p class="quiz-prompt">4. Fill in the blank: Case 3 of the Master Theorem additionally requires the ___ condition, ensuring the recursive work doesn't grow to rival the root's own work.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Without a·f(n/b) ≤ c·f(n) for some c&lt;1, the recursive contributions could in principle still add up to something comparable to f(n), undermining the "root dominates" conclusion.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="polynomially|polynomial">
+    <p class="quiz-prompt">5. Fill in the blank: Cases 1 and 3 both require f(n) to differ from n^(log_b a) ___ — by a fixed power ε, not just by any growing factor.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The theorem's cases only cover polynomial separations; a merely asymptotic-but-not-polynomial gap (like a log factor) is exactly what falls through the cracks between the cases.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: CLRS, Chapter 4, Section 4.5, "The master method for solving recurrences," gives the full proof of all three cases via the recursion tree, formalizing exactly the argument this lesson sketched.</p>
+
+  <p class="ask-teacher">Have a recurrence you're not sure which case it falls into? Ask your teacher — that's what I'm here for. Next up: amortized analysis, for algorithms where no single recurrence describes the cost, but the average cost per operation over a whole sequence still has a clean bound.</p>
+
+  <footer class="lesson-footer">STEM+ · Advanced Algorithms · Lesson 3 of the course sequence</footer>
+</div>

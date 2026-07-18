@@ -1,0 +1,113 @@
+<meta charset="UTF-8">
+<title>Lesson 20: Clairaut's Theorem and Higher-Order Partials — STEM+</title>
+<link rel="stylesheet" href="../../../assets/style.css">
+<script src="../../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Real Analysis B · Unit 4 · Lesson 20</span>
+  <h1>Clairaut's Theorem and Higher-Order Partials</h1>
+  <p class="subtitle">Differentiating twice in two different orders looks like it must give the same answer — and usually does. This lesson pins down exactly when that's guaranteed, and shows the guarantee can genuinely fail.</p>
+  <p class="nav-links"><a href="0019-the-jacobian-and-the-chain-rule.html" class="nav-prev">← Lesson 19</a> <a href="0021-the-inverse-and-implicit-function-theorems.html" class="nav-next">Lesson 21 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <div class="box">
+    <span class="box-label">Definition — Second-Order Partial Derivatives</span>
+    Given f: ℝⁿ → ℝ, the <strong>second-order partial derivative</strong> ∂²f/∂xᵢ∂xⱼ is defined as ∂/∂xᵢ (∂f/∂xⱼ) — differentiate with respect to xⱼ first, then with respect to xᵢ.
+  </div>
+
+  <p>A natural question: is ∂²f/∂x∂y always the same as ∂²f/∂y∂x? Surprisingly, the answer is no — not without an extra hypothesis.</p>
+
+  <div class="box example">
+    <span class="box-label">Example (computation omitted): mixed partials can disagree</span>
+    Let f(x,y) = xy(x²−y²)/(x²+y²) for (x,y) ≠ (0,0), and f(0,0) = 0. A direct (if tedious) computation from the definitions gives ∂²f/∂x∂y(0,0) = 1 and ∂²f/∂y∂x(0,0) = −1 — the two mixed partial derivatives exist at the origin but are not equal. The full computation is in the source reading below.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why this is possible at all</span>
+    Both second-order partials exist at the origin in this example — the failure isn't that a limit fails to exist, but that two limits which look like they should coincide simply don't, because neither mixed partial is continuous at the origin. This is the exact hypothesis the next theorem adds back.
+  </div>
+
+  <div class="box">
+    <span class="box-label">Theorem — Clairaut's Theorem (Equality of Mixed Partials)</span>
+    If ∂²f/∂x∂y and ∂²f/∂y∂x both exist in a neighborhood of a point and are continuous at that point, then ∂²f/∂x∂y = ∂²f/∂y∂x there.
+  </div>
+
+  <div class="box">
+    <span class="box-label">Proof sketch</span>
+    Fix a point (a,b) and consider the second difference Δ(h,k) = f(a+h,b+k) − f(a+h,b) − f(a,b+k) + f(a,b) for small h, k ≠ 0. Viewing Δ(h,k) as φ(a+h) − φ(a) for φ(x) = f(x,b+k) − f(x,b), the single-variable Mean Value Theorem gives Δ(h,k) = h·[∂f/∂x(a+θh,b+k) − ∂f/∂x(a+θh,b)] for some θ ∈ (0,1); applying the Mean Value Theorem once more, this time in y, gives Δ(h,k) = hk·∂²f/∂y∂x(a+θh, b+ψk) for some ψ ∈ (0,1). Running the identical argument with the roles of x and y swapped instead produces Δ(h,k) = hk·∂²f/∂x∂y(a+θ'h, b+ψ'k) for possibly different θ', ψ' ∈ (0,1). Dividing both expressions by hk and letting h, k → 0, continuity of both mixed partials at (a,b) forces both right-hand sides to converge to the value of the corresponding mixed partial exactly at (a,b) — and since both expressions equal the same quantity Δ(h,k)/hk, the two limits must agree. So ∂²f/∂x∂y(a,b) = ∂²f/∂y∂x(a,b). The full accounting of the two applications of the Mean Value Theorem is in the source reading below.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why continuity is exactly the missing ingredient</span>
+    The proof genuinely needs continuity of the mixed partials at (a,b) to pass from "Δ(h,k)/hk equals the mixed partial at some nearby point" to "equals the mixed partial exactly at (a,b)" as h, k → 0. In the xy(x²−y²)/(x²+y²) example, both mixed partials exist everywhere but are discontinuous at the origin — exactly where they fail to agree.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Example</span>
+    f(x,y) = x³y² has ∂f/∂x = 3x²y², so ∂²f/∂y∂x = 6x²y; and ∂f/∂y = 2x³y, so ∂²f/∂x∂y = 6x²y. Both mixed partials are polynomials, hence continuous everywhere, and indeed agree — consistent with Clairaut's Theorem.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What can cause the two mixed partial derivatives of a function to disagree at a point?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">The function failing to be bounded</button>
+      <button class="quiz-choice" data-correct="true">The mixed partials existing but failing to be continuous at that point</button>
+      <button class="quiz-choice" data-correct="false">The domain failing to be connected</button>
+      <button class="quiz-choice" data-correct="false">The function being a polynomial</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The xy(x²−y²)/(x²+y²) example has both mixed partials existing everywhere but discontinuous at the origin, exactly where they disagree.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. What hypothesis does Clairaut's Theorem require to guarantee equal mixed partials?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">That f be bounded near the point</button>
+      <button class="quiz-choice" data-correct="true">That both mixed partials exist near the point and be continuous at it</button>
+      <button class="quiz-choice" data-correct="false">That f be differentiable everywhere except at that point</button>
+      <button class="quiz-choice" data-correct="false">That the domain be compact</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Continuity of both mixed partials at the point is exactly the hypothesis the proof uses to force the two limits to coincide.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. What tool does the proof sketch of Clairaut's Theorem apply twice?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">The Heine-Borel Theorem</button>
+      <button class="quiz-choice" data-correct="true">The single-variable Mean Value Theorem, once in each variable</button>
+      <button class="quiz-choice" data-correct="false">The Bolzano-Weierstrass Theorem</button>
+      <button class="quiz-choice" data-correct="false">The Weierstrass M-Test</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Applying the Mean Value Theorem in x then y (or y then x) produces two expressions for Δ(h,k)/hk that must agree in the limit.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="clairaut">
+    <p class="quiz-prompt">4. Fill in the blank: the theorem guaranteeing equal mixed partial derivatives, given continuity, is ___'s Theorem.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Clairaut's Theorem is the standard name for the equality-of-mixed-partials result.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="continuous">
+    <p class="quiz-prompt">5. Fill in the blank: mixed partials can exist yet disagree at a point where they fail to be ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Discontinuity of the mixed partials at a point is exactly what allows them to disagree there.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: Rudin's <em>Principles of Mathematical Analysis</em>, Chapter 9, proves Clairaut's Theorem in full and works the xy(x²−y²)/(x²+y²) counterexample computation completely.</p>
+
+  <p class="ask-teacher">Stuck on why the two Mean Value Theorem applications need continuity to force agreement in the limit? Ask your teacher — that's what I'm here for. Next up: the unit's capstone — when a multivariable function can be locally inverted, and what that means for solving equations implicitly.</p>
+
+  <footer class="lesson-footer">STEM+ · Real Analysis B · Lesson 20 of the course sequence</footer>
+</div>

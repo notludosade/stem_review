@@ -1,0 +1,117 @@
+<meta charset="UTF-8">
+<title>Lesson 24: AVL Rotations — STEM+</title>
+<link rel="stylesheet" href="../../../assets/style.css">
+<script src="../../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Advanced Algorithms · Unit 6 · Lesson 24</span>
+  <h1>AVL Rotations</h1>
+  <p class="subtitle">An ordinary binary search tree's Θ(log n) search only holds if the tree stays balanced — a bad insertion order can degrade it to a Θ(n) linked list. AVL trees fix this by rebalancing automatically after every insertion and deletion.</p>
+  <p class="nav-links"><a href="0023-fenwick-trees.html" class="nav-prev">← Lesson 23</a> <a href="0025-disjoint-set-union-proved.html" class="nav-next">Lesson 25 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>CP2+ Lesson 13 ("Binary Search Trees: Properties and Validation") established the BST invariant — every left subtree's keys are smaller, every right subtree's keys are larger — and relied on this to make search, insert, and delete all Θ(h), where h is the tree's height. That analysis quietly assumed h = Θ(log n). It isn't automatic: inserting keys 1, 2, 3, 4, 5 in increasing order into a plain BST produces a tree that's really a linked list, with h = Θ(n) and every operation degraded to Θ(n). An <strong>AVL tree</strong> (named for inventors Adelson-Velsky and Landis) is a BST that maintains h = Θ(log n) automatically, by rebalancing itself after every insertion and deletion.</p>
+
+  <h2>The balance invariant</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    For every node v in an AVL tree, define balance(v) = height(left subtree of v) − height(right subtree of v) (treating an empty subtree as height −1). The AVL invariant requires balance(v) ∈ {−1, 0, 1} for every node v, at all times. Whenever an insertion or deletion would violate this at some node, one or two <strong>rotations</strong> restore it before the operation is considered complete.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why this invariant forces Θ(log n) height</span>
+    Let N(h) be the minimum number of nodes possible in an AVL tree of height h. A tree of height h has a root with two subtrees of height at least h−1 and h−2 (the most unbalanced the invariant allows), so N(h) ≥ 1 + N(h−1) + N(h−2) — the same recurrence shape as Fibonacci (Lesson 21), which grows exponentially in h. Since N(h) grows exponentially in h, h itself can grow no faster than logarithmically in n (inverting the exponential relationship) — so the balance invariant provably bounds height at Θ(log n), which is exactly what search, insert, and delete need to stay Θ(log n).
+  </div>
+
+  <h2>Rotations — restoring balance in O(1)</h2>
+  <div class="box">
+    <span class="box-label">Right rotation (fixes a left-heavy imbalance)</span>
+<pre class="code-block"><code>function rotateRight(y):
+    x = y.left
+    y.left = x.right
+    x.right = y
+    updateHeight(y)             // update child before parent — order matters
+    updateHeight(x)
+    return x                    // x is the new root of this subtree</code></pre>
+    A left rotation is the mirror image (swap left/right throughout). Both run in O(1): only a constant number of pointers and heights change, no matter how large the subtrees involved are.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">The four imbalance cases</span>
+    After an insertion, walk back up from the inserted node to the root, checking balance(v) at each ancestor. If some node v has balance(v) = 2 (left-heavy) or −2 (right-heavy), one of four cases applies: Left-Left (balance(v.left) ≥ 0) — a single right rotation at v fixes it. Right-Right (mirror) — a single left rotation. Left-Right (balance(v.left) &lt; 0) — a left rotation at v.left first, converting it to the Left-Left case, then a right rotation at v. Right-Left (mirror) — a right rotation at v.right first, then a left rotation at v. At most one of these (single or double) rotation is ever needed per insertion, since fixing the lowest unbalanced ancestor always restores the subtree to its pre-insertion height.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why insertion only ever needs one rebalancing step</span>
+    After a single insertion, at most one node's subtree height actually increases along the path back to the root — once a rotation restores that subtree to its original height, every ancestor above it sees no height change at all, so no further rotations are triggered. This is why AVL insertion is O(log n) overall: O(log n) to walk down and insert, plus O(1) work (at most one rotation, single or double) to rebalance, not O(log n) rotations. (Deletion is a similar walk back up, but can require rebalancing at multiple ancestors in the worst case — still O(log n) total, since there are only O(log n) ancestors to check.)
+  </div>
+
+  <div class="box">
+    <span class="box-label">Runtime summary</span>
+    Search, insert, and delete are all Θ(log n) worst case — a guarantee an ordinary unbalanced BST cannot make, since its worst case (a degenerate, linked-list-shaped tree) is Θ(n).
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. Why can an ordinary (non-self-balancing) binary search tree degrade to Θ(n) search time?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because BSTs are fundamentally incapable of storing more than log n elements.</button>
+      <button class="quiz-choice" data-correct="true">Because inserting keys in a bad order (such as strictly increasing) can produce a tree shaped like a linked list, with height Θ(n) instead of Θ(log n).</button>
+      <button class="quiz-choice" data-correct="false">Because BSTs must be rebuilt from scratch before every search.</button>
+      <button class="quiz-choice" data-correct="false">Because comparison-based search is always Θ(n) regardless of structure.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Search cost is proportional to tree height, and an unlucky insertion order can make that height linear rather than logarithmic.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why does the AVL balance invariant (balance factor in {−1, 0, 1} at every node) guarantee Θ(log n) height?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because it directly limits the number of nodes in the tree to log n.</button>
+      <button class="quiz-choice" data-correct="true">Because the minimum number of nodes possible at a given height grows exponentially (following a Fibonacci-like recurrence), so height can grow no faster than logarithmically in the number of nodes.</button>
+      <button class="quiz-choice" data-correct="false">Because AVL trees are always perfectly complete binary trees.</button>
+      <button class="quiz-choice" data-correct="false">Because the invariant forces every leaf to be at exactly the same depth.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Inverting an exponential lower bound on node count as a function of height is exactly what produces a logarithmic upper bound on height as a function of node count.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why does a single AVL insertion only ever require rebalancing at most one subtree (a single or double rotation), rather than rotations all the way up the tree?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because AVL trees never actually need to rebalance after insertion, only after deletion.</button>
+      <button class="quiz-choice" data-correct="true">Because once a rotation restores the lowest unbalanced subtree to its pre-insertion height, no ancestor above it observes any height change, so no further rebalancing is triggered.</button>
+      <button class="quiz-choice" data-correct="false">Because insertions are always performed at the root of the tree.</button>
+      <button class="quiz-choice" data-correct="false">Because rotations are illegal above the first unbalanced node encountered.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Restoring the original height at the lowest imbalance point means every ancestor's own height calculation is unaffected, stopping propagation immediately.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="rotation|rotations">
+    <p class="quiz-prompt">4. Fill in the blank: an AVL tree restores its balance invariant after an insertion or deletion using one or two ___ , each of which runs in O(1) time.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Rotations are the sole mechanism AVL trees use to restore balance, and each touches only a constant number of pointers.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="log n|logarithmic">
+    <p class="quiz-prompt">5. Fill in the blank: by keeping every node's balance factor within {−1, 0, 1}, an AVL tree guarantees height Θ(___), which keeps search, insert, and delete all worst-case efficient.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>This is the entire payoff of maintaining the invariant — logarithmic height under any sequence of insertions and deletions, not just favorable ones.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: CLRS's problem 13-3 covers AVL trees directly, and <a href="https://cp-algorithms.com/data_structures/avl_tree.html">CP-Algorithms, "AVL Tree"</a> walks through the four rotation cases with diagrams.</p>
+
+  <p class="ask-teacher">Want to trace all four rotation cases by hand on a small example, inserting keys one at a time? Ask your teacher — that's what I'm here for. Next up: proving the amortized runtime of Union-Find with path compression — a debt owed since Lesson 4 first introduced the potential method.</p>
+
+  <footer class="lesson-footer">STEM+ · Advanced Algorithms · Lesson 24 of the course sequence</footer>
+</div>

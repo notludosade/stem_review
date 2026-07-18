@@ -1,0 +1,114 @@
+<meta charset="UTF-8">
+<title>Lesson 16: Ford-Fulkerson — STEM+</title>
+<link rel="stylesheet" href="../../../assets/style.css">
+<script src="../../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Advanced Algorithms · Unit 4 · Lesson 16</span>
+  <h1>Ford-Fulkerson</h1>
+  <p class="subtitle">Given a network of pipes with capacities, how much can flow from a source to a sink at once? Ford-Fulkerson answers this by repeatedly finding an augmenting path — and its correctness depends on a construction that lets flow "undo" a bad earlier decision.</p>
+  <p class="nav-links"><a href="0015-scc.html" class="nav-prev">← Lesson 15</a> <a href="0017-max-flow-min-cut.html" class="nav-next">Lesson 17 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>A <strong>flow network</strong> is a directed graph where each edge (u, v) has a capacity c(u, v) ≥ 0, with a designated source s and sink t. A <strong>flow</strong> assigns each edge a value f(u, v) ≤ c(u, v) such that, for every vertex except s and t, total flow in equals total flow out (conservation). The <strong>maximum flow problem</strong> asks for the flow of largest total value leaving s (equivalently, arriving at t). Ford-Fulkerson solves it by a beautifully simple repeated step — but getting that step right requires one non-obvious construction.</p>
+
+  <h2>The residual graph — the construction that makes it work</h2>
+  <div class="box">
+    <span class="box-label">Definition — residual graph</span>
+    Given a flow f, the residual graph G<sub>f</sub> has, for each original edge (u, v) with capacity c and current flow f(u,v): a forward edge (u, v) with residual capacity c − f(u,v) (remaining room to push more flow), and a backward edge (v, u) with residual capacity f(u,v) (room to "undo" flow already sent).
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why the backward edge is essential, not optional</span>
+    Without backward edges, a greedy algorithm that picks a "good-looking" path early can get stuck: imagine sending flow along a path that turns out, in hindsight, to have been the wrong choice compared to a different routing. The backward edge is exactly what lets a later augmenting path effectively cancel that earlier flow and reroute it — it's the mechanism that makes a purely greedy, no-backtracking algorithm still reach the true optimum, since "backtracking" is folded directly into the graph structure the algorithm searches.
+  </div>
+
+  <h2>The algorithm</h2>
+  <div class="box">
+    <span class="box-label">Algorithm</span>
+<pre class="code-block"><code>function fordFulkerson(graph, s, t):
+    f(u, v) = 0 for every edge                  // start with zero flow
+    while there exists a path from s to t in the residual graph G_f:
+        find such a path P (any path — via DFS or BFS)
+        bottleneck = minimum residual capacity of any edge along P
+        for each edge (u, v) in P:
+            if (u, v) is a forward edge: f(u, v) += bottleneck
+            if (u, v) is a backward edge: f(v, u) -= bottleneck   // undo flow
+        rebuild G_f with the updated flow
+    return total flow value (sum of flow out of s)</code></pre>
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Worked example — one augmenting path undoing a previous choice</span>
+    S→A (cap 10), S→B (cap 10), A→B (cap 1), A→T (cap 10), B→T (cap 10). First augmenting path S→A→T sends 10 (bottleneck at S→A or A→T, both cap 10). Second path S→B→T sends 10. Total flow so far: 20 — and this happens to already be optimal in this instance, since S has total outgoing capacity 20 and T has total incoming capacity 20. But if instead the first path chosen had been S→A→B→T (bottleneck 1, since A→B has cap 1), only 1 unit would flow that way; a second path S→A→T could still send up to 9 more (residual capacity on A→T is now 10−1=9), and a third S→B→T could send 10 — total 1+9+10 = 20 again, reaching the same optimum via a different sequence of augmenting paths, exactly the "any order works" flexibility the algorithm's correctness proof establishes.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Runtime and Edmonds-Karp</span>
+    Each augmenting path increases flow by at least 1 (assuming integer capacities), so the algorithm terminates, but a poor choice of path (via DFS) can take as many as O(max flow value) iterations, each costing O(E) to find a path — pathologically slow if capacities are large. The Edmonds-Karp refinement — always choosing the <em>shortest</em> augmenting path (via BFS) — bounds the number of iterations by O(VE), giving Θ(VE²) total, independent of the capacity values. This is the same "choice of traversal changes the guarantee" idea Lesson 15 highlighted between Kosaraju's and Tarjan's, applied here to bounding iteration count rather than pass count.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What is a residual graph's backward edge used for?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">It represents an edge that was never part of the original network.</button>
+      <button class="quiz-choice" data-correct="true">It allows a later augmenting path to reduce ("undo") flow sent along the forward edge earlier, enabling effective rerouting.</button>
+      <button class="quiz-choice" data-correct="false">It doubles the capacity of every forward edge automatically.</button>
+      <button class="quiz-choice" data-correct="false">It marks edges that must never be used again.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The backward edge is exactly the mechanism that lets a greedy, no-explicit-backtracking algorithm still reach the true maximum flow.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. What determines how much flow an augmenting path can add?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">The total number of edges along the path.</button>
+      <button class="quiz-choice" data-correct="true">The bottleneck — the minimum residual capacity among all edges on the path.</button>
+      <button class="quiz-choice" data-correct="false">The capacity of the very first edge leaving the source.</button>
+      <button class="quiz-choice" data-correct="false">The sum of residual capacities of every edge on the path.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>You can only push as much flow as the tightest edge along the path allows — that minimum is the bottleneck.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why does the Edmonds-Karp refinement (always using BFS to find the shortest augmenting path) improve on plain Ford-Fulkerson?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">It guarantees a larger maximum flow value than plain Ford-Fulkerson.</button>
+      <button class="quiz-choice" data-correct="true">It bounds the number of augmenting-path iterations by O(VE), independent of the capacity values, instead of depending on the magnitude of the max flow.</button>
+      <button class="quiz-choice" data-correct="false">It removes the need for a residual graph entirely.</button>
+      <button class="quiz-choice" data-correct="false">It guarantees every augmenting path has bottleneck exactly 1.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Plain Ford-Fulkerson's iteration count can depend on capacity magnitudes; Edmonds-Karp's shortest-path choice removes that dependency.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="bottleneck">
+    <p class="quiz-prompt">4. Fill in the blank: the amount of flow added along an augmenting path equals the ___ — the smallest residual capacity of any edge on that path.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>No more flow can be pushed along a path than its tightest edge allows.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="residual|residual graph">
+    <p class="quiz-prompt">5. Fill in the blank: Ford-Fulkerson repeatedly searches for a path from source to sink in the ___ graph, which includes both forward capacity-remaining edges and backward flow-undoing edges.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The residual graph is the single data structure that both encodes remaining capacity and enables undoing earlier flow choices.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: CLRS, Chapter 26, Sections 26.1–26.2, "Flow networks" and "The Ford-Fulkerson method," gives the full construction and a worked numerical example.</p>
+
+  <p class="ask-teacher">Want to trace Ford-Fulkerson on a small network where the first augmenting path chosen isn't part of the final optimal flow? Ask your teacher — that's what I'm here for. Next up: the max-flow min-cut theorem, which proves Ford-Fulkerson actually reaches the true maximum — and gives a second, completely different way to compute the same number.</p>
+
+  <footer class="lesson-footer">STEM+ · Advanced Algorithms · Lesson 16 of the course sequence</footer>
+</div>

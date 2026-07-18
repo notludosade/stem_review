@@ -1,0 +1,106 @@
+<meta charset="UTF-8">
+<title>Lesson 19: Handling Missing Data — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Data Handling: CB · Unit 5 · Lesson 19</span>
+  <h1>Handling Missing Data</h1>
+  <p class="subtitle">Lesson 3 named completeness as a data quality dimension. This lesson is the practical follow-through: how to recognize missing data, why it's missing matters, and what your real options are once you find it.</p>
+  <p class="nav-links"><a href="../Unit%204/0018-intro-to-regression.html" class="nav-prev">← Lesson 18</a> <a href="0020-outliers.html" class="nav-next">Lesson 20 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Recall Lesson 3's $0 revenue example: a zero could mean genuinely no revenue, an unrecorded value, or an error. Before deciding what to do about missing data, you first have to reliably recognize it — which sounds simpler than it is.</p>
+
+  <h2>Recognizing missing data</h2>
+  <div class="box">
+    <span class="box-label">Forms missing data takes</span>
+    True blanks (an empty cell or NULL) are the easy case. Harder: <strong>sentinel values</strong> standing in for "missing" — a "9999" age, a "N/A" typed as text into a numeric column, a "01/01/1900" placeholder date, or (Lesson 3's example) a "0" used where the real answer is "not recorded." Sentinel values are dangerous specifically because they look like real data to any tool that isn't told otherwise — an average that includes a "9999" placeholder age is badly wrong, with no error raised.
+  </div>
+
+  <h2>Why missing data is missing: MCAR, MAR, MNAR</h2>
+  <div class="box">
+    <span class="box-label">Definitions</span>
+    <strong>Missing Completely At Random (MCAR)</strong> — the chance of being missing has nothing to do with any value, observed or not (a sensor randomly dropped a reading). <strong>Missing At Random (MAR)</strong> — missingness relates to something else you did observe, but not to the missing value itself (older respondents in a survey are more likely to skip an optional digital-literacy question, but conditional on age, skipping isn't related to their actual answer). <strong>Missing Not At Random (MNAR)</strong> — the missingness is related to the value itself (people with very high incomes are more likely to decline to state their income) — the most dangerous case, since the missing values differ systematically from the ones you can see.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why the reason for missingness changes what's safe to do about it</span>
+    If data is MCAR, simply dropping the incomplete rows introduces no systematic distortion — you lose sample size, nothing else. If data is MNAR, dropping incomplete rows (or filling them with an average) actively biases the remaining data, because the missing values weren't a random subset — they were disproportionately the high (or low) end of the real distribution. This is structurally the same warning as Lesson 2's sampling bias: a subset that isn't random doesn't represent the whole, whether that subset is who happened to answer a survey or which rows happened to have complete data.
+  </div>
+
+  <h2>What to actually do about it</h2>
+  <div class="box">
+    <span class="box-label">Options</span>
+    <strong>Delete the row</strong> (safe under MCAR, riskier otherwise, and only reasonable when missing rows are a small share of the data). <strong>Delete the column</strong> (when a field is missing too often to be usable at all). <strong>Impute</strong> — fill in a reasoned estimate, e.g. the column's mean or median (Lesson 14) for numeric data, or the most common category (mode) for categorical data — cheap, but risks understating the data's true variability. <strong>Flag it</strong> — keep the value as missing but add a separate column marking that it was missing, preserving the information that something was unknown rather than hiding it inside a filled-in guess.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Worked example</span>
+    A customer database has 3% of rows missing a "region" value. If those blanks arose because a form field was optional and skipped essentially at random (MCAR), dropping those rows for a regional analysis is defensible. If instead the blanks are concentrated among customers who signed up through a specific channel that never asked for region (a pattern related to something observable — MAR), dropping them would silently underrepresent that channel's customers in every regional breakdown that follows.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. Why are sentinel values (like "9999" for age) more dangerous than a true blank cell?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because sentinel values always cause the spreadsheet or database to raise an error.</button>
+      <button class="quiz-choice" data-correct="true">Because they look like real, valid data to any tool or calculation that isn't specifically told to treat them as missing, silently distorting results like averages.</button>
+      <button class="quiz-choice" data-correct="false">Because sentinel values can only appear in text columns, never numeric ones.</button>
+      <button class="quiz-choice" data-correct="false">Because a true blank cell is always more common than a sentinel value in real datasets.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A blank is at least recognizable as missing; a sentinel value hides in plain sight as a plausible-looking number or entry.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why is Missing Not At Random (MNAR) data the most dangerous case to simply drop or fill with an average?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because MNAR data is always a larger share of the dataset than MCAR or MAR data.</button>
+      <button class="quiz-choice" data-correct="true">Because the missingness is related to the value itself, so the missing values systematically differ from the visible ones — dropping or naively filling them distorts the remaining data rather than just shrinking the sample.</button>
+      <button class="quiz-choice" data-correct="false">Because MNAR data can never be identified in a real dataset.</button>
+      <button class="quiz-choice" data-correct="false">Because MNAR only applies to text columns, never numeric ones.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>MNAR's defining danger is that the missing values aren't a random subset — they differ systematically from what's observed, echoing the sampling-bias concern from Lesson 2.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. What does "flagging" missing data (adding a separate column marking a value as missing) preserve that simple imputation does not?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">It preserves the exact original value that would have been recorded.</button>
+      <button class="quiz-choice" data-correct="true">It preserves the information that a value was unknown, rather than letting a filled-in guess look indistinguishable from a genuinely observed value.</button>
+      <button class="quiz-choice" data-correct="false">It removes the need to ever analyze that column again.</button>
+      <button class="quiz-choice" data-correct="false">It automatically corrects any sampling bias present in the dataset.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Flagging keeps the "this was missing" fact visible and analyzable, rather than burying it inside an imputed value that looks just like real data.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="impute|imputation">
+    <p class="quiz-prompt">4. Fill in the blank: filling in a missing value with a reasoned estimate, such as a column's mean or mode, is called ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Imputation is the general term for filling in missing values with an estimated substitute.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="MNAR">
+    <p class="quiz-prompt">5. Fill in the blank: the category of missingness where the chance of a value being missing is related to the value itself (e.g. high earners declining to state income) is abbreviated ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>MNAR (Missing Not At Random) is the case where missingness itself correlates with the unseen value.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: the Google Data Analytics Certificate's "Data Cleaning" module (coursera.org) covers missing-data handling with the same MCAR/MAR/MNAR framework used in most applied statistics texts.</p>
+
+  <p class="ask-teacher">Have a real dataset with missing values and unsure which category it falls into? Ask your teacher — that's what I'm here for. Next up: the other common data-quality problem — values that are present, but wrong or extreme.</p>
+
+  <footer class="lesson-footer">STEM+ · Data Handling: CB · Lesson 19 of the course sequence</footer>
+</div>

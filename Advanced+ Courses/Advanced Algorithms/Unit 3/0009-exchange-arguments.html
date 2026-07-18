@@ -1,0 +1,99 @@
+<meta charset="UTF-8">
+<title>Lesson 9: Exchange Arguments — STEM+</title>
+<link rel="stylesheet" href="../../../assets/style.css">
+<script src="../../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Advanced Algorithms · Unit 3 · Lesson 9</span>
+  <h1>Exchange Arguments</h1>
+  <p class="subtitle">CP2+'s greedy lesson taught you to recognize the pattern and trust that the locally-best choice works. This lesson proves it — with the one technique that turns "seems locally optimal" into "provably optimal."</p>
+  <p class="nav-links"><a href="../Unit%202/0008-strassens-algorithm.html" class="nav-prev">← Lesson 8</a> <a href="0010-kruskals-and-prims.html" class="nav-next">Lesson 10 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>CP2+'s Lesson 31 ("Greedy Algorithms &amp; Interval Scheduling") taught the greedy pattern from the interview angle: make the locally best choice at each step, check it against examples, trust the pattern once it matches a known template. That's a reasonable way to solve problems quickly, but it's not a proof — greedy algorithms are notorious for looking correct on every example you try and then failing on some case you didn't think of. This lesson gives you the one proof technique that actually establishes a greedy algorithm's correctness: the <strong>exchange argument</strong>.</p>
+
+  <h2>The exchange argument, as a method</h2>
+  <div class="box">
+    <span class="box-label">Method — exchange argument</span>
+    1. Let G be the solution the greedy algorithm produces. 2. Let O be <em>any</em> optimal solution (assume one exists, possibly different from G). 3. Show that if G and O differ, you can find a specific "exchange" — swap one element of O for one from G — that produces another solution O′ which is (a) still feasible, and (b) at least as good as O. 4. Repeating this exchange transforms O into G without ever making the solution worse, proving G is itself optimal (since it matches an optimal solution after finitely many non-worsening changes).
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why this is the right proof shape for greedy — and not for other paradigms</span>
+    Divide-and-conquer's correctness proof (Lesson 5) is about trusting recursive subproblems combined by a correct merge step. Greedy has no subproblems to trust — it makes one irrevocable choice at a time and never reconsiders. The exchange argument's power is that it doesn't need to reason about the whole solution space at once; it only needs to show that <em>any</em> hypothetical optimal solution can be nudged, one swap at a time, toward what greedy produced, without ever losing quality. That local, one-swap-at-a-time argument is exactly matched to greedy's local, one-choice-at-a-time structure.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Worked proof — interval scheduling (earliest finish time wins)</span>
+    Problem: given intervals with start/end times, select the maximum number of non-overlapping intervals. Greedy rule: repeatedly pick the remaining interval with the earliest finish time. Claim: this is optimal. Proof by exchange: let O be any optimal solution, sorted by start time; let g₁ be greedy's first pick (earliest finish time overall) and o₁ be O's first interval. Since g₁ has the earliest finish time of <em>all</em> intervals, finish(g₁) ≤ finish(o₁). Swap o₁ for g₁ in O: since g₁ finishes no later than o₁ did, every interval in O that started after o₁ finished still doesn't overlap g₁ either — so O′ = O with o₁ replaced by g₁ is still feasible, and has the same size as O. Now O′ agrees with greedy's first choice. Repeat the same argument on the remaining sub-problem (intervals starting after g₁ finishes): by induction on the number of remaining intervals, O can be transformed, one swap at a time, into exactly greedy's full solution without ever shrinking — so greedy's solution size equals O's, i.e. greedy is optimal.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why "earliest finish time," not "shortest interval" or "earliest start time"</span>
+    The exchange argument is also the tool for showing <em>other</em> plausible greedy rules fail. "Pick the shortest interval first" seems reasonable but breaks: a short interval in the middle of the timeline can block two longer, non-overlapping intervals on either side of it, and no exchange argument can be built to justify it, because the claim "swapping in the shortest interval never hurts" is simply false — a direct counterexample (one short middle interval overlapping two others that together beat it) refutes it. The exchange argument's value cuts both ways: when it goes through cleanly (as with earliest-finish-time), you've proven correctness; when you try to build one and can't find a valid swap step, that's a strong signal the greedy rule itself is wrong, not just under-proven.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What does an exchange argument actually prove, at a high level?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">That the greedy algorithm runs faster than any alternative approach.</button>
+      <button class="quiz-choice" data-correct="true">That any optimal solution can be transformed, one non-worsening swap at a time, into the greedy solution — proving the greedy solution is itself optimal.</button>
+      <button class="quiz-choice" data-correct="false">That every greedy algorithm is automatically correct without further justification.</button>
+      <button class="quiz-choice" data-correct="false">That the greedy algorithm and brute force always produce identical intermediate steps.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The exchange argument's core move is showing a hypothetical optimal solution can be nudged toward greedy's choices without ever getting worse, which forces greedy's solution to match optimal quality.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. In the interval scheduling proof, why must finish(g₁) ≤ finish(o₁)?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because o₁ was chosen at random from the optimal solution.</button>
+      <button class="quiz-choice" data-correct="true">Because g₁ is defined as the interval with the earliest finish time among all intervals, so no other interval — including o₁ — can finish earlier.</button>
+      <button class="quiz-choice" data-correct="false">Because greedy always processes intervals in the same order as O.</button>
+      <button class="quiz-choice" data-correct="false">Because o₁ is required to be the shortest interval in O.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Greedy's selection rule directly defines g₁ as having the minimum finish time over the whole candidate set, which makes finish(g₁) ≤ finish(o₁) true by definition, not by coincidence.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why does "pick the shortest interval first" fail as a greedy rule for interval scheduling, in a way "earliest finish time" doesn't?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because short intervals are always slower to process computationally.</button>
+      <button class="quiz-choice" data-correct="true">Because a short interval can block two longer, non-overlapping intervals on either side, so no valid non-worsening exchange step can be constructed to justify it.</button>
+      <button class="quiz-choice" data-correct="false">Because interval scheduling has no optimal solution to compare against.</button>
+      <button class="quiz-choice" data-correct="false">Because shortest-interval-first and earliest-finish-time always produce identical results.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A concrete counterexample (one blocking short interval versus two better non-overlapping longer ones) shows the claim underlying that exchange step is simply false, which is exactly the sign a greedy rule is wrong rather than just unproven.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="swap|exchange">
+    <p class="quiz-prompt">4. Fill in the blank: the exchange argument works by showing a single ___ between an optimal solution and greedy's choice never makes the solution worse.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Each individual swap step is the atomic unit of the argument, repeated until the optimal solution has been fully transformed into greedy's.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="counterexample|counter-example">
+    <p class="quiz-prompt">5. Fill in the blank: when an exchange step cannot be justified for a proposed greedy rule, it's often because a direct ___ refutes the rule entirely, rather than the proof merely being incomplete.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A failed exchange-argument attempt is a strong signal to go looking for a concrete case where the proposed rule genuinely produces a suboptimal answer.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: Kleinberg &amp; Tardos, <em>Algorithm Design</em>, Chapter 4.1, "Interval Scheduling: The Greedy Algorithm," is the canonical presentation of this exact exchange-argument proof.</p>
+
+  <p class="ask-teacher">Want to try building an exchange argument for a greedy rule of your own? Ask your teacher — that's what I'm here for. Next up: Kruskal's and Prim's algorithms for minimum spanning trees, two very different-looking greedy strategies that turn out to both be provably optimal.</p>
+
+  <footer class="lesson-footer">STEM+ · Advanced Algorithms · Lesson 9 of the course sequence</footer>
+</div>

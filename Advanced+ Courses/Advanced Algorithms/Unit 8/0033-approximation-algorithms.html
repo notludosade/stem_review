@@ -1,0 +1,128 @@
+<meta charset="UTF-8">
+<title>Lesson 33: Approximation Algorithms — STEM+</title>
+<link rel="stylesheet" href="../../../assets/style.css">
+<script src="../../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Advanced Algorithms · Unit 8 · Lesson 33</span>
+  <h1>Approximation Algorithms</h1>
+  <p class="subtitle">NP-hard problems have no known polynomial-time algorithm for an exact answer. This lesson asks the practical follow-up: what provable guarantee can a fast algorithm still make, if not exactness?</p>
+  <p class="nav-links"><a href="0032-common-np-complete-problems.html" class="nav-prev">← Lesson 32</a> <a href="0034-capstone.html" class="nav-next">Lesson 34 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Lesson 32 showed Vertex Cover, TSP, and a family of related problems are NP-complete — no polynomial-time algorithm is known to solve them exactly. But "no exact algorithm" doesn't mean "nothing useful can be computed." An <strong>approximation algorithm</strong> runs in polynomial time and returns a solution provably within some bounded factor of the true optimum, even without ever computing that optimum directly.</p>
+
+  <h2>Approximation ratio</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    For a minimization problem, an algorithm is a <strong>c-approximation</strong> (c ≥ 1) if, for every instance, it runs in polynomial time and returns a solution of cost at most c times the true optimal cost OPT. (For maximization, the inequality flips: at least OPT/c.) Smaller c is a stronger guarantee; c=1 would mean solving the problem exactly.
+  </div>
+
+  <h2>Vertex Cover — a 2-approximation via a matching argument</h2>
+  <div class="box">
+    <span class="box-label">Algorithm</span>
+<pre class="code-block"><code>function approxVertexCover(G):
+    C = {}
+    E' = copy of G.edges
+    while E' is not empty:
+        pick any edge (u, v) from E'
+        add u and v to C
+        remove every edge in E' touching u or v
+    return C</code></pre>
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why this is a 2-approximation</span>
+    Let M be the set of edges actually picked by the loop. No two edges in M share an endpoint — the moment an edge is picked, every edge touching either of its endpoints is removed, so the next pick can't share a vertex with it. That makes M a <strong>matching</strong>. Any vertex cover — including the optimal one — must include at least one endpoint from every edge in M (since M's edges still need covering), and since M's edges are pairwise disjoint, covering all of them requires at least |M| distinct vertices: OPT ≥ |M|. The algorithm's cover C has exactly 2|M| vertices (both endpoints of every picked edge), so |C| = 2|M| ≤ 2·OPT — a 2-approximation, using nothing more than counting a matching's disjointness.
+  </div>
+
+  <h2>LP relaxation and rounding — a second route to the same guarantee</h2>
+  <div class="box">
+    <span class="box-label">Vertex Cover as an integer program</span>
+    Vertex Cover can be written as: minimize Σxᵥ subject to xᵤ+xᵥ ≥ 1 for every edge (u,v), and xᵥ ∈ {0,1} for every vertex. This is an <strong>integer linear program</strong> (ILP) — solving it exactly is exactly as hard as Vertex Cover itself (it's the same problem, just written algebraically). But <strong>relaxing</strong> the integrality constraint to 0 ≤ xᵥ ≤ 1 turns it into a genuine linear program (LP), solvable in polynomial time by standard LP methods.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why the LP's optimal value bounds the true optimum — this is the "LP duality's cousin" Lesson 17 pointed to</span>
+    Every feasible integer solution (every xᵥ ∈ {0,1} satisfying the constraints) is also a feasible <em>fractional</em> solution (0 ≤ xᵥ ≤ 1 is satisfied by any 0/1 value). So the LP's feasible region is a strict superset of the ILP's, meaning the LP's minimum can only be less than or equal to the ILP's minimum: LP_OPT ≤ ILP_OPT. This is exactly the same style of reasoning Lesson 17 used for max-flow min-cut — a second, differently-structured problem (there, a cut; here, a relaxed LP) whose value <em>certifies</em> a bound on the first problem's optimum without solving the first problem directly. Max-flow min-cut got an <em>exact</em> certificate (equality); LP relaxation only gets a one-sided bound — but that's still exactly enough to prove an approximation ratio, since it substitutes for OPT in the argument below.
+  </div>
+
+  <div class="box">
+    <span class="box-label">Rounding</span>
+    Solve the LP relaxation to get fractional xᵥ* values, then round: set xᵥ=1 if xᵥ* ≥ 0.5, else xᵥ=0. Every constraint xᵤ+xᵥ ≥ 1 is still satisfied after rounding — for any edge, xᵤ*+xᵥ* ≥ 1 means at least one of xᵤ*, xᵥ* is ≥ 0.5, so at least one of xᵤ, xᵥ rounds to 1. The rounded solution is a valid vertex cover.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why rounding also gives a 2-approximation</span>
+    Rounding a variable to 1 only happens when its fractional value was ≥ 0.5 — so each rounded variable contributes at most 2× its fractional value to the cost. Summed over all vertices, the rounded solution's cost is at most 2·(LP optimal cost), which is at most 2·OPT (from the bound above). Two entirely different algorithms — the matching-based greedy loop and LP-relaxation-with-rounding — land on the identical 2-approximation guarantee, via genuinely different arguments.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Approximability is not uniform across NP-hard problems</span>
+    Not every NP-hard problem admits as clean a guarantee as Vertex Cover's factor of 2. TSP with the triangle inequality (edge weights satisfying d(a,c) ≤ d(a,b)+d(b,c)) has a 1.5-approximation (Christofides' algorithm); general TSP (no triangle inequality) has no polynomial-time constant-factor approximation at all, unless P=NP — a fact provable via a reduction from Hamiltonian Cycle similar in spirit to Lesson 32's. Approximability itself turns out to be a rich hierarchy, not a single fallback bolted onto every hard problem.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What does it mean for an algorithm to be a "2-approximation" for a minimization problem?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">It runs in exactly twice the time of the exact algorithm.</button>
+      <button class="quiz-choice" data-correct="true">It runs in polynomial time and always returns a solution of cost at most twice the true optimal cost.</button>
+      <button class="quiz-choice" data-correct="false">It is correct on exactly half of all possible input instances.</button>
+      <button class="quiz-choice" data-correct="false">It solves the problem exactly, but only for inputs of even size.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The approximation ratio is a worst-case multiplicative bound on solution cost relative to the true optimum, holding for every instance.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. In the greedy Vertex Cover algorithm, why does OPT ≥ |M| for the matching M of picked edges?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because every vertex cover must contain every vertex in the graph.</button>
+      <button class="quiz-choice" data-correct="true">Because M's edges share no endpoints, so covering all of them requires at least one distinct vertex per edge — at least |M| vertices in any valid cover.</button>
+      <button class="quiz-choice" data-correct="false">Because M is always the smallest possible matching in the graph.</button>
+      <button class="quiz-choice" data-correct="false">Because the algorithm always picks exactly half of the graph's edges.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The pairwise-disjoint structure of a matching is exactly what forces any valid cover to spend at least one vertex per matched edge.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why does LP_OPT ≤ ILP_OPT hold for the Vertex Cover relaxation?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because the LP relaxation and the integer program always have the exact same optimal value.</button>
+      <button class="quiz-choice" data-correct="true">Because every feasible integer solution is also a feasible fractional solution, so the LP minimizes over a strictly larger feasible region and can only find a value less than or equal to the integer optimum.</button>
+      <button class="quiz-choice" data-correct="false">Because the LP relaxation ignores the problem's constraints entirely.</button>
+      <button class="quiz-choice" data-correct="false">Because rounding always increases the optimal value before it can be compared.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A superset feasible region for a minimization problem can only produce a value at or below the more constrained integer optimum.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="matching">
+    <p class="quiz-prompt">4. Fill in the blank: the greedy Vertex Cover algorithm's approximation guarantee relies on the picked edges forming a ___ — a set of edges with no shared endpoints.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The matching's pairwise-disjoint edges are exactly what forces any cover to spend at least one vertex per picked edge.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="0.5|half">
+    <p class="quiz-prompt">5. Fill in the blank: the LP-rounding scheme sets xᵥ=1 exactly when the fractional solution's xᵥ* is at least ___, which is what keeps every constraint satisfied after rounding.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Since xᵤ*+xᵥ* ≥ 1 for every edge, at least one endpoint must have fractional value ≥ 0.5, guaranteeing it rounds up to 1.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the final lesson: CLRS, Chapter 35, "Approximation Algorithms," covers both the Vertex Cover matching argument and LP-relaxation rounding, and Vazirani's <em>Approximation Algorithms</em> is the standard full reference for the broader hierarchy of approximability across NP-hard problems.</p>
+
+  <p class="ask-teacher">Want to work through why Christofides' algorithm needs the triangle inequality specifically, or trace the LP relaxation and rounding on a small 4-vertex graph by hand? Ask your teacher — that's what I'm here for. Next up: the capstone, tracing this entire course's dependency chain from Unit 1's asymptotic notation to this unit's proof that some problems resist exact efficient solutions altogether.</p>
+
+  <footer class="lesson-footer">STEM+ · Advanced Algorithms · Lesson 33 of the course sequence</footer>
+</div>

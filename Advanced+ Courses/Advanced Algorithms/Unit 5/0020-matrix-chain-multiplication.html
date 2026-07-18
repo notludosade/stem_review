@@ -1,0 +1,119 @@
+<meta charset="UTF-8">
+<title>Lesson 20: Matrix Chain Multiplication — STEM+</title>
+<link rel="stylesheet" href="../../../assets/style.css">
+<script src="../../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Advanced Algorithms · Unit 5 · Lesson 20</span>
+  <h1>Matrix Chain Multiplication</h1>
+  <p class="subtitle">Matrix multiplication is associative, so a chain of matrices can be parenthesized many different ways — all producing the same result, but at wildly different computational costs. This lesson finds the cheapest parenthesization with an interval-based DP.</p>
+  <p class="nav-links"><a href="0019-bitmask-dp.html" class="nav-prev">← Lesson 19</a> <a href="0021-matrix-exponentiation.html" class="nav-next">Lesson 21 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Multiplying a p×q matrix by a q×r matrix costs p·q·r scalar multiplications (the standard schoolbook cost, ignoring Strassen's improvement from Lesson 8, which doesn't change which parenthesization is cheapest, just the constant for each individual multiply). Given a chain of matrices A₁A₂...Aₙ, matrix multiplication is associative, so every legal parenthesization computes the exact same final matrix — but the total scalar-multiplication cost can differ by orders of magnitude depending on the order chosen. This problem introduces a DP shape indexed by an <em>interval</em> of the chain, distinct from both the "which prefix" state of sequence DP and the "which subset" state of Lesson 19's bitmask DP.</p>
+
+  <h2>Why order matters — a concrete example</h2>
+  <div class="box example">
+    <span class="box-label">Worked example</span>
+    Three matrices: A₁ (10×100), A₂ (100×5), A₃ (5×50). Parenthesizing as (A₁A₂)A₃: A₁A₂ costs 10·100·5=5,000, producing a 10×5 result; then (A₁A₂)A₃ costs 10·5·50=2,500. Total: 7,500. Parenthesizing as A₁(A₂A₃) instead: A₂A₃ costs 100·5·50=25,000, producing a 100×50 result; then A₁(A₂A₃) costs 10·100·50=50,000. Total: 75,000 — ten times more expensive, despite computing the identical final matrix. The order of multiplication, not just the operation itself, is a genuine optimization problem.
+  </div>
+
+  <h2>The DP</h2>
+  <div class="box">
+    <span class="box-label">State</span>
+    Let dims[0..n] be the matrix dimensions, so matrix Aᵢ has size dims[i−1] × dims[i]. Define dp[i][j] = the minimum cost to multiply the chain Aᵢ...Aⱼ into a single matrix (for i ≤ j; dp[i][i] = 0, a single matrix needs no multiplication).
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Recurrence</span>
+    dp[i][j] = min over every split point k (i ≤ k &lt; j) of ( dp[i][k] + dp[k+1][j] + dims[i−1]·dims[k]·dims[j] ). Reasoning: some multiplication must be the <em>last</em> one performed for the whole chain Aᵢ...Aⱼ — it multiplies the result of Aᵢ...Aₖ (a dims[i−1]×dims[k] matrix) by the result of Aₖ₊₁...Aⱼ (a dims[k]×dims[j] matrix). Trying every possible split point k and taking the best mirrors the same "try every way to combine two subproblems, take the optimum" logic Lesson 7's median-of-medians and Lesson 6's merge sort both used — but here the two subproblems are determined by an interval split, not a fixed midpoint.
+  </div>
+
+  <div class="box">
+    <span class="box-label">Algorithm</span>
+<pre class="code-block"><code>function matrixChainOrder(dims, n):
+    dp = n x n table, dp[i][i] = 0 for all i
+    for length in 2..n:                        // length of the chain being solved
+        for i in 1..(n - length + 1):
+            j = i + length - 1
+            dp[i][j] = infinity
+            for k in i..(j - 1):
+                cost = dp[i][k] + dp[k+1][j] + dims[i-1]*dims[k]*dims[j]
+                dp[i][j] = min(dp[i][j], cost)
+    return dp[1][n]</code></pre>
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why the outer loop goes by increasing chain length</span>
+    dp[i][j]'s recurrence depends on dp[i][k] and dp[k+1][j], both strictly shorter chains than [i,j] — so every subproblem of length L must be fully solved before any subproblem of length L+1 can be computed. Iterating the outer loop by increasing length (rather than by i or j directly) is what guarantees every dependency is already resolved when needed — the same "smaller subproblems must be finished first" discipline Floyd-Warshall's k-outermost loop (Lesson 14) enforced, just organized around chain length instead of an allowed-intermediate-vertex count.
+  </div>
+
+  <div class="box">
+    <span class="box-label">Runtime</span>
+    Θ(n³): Θ(n²) intervals [i,j], each considering up to n split points k.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. Why can different parenthesizations of the same matrix chain product have very different computational costs, even though they compute the same result?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because matrix multiplication is not associative, so different orders give different results.</button>
+      <button class="quiz-choice" data-correct="true">Because the cost of each individual multiplication depends on the intermediate matrix dimensions, which differ depending on which multiplication is performed first.</button>
+      <button class="quiz-choice" data-correct="false">Because only one specific parenthesization is mathematically valid.</button>
+      <button class="quiz-choice" data-correct="false">Because larger matrices are always multiplied before smaller ones in every valid order.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Matrix multiplication is associative (same final result) but not cost-invariant, since intermediate result sizes vary by parenthesization order.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. What does the split point k represent in the matrix chain multiplication recurrence?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">The total number of matrices in the entire chain.</button>
+      <button class="quiz-choice" data-correct="true">The boundary between two sub-chains (Aᵢ...Aₖ and Aₖ₊₁...Aⱼ) whose results are combined by the last multiplication performed.</button>
+      <button class="quiz-choice" data-correct="false">The number of rows in matrix Aᵢ.</button>
+      <button class="quiz-choice" data-correct="false">A fixed midpoint, always exactly halfway through the chain.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Unlike a fixed-midpoint split (as in ordinary merge sort), k ranges over every possible split point, since the optimal split isn't known in advance.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why must the DP's outer loop iterate by increasing chain length, rather than by increasing i or j directly?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Chain length has no effect on the order subproblems must be solved in.</button>
+      <button class="quiz-choice" data-correct="true">Because dp[i][j] depends on strictly shorter sub-chains, so all shorter chains must be fully computed before any longer chain that depends on them.</button>
+      <button class="quiz-choice" data-correct="false">Because longer chains always have smaller optimal cost than shorter ones.</button>
+      <button class="quiz-choice" data-correct="false">Because i and j must always be equal at the start of the algorithm.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Length-based ordering directly matches the recurrence's dependency structure, guaranteeing every needed subproblem is already solved.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="split point|split">
+    <p class="quiz-prompt">4. Fill in the blank: the matrix chain DP tries every possible ___ point k for the last multiplication, taking whichever minimizes total cost.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Since the optimal split isn't known in advance, every candidate must be tried and compared.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="dimensions|dimension">
+    <p class="quiz-prompt">5. Fill in the blank: the cost of multiplying two matrices depends on their ___ , which is exactly what makes different parenthesizations of the same chain cost differently.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Intermediate matrix dimensions vary with parenthesization order, and those dimensions directly determine each multiplication's cost.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: CLRS, Chapter 14, Section 14.2, "Matrix-chain multiplication," gives the full derivation, pseudocode, and a worked 6-matrix example.</p>
+
+  <p class="ask-teacher">Want to trace the dp table by hand for a 4-matrix chain? Ask your teacher — that's what I'm here for. Next up: matrix exponentiation, which uses fast exponentiation (repeated squaring) to compute linear recurrences like Fibonacci in logarithmic time instead of linear time.</p>
+
+  <footer class="lesson-footer">STEM+ · Advanced Algorithms · Lesson 20 of the course sequence</footer>
+</div>

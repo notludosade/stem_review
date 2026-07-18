@@ -1,0 +1,107 @@
+<meta charset="UTF-8">
+<title>Lesson 4: Databases vs. Spreadsheets vs. Files — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Data Handling: CB · Unit 1 · Lesson 4</span>
+  <h1>Databases vs. Spreadsheets vs. Files</h1>
+  <p class="subtitle">Three different tools all store data in rows and columns — but they're built for different jobs, and picking the wrong one causes real pain later. This lesson gives you the mental model for choosing correctly.</p>
+  <p class="nav-links"><a href="0003-data-quality.html" class="nav-prev">← Lesson 3</a> <a href="../Unit%202/0005-core-spreadsheet-functions.html" class="nav-next">Lesson 5 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Units 2 and 3 of this course teach spreadsheets and SQL databases in depth. Before diving into either, it's worth understanding what each tool is actually for — and what a plain data file (like CSV or JSON) is, since it's the format that usually moves data between the two.</p>
+
+  <h2>The row-and-column mental model</h2>
+  <div class="box">
+    <span class="box-label">Shared structure</span>
+    Spreadsheets, database tables, and CSV files all share the same basic shape: rows (individual records — one customer, one order, one measurement) and columns (fields — the same attribute recorded for every row, like "email" or "order date"). If you understand this shape, you already understand 80% of what all three tools are organizing.
+  </div>
+
+  <h2>Spreadsheets</h2>
+  <div class="box">
+    <span class="box-label">What they're built for</span>
+    A spreadsheet (Excel, Google Sheets) is built for small-to-medium datasets a single person or small team edits directly, interactively, with formulas recalculating live as data changes. Strengths: fast to start, visual, no setup required, great for one-off analysis and quick calculations. Weaknesses: struggles past roughly hundreds of thousands of rows, has no built-in way to enforce that data stays consistent across multiple people editing at once, and formulas referencing the wrong cell fail silently rather than raising an error.
+  </div>
+
+  <h2>Databases</h2>
+  <div class="box">
+    <span class="box-label">What they're built for</span>
+    A database (the subject of Unit 3) stores data in formally defined tables with enforced rules — a "quantity" column can be forced to always be a number, never blank. Strengths: handles millions or billions of rows, supports many people and programs reading and writing at once safely, and lets you ask precise questions (via SQL) without manually scrolling. Weaknesses: more setup and technical overhead than a spreadsheet, and not built for the highly visual, drag-and-drop interactivity a spreadsheet offers.
+  </div>
+
+  <h2>Plain data files: CSV and JSON</h2>
+  <div class="box">
+    <span class="box-label">What they're built for</span>
+    A <strong>CSV</strong> (comma-separated values) file is the simplest possible structured-data format: plain text, one row per line, values separated by commas. It's the universal export/import format — nearly every spreadsheet and database can read and write CSV, which is exactly why it's used to move data between them. <strong>JSON</strong> (JavaScript Object Notation) is a semi-structured text format built from key-value pairs and nested lists, common in exports from web services and APIs (recall Lesson 1's semi-structured data category) — more flexible than CSV's strict rows-and-columns shape, at the cost of not opening cleanly in a spreadsheet without some conversion.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why the choice actually matters</span>
+    Picking a spreadsheet for a dataset that's really a multi-person, constantly-updated, million-row operational system leads to broken formulas, version-conflict chaos ("final_v3_ACTUAL.xlsx"), and silent data corruption. Picking a full database for a one-time analysis of 200 rows is needless overhead. The right default: use a spreadsheet for small, single-analyst, interactive work; use a database when multiple people or programs need reliable, simultaneous access to larger data; use CSV/JSON as the transfer format connecting the two, or as a lightweight way to store a small dataset without either tool's overhead.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What structural feature do spreadsheets, database tables, and CSV files all share?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">They all require a formal schema to be defined before any data can be entered.</button>
+      <button class="quiz-choice" data-correct="true">They all organize data into rows (individual records) and columns (fields recorded consistently for every row).</button>
+      <button class="quiz-choice" data-correct="false">They all support simultaneous editing by many people without conflicts.</button>
+      <button class="quiz-choice" data-correct="false">They are all plain-text formats readable without special software.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The rows-and-columns shape is the one structural idea shared across all three tools, even though their capabilities differ sharply.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why would a database generally be a better choice than a spreadsheet for a million-row dataset edited simultaneously by many people?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because spreadsheets cannot store more than a few hundred rows under any circumstances.</button>
+      <button class="quiz-choice" data-correct="true">Because databases are built to handle much larger row counts and to support many simultaneous readers/writers safely with enforced consistency rules, which spreadsheets aren't designed for.</button>
+      <button class="quiz-choice" data-correct="false">Because spreadsheets cannot contain formulas, only raw data.</button>
+      <button class="quiz-choice" data-correct="false">Because databases are always faster to set up than a spreadsheet.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Scale and safe concurrent access are exactly where spreadsheets start to break down and databases are specifically designed to hold up.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why is CSV commonly used to move data between a spreadsheet and a database?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because CSV enforces the same data-consistency rules a database does.</button>
+      <button class="quiz-choice" data-correct="true">Because CSV is a simple, universal plain-text format that nearly every spreadsheet and database program can read and write.</button>
+      <button class="quiz-choice" data-correct="false">Because CSV supports nested key-value structures that spreadsheets cannot represent.</button>
+      <button class="quiz-choice" data-correct="false">Because CSV files can only be created by database software, never by spreadsheets.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>CSV's simplicity is exactly what makes it universally importable and exportable, which is why it works as a lowest-common-denominator transfer format.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="JSON">
+    <p class="quiz-prompt">4. Fill in the blank: the semi-structured, key-value-based text format common in web service and API exports, more flexible than CSV's strict rows-and-columns shape, is called ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>JSON's nested key-value structure gives it more flexibility than CSV, at the cost of not opening cleanly as a simple table.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="columns">
+    <p class="quiz-prompt">5. Fill in the blank: in the shared row-and-column mental model, a row is an individual record, and a ___ is an attribute recorded consistently for every row.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Rows are individual records; columns are the fields recorded the same way across every one of those records.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: the Google Data Analytics Certificate's overview of "Databases and spreadsheets" (coursera.org) gives a practical, tool-agnostic comparison consistent with the framing used here.</p>
+
+  <p class="ask-teacher">Have a real dataset in mind and want help deciding which tool fits it best? Ask your teacher — that's what I'm here for. Next up: Unit 2 starts hands-on with spreadsheets — the core functions you'll use constantly.</p>
+
+  <footer class="lesson-footer">STEM+ · Data Handling: CB · Lesson 4 of the course sequence</footer>
+</div>

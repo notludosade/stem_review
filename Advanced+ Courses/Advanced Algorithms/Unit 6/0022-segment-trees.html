@@ -1,0 +1,128 @@
+<meta charset="UTF-8">
+<title>Lesson 22: Segment Trees — STEM+</title>
+<link rel="stylesheet" href="../../../assets/style.css">
+<script src="../../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Advanced Algorithms · Unit 6 · Lesson 22</span>
+  <h1>Segment Trees</h1>
+  <p class="subtitle">Answering "what's the sum (or min, or max) of this range?" after every update, on an array that keeps changing, needs more than a running total. A segment tree answers both range queries and point updates in Θ(log n).</p>
+  <p class="nav-links"><a href="../Unit%205/0021-matrix-exponentiation.html" class="nav-prev">← Lesson 21</a> <a href="0023-fenwick-trees.html" class="nav-next">Lesson 23 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Given an array that supports two operations — update a single element, and query the sum (or min/max) of a range [l, r] — a naive approach makes updates Θ(1) but range queries Θ(n) (scan the whole range), or precomputes prefix sums for Θ(1) queries but Θ(n) updates (every prefix sum after the changed index must be recomputed). A <strong>segment tree</strong> is a binary tree over the array that gets both operations down to Θ(log n), by storing precomputed aggregates at every level of a recursive halving — an idea structurally close to the recursion tree method (Lesson 2), but built once and then queried repeatedly rather than solved and discarded.</p>
+
+  <h2>The structure</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    A segment tree over an array of size n is a binary tree where each node represents a contiguous range [lo, hi]. The root represents the whole array [0, n−1]; each internal node's two children split its range in half ([lo, mid] and [mid+1, hi]); each leaf represents a single array index. Every node stores the aggregate (sum, min, or max — whichever operation this instance is built for) of its entire range, computed once at build time from its two children's aggregates.
+  </div>
+
+  <div class="box">
+    <span class="box-label">Build — O(n)</span>
+<pre class="code-block"><code>function build(arr, node, lo, hi):
+    if lo == hi:
+        tree[node] = arr[lo]
+        return
+    mid = (lo + hi) / 2
+    build(arr, 2*node, lo, mid)
+    build(arr, 2*node+1, mid+1, hi)
+    tree[node] = tree[2*node] + tree[2*node+1]   // combine children</code></pre>
+  </div>
+
+  <div class="box">
+    <span class="box-label">Range query — O(log n)</span>
+<pre class="code-block"><code>function query(node, lo, hi, l, r):               // query range [l, r]
+    if r < lo or hi < l: return 0                  // no overlap
+    if l <= lo and hi <= r: return tree[node]      // fully covered
+    mid = (lo + hi) / 2
+    return query(2*node, lo, mid, l, r) + query(2*node+1, mid+1, hi, l, r)</code></pre>
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why the query is Θ(log n), not Θ(n)</span>
+    At each level of the tree, a query range can only partially overlap at most two "boundary" nodes on each side — every other node visited at that level is either fully outside (skipped) or fully inside (returned immediately, no further recursion). Since the tree has Θ(log n) levels and the boundary nodes contribute at most a constant number of extra visits per level, total work is Θ(log n) — a proof shape similar in spirit to the recursion tree method (Lesson 2), summing bounded work across a logarithmic number of levels.
+  </div>
+
+  <div class="box">
+    <span class="box-label">Point update — O(log n)</span>
+<pre class="code-block"><code>function update(node, lo, hi, index, newValue):
+    if lo == hi:
+        tree[node] = newValue
+        return
+    mid = (lo + hi) / 2
+    if index <= mid: update(2*node, lo, mid, index, newValue)
+    else: update(2*node+1, mid+1, hi, index, newValue)
+    tree[node] = tree[2*node] + tree[2*node+1]     // recompute after child changes</code></pre>
+    Only the Θ(log n) nodes on the root-to-leaf path for the updated index need recomputing, since every other node's range doesn't contain that index at all.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why this matters for problems Union-Find and Dijkstra's can't touch</span>
+    Neither Union-Find (CP2+ Lesson 21) nor Dijkstra's (CP2+ Lesson 22) can answer "what's the minimum edge weight in this range of a sorted list, after several updates" — that's a fundamentally different question, about ranges of an ordered sequence rather than connectivity or shortest paths. Segment trees are the standard tool whenever a problem needs repeated range queries interleaved with point updates, which is common enough in competitive programming to be considered foundational infrastructure, not a niche technique.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What does each node of a segment tree store?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">The index of the node within the tree.</button>
+      <button class="quiz-choice" data-correct="true">The aggregate (such as sum, min, or max) of the contiguous array range that node represents.</button>
+      <button class="quiz-choice" data-correct="false">A pointer to every leaf in its subtree.</button>
+      <button class="quiz-choice" data-correct="false">The single largest value in the entire array, regardless of range.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Each node's stored aggregate covers exactly its own range, computed from combining its two children's aggregates.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why does a range query on a segment tree take Θ(log n) instead of Θ(n)?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because segment trees only support queries on the entire array, never a sub-range.</button>
+      <button class="quiz-choice" data-correct="true">Because at each of the Θ(log n) levels, only a constant number of boundary nodes require partial recursion — fully inside or fully outside nodes are resolved immediately.</button>
+      <button class="quiz-choice" data-correct="false">Because the array is always sorted before building the tree.</button>
+      <button class="quiz-choice" data-correct="false">Because segment trees cache every possible range query result in advance.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Bounded extra work per level, across a logarithmic number of levels, is exactly what gives the Θ(log n) total.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why does a point update only need to recompute Θ(log n) nodes, rather than the whole tree?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because segment trees don't actually support updates after being built.</button>
+      <button class="quiz-choice" data-correct="true">Because only the nodes on the root-to-leaf path for the updated index have a range containing that index — every other node's aggregate is unaffected.</button>
+      <button class="quiz-choice" data-correct="false">Because updates are batched and only applied once per Θ(n) updates.</button>
+      <button class="quiz-choice" data-correct="false">Because the tree is rebuilt from scratch on every update, which happens to be fast.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Nodes whose range doesn't include the updated index have aggregates that provably can't change, so only the single root-to-leaf path needs recomputation.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="aggregate">
+    <p class="quiz-prompt">4. Fill in the blank: every segment tree node stores an ___ (such as a sum, minimum, or maximum) summarizing its entire range, computed from its two children.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>This precomputed aggregate at every level is exactly what avoids a full linear scan on every query.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="log n|logarithmic">
+    <p class="quiz-prompt">5. Fill in the blank: both range queries and point updates on a segment tree run in Θ(___) time, a large improvement over a naive Θ(n) array scan.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Both operations only ever touch a logarithmic number of nodes, thanks to the tree's recursive range-halving structure.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: <a href="https://cp-algorithms.com/data_structures/segment_tree.html">CP-Algorithms, "Segment Tree"</a> covers this exact structure with several extensions (lazy propagation, range updates) beyond what's needed here.</p>
+
+  <p class="ask-teacher">Want to trace a build and a few queries/updates by hand on an 8-element array? Ask your teacher — that's what I'm here for. Next up: Fenwick trees, a much simpler structure that solves the prefix-sum-with-updates version of this same problem using a clever bit trick.</p>
+
+  <footer class="lesson-footer">STEM+ · Advanced Algorithms · Lesson 22 of the course sequence</footer>
+</div>

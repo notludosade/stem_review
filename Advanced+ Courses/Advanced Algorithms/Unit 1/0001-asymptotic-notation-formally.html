@@ -1,0 +1,117 @@
+<meta charset="UTF-8">
+<title>Lesson 1: Asymptotic Notation, Formally — STEM+</title>
+<link rel="stylesheet" href="../../../assets/style.css">
+<script src="../../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Advanced Algorithms · Unit 1 · Lesson 1</span>
+  <h1>Asymptotic Notation, Formally</h1>
+  <p class="subtitle">CP2 taught you to read Big-O by intuition — drop constants, keep the fastest-growing term. This lesson gives you the actual quantifier-based definitions underneath that intuition, so you can prove a bound instead of eyeballing it.</p>
+  <p class="nav-links"><a href="../index.html" class="nav-prev">← Course Contents</a> <a href="0002-the-recursion-tree-method.html" class="nav-next">Lesson 2 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Computer Programming 2's Unit 3 taught Big-O as a practical skill: count nested loops, drop lower-order terms, drop constants, and you have a good-enough growth-rate label. That intuition is correct, but it hides a precise mathematical claim. This course proves things about algorithms — that a greedy choice is optimal, that a recurrence solves to a specific bound, that one problem reduces to another — and proofs need definitions with no hand-waving in them. Asymptotic notation is the first place that matters, because every later proof in this course states its conclusion in these terms.</p>
+
+  <h2>The formal definition of O</h2>
+  <div class="box">
+    <span class="box-label">Definition — Big-O</span>
+    f(n) = O(g(n)) if there exist positive constants c and n₀ such that 0 ≤ f(n) ≤ c·g(n) for all n ≥ n₀.
+  </div>
+  <div class="box why">
+    <span class="box-label">Why the constants and the threshold both matter</span>
+    The constant c is what lets you ignore multiplicative overhead — "3n² operations" and "500n² operations" are both O(n²), because you're free to pick c = 500. The threshold n₀ is what lets you ignore small-input behavior — an algorithm can do something bizarre for n &lt; 100 and still be O(n²), as long as the bound holds from some point onward. Both escape hatches exist for the same reason: asymptotic notation describes long-run growth rate, not exact runtime, and exact runtime is dominated by implementation details that have nothing to do with the algorithm's actual structure.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Worked proof — 3n² + 5n = O(n²)</span>
+    Claim: 3n² + 5n = O(n²). Pick c = 8 and n₀ = 1. For all n ≥ 1, n ≤ n², so 5n ≤ 5n², giving 3n² + 5n ≤ 3n² + 5n² = 8n². That's exactly the form f(n) ≤ c·g(n) for n ≥ n₀, so the definition is satisfied. Notice the proof only had to produce <em>some</em> working c and n₀ — not the best possible ones.
+  </div>
+
+  <h2>Ω and Θ: the other two directions</h2>
+  <div class="box">
+    <span class="box-label">Definition — Big-Omega (lower bound)</span>
+    f(n) = Ω(g(n)) if there exist positive constants c and n₀ such that 0 ≤ c·g(n) ≤ f(n) for all n ≥ n₀. Where O is an upper bound on growth, Ω is a lower bound.
+  </div>
+  <div class="box">
+    <span class="box-label">Definition — Big-Theta (tight bound)</span>
+    f(n) = Θ(g(n)) if f(n) = O(g(n)) <em>and</em> f(n) = Ω(g(n)) — equivalently, there exist positive constants c₁, c₂, n₀ such that c₁·g(n) ≤ f(n) ≤ c₂·g(n) for all n ≥ n₀. Θ is the notation for "grows at exactly this rate," and it's the one you should reach for whenever you actually know the tight bound.
+  </div>
+  <div class="box why">
+    <span class="box-label">Why CP2 mostly said O when it meant Θ</span>
+    In casual use, "this algorithm is O(n log n)" almost always means the algorithm's runtime is <em>exactly</em> proportional to n log n — that's a Θ claim wearing an O label. The distinction matters here because some of this course's proofs genuinely need a one-directional bound. A reduction proof (Unit 8) only needs an upper bound on how much work a transformation adds — O, not Θ — because it's establishing "at most this much extra cost," not "exactly this much."
+  </div>
+
+  <h2>Little-o and little-ω: strict versions</h2>
+  <div class="box">
+    <span class="box-label">Definition — little-o and little-ω</span>
+    f(n) = o(g(n)) if for <em>every</em> positive constant c, there exists n₀ such that f(n) &lt; c·g(n) for all n ≥ n₀ — equivalently, lim(n→∞) f(n)/g(n) = 0. This is a strict version of O: g(n) grows strictly faster than f(n), not just "at least as fast, up to a constant." Little-ω is the symmetric strict version of Ω.
+  </div>
+  <div class="box example">
+    <span class="box-label">Telling O apart from o</span>
+    n² = O(n²) is true — g can equal f up to a constant. But n² = o(n²) is false, since the limit n²/n² = 1 ≠ 0. Meanwhile n = o(n²) is true, since n/n² = 1/n → 0. The little-o notation is what you'll use in Unit 6 to state that one data structure's operation is asymptotically negligible next to another's.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. In the formal definition of f(n) = O(g(n)), what are c and n₀ for?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">c bounds the input size and n₀ bounds the runtime.</button>
+      <button class="quiz-choice" data-correct="true">c absorbs constant multiplicative overhead and n₀ lets the bound ignore small-input behavior.</button>
+      <button class="quiz-choice" data-correct="false">c and n₀ are both required to equal 1 for the definition to apply.</button>
+      <button class="quiz-choice" data-correct="false">c counts loop iterations and n₀ counts recursive calls.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>c makes the bound insensitive to constant factors; n₀ makes it insensitive to behavior before some threshold — together they capture only long-run growth rate.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why is f(n) = Θ(g(n)) a strictly stronger claim than f(n) = O(g(n))?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Θ requires a smaller constant c than O does.</button>
+      <button class="quiz-choice" data-correct="true">Θ requires both an upper bound and a matching lower bound, pinning down the exact growth rate.</button>
+      <button class="quiz-choice" data-correct="false">Θ only applies to polynomial functions, while O applies to any function.</button>
+      <button class="quiz-choice" data-correct="false">Θ and O are equivalent notations that differ only in typography.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>O alone only says "grows no faster than"; Θ additionally says "grows no slower than," which together pin down the exact asymptotic rate.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Which statement is true: n² = o(n²), or n = o(n²)?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">n² = o(n²) is true, because a function is always little-o of itself.</button>
+      <button class="quiz-choice" data-correct="true">n = o(n²) is true, because n/n² → 0, while n²/n² → 1 ≠ 0.</button>
+      <button class="quiz-choice" data-correct="false">Neither statement is true, since little-o never applies to polynomials.</button>
+      <button class="quiz-choice" data-correct="false">Both statements are true, since O and o are interchangeable for polynomials.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Little-o requires the ratio to vanish in the limit, which rules out a function being little-o of itself but allows a strictly slower-growing function.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="lower|lower bound">
+    <p class="quiz-prompt">4. Fill in the blank: Ω(g(n)) is a formal ___ bound on f(n)'s growth, the mirror image of O's upper bound.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>O caps growth from above; Ω guarantees growth from below — Θ is exactly the overlap of both.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="constants|constant">
+    <p class="quiz-prompt">5. Fill in the blank: the whole point of the c and n₀ in these definitions is to make asymptotic notation ignore multiplicative ___ and small-input exceptions.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Asymptotic notation is deliberately blind to constant factors and to a finite prefix of small inputs, since it's meant to describe long-run growth rate only.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: CLRS (Cormen, Leiserson, Rivest &amp; Stein, <em>Introduction to Algorithms</em>, 4th ed.), Chapter 3, "Characterizing Running Times," is the canonical formal treatment these definitions are drawn from.</p>
+
+  <p class="ask-teacher">Unsure how to pick c and n₀ for a bound of your own? Ask your teacher — that's what I'm here for. Next up: solving recurrences by drawing out the recursion tree by hand, before the Master Theorem gives you a shortcut.</p>
+
+  <footer class="lesson-footer">STEM+ · Advanced Algorithms · Lesson 1 of the course sequence</footer>
+</div>

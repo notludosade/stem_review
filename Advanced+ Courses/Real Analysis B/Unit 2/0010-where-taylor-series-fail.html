@@ -1,0 +1,119 @@
+<meta charset="UTF-8">
+<title>Lesson 10: Where Taylor Series Can Fail — STEM+</title>
+<link rel="stylesheet" href="../../../assets/style.css">
+<script src="../../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Real Analysis B · Unit 2 · Lesson 10</span>
+  <h1>Where Taylor Series Can Fail</h1>
+  <p class="subtitle">eˣ and sin(x) were both analytic everywhere — it would be easy to walk away thinking every C^∞ function is. It isn't, and the counterexample closes this unit by showing exactly how the remainder term can refuse to vanish.</p>
+  <p class="nav-links"><a href="0009-taylor-series-and-analytic-functions.html" class="nav-prev">← Lesson 9</a> <a href="../Unit%203/0011-metric-spaces-definitions-and-examples.html" class="nav-next">Lesson 11 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <div class="box">
+    <span class="box-label">Lemma — Exponential Decay Beats Any Power</span>
+    For every integer n ≥ 0, lim<sub>x→0</sub> e<sup>−1/x²</sup>/xⁿ = 0.
+  </div>
+
+  <div class="box">
+    <span class="box-label">Proof</span>
+    Take x &gt; 0 (the case x &lt; 0 is identical by symmetry) and let u = 1/x², so u → ∞ as x → 0⁺. Then e<sup>−1/x²</sup>/xⁿ = e<sup>−u</sup>·uⁿ<sup>/2</sup>. Fix any integer m &gt; n/2. Since eᵘ = Σ<sub>k=0</sub><sup>∞</sup> uᵏ/k! (Lesson 9) and every term is positive for u &gt; 0, the single term k = m gives eᵘ ≥ uᵐ/m!. So e<sup>−u</sup> ≤ m!/uᵐ, and e<sup>−u</sup>·uⁿ<sup>/2</sup> ≤ m!·u<sup>n/2 − m</sup> → 0 as u → ∞, since n/2 − m &lt; 0. ∎
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why this lemma is the whole example, in miniature</span>
+    This is exactly the factorial-beats-exponential idea from Lesson 6 and Lesson 9's remainder bounds, turned around: there, factorial growth in the denominator forced a remainder to 0; here, the exponential's own Taylor series is reused to show e<sup>−1/x²</sup> decays faster than any power of x grows, as x → 0. That's strong enough decay to kill every derivative at 0 — which is exactly the trap.
+  </div>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    Let f(x) = e<sup>−1/x²</sup> for x ≠ 0, and f(0) = 0.
+  </div>
+
+  <div class="box">
+    <span class="box-label">Claim — f is C^∞ at 0, and f<sup>(k)</sup>(0) = 0 for every k</span>
+    For x ≠ 0, each derivative f<sup>(k)</sup>(x) works out (by induction, differentiating with the chain rule at each step) to a polynomial in 1/x times e<sup>−1/x²</sup> — a finite sum of terms of the form 1/xᵐ · e<sup>−1/x²</sup>. By the Lemma, every such term → 0 as x → 0, so f<sup>(k−1)</sup>(x) − f<sup>(k−1)</sup>(0) all → 0 as well, meaning each difference quotient [f<sup>(k−1)</sup>(h) − f<sup>(k−1)</sup>(0)]/h (itself a sum of terms 1/hᵐ⁺¹·e<sup>−1/h²</sup>) also → 0 as h → 0 by the Lemma. So f<sup>(k)</sup>(0) exists and equals 0, for every k.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why f(0) = 0 is not a technicality</span>
+    The formula e<sup>−1/x²</sup> is not even defined at x = 0, so the value f(0) = 0 has to be built in by hand. But it's exactly the value the Lemma forces every derivative toward — this isn't a convenient choice competing with some other natural value; it's the only value under which f is even continuous at 0, let alone differentiable.
+  </div>
+
+  <div class="box">
+    <span class="box-label">Conclusion — f is not analytic at 0</span>
+    Since f<sup>(k)</sup>(0) = 0 for every k, f's Taylor series centered at 0 is Σ<sub>k=0</sub><sup>∞</sup> 0·xᵏ = 0 — the identically-zero series, which trivially converges everywhere. But f(x) = e<sup>−1/x²</sup> ≠ 0 for every x ≠ 0. So the Taylor series converges on all of ℝ, yet equals f(x) only at the single point x = 0. f is C^∞ at 0 — infinitely differentiable, with no gap in the derivatives — but not analytic at 0.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why this doesn't contradict Taylor's Theorem</span>
+    Taylor's Theorem (Lesson 9) still holds here — it guarantees a ξ making Rₙ(x) = f<sup>(n+1)</sup>(ξ)/(n+1)!·xⁿ⁺¹ exact, for every n. What fails is the strategy that worked for eˣ and sin(x): there, a single bound B on |f<sup>(n+1)</sup>| independent of n forced Rₙ(x) → 0. Here, the derivatives f<sup>(k)</sup>(x) for x near but not at 0 grow without any such uniform bound as k increases (the polynomial-in-1/x factor grows with k even as the exponential factor shrinks) — so the remainder is not forced to 0, and indeed cannot be, since Rₙ(x) = f(x) − 0 = f(x) ≠ 0 for every n when x ≠ 0. The theorem is silent about which case you're in; it only supplies the formula, not a guarantee that the formula shrinks.
+  </div>
+
+  <h2>Unit 2 in one line</h2>
+  <p>Power series inherit uniform convergence automatically on compact subintervals (Lessons 6–7), which licenses term-by-term differentiation and integration (Lesson 8) and forces a power series's coefficients to be its own Taylor coefficients. Turning that around, a Taylor series can always be written down from a C^∞ function's derivatives (Lesson 9) — but as this lesson shows, writing it down is not the same as it converging back to the function. Analyticity is a genuinely stronger property than infinite differentiability, and the gap between them is exactly what e<sup>−1/x²</sup> lives in.</p>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What does the Lemma establish?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">That e<sup>−1/x²</sup> is unbounded as x → 0</button>
+      <button class="quiz-choice" data-correct="true">That e<sup>−1/x²</sup>/xⁿ → 0 as x → 0, for every fixed power n</button>
+      <button class="quiz-choice" data-correct="false">That e<sup>−1/x²</sup> is not continuous at x = 0</button>
+      <button class="quiz-choice" data-correct="false">That eˣ fails to be analytic</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The Lemma shows the exponential decay term e^(−1/x²) beats any polynomial power of 1/x, forcing the ratio to 0 no matter how large n is.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. What is f's Taylor series at 0, and what does f actually equal near 0?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">The Taylor series diverges, so the question of equality doesn't arise</button>
+      <button class="quiz-choice" data-correct="true">The Taylor series is identically 0, but f(x) ≠ 0 for every x ≠ 0</button>
+      <button class="quiz-choice" data-correct="false">The Taylor series equals f(x) exactly on some small interval around 0</button>
+      <button class="quiz-choice" data-correct="false">f is not actually differentiable at 0, so it has no Taylor series</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Every derivative at 0 is 0, so the series is trivially 0 everywhere — while f itself is nonzero away from 0, so the series never equals f except at the single point 0.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why doesn't this example contradict Taylor's Theorem from Lesson 9?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because Taylor's Theorem only applies to polynomials</button>
+      <button class="quiz-choice" data-correct="true">Because the theorem only supplies a formula for the remainder — it doesn't guarantee the remainder shrinks to 0, and here it provably doesn't</button>
+      <button class="quiz-choice" data-correct="false">Because f is not infinitely differentiable at 0</button>
+      <button class="quiz-choice" data-correct="false">Because Rolle's Theorem fails for this f</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Taylor's Theorem always gives an exact remainder formula; whether that remainder vanishes as n grows is a separate question the theorem does not answer, and here it does not vanish.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="analytic">
+    <p class="quiz-prompt">4. Fill in the blank: e<sup>−1/x²</sup> is infinitely differentiable at 0 but not ___ at 0.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Being C^∞ does not imply analytic — this function is the standard example separating the two properties.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="zero">
+    <p class="quiz-prompt">5. Fill in the blank: every derivative of e<sup>−1/x²</sup> at x = 0 equals ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The Lemma forces every derivative at 0 to vanish, making the Taylor series identically 0.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: Abbott's <em>Understanding Analysis</em>, Section 6.6 (Epilogue and exercises), discusses e<sup>−1/x²</sup> as the standard example of a C^∞-but-not-analytic function.</p>
+
+  <p class="ask-teacher">Stuck on why the derivatives of e<sup>−1/x²</sup> at nearby points aren't uniformly bounded the way eˣ's are? Ask your teacher — that's what I'm here for. Next up: leaving the real line behind — metric spaces, where distance itself becomes the object of study.</p>
+
+  <footer class="lesson-footer">STEM+ · Real Analysis B · Lesson 10 of the course sequence</footer>
+</div>

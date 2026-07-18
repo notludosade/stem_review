@@ -1,0 +1,106 @@
+<meta charset="UTF-8">
+<title>Lesson 8: Term-by-Term Differentiation and Integration — STEM+</title>
+<link rel="stylesheet" href="../../../assets/style.css">
+<script src="../../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Real Analysis B · Unit 2 · Lesson 8</span>
+  <h1>Term-by-Term Differentiation and Integration</h1>
+  <p class="subtitle">Calculus BC differentiated and integrated power series term by term as a computational shortcut. This lesson proves the shortcut is exactly correct — and along the way, uncovers what a power series's coefficients really are.</p>
+  <p class="nav-links"><a href="0007-uniform-convergence-of-power-series.html" class="nav-prev">← Lesson 7</a> <a href="0009-taylor-series-and-analytic-functions.html" class="nav-next">Lesson 9 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <div class="box">
+    <span class="box-label">Lemma — Differentiating Preserves the Radius of Convergence</span>
+    If f(x) = Σaₙ(x−c)ⁿ has radius of convergence R, then the term-by-term differentiated series Σn·aₙ(x−c)ⁿ⁻¹ also has radius of convergence R.
+  </div>
+
+  <div class="box">
+    <span class="box-label">Proof</span>
+    Fix any r &lt; R and choose r' with r &lt; r' &lt; R. Since Σaₙr'ⁿ converges absolutely, its terms go to 0, hence are bounded: |aₙ|r'ⁿ ≤ M for all n. Let q = r/r' &lt; 1. Then |n·aₙ·rⁿ⁻¹| = (|aₙ|r'ⁿ) · n·(r/r')ⁿ⁻¹ / r' ≤ (M/r')·n·qⁿ⁻¹. The series Σn·qⁿ⁻¹ converges by the Ratio Test (Real Analysis A): the ratio of consecutive terms is (n+1)qⁿ/(n·qⁿ⁻¹) = q·(n+1)/n → q &lt; 1. So by the Comparison Test, Σ|n·aₙ·rⁿ⁻¹| converges — the differentiated series converges absolutely for every r &lt; R, so its radius is at least R. Conversely, for n ≥ 1, |aₙrⁿ| = (r/n)·|n·aₙ·rⁿ⁻¹| ≤ r·|n·aₙ·rⁿ⁻¹|, so absolute convergence of the differentiated series at r forces absolute convergence of the original series there too — the differentiated series's radius is at most R as well. Both directions together give exactly R. ∎
+  </div>
+
+  <div class="box">
+    <span class="box-label">Theorem — Term-by-Term Differentiation and Integration</span>
+    Let f(x) = Σaₙ(x−c)ⁿ have radius of convergence R &gt; 0. Then f is differentiable on (c−R, c+R), with f′(x) = Σn·aₙ(x−c)ⁿ⁻¹, and for any [a,b] ⊆ (c−R, c+R), ∫ₐᵇ f(x) dx = Σaₙ∫ₐᵇ(x−c)ⁿ dx — the series can be differentiated and integrated term by term throughout its radius of convergence.
+  </div>
+
+  <div class="box">
+    <span class="box-label">Proof sketch</span>
+    Fix x ∈ (c−R, c+R) and choose r with |x − c| &lt; r &lt; R. By the Lemma, the differentiated series has the same radius R, so by Lesson 7 both Σaₙ(t−c)ⁿ and its term-by-term derivative Σn·aₙ(t−c)ⁿ⁻¹ converge uniformly on [c−r, c+r]. Let sₙ be the partial sums of f; then (sₙ′) converges uniformly on [c−r, c+r] to the derivative series, and (sₙ(c)) converges trivially (sₙ(c) = a₀ for every n). By the Differentiable Limit Theorem (Unit 1, Lesson 5), f is differentiable on [c−r, c+r] with f′ equal to the derivative series — and x was an arbitrary point of (c−R, c+R), so this holds throughout. For integration: since Σaₙ(x−c)ⁿ already converges uniformly on any [a,b] ⊆ (c−R, c+R) by Lesson 7, the Uniform Convergence and Integration theorem (Unit 1, Lesson 4) applies directly to the partial sums, giving term-by-term integration with no extra work. ∎
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why this reveals what the coefficients aₙ really are</span>
+    Applying the differentiation half of the theorem repeatedly: f′(x) = Σn·aₙ(x−c)ⁿ⁻¹, f″(x) = Σn(n−1)aₙ(x−c)ⁿ⁻², and in general f<sup>(k)</sup>(x) = Σn(n−1)⋯(n−k+1)aₙ(x−c)ⁿ⁻ᵏ — each differentiation preserves the radius R by the Lemma, so f is infinitely differentiable throughout (c−R, c+R). Evaluating f<sup>(k)</sup> at x = c kills every term except n = k (every lower power of (x−c) is already differentiated away, every higher power still has a factor of (x−c) that vanishes at x=c), leaving f<sup>(k)</sup>(c) = k!·aₖ. So aₖ = f<sup>(k)</sup>(c)/k! — the coefficients of a power series are forced to be exactly its own Taylor coefficients at the center. This is not a coincidence to be checked case by case; it's a direct consequence of term-by-term differentiation being valid at all.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Example: differentiating the geometric series</span>
+    f(x) = Σ<sub>n=0</sub><sup>∞</sup> xⁿ = 1/(1−x) has R = 1. Term-by-term differentiation gives f′(x) = Σ<sub>n=1</sub><sup>∞</sup> n·xⁿ⁻¹, which by the theorem must equal the ordinary derivative of 1/(1−x), namely 1/(1−x)². So Σ<sub>n=1</sub><sup>∞</sup> n·xⁿ⁻¹ = 1/(1−x)² for |x| &lt; 1 — an identity for a whole new series, obtained with no extra convergence work beyond this lesson's theorem.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What does the Lemma establish about differentiating a power series term by term?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">The radius of convergence always shrinks by a factor of the derivative</button>
+      <button class="quiz-choice" data-correct="true">The differentiated series has exactly the same radius of convergence R as the original</button>
+      <button class="quiz-choice" data-correct="false">The differentiated series never converges</button>
+      <button class="quiz-choice" data-correct="false">The radius of convergence becomes infinite</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Both directions of the comparison in the proof show the differentiated series converges absolutely exactly when the original does, for the same radius R.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Which two Unit 1 theorems does the proof of term-by-term differentiation combine?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">The Weierstrass M-Test and the Bolzano-Weierstrass Theorem</button>
+      <button class="quiz-choice" data-correct="true">Uniform convergence on compact subintervals (Lesson 7) and the Differentiable Limit Theorem (Unit 1, Lesson 5)</button>
+      <button class="quiz-choice" data-correct="false">The Cauchy Criterion for Integrability and the Mean Value Theorem alone</button>
+      <button class="quiz-choice" data-correct="false">The Intermediate Value Theorem and the Extreme Value Theorem</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Lesson 7 supplies uniform convergence of both the series and its derivative series on a compact subinterval, exactly the hypothesis the Differentiable Limit Theorem needs.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. What does f<sup>(k)</sup>(c) = k!·aₖ reveal about a power series's coefficients?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">That the coefficients are arbitrary and unrelated to the function's derivatives</button>
+      <button class="quiz-choice" data-correct="true">That the coefficients are forced to equal the function's own Taylor coefficients at the center</button>
+      <button class="quiz-choice" data-correct="false">That every power series has all coefficients equal to 0</button>
+      <button class="quiz-choice" data-correct="false">That k! must divide every coefficient aₖ</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Since term-by-term differentiation is valid, evaluating the k-th derivative at the center isolates aₖ exactly as k!·aₖ, forcing aₖ = f^(k)(c)/k!.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="same">
+    <p class="quiz-prompt">4. Fill in the blank: differentiating a power series term by term produces a new series with the ___ radius of convergence as the original.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The Lemma proves the differentiated series's radius equals the original's radius exactly.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="infinitely">
+    <p class="quiz-prompt">5. Fill in the blank: because differentiation can be repeated arbitrarily, a power series is ___ differentiable throughout its radius of convergence.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Since the radius never shrinks under differentiation, the process can be repeated forever, making the sum function infinitely (C^∞) differentiable.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: Abbott's <em>Understanding Analysis</em>, Section 6.5, proves term-by-term differentiation and integration of power series, including the radius-preservation lemma.</p>
+
+  <p class="ask-teacher">Stuck on why evaluating f<sup>(k)</sup> at x=c kills every term except n=k? Ask your teacher — that's what I'm here for. Next up: turning aₖ = f<sup>(k)</sup>(c)/k! around — building a series directly from a function's derivatives, and asking whether it actually converges back to that function.</p>
+
+  <footer class="lesson-footer">STEM+ · Real Analysis B · Lesson 8 of the course sequence</footer>
+</div>

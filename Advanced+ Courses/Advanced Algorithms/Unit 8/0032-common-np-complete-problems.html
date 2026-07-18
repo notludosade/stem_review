@@ -1,0 +1,116 @@
+<meta charset="UTF-8">
+<title>Lesson 32: Common NP-Complete Problems — STEM+</title>
+<link rel="stylesheet" href="../../../assets/style.css">
+<script src="../../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Advanced Algorithms · Unit 8 · Lesson 32</span>
+  <h1>Common NP-Complete Problems</h1>
+  <p class="subtitle">Cook-Levin proved SAT is NP-complete directly, from the definition of NP itself. Every problem in this lesson is proven NP-complete the easier way — a short reduction from SAT, 3-SAT, or another problem already known to be NP-complete.</p>
+  <p class="nav-links"><a href="0031-np-completeness-and-cook-levin.html" class="nav-prev">← Lesson 31</a> <a href="0033-approximation-algorithms.html" class="nav-next">Lesson 33 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Lesson 31 established SAT (and 3-SAT) as NP-complete via Cook-Levin's direct construction. This lesson chains outward from that seed: 3-SAT ≤ₚ Independent Set, Independent Set ≤ₚ Vertex Cover (already shown in Lesson 30), Hamiltonian Cycle is NP-complete by a separate reduction from 3-SAT, and — the problem this course has been building toward since Lesson 19 — the traveling salesman problem is NP-complete via a short reduction from Hamiltonian Cycle.</p>
+
+  <h2>3-SAT ≤ₚ Independent Set</h2>
+  <div class="box">
+    <span class="box-label">The construction</span>
+    Given a 3-SAT formula with k clauses, build a graph with one triangle of 3 vertices per clause (one vertex per literal in that clause), plus an edge between any two vertices representing a literal and its negation (e.g. x₁ in one clause's triangle and ¬x₁ in another's). Claim: the formula is satisfiable exactly when this graph has an independent set of size k.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why this reduction is correct</span>
+    An independent set can contain at most one vertex per triangle (any two vertices within a triangle are connected), so a size-k independent set must pick exactly one literal per clause — satisfying that clause. The cross-triangle edges between a literal and its negation prevent the independent set from picking contradictory truth values for the same variable across different clauses. So a size-k independent set corresponds exactly to choosing one true literal per clause with no variable assigned inconsistently — precisely a satisfying assignment. Since Independent Set is trivially in NP (a candidate set is a certificate, checkable in polynomial time by confirming no two chosen vertices are adjacent), and 3-SAT is NP-hard, this reduction makes Independent Set NP-complete too.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Vertex Cover is NP-complete "for free," by transitivity</span>
+    Lesson 30 showed Independent Set ≤ₚ Vertex Cover. Reductions chain: since every NP problem reduces to Independent Set (Independent Set is now known NP-hard), and Independent Set reduces to Vertex Cover, every NP problem reduces to Vertex Cover too — making Vertex Cover NP-hard, and (since a candidate cover is a trivially checkable certificate) NP-complete. No new construction was needed; transitivity of reductions did the entire proof.
+  </div>
+
+  <h2>Hamiltonian Cycle</h2>
+  <div class="box">
+    <span class="box-label">Statement (proof cited, not reproduced)</span>
+    Given a graph G, does it contain a cycle visiting every vertex exactly once? Hamiltonian Cycle is NP-complete, via a reduction from 3-SAT that's more involved than the Independent Set construction above (it builds elaborate per-variable and per-clause "gadget" subgraphs) — see the citation below for the full construction.
+  </div>
+
+  <h2>The traveling salesman problem, finally proven NP-complete</h2>
+  <div class="box">
+    <span class="box-label">Hamiltonian Cycle ≤ₚ TSP (decision version)</span>
+    Given a graph G=(V,E) (a Hamiltonian Cycle instance), build a complete weighted graph on the same vertices: edge weight 1 if the edge is in E, weight 2 if it isn't. Ask the TSP decision question: is there a tour visiting every vertex with total weight ≤ |V|? Since |V| edges are traversed in any tour, a tour of weight exactly |V| must use only weight-1 edges — meaning it only uses edges of the original graph G, exactly a Hamiltonian cycle in G. A tour using even one weight-2 edge costs at least |V|+1. So a tour of weight ≤ |V| exists exactly when G has a Hamiltonian cycle.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">This is Lesson 19's promised answer</span>
+    Lesson 19 introduced bitmask DP for TSP, noting it was one of Unit 8's "canonical NP-hard problems," with the precise reason deferred to this lesson. That reason is exactly the reduction above: Hamiltonian Cycle (already NP-complete, via 3-SAT) reduces to TSP's decision version in polynomial time (the weight-assignment step touches every edge once, so it's O(|V|²) for a complete graph), and TSP is in NP (a proposed tour is a certificate, checkable in O(|V|) time by summing its edge weights) — making TSP NP-complete. Bitmask DP's Θ(n²·2ⁿ) runtime was never in tension with this: it's still exponential, just a better exponential than brute force's Θ(n!).
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Other well-known NP-complete problems (stated, not proven here)</span>
+    <strong>Subset Sum</strong> (does some subset of a set of integers sum to exactly a target value?) reduces from 3-SAT via a clever digit-encoding construction. <strong>Graph Coloring</strong> (can a graph's vertices be colored with k colors so no edge joins two same-colored vertices?) reduces from 3-SAT for any k≥3. Both follow the same pattern as everything above: pick a problem already known NP-complete, and reduce it into the new problem in polynomial time.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. In the 3-SAT ≤ₚ Independent Set reduction, why can an independent set contain at most one vertex from any single clause's triangle?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because triangles are excluded from independent sets by definition.</button>
+      <button class="quiz-choice" data-correct="true">Because every pair of vertices within a triangle is connected by an edge, and an independent set can never contain two adjacent vertices.</button>
+      <button class="quiz-choice" data-correct="false">Because each triangle represents only one possible literal, not three.</button>
+      <button class="quiz-choice" data-correct="false">Because independent sets are always limited to exactly one vertex total.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Triangle edges force at most one vertex per clause to be selected, which is exactly what makes each selected vertex correspond to one satisfied literal per clause.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why does Vertex Cover become NP-complete "for free" once Independent Set is shown NP-complete?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because Vertex Cover and Independent Set are exactly the same problem restated.</button>
+      <button class="quiz-choice" data-correct="true">Because reductions chain transitively: every NP problem already reduces to Independent Set, and Independent Set reduces to Vertex Cover, so every NP problem reduces to Vertex Cover too.</button>
+      <button class="quiz-choice" data-correct="false">Because Vertex Cover was proven NP-complete directly by Cook and Levin.</button>
+      <button class="quiz-choice" data-correct="false">Because Vertex Cover is not actually in NP, so the question is meaningless.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Transitivity of reductions is precisely what lets a single new reduction (Independent Set to Vertex Cover) inherit NP-hardness from Independent Set's already-established hardness.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. In the Hamiltonian Cycle ≤ₚ TSP reduction, why does a tour of total weight exactly |V| correspond precisely to a Hamiltonian cycle in the original graph?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because every tour in the complete graph automatically has weight |V|, regardless of which edges it uses.</button>
+      <button class="quiz-choice" data-correct="true">Because a tour uses exactly |V| edges, so weight exactly |V| is only possible if every edge used has weight 1 — meaning every edge belongs to the original graph G.</button>
+      <button class="quiz-choice" data-correct="false">Because weight-2 edges are removed entirely from the constructed complete graph.</button>
+      <button class="quiz-choice" data-correct="false">Because |V| is always equal to the number of edges in G.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Since |V| edges are always traversed, hitting exactly weight |V| forces every single edge used to be weight 1, i.e. an edge that actually exists in G.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="transitive|transitivity">
+    <p class="quiz-prompt">4. Fill in the blank: chaining A ≤ₚ B and B ≤ₚ C to conclude A ≤ₚ C relies on the ___ of polynomial-time reductions.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Transitivity is exactly what let Vertex Cover inherit NP-hardness without a fresh from-scratch construction.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="Hamiltonian Cycle|Hamiltonian cycle">
+    <p class="quiz-prompt">5. Fill in the blank: TSP's decision version is proven NP-complete by a polynomial-time reduction from ___, using a 1-vs-2 edge weight trick.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>This is exactly the reduction Lesson 19 deferred — the precise reason TSP has no known polynomial-time algorithm.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: CLRS, Chapter 34.5, "NP-completeness proofs," covers Vertex Cover, Hamiltonian Cycle, and TSP's NP-completeness proofs (including the full Hamiltonian Cycle gadget construction omitted here) in complete detail.</p>
+
+  <p class="ask-teacher">Want to trace the 3-SAT-to-Independent-Set construction by hand on a small 2-clause formula, or work through the Subset Sum reduction's digit-encoding trick? Ask your teacher — that's what I'm here for. Next up: if a problem is NP-hard, what can still be salvaged — approximation algorithms that trade exactness for guaranteed speed.</p>
+
+  <footer class="lesson-footer">STEM+ · Advanced Algorithms · Lesson 32 of the course sequence</footer>
+</div>

@@ -1,0 +1,104 @@
+<meta charset="UTF-8">
+<title>Lesson 11: The Cut Property — STEM+</title>
+<link rel="stylesheet" href="../../../assets/style.css">
+<script src="../../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Advanced Algorithms · Unit 3 · Lesson 11</span>
+  <h1>The Cut Property</h1>
+  <p class="subtitle">One theorem about graph cuts proves Kruskal's and Prim's correct simultaneously, even though the two algorithms don't look like they're doing the same thing at all.</p>
+  <p class="nav-links"><a href="0010-kruskals-and-prims.html" class="nav-prev">← Lesson 10</a> <a href="0012-huffman-coding.html" class="nav-next">Lesson 12 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>A <strong>cut</strong> of a graph is a partition of its vertices into two nonempty sets S and V−S. An edge <strong>crosses</strong> the cut if it has one endpoint in each set. The cut property is a single statement about cuts and minimum spanning trees that, once proved, immediately certifies both Kruskal's and Prim's algorithms as correct — because both algorithms, at every step, are doing nothing more than repeatedly applying this one property.</p>
+
+  <h2>The theorem</h2>
+  <div class="box">
+    <span class="box-label">Theorem — the cut property</span>
+    For any cut (S, V−S) of a connected weighted graph, if edge e is the unique minimum-weight edge crossing that cut, then e belongs to every minimum spanning tree of the graph.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Proof — by exchange argument (Lesson 9's technique, reapplied)</span>
+    Suppose for contradiction that some MST T does not contain e. Adding e to T creates exactly one cycle (T is a spanning tree, so adding any edge not already in it closes exactly one cycle). Since e crosses the cut (S, V−S), and the cycle it creates must cross back, that cycle contains at least one <em>other</em> edge f that also crosses the cut (a cycle crossing a partition must cross it an even number of times, so at least twice — once via e). Since e is the unique minimum-weight edge crossing the cut, weight(f) &gt; weight(e). Remove f and keep e: T′ = T − f + e is still a spanning tree (removing f breaks the cycle back into a tree, and e keeps it connected), and weight(T′) = weight(T) − weight(f) + weight(e) &lt; weight(T). This contradicts T being minimum. So e must be in every MST after all.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">How Kruskal's algorithm is just repeated application of this theorem</span>
+    When Kruskal's algorithm considers the next edge e (sorted by weight, ascending) and finds find(u) ≠ find(v), let S be u's current connected component in the partially-built forest. Every edge considered so far either was rejected (both endpoints already in the same component) or added (crossing some earlier cut); e is the minimum-weight edge among all edges not yet considered, and it crosses the cut (S, V−S) — so it is, at this moment, the minimum-weight edge crossing that cut among remaining candidates, satisfying the cut property's hypothesis (ties are handled by an arbitrary but fixed tie-break, which the proof accommodates by considering e "a" minimum edge rather than requiring strict uniqueness). The cut property guarantees e belongs to some MST, so adding it is always safe.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">How Prim's algorithm is the same theorem from the other side</span>
+    At every step of Prim's algorithm, let S be the set of visited vertices and V−S the rest. Prim's picks the minimum-weight edge crossing exactly this cut (S, V−S) by construction. That is a direct, literal instance of the cut property's hypothesis — Prim's algorithm doesn't need a separate correctness proof at all; it's reading the cut property off a differently-shaped cut (visited vs. unvisited) than Kruskal's does (one connected component vs. the rest), and drawing the identical conclusion each time.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why one theorem unifies two very different-looking algorithms</span>
+    Kruskal's and Prim's look unrelated — one sorts all edges globally and grows a forest, the other grows a single tree greedily from one starting vertex — but the cut property shows they're both just choosing, at each step, a cut and then taking its minimum crossing edge. The only difference is <em>which</em> cut each algorithm happens to look at on a given step. This is exactly the kind of unifying structural insight this course is built to surface: two algorithms that seem to require two separate correctness arguments turn out to need only one, once you find the right level of abstraction.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What does the cut property state?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Every edge in a graph must cross at least one cut.</button>
+      <button class="quiz-choice" data-correct="true">The unique minimum-weight edge crossing any cut must belong to every minimum spanning tree.</button>
+      <button class="quiz-choice" data-correct="false">A graph has exactly one minimum spanning tree if and only if it has no cuts.</button>
+      <button class="quiz-choice" data-correct="false">Removing the minimum-weight edge from a cut always disconnects the graph.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The cut property is specifically about the minimum-weight edge crossing a given cut being forced into every MST, which is the fact both Kruskal's and Prim's exploit at every step.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. In the cut property's proof, why does swapping f for e strictly decrease the spanning tree's weight?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because f is always the heaviest edge in the whole graph.</button>
+      <button class="quiz-choice" data-correct="true">Because f is some other edge crossing the same cut, and e was assumed to be the unique minimum-weight edge crossing it, so weight(f) &gt; weight(e).</button>
+      <button class="quiz-choice" data-correct="false">Because removing any edge from a spanning tree always decreases its total weight.</button>
+      <button class="quiz-choice" data-correct="false">Because e and f must have equal weight by the cycle-closing argument.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The uniqueness of e as the minimum crossing edge is exactly what forces weight(f) &gt; weight(e), which is what makes the swap strictly improve the tree and produce the needed contradiction.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why does Prim's algorithm not need its own separate correctness proof beyond the cut property?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because Prim's algorithm is only a heuristic and isn't actually claimed to be optimal.</button>
+      <button class="quiz-choice" data-correct="true">Because at every step, Prim's literally picks the minimum-weight edge crossing the cut (visited, unvisited) — a direct instance of the cut property's hypothesis.</button>
+      <button class="quiz-choice" data-correct="false">Because Prim's algorithm never considers more than one cut in its entire execution.</button>
+      <button class="quiz-choice" data-correct="false">Because Prim's algorithm and Kruskal's algorithm always produce identical trees.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Prim's step is exactly "take the minimum edge crossing this particular cut," which the cut property already certifies as belonging to some MST — no additional argument is needed.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="cycle">
+    <p class="quiz-prompt">4. Fill in the blank: adding edge e to a spanning tree T that doesn't already contain it creates exactly one ___ , since T was already fully connected without it.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A spanning tree already connects every vertex with the minimum number of edges, so any extra edge necessarily closes exactly one cycle rather than zero or more than one.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="cut">
+    <p class="quiz-prompt">5. Fill in the blank: Kruskal's and Prim's differ only in which ___ they examine at each step — Kruskal's uses connected components, Prim's uses visited-versus-unvisited.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Both algorithms are repeatedly applying the same cut property; the only difference is the specific partition of vertices each one happens to be looking at on a given step.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: Kleinberg &amp; Tardos, <em>Algorithm Design</em>, Chapter 4.5, "The Minimum Spanning Tree Problem," proves the cut property in full and derives both Kruskal's and Prim's from it as corollaries.</p>
+
+  <p class="ask-teacher">Want to work through why the cut property still holds when there are weight ties (dropping the "unique" assumption)? Ask your teacher — that's what I'm here for. Next up: Huffman coding, a greedy algorithm for optimal prefix-free codes, proved correct with yet another exchange argument.</p>
+
+  <footer class="lesson-footer">STEM+ · Advanced Algorithms · Lesson 11 of the course sequence</footer>
+</div>

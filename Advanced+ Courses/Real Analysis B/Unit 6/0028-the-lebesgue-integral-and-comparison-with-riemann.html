@@ -1,0 +1,146 @@
+<meta charset="UTF-8">
+<title>Lesson 28: The Lebesgue Integral and Comparison with Riemann — STEM+</title>
+<link rel="stylesheet" href="../../../assets/style.css">
+<script src="../../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Real Analysis B · Unit 6 · Lesson 28</span>
+  <h1>The Lebesgue Integral and Comparison with Riemann</h1>
+  <p class="subtitle">Lesson 27 integrated nonnegative functions. This lesson allows negative values, pins down exactly which functions are integrable, and asks the reassuring question: does this new integral still agree with the old one, wherever the old one worked?</p>
+  <p class="nav-links"><a href="0027-the-lebesgue-integral-of-simple-functions.html" class="nav-prev">← Lesson 27</a> <a href="0029-the-monotone-convergence-theorem.html" class="nav-next">Lesson 29 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <div class="box">
+    <span class="box-label">Definition — Positive and Negative Parts</span>
+    For measurable f: ℝ → ℝ, let f⁺ = max(f,0) and f⁻ = max(−f,0). Both are nonnegative and measurable, f = f⁺ − f⁻, and |f| = f⁺ + f⁻.
+  </div>
+
+  <div class="box">
+    <span class="box-label">Definition — Lebesgue Integrability</span>
+    f is <strong>Lebesgue integrable</strong> on a measurable set E if ∫_Ef⁺dm &lt; ∞ and ∫_Ef⁻dm &lt; ∞. In that case, define
+    <br><br>
+    ∫_Ef dm = ∫_Ef⁺dm − ∫_Ef⁻dm.
+  </div>
+
+  <div class="box">
+    <span class="box-label">Lemma — Additivity Over a Domain Partition</span>
+    If g ≥ 0 is measurable and A is a measurable set, then ∫_Ag dm + ∫_{Aᶜ}g dm = ∫_ℝ g dm.
+  </div>
+
+  <div class="box">
+    <span class="box-label">Proof</span>
+    (≤): let φ, ψ be simple with φ ≤ g·χ_A and ψ ≤ g·χ_{Aᶜ}. Then φ+ψ is simple, and φ+ψ ≤ g everywhere (on A, φ+ψ = φ ≤ g, since ψ=0 is forced off Aᶜ... more precisely, since φ≤gχ_A means φ=0 off A, and ψ≤gχ_{Aᶜ} means ψ=0 off Aᶜ, so on A: φ+ψ=φ≤g, and on Aᶜ: φ+ψ=ψ≤g). By Lesson 27's simple-function linearity, ∫φdm+∫ψdm = ∫(φ+ψ)dm ≤ ∫gdm, since φ+ψ is a valid candidate in the supremum defining ∫gdm. Taking the supremum over all such φ, then over all such ψ, gives ∫_Agdm + ∫_{Aᶜ}gdm ≤ ∫gdm.
+    <br><br>
+    (≥): let χ be any simple function with χ ≤ g. Set φ = χ·χ_A and ψ = χ·χ_{Aᶜ}, both simple, with φ ≤ g·χ_A and ψ ≤ g·χ_{Aᶜ} (since χ≤g), and χ = φ+ψ (A, Aᶜ partition the domain). By simple-function linearity, ∫χdm = ∫φdm + ∫ψdm ≤ ∫_Agdm + ∫_{Aᶜ}gdm, since φ, ψ are valid candidates in their respective suprema. This holds for every simple χ ≤ g, so taking the supremum over χ gives ∫gdm ≤ ∫_Agdm + ∫_{Aᶜ}gdm.
+    <br><br>
+    Combining both directions gives equality. ∎
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why this lemma is the elementary case, not the hard one</span>
+    This lemma splits <em>one</em> function g over a partition of the domain into A and Aᶜ — both directions reduce directly to gluing or restricting simple functions, which Lesson 27 already handles exactly. The genuinely hard fact — that ∫(f+g)dm = ∫fdm + ∫gdm for two <em>different</em> nonnegative measurable functions f and g over the same domain — cannot be proved this elementarily; it is a corollary of the Monotone Convergence Theorem, next lesson.
+  </div>
+
+  <div class="box">
+    <span class="box-label">Theorem — Integrability via |f|, and the Triangle Inequality</span>
+    f is Lebesgue integrable on E if and only if ∫_E|f|dm &lt; ∞, and in that case |∫_Ef dm| ≤ ∫_E|f| dm.
+  </div>
+
+  <div class="box">
+    <span class="box-label">Proof</span>
+    Let A = {x∈E : f(x)≥0}, so f⁺ = |f|·χ_A and f⁻ = |f|·χ_{Aᶜ} exactly (pointwise: on A, f⁺=f=|f| and f⁻=0; on Aᶜ, f⁺=0 and f⁻=−f=|f|). By the lemma above (applied with g=|f|·χ_E), ∫_Ef⁺dm + ∫_Ef⁻dm = ∫_E|f|dm.
+    <br><br>
+    If f is integrable, both terms on the left are finite, so their sum ∫_E|f|dm is finite. Conversely, if ∫_E|f|dm &lt; ∞, then since 0≤f⁺≤|f| and 0≤f⁻≤|f|, monotonicity (Lesson 27) gives ∫_Ef⁺dm ≤ ∫_E|f|dm &lt; ∞ and likewise for f⁻, so both are finite and f is integrable.
+    <br><br>
+    For the triangle inequality: |∫_Efdm| = |∫_Ef⁺dm − ∫_Ef⁻dm| ≤ ∫_Ef⁺dm + ∫_Ef⁻dm = ∫_E|f|dm. ∎
+  </div>
+
+  <div class="box">
+    <span class="box-label">Lemma — Bounded Functions on Finite-Measure Sets Are Integrable</span>
+    If f is measurable, |f| ≤ M on E, and m(E) &lt; ∞, then f is Lebesgue integrable on E.
+  </div>
+
+  <div class="box">
+    <span class="box-label">Proof</span>
+    The constant function M·χ_E is simple with ∫_E(M·χ_E)dm = M·m(E) &lt; ∞ (finite since m(E)&lt;∞). Since |f| ≤ M·χ_E on E, monotonicity gives ∫_E|f|dm ≤ M·m(E) &lt; ∞. By the theorem above, f is integrable. ∎
+  </div>
+
+  <div class="box">
+    <span class="box-label">Theorem (stated) — Riemann Integrable Implies Lebesgue Integrable, with Equal Value</span>
+    If f is Riemann integrable on [a,b], then f is Lebesgue integrable on [a,b], and ∫_a^b f(x)dx (Riemann) = ∫_{[a,b]} f dm (Lebesgue).
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why this theorem is stated here but proved next lesson</span>
+    Riemann integrability makes f bounded, and [a,b] has finite measure b−a, so the lemma above already shows f is Lebesgue integrable — that much is immediate. Equality of the two integral values, though, comes from sandwiching f between increasing lower step functions φₙ and decreasing upper step functions ψₙ built from a refining sequence of partitions (exactly Lesson 23's interval-splitting idea, now applied function-wise), and passing to the limit inside the integral. That limit-passing step — "the integral of an increasing limit is the limit of the integrals" — is precisely the Monotone Convergence Theorem, proved next lesson. The full proof resumes immediately once that theorem is in hand.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why this comparison matters going forward</span>
+    Every Riemann integral computed in prerequisite calculus, and every Riemann integral proved in Real Analysis A, remains valid and unchanged under the Lebesgue integral — nothing is lost. What's gained is everything Riemann integration couldn't reach: Dirichlet's function (Lesson 27), and, starting next lesson, integrals of limits that Riemann's framework couldn't even discuss.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. When is f Lebesgue integrable on E?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">When f is continuous on E</button>
+      <button class="quiz-choice" data-correct="true">When ∫_Ef⁺dm and ∫_Ef⁻dm are both finite</button>
+      <button class="quiz-choice" data-correct="false">When f is simple</button>
+      <button class="quiz-choice" data-correct="false">When m(E) = 0</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Both the positive and negative parts of f must have finite integral for f itself to be integrable.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why doesn't the Domain-Partition Additivity Lemma need the Monotone Convergence Theorem?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because it only applies to simple functions</button>
+      <button class="quiz-choice" data-correct="true">Because it splits one function g over A and Aᶜ, reducing directly to gluing or restricting simple functions already handled in Lesson 27</button>
+      <button class="quiz-choice" data-correct="false">Because A and Aᶜ always have measure zero</button>
+      <button class="quiz-choice" data-correct="false">Because it assumes g is bounded</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Splitting a single function over a domain partition is elementary; combining two different functions over the same domain is the harder fact needing MCT.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. What does the Riemann-Lebesgue comparison theorem's proof still need, deferred to next lesson?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">The Heine-Borel Theorem</button>
+      <button class="quiz-choice" data-correct="true">Passing a limit inside the integral for an increasing sequence of step functions — the Monotone Convergence Theorem</button>
+      <button class="quiz-choice" data-correct="false">The Vitali set construction</button>
+      <button class="quiz-choice" data-correct="false">The Implicit Function Theorem</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The step-function sandwich reduces the comparison to exactly the limit-interchange the Monotone Convergence Theorem supplies.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="finite">
+    <p class="quiz-prompt">4. Fill in the blank: a measurable function bounded by M on a set of ___ measure is automatically Lebesgue integrable.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Boundedness plus finite measure bounds ∫|f|dm by M times that finite measure.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="monotone">
+    <p class="quiz-prompt">5. Fill in the blank: the theorem needed to finish the Riemann-Lebesgue comparison proof is the ___ Convergence Theorem.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The Monotone Convergence Theorem is exactly what lets the limit of the step-function integrals equal the integral of the limit.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: Royden and Fitzpatrick's <em>Real Analysis</em>, Chapter 4, defines the general Lebesgue integral and proves the Riemann comparison theorem in full once the Monotone Convergence Theorem is available.</p>
+
+  <p class="ask-teacher">Stuck on why the domain-partition lemma's proof works without the harder machinery the next lesson introduces? Ask your teacher — that's what I'm here for. Next up: the Monotone Convergence Theorem — the tool that finally lets integrals pass through limits.</p>
+
+  <footer class="lesson-footer">STEM+ · Real Analysis B · Lesson 28 of the course sequence</footer>
+</div>

@@ -1,0 +1,134 @@
+<meta charset="UTF-8">
+<title>Lesson 25: Disjoint Set Union, Proved — STEM+</title>
+<link rel="stylesheet" href="../../../assets/style.css">
+<script src="../../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Advanced Algorithms · Unit 6 · Lesson 25</span>
+  <h1>Disjoint Set Union, Proved</h1>
+  <p class="subtitle">Kruskal's algorithm (Lesson 10) and Tarjan's SCC algorithm (Lesson 15) both leaned on Union-Find being "amortized near-constant time" without proof. This lesson pays that debt, using the potential method Lesson 4 introduced.</p>
+  <p class="nav-links"><a href="0024-avl-rotations.html" class="nav-prev">← Lesson 24</a> <a href="0026-tries.html" class="nav-next">Lesson 26 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>CP2+ Lesson 21 ("Union-Find &amp; Redundant Connection") introduced <code class="inline-code">find</code> and <code class="inline-code">union</code> with path compression, and stated informally that both run in "nearly O(1)" — technically O(α(n)), the inverse Ackermann function — without proving it. This course has since leaned on that claim twice more: Lesson 10 used it to justify Kruskal's Θ(E log E) runtime, and Lesson 15 cited it (by analogy) when explaining why Tarjan's SCC algorithm only needs O(1) extra bookkeeping per vertex. This lesson finally proves it, building on the potential method from Lesson 4.</p>
+
+  <h2>The structure — a forest of trees</h2>
+  <div class="box">
+    <span class="box-label">Representation</span>
+    Union-Find represents a collection of disjoint sets as a forest: each element has a parent pointer, and each tree's root is that set's representative. find(x) walks parent pointers from x up to its root. union(x, y) links the two roots together, merging their trees. Without any care about <em>which</em> root gets attached to which, a long sequence of unpredictable unions can produce a tree that's really a chain — depth Θ(n), exactly the same failure mode an unbalanced BST has (Lesson 24) — making find degrade to Θ(n).
+  </div>
+
+  <h2>Optimization 1: union by rank — a real, complete proof</h2>
+  <div class="box">
+    <span class="box-label">The technique</span>
+    Track a rank(v) for each tree root, initialized to 0. When union merges two trees, attach the lower-rank root as a child of the higher-rank root (breaking ties arbitrarily, incrementing the surviving root's rank by 1 in that case only). This never lets a tree's height exceed its root's rank.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Theorem: any tree with root rank r has at least 2ʳ nodes</span>
+    Proof by induction on the number of unions performed. Base case: a tree of rank 0 is a single node, and 2⁰ = 1. Inductive step: a tree's rank only increases from r to r+1 at the moment two trees of equal rank r are merged (any other merge keeps the surviving root's rank unchanged, per the rule above). By the inductive hypothesis, each of those two rank-r trees already has at least 2ʳ nodes, so the merged rank-(r+1) tree has at least 2ʳ + 2ʳ = 2ʳ⁺¹ nodes. By induction, the claim holds for every rank ever reached. This is the identical "count nodes, get an exponential lower bound on size as a function of a height-like quantity" argument AVL trees used (Lesson 24) — there it bounded height via balance factor, here it bounds height via rank.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Corollary: union by rank alone bounds every find to O(log n)</span>
+    Since a tree's root has rank r only if the tree has at least 2ʳ nodes, and the whole structure has at most n nodes total, no root can ever have rank exceeding log₂n. A second fact — that rank strictly increases along any parent-pointer path from a node to its root, since union by rank never attaches a higher-rank tree under a lower-rank one — means a path from any node to its root passes through strictly increasing ranks, so its length is bounded by the maximum rank, O(log n). Union by rank alone, with no path compression at all, already guarantees every single find call costs O(log n) worst case — not just amortized.
+  </div>
+
+  <h2>Optimization 2: path compression</h2>
+  <div class="box">
+    <span class="box-label">The technique</span>
+<pre class="code-block"><code>function find(x):
+    if parent[x] != x:
+        parent[x] = find(parent[x])   // point x directly at the root
+    return parent[x]
+
+function union(x, y):
+    rootX = find(x)
+    rootY = find(y)
+    if rootX == rootY: return
+    if rank[rootX] < rank[rootY]: parent[rootX] = rootY
+    elif rank[rootX] > rank[rootY]: parent[rootY] = rootX
+    else: parent[rootY] = rootX; rank[rootX] += 1</code></pre>
+    Every node visited on the way up during a find gets relinked to point directly at the root, flattening the path for every future find through any of those nodes — exactly the kind of self-improving structure CP2+ Lesson 21 used without formally justifying its cost.
+  </div>
+
+  <h2>Combined: the inverse Ackermann bound</h2>
+  <div class="box">
+    <span class="box-label">Theorem (Tarjan, 1975)</span>
+    With both union by rank and path compression, a sequence of m find/union operations on n elements costs O(m·α(n)) total — an amortized O(α(n)) per operation, where α is the inverse Ackermann function: the number of times the (extraordinarily fast-growing) Ackermann function must be applied to reach a value ≥ n. α(n) grows so slowly that α(n) ≤ 4 for any n that could ever physically be represented in memory — making O(α(n)) "practically O(1)" in every real sense, even though it is not a true constant.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why this is a genuinely harder proof, and where it comes from</span>
+    The full proof extends the potential method from Lesson 4, but with a potential function that groups ranks into O(α(n)) tiers using a tower-of-twos-style grouping, then argues that potential can only decrease a bounded number of times within each tier before a node's ancestor rank jumps to the next one — giving an O(α(n)) amortized charge per operation instead of Lesson 4's simpler telescoping argument. This is Tarjan's original 1975 proof, and it runs several pages of careful bookkeeping — long enough that we state the theorem and its proof shape here rather than reproduce all of it. The full derivation is in <a href="https://cp-algorithms.com/data_structures/disjoint_set_union.html">CP-Algorithms' Disjoint Set Union article</a> (the same source CP2+ Lesson 21 already pointed to) and in CLRS Chapter 21.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Why this closes the loop on three earlier forward-references</span>
+    Lesson 10's Kruskal's algorithm needed "near-constant" same-set queries to keep its total runtime at Θ(E log E) rather than Θ(E·V); this theorem is exactly what makes that arithmetic hold. Lesson 15's comparison of Tarjan's SCC algorithm to Lesson 4's amortized-analysis vocabulary was pointing at this same family of proof — a data structure whose *individual* operations look expensive in the worst case, but whose amortized cost across any sequence is nearly constant, certified by a potential function.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. Why does union by rank alone (without path compression) guarantee every tree has height O(log n)?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because union by rank always produces a perfectly balanced, complete tree.</button>
+      <button class="quiz-choice" data-correct="true">Because a tree with root rank r is proven (by induction) to contain at least 2ʳ nodes, and rank strictly increases from child to root along any path — bounding both max rank and path length by O(log n).</button>
+      <button class="quiz-choice" data-correct="false">Because rank counts the exact number of nodes in the tree directly.</button>
+      <button class="quiz-choice" data-correct="false">Because union by rank forbids merging any two trees of different sizes.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The exponential node-count lower bound as a function of rank, combined with strictly increasing ranks along any root path, is exactly what bounds height logarithmically.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. What does path compression do during a find operation?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">It merges two entirely separate sets into one.</button>
+      <button class="quiz-choice" data-correct="true">It relinks every node visited on the way to the root so it points directly at the root, flattening the path for future finds.</button>
+      <button class="quiz-choice" data-correct="false">It deletes nodes that haven't been queried recently.</button>
+      <button class="quiz-choice" data-correct="false">It recomputes every node's rank from scratch.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Path compression's entire benefit comes from shortening future paths by relinking visited nodes directly to the root during the current find.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why is α(n) (the inverse Ackermann function) described as "practically O(1)" even though it is not a true mathematical constant?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because α(n) is exactly equal to 1 for every value of n.</button>
+      <button class="quiz-choice" data-correct="true">Because α(n) grows so slowly that its value is at most 4 for any n that could ever be physically represented, even though it technically increases without bound as n grows arbitrarily.</button>
+      <button class="quiz-choice" data-correct="false">Because α(n) only applies to graphs with fewer than 10 vertices.</button>
+      <button class="quiz-choice" data-correct="false">Because Ackermann's function has never been rigorously defined.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Inverse Ackermann is unbounded in principle but grows so slowly that it never exceeds small single-digit values for any realistic input size.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="rank">
+    <p class="quiz-prompt">4. Fill in the blank: union by rank attaches the lower-___ tree's root as a child of the higher-___ tree's root, incrementing the surviving root's value only when the two are equal.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Rank is the height-like quantity union by rank uses to decide which root should become the parent.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="potential|potential function">
+    <p class="quiz-prompt">5. Fill in the blank: Tarjan's full inverse-Ackermann proof extends Lesson 4's ___ method, using a more intricate function that groups ranks into tiers rather than a single telescoping sum.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The same potential-method machinery from Lesson 4 underlies this proof, just with a more elaborate potential function than the dynamic array's.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: <a href="https://cp-algorithms.com/data_structures/disjoint_set_union.html">CP-Algorithms, "Disjoint Set Union"</a> gives the full inverse-Ackermann proof this lesson only sketched, and CLRS Chapter 21 covers the same material with the original tower-function grouping argument.</p>
+
+  <p class="ask-teacher">Want to work through why rank must strictly increase along any root path in more detail, or see a small example where path compression visibly flattens a chain? Ask your teacher — that's what I'm here for. Next up: tries, a tree structure specialized for storing and querying strings by shared prefix.</p>
+
+  <footer class="lesson-footer">STEM+ · Advanced Algorithms · Lesson 25 of the course sequence</footer>
+</div>
