@@ -59,6 +59,20 @@
   --code-bg: #f2efe8;
 }
 
+/* Difficulty-mood tiers: intro (lighter/happier) and advanced (darker/serious) courses
+   override --accent/--accent-soft so every existing accent-driven rule picks up the mood
+   for free. Core-tier courses are untouched and keep the default brown above. */
+.page[data-tier="intro"], .toc-item[data-tier="intro"] { --accent: #1f7a63; --accent-soft: #dcf1ea; }
+.page[data-tier="advanced"], .toc-item[data-tier="advanced"] { --accent: #3d3a7a; --accent-soft: #e5e3f7; }
+@media (prefers-color-scheme: dark) {
+  .page[data-tier="intro"], .toc-item[data-tier="intro"] { --accent: #6fd6b8; --accent-soft: #163229; }
+  .page[data-tier="advanced"], .toc-item[data-tier="advanced"] { --accent: #9c98e8; --accent-soft: #221f3d; }
+}
+:root[data-theme="dark"] .page[data-tier="intro"], :root[data-theme="dark"] .toc-item[data-tier="intro"] { --accent: #6fd6b8; --accent-soft: #163229; }
+:root[data-theme="dark"] .page[data-tier="advanced"], :root[data-theme="dark"] .toc-item[data-tier="advanced"] { --accent: #9c98e8; --accent-soft: #221f3d; }
+:root[data-theme="light"] .page[data-tier="intro"], :root[data-theme="light"] .toc-item[data-tier="intro"] { --accent: #1f7a63; --accent-soft: #dcf1ea; }
+:root[data-theme="light"] .page[data-tier="advanced"], :root[data-theme="light"] .toc-item[data-tier="advanced"] { --accent: #3d3a7a; --accent-soft: #e5e3f7; }
+
 * { box-sizing: border-box; }
 
 body {
@@ -426,6 +440,29 @@ footer.lesson-footer {
   margin: 1rem 0 2rem;
 }
 
+/* Unit accordions on course table-of-contents pages */
+details.unit-toc { margin: 2.2rem 0 0.8rem; }
+details.unit-toc > summary {
+  list-style: none;
+  cursor: pointer;
+  font-size: 1.35rem;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 0.3rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+details.unit-toc > summary::-webkit-details-marker { display: none; }
+details.unit-toc > summary::before {
+  content: "▸";
+  color: var(--accent);
+  font-size: 0.85em;
+  transition: transform 0.15s ease;
+}
+details.unit-toc[open] > summary::before { transform: rotate(90deg); }
+details.unit-toc > summary:hover { color: var(--accent); }
+details.unit-toc > .toc-list { margin-top: 0.8rem; margin-bottom: 0; }
+
 /* Code blocks (Computer Programming courses) */
 pre.code-block {
   font-family: "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
@@ -467,4 +504,6 @@ code.inline-code {
   body { padding: 0.5in; font-size: 12pt; background: #fff; color: #000; }
   .quiz, .ask-teacher, .nav-links { display: none; }
   a { color: #000; text-decoration: underline; }
+  details.unit-toc:not([open]) > :not(summary) { display: block !important; }
+  details.unit-toc > summary::before { display: none; }
 }
