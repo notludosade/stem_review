@@ -1,0 +1,181 @@
+<meta charset="UTF-8">
+<title>Unit 4 Test — Version A — Computer Programming Ethics — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/tests.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · Computer Programming Ethics · Unit 4 · Unit Test</span>
+  <h1>Unit 4 Test — Version A</h1>
+  <p class="subtitle">Transparency &amp; Honest Failure. 10 points across every lesson in this unit — 5 questions worth 1 point, 5 worth 1 point split across two parts. Score 90% or higher to clear this unit.</p>
+  <p class="nav-links"><a href="../index.html" class="nav-toc">← Course Contents</a> <a href="unit-test-b.html" class="nav-toc">Version B →</a></p>
+
+  <div data-test data-course="Computer Programming Ethics" data-unit="Unit 4" data-kind="unit_test" data-version="A">
+
+    <div class="quiz" data-test-item data-topic="Vague Error Messages">
+      <p class="quiz-prompt">1. A user gets only the message "Something went wrong. Please try again." after a failed action. What's the honest-failure problem with stopping there?</p>
+      <div class="quiz-choices">
+        <button class="quiz-choice" data-correct="true">It's honest that something failed, but leaves the user with no way to know if it was their mistake or the system's.</button>
+        <button class="quiz-choice" data-correct="false">It causes the request to run twice on the server.</button>
+        <button class="quiz-choice" data-correct="false">It bypasses the need for exception handling entirely.</button>
+        <button class="quiz-choice" data-correct="false">It automatically retries the action three times.</button>
+      </div>
+      <p class="quiz-feedback" hidden></p>
+      <p class="quiz-explain" hidden>An error can be truthful without being useful — a vague message clears the "don't lie" bar but fails the "give something actionable" bar this unit draws.</p>
+    </div>
+
+    <div class="quiz" data-test-item data-test-fill data-topic="Information Disclosure" data-answers="information disclosure">
+      <p class="quiz-prompt">2. Fill in the blank: revealing stack traces, database hostnames, or internal file paths to an end user or attacker is a security weakness known as ___ ___.</p>
+      <div class="quiz-fill-row">
+        <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      </div>
+      <p class="quiz-feedback" hidden></p>
+      <p class="quiz-explain" hidden>This sits under OWASP's broader "Security Misconfiguration" category — internal details that help an attacker understand and exploit a system.</p>
+    </div>
+
+    <div class="quiz" data-test-item data-topic="Reference ID Pattern">
+      <p class="quiz-prompt">3. A payment endpoint fails internally. Answer both parts about how to respond honestly and safely:</p>
+      <div class="quiz-part" data-part>
+        <p class="quiz-part-label">(a) Which response correctly balances honesty to the user with safety for the system?</p>
+        <div class="quiz-choices">
+          <button class="quiz-choice" data-correct="false">Return the full stack trace so the user can self-diagnose.</button>
+          <button class="quiz-choice" data-correct="true">Return a plain "we couldn't process that" message plus a reference ID, and log the full detail separately.</button>
+          <button class="quiz-choice" data-correct="false">Return only an HTTP 200 with an empty body, regardless of what happened.</button>
+          <button class="quiz-choice" data-correct="false">Silently retry the payment without telling the user anything.</button>
+        </div>
+      </div>
+      <div class="quiz-part" data-part data-answers="log|logs">
+        <p class="quiz-part-label">(b) Fill in the blank: the detailed technical error data itself should be written to a ___ that only the development team can access, not returned in the response.</p>
+        <div class="quiz-fill-row">
+          <input type="text" class="quiz-fill-input" aria-label="Your answer">
+        </div>
+      </div>
+      <p class="quiz-feedback" hidden></p>
+      <p class="quiz-explain" hidden>(a) A plain message plus a reference ID gives the user something honest and actionable without handing over internals. (b) The full technical detail belongs in a log the team can search, connected back to the user's report only through the reference ID.</p>
+    </div>
+
+    <div class="quiz" data-test-item data-topic="Log Access Risk">
+      <p class="quiz-prompt">4. Why is logging a raw exception object still risky, even though ordinary users never see server logs directly?</p>
+      <div class="quiz-choices">
+        <button class="quiz-choice" data-correct="true">Logs are a second copy of data with their own access list and retention policy, often less controlled than the primary database.</button>
+        <button class="quiz-choice" data-correct="false">Logging frameworks publish log files to the public internet by default.</button>
+        <button class="quiz-choice" data-correct="false">Logging always slows a running program down by a factor of ten.</button>
+        <button class="quiz-choice" data-correct="false">Most languages don't allow writing exception messages to a log at all.</button>
+      </div>
+      <p class="quiz-feedback" hidden></p>
+      <p class="quiz-explain" hidden>A log is a second data store with its own, often weaker, protections — the same "log leak" concern that applies to any second copy of sensitive data.</p>
+    </div>
+
+    <div class="quiz" data-test-item data-topic="Log Scrubbing">
+      <p class="quiz-prompt">5. A payment failure needs to be logged for later debugging. Answer both parts:</p>
+      <div class="quiz-part" data-part>
+        <p class="quiz-part-label">(a) Which is the safer logging approach?</p>
+        <div class="quiz-choices">
+          <button class="quiz-choice" data-correct="false">logger.error(f"Payment failed: {e}") using the raw exception directly</button>
+          <button class="quiz-choice" data-correct="true">logger.error("Payment failed", extra={"error_type": ..., "order_id": ..., "amount": ...})</button>
+          <button class="quiz-choice" data-correct="false">Skipping the log entirely so nothing is ever recorded</button>
+          <button class="quiz-choice" data-correct="false">Logging the customer's full card number so support can verify it quickly</button>
+        </div>
+      </div>
+      <div class="quiz-part" data-part data-answers="log scrubbing">
+        <p class="quiz-part-label">(b) Fill in the blank: deliberately removing or masking sensitive fields — passwords, tokens, card numbers — before a message is written to a log is called ___ ___.</p>
+        <div class="quiz-fill-row">
+          <input type="text" class="quiz-fill-input" aria-label="Your answer">
+        </div>
+      </div>
+      <p class="quiz-feedback" hidden></p>
+      <p class="quiz-explain" hidden>(a) Named fields chosen deliberately are more useful for debugging and safer than whatever the raw exception happens to contain. (b) This deliberate removal or masking of sensitive fields is log scrubbing.</p>
+    </div>
+
+    <div class="quiz" data-test-item data-topic="Structured Logging">
+      <p class="quiz-prompt">6. What security advantage does passing a dictionary of named fields to a logger have over building one long f-string sentence?</p>
+      <div class="quiz-choices">
+        <button class="quiz-choice" data-correct="true">It forces the developer to consciously choose exactly which fields are included.</button>
+        <button class="quiz-choice" data-correct="false">It makes the log file completely unreadable to anyone, including the team.</button>
+        <button class="quiz-choice" data-correct="false">It automatically deletes the log after 24 hours.</button>
+        <button class="quiz-choice" data-correct="false">It is the only format any logging library will accept.</button>
+      </div>
+      <p class="quiz-feedback" hidden></p>
+      <p class="quiz-explain" hidden>An f-string can silently absorb an entire object's contents; a dictionary of named fields makes each included piece of data explicit and deliberate.</p>
+    </div>
+
+    <div class="quiz" data-test-item data-topic="Fail-Closed vs Fail-Open">
+      <p class="quiz-prompt">7. Answer both parts about how a system should respond when a check it depends on can't run:</p>
+      <div class="quiz-part" data-part data-answers="fail-closed|fail closed|fail-secure">
+        <p class="quiz-part-label">(a) Fill in the blank: a system that defaults to the safer, more restrictive state when it hits an unresolved error is described as ___.</p>
+        <div class="quiz-fill-row">
+          <input type="text" class="quiz-fill-input" aria-label="Your answer">
+        </div>
+      </div>
+      <div class="quiz-part" data-part>
+        <p class="quiz-part-label">(b) Which code correctly implements a fail-closed permissions check?</p>
+        <div class="quiz-choices">
+          <button class="quiz-choice" data-correct="true">except ServiceUnavailable: return False — deny access when the check itself can't run</button>
+          <button class="quiz-choice" data-correct="false">except ServiceUnavailable: return True — let the user through</button>
+          <button class="quiz-choice" data-correct="false">except ServiceUnavailable: pass — ignore the exception and continue as if authorized</button>
+          <button class="quiz-choice" data-correct="false">except ServiceUnavailable: retry forever with no logging</button>
+        </div>
+      </div>
+      <p class="quiz-feedback" hidden></p>
+      <p class="quiz-explain" hidden>(a) A locked door failing this way is the canonical example — the safer, more restrictive default on an unresolved error. (b) Returning False on the exception path denies access rather than silently granting it during an outage.</p>
+    </div>
+
+    <div class="quiz" data-test-item data-topic="Fail-Open Risk">
+      <p class="quiz-prompt">8. Why is a fail-open default on a permissions check especially risky?</p>
+      <div class="quiz-choices">
+        <button class="quiz-choice" data-correct="true">The permissions service may be unavailable precisely because of an outage or an active attack — exactly when enforcement matters most.</button>
+        <button class="quiz-choice" data-correct="false">Fail-open code always takes longer to execute than fail-closed code.</button>
+        <button class="quiz-choice" data-correct="false">Programming languages forbid implementing fail-open behavior for permissions.</button>
+        <button class="quiz-choice" data-correct="false">It only affects logging output, not actual access.</button>
+      </div>
+      <p class="quiz-feedback" hidden></p>
+      <p class="quiz-explain" hidden>An outage and an active attack can happen at the same time, or one can cause the other — exactly when you'd want the check enforced most.</p>
+    </div>
+
+    <div class="quiz" data-test-item data-topic="Context-Dependent Failure Mode">
+      <p class="quiz-prompt">9. Fail-closed isn't automatically the more ethical choice in every situation. Answer both parts:</p>
+      <div class="quiz-part" data-part>
+        <p class="quiz-part-label">(a) Why are electronic building door locks deliberately designed to fail open during a power outage?</p>
+        <div class="quiz-choices">
+          <button class="quiz-choice" data-correct="true">Trapping people inside during an emergency is worse than a temporary security gap.</button>
+          <button class="quiz-choice" data-correct="false">Fail-closed locks are illegal in most jurisdictions.</button>
+          <button class="quiz-choice" data-correct="false">Power outages never happen while a building is occupied.</button>
+          <button class="quiz-choice" data-correct="false">Open locks use less electricity than closed ones.</button>
+        </div>
+      </div>
+      <div class="quiz-part" data-part data-answers="harm">
+        <p class="quiz-part-label">(b) Fill in the blank: choosing fail-open or fail-closed correctly requires reasoning about which failure mode does less ___ for the specific thing being guarded, not defaulting to one out of convenience.</p>
+        <div class="quiz-fill-row">
+          <input type="text" class="quiz-fill-input" aria-label="Your answer">
+        </div>
+      </div>
+      <p class="quiz-feedback" hidden></p>
+      <p class="quiz-explain" hidden>(a) A fire exit is the classic case for fail-open — safety during an emergency outweighs a temporary security gap. (b) The judgment call is about which failure mode does less harm, reasoned through deliberately rather than defaulted to.</p>
+    </div>
+
+    <div class="quiz" data-test-item data-topic="Honest Error Boundaries">
+      <p class="quiz-prompt">10. "Honest error messages" doesn't mean "unfiltered error messages." Answer both parts:</p>
+      <div class="quiz-part" data-part>
+        <p class="quiz-part-label">(a) Which of the following would violate the honesty requirement, even if it revealed zero technical detail?</p>
+        <div class="quiz-choices">
+          <button class="quiz-choice" data-correct="true">Returning a "success" response for a request that actually failed.</button>
+          <button class="quiz-choice" data-correct="false">Returning "We couldn't process that request" alongside a reference ID.</button>
+          <button class="quiz-choice" data-correct="false">Logging the full stack trace to a developer-only log.</button>
+          <button class="quiz-choice" data-correct="false">Declining to show the user a raw SQL query.</button>
+        </div>
+      </div>
+      <div class="quiz-part" data-part data-answers="detail">
+        <p class="quiz-part-label">(b) Fill in the blank: within the two boundaries of never claiming false success and never hiding that a failure happened, the amount of ___ shown to the user versus logged internally is a real design decision.</p>
+        <div class="quiz-fill-row">
+          <input type="text" class="quiz-fill-input" aria-label="Your answer">
+        </div>
+      </div>
+      <p class="quiz-feedback" hidden></p>
+      <p class="quiz-explain" hidden>(a) Claiming success on a failed request breaks honesty outright, regardless of how little or much technical detail is shown. (b) Everything within those two honesty boundaries is a design decision about how much detail to surface where.</p>
+    </div>
+
+    <p class="test-warning" data-test-warning hidden></p>
+    <button class="widget-btn" data-test-submit>Submit Test</button>
+    <div class="test-result" data-test-result hidden></div>
+  </div>
+
+  <footer class="lesson-footer">STEM+ · Computer Programming Ethics · Unit 4 Test — Version A</footer>
+</div>

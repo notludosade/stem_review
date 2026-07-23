@@ -1,0 +1,190 @@
+<meta charset="UTF-8">
+<title>Unit 6 Test — Version A — Computer Programming 2 — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/tests.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Computer Programming 2 · Unit 6 · Unit Test</span>
+  <h1>Unit 6 Test — Version A</h1>
+  <p class="subtitle">Memory Models. 10 points across every lesson in this unit — 5 questions worth 1 point, 5 worth 1 point split across two parts. Score 90% or higher to clear this unit.</p>
+  <p class="nav-links"><a href="../index.html" class="nav-toc">← Course Contents</a> <a href="unit-test-b.html" class="nav-toc">Version B →</a></p>
+
+  <div data-test data-course="Computer Programming 2" data-unit="Unit 6" data-kind="unit_test" data-version="A">
+
+    <div class="quiz" data-test-item data-topic="Stack Memory">
+      <p class="quiz-prompt">1. What happens to stack-allocated data when its function returns?</p>
+      <div class="quiz-choices">
+        <button class="quiz-choice" data-correct="false">It moves permanently onto the heap.</button>
+        <button class="quiz-choice" data-correct="true">It's automatically freed as the call frame pops, with no manual action needed.</button>
+        <button class="quiz-choice" data-correct="false">It must be manually deleted before the function is allowed to return.</button>
+        <button class="quiz-choice" data-correct="false">It stays valid forever, exactly like heap data.</button>
+      </div>
+      <p class="quiz-feedback" hidden></p>
+      <p class="quiz-explain" hidden>This automatic cleanup is the same call-stack behavior introduced back in Unit 4 — each frame is freed the instant it pops.</p>
+    </div>
+
+    <div class="quiz" data-test-item data-test-fill data-topic="Heap Memory" data-answers="heap">
+      <p class="quiz-prompt">2. Fill in the blank: data whose lifetime needs to outlive the function call that created it is allocated on the ___.</p>
+      <div class="quiz-fill-row">
+        <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      </div>
+      <p class="quiz-feedback" hidden></p>
+      <p class="quiz-explain" hidden>make_list's returned list, and heapValue's *p in C++, both need to survive past the function that created them — that's exactly what the heap is for.</p>
+    </div>
+
+    <div class="quiz" data-test-item data-topic="C++ Stack/Heap Choice">
+      <p class="quiz-prompt">3. In C++, what does <code class="inline-code">new int(5)</code> do that <code class="inline-code">int x = 5;</code> does not?</p>
+      <div class="quiz-choices">
+        <button class="quiz-choice" data-correct="false">It creates a variable that is destroyed automatically at the end of the current scope.</button>
+        <button class="quiz-choice" data-correct="true">It explicitly allocates the int on the heap, so it can outlive the current scope.</button>
+        <button class="quiz-choice" data-correct="false">It has no meaningful difference from a plain stack variable in C++.</button>
+        <button class="quiz-choice" data-correct="false">It only works when writing Python, Java, or JavaScript, not C++.</button>
+      </div>
+      <p class="quiz-feedback" hidden></p>
+      <p class="quiz-explain" hidden>C++ is the one language of the four that gives code a direct choice between stack and heap — new explicitly requests heap memory.</p>
+    </div>
+
+    <div class="quiz" data-test-item data-topic="Garbage Collection">
+      <p class="quiz-prompt">4. What does a garbage collector do?</p>
+      <div class="quiz-choices">
+        <button class="quiz-choice" data-correct="false">Deletes all variables at the start of every function call.</button>
+        <button class="quiz-choice" data-correct="false">Prevents a program from ever allocating heap memory in the first place.</button>
+        <button class="quiz-choice" data-correct="true">Automatically frees heap memory once nothing in the program can still reach it.</button>
+        <button class="quiz-choice" data-correct="false">Only runs once, at the very end of the program.</button>
+      </div>
+      <p class="quiz-feedback" hidden></p>
+      <p class="quiz-explain" hidden>This is what Python, Java, and JavaScript all do automatically — no delete or free call is required from the developer.</p>
+    </div>
+
+    <div class="quiz" data-test-item data-topic="Memory Leak">
+      <p class="quiz-prompt">5. What is a memory leak?</p>
+      <div class="quiz-choices">
+        <button class="quiz-choice" data-correct="false">Any variable declared on the stack instead of the heap.</button>
+        <button class="quiz-choice" data-correct="true">Heap memory that's become unreachable but was never freed, making it permanently unusable for the rest of the run.</button>
+        <button class="quiz-choice" data-correct="false">A program that simply runs somewhat slower than expected.</button>
+        <button class="quiz-choice" data-correct="false">A syntax error that stops a C++ program from compiling.</button>
+      </div>
+      <p class="quiz-feedback" hidden></p>
+      <p class="quiz-explain" hidden>makeAndLeak's array is exactly this — the pointer to it is gone the moment the function returns, but the memory itself was never released.</p>
+    </div>
+
+    <div class="quiz" data-test-item data-topic="Manual Memory Management in C++">
+      <p class="quiz-prompt">6. Given these two C++ functions:<br>
+      <code class="inline-code">void makeAndLeak() { int* data = new int[500000]; }</code><br>
+      <code class="inline-code">void makeAndFree() { int* data = new int[500000]; delete[] data; }</code><br>
+      answer both parts:</p>
+      <div class="quiz-part" data-part>
+        <p class="quiz-part-label">(a) Which function produces a memory leak?</p>
+        <div class="quiz-choices">
+          <button class="quiz-choice" data-correct="false">makeAndFree — since delete[] is called too early.</button>
+          <button class="quiz-choice" data-correct="false">Both — neither one ever frees its memory.</button>
+          <button class="quiz-choice" data-correct="false">Neither — C++ garbage collects both automatically.</button>
+          <button class="quiz-choice" data-correct="true">makeAndLeak — its heap memory is never freed after the pointer goes out of scope.</button>
+        </div>
+      </div>
+      <div class="quiz-part" data-part data-answers="delete">
+        <p class="quiz-part-label">(b) Fill in the blank: makeAndFree avoids the leak by calling ___[] to explicitly release the array.</p>
+        <div class="quiz-fill-row">
+          <input type="text" class="quiz-fill-input" aria-label="Your answer">
+        </div>
+      </div>
+      <p class="quiz-feedback" hidden></p>
+      <p class="quiz-explain" hidden>(a) makeAndLeak's data pointer disappears when the function returns, but the array it pointed to is never released — permanently unreachable, permanently allocated. (b) delete[] is the array form of C++'s explicit free; a single new requires exactly one matching delete or delete[].</p>
+    </div>
+
+    <div class="quiz" data-test-item data-topic="Pointers">
+      <p class="quiz-prompt">7. Given this C++ code:<br>
+      <code class="inline-code">int x = 10; int* p = &amp;x; *p = 50;</code><br>
+      answer both parts:</p>
+      <div class="quiz-part" data-part>
+        <p class="quiz-part-label">(a) After this code runs, what is the value of x?</p>
+        <div class="quiz-choices">
+          <button class="quiz-choice" data-correct="false">10</button>
+          <button class="quiz-choice" data-correct="true">50</button>
+          <button class="quiz-choice" data-correct="false">0</button>
+          <button class="quiz-choice" data-correct="false">It's impossible to know without more information.</button>
+        </div>
+      </div>
+      <div class="quiz-part" data-part data-answers="address">
+        <p class="quiz-part-label">(b) Fill in the blank: p is a pointer whose value is the memory ___ of x.</p>
+        <div class="quiz-fill-row">
+          <input type="text" class="quiz-fill-input" aria-label="Your answer">
+        </div>
+      </div>
+      <p class="quiz-feedback" hidden></p>
+      <p class="quiz-explain" hidden>(a) &amp;x takes x's address into p, and *p = 50 dereferences p to write through it — changing x itself to 50. (b) A pointer's entire value is the address of the thing it points to.</p>
+    </div>
+
+    <div class="quiz" data-test-item data-topic="References">
+      <p class="quiz-prompt">8. Given this Python code:<br>
+      <code class="inline-code">a = [1, 2, 3]; b = a; b.append(9)</code><br>
+      answer both parts:</p>
+      <div class="quiz-part" data-part>
+        <p class="quiz-part-label">(a) What does print(a) show after this code runs?</p>
+        <div class="quiz-choices">
+          <button class="quiz-choice" data-correct="false">[1, 2, 3]</button>
+          <button class="quiz-choice" data-correct="true">[1, 2, 3, 9]</button>
+          <button class="quiz-choice" data-correct="false">[9]</button>
+          <button class="quiz-choice" data-correct="false">This code raises an error.</button>
+        </div>
+      </div>
+      <div class="quiz-part" data-part data-answers="reference">
+        <p class="quiz-part-label">(b) Fill in the blank: this happens because b and a both ___ the same underlying list object, rather than b being a separate copy.</p>
+        <div class="quiz-fill-row">
+          <input type="text" class="quiz-fill-input" aria-label="Your answer">
+        </div>
+      </div>
+      <p class="quiz-feedback" hidden></p>
+      <p class="quiz-explain" hidden>(a) There's only one list object in memory; a and b are just two names pointing at it, so appending through either name is visible through both. (b) Every object assignment in Python, Java, and JavaScript works this way — the underlying reference behavior is always on.</p>
+    </div>
+
+    <div class="quiz" data-test-item data-topic="Dangling Pointers and Use-After-Free">
+      <p class="quiz-prompt">9. Given this C++ function:<br>
+      <code class="inline-code">int* makeDangling() { int value = 42; return &amp;value; }</code><br>
+      answer both parts:</p>
+      <div class="quiz-part" data-part>
+        <p class="quiz-part-label">(a) What's wrong with makeDangling?</p>
+        <div class="quiz-choices">
+          <button class="quiz-choice" data-correct="true">It returns the address of a stack variable that's destroyed the instant the function returns, producing a dangling pointer.</button>
+          <button class="quiz-choice" data-correct="false">It leaks heap memory that was allocated with new.</button>
+          <button class="quiz-choice" data-correct="false">It fails to compile because value is never used.</button>
+          <button class="quiz-choice" data-correct="false">Nothing — this is a safe, correct way to return a value in C++.</button>
+        </div>
+      </div>
+      <div class="quiz-part" data-part data-answers="use">
+        <p class="quiz-part-label">(b) Fill in the blank: reading through a pointer to memory that has already been freed is called ___-after-free.</p>
+        <div class="quiz-fill-row">
+          <input type="text" class="quiz-fill-input" aria-label="Your answer">
+        </div>
+      </div>
+      <p class="quiz-feedback" hidden></p>
+      <p class="quiz-explain" hidden>(a) value lives on the stack and is gone the moment the function returns, but the returned pointer still holds its old address. (b) Use-after-free is one of the most notorious bug categories in C++ specifically because it often corrupts data silently instead of crashing right away.</p>
+    </div>
+
+    <div class="quiz" data-test-item data-topic="Smart Pointers and RAII">
+      <p class="quiz-prompt">10. Answer both parts about modern C++ memory management:</p>
+      <div class="quiz-part" data-part>
+        <p class="quiz-part-label">(a) What does a std::unique_ptr do automatically that a raw pointer does not?</p>
+        <div class="quiz-choices">
+          <button class="quiz-choice" data-correct="false">Prevents the program from ever allocating heap memory.</button>
+          <button class="quiz-choice" data-correct="false">Allows unlimited copies to share ownership with no tracking at all.</button>
+          <button class="quiz-choice" data-correct="true">Frees its owned heap memory automatically the instant it goes out of scope.</button>
+          <button class="quiz-choice" data-correct="false">Makes dereferencing permanently impossible.</button>
+        </div>
+      </div>
+      <div class="quiz-part" data-part data-answers="RAII">
+        <p class="quiz-part-label">(b) Fill in the blank: tying a resource's cleanup to an object's own automatic scope, the pattern smart pointers use, is called ___.</p>
+        <div class="quiz-fill-row">
+          <input type="text" class="quiz-fill-input" aria-label="Your answer">
+        </div>
+      </div>
+      <p class="quiz-feedback" hidden></p>
+      <p class="quiz-explain" hidden>(a) unique_ptr borrows the stack's "cleans up on its own" guarantee and applies it to heap memory, with no explicit delete required. (b) RAII — Resource Acquisition Is Initialization — is how modern C++ gets close to garbage-collector convenience while keeping deterministic cleanup.</p>
+    </div>
+
+    <p class="test-warning" data-test-warning hidden></p>
+    <button class="widget-btn" data-test-submit>Submit Test</button>
+    <div class="test-result" data-test-result hidden></div>
+  </div>
+
+  <footer class="lesson-footer">STEM+ · Computer Programming 2 · Unit 6 Test — Version A</footer>
+</div>
