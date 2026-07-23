@@ -1,0 +1,181 @@
+<meta charset="UTF-8">
+<title>Unit 2 Test — Version A — Advanced Algorithms — STEM+</title>
+<link rel="stylesheet" href="../../../assets/style.css">
+<script src="../../../assets/tests.js" defer></script>
+<div class="page" data-tier="advanced">
+  <span class="kicker">STEM+ · Advanced Algorithms · Unit 2 · Unit Test</span>
+  <h1>Unit 2 Test — Version A</h1>
+  <p class="subtitle">Divide and Conquer. 10 points across every lesson in this unit — 5 questions worth 1 point, 5 worth 1 point split across two parts. Score 90% or higher to clear this unit.</p>
+  <p class="nav-links"><a href="../index.html" class="nav-toc">← Course Contents</a> <a href="unit-test-b.html" class="nav-toc">Version B →</a></p>
+
+  <div data-test data-course="Advanced Algorithms" data-unit="Unit 2" data-kind="unit_test" data-version="A">
+
+    <div class="quiz" data-test-item data-topic="Strong Induction — Why Strong, Not Ordinary">
+      <p class="quiz-prompt">1. A divide-and-conquer algorithm recursively calls itself on subproblems of size n/3 and 2n/3. Why does proving it correct require strong induction rather than ordinary induction?</p>
+      <div class="quiz-choices">
+        <button class="quiz-choice" data-correct="false">Because ordinary induction cannot handle recursive algorithms at all.</button>
+        <button class="quiz-choice" data-correct="true">Because the recursive calls are not on size n−1, so the inductive hypothesis must cover every smaller size at once, which only strong induction provides.</button>
+        <button class="quiz-choice" data-correct="false">Because strong induction is only valid for arrays of even length.</button>
+        <button class="quiz-choice" data-correct="false">Because the algorithm has no base case.</button>
+      </div>
+      <p class="quiz-feedback" hidden></p>
+      <p class="quiz-explain" hidden>Ordinary induction's single "assume n−1" step can't reach a jump to n/3 or 2n/3, so the hypothesis needs to hold for every smaller size simultaneously — exactly what strong induction supplies.</p>
+    </div>
+
+    <div class="quiz" data-test-item data-topic="Counting Inversions — Cross-Inversions">
+      <p class="quiz-prompt">2. An inversion is a pair of indices i &lt; j with arr[i] &gt; arr[j]. When splitting an array into halves L and R for counting inversions, which kind of inversion can ONLY be detected during the merge step, not by either recursive call alone?</p>
+      <div class="quiz-choices">
+        <button class="quiz-choice" data-correct="false">Inversions where both indices are in L.</button>
+        <button class="quiz-choice" data-correct="false">Inversions where both indices are in R.</button>
+        <button class="quiz-choice" data-correct="true">Inversions where one index is in L and the other in R.</button>
+        <button class="quiz-choice" data-correct="false">Inversions where the two indices are adjacent.</button>
+      </div>
+      <p class="quiz-feedback" hidden></p>
+      <p class="quiz-explain" hidden>Recursion on L only ever compares indices inside L, and likewise for R — a pair straddling both halves is structurally invisible to either recursive call, which is exactly why the merge step must detect it.</p>
+    </div>
+
+    <div class="quiz" data-test-item data-topic="Median of Medians — Groups of Five">
+      <p class="quiz-prompt">3. In median-of-medians, why does dividing the array into groups of 5 (rather than groups of 3) produce a usable worst-case guarantee?</p>
+      <div class="quiz-choices">
+        <button class="quiz-choice" data-correct="true">Groups of 5 guarantee at least roughly 3n/10 elements are provably on each side of the pivot, a guarantee groups of 3 are too small to provide.</button>
+        <button class="quiz-choice" data-correct="false">Groups of 5 are required because 5 is a prime number.</button>
+        <button class="quiz-choice" data-correct="false">Groups of 5 make every group already sorted before the algorithm starts.</button>
+        <button class="quiz-choice" data-correct="false">Groups of 5 eliminate the need for any recursive call.</button>
+      </div>
+      <p class="quiz-feedback" hidden></p>
+      <p class="quiz-explain" hidden>The 3n/10 fraction comes directly from each "median ≤ pivot" group contributing 3 elements ≤ pivot (the median plus 2 below it); groups of 3 give too weak a fraction to force the recursion to shrink fast enough.</p>
+    </div>
+
+    <div class="quiz" data-test-item data-topic="Strassen's Algorithm — Multiplication Count">
+      <p class="quiz-prompt">4. Why does the naive divide-and-conquer approach to matrix multiplication (splitting into 4 blocks, 8 recursive multiplications) fail to beat schoolbook Θ(n³)?</p>
+      <div class="quiz-choices">
+        <button class="quiz-choice" data-correct="true">Because T(n) = 8T(n/2) + Θ(n²) solves to Θ(n³) by the Master Theorem, since n^(log₂8) = n³ dominates the Θ(n²) combine step.</button>
+        <button class="quiz-choice" data-correct="false">Because block matrices cannot be multiplied recursively.</button>
+        <button class="quiz-choice" data-correct="false">Because 8 recursive calls exceed a hard limit the Master Theorem imposes.</button>
+        <button class="quiz-choice" data-correct="false">Because the naive approach produces an incorrect result.</button>
+      </div>
+      <p class="quiz-feedback" hidden></p>
+      <p class="quiz-explain" hidden>With a=8, b=2, n^(log_b a) = n³ exactly matches schoolbook's exponent, so the naive 8-multiplication block recursion offers no asymptotic improvement — the whole point of Strassen's trick is cutting the count to 7.</p>
+    </div>
+
+    <div class="quiz" data-test-item data-test-fill data-topic="Correctness: Recursive Calls vs Combine Step" data-answers="combine|merge">
+      <p class="quiz-prompt">5. Fill in the blank: strong induction alone proves the recursive calls trustworthy; the non-recursive ___ step (like merge, or mergeAndCount) always needs its own separate, direct correctness argument.</p>
+      <div class="quiz-fill-row">
+        <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      </div>
+      <p class="quiz-feedback" hidden></p>
+      <p class="quiz-explain" hidden>Induction covers "trust the subproblems"; it says nothing about whether the code stitching subproblem answers together is itself correct — that needs a separate, direct proof.</p>
+    </div>
+
+    <div class="quiz" data-test-item data-topic="Strong Induction — Proof Structure">
+      <p class="quiz-prompt">6. A divide-and-conquer algorithm finds the maximum of an array by splitting it into two halves, recursively finding each half's maximum, then returning the larger of the two. Answer both parts:</p>
+      <div class="quiz-part" data-part>
+        <p class="quiz-part-label">(a) What is the correct base case for this proof?</p>
+        <div class="quiz-choices">
+          <button class="quiz-choice" data-correct="true">Array of size 1 — the algorithm returns that single element directly, which is trivially the maximum.</button>
+          <button class="quiz-choice" data-correct="false">Array of size 0, since an empty array's maximum is defined to be 0.</button>
+          <button class="quiz-choice" data-correct="false">Any array size, since recursion never needs a base case for this algorithm.</button>
+          <button class="quiz-choice" data-correct="false">The largest possible array size, since correctness must be checked from the top down.</button>
+        </div>
+      </div>
+      <div class="quiz-part" data-part data-answers="n">
+        <p class="quiz-part-label">(b) Fill in the blank: the inductive step must directly show that taking the larger of the two recursively-found half-maxima equals the true maximum of the whole ___-element array.</p>
+        <div class="quiz-fill-row">
+          <input type="text" class="quiz-fill-input" aria-label="Your answer">
+        </div>
+      </div>
+      <p class="quiz-feedback" hidden></p>
+      <p class="quiz-explain" hidden>(a) A size-1 array has an unambiguous maximum (the element itself) and needs no recursive call, making it the natural base case. (b) Every element of the array is in exactly one of the two halves, and each half's recursively-found value is (by hypothesis) that half's true maximum, so the larger of the two must be the true maximum of the whole n-element array — the direct argument the combine step needs.</p>
+    </div>
+
+    <div class="quiz" data-test-item data-topic="Counting Inversions — Tracing the Merge">
+      <p class="quiz-prompt">7. During mergeAndCount on left half L = [2, 5, 8] and right half R = [1, 3, 9] (both already sorted from the recursive calls), answer both parts:</p>
+      <div class="quiz-part" data-part data-answers="5">
+        <p class="quiz-part-label">(a) Fill in the blank: the total number of cross-inversions detected while merging L and R is ___.</p>
+        <div class="quiz-fill-row">
+          <input type="text" class="quiz-fill-input" aria-label="Your answer">
+        </div>
+      </div>
+      <div class="quiz-part" data-part>
+        <p class="quiz-part-label">(b) Why does adding this cross-inversion bookkeeping to the merge step not change the algorithm's overall asymptotic runtime?</p>
+        <div class="quiz-choices">
+          <button class="quiz-choice" data-correct="false">Because merging always takes O(1) time regardless of array size.</button>
+          <button class="quiz-choice" data-correct="true">Because the extra bookkeeping per comparison is O(1), so the recurrence stays T(n) = 2T(n/2) + Θ(n), unchanged from plain merge sort.</button>
+          <button class="quiz-choice" data-correct="false">Because cross-inversions are only ever counted at the deepest level of recursion.</button>
+          <button class="quiz-choice" data-correct="false">Because sorted halves never contain any cross-inversions.</button>
+        </div>
+      </div>
+      <p class="quiz-feedback" hidden></p>
+      <p class="quiz-explain" hidden>(a) Tracing the merge: R[0]=1 &lt; L[0]=2, so count += (3−0) = 3 remaining L elements; later R[1]=3 &lt; L[1]=5, so count += (3−1) = 2. Total = 3 + 2 = 5, matching the direct pair count: 2&gt;1, 5&gt;1, 8&gt;1, 5&gt;3, 8&gt;3. (b) Adding an O(1) increment per comparison doesn't change the recurrence's asymptotic shape, so it stays Θ(n log n) exactly as in plain merge sort.</p>
+    </div>
+
+    <div class="quiz" data-test-item data-topic="Median of Medians — Solving the Recurrence">
+      <p class="quiz-prompt">8. The recurrence T(n) ≤ T(n/5) + T(7n/10) + Θ(n) for median-of-medians is verified by guessing T(n) ≤ cn. Answer both parts:</p>
+      <div class="quiz-part" data-part>
+        <p class="quiz-part-label">(a) What must be true of the coefficient 1/5 + 7/10 for the substitution proof to succeed?</p>
+        <div class="quiz-choices">
+          <button class="quiz-choice" data-correct="false">It must equal exactly 1, so the recursive terms exactly cancel the Θ(n) term.</button>
+          <button class="quiz-choice" data-correct="true">It must be strictly less than 1, so the recursive contribution c·(9/10)n leaves room to absorb the Θ(n) term into a larger constant c.</button>
+          <button class="quiz-choice" data-correct="false">It must be greater than 1, guaranteeing the recursion diverges.</button>
+          <button class="quiz-choice" data-correct="false">It has no effect on whether the substitution proof succeeds.</button>
+        </div>
+      </div>
+      <div class="quiz-part" data-part data-answers="n">
+        <p class="quiz-part-label">(b) Fill in the blank: since 1/5 + 7/10 = 9/10 &lt; 1, the substitution method confirms T(n) = O(___) — linear time despite two recursive calls.</p>
+        <div class="quiz-fill-row">
+          <input type="text" class="quiz-fill-input" aria-label="Your answer">
+        </div>
+      </div>
+      <p class="quiz-feedback" hidden></p>
+      <p class="quiz-explain" hidden>(a) The coefficient 9/10 &lt; 1 is exactly what lets a sufficiently large constant c absorb the added Θ(n) term, confirming the guess T(n) ≤ cn holds for all n. (b) This matches the lesson's conclusion: worst-case linear-time selection, with no randomness required.</p>
+    </div>
+
+    <div class="quiz" data-test-item data-topic="Strassen's Algorithm — Runtime &amp; Master Theorem">
+      <p class="quiz-prompt">9. Strassen's algorithm gives T(n) = 7T(n/2) + Θ(n²). Answer both parts:</p>
+      <div class="quiz-part" data-part>
+        <p class="quiz-part-label">(a) What is n^(log₂7), the exponent that determines the algorithm's overall runtime?</p>
+        <div class="quiz-choices">
+          <button class="quiz-choice" data-correct="false">n³ exactly, same as schoolbook.</button>
+          <button class="quiz-choice" data-correct="true">Approximately n^2.807, strictly between n² and n³.</button>
+          <button class="quiz-choice" data-correct="false">n² exactly, matching the combine step.</button>
+          <button class="quiz-choice" data-correct="false">n^3.5</button>
+        </div>
+      </div>
+      <div class="quiz-part" data-part data-answers="1">
+        <p class="quiz-part-label">(b) Fill in the blank: since f(n)=n² is polynomially smaller than n^(log₂7)≈n^2.807, this is Master Theorem Case ___, giving T(n) = Θ(n^(log₂7)).</p>
+        <div class="quiz-fill-row">
+          <input type="text" class="quiz-fill-input" aria-label="Your answer">
+        </div>
+      </div>
+      <p class="quiz-feedback" hidden></p>
+      <p class="quiz-explain" hidden>(a) log₂(7) ≈ 2.807, since 2^2.807 ≈ 7 — strictly less than 3, which is exactly why Strassen's algorithm beats schoolbook. (b) Case 1 (leaves dominate) applies because f(n)=n² grows polynomially slower than n^(log₂7).</p>
+    </div>
+
+    <div class="quiz" data-test-item data-topic="Counting Inversions — Correctness Structure">
+      <p class="quiz-prompt">10. In the correctness proof for countInversions, every inversion in the array falls into exactly one of three categories. Answer both parts:</p>
+      <div class="quiz-part" data-part>
+        <p class="quiz-part-label">(a) What are the three categories, and why do they cover every possible inversion?</p>
+        <div class="quiz-choices">
+          <button class="quiz-choice" data-correct="true">Within L, within R, or crossing between them — because every pair of indices (i, j) with i &lt; j must fall into one of the two halves or straddle both.</button>
+          <button class="quiz-choice" data-correct="false">Only within L and within R — cross-inversions do not exist.</button>
+          <button class="quiz-choice" data-correct="false">Ascending, descending, and equal pairs.</button>
+          <button class="quiz-choice" data-correct="false">Sorted, unsorted, and partially sorted pairs.</button>
+        </div>
+      </div>
+      <div class="quiz-part" data-part data-answers="crosscount|cross count">
+        <p class="quiz-part-label">(b) Fill in the blank: the total inversion count returned is countL + countR + ___, matching the sum computed by mergeAndCount.</p>
+        <div class="quiz-fill-row">
+          <input type="text" class="quiz-fill-input" aria-label="Your answer">
+        </div>
+      </div>
+      <p class="quiz-feedback" hidden></p>
+      <p class="quiz-explain" hidden>(a) Any pair of indices either both lie in L, both lie in R, or one lies in each — an exhaustive partition of every possible inversion. (b) countInversions returns exactly countL + countR + crossCount, the sum of all three categories.</p>
+    </div>
+
+    <p class="test-warning" data-test-warning hidden></p>
+    <button class="widget-btn" data-test-submit>Submit Test</button>
+    <div class="test-result" data-test-result hidden></div>
+  </div>
+
+  <footer class="lesson-footer">STEM+ · Advanced Algorithms · Unit 2 Test — Version A</footer>
+</div>

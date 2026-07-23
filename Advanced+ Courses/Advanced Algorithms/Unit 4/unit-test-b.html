@@ -1,0 +1,181 @@
+<meta charset="UTF-8">
+<title>Unit 4 Test — Version B — Advanced Algorithms — STEM+</title>
+<link rel="stylesheet" href="../../../assets/style.css">
+<script src="../../../assets/tests.js" defer></script>
+<div class="page" data-tier="advanced">
+  <span class="kicker">STEM+ · Advanced Algorithms · Unit 4 · Unit Test</span>
+  <h1>Unit 4 Test — Version B</h1>
+  <p class="subtitle">Advanced Graph Algorithms. 10 points across every lesson in this unit — 5 questions worth 1 point, 5 worth 1 point split across two parts. Score 90% or higher to clear this unit.</p>
+  <p class="nav-links"><a href="../index.html" class="nav-toc">← Course Contents</a> <a href="unit-test-a.html" class="nav-toc">← Version A</a></p>
+
+  <div data-test data-course="Advanced Algorithms" data-unit="Unit 4" data-kind="unit_test" data-version="B">
+
+    <div class="quiz" data-test-item data-topic="Bellman-Ford Shortest Path Trace">
+      <p class="quiz-prompt">1. Consider the graph with vertices S, M, N and edges S→M (weight 3), S→N (weight 9), M→N (weight −5). What is the correct shortest-path distance from S to N?</p>
+      <div class="quiz-choices">
+        <button class="quiz-choice" data-correct="false">9</button>
+        <button class="quiz-choice" data-correct="false">3</button>
+        <button class="quiz-choice" data-correct="false">−5</button>
+        <button class="quiz-choice" data-correct="true">−2</button>
+      </div>
+      <p class="quiz-feedback" hidden></p>
+      <p class="quiz-explain" hidden>The path S→M→N costs 3 + (−5) = −2, cheaper than the direct S→N edge (9) — the same kind of negative-edge shortcut that makes Dijkstra's algorithm unreliable and requires Bellman-Ford instead.</p>
+    </div>
+
+    <div class="quiz" data-test-item data-topic="Bellman-Ford Rounds &amp; Negative Cycles">
+      <p class="quiz-prompt">2. A graph has 8 vertices and no negative-weight cycle. Answer both parts about running Bellman-Ford on it:</p>
+      <div class="quiz-part" data-part>
+        <p class="quiz-part-label">(a) How many rounds of edge relaxation are guaranteed to make every shortest-path distance correct?</p>
+        <div class="quiz-choices">
+          <button class="quiz-choice" data-correct="false">8</button>
+          <button class="quiz-choice" data-correct="false">6</button>
+          <button class="quiz-choice" data-correct="false">14</button>
+          <button class="quiz-choice" data-correct="true">7</button>
+        </div>
+      </div>
+      <div class="quiz-part" data-part data-answers="negative cycle|negative-weight cycle">
+        <p class="quiz-part-label">(b) Fill in the blank: if an additional relaxation pass after those rounds still updates some distance, the graph must contain a reachable ___ that makes shortest path undefined.</p>
+        <div class="quiz-fill-row">
+          <input type="text" class="quiz-fill-input" aria-label="Your answer">
+        </div>
+      </div>
+      <p class="quiz-feedback" hidden></p>
+      <p class="quiz-explain" hidden>(a) With no negative cycle, every shortest path uses at most |V|−1 = 7 edges, and each full relaxation round guarantees one more edge's worth of paths are correct. (b) Any change beyond that many rounds can only come from repeatedly looping a negative cycle, since every simple-path distance is already settled.</p>
+    </div>
+
+    <div class="quiz" data-test-item data-topic="Floyd-Warshall Recurrence">
+      <p class="quiz-prompt">3. In a Floyd-Warshall run, suppose dist₂(1, 4) = 15 using only intermediates from {1,2}. Allowing vertex 3 as an intermediate opens a new path 1→3→4 with cost dist₂(1,3) + dist₂(3,4) = 5 + 9 = 14. Answer both parts:</p>
+      <div class="quiz-part" data-part>
+        <p class="quiz-part-label">(a) What does dist₃(1, 4) equal once vertex 3 is considered?</p>
+        <div class="quiz-choices">
+          <button class="quiz-choice" data-correct="false">15</button>
+          <button class="quiz-choice" data-correct="false">5</button>
+          <button class="quiz-choice" data-correct="false">9</button>
+          <button class="quiz-choice" data-correct="true">14</button>
+        </div>
+      </div>
+      <div class="quiz-part" data-part data-answers="zero|no">
+        <p class="quiz-part-label">(b) Fill in the blank: dist₀(i, j) — the base case before any vertex is allowed as an intermediate — is defined using ___ intermediate vertices, just the direct edge weight (or infinity if none exists).</p>
+        <div class="quiz-fill-row">
+          <input type="text" class="quiz-fill-input" aria-label="Your answer">
+        </div>
+      </div>
+      <p class="quiz-feedback" hidden></p>
+      <p class="quiz-explain" hidden>(a) dist_k(i,j) = min(dist_(k−1)(i,j), dist_(k−1)(i,k)+dist_(k−1)(k,j)) = min(15, 5+9) = min(15,14) = 14. (b) At k=0, no intermediate vertex is allowed yet, so only direct edges count.</p>
+    </div>
+
+    <div class="quiz" data-test-item data-test-fill data-topic="Floyd-Warshall Runtime &amp; Density Trade-off" data-answers="dense">
+      <p class="quiz-prompt">4. Fill in the blank: Floyd-Warshall's Θ(V³) runtime beats repeated Bellman-Ford's Θ(V²E) specifically when the graph is ___, meaning E is large relative to V.</p>
+      <div class="quiz-fill-row">
+        <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      </div>
+      <p class="quiz-feedback" hidden></p>
+      <p class="quiz-explain" hidden>Floyd-Warshall's fixed Θ(V³) cost wins out once the edge count E is large enough — for sparse graphs with few edges, running Bellman-Ford once per source can actually be the faster choice instead.</p>
+    </div>
+
+    <div class="quiz" data-test-item data-topic="Identifying Strongly Connected Components">
+      <p class="quiz-prompt">5. A directed graph has edges W→X, X→Y, Y→W, and Y→Z. Which set of vertices forms a strongly connected component?</p>
+      <div class="quiz-choices">
+        <button class="quiz-choice" data-correct="false">{W, X, Y, Z}</button>
+        <button class="quiz-choice" data-correct="false">{X, Y, Z}</button>
+        <button class="quiz-choice" data-correct="false">{Y, Z}</button>
+        <button class="quiz-choice" data-correct="true">{W, X, Y}</button>
+      </div>
+      <p class="quiz-feedback" hidden></p>
+      <p class="quiz-explain" hidden>W, X, and Y can each reach each other around the cycle W→X→Y→W. Z is reachable from Y but has no edge back to Y, W, or X, so it can't be part of their component.</p>
+    </div>
+
+    <div class="quiz" data-test-item data-topic="Tarjan's Low-Link &amp; Kosaraju's Two-Pass Structure">
+      <p class="quiz-prompt">6. Answer both parts about the two classical SCC algorithms:</p>
+      <div class="quiz-part" data-part>
+        <p class="quiz-part-label">(a) In Tarjan's algorithm, what does low[v] represent for a vertex v?</p>
+        <div class="quiz-choices">
+          <button class="quiz-choice" data-correct="false">The total number of children of v in the DFS tree</button>
+          <button class="quiz-choice" data-correct="false">The discovery time of v itself</button>
+          <button class="quiz-choice" data-correct="false">The size of v's entire subtree</button>
+          <button class="quiz-choice" data-correct="true">The smallest discovery time reachable from v's DFS subtree via at most one back-edge</button>
+        </div>
+      </div>
+      <div class="quiz-part" data-part data-answers="reverse|reversed">
+        <p class="quiz-part-label">(b) Fill in the blank: Kosaraju's algorithm requires building the ___ graph — every edge flipped from the original — before running its second DFS pass.</p>
+        <div class="quiz-fill-row">
+          <input type="text" class="quiz-fill-input" aria-label="Your answer">
+        </div>
+      </div>
+      <p class="quiz-feedback" hidden></p>
+      <p class="quiz-explain" hidden>(a) That smallest-reachable-discovery-time value is exactly what lets Tarjan's algorithm detect, in a single pass, the moment a vertex's subtree can't reach back above it. (b) Kosaraju's second pass must run on this reversed graph, using the finish-time order from the first pass, to keep each run confined to one component.</p>
+    </div>
+
+    <div class="quiz" data-test-item data-topic="Ford-Fulkerson Bottleneck Capacity">
+      <p class="quiz-prompt">7. In the flow network S→P (capacity 6), S→Q (capacity 10), P→Q (capacity 2), P→T (capacity 9), Q→T (capacity 7), what is the bottleneck capacity of the augmenting path S→P→T?</p>
+      <div class="quiz-choices">
+        <button class="quiz-choice" data-correct="false">9</button>
+        <button class="quiz-choice" data-correct="false">2</button>
+        <button class="quiz-choice" data-correct="false">10</button>
+        <button class="quiz-choice" data-correct="true">6</button>
+      </div>
+      <p class="quiz-feedback" hidden></p>
+      <p class="quiz-explain" hidden>The bottleneck is the minimum residual capacity along the path: min(6, 9) = 6, limited by the S→P edge even though P→T could carry more.</p>
+    </div>
+
+    <div class="quiz" data-test-item data-topic="Residual Graph Construction">
+      <p class="quiz-prompt">8. Using the network from question 7, suppose 6 units of flow are sent along S→P→T. Answer both parts:</p>
+      <div class="quiz-part" data-part>
+        <p class="quiz-part-label">(a) What is the residual capacity of the backward edge T→P in the resulting residual graph?</p>
+        <div class="quiz-choices">
+          <button class="quiz-choice" data-correct="false">0</button>
+          <button class="quiz-choice" data-correct="false">9</button>
+          <button class="quiz-choice" data-correct="false">3</button>
+          <button class="quiz-choice" data-correct="true">6</button>
+        </div>
+      </div>
+      <div class="quiz-part" data-part data-answers="flow">
+        <p class="quiz-part-label">(b) Fill in the blank: the residual capacity of a forward edge (u, v) equals its original capacity minus the current ___ on that edge.</p>
+        <div class="quiz-fill-row">
+          <input type="text" class="quiz-fill-input" aria-label="Your answer">
+        </div>
+      </div>
+      <p class="quiz-feedback" hidden></p>
+      <p class="quiz-explain" hidden>(a) A backward edge's residual capacity always equals the current flow on the corresponding forward edge — here f(P,T) = 6. (b) That's the general formula for any forward residual capacity: c(u,v) − f(u,v).</p>
+    </div>
+
+    <div class="quiz" data-test-item data-topic="s-t Cut Capacity">
+      <p class="quiz-prompt">9. For the network S→A (capacity 6), S→B (capacity 6), A→B (capacity 2), A→T (capacity 6), B→T (capacity 6), what is the capacity of the s-t cut S = {s, A}, T = {B, t}?</p>
+      <div class="quiz-choices">
+        <button class="quiz-choice" data-correct="false">12</button>
+        <button class="quiz-choice" data-correct="false">8</button>
+        <button class="quiz-choice" data-correct="false">6</button>
+        <button class="quiz-choice" data-correct="true">14</button>
+      </div>
+      <p class="quiz-feedback" hidden></p>
+      <p class="quiz-explain" hidden>Edges crossing from S to T are S→B (6), A→B (2), and A→T (6), summing to 14 — larger than the true minimum cut of 12 (from S={s}, using only S→A and S→B), consistent with flow never exceeding any cut's capacity.</p>
+    </div>
+
+    <div class="quiz" data-test-item data-topic="Max-Flow Min-Cut Theorem">
+      <p class="quiz-prompt">10. Answer both parts about the max-flow min-cut theorem:</p>
+      <div class="quiz-part" data-part>
+        <p class="quiz-part-label">(a) Why must the total flow value from s to t never exceed the capacity of any s-t cut (S, T)?</p>
+        <div class="quiz-choices">
+          <button class="quiz-choice" data-correct="false">Because Ford-Fulkerson never sends more flow than the graph's total edge count</button>
+          <button class="quiz-choice" data-correct="false">Because S and T must always contain the same number of vertices</button>
+          <button class="quiz-choice" data-correct="true">Because every unit of flow from s to t must cross from S to T at some edge, and the cut's capacity bounds that total crossing capacity</button>
+          <button class="quiz-choice" data-correct="false">Because flow values are always rounded down to the nearest integer</button>
+        </div>
+      </div>
+      <div class="quiz-part" data-part data-answers="reachable">
+        <p class="quiz-part-label">(b) Fill in the blank: the theorem's proof defines S as exactly the set of vertices ___ from s in the final residual graph, once no augmenting path remains.</p>
+        <div class="quiz-fill-row">
+          <input type="text" class="quiz-fill-input" aria-label="Your answer">
+        </div>
+      </div>
+      <p class="quiz-feedback" hidden></p>
+      <p class="quiz-explain" hidden>(a) Any flow from s to t is forced to physically cross from the S side to the T side somewhere, so it can never exceed the total capacity available to cross there. (b) That reachable set is precisely what the proof uses to construct the specific cut whose capacity equals the maximum flow.</p>
+    </div>
+
+    <p class="test-warning" data-test-warning hidden></p>
+    <button class="widget-btn" data-test-submit>Submit Test</button>
+    <div class="test-result" data-test-result hidden></div>
+  </div>
+
+  <footer class="lesson-footer">STEM+ · Advanced Algorithms · Unit 4 Test — Version B</footer>
+</div>

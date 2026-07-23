@@ -1,0 +1,178 @@
+<meta charset="UTF-8">
+<title>Unit 8 Test — Version B — AI Developer — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/tests.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · AI Developer · Unit 8 · Unit Test</span>
+  <h1>Unit 8 Test — Version B</h1>
+  <p class="subtitle">Deploying &amp; Maintaining AI in Production. 10 points across every lesson in this unit — 5 questions worth 1 point, 5 worth 1 point split across two parts. Score 90% or higher to clear this unit.</p>
+  <p class="nav-links"><a href="../index.html" class="nav-toc">← Course Contents</a> <a href="unit-test-a.html" class="nav-toc">← Version A</a></p>
+
+  <div data-test data-course="AI Developer" data-unit="Unit 8" data-kind="unit_test" data-version="B">
+
+    <div class="quiz" data-test-item data-topic="Latency">
+      <p class="quiz-prompt">1. A request to an LLM API is sent at 2:00:00.000 and a response arrives at 2:00:01.200. What is that 1.2-second gap called?</p>
+      <div class="quiz-choices">
+        <button class="quiz-choice" data-correct="true">Latency — the time between sending a request and receiving a response.</button>
+        <button class="quiz-choice" data-correct="false">The cache hit rate.</button>
+        <button class="quiz-choice" data-correct="false">The token cost of the call.</button>
+        <button class="quiz-choice" data-correct="false">The drift of the model.</button>
+      </div>
+      <p class="quiz-feedback" hidden></p>
+      <p class="quiz-explain" hidden>Latency is exactly this: the time between sending a request and receiving a response.</p>
+    </div>
+
+    <div class="quiz" data-test-item data-test-fill data-topic="Cost of API Calls" data-answers="cost">
+      <p class="quiz-prompt">2. Fill in the blank: because real API calls are priced per token, a tool used by thousands of people on the same handful of repeated questions pays that ___ again for every single one, unless a cache intervenes.</p>
+      <div class="quiz-fill-row">
+        <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      </div>
+      <p class="quiz-feedback" hidden></p>
+      <p class="quiz-explain" hidden>Every call has a real dollar cost, priced per token, that repeats for every request unless caching avoids it.</p>
+    </div>
+
+    <div class="quiz" data-test-item data-topic="Cache Mechanism">
+      <p class="quiz-prompt">3. Two different tickets, both reading exactly "My account is locked", arrive an hour apart. Answer both parts about triage_ticket_cached:</p>
+      <div class="quiz-part" data-part>
+        <p class="quiz-part-label">(a) What happens on the second identical arrival?</p>
+        <div class="quiz-choices">
+          <button class="quiz-choice" data-correct="true">It's returned instantly from the cache dictionary, with no new API call made at all.</button>
+          <button class="quiz-choice" data-correct="false">It pays the full latency and cost of a brand-new API call, same as the first time.</button>
+          <button class="quiz-choice" data-correct="false">It's rejected as invalid input.</button>
+          <button class="quiz-choice" data-correct="false">It automatically triggers a rollback.</button>
+        </div>
+      </div>
+      <div class="quiz-part" data-part data-answers="cache">
+        <p class="quiz-part-label">(b) Fill in the blank: this dictionary that stores a previous result for instant reuse is called a ___.</p>
+        <div class="quiz-fill-row">
+          <input type="text" class="quiz-fill-input" aria-label="Your answer">
+        </div>
+      </div>
+      <p class="quiz-feedback" hidden></p>
+      <p class="quiz-explain" hidden>(a) An identical hash key means the second request finds the first result already stored, skipping the API call. (b) That store of previous results is a cache.</p>
+    </div>
+
+    <div class="quiz" data-test-item data-topic="Limits of Exact-Match Caching">
+      <p class="quiz-prompt">4. Two tickets — "my account is locked" and "I can't log into my account" — describe the same real problem in different words. Answer both parts:</p>
+      <div class="quiz-part" data-part>
+        <p class="quiz-part-label">(a) Would triage_ticket_cached's hash-based cache treat these as the same request?</p>
+        <div class="quiz-choices">
+          <button class="quiz-choice" data-correct="true">No — since the exact text differs, hashlib.sha256 produces two completely different keys, so it's a cache miss.</button>
+          <button class="quiz-choice" data-correct="false">Yes — hashing ignores wording and matches on meaning.</button>
+          <button class="quiz-choice" data-correct="false">Yes — any two tickets about accounts always hash identically.</button>
+          <button class="quiz-choice" data-correct="false">It depends on which model is being called.</button>
+        </div>
+      </div>
+      <div class="quiz-part" data-part data-answers="embeddings|embedding">
+        <p class="quiz-part-label">(b) Fill in the blank: catching near-duplicate wording like this would need a cache keyed on ___ instead of exact text.</p>
+        <div class="quiz-fill-row">
+          <input type="text" class="quiz-fill-input" aria-label="Your answer">
+        </div>
+      </div>
+      <p class="quiz-feedback" hidden></p>
+      <p class="quiz-explain" hidden>(a) A hash-based cache only matches byte-identical text, so differently worded tickets miss. (b) Embeddings-based similarity can catch near-duplicate meaning that exact hashing misses.</p>
+    </div>
+
+    <div class="quiz" data-test-item data-topic="Drift">
+      <p class="quiz-prompt">5. A model's accuracy was verified once at launch and never checked again. Six months later, what could be silently happening according to Lesson 26?</p>
+      <div class="quiz-choices">
+        <button class="quiz-choice" data-correct="true">Drift — a gradual mismatch opening up between the model's original training and current real-world data.</button>
+        <button class="quiz-choice" data-correct="false">Caching — the model is now returning stored results instead of live ones.</button>
+        <button class="quiz-choice" data-correct="false">Rollback — the model has automatically reverted to an older version.</button>
+        <button class="quiz-choice" data-correct="false">Input validation — the model has started rejecting malformed requests.</button>
+      </div>
+      <p class="quiz-feedback" hidden></p>
+      <p class="quiz-explain" hidden>A one-time launch check tells you nothing about drift quietly opening up months later.</p>
+    </div>
+
+    <div class="quiz" data-test-item data-test-fill data-topic="Monitoring" data-answers="monitoring">
+      <p class="quiz-prompt">6. Fill in the blank: appending a log entry to triage_log.jsonl on every single call is an example of ___ — building a record over time rather than checking a system once and assuming it holds forever.</p>
+      <div class="quiz-fill-row">
+        <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      </div>
+      <p class="quiz-feedback" hidden></p>
+      <p class="quiz-explain" hidden>Continuously logging inputs, outputs, and performance over time is exactly what monitoring means.</p>
+    </div>
+
+    <div class="quiz" data-test-item data-topic="Detecting Drift Signals">
+      <p class="quiz-prompt">7. A human reviewer starts disagreeing with the model's urgency calls noticeably more often than they did at launch, with no change in how tickets are written. Answer both parts:</p>
+      <div class="quiz-part" data-part>
+        <p class="quiz-part-label">(a) What does this suggest?</p>
+        <div class="quiz-choices">
+          <button class="quiz-choice" data-correct="true">Drift — a sign the model's original training no longer matches current reality closely enough.</button>
+          <button class="quiz-choice" data-correct="false">That the reviewer, not the model, must be making the errors.</button>
+          <button class="quiz-choice" data-correct="false">That the cache is returning stale results.</button>
+          <button class="quiz-choice" data-correct="false">Nothing — reviewer disagreement is expected to be constant over time.</button>
+        </div>
+      </div>
+      <div class="quiz-part" data-part data-answers="monitoring">
+        <p class="quiz-part-label">(b) Fill in the blank: rising reviewer disagreement with no real change in the tickets themselves is exactly the kind of signal ongoing ___ is built to catch.</p>
+        <div class="quiz-fill-row">
+          <input type="text" class="quiz-fill-input" aria-label="Your answer">
+        </div>
+      </div>
+      <p class="quiz-feedback" hidden></p>
+      <p class="quiz-explain" hidden>(a) A steady rise in disagreement, with no real change in the tickets, is exactly the kind of signal drift produces. (b) Only ongoing monitoring can surface a slow trend like this.</p>
+    </div>
+
+    <div class="quiz" data-test-item data-topic="Why Keep Multiple Prompt Versions">
+      <p class="quiz-prompt">8. Suppose PROMPT_VERSIONS held only one prompt, overwritten each time it changed, with no history kept. What would this make impossible?</p>
+      <div class="quiz-choices">
+        <button class="quiz-choice" data-correct="true">Rolling back to a previous known-good version once a new one is found to have regressed.</button>
+        <button class="quiz-choice" data-correct="false">Calling the model at all.</button>
+        <button class="quiz-choice" data-correct="false">Measuring the latency of any single request.</button>
+        <button class="quiz-choice" data-correct="false">Validating incoming requests before they reach the core logic.</button>
+      </div>
+      <p class="quiz-feedback" hidden></p>
+      <p class="quiz-explain" hidden>Without a previous version still on hand, there is nothing left to revert to once a regression is caught.</p>
+    </div>
+
+    <div class="quiz" data-test-item data-topic="Version Pinning">
+      <p class="quiz-prompt">9. Code written against the alias "gpt-4o-mini" behaves differently one morning, with no line of code having changed. Answer both parts:</p>
+      <div class="quiz-part" data-part>
+        <p class="quiz-part-label">(a) What most likely happened, and what would have prevented it?</p>
+        <div class="quiz-choices">
+          <button class="quiz-choice" data-correct="true">The provider updated what the alias points to; pinning an exact, dated snapshot instead would have prevented the silent change.</button>
+          <button class="quiz-choice" data-correct="false">The cache expired; clearing it would have prevented this.</button>
+          <button class="quiz-choice" data-correct="false">Drift occurred in the training data; retraining would have prevented this.</button>
+          <button class="quiz-choice" data-correct="false">Input validation failed; a stricter schema would have prevented this.</button>
+        </div>
+      </div>
+      <div class="quiz-part" data-part data-answers="pinning">
+        <p class="quiz-part-label">(b) Fill in the blank: locking in an exact, dated model snapshot instead of a movable name is called version ___.</p>
+        <div class="quiz-fill-row">
+          <input type="text" class="quiz-fill-input" aria-label="Your answer">
+        </div>
+      </div>
+      <p class="quiz-feedback" hidden></p>
+      <p class="quiz-explain" hidden>(a) A movable alias can silently point to a different model over time; a pinned snapshot cannot. (b) That practice is called version pinning.</p>
+    </div>
+
+    <div class="quiz" data-test-item data-topic="Rollback">
+      <p class="quiz-prompt">10. Answer both parts about the rollback() function from Lesson 27:</p>
+      <div class="quiz-part" data-part>
+        <p class="quiz-part-label">(a) What does calling it actually do?</p>
+        <div class="quiz-choices">
+          <button class="quiz-choice" data-correct="true">Switches ACTIVE_VERSION back to a previous, known-good prompt version.</button>
+          <button class="quiz-choice" data-correct="false">Permanently deletes the regressed version from the codebase.</button>
+          <button class="quiz-choice" data-correct="false">Retrains the model on corrected data.</button>
+          <button class="quiz-choice" data-correct="false">Disables the tool entirely until a developer manually restarts it.</button>
+        </div>
+      </div>
+      <div class="quiz-part" data-part data-answers="rollback">
+        <p class="quiz-part-label">(b) Fill in the blank: this act of reverting to a previous known-good version after a regression is called a ___.</p>
+        <div class="quiz-fill-row">
+          <input type="text" class="quiz-fill-input" aria-label="Your answer">
+        </div>
+      </div>
+      <p class="quiz-feedback" hidden></p>
+      <p class="quiz-explain" hidden>(a) It simply switches ACTIVE_VERSION back to "v1", without touching the underlying model. (b) That reversion is called a rollback.</p>
+    </div>
+
+    <p class="test-warning" data-test-warning hidden></p>
+    <button class="widget-btn" data-test-submit>Submit Test</button>
+    <div class="test-result" data-test-result hidden></div>
+  </div>
+
+  <footer class="lesson-footer">STEM+ · AI Developer · Unit 8 Test — Version B</footer>
+</div>

@@ -1,0 +1,181 @@
+<meta charset="UTF-8">
+<title>Unit 2 Test — Version B — Advanced Algorithms — STEM+</title>
+<link rel="stylesheet" href="../../../assets/style.css">
+<script src="../../../assets/tests.js" defer></script>
+<div class="page" data-tier="advanced">
+  <span class="kicker">STEM+ · Advanced Algorithms · Unit 2 · Unit Test</span>
+  <h1>Unit 2 Test — Version B</h1>
+  <p class="subtitle">Divide and Conquer. 10 points across every lesson in this unit — 5 questions worth 1 point, 5 worth 1 point split across two parts. Score 90% or higher to clear this unit.</p>
+  <p class="nav-links"><a href="../index.html" class="nav-toc">← Course Contents</a> <a href="unit-test-a.html" class="nav-toc">Version A →</a></p>
+
+  <div data-test data-course="Advanced Algorithms" data-unit="Unit 2" data-kind="unit_test" data-version="B">
+
+    <div class="quiz" data-test-item data-topic="Strong Induction — Why Strong, Not Ordinary">
+      <p class="quiz-prompt">1. A recursive algorithm calls itself on a subproblem of size n/4 and another of size 3n/4. Why does correctness require strong induction instead of ordinary induction?</p>
+      <div class="quiz-choices">
+        <button class="quiz-choice" data-correct="false">Ordinary induction is invalid for any recursive algorithm.</button>
+        <button class="quiz-choice" data-correct="true">Because n/4 and 3n/4 are not n−1, so the inductive hypothesis must hold for every smaller size at once — exactly what strong induction provides.</button>
+        <button class="quiz-choice" data-correct="false">Because the algorithm has two recursive calls, and ordinary induction only allows one.</button>
+        <button class="quiz-choice" data-correct="false">Because strong induction is only needed when subproblems are unequal in size, never when they're equal.</button>
+      </div>
+      <p class="quiz-feedback" hidden></p>
+      <p class="quiz-explain" hidden>Ordinary induction's "assume n−1" step doesn't reach a jump to n/4 or 3n/4, so the hypothesis must hold for every smaller size simultaneously — even equal splits like n/2 need this same strengthened hypothesis, not just uneven ones.</p>
+    </div>
+
+    <div class="quiz" data-test-item data-topic="Counting Inversions — Cross-Inversions">
+      <p class="quiz-prompt">2. While recursively counting inversions on an array split into L and R, which statement about cross-inversions is correct?</p>
+      <div class="quiz-choices">
+        <button class="quiz-choice" data-correct="true">Cross-inversions are pairs with one index in L and one in R, and they can only be found during the merge step since the recursive calls never compare across the split.</button>
+        <button class="quiz-choice" data-correct="false">Cross-inversions are counted twice, once in each recursive call.</button>
+        <button class="quiz-choice" data-correct="false">Cross-inversions never occur if both L and R are already sorted.</button>
+        <button class="quiz-choice" data-correct="false">Cross-inversions require a third recursive call spanning both halves.</button>
+      </div>
+      <p class="quiz-feedback" hidden></p>
+      <p class="quiz-explain" hidden>Recursion on L only ever compares indices inside L, and likewise for R, so a pair straddling both halves is structurally outside what either recursive call could ever detect — only the merge step, which compares across the split, can find it.</p>
+    </div>
+
+    <div class="quiz" data-test-item data-topic="Median of Medians — Groups of Five">
+      <p class="quiz-prompt">3. What would go wrong if median-of-medians used groups of 3 instead of groups of 5?</p>
+      <div class="quiz-choices">
+        <button class="quiz-choice" data-correct="false">Nothing — groups of 3 would work identically.</button>
+        <button class="quiz-choice" data-correct="true">The fraction of elements provably on each side of the pivot would be too small to guarantee the recursion shrinks fast enough for linear time.</button>
+        <button class="quiz-choice" data-correct="false">Groups of 3 would make the algorithm sort the entire array as a side effect.</button>
+        <button class="quiz-choice" data-correct="false">Groups of 3 would require an entirely different data structure.</button>
+      </div>
+      <p class="quiz-feedback" hidden></p>
+      <p class="quiz-explain" hidden>Groups of 5 are the smallest odd size that produces a strong enough "at least roughly 3n/10 on each side" guarantee to make the recurrence resolve to O(n); groups of 3 give a guarantee too weak for that.</p>
+    </div>
+
+    <div class="quiz" data-test-item data-topic="Strassen's Algorithm — Multiplication Count">
+      <p class="quiz-prompt">4. What is the essential change Strassen's algorithm makes to block matrix multiplication that allows it to beat Θ(n³)?</p>
+      <div class="quiz-choices">
+        <button class="quiz-choice" data-correct="true">It reduces the 8 naive block multiplications to 7, at the cost of extra additions, which lowers the recurrence's exponent below 3.</button>
+        <button class="quiz-choice" data-correct="false">It multiplies matrices column by column instead of row by row.</button>
+        <button class="quiz-choice" data-correct="false">It eliminates the need for recursion entirely.</button>
+        <button class="quiz-choice" data-correct="false">It requires all matrix entries to be integers.</button>
+      </div>
+      <p class="quiz-feedback" hidden></p>
+      <p class="quiz-explain" hidden>Since multiplications set the recurrence's branching factor a (and hence its exponent log_b a), trading one multiplication for extra Θ(n²) additions strictly improves the asymptotics without changing the combine step's order.</p>
+    </div>
+
+    <div class="quiz" data-test-item data-test-fill data-topic="Correctness: Recursive Calls vs Combine Step" data-answers="combine|merge">
+      <p class="quiz-prompt">5. Fill in the blank: strong induction discharges the recursive calls, but a divide-and-conquer proof still needs a separate, direct argument that the ___ step correctly stitches subproblem answers together.</p>
+      <div class="quiz-fill-row">
+        <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      </div>
+      <p class="quiz-feedback" hidden></p>
+      <p class="quiz-explain" hidden>Induction only covers "trust the subproblems"; the non-recursive glue code needs its own direct correctness argument, which is exactly the gap the combine step's proof fills.</p>
+    </div>
+
+    <div class="quiz" data-test-item data-topic="Strong Induction — Proof Structure">
+      <p class="quiz-prompt">6. A divide-and-conquer algorithm computes the sum of an array by splitting it into two halves, recursively summing each half, then adding the two sums. Answer both parts:</p>
+      <div class="quiz-part" data-part>
+        <p class="quiz-part-label">(a) What is the correct base case?</p>
+        <div class="quiz-choices">
+          <button class="quiz-choice" data-correct="true">Array of size 0, which sums to 0.</button>
+          <button class="quiz-choice" data-correct="false">Array of size 1, which always sums to 0.</button>
+          <button class="quiz-choice" data-correct="false">The largest array the algorithm will ever see.</button>
+          <button class="quiz-choice" data-correct="false">There is no base case needed for summing.</button>
+        </div>
+      </div>
+      <div class="quiz-part" data-part data-answers="half">
+        <p class="quiz-part-label">(b) Fill in the blank: the inductive step must directly show that adding the two recursively-computed half-sums equals the true sum of all n elements — a fact that holds because every element belongs to exactly one ___.</p>
+        <div class="quiz-fill-row">
+          <input type="text" class="quiz-fill-input" aria-label="Your answer">
+        </div>
+      </div>
+      <p class="quiz-feedback" hidden></p>
+      <p class="quiz-explain" hidden>(a) An empty array (size 0) trivially sums to 0 with no recursive call needed, making it a clean base case. (b) Each element is in exactly one of the two halves, so summing both halves' sums covers every element exactly once — the direct argument the combine step needs.</p>
+    </div>
+
+    <div class="quiz" data-test-item data-topic="Counting Inversions — Tracing the Merge">
+      <p class="quiz-prompt">7. During mergeAndCount on left half L = [3, 6, 10] and right half R = [2, 4, 5] (both already sorted), answer both parts:</p>
+      <div class="quiz-part" data-part data-answers="7">
+        <p class="quiz-part-label">(a) Fill in the blank: merging L and R via mergeAndCount detects ___ total cross-inversions.</p>
+        <div class="quiz-fill-row">
+          <input type="text" class="quiz-fill-input" aria-label="Your answer">
+        </div>
+      </div>
+      <div class="quiz-part" data-part>
+        <p class="quiz-part-label">(b) If mergeAndCount instead compared every pair of elements individually across L and R (brute force) rather than using the sorted-array shortcut, what would change?</p>
+        <div class="quiz-choices">
+          <button class="quiz-choice" data-correct="false">The count would be different, since brute force counts differently.</button>
+          <button class="quiz-choice" data-correct="true">The count would be identical, but comparing every pair directly would cost Θ(|L|·|R|) instead of the O(|L|+|R|) the sorted-array shortcut achieves.</button>
+          <button class="quiz-choice" data-correct="false">Brute force would be faster because it skips the sortedness check.</button>
+          <button class="quiz-choice" data-correct="false">The count would be undefined without sorted halves.</button>
+        </div>
+      </div>
+      <p class="quiz-feedback" hidden></p>
+      <p class="quiz-explain" hidden>(a) Tracing the merge: R[0]=2 &lt; L[0]=3, count += (3−0) = 3; then R[1]=4 &lt; L[1]=6, count += (3−1) = 2; then R[2]=5 &lt; L[1]=6, count += (3−1) = 2. Total = 3+2+2 = 7, matching the direct pair count (3&gt;2; 6&gt;2,6&gt;4,6&gt;5; 10&gt;2,10&gt;4,10&gt;5) = 1+3+3 = 7. (b) Sortedness is what licenses jumping to "all remaining L elements" instead of comparing every pair individually, giving the same count in linear rather than quadratic time.</p>
+    </div>
+
+    <div class="quiz" data-test-item data-topic="Median of Medians — Solving the Recurrence">
+      <p class="quiz-prompt">8. In the recurrence T(n) ≤ T(n/5) + T(7n/10) + Θ(n) for median-of-medians, answer both parts:</p>
+      <div class="quiz-part" data-part>
+        <p class="quiz-part-label">(a) Which term corresponds to recursively finding the pivot itself (the median of the group medians)?</p>
+        <div class="quiz-choices">
+          <button class="quiz-choice" data-correct="true">T(n/5), since there are about n/5 group medians and the pivot is found by recursively selecting among them.</button>
+          <button class="quiz-choice" data-correct="false">T(7n/10), since the pivot must be found within the larger partition.</button>
+          <button class="quiz-choice" data-correct="false">Θ(n), since finding the pivot takes only linear time directly.</button>
+          <button class="quiz-choice" data-correct="false">None of the terms — the pivot is computed without any recursive call.</button>
+        </div>
+      </div>
+      <div class="quiz-part" data-part data-answers="n">
+        <p class="quiz-part-label">(b) Fill in the blank: substituting the guess T(n) ≤ cn gives c(n/5) + c(7n/10) + Θ(n) = c(9n/10) + Θ(n); since 9/10 &lt; 1, a large enough c can absorb the Θ(n) term, confirming T(n) = O(___).</p>
+        <div class="quiz-fill-row">
+          <input type="text" class="quiz-fill-input" aria-label="Your answer">
+        </div>
+      </div>
+      <p class="quiz-feedback" hidden></p>
+      <p class="quiz-explain" hidden>(a) The ⌈n/5⌉ group medians are themselves searched recursively via select(medians, ...), which is exactly the T(n/5) term; T(7n/10) is the separate recursive call into the larger partition after pivoting. (b) This matches the lesson's conclusion: worst-case linear-time selection, T(n) = O(n).</p>
+    </div>
+
+    <div class="quiz" data-test-item data-topic="Strassen's Algorithm — Runtime &amp; Master Theorem">
+      <p class="quiz-prompt">9. Compared to the naive T(n) = 8T(n/2) + Θ(n²) (which solves to Θ(n³)), answer both parts:</p>
+      <div class="quiz-part" data-part>
+        <p class="quiz-part-label">(a) Why does cutting to seven multiplications change the result at all, given that both recurrences still have a Θ(n²) combine cost?</p>
+        <div class="quiz-choices">
+          <button class="quiz-choice" data-correct="true">Because the number of recursive calls (a) directly sets the exponent n^(log_b a); lowering a from 8 to 7 lowers log₂(a) from 3 to about 2.807, which the Master Theorem's Case 1 result inherits directly.</button>
+          <button class="quiz-choice" data-correct="false">Because seven recursive calls always run in parallel while eight cannot.</button>
+          <button class="quiz-choice" data-correct="false">Because the Θ(n²) combine cost changes when a changes.</button>
+          <button class="quiz-choice" data-correct="false">Because seven is odd and eight is even, which changes which Master Theorem case applies.</button>
+        </div>
+      </div>
+      <div class="quiz-part" data-part data-answers="1">
+        <p class="quiz-part-label">(b) Fill in the blank: since f(n)=n² is polynomially smaller than n^(log₂7)≈n^2.807, Strassen's recurrence falls into Master Theorem Case ___, so T(n) = Θ(n^(log₂7)).</p>
+        <div class="quiz-fill-row">
+          <input type="text" class="quiz-fill-input" aria-label="Your answer">
+        </div>
+      </div>
+      <p class="quiz-feedback" hidden></p>
+      <p class="quiz-explain" hidden>(a) log_b(a) directly determines the leaf-dominated exponent in Case 1; dropping a from 8 to 7 lowers the exponent from 3 to ≈2.807, with the Θ(n²) combine term unaffected either way. (b) Case 1 applies since n² is polynomially smaller than n^2.807.</p>
+    </div>
+
+    <div class="quiz" data-test-item data-topic="Counting Inversions — Correctness Structure">
+      <p class="quiz-prompt">10. In the direct correctness argument for mergeAndCount, answer both parts:</p>
+      <div class="quiz-part" data-part>
+        <p class="quiz-part-label">(a) Why does R[j] forming an inversion with L[i] guarantee it also inverts with every element from L[i+1] onward?</p>
+        <div class="quiz-choices">
+          <button class="quiz-choice" data-correct="true">Because L is sorted, so every element from L[i] onward is ≥ L[i] &gt; R[j], and each such element appears earlier in the original array than R[j].</button>
+          <button class="quiz-choice" data-correct="false">Because R is sorted in decreasing order.</button>
+          <button class="quiz-choice" data-correct="false">Because all elements of L are assumed equal.</button>
+          <button class="quiz-choice" data-correct="false">Because the algorithm double-counts every element of L by design.</button>
+        </div>
+      </div>
+      <div class="quiz-part" data-part data-answers="comparison|step">
+        <p class="quiz-part-label">(b) Fill in the blank: this shortcut — counting (length of L − i) inversions at once instead of checking each element of L individually — is exactly what keeps mergeAndCount's extra work at O(1) per ___, preserving merge sort's overall runtime.</p>
+        <div class="quiz-fill-row">
+          <input type="text" class="quiz-fill-input" aria-label="Your answer">
+        </div>
+      </div>
+      <p class="quiz-feedback" hidden></p>
+      <p class="quiz-explain" hidden>(a) Sortedness of L guarantees every element from L[i] onward is at least as large as L[i], which is already greater than R[j] — and since R[j]'s original position is to the right of the whole R-half, each such pair is a genuine inversion. (b) Adding a constant-time increment per comparison, instead of checking every remaining L element one by one, is what keeps the recurrence identical to plain merge sort's.</p>
+    </div>
+
+    <p class="test-warning" data-test-warning hidden></p>
+    <button class="widget-btn" data-test-submit>Submit Test</button>
+    <div class="test-result" data-test-result hidden></div>
+  </div>
+
+  <footer class="lesson-footer">STEM+ · Advanced Algorithms · Unit 2 Test — Version B</footer>
+</div>

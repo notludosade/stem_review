@@ -1,0 +1,178 @@
+<meta charset="UTF-8">
+<title>Unit 5 Test — Version A — Advanced Algorithms — STEM+</title>
+<link rel="stylesheet" href="../../../assets/style.css">
+<script src="../../../assets/tests.js" defer></script>
+<div class="page" data-tier="advanced">
+  <span class="kicker">STEM+ · Advanced Algorithms · Unit 5 · Unit Test</span>
+  <h1>Unit 5 Test — Version A</h1>
+  <p class="subtitle">Advanced Dynamic Programming. 10 points across every lesson in this unit — 5 questions worth 1 point, 5 worth 1 point split across two parts. Score 90% or higher to clear this unit.</p>
+  <p class="nav-links"><a href="../index.html" class="nav-toc">← Course Contents</a> <a href="unit-test-b.html" class="nav-toc">Version B →</a></p>
+
+  <div data-test data-course="Advanced Algorithms" data-unit="Unit 5" data-kind="unit_test" data-version="A">
+
+    <div class="quiz" data-test-item data-topic="Tree DP Include/Exclude Values">
+      <p class="quiz-prompt">1. A tree has root R (weight 5) with two leaf children A (weight 3) and B (weight 4). Using the include/exclude tree DP for maximum weight independent set, what is the maximum weight achievable?</p>
+      <div class="quiz-choices">
+        <button class="quiz-choice" data-correct="false">5</button>
+        <button class="quiz-choice" data-correct="false">12</button>
+        <button class="quiz-choice" data-correct="false">9</button>
+        <button class="quiz-choice" data-correct="true">7</button>
+      </div>
+      <p class="quiz-feedback" hidden></p>
+      <p class="quiz-explain" hidden>Since A and B are only adjacent to R (not to each other), selecting both leaves gives 3+4=7, beating selecting R alone (5). All three can't be picked together, since each leaf is adjacent to R.</p>
+    </div>
+
+    <div class="quiz" data-test-item data-topic="Tree DP Traversal &amp; Complexity">
+      <p class="quiz-prompt">2. Answer both parts about the tree DP algorithm:</p>
+      <div class="quiz-part" data-part>
+        <p class="quiz-part-label">(a) Why must every child of v be fully processed before v's own include/exclude values can be computed?</p>
+        <div class="quiz-choices">
+          <button class="quiz-choice" data-correct="false">Because trees must be traversed alphabetically by node label</button>
+          <button class="quiz-choice" data-correct="false">Because pre-order traversal cannot visit every vertex in a tree</button>
+          <button class="quiz-choice" data-correct="false">Because leaves always have a smaller weight than internal nodes</button>
+          <button class="quiz-choice" data-correct="true">Because the recurrence for include(v) and exclude(v) is defined directly in terms of each child's include/exclude values</button>
+        </div>
+      </div>
+      <div class="quiz-part" data-part data-answers="edge|edges">
+        <p class="quiz-part-label">(b) Fill in the blank: the tree DP's total runtime is Θ(V) because each ___ in the tree contributes only O(1) work exactly once, across all vertices combined.</p>
+        <div class="quiz-fill-row">
+          <input type="text" class="quiz-fill-input" aria-label="Your answer">
+        </div>
+      </div>
+      <p class="quiz-feedback" hidden></p>
+      <p class="quiz-explain" hidden>(a) The parent's recurrence literally sums and compares its children's include/exclude values, so those values must already exist — forcing post-order (children-before-parent) traversal. (b) Summing that constant per-edge work across the whole tree is exactly what gives the Θ(V) total.</p>
+    </div>
+
+    <div class="quiz" data-test-item data-test-fill data-topic="Bitmask Encoding of Visited Cities" data-answers="1|o(1)">
+      <p class="quiz-prompt">3. Fill in the blank: checking whether city k is already in a bitmask, and adding city k to that bitmask, are both bitwise operations that run in O(___) time, independent of how many cities have been visited.</p>
+      <div class="quiz-fill-row">
+        <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      </div>
+      <p class="quiz-feedback" hidden></p>
+      <p class="quiz-explain" hidden>mask &amp; (1&lt;&lt;k) and mask | (1&lt;&lt;k) are both single machine-word operations, regardless of how large the mask or how many cities are already marked.</p>
+    </div>
+
+    <div class="quiz" data-test-item data-topic="TSP DP Recurrence &amp; Table Trace">
+      <p class="quiz-prompt">4. In a 3-city TSP instance (cities 0, 1, 2) with dist(0,1)=10, dist(0,2)=15, dist(1,2)=20, and dp[{0}][0] = 0. Answer both parts:</p>
+      <div class="quiz-part" data-part>
+        <p class="quiz-part-label">(a) What does dp[{0,1}][1] equal?</p>
+        <div class="quiz-choices">
+          <button class="quiz-choice" data-correct="false">15</button>
+          <button class="quiz-choice" data-correct="false">20</button>
+          <button class="quiz-choice" data-correct="false">0</button>
+          <button class="quiz-choice" data-correct="true">10</button>
+        </div>
+      </div>
+      <div class="quiz-part" data-part data-answers="30">
+        <p class="quiz-part-label">(b) Fill in the blank: given dp[{0,1}][1] = 10, dp[{0,1,2}][2] = dp[{0,1}][1] + dist(1,2) = 10 + 20 = ___.</p>
+        <div class="quiz-fill-row">
+          <input type="text" class="quiz-fill-input" aria-label="Your answer">
+        </div>
+      </div>
+      <p class="quiz-feedback" hidden></p>
+      <p class="quiz-explain" hidden>(a) The only way to have visited exactly {0,1} and be standing at city 1 is having come directly from city 0, so dp[{0,1}][1] = dp[{0}][0] + dist(0,1) = 0 + 10 = 10. (b) Extending that partial tour to also visit city 2, arriving last, adds dist(1,2) = 20, giving 30.</p>
+    </div>
+
+    <div class="quiz" data-test-item data-topic="Bitmask DP Complexity vs Brute Force">
+      <p class="quiz-prompt">5. Bitmask DP solves TSP in Θ(n²·2ⁿ) time, a large improvement over Θ(n!) brute force. Why doesn't this contradict TSP's status as an NP-hard problem?</p>
+      <div class="quiz-choices">
+        <button class="quiz-choice" data-correct="false">Because Θ(n²·2ⁿ) is actually a polynomial-time bound</button>
+        <button class="quiz-choice" data-correct="false">Because bitmask DP only works on instances with fewer than 4 cities</button>
+        <button class="quiz-choice" data-correct="true">Because Θ(n²·2ⁿ) is still exponential in n — it improves the constant inside the exponent, but is not a polynomial-time algorithm</button>
+        <button class="quiz-choice" data-correct="false">Because NP-hardness has nothing to do with runtime at all</button>
+      </div>
+      <p class="quiz-feedback" hidden></p>
+      <p class="quiz-explain" hidden>2ⁿ growth is exponential no matter what polynomial factor multiplies it, so this remains fully consistent with no known polynomial-time algorithm existing for TSP.</p>
+    </div>
+
+    <div class="quiz" data-test-item data-topic="Matrix Chain Cost Trace">
+      <p class="quiz-prompt">6. For matrices A₁ (10×100), A₂ (100×5), A₃ (5×50), answer both parts:</p>
+      <div class="quiz-part" data-part>
+        <p class="quiz-part-label">(a) What is the total cost of computing (A₁A₂)A₃?</p>
+        <div class="quiz-choices">
+          <button class="quiz-choice" data-correct="false">75000</button>
+          <button class="quiz-choice" data-correct="false">5000</button>
+          <button class="quiz-choice" data-correct="false">2500</button>
+          <button class="quiz-choice" data-correct="true">7500</button>
+        </div>
+      </div>
+      <div class="quiz-part" data-part data-answers="75000">
+        <p class="quiz-part-label">(b) Fill in the blank: the alternative parenthesization A₁(A₂A₃) costs ___ total — ten times more expensive, despite computing the identical final matrix.</p>
+        <div class="quiz-fill-row">
+          <input type="text" class="quiz-fill-input" aria-label="Your answer">
+        </div>
+      </div>
+      <p class="quiz-feedback" hidden></p>
+      <p class="quiz-explain" hidden>(a) A₁A₂ costs 10·100·5=5,000 (producing a 10×5 matrix), then (A₁A₂)A₃ costs 10·5·50=2,500 — total 7,500. (b) A₂A₃ costs 100·5·50=25,000 (producing a 100×50 matrix), then A₁(A₂A₃) costs 10·100·50=50,000 — total 75,000.</p>
+    </div>
+
+    <div class="quiz" data-test-item data-test-fill data-topic="Matrix Chain Split Point" data-answers="advance">
+      <p class="quiz-prompt">7. Fill in the blank: the matrix chain DP tries every possible split point k, rather than always splitting at a fixed midpoint (as ordinary merge sort does), because the optimal split isn't known in ___.</p>
+      <div class="quiz-fill-row">
+        <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      </div>
+      <p class="quiz-feedback" hidden></p>
+      <p class="quiz-explain" hidden>Since there's no way to know which split point is cheapest ahead of time, every candidate k must be tried and compared — unlike merge sort's fixed halfway split.</p>
+    </div>
+
+    <div class="quiz" data-test-item data-topic="Matrix Chain DP Loop Order">
+      <p class="quiz-prompt">8. Answer both parts about the matrix chain DP's structure:</p>
+      <div class="quiz-part" data-part>
+        <p class="quiz-part-label">(a) Why must the DP's outer loop iterate by increasing chain length, rather than by increasing i or j directly?</p>
+        <div class="quiz-choices">
+          <button class="quiz-choice" data-correct="false">Because longer chains always have smaller optimal cost than shorter ones</button>
+          <button class="quiz-choice" data-correct="false">Because i and j must always be equal at the start of the algorithm</button>
+          <button class="quiz-choice" data-correct="true">Because dp[i][j] depends on strictly shorter sub-chains, which must be fully computed before any longer chain that depends on them</button>
+          <button class="quiz-choice" data-correct="false">Because chain length has no effect on the order subproblems must be solved in</button>
+        </div>
+      </div>
+      <div class="quiz-part" data-part data-answers="0">
+        <p class="quiz-part-label">(b) Fill in the blank: dp[i][i] = ___, since a single matrix requires no multiplication at all.</p>
+        <div class="quiz-fill-row">
+          <input type="text" class="quiz-fill-input" aria-label="Your answer">
+        </div>
+      </div>
+      <p class="quiz-feedback" hidden></p>
+      <p class="quiz-explain" hidden>(a) Every dp[i][j] recurrence reads dp[i][k] and dp[k+1][j] for strictly shorter chains, so those must already be solved — length-based ordering is what guarantees that. (b) A chain of one matrix needs zero multiplications, so its cost is trivially 0.</p>
+    </div>
+
+    <div class="quiz" data-test-item data-topic="Fibonacci Matrix Construction">
+      <p class="quiz-prompt">9. Which matrix M satisfies [F(n+1), F(n)]ᵀ = M · [F(n), F(n−1)]ᵀ for the Fibonacci recurrence?</p>
+      <div class="quiz-choices">
+        <button class="quiz-choice" data-correct="false">The identity matrix [[1,0],[0,1]]</button>
+        <button class="quiz-choice" data-correct="false">[[0,1],[1,1]]</button>
+        <button class="quiz-choice" data-correct="false">A matrix that depends on the specific value of n</button>
+        <button class="quiz-choice" data-correct="true">[[1,1],[1,0]]</button>
+      </div>
+      <p class="quiz-feedback" hidden></p>
+      <p class="quiz-explain" hidden>Multiplying [[1,1],[1,0]] by [F(n), F(n−1)]ᵀ gives F(n+1)=F(n)+F(n−1) in the top entry and F(n)=F(n) in the bottom — exactly matching the recurrence and its carry-over term.</p>
+    </div>
+
+    <div class="quiz" data-test-item data-topic="Matrix Exponentiation Runtime &amp; Generalization">
+      <p class="quiz-prompt">10. Answer both parts about matrix exponentiation:</p>
+      <div class="quiz-part" data-part>
+        <p class="quiz-part-label">(a) What is the runtime of computing F(n) via matrix exponentiation, and why is it better than the ordinary Θ(n) Fibonacci DP?</p>
+        <div class="quiz-choices">
+          <button class="quiz-choice" data-correct="false">Θ(n), identical to the ordinary DP but using less memory</button>
+          <button class="quiz-choice" data-correct="false">Θ(n²), since matrix multiplication is more expensive than scalar addition</button>
+          <button class="quiz-choice" data-correct="false">Θ(1), since matrix exponentiation removes the need for any recurrence at all</button>
+          <button class="quiz-choice" data-correct="true">Θ(log n) matrix multiplications, since repeated squaring computes Mⁿ logarithmically rather than linearly</button>
+        </div>
+      </div>
+      <div class="quiz-part" data-part data-answers="companion|companion matrix">
+        <p class="quiz-part-label">(b) Fill in the blank: any fixed-order linear recurrence can be advanced one step at a time by multiplying by a fixed ___ matrix, generalizing the 2×2 Fibonacci case used here.</p>
+        <div class="quiz-fill-row">
+          <input type="text" class="quiz-fill-input" aria-label="Your answer">
+        </div>
+      </div>
+      <p class="quiz-feedback" hidden></p>
+      <p class="quiz-explain" hidden>(a) Repeated squaring computes Mⁿ using only O(log n) matrix multiplications, a dramatic improvement once n is astronomically large. (b) This companion-matrix construction extends the same trick to any fixed-order linear recurrence, not just Fibonacci.</p>
+    </div>
+
+    <p class="test-warning" data-test-warning hidden></p>
+    <button class="widget-btn" data-test-submit>Submit Test</button>
+    <div class="test-result" data-test-result hidden></div>
+  </div>
+
+  <footer class="lesson-footer">STEM+ · Advanced Algorithms · Unit 5 Test — Version A</footer>
+</div>

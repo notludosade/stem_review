@@ -1,0 +1,181 @@
+<meta charset="UTF-8">
+<title>Unit 7 Test — Version A — Advanced Algorithms — STEM+</title>
+<link rel="stylesheet" href="../../../assets/style.css">
+<script src="../../../assets/tests.js" defer></script>
+<div class="page" data-tier="advanced">
+  <span class="kicker">STEM+ · Advanced Algorithms · Unit 7 · Unit Test</span>
+  <h1>Unit 7 Test — Version A</h1>
+  <p class="subtitle">String Algorithms. 10 points across every lesson in this unit — 5 questions worth 1 point, 5 worth 1 point split across two parts. Score 90% or higher to clear this unit.</p>
+  <p class="nav-links"><a href="../index.html" class="nav-toc">← Course Contents</a> <a href="unit-test-b.html" class="nav-toc">Version B →</a></p>
+
+  <div data-test data-course="Advanced Algorithms" data-unit="Unit 7" data-kind="unit_test" data-version="A">
+
+    <div class="quiz" data-test-item data-topic="Naive Substring Search Worst Case">
+      <p class="quiz-prompt">1. Naive substring search tries every starting position in the text, comparing character-by-character and restarting from scratch at the first mismatch. What is its worst-case time complexity, in terms of text length n and pattern length m?</p>
+      <div class="quiz-choices">
+        <button class="quiz-choice" data-correct="false">Θ(n+m)</button>
+        <button class="quiz-choice" data-correct="true">Θ(nm)</button>
+        <button class="quiz-choice" data-correct="false">Θ(n log m)</button>
+        <button class="quiz-choice" data-correct="false">Θ(m log n)</button>
+      </div>
+      <p class="quiz-feedback" hidden></p>
+      <p class="quiz-explain" hidden>A text like "aaaaaaaaab" against pattern "aaab" forces the naive approach to touch Θ(m) characters at nearly every one of Θ(n) starting positions, since a mismatch restarts the pattern comparison from scratch rather than reusing any information.</p>
+    </div>
+
+    <div class="quiz" data-test-item data-topic="LPS / Failure Function Definition">
+      <p class="quiz-prompt">2. For a pattern P, what does lps[i] represent?</p>
+      <div class="quiz-choices">
+        <button class="quiz-choice" data-correct="false">The number of distinct characters appearing in P[0..i].</button>
+        <button class="quiz-choice" data-correct="true">The length of the longest proper prefix of P[0..i] that is also a suffix of P[0..i].</button>
+        <button class="quiz-choice" data-correct="false">The position in the text where a match was most recently found.</button>
+        <button class="quiz-choice" data-correct="false">The total length of P minus i.</button>
+      </div>
+      <p class="quiz-feedback" hidden></p>
+      <p class="quiz-explain" hidden>This prefix-that-is-also-a-suffix length is the entire mechanism KMP uses to decide how much of a partial match can be reused after a mismatch, rather than restarting the pattern from scratch.</p>
+    </div>
+
+    <div class="quiz" data-test-item data-topic="Hash Collision &amp; Verification">
+      <p class="quiz-prompt">3. Even after two windows' hashes match in Rabin-Karp, why must the algorithm still perform a direct character-by-character comparison before reporting a match?</p>
+      <div class="quiz-choices">
+        <button class="quiz-choice" data-correct="false">Because the rolling hash update never actually computes a correct value.</button>
+        <button class="quiz-choice" data-correct="true">Because different strings can collide to the same hash value, so a hash match alone doesn't guarantee the underlying substrings are actually equal.</button>
+        <button class="quiz-choice" data-correct="false">Because the modulus q must be re-derived from the text before any comparison can be trusted.</button>
+        <button class="quiz-choice" data-correct="false">Because verification is a stylistic convention with no effect on correctness.</button>
+      </div>
+      <p class="quiz-feedback" hidden></p>
+      <p class="quiz-explain" hidden>Hashing compresses an m-character window into a single number modulo q, an inherently lossy operation, so a collision — two different strings sharing a hash — is always possible in principle, making direct verification necessary for correctness.</p>
+    </div>
+
+    <div class="quiz" data-test-item data-topic="Suffix Array Structure">
+      <p class="quiz-prompt">4. What does a suffix array SA[0..n−1], built for a text T of length n, actually store?</p>
+      <div class="quiz-choices">
+        <button class="quiz-choice" data-correct="false">The suffix strings of T themselves, stored in sorted order.</button>
+        <button class="quiz-choice" data-correct="true">The starting positions of T's suffixes, permuted so the suffixes they reference appear in sorted lexicographic order.</button>
+        <button class="quiz-choice" data-correct="false">The hash of every substring of T, indexed by starting position.</button>
+        <button class="quiz-choice" data-correct="false">The failure function values for every prefix of T.</button>
+      </div>
+      <p class="quiz-feedback" hidden></p>
+      <p class="quiz-explain" hidden>SA stores only integer starting positions; the suffixes themselves stay implicit, recoverable from T plus a starting index at any time.</p>
+    </div>
+
+    <div class="quiz" data-test-item data-test-fill data-topic="Rabin-Karp Worst-Case Complexity" data-answers="nm|mn">
+      <p class="quiz-prompt">5. Fill in the blank: if many (or adversarially-crafted) windows collide with the pattern's hash, Rabin-Karp's running time degrades in the worst case to Θ(___), identical to the naive approach.</p>
+      <div class="quiz-fill-row">
+        <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      </div>
+      <p class="quiz-feedback" hidden></p>
+      <p class="quiz-explain" hidden>Frequent hash collisions force frequent O(m) verifications at nearly every one of the n windows, erasing the average-case speed advantage entirely.</p>
+    </div>
+
+    <div class="quiz" data-test-item data-topic="KMP Failure Function Trace &amp; Build Time">
+      <p class="quiz-prompt">6. Consider the KMP failure function (LPS array) for pattern P = "aabaa". Answer both parts:</p>
+      <div class="quiz-part" data-part>
+        <p class="quiz-part-label">(a) What is lps[4] (0-indexed) for this pattern?</p>
+        <div class="quiz-choices">
+          <button class="quiz-choice" data-correct="false">0</button>
+          <button class="quiz-choice" data-correct="false">1</button>
+          <button class="quiz-choice" data-correct="true">2</button>
+          <button class="quiz-choice" data-correct="false">4</button>
+        </div>
+      </div>
+      <div class="quiz-part" data-part data-answers="m">
+        <p class="quiz-part-label">(b) Fill in the blank: building the entire lps array for a pattern of length m takes Θ(___) time.</p>
+        <div class="quiz-fill-row">
+          <input type="text" class="quiz-fill-input" aria-label="Your answer">
+        </div>
+      </div>
+      <p class="quiz-feedback" hidden></p>
+      <p class="quiz-explain" hidden>(a) The full array is lps = [0, 1, 0, 1, 2]: "aa" (prefix "a" = suffix "a") gives lps[1]=1, "aab" resets to lps[2]=0, "aaba" gives lps[3]=1, and "aabaa" gives lps[4]=2 since prefix "aa" equals suffix "aa". (b) buildLPS makes a single pass with i advancing except on fallbacks bounded by len's own growth, giving Θ(m) overall.</p>
+    </div>
+
+    <div class="quiz" data-test-item data-topic="KMP Fallback &amp; Amortized Search Runtime">
+      <p class="quiz-prompt">7. During a KMP search, suppose the pattern has matched the text through P[0..j−1] and then mismatches at P[j]. Answer both parts:</p>
+      <div class="quiz-part" data-part>
+        <p class="quiz-part-label">(a) Where does the search resume comparing from in the pattern, without ever moving the text index i backward?</p>
+        <div class="quiz-choices">
+          <button class="quiz-choice" data-correct="false">P[0], restarting the pattern from scratch</button>
+          <button class="quiz-choice" data-correct="true">P[lps[j−1]]</button>
+          <button class="quiz-choice" data-correct="false">P[j], unchanged from before the mismatch</button>
+          <button class="quiz-choice" data-correct="false">P[m−1], the last character of the pattern</button>
+        </div>
+      </div>
+      <div class="quiz-part" data-part data-answers="n">
+        <p class="quiz-part-label">(b) Fill in the blank: because i never decreases and the total fallback steps are bounded by the total number of times the pattern index was ever advanced, the entire KMP search loop runs in Θ(___) total, in terms of text length alone.</p>
+        <div class="quiz-fill-row">
+          <input type="text" class="quiz-fill-input" aria-label="Your answer">
+        </div>
+      </div>
+      <p class="quiz-feedback" hidden></p>
+      <p class="quiz-explain" hidden>(a) The pseudocode's fallback branch sets j = lps[j−1] while i is left untouched, reusing the already-matched text region instead of re-scanning it. (b) This is an amortized argument: i's monotonic advance bounds the total "budget" fallback steps can ever spend, giving Θ(n) for the search loop (plus Θ(m) to build lps, for Θ(n+m) overall).</p>
+    </div>
+
+    <div class="quiz" data-test-item data-topic="Rolling Hash Update Mechanics">
+      <p class="quiz-prompt">8. Rabin-Karp's rolling hash update formula, when sliding the window one position to the right (dropping s[0], adding character c), is newHash = ((hash − s[0]·bᵐ⁻¹)·b + c) mod q. Answer both parts:</p>
+      <div class="quiz-part" data-part>
+        <p class="quiz-part-label">(a) What does multiplying by b accomplish in this update?</p>
+        <div class="quiz-choices">
+          <button class="quiz-choice" data-correct="false">It removes the departing character's contribution entirely.</button>
+          <button class="quiz-choice" data-correct="true">It shifts every remaining term up one power of b, matching each character's new position within the window.</button>
+          <button class="quiz-choice" data-correct="false">It inserts the new character c at the lowest-order position.</button>
+          <button class="quiz-choice" data-correct="false">It recomputes the hash of the entire new window from scratch.</button>
+        </div>
+      </div>
+      <div class="quiz-part" data-part data-answers="rolling">
+        <p class="quiz-part-label">(b) Fill in the blank: this O(1)-updatable hash technique — the entire reason hashing every window of the text is affordable — is called a ___ hash.</p>
+        <div class="quiz-fill-row">
+          <input type="text" class="quiz-fill-input" aria-label="Your answer">
+        </div>
+      </div>
+      <p class="quiz-feedback" hidden></p>
+      <p class="quiz-explain" hidden>(a) Subtracting s[0]·bᵐ⁻¹ removes the departing character's (highest-order) contribution, and multiplying by b shifts every remaining term up one power to reflect its new position, before c is added at the lowest-order slot. (b) "Rolling" names exactly this O(1) incremental update, avoiding a full rescan of the window's characters.</p>
+    </div>
+
+    <div class="quiz" data-test-item data-topic="Suffix Array: Sorted Suffix Order &amp; Pattern Query">
+      <p class="quiz-prompt">9. For T = "mama" with an appended sentinel, giving "mama$", the suffixes sorted lexicographically are "$", "a$", "ama$", "ma$", "mama$" — so SA = [4, 3, 1, 2, 0]. Answer both parts:</p>
+      <div class="quiz-part" data-part>
+        <p class="quiz-part-label">(a) What is SA[2]?</p>
+        <div class="quiz-choices">
+          <button class="quiz-choice" data-correct="false">0</button>
+          <button class="quiz-choice" data-correct="true">1</button>
+          <button class="quiz-choice" data-correct="false">2</button>
+          <button class="quiz-choice" data-correct="false">4</button>
+        </div>
+      </div>
+      <div class="quiz-part" data-part data-answers="binary search">
+        <p class="quiz-part-label">(b) Fill in the blank: once a suffix array is built, a pattern query locates every occurrence by performing a ___ over the sorted suffixes to find the contiguous block starting with the pattern.</p>
+        <div class="quiz-fill-row">
+          <input type="text" class="quiz-fill-input" aria-label="Your answer">
+        </div>
+      </div>
+      <p class="quiz-feedback" hidden></p>
+      <p class="quiz-explain" hidden>(a) SA[2] is the third suffix in sorted order, "ama$", which starts at position 1 in T. (b) Every suffix starting with the same pattern sorts into one contiguous run, so binary search for that block's boundaries — comparing the pattern against the suffix at SA[mid] — locates every match in O(m log n).</p>
+    </div>
+
+    <div class="quiz" data-test-item data-topic="Suffix Array: Preprocessing Trade-off">
+      <p class="quiz-prompt">10. Building a suffix array by naively sorting all n suffixes costs up to O(n² log n), paid once per text rather than once per query. Answer both parts:</p>
+      <div class="quiz-part" data-part>
+        <p class="quiz-part-label">(a) Why is this upfront cost worthwhile when many different patterns will be queried against the same fixed text?</p>
+        <div class="quiz-choices">
+          <button class="quiz-choice" data-correct="true">Each subsequent pattern query then costs only O(m log n), instead of repeating a fresh O(n+m) scan of the whole text.</button>
+          <button class="quiz-choice" data-correct="false">It eliminates the need to store the original text T at all.</button>
+          <button class="quiz-choice" data-correct="false">It guarantees O(1) time for every future query, regardless of pattern length.</button>
+          <button class="quiz-choice" data-correct="false">It removes the need to ever verify a match once found.</button>
+        </div>
+      </div>
+      <div class="quiz-part" data-part data-answers="segment">
+        <p class="quiz-part-label">(b) Fill in the blank: this "pay more upfront, save on every repeated query" trade-off is the same one an earlier lesson's ___ tree makes relative to re-scanning an array from scratch on every range query.</p>
+        <div class="quiz-fill-row">
+          <input type="text" class="quiz-fill-input" aria-label="Your answer">
+        </div>
+      </div>
+      <p class="quiz-feedback" hidden></p>
+      <p class="quiz-explain" hidden>(a) Amortizing a one-time preprocessing cost across many queries is exactly the trade-off that makes suffix arrays worthwhile once query count is high. (b) The segment tree preprocesses an array once to answer range queries in O(log n) each, the same "pay once, save repeatedly" idea suffix arrays apply to pattern queries.</p>
+    </div>
+
+    <p class="test-warning" data-test-warning hidden></p>
+    <button class="widget-btn" data-test-submit>Submit Test</button>
+    <div class="test-result" data-test-result hidden></div>
+  </div>
+
+  <footer class="lesson-footer">STEM+ · Advanced Algorithms · Unit 7 Test — Version A</footer>
+</div>
