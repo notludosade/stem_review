@@ -1,0 +1,174 @@
+<meta charset="UTF-8">
+<title>Unit 3 Test — Version B — Data Handling: CB — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/tests.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · Data Handling: CB · Unit 3 · Unit Test</span>
+  <h1>Unit 3 Test — Version B</h1>
+  <p class="subtitle">Databases and SQL. 10 questions covering every lesson in this unit. Score 90% or higher to clear this unit.</p>
+  <p class="nav-links"><a href="../index.html" class="nav-toc">← Course Contents</a> <a href="unit-test-a.html" class="nav-toc">← Version A</a></p>
+
+  <div data-test data-course="Data Handling CB" data-unit="Unit 3" data-kind="unit_test" data-version="B">
+
+    <div class="quiz" data-test-item data-topic="Primary Keys">
+      <p class="quiz-prompt">1. A Books table needs a primary key, and includes columns ISBN, Title, Author, and Publication Year. Which column is the right choice?</p>
+      <div class="quiz-choices">
+        <button class="quiz-choice" data-correct="false">Author — many books share the same author</button>
+        <button class="quiz-choice" data-correct="true">ISBN — a unique, never-blank identifier for every book</button>
+        <button class="quiz-choice" data-correct="false">Title — different books can share a title</button>
+        <button class="quiz-choice" data-correct="false">Publication Year — many books share the same year</button>
+      </div>
+      <p class="quiz-feedback" hidden></p>
+      <p class="quiz-explain" hidden>A primary key must uniquely identify every row and never be blank — ISBN is the only column here guaranteed to satisfy both.</p>
+    </div>
+
+    <div class="quiz" data-test-item data-test-fill data-topic="Foreign Keys and Normalization" data-answers="normalization">
+      <p class="quiz-prompt">2. Fill in the blank: storing a Publisher ID in a Books table, instead of repeating each publisher's full name and address on every book row, is an example of ___ — splitting data into linked tables so any fact is stored in exactly one place.</p>
+      <div class="quiz-fill-row">
+        <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      </div>
+      <p class="quiz-feedback" hidden></p>
+      <p class="quiz-explain" hidden>Normalization is the principle behind splitting data this way, so updating a publisher's details only ever requires changing one row.</p>
+    </div>
+
+    <div class="quiz" data-test-item data-topic="SELECT and WHERE">
+      <p class="quiz-prompt">3. A table <code>employees</code> has columns emp_id, department, salary. Rows: (1, Sales, 55000), (2, IT, 72000), (3, Sales, 61000), (4, Sales, 40000). What does <code>SELECT emp_id FROM employees WHERE department = 'Sales' AND salary &gt; 50000;</code> return?</p>
+      <div class="quiz-choices">
+        <button class="quiz-choice" data-correct="false">Every emp_id in the table</button>
+        <button class="quiz-choice" data-correct="true">emp_id 1 and 3</button>
+        <button class="quiz-choice" data-correct="false">emp_id 1, 3, and 4</button>
+        <button class="quiz-choice" data-correct="false">Nothing — salary isn't listed in SELECT, so WHERE can't use it</button>
+      </div>
+      <p class="quiz-feedback" hidden></p>
+      <p class="quiz-explain" hidden>WHERE filters on department = Sales and salary > 50000 first — emp 4's salary of 40000 fails that second condition — then SELECT displays only emp_id from the two surviving rows.</p>
+    </div>
+
+    <div class="quiz" data-test-item data-test-fill data-topic="ORDER BY and LIMIT" data-answers="order by">
+      <p class="quiz-prompt">4. Fill in the blank: the SQL clause used to sort a query's results by a chosen column, with DESC added for descending order, is ___.</p>
+      <div class="quiz-fill-row">
+        <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      </div>
+      <p class="quiz-feedback" hidden></p>
+      <p class="quiz-explain" hidden>ORDER BY sorts the result set; ascending is the default unless DESC is added.</p>
+    </div>
+
+    <div class="quiz" data-test-item data-topic="Query Execution Order">
+      <p class="quiz-prompt">5. In <code>SELECT emp_id FROM employees WHERE salary &gt; 50000 ORDER BY salary DESC;</code>, which best describes the conceptual evaluation order?</p>
+      <div class="quiz-choices">
+        <button class="quiz-choice" data-correct="false">SELECT chooses columns before FROM identifies which table to use</button>
+        <button class="quiz-choice" data-correct="false">The clauses run in exactly the order they're written, top to bottom, with no exceptions</button>
+        <button class="quiz-choice" data-correct="true">FROM is resolved, then WHERE filters rows, then SELECT chooses columns, then ORDER BY sorts what's left</button>
+        <button class="quiz-choice" data-correct="false">ORDER BY always runs before WHERE, since it's a formatting step</button>
+      </div>
+      <p class="quiz-feedback" hidden></p>
+      <p class="quiz-explain" hidden>Filtering on the full row happens before column selection narrows the display, which is exactly why WHERE can reference a column that SELECT never displays.</p>
+    </div>
+
+    <div class="quiz" data-test-item data-topic="INNER JOIN vs LEFT JOIN">
+      <p class="quiz-prompt">6. <code>students</code>: (201, Maya), (202, Liam), (203, Noah). <code>enrollments</code>: (e1, student_id 201), (e2, student_id 202), (e3, student_id 777 — no such student). Answer both parts:</p>
+      <div class="quiz-part" data-part>
+        <p class="quiz-part-label">(a) An INNER JOIN of enrollments to students on student_id would exclude which enrollment?</p>
+        <div class="quiz-choices">
+          <button class="quiz-choice" data-correct="false">e1</button>
+          <button class="quiz-choice" data-correct="false">e2</button>
+          <button class="quiz-choice" data-correct="true">e3</button>
+        </div>
+      </div>
+      <div class="quiz-part" data-part>
+        <p class="quiz-part-label">(b) A LEFT JOIN from students to enrollments would still include Noah (student_id 203) in the result, with the enrollment columns filled in as what?</p>
+        <div class="quiz-choices">
+          <button class="quiz-choice" data-correct="false">Maya's enrollment details</button>
+          <button class="quiz-choice" data-correct="true">NULL</button>
+          <button class="quiz-choice" data-correct="false">The text "no match"</button>
+        </div>
+      </div>
+      <p class="quiz-explain" hidden>INNER JOIN silently drops rows with no match on either side — e3's invalid student_id has no match, so it's excluded. LEFT JOIN keeps every row from the left table regardless, filling NULL where no match exists.</p>
+    </div>
+
+    <div class="quiz" data-test-item data-topic="Aggregate Functions and GROUP BY">
+      <p class="quiz-prompt">7. A table <code>sales</code>: (s1, North, 100), (s2, South, 150), (s3, North, 300), (s4, North, 50), (s5, South, 200). <code>SELECT region, COUNT(*) AS n, SUM(amount) AS total_sum FROM sales GROUP BY region;</code>. Answer both parts:</p>
+      <div class="quiz-part" data-part>
+        <p class="quiz-part-label">(a) How many rows fall into the North group?</p>
+        <div class="quiz-choices">
+          <button class="quiz-choice" data-correct="true">3</button>
+          <button class="quiz-choice" data-correct="false">2</button>
+          <button class="quiz-choice" data-correct="false">5</button>
+        </div>
+      </div>
+      <div class="quiz-part" data-part data-answers="350">
+        <p class="quiz-part-label">(b) Fill in the blank: SUM(amount) for the South group equals ___.</p>
+        <div class="quiz-fill-row">
+          <input type="text" class="quiz-fill-input" aria-label="Your answer">
+        </div>
+      </div>
+      <p class="quiz-explain" hidden>North has three rows (100, 300, 50). South has two rows (150 and 200), summing to 350. GROUP BY collapses each region into one row with its own aggregate values.</p>
+    </div>
+
+    <div class="quiz" data-test-item data-topic="WHERE vs HAVING">
+      <p class="quiz-prompt">8. A query needs to keep only regions whose total sales exceed $400. Answer both parts:</p>
+      <div class="quiz-part" data-part>
+        <p class="quiz-part-label">(a) Which clause should filter on the condition <code>SUM(amount) &gt; 400</code>, applied after grouping?</p>
+        <div class="quiz-choices">
+          <button class="quiz-choice" data-correct="true">HAVING</button>
+          <button class="quiz-choice" data-correct="false">WHERE</button>
+          <button class="quiz-choice" data-correct="false">ORDER BY</button>
+        </div>
+      </div>
+      <div class="quiz-part" data-part>
+        <p class="quiz-part-label">(b) Why can't the other clause do this instead?</p>
+        <div class="quiz-choices">
+          <button class="quiz-choice" data-correct="false">It's simply a different name for the exact same clause</button>
+          <button class="quiz-choice" data-correct="true">It filters individual rows before grouping happens, so the summed total doesn't exist yet at that point</button>
+          <button class="quiz-choice" data-correct="false">It can only be used with text columns, never numeric ones</button>
+        </div>
+      </div>
+      <p class="quiz-explain" hidden>WHERE filters raw rows before GROUP BY computes any aggregate, so it has nothing to compare a summed total against — that's exactly what HAVING is for.</p>
+    </div>
+
+    <div class="quiz" data-test-item data-topic="Subqueries">
+      <p class="quiz-prompt">9. Using the same <code>sales</code> table from question 7 (amounts 100, 150, 300, 50, 200 — average 160): <code>SELECT sale_id FROM sales WHERE amount &gt; (SELECT AVG(amount) FROM sales);</code>. Answer both parts:</p>
+      <div class="quiz-part" data-part>
+        <p class="quiz-part-label">(a) What does the subquery <code>(SELECT AVG(amount) FROM sales)</code> compute?</p>
+        <div class="quiz-choices">
+          <button class="quiz-choice" data-correct="false">The single highest sale amount in the table</button>
+          <button class="quiz-choice" data-correct="true">The average sale amount across all rows in the table</button>
+          <button class="quiz-choice" data-correct="false">The total number of rows in the table</button>
+        </div>
+      </div>
+      <div class="quiz-part" data-part>
+        <p class="quiz-part-label">(b) Which sale_ids does the outer query return?</p>
+        <div class="quiz-choices">
+          <button class="quiz-choice" data-correct="false">s1 and s4</button>
+          <button class="quiz-choice" data-correct="true">s3 and s5</button>
+          <button class="quiz-choice" data-correct="false">All five sale_ids</button>
+        </div>
+      </div>
+      <p class="quiz-explain" hidden>The subquery computes the overall average (160); the outer query keeps only rows exceeding it — 300 and 200 both exceed 160, while 100, 150, and 50 don't.</p>
+    </div>
+
+    <div class="quiz" data-test-item data-topic="CTEs">
+      <p class="quiz-prompt">10. A multi-step query names an intermediate result with <code>WITH regional_totals AS (...)</code> before its main SELECT. Answer both parts:</p>
+      <div class="quiz-part" data-part>
+        <p class="quiz-part-label">(a) What is the main practical benefit of writing this as a CTE instead of an equivalent nested subquery?</p>
+        <div class="quiz-choices">
+          <button class="quiz-choice" data-correct="false">It always executes faster than any subquery, regardless of the database engine</button>
+          <button class="quiz-choice" data-correct="true">It lets a multi-step query be read top to bottom as named, sequential steps, rather than parsed inward through nested parentheses</button>
+          <button class="quiz-choice" data-correct="false">It removes the need for a FROM clause anywhere in the query</button>
+        </div>
+      </div>
+      <div class="quiz-part" data-part data-answers="with">
+        <p class="quiz-part-label">(b) Fill in the blank: the SQL keyword that introduces this named result is ___.</p>
+        <div class="quiz-fill-row">
+          <input type="text" class="quiz-fill-input" aria-label="Your answer">
+        </div>
+      </div>
+      <p class="quiz-explain" hidden>A CTE (introduced with WITH) and an equivalent subquery often produce the identical result — the real advantage is readability from naming each step.</p>
+    </div>
+
+    <p class="test-warning" data-test-warning hidden></p>
+    <button class="widget-btn" data-test-submit>Submit Test</button>
+    <div class="test-result" data-test-result hidden></div>
+  </div>
+
+  <footer class="lesson-footer">STEM+ · Data Handling: CB · Unit 3 Test — Version B</footer>
+</div>
