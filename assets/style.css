@@ -73,6 +73,32 @@
 :root[data-theme="light"] .page[data-tier="intro"], :root[data-theme="light"] .toc-item[data-tier="intro"] { --accent: #1f7a63; --accent-soft: #dcf1ea; }
 :root[data-theme="light"] .page[data-tier="advanced"], :root[data-theme="light"] .toc-item[data-tier="advanced"] { --accent: #3d3a7a; --accent-soft: #e5e3f7; }
 
+/* Pathway identity colors: each published pathway (and its capstone project) gets its own
+   --accent/--accent-soft so the whole track reads as one visual thread — distinct from the
+   difficulty-mood tiers above, which grade a single course instead of a multi-course track. */
+.page[data-pathway="swe"], .toc-item[data-pathway="swe"] { --accent: #2c5f8a; --accent-soft: #dbe7f2; }
+.page[data-pathway="ai-data"], .toc-item[data-pathway="ai-data"] { --accent: #7a3d6e; --accent-soft: #f3e3ef; }
+.page[data-pathway="math"], .toc-item[data-pathway="math"] { --accent: #8a6d1f; --accent-soft: #f4ecd6; }
+.page[data-pathway="engineering"], .toc-item[data-pathway="engineering"] { --accent: #a3491f; --accent-soft: #f6e2d4; }
+.page[data-pathway="algorithms"], .toc-item[data-pathway="algorithms"] { --accent: #8a2b3d; --accent-soft: #f4dde2; }
+@media (prefers-color-scheme: dark) {
+  .page[data-pathway="swe"], .toc-item[data-pathway="swe"] { --accent: #7fb2e0; --accent-soft: #1a2836; }
+  .page[data-pathway="ai-data"], .toc-item[data-pathway="ai-data"] { --accent: #d999c9; --accent-soft: #2e1f2b; }
+  .page[data-pathway="math"], .toc-item[data-pathway="math"] { --accent: #dcb84f; --accent-soft: #2f2712; }
+  .page[data-pathway="engineering"], .toc-item[data-pathway="engineering"] { --accent: #e0925f; --accent-soft: #33200f; }
+  .page[data-pathway="algorithms"], .toc-item[data-pathway="algorithms"] { --accent: #e08a97; --accent-soft: #331a1f; }
+}
+:root[data-theme="dark"] .page[data-pathway="swe"], :root[data-theme="dark"] .toc-item[data-pathway="swe"] { --accent: #7fb2e0; --accent-soft: #1a2836; }
+:root[data-theme="dark"] .page[data-pathway="ai-data"], :root[data-theme="dark"] .toc-item[data-pathway="ai-data"] { --accent: #d999c9; --accent-soft: #2e1f2b; }
+:root[data-theme="dark"] .page[data-pathway="math"], :root[data-theme="dark"] .toc-item[data-pathway="math"] { --accent: #dcb84f; --accent-soft: #2f2712; }
+:root[data-theme="dark"] .page[data-pathway="engineering"], :root[data-theme="dark"] .toc-item[data-pathway="engineering"] { --accent: #e0925f; --accent-soft: #33200f; }
+:root[data-theme="dark"] .page[data-pathway="algorithms"], :root[data-theme="dark"] .toc-item[data-pathway="algorithms"] { --accent: #e08a97; --accent-soft: #331a1f; }
+:root[data-theme="light"] .page[data-pathway="swe"], :root[data-theme="light"] .toc-item[data-pathway="swe"] { --accent: #2c5f8a; --accent-soft: #dbe7f2; }
+:root[data-theme="light"] .page[data-pathway="ai-data"], :root[data-theme="light"] .toc-item[data-pathway="ai-data"] { --accent: #7a3d6e; --accent-soft: #f3e3ef; }
+:root[data-theme="light"] .page[data-pathway="math"], :root[data-theme="light"] .toc-item[data-pathway="math"] { --accent: #8a6d1f; --accent-soft: #f4ecd6; }
+:root[data-theme="light"] .page[data-pathway="engineering"], :root[data-theme="light"] .toc-item[data-pathway="engineering"] { --accent: #a3491f; --accent-soft: #f6e2d4; }
+:root[data-theme="light"] .page[data-pathway="algorithms"], :root[data-theme="light"] .toc-item[data-pathway="algorithms"] { --accent: #8a2b3d; --accent-soft: #f4dde2; }
+
 * { box-sizing: border-box; }
 
 body {
@@ -506,6 +532,50 @@ footer.lesson-footer {
 }
 .toc-item.is-soon:hover { border-color: var(--border); background: none; }
 .toc-item.is-soon .toc-num { color: var(--muted); }
+
+/* Project lock badges — dropped into a hub/pathway listing's .toc-sub by mountProjectStatus(),
+   computed live from this browser's saved course-exam results. */
+.lock-badge {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-weight: 700;
+  padding: 0.15rem 0.55rem;
+  border-radius: 20px;
+  display: inline-block;
+  margin-top: 0.4rem;
+}
+.lock-badge.is-unlocked { color: var(--correct); background: var(--correct-soft); }
+.lock-badge.is-locked { color: var(--muted); background: var(--code-bg); }
+
+/* Reflection component (project pages) — open-ended text answers, saved to localStorage */
+.reflection-item { margin: 1.6rem 0; }
+.reflection-prompt { font-weight: 600; margin: 0 0 0.5rem; }
+.reflection-textarea {
+  width: 100%;
+  min-height: 7rem;
+  font-family: inherit;
+  font-size: 0.98rem;
+  padding: 0.7rem 0.9rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg);
+  color: var(--text);
+  resize: vertical;
+}
+.reflection-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-top: 1.4rem;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 0.9rem;
+}
+.reflection-actions label { display: flex; align-items: center; gap: 0.4rem; color: var(--muted); }
+.reflection-status { color: var(--muted); font-size: 0.85rem; }
+.reflection-status.is-saved { color: var(--correct); }
 
 /* Unit accordions on course table-of-contents pages */
 details.unit-toc { margin: 2.2rem 0 0.8rem; }

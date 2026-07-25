@@ -31,10 +31,36 @@
 //                        <div data-report-body></div>
 //                        <button data-report-print>Print Report</button>
 //                      </div>
+//   Project gate (Projects/*.html): locked until every listed course's exam has been passed —
+//   same "course exam, not just units" standard as the course-exam gate above, generalized
+//   across courses instead of across units within one course.
+//     <div data-project-gate data-required-courses="Course A|Course B|…">
+//       <div data-project-locked hidden></div>
+//       <div data-project-content hidden> … the brief + <div data-reflection> below … </div>
+//     </div>
+//   Project status badge (hub/pathway listings) — read-only, never hides anything, just
+//   reports this browser's progress toward a project so it can be judged "separately":
+//     <span data-project-status data-required-courses="Course A|Course B|…"></span>
+//   Single-course badge (pathway listings, one per course in the route):
+//     <span data-course-status="Course A"></span>
+//   Reflection (project pages) — open-ended answers, saved to this browser's localStorage,
+//   independent of the pass/fail scoring in mountTest above:
+//     <div data-reflection data-project="unique-project-id">
+//       <div data-reflection-item data-key="q1">
+//         <p class="reflection-prompt">…</p>
+//         <textarea class="reflection-textarea" data-reflection-input></textarea>
+//       </div>
+//       <div class="reflection-actions">
+//         <button data-reflection-save class="widget-btn">Save Reflection</button>
+//         <label><input type="checkbox" data-reflection-complete> Mark project complete</label>
+//         <span data-reflection-status class="reflection-status"></span>
+//       </div>
+//     </div>
 window.STEMPlusTests = (function () {
   var PASS_THRESHOLD = 0.9;
   var WEAK_TOPIC_THRESHOLD = 0.7;
   var STORAGE_KEY = 'stemplus:results:v1';
+  var PROJECTS_STORAGE_KEY = 'stemplus:projects:v1';
 
   function normalize(s) {
     return s.trim().toLowerCase();
@@ -121,6 +147,131 @@ window.STEMPlusTests = (function () {
     topics.sort((a, b) => a.accuracy - b.accuracy);
 
     return { units, courseExam, topics };
+  }
+
+  function isCourseExamPassed(course) {
+    return summarizeCourseExam(getResultsForCourse(course)).passed;
+  }
+
+  function requiredCoursesStatus(courses) {
+    return courses.map((course) => ({ course, passed: isCourseExamPassed(course) }));
+  }
+
+  function loadProjectData() {
+    try {
+      var raw = window.localStorage.getItem(PROJECTS_STORAGE_KEY);
+      return raw ? JSON.parse(raw) : {};
+    } catch (err) {
+      console.error('Could not read saved project progress', err);
+      return {};
+    }
+  }
+
+  function saveProjectData(data) {
+    try {
+      window.localStorage.setItem(PROJECTS_STORAGE_KEY, JSON.stringify(data));
+      return true;
+    } catch (err) {
+      console.error('Could not save project progress', err);
+      return false;
+    }
+  }
+
+  function isProjectComplete(projectId) {
+    var data = loadProjectData();
+    return !!(data[projectId] && data[projectId].complete);
+  }
+
+  function mountProjectGate(gate) {
+    const required = (gate.getAttribute('data-required-courses') || '').split('|').filter(Boolean);
+    const locked = gate.querySelector('[data-project-locked]');
+    const content = gate.querySelector('[data-project-content]');
+    const statuses = requiredCoursesStatus(required);
+    const missing = statuses.filter((s) => !s.passed);
+
+    if (missing.length > 0) {
+      if (locked) {
+        let html = '<p class="box-label">Project locked</p>';
+        html += '<p>This project draws on every course below — pass each course exam (not just the unit tests) before it unlocks:</p><ul>';
+        statuses.forEach((s) => {
+          html += '<li>' + (s.passed ? '✓ ' : '— ') + s.course + (s.passed ? ' — passed' : ' — not yet') + '</li>';
+        });
+        html += '</ul>';
+        locked.innerHTML = html;
+        locked.hidden = false;
+      }
+      if (content) content.hidden = true;
+      return;
+    }
+
+    if (locked) locked.hidden = true;
+    if (content) content.hidden = false;
+  }
+
+  function mountCourseStatus(el) {
+    const course = el.getAttribute('data-course-status');
+    const passed = isCourseExamPassed(course);
+    el.classList.add('lock-badge');
+    el.classList.remove('is-locked', 'is-unlocked');
+    el.classList.add(passed ? 'is-unlocked' : 'is-locked');
+    el.textContent = passed ? 'Course exam passed' : 'Course exam not yet passed';
+  }
+
+  function mountProjectStatus(el) {
+    const required = (el.getAttribute('data-required-courses') || '').split('|').filter(Boolean);
+    const statuses = requiredCoursesStatus(required);
+    const passedCount = statuses.filter((s) => s.passed).length;
+    const unlocked = passedCount === statuses.length;
+    el.classList.add('lock-badge');
+    el.classList.remove('is-locked', 'is-unlocked');
+    el.classList.add(unlocked ? 'is-unlocked' : 'is-locked');
+    el.textContent = unlocked ? 'Unlocked' : 'Locked · ' + passedCount + '/' + statuses.length + ' courses passed';
+  }
+
+  function mountReflection(container) {
+    if (!container) return;
+    const projectId = container.getAttribute('data-reflection');
+    const items = Array.from(container.querySelectorAll('[data-reflection-item]'));
+    const completeBox = container.querySelector('[data-reflection-complete]');
+    const status = container.querySelector('[data-reflection-status]');
+    const saveBtn = container.querySelector('[data-reflection-save]');
+
+    const saved = loadProjectData()[projectId];
+    if (saved) {
+      items.forEach((item) => {
+        const key = item.getAttribute('data-key');
+        const textarea = item.querySelector('[data-reflection-input]');
+        if (textarea && saved.answers && saved.answers[key] != null) textarea.value = saved.answers[key];
+      });
+      if (completeBox) completeBox.checked = !!saved.complete;
+      if (status && saved.savedAt) {
+        status.textContent = 'Last saved ' + new Date(saved.savedAt).toLocaleString() + (saved.complete ? ' — marked complete.' : '.');
+        status.classList.add('is-saved');
+      }
+    }
+
+    if (!saveBtn) return;
+    saveBtn.addEventListener('click', () => {
+      const answers = {};
+      items.forEach((item) => {
+        const key = item.getAttribute('data-key');
+        const textarea = item.querySelector('[data-reflection-input]');
+        answers[key] = textarea ? textarea.value : '';
+      });
+      const complete = completeBox ? completeBox.checked : false;
+      const data = loadProjectData();
+      data[projectId] = { answers, complete, savedAt: new Date().toISOString() };
+      const ok = saveProjectData(data);
+      if (status) {
+        status.classList.remove('is-saved');
+        if (ok) {
+          status.textContent = 'Saved just now' + (complete ? ' — marked complete.' : '.');
+          status.classList.add('is-saved');
+        } else {
+          status.textContent = 'This browser could not save your reflection (storage may be disabled or full).';
+        }
+      }
+    });
   }
 
   function isSubAnswered(el) {
@@ -367,7 +518,15 @@ window.STEMPlusTests = (function () {
     });
     document.querySelectorAll('[data-exam-gate]').forEach(mountCourseExamGate);
     document.querySelectorAll('[data-report]').forEach(mountProgressReport);
+    document.querySelectorAll('[data-project-gate]').forEach(mountProjectGate);
+    document.querySelectorAll('[data-project-status]').forEach(mountProjectStatus);
+    document.querySelectorAll('[data-course-status]').forEach(mountCourseStatus);
+    document.querySelectorAll('[data-reflection]').forEach(mountReflection);
   });
 
-  return { mountTest, mountCourseExamGate, mountProgressReport };
+  return {
+    mountTest, mountCourseExamGate, mountProgressReport,
+    mountProjectGate, mountProjectStatus, mountCourseStatus, mountReflection,
+    isCourseExamPassed, isProjectComplete,
+  };
 })();
