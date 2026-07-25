@@ -2,8 +2,20 @@
 // Two markup contracts:
 //   Multiple choice: <div class="quiz" data-quiz> ... button.quiz-choice[data-correct] ... .quiz-feedback, .quiz-explain
 //   Fill-in-blank:   <div class="quiz" data-quiz-fill data-answers="a|b|c"> ... .quiz-fill-input, .quiz-fill-check ...
+function shuffleQuizChoices(container) {
+  container.querySelectorAll('.quiz-choices').forEach((choicesEl) => {
+    const items = Array.from(choicesEl.children);
+    for (let i = items.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [items[i], items[j]] = [items[j], items[i]];
+    }
+    items.forEach((item) => choicesEl.appendChild(item));
+  });
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   document.querySelectorAll('[data-quiz]').forEach((quiz) => {
+    shuffleQuizChoices(quiz);
     const choices = Array.from(quiz.querySelectorAll('.quiz-choice'));
     const feedback = quiz.querySelector('.quiz-feedback');
     const explain = quiz.querySelector('.quiz-explain');

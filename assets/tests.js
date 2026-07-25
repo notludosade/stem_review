@@ -197,6 +197,17 @@ window.STEMPlusTests = (function () {
     if (explain) explain.hidden = false;
   }
 
+  function shuffleChoices(container) {
+    container.querySelectorAll('.quiz-choices').forEach((choicesEl) => {
+      const items = Array.from(choicesEl.children);
+      for (let i = items.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [items[i], items[j]] = [items[j], items[i]];
+      }
+      items.forEach((item) => choicesEl.appendChild(item));
+    });
+  }
+
   function wireSelection(container) {
     container.querySelectorAll('[data-test-item]:not([data-test-fill]) .quiz-choice').forEach((choice) => {
       choice.addEventListener('click', () => {
@@ -243,6 +254,7 @@ window.STEMPlusTests = (function () {
   }
 
   function mountTest(container) {
+    shuffleChoices(container);
     wireSelection(container);
     const submit = container.querySelector('[data-test-submit]');
     const warning = container.querySelector('[data-test-warning]');
