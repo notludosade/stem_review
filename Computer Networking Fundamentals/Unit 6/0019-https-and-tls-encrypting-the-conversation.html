@@ -1,0 +1,98 @@
+<meta charset="UTF-8">
+<title>Lesson 19: HTTPS and TLS — Encrypting the Conversation — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · Computer Networking Fundamentals · Unit 6 · Lesson 19</span>
+  <h1>HTTPS and TLS — Encrypting the Conversation</h1>
+  <p class="subtitle">Every HTTP request and response from Lessons 17 and 18 was plain, readable text. Anyone with access to the wire in between could read every word — this lesson is the fix.</p>
+  <p class="nav-links"><a href="0018-status-codes-headers-and-statelessness.html" class="nav-prev">← Lesson 18</a> <a href="0020-rest-apis-http-as-an-interface-between-programs.html" class="nav-next">Lesson 20 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Recall that a packet's journey (Lesson 2) typically crosses several independently owned networks — your home network, your ISP, one or more backbone carriers, the destination's ISP. Plain HTTP, exactly as shown in Lesson 17's widget, travels through every one of those hops as completely readable text. Any device along that path capable of inspecting traffic could read your password, your messages, or your search terms, in plain sight. HTTPS exists to close that gap.</p>
+
+  <h2>HTTPS: HTTP, plus encryption</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    <strong>HTTPS</strong> (HTTP Secure) is ordinary HTTP — the exact same request-response pattern, methods, and status codes from Lessons 17 and 18 — sent over an <strong>encrypted</strong> connection instead of a plain one. <strong>Encryption</strong> transforms readable data into a scrambled form that's computationally infeasible to reverse without possessing the correct key, so that anyone intercepting the traffic along the way sees only that scrambled form, not the original request or response.
+  </div>
+
+  <h2>TLS: the protocol doing the actual encrypting</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    <strong>TLS</strong> (Transport Layer Security) is the protocol that actually performs HTTPS's encryption, sitting logically between the Transport layer (Lesson 15's TCP) and the Application layer (HTTP) — it wraps an ordinary TCP connection in an encrypted tunnel before any HTTP request or response is sent through it. TLS also verifies the server's identity using a <strong>certificate</strong> — a credential, issued by a trusted third party, proving that a server claiming to be <code>example.com</code> actually is.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why verifying identity matters just as much as encrypting the data</span>
+    Encryption alone protects data from being <em>read</em> by an eavesdropper, but it does nothing to stop you from being tricked into having an encrypted conversation with the wrong party entirely. Without a way to verify who's actually on the other end, an attacker could intercept a connection, present themselves as the real server, and have a perfectly encrypted — but completely compromised — conversation with you, reading everything you send before quietly forwarding it (or not) to the real destination. This exact scenario, called a man-in-the-middle attack, is covered directly in Lesson 25; a certificate is what makes it far harder to pull off, because your browser refuses to proceed if the certificate presented doesn't check out.
+  </div>
+
+  <h2>The TLS handshake, briefly</h2>
+  <p>Before any encrypted HTTP traffic flows, TLS performs its own handshake — layered on top of, and happening right after, TCP's own three-way handshake from Lesson 15. In broad strokes: the client and server agree on which encryption method to use, the server presents its certificate for the client to verify, and both sides derive a shared secret key that only the two of them know, used to encrypt everything that follows. Only once this TLS handshake completes does the actual HTTP request finally get sent — meaning an HTTPS connection has strictly more setup overhead than plain HTTP, a small, worthwhile cost for the protection it buys.</p>
+
+  <div class="box example">
+    <span class="box-label">Worked example: what actually happens when you load an HTTPS site</span>
+    Your browser opens a TCP connection (Lesson 15's handshake). Then TLS performs its own handshake: negotiating encryption, verifying the server's certificate, and establishing a shared key. Only after both handshakes complete does your browser send its actual HTTP GET request — but now it's encrypted before it ever leaves your device, and every intermediate network it crosses only ever sees scrambled bytes, not your original request or the server's response.
+  </div>
+
+  <div class="box">
+    <span class="box-label">Recognizing it</span>
+    Port-wise, this lesson connects directly back to Lesson 14: plain HTTP defaults to port 80; HTTPS defaults to port 443. A browser's padlock icon, and a URL beginning with <code>https://</code> instead of <code>http://</code>, are the everyday, user-facing signals that a connection's TLS handshake succeeded and the conversation that follows is encrypted.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What does HTTPS actually add on top of ordinary HTTP?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Encryption of the connection, via TLS — the same HTTP request-response pattern, just sent over a scrambled channel instead of a plain one.</button>
+      <button class="quiz-choice" data-correct="false">A completely different set of methods and status codes than HTTP.</button>
+      <button class="quiz-choice" data-correct="false">Guaranteed delivery, on top of what TCP already guarantees.</button>
+      <button class="quiz-choice" data-correct="false">Compression of the response body only.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>HTTPS is ordinary HTTP encrypted by TLS — the request-response pattern itself is unchanged.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why does TLS verify the server's identity using a certificate, instead of just encrypting the data and stopping there?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Encryption alone doesn't stop you from having a perfectly encrypted conversation with an attacker impersonating the real server — a certificate is what lets your browser confirm it's actually talking to the right party.</button>
+      <button class="quiz-choice" data-correct="false">Certificates are only needed to make encryption run faster.</button>
+      <button class="quiz-choice" data-correct="false">Identity verification is unrelated to security and only affects page loading speed.</button>
+      <button class="quiz-choice" data-correct="false">TLS does not actually verify identity at all.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Encryption protects data from being read; a certificate protects against talking to the wrong party in the first place — both matter.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. When does an HTTPS connection actually start sending the HTTP request?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Only after both the TCP three-way handshake and the TLS handshake (negotiation, certificate verification, key exchange) have completed.</button>
+      <button class="quiz-choice" data-correct="false">Immediately, before any handshake of any kind.</button>
+      <button class="quiz-choice" data-correct="false">Only after the TLS handshake, skipping TCP's handshake entirely.</button>
+      <button class="quiz-choice" data-correct="false">HTTPS never actually sends a standard HTTP request.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>TLS's handshake happens on top of, and after, TCP's own handshake — only then does the encrypted HTTP request get sent.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="certificate">
+    <p class="quiz-prompt">4. Fill in the blank: a credential, issued by a trusted third party, that proves a server is who it claims to be, is called a ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A certificate is what lets a browser verify server identity before proceeding with an encrypted connection.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: Cloudflare's "<a href="https://www.cloudflare.com/learning/ssl/transport-layer-security-tls/">What is Transport Layer Security (TLS)?</a>" walks through the TLS handshake in more detail than this lesson had room for, useful context before Lesson 25 covers what happens when a connection <em>isn't</em> properly encrypted or verified.</p>
+
+  <p class="ask-teacher">Want to look at a real website's certificate details in a browser together? Ask your teacher — that's what I'm here for. Next up: HTTP isn't only for loading web pages in a browser — REST APIs use the exact same protocol as an interface between two programs.</p>
+
+  <footer class="lesson-footer">STEM+ · Computer Networking Fundamentals · Lesson 19 of the course sequence</footer>
+</div>

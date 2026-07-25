@@ -1,0 +1,92 @@
+<meta charset="UTF-8">
+<title>Lesson 13: DNS — Turning Names into Addresses — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · Computer Networking Fundamentals · Unit 4 · Lesson 13</span>
+  <h1>DNS — Turning Names into Addresses</h1>
+  <p class="subtitle">Nobody types an IP address into a browser. DNS is the system quietly translating the name you typed into the address every earlier lesson in this unit has actually needed.</p>
+  <p class="nav-links"><a href="0012-nat-sharing-one-public-address.html" class="nav-prev">← Lesson 12</a> <a href="../Unit%205/0014-ports-and-multiplexing.html" class="nav-next">Unit 5, Lesson 14 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Every lesson in this unit has assumed you already know the destination's IP address. In reality, you almost never do — you type a domain name, and something else figures out the address for you, invisibly, in a fraction of a second. That something is DNS, and understanding it means understanding that "typing a website name" is actually two separate network operations stacked on top of each other, not one.</p>
+
+  <h2>Domain names and the DNS</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    A <strong>domain name</strong> is a human-readable name — like <code>example.com</code> — that identifies a resource on the internet without requiring anyone to memorize its numeric IP address. <strong>DNS</strong> (Domain Name System) is the distributed system that translates domain names into IP addresses on request, functioning as the internet's phone book: you look up a name, and DNS hands back the number to actually dial.
+  </div>
+
+  <h2>How a lookup actually works</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    A <strong>resolver</strong> is the piece of software (usually run by your ISP or a public service like a company's own DNS server) that performs the actual lookup on your behalf. A domain name isn't stored in one single place — DNS is organized hierarchically, and a resolver typically queries a chain of servers, each more specific than the last: a <strong>root server</strong> (knows only which server handles each top-level domain, like <code>.com</code> or <code>.org</code>), a <strong>TLD server</strong> (knows which server is authoritative for a specific domain within that top-level domain), and finally an <strong>authoritative server</strong> for that exact domain, which holds the actual answer.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Worked example: resolving example.com</span>
+    Your device asks its resolver for <code>example.com</code>'s IP address. The resolver first asks a root server, which doesn't know the answer but knows which server handles <code>.com</code> domains, and points the resolver there. The resolver then asks that <code>.com</code> TLD server, which doesn't know the exact IP address either, but knows which server is authoritative for <code>example.com</code> specifically, and points the resolver there. Finally, the resolver asks that authoritative server directly, which holds an <strong>A record</strong> (the specific DNS record type mapping a domain name to an IPv4 address) for <code>example.com</code>, and returns the actual IP address. The resolver hands that address back to your device, and only <em>then</em> does your device have what it needs to actually connect — everything this unit's earlier lessons covered (routing, addressing) happens only after this lookup finishes.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why DNS is hierarchical instead of one giant lookup table</span>
+    No single server could realistically hold the authoritative answer for every domain name that exists — the internet has hundreds of millions of registered domains, updated constantly. Splitting the responsibility hierarchically means each server only needs to know a small, manageable slice: a root server needs to know only a few hundred top-level domains, not hundreds of millions of individual sites. This is the same "each hop only needs local knowledge" idea Lesson 11 introduced for routing, applied to name lookups instead of packet forwarding.
+  </div>
+
+  <p>In practice, this whole multi-step lookup usually takes a few milliseconds, and it's rarely even repeated for the same domain: resolvers <strong>cache</strong> (temporarily store) answers they've already looked up, for a length of time the authoritative server specifies, so that visiting the same site again shortly after doesn't require repeating the full root-to-authoritative chain.</p>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What problem does DNS solve?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">It translates human-readable domain names into the numeric IP addresses actually needed to route a connection.</button>
+      <button class="quiz-choice" data-correct="false">It encrypts traffic between a browser and a web server.</button>
+      <button class="quiz-choice" data-correct="false">It assigns MAC addresses to new devices.</button>
+      <button class="quiz-choice" data-correct="false">It compresses web pages before they're downloaded.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>DNS is purely a name-to-address translation system, functioning as the internet's phone book.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why is DNS organized hierarchically (root, then TLD, then authoritative server) instead of one giant central lookup table?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">No single server could realistically hold the authoritative answer for every domain on the internet — splitting responsibility means each server only needs a small, manageable slice of knowledge.</button>
+      <button class="quiz-choice" data-correct="false">A hierarchy is required by law in every country.</button>
+      <button class="quiz-choice" data-correct="false">It makes lookups slower on purpose, for security reasons.</button>
+      <button class="quiz-choice" data-correct="false">A single table would run out of storage after just a few thousand domains.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Hierarchical delegation lets each server hold only a manageable slice of the total mapping, mirroring how routers only need local, next-hop knowledge.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. What does a resolver do when it caches a DNS answer?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">It temporarily stores the answer so a repeated lookup for the same domain shortly after doesn't require repeating the full root-to-authoritative chain.</button>
+      <button class="quiz-choice" data-correct="false">It permanently deletes the domain's DNS record after one use.</button>
+      <button class="quiz-choice" data-correct="false">It forwards the answer to every other resolver on the internet.</button>
+      <button class="quiz-choice" data-correct="false">It converts the domain name into a MAC address for future use.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Caching avoids repeating the multi-step lookup for domains that were already resolved recently.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="a record">
+    <p class="quiz-prompt">4. Fill in the blank: the specific DNS record type that maps a domain name to an IPv4 address is called an ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>An A record is the DNS record type held by the authoritative server, returned at the end of a successful lookup.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: Cloudflare's "<a href="https://www.cloudflare.com/learning/dns/what-is-dns/">What Is DNS?</a>" includes its own root-TLD-authoritative diagram, useful for comparing against the worked example above from a slightly different angle.</p>
+
+  <p class="ask-teacher">Want to look up a real domain's DNS records together, or see how long a cached lookup actually saves in practice? Ask your teacher — that's what I'm here for. Unit 4 is complete. Next up: Unit 5 zooms into the Transport layer this unit kept referencing but never fully opened — starting with ports, the piece that finally gets data to the correct <em>program</em>, not just the correct device.</p>
+
+  <footer class="lesson-footer">STEM+ · Computer Networking Fundamentals · Lesson 13 of the course sequence</footer>
+</div>

@@ -1,0 +1,136 @@
+<meta charset="UTF-8">
+<title>Lesson 19: Choosing a Cloud Architecture for a Real App — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<script src="../../assets/interactive.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · Cloud Computing A · Unit 7 · Lesson 19</span>
+  <h1>Choosing a Cloud Architecture for a Real App</h1>
+  <p class="subtitle">Every lesson so far taught one decision in isolation: which compute model, which storage model, whether to use a queue. A real architecture is all of those decisions made together, for one actual workload — and the right combination changes completely depending on what that workload actually looks like.</p>
+  <p class="nav-links"><a href="../Unit%206/0018-redundancy-failover-and-designing-for-failure.html" class="nav-prev">← Unit 6, Lesson 18</a> <a href="0020-vendor-lock-in-and-portability.html" class="nav-next">Lesson 20 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>There is no single "correct" cloud architecture — only an architecture that fits a specific workload's traffic pattern, data shape, and reliability needs, or one that doesn't. This lesson doesn't introduce new services; it's about the judgment call of combining everything from Units 2 through 6 into one coherent design, and recognizing that the same set of building blocks produces a genuinely different architecture for a genuinely different workload.</p>
+
+  <h2>The questions, in the order they matter</h2>
+  <div class="box">
+    <span class="box-label">A working checklist</span>
+    <strong>Compute (Unit 2):</strong> Is the workload constant, spiky, or mostly idle? <strong>Storage (Unit 3):</strong> Whole files, database rows, or a shared filesystem — and how often is it actually touched? <strong>Networking (Unit 4):</strong> Does it serve the public internet, and does distance to users matter? <strong>Managed services (Unit 5):</strong> Is there a well-understood piece of infrastructure (a database, a queue) worth not building by hand? <strong>Scale and reliability (Unit 6):</strong> What does downtime actually cost, and does load change predictably or unpredictably? Answering these, in order, for a real workload turns "design an architecture" from a guess into a series of small, defensible decisions.
+  </div>
+
+  <h2>See how the answer changes with the workload</h2>
+  <p>The same toolbox — compute, storage, networking, managed services, elasticity — produces three very different architectures below, depending only on what's actually being built.</p>
+
+  <div class="widget" id="arch-widget">
+    <p class="widget-label">Interactive: matching architecture to workload</p>
+    <div class="fm-tabs" id="arch-tabs">
+      <button class="fm-tab is-active" type="button" data-arch-scenario="photo">Photo-Sharing App</button>
+      <button class="fm-tab" type="button" data-arch-scenario="api">Spiky Internal API</button>
+      <button class="fm-tab" type="button" data-arch-scenario="orders">Steady-State Order Database</button>
+    </div>
+
+    <div class="fm-panel" data-arch-panel="photo">
+      <p><strong>Shape:</strong> unpredictable public uploads, global users, media files, read far more than written.</p>
+      <ul>
+        <li><strong>Compute:</strong> containers in an auto scaling group for the API tier; a serverless function to generate thumbnails on upload.</li>
+        <li><strong>Storage:</strong> object storage for photos, with a lifecycle policy moving rarely-viewed ones to a cold tier.</li>
+        <li><strong>Networking:</strong> a CDN in front of the photo storage for fast delivery worldwide; a load balancer in front of the API tier.</li>
+        <li><strong>Reliability:</strong> multi-AZ deployment for the API tier; object storage's built-in high durability covers the photos themselves.</li>
+      </ul>
+    </div>
+    <div class="fm-panel" data-arch-panel="api" hidden>
+      <p><strong>Shape:</strong> internal-only, bursts of activity a few times a day, long idle stretches in between.</p>
+      <ul>
+        <li><strong>Compute:</strong> a serverless function — scale-to-zero is close to free during the long idle stretches, and cold starts are an acceptable tradeoff for internal, non-latency-critical traffic.</li>
+        <li><strong>Storage:</strong> minimal; a managed queue buffers each burst so downstream systems process it at their own pace.</li>
+        <li><strong>Networking:</strong> stays inside a private subnet — it's internal-only, so no public route or CDN is needed.</li>
+        <li><strong>Reliability:</strong> the queue itself is the resilience story here — a burst just makes the queue longer, not a crashed system.</li>
+      </ul>
+    </div>
+    <div class="fm-panel" data-arch-panel="orders" hidden>
+      <p><strong>Shape:</strong> constant, moderate, predictable transactional load; correctness and durability matter enormously.</p>
+      <ul>
+        <li><strong>Compute:</strong> a modestly sized, steady fleet — elasticity's aggressive scaling matters less when load barely changes hour to hour.</li>
+        <li><strong>Storage:</strong> a managed database on block storage, chosen specifically for low-latency, small, transactional reads and writes.</li>
+        <li><strong>Networking:</strong> the database sits in a private subnet, reachable only from the app tier in a public subnet behind a load balancer.</li>
+        <li><strong>Reliability:</strong> the managed database's automatic failover to a standby, plus a multi-AZ app tier — downtime here has a real business cost.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why copying another company's architecture is a common mistake</span>
+    A widely publicized architecture diagram from a huge streaming company solves problems that huge streaming company actually has — massive global scale, extreme personalization, a specific cost structure. Copying it wholesale for a five-person startup's internal tool imports all of that complexity without any of the reasons for it: more services to operate, more failure modes to design around, and often a larger bill for capacity nobody needs yet. The right process is always the checklist above, applied honestly to the actual workload in front of you — not a template borrowed from a company solving a different problem at a different scale.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. Why does the spiky internal API scenario favor serverless compute, while the steady-state order database scenario favors a steady fleet of provisioned servers?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Serverless's scale-to-zero suits long idle stretches between bursts; a steady, predictable load doesn't benefit as much from that elasticity and can be sized once.</button>
+      <button class="quiz-choice" data-correct="false">Serverless is always cheaper than provisioned servers for every workload, with no exceptions.</button>
+      <button class="quiz-choice" data-correct="false">Databases are technically incapable of running on provisioned servers.</button>
+      <button class="quiz-choice" data-correct="false">There is no meaningful difference between the two workloads' compute needs.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Matching compute model to traffic pattern — spiky and idle vs. steady and predictable — is exactly the judgment call this lesson is about.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. In the photo-sharing app scenario, why does a CDN make sense in front of the photo storage, but not in front of the internal API scenario's traffic?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">The photo app serves static, cacheable content to global public users, while the internal API is private, internal-only traffic with no public, cacheable content to distribute.</button>
+      <button class="quiz-choice" data-correct="false">CDNs are only compatible with serverless compute, never with containers.</button>
+      <button class="quiz-choice" data-correct="false">Internal APIs are always physically incapable of using a CDN.</button>
+      <button class="quiz-choice" data-correct="false">A CDN would make the internal API's traffic slower, so it's avoided for that reason alone.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A CDN earns its keep on public, cacheable, globally-distributed content — not on private, internal-only traffic.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why is copying a huge streaming company's public architecture diagram risky for a five-person startup's internal tool?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">It imports complexity, more services to operate, and often unnecessary cost, without the scale or problems that justified that complexity in the first place.</button>
+      <button class="quiz-choice" data-correct="false">It's risky because small startups are legally prohibited from using the same cloud services as large companies.</button>
+      <button class="quiz-choice" data-correct="false">It's not risky at all — every application benefits equally from the most complex possible architecture.</button>
+      <button class="quiz-choice" data-correct="false">It's risky because large companies never publish real architecture information.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>An architecture should fit the actual workload's needs — borrowing one built for a different scale and problem imports cost and complexity without the matching benefit.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="traffic pattern">
+    <p class="quiz-prompt">4. Fill in the blank: whether a workload is constant, spiky, or mostly idle — its ___ — is one of the first questions this lesson's checklist asks when choosing a compute model.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Traffic pattern is the first and most decisive question when choosing between VMs, containers, and serverless.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="workload">
+    <p class="quiz-prompt">5. Fill in the blank: there is no single "best" cloud architecture — only one that fits a specific ___'s actual traffic pattern, data shape, and reliability needs.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Every architecture decision in this course is relative to the specific workload it's built for.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: AWS's <a href="https://aws.amazon.com/architecture/well-architected/">Well-Architected Framework</a> formalizes this same kind of workload-driven checklist into six real design pillars used across the industry.</p>
+
+  <p class="ask-teacher">Have a real app idea you'd like to sketch an architecture for using this lesson's checklist? Ask your teacher — that's what I'm here for. Next up: the last consideration in choosing an architecture — how hard it would be to leave the provider you just chose.</p>
+
+  <footer class="lesson-footer">STEM+ · Cloud Computing A · Lesson 19 of the course sequence</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  STEMPlus.mountTabs(document.getElementById('arch-tabs').parentElement, 'data-arch-scenario', 'data-arch-panel');
+});
+</script>

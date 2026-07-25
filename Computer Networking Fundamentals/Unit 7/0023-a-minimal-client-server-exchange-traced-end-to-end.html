@@ -1,0 +1,128 @@
+<meta charset="UTF-8">
+<title>Lesson 23: A Minimal Client-Server Exchange, Traced End to End — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · Computer Networking Fundamentals · Unit 7 · Lesson 23</span>
+  <h1>A Minimal Client-Server Exchange, Traced End to End</h1>
+  <p class="subtitle">Every unit in this course covered one piece of this exchange. This lesson runs the whole thing start to finish, naming which lesson explains each step as it happens.</p>
+  <p class="nav-links"><a href="0022-client-server-vs-peer-to-peer.html" class="nav-prev">← Lesson 22</a> <a href="../Unit%208/0024-firewalls-and-network-security-basics.html" class="nav-next">Unit 8, Lesson 24 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Take Lesson 21's minimal server and client. Below is the exact same tiny exchange — client sends <code>"World"</code>, server replies <code>"Hello, World"</code> — but this time walked through hop by hop and layer by layer, tying together nearly every concept from Units 1 through 7 into one concrete trip.</p>
+
+  <div class="widget" id="trace-widget">
+    <div class="widget-label">Try It — Trace the Full Exchange</div>
+    <div id="trace-log" style="min-height: 4rem; font-family:'SF Mono',Menlo,Consolas,monospace; font-size:0.85rem; line-height:1.5;"></div>
+    <div style="display:flex; gap:0.5rem; flex-wrap:wrap; margin-top:0.9rem;">
+      <button class="widget-btn" id="trace-next">Next Step →</button>
+      <button class="widget-btn" id="trace-reset">Reset</button>
+    </div>
+    <p class="plot-readout" id="trace-readout">—</p>
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Naming which lesson covers each step</span>
+    <strong>Handshake (steps 1-3):</strong> Lesson 15's TCP three-way handshake, triggered by the client's <code>connect()</code> call (Lesson 21). <strong>Encapsulation (step 4):</strong> Lesson 6 — the message <code>"World"</code> gets wrapped in a TCP header (Lesson 14's port numbers), then an IP header (Unit 3's addresses), then a Link header (Lesson 7's MAC addresses). <strong>Routing (step 5):</strong> Lesson 11 — each router along the path reads only the IP header, decrements TTL, and forwards toward the next hop, exactly as if this were an HTTP request instead of a custom message. <strong>Decapsulation and delivery (step 6):</strong> the server's Transport layer strips headers in reverse order and uses the destination port to hand the message to the correct listening program (Lesson 14's demultiplexing). <strong>Reply (steps 7-8):</strong> the exact same process, direction reversed — the server's response gets encapsulated, routed back, and decapsulated at the client.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why this same trace applies to something as big as loading a website</span>
+    Swap "World" for a full HTTP GET request (Unit 6), and the trace above is otherwise identical — same handshake, same encapsulation, same hop-by-hop routing, same decapsulation-and-port-delivery on arrival. The only things that actually differ between this toy example and loading a real website are the size and format of the Application-layer payload, and possibly a TLS handshake (Lesson 19) layered in before any Application data is sent. Every layer below the Application layer does not care, and cannot tell the difference — which is exactly what Lesson 5 promised layering would deliver, and it's been true in every single lesson since.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. In the traced exchange, what triggers the TCP three-way handshake to begin?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">The client's code calling connect(), which starts the SYN / SYN-ACK / ACK exchange before any message data is sent.</button>
+      <button class="quiz-choice" data-correct="false">The server calling send() first.</button>
+      <button class="quiz-choice" data-correct="false">A DNS lookup completing.</button>
+      <button class="quiz-choice" data-correct="false">The message "World" being typed by a human.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>connect() is the client-side call that triggers TCP's handshake, as covered in Lesson 21.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. When the message finally leaves the client, in what order are headers added around it?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">TCP header first, then IP header, then Link (Ethernet) header — the same order Lesson 6 described for encapsulation.</button>
+      <button class="quiz-choice" data-correct="false">Link header first, then IP header, then TCP header.</button>
+      <button class="quiz-choice" data-correct="false">All three headers are added simultaneously in a single step.</button>
+      <button class="quiz-choice" data-correct="false">No headers are added — only the raw message is sent.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Encapsulation proceeds Transport, then Internet, then Link — outermost header added last, on the way out.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Once the frame arrives at the server, how does the server's operating system know which specific listening program should receive the message?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">The destination port number, read from the TCP header after decapsulation, is used to demultiplex the message to the correct program.</button>
+      <button class="quiz-choice" data-correct="false">Every program running on the server receives every incoming message.</button>
+      <button class="quiz-choice" data-correct="false">The message's content is read first, before any header, to guess the destination program.</button>
+      <button class="quiz-choice" data-correct="false">The server's MAC address alone determines which program receives it.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Demultiplexing by destination port (Lesson 14) is what delivers arriving data to the correct program.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="layering">
+    <p class="quiz-prompt">4. Fill in the blank: the reason this exact same trace applies whether the message is "World" or a full HTTP request is ___ — lower layers don't know or care what the Application-layer payload actually contains.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Layering (Lesson 5) is exactly what keeps the lower layers indifferent to the specific content of the Application-layer payload.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: revisit Lesson 6's encapsulation widget and Lesson 15's handshake widget side by side with the trace above — seeing the same two mechanisms reappear in one continuous example is the best way to cement how they fit together.</p>
+
+  <p class="ask-teacher">Want to run this exact minimal server and client on two machines (or two terminal windows) and watch it happen for real? Ask your teacher — that's what I'm here for. Unit 7 is complete. Next up: Unit 8 covers what happens when this whole system is deliberately attacked, or simply breaks — starting with firewalls, the first line of defense.</p>
+
+  <footer class="lesson-footer">STEM+ · Computer Networking Fundamentals · Lesson 23 of the course sequence</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var log = document.getElementById('trace-log');
+  var nextBtn = document.getElementById('trace-next');
+  var resetBtn = document.getElementById('trace-reset');
+  var readout = document.getElementById('trace-readout');
+  var step = 0;
+
+  var steps = [
+    { text: 'Client → Server: SYN', note: 'Client calls connect(). TCP’s three-way handshake begins (Lesson 15).' },
+    { text: 'Server → Client: SYN-ACK', note: 'Server acknowledges and proposes its own sequence number.' },
+    { text: 'Client → Server: ACK — connection established', note: 'Handshake complete. Both sides may now send data.' },
+    { text: 'Client encapsulates "World": [Eth [IP [TCP "World"]]]', note: 'Client calls send(b"World"). Transport wraps it in a TCP segment (port numbers, Lesson 14), Internet wraps that in an IP packet (addresses, Unit 3), Link wraps that in an Ethernet frame (Lesson 6).' },
+    { text: 'Frame → Router → Router → Server (TTL decremented at each hop)', note: 'Each router reads only the IP header and forwards toward the next hop (Lesson 11) — none of them ever look at "World" itself.' },
+    { text: 'Server decapsulates: frame → packet → segment → "World"', note: 'Headers stripped in reverse order (Lesson 6). Destination port used to deliver "World" to the correct listening program (Lesson 14).' },
+    { text: 'Server encapsulates reply "Hello, World" and sends it back', note: 'The exact same encapsulation process, now in the reverse direction, addressed back to the client.' },
+    { text: 'Client decapsulates and receives: "Hello, World"', note: 'recv() returns the final bytes. The full round trip — handshake, two encapsulated messages, multiple hops each way — is complete.' }
+  ];
+
+  function render() {
+    var html = '';
+    for (var i = 0; i < step; i++) {
+      html += '<div style="margin:0.35rem 0; padding:0.4rem 0.7rem; background:var(--code-bg); border-radius:4px;">' + (i + 1) + '. ' + steps[i].text + '</div>';
+    }
+    log.innerHTML = html || '<span style="color:var(--muted);">Click "Next Step" to begin.</span>';
+    readout.textContent = step > 0 ? steps[step - 1].note : 'No steps taken yet.';
+    nextBtn.disabled = step >= steps.length;
+  }
+
+  nextBtn.addEventListener('click', function () {
+    if (step < steps.length) { step++; render(); }
+  });
+  resetBtn.addEventListener('click', function () {
+    step = 0; render();
+  });
+
+  render();
+});
+</script>

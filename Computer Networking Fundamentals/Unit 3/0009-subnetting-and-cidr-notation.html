@@ -1,0 +1,161 @@
+<meta charset="UTF-8">
+<title>Lesson 9: Subnetting and CIDR Notation — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · Computer Networking Fundamentals · Unit 3 · Lesson 9</span>
+  <h1>Subnetting and CIDR Notation</h1>
+  <p class="subtitle">Lesson 8 left one question hanging: how much of a 32-bit IPv4 address identifies the network, and how much identifies the specific device? This lesson is the arithmetic that answers it.</p>
+  <p class="nav-links"><a href="0008-ipv4-addresses-and-dotted-decimal-notation.html" class="nav-prev">← Lesson 8</a> <a href="0010-ipv6-why-we-needed-more-addresses.html" class="nav-next">Lesson 10 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Every IPv4 address is split into two parts: a <strong>network portion</strong>, shared by every device on the same local network, and a <strong>host portion</strong>, unique to one specific device within that network. Where exactly that split happens isn't fixed — it's configurable, and that configurability is the whole subject of this lesson.</p>
+
+  <h2>Subnet masks and CIDR notation</h2>
+  <div class="box">
+    <span class="box-label">Definitions</span>
+    A <strong>subnet</strong> is a logically visible subdivision of a larger network. A <strong>subnet mask</strong> marks exactly where the network/host split happens in a 32-bit address, using a run of 1-bits (network portion) followed by a run of 0-bits (host portion) — like <code>11111111.11111111.11111111.00000000</code>, written in dotted-decimal as <code>255.255.255.0</code>. <strong>CIDR notation</strong> (Classless Inter-Domain Routing) writes the same information far more compactly: instead of a full second dotted-decimal number, it just writes a slash followed by the count of 1-bits — <code>192.168.1.0/24</code> means "the first 24 bits are the network portion," which is exactly the same information as pairing that address with the mask <code>255.255.255.0</code>.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Reading a CIDR prefix</span>
+    <code>192.168.1.0/24</code>: 24 network bits, leaving 32 − 24 = 8 host bits — exactly one full octet's worth, so every device on this subnet shares <code>192.168.1</code> and only the last number varies (192.168.1.1, 192.168.1.2, etc.). <code>10.0.0.0/16</code>: 16 network bits, leaving 16 host bits — a much larger subnet, where every device shares only <code>10.0</code> and both of the last two octets can vary.
+  </div>
+
+  <h2>Network address, broadcast address, and usable hosts</h2>
+  <div class="box">
+    <span class="box-label">Definitions</span>
+    The <strong>network address</strong> is the address within a subnet where every host bit is 0 — it identifies the subnet itself and is never assigned to an individual device. The <strong>broadcast address</strong> is the address where every host bit is 1 — sending to it reaches every device on that subnet at once, and it's likewise never assigned to a single device. Every other address in between is available to assign to an actual device, so the number of <strong>usable hosts</strong> in a subnet with <em>h</em> host bits is 2<sup><em>h</em></sup> − 2 (the −2 accounts for the network and broadcast addresses being reserved, not usable).
+  </div>
+
+  <div class="widget" id="subnet-widget">
+    <div class="widget-label">Try It — CIDR Subnet Calculator</div>
+    <p>Host address: <code>203.0.113.77</code>. Drag the prefix length and watch the subnet's boundaries move.</p>
+    <div class="slider-row">
+      <label for="subnet-prefix">prefix length</label>
+      <input type="range" id="subnet-prefix" min="16" max="30" step="1" value="24">
+      <span class="slider-value" id="subnet-prefix-label">/24</span>
+    </div>
+    <table>
+      <tbody>
+        <tr><th>Subnet mask</th><td id="subnet-mask">—</td></tr>
+        <tr><th>Network address</th><td id="subnet-network">—</td></tr>
+        <tr><th>Broadcast address</th><td id="subnet-broadcast">—</td></tr>
+        <tr><th>Usable host range</th><td id="subnet-range">—</td></tr>
+        <tr><th>Usable hosts</th><td id="subnet-count">—</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why the network/host split is configurable at all, instead of fixed</span>
+    A fixed split (say, always exactly one octet for hosts) would force every subnet in the world to be the same size — wildly wasteful for a home network with 5 devices, and completely inadequate for a data center with 50,000. CIDR's configurable prefix length lets a network administrator size a subnet to the actual number of devices it needs to hold: a small home network might use a /28 (16 total addresses, 14 usable), while a large organization might use a /16 (65,536 total addresses). This flexibility is precisely why CIDR replaced IPv4's older, rigid "class-based" addressing system in the 1990s — the "classless" in Classless Inter-Domain Routing is a direct reference to abandoning those fixed-size classes.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Worked example, done by hand</span>
+    Subnet <code>192.168.1.0/26</code>: 26 network bits leave 6 host bits, so usable hosts = 2⁶ − 2 = 62. The network address is <code>192.168.1.0</code> (all host bits 0). The broadcast address is <code>192.168.1.63</code> (all 6 host bits set to 1, since 2⁶ − 1 = 63, and 0 + 63 = 63). Usable device addresses run from <code>192.168.1.1</code> through <code>192.168.1.62</code> — 62 addresses, matching the count above.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What does the "/24" in 192.168.1.0/24 mean?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">The first 24 bits of the 32-bit address are the network portion, leaving 8 bits for host addresses.</button>
+      <button class="quiz-choice" data-correct="false">The subnet can hold exactly 24 devices.</button>
+      <button class="quiz-choice" data-correct="false">The address is using port 24.</button>
+      <button class="quiz-choice" data-correct="false">The subnet is 24 hops away.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>CIDR notation directly states the network-bit count, equivalent to a full subnet mask like 255.255.255.0 for /24.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why are the network address and broadcast address of a subnet never assigned to an individual device?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">The network address (all host bits 0) identifies the subnet itself, and the broadcast address (all host bits 1) reaches every device at once — neither refers to one single device.</button>
+      <button class="quiz-choice" data-correct="false">Those two addresses are always reserved for the network's router specifically.</button>
+      <button class="quiz-choice" data-correct="false">They're only reserved on subnets smaller than /24.</button>
+      <button class="quiz-choice" data-correct="false">They're reserved for historical reasons with no functional purpose today.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>This is exactly why usable-host count is 2^h − 2, subtracting these two reserved addresses.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why does CIDR's configurable prefix length matter, compared to a fixed-size subnet for every network?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">It lets a subnet be sized to the actual number of devices it needs — a small home network and a large data center can each use an appropriately sized block instead of one fixed size for everyone.</button>
+      <button class="quiz-choice" data-correct="false">It makes every IPv4 address globally routable regardless of range.</button>
+      <button class="quiz-choice" data-correct="false">It eliminates the need for a network address entirely.</button>
+      <button class="quiz-choice" data-correct="false">It only matters for IPv6, not IPv4.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Sizing subnets to actual need, instead of one fixed size for everyone, is exactly what "classless" addressing enables.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="62">
+    <p class="quiz-prompt">4. Fill in the blank: a subnet with 6 host bits (like a /26) has 2⁶ − 2 = ___ usable host addresses.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>2⁶ = 64 total addresses; subtract 2 for the reserved network and broadcast addresses, leaving 62 usable.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: the ARIN (American Registry for Internet Numbers) subnetting guide includes a printable CIDR cheat-sheet table mapping every prefix length to its host count, worth keeping handy while this math is still new.</p>
+
+  <p class="ask-teacher">Want more subnetting practice problems, or to double-check a subnet calculation from a real assignment? Ask your teacher — that's what I'm here for. Next up: why IPv4's 32-bit address space, despite CIDR's flexibility, still ran out — and the much larger address system built to replace it.</p>
+
+  <footer class="lesson-footer">STEM+ · Computer Networking Fundamentals · Lesson 9 of the course sequence</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var BASE_IP = [203, 0, 113, 77];
+  var slider = document.getElementById('subnet-prefix');
+  var prefixLabel = document.getElementById('subnet-prefix-label');
+  var maskEl = document.getElementById('subnet-mask');
+  var networkEl = document.getElementById('subnet-network');
+  var broadcastEl = document.getElementById('subnet-broadcast');
+  var rangeEl = document.getElementById('subnet-range');
+  var countEl = document.getElementById('subnet-count');
+
+  function ipToInt(parts) {
+    return parts[0] * 16777216 + parts[1] * 65536 + parts[2] * 256 + parts[3];
+  }
+  function intToIp(n) {
+    return [(n >>> 24) & 255, (n >>> 16) & 255, (n >>> 8) & 255, n & 255].join('.');
+  }
+
+  function render() {
+    var prefix = parseInt(slider.value, 10);
+    prefixLabel.textContent = '/' + prefix;
+
+    var maskInt = prefix === 0 ? 0 : (0xFFFFFFFF << (32 - prefix)) >>> 0;
+    var ipInt = ipToInt(BASE_IP);
+    var networkInt = (ipInt & maskInt) >>> 0;
+    var invMaskInt = (~maskInt) >>> 0;
+    var broadcastInt = (networkInt | invMaskInt) >>> 0;
+    var hostBits = 32 - prefix;
+    var totalAddresses = Math.pow(2, hostBits);
+    var usable = hostBits >= 1 ? Math.max(totalAddresses - 2, 0) : 0;
+
+    maskEl.textContent = intToIp(maskInt);
+    networkEl.textContent = intToIp(networkInt) + '/' + prefix;
+    broadcastEl.textContent = intToIp(broadcastInt);
+    if (usable > 0) {
+      rangeEl.textContent = intToIp(networkInt + 1) + ' – ' + intToIp(broadcastInt - 1);
+    } else {
+      rangeEl.textContent = '(none — prefix too large)';
+    }
+    countEl.textContent = usable.toLocaleString();
+  }
+
+  slider.addEventListener('input', render);
+  render();
+});
+</script>

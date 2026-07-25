@@ -1,0 +1,161 @@
+<meta charset="UTF-8">
+<title>Lesson 16: Elasticity — Scaling Up and Down with Demand — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · Cloud Computing A · Unit 6 · Lesson 16</span>
+  <h1>Elasticity — Scaling Up and Down with Demand</h1>
+  <p class="subtitle">Lesson 1 opened this whole course with a retailer stuck buying enough hardware for Black Friday and eating the cost the other 364 days. This lesson is the actual, mechanical answer to that problem.</p>
+  <p class="nav-links"><a href="../Unit%205/0015-identity-and-access-management.html" class="nav-prev">← Unit 5, Lesson 15</a> <a href="0017-understanding-a-cloud-bill.html" class="nav-next">Lesson 17 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Every piece of this course so far — VMs, load balancers, managed databases — can be sized once and left alone. Real traffic doesn't hold still, though: a retail site might see ten times more visitors at 8 p.m. than at 4 a.m., every single day. Sizing a fleet for the 8 p.m. peak wastes money at 4 a.m.; sizing it for the 4 a.m. quiet crashes at 8 p.m. Elasticity is the mechanism that makes picking one fixed size unnecessary.</p>
+
+  <h2>What elasticity actually is</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    <strong>Elasticity</strong> is a cloud environment's ability to automatically add or remove compute capacity in near-real time, in response to actual demand, with no human manually provisioning anything. The mechanism behind it is usually an <strong>auto scaling group</strong>: a defined pool of identical servers (built from Lesson 4's instance types) with a minimum size, a maximum size, and a scaling policy — a rule like "add another server whenever average CPU usage across the fleet exceeds 70%; remove one whenever it drops below 30%."
+  </div>
+
+  <h2>See it in action</h2>
+  <p>Drag the slider to simulate rising and falling traffic, and watch an auto scaling group react — within its configured minimum and maximum.</p>
+
+  <div class="widget" id="elasticity-widget">
+    <p class="widget-label">Interactive: an auto scaling group reacting to traffic</p>
+    <div class="slider-row">
+      <label for="load-slider">Traffic load</label>
+      <input type="range" id="load-slider" min="0" max="100" step="5" value="10">
+      <span class="slider-value" data-load-label>10%</span>
+    </div>
+    <svg class="figure" id="fleet-svg" viewBox="0 0 340 70" width="340" height="70"></svg>
+    <p class="plot-readout" data-fleet-readout></p>
+    <p class="plot-hint">This group is configured with a minimum of 2 servers (never scales below, for baseline reliability) and a maximum of 8 (a cost ceiling — see Lesson 17).</p>
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Worked example: a daily traffic curve</span>
+    A news site's auto scaling group is configured with a minimum of 2 servers and a maximum of 12. Overnight, with almost no readers, it settles at its 2-server minimum, paying only for that baseline capacity. As readers wake up and traffic climbs through the morning, the scaling policy adds servers automatically, one at a time, staying just ahead of demand. During a rare viral-story spike, it climbs toward its 12-server maximum. Once the spike passes, it scales back down over the following hour — no engineer touched a single setting during any of it.
+  </div>
+
+  <h2>Horizontal vs. vertical scaling</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    <strong>Horizontal scaling</strong> (scaling out) means adding more servers of the same size, exactly what the auto scaling group above does — and it pairs naturally with Lesson 11's load balancer, which simply routes traffic across however many servers currently exist. <strong>Vertical scaling</strong> (scaling up) means making one existing server bigger — more vCPU, more memory. Vertical scaling has a hard ceiling (the biggest instance type a provider offers) and usually requires a brief restart; horizontal scaling has no such ceiling and can add capacity without interrupting servers already running. Most elastic cloud architectures lean on horizontal scaling for exactly these reasons.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why a maximum matters as much as a minimum</span>
+    It's tempting to think of the maximum as pure caution, but it's doing two jobs at once. First, it's a hard cost ceiling — Lesson 17 covers how directly server count translates into your bill, and an auto scaling group with no maximum has, in effect, no spending limit. Second, it protects against runaway scaling triggered by a bug: a broken scaling policy or a misbehaving piece of code that keeps requesting more capacity in a loop has nowhere to go past the configured maximum. The minimum, in turn, guarantees a baseline of servers is always running, so there's no gap where a sudden burst of traffic arrives to find zero capacity waiting.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What is elasticity, in the cloud infrastructure sense?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">A cloud environment's ability to automatically add or remove compute capacity in response to real demand, without manual provisioning.</button>
+      <button class="quiz-choice" data-correct="false">The physical flexibility of the cables connecting servers in a data center.</button>
+      <button class="quiz-choice" data-correct="false">A fixed amount of compute capacity that never changes.</button>
+      <button class="quiz-choice" data-correct="false">A pricing discount available only during off-peak hours.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Elasticity is specifically about automatic, demand-driven capacity changes, not a fixed size or a discount.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why does horizontal scaling pair naturally with a load balancer?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">The load balancer simply routes traffic across however many identically-sized servers currently exist in the group.</button>
+      <button class="quiz-choice" data-correct="false">A load balancer is only compatible with vertical scaling, never horizontal.</button>
+      <button class="quiz-choice" data-correct="false">Horizontal scaling requires restarting the load balancer every time a server is added.</button>
+      <button class="quiz-choice" data-correct="false">Load balancers cannot route traffic to more than one server at a time.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Adding or removing identical servers is exactly what a load balancer is built to route across seamlessly.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why does an auto scaling group's maximum setting matter, beyond just being cautious?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">It caps the cost ceiling and protects against runaway scaling caused by a bug, since capacity has nowhere to go past that limit.</button>
+      <button class="quiz-choice" data-correct="false">It has no real effect — auto scaling groups perform identically with or without a maximum.</button>
+      <button class="quiz-choice" data-correct="false">It only affects the group's minimum setting, not its maximum behavior.</button>
+      <button class="quiz-choice" data-correct="false">It automatically deletes the entire application once reached.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The maximum is both a spending limit and a safeguard against a scaling policy or bug that keeps requesting more capacity indefinitely.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="auto scaling group|auto scaling">
+    <p class="quiz-prompt">4. Fill in the blank: a defined pool of identical servers with a minimum size, maximum size, and a scaling policy is called an ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>An auto scaling group is the mechanism that implements elasticity automatically.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="vertical scaling|vertical">
+    <p class="quiz-prompt">5. Fill in the blank: making one existing server bigger — more vCPU, more memory — rather than adding more servers, is called ___ scaling.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Vertical scaling grows one machine's size, unlike horizontal scaling's approach of adding more machines.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: AWS's <a href="https://docs.aws.amazon.com/autoscaling/ec2/userguide/what-is-amazon-ec2-auto-scaling.html">"What Is Amazon EC2 Auto Scaling?"</a> documentation shows real scaling policies and min/max configuration on a production auto scaling service.</p>
+
+  <p class="ask-teacher">Curious how fast a real auto scaling group can add a new server once triggered? Ask your teacher — that's what I'm here for. Next up: since server count now changes automatically, how does that actually turn into the number at the bottom of a cloud bill?</p>
+
+  <footer class="lesson-footer">STEM+ · Cloud Computing A · Lesson 16 of the course sequence</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var MIN = 2, MAX = 8;
+  var svgNS = 'http://www.w3.org/2000/svg';
+  var svg = document.getElementById('fleet-svg');
+  var slider = document.getElementById('load-slider');
+  var loadLabel = document.querySelector('[data-load-label]');
+  var readout = document.querySelector('[data-fleet-readout]');
+
+  var boxes = [];
+  for (var i = 0; i < MAX; i++) {
+    var rect = document.createElementNS(svgNS, 'rect');
+    rect.setAttribute('x', 10 + i * 40);
+    rect.setAttribute('y', 15);
+    rect.setAttribute('width', 30);
+    rect.setAttribute('height', 30);
+    rect.setAttribute('rx', 4);
+    rect.setAttribute('stroke-width', 1.5);
+    svg.appendChild(rect);
+    boxes.push(rect);
+  }
+
+  function activeServers(load) {
+    return Math.max(MIN, Math.min(MAX, Math.round(MIN + (load / 100) * (MAX - MIN))));
+  }
+
+  function render() {
+    var load = Number(slider.value);
+    loadLabel.textContent = load + '%';
+    var active = activeServers(load);
+    boxes.forEach(function (box, i) {
+      var on = i < active;
+      box.style.fill = on ? 'var(--accent-soft)' : 'var(--code-bg)';
+      box.style.stroke = on ? 'var(--accent)' : 'var(--border)';
+    });
+    var atMin = active === MIN;
+    var atMax = active === MAX;
+    readout.textContent = active + ' of ' + MAX + ' servers running' +
+      (atMin ? ' (at the configured minimum)' : atMax ? ' (at the configured maximum)' : '') + '.';
+  }
+
+  slider.addEventListener('input', render);
+  render();
+});
+</script>

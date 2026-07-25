@@ -1,0 +1,167 @@
+<meta charset="UTF-8">
+<title>Lesson 17: Understanding a Cloud Bill — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · Cloud Computing A · Unit 6 · Lesson 17</span>
+  <h1>Understanding a Cloud Bill</h1>
+  <p class="subtitle">An on-prem invoice is one number: what the hardware cost. A cloud bill is dozens of small, separately-metered line items — and the biggest one is rarely the one people expect.</p>
+  <p class="nav-links"><a href="0016-elasticity-scaling-up-and-down-with-demand.html" class="nav-prev">← Lesson 16</a> <a href="0018-redundancy-failover-and-designing-for-failure.html" class="nav-next">Lesson 18 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Lesson 1 introduced OpEx — a recurring, usage-based cost instead of one big upfront purchase. What that recurring cost actually looks like, itemized, is a bill with a separate line for practically every resource this course has covered: compute hours, storage gigabyte-months, database instance time, and one line that catches a lot of people off guard the first time they see it.</p>
+
+  <h2>A cloud bill is metered, line by line</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    A cloud bill is <strong>itemized</strong> down to individual, separately-metered resources: compute is billed by the hour (or the millisecond, for serverless — Lesson 6), storage by the gigabyte per month, a managed database by its instance size and hours running, and so on. Nothing is bundled into one flat number the way an on-prem hardware purchase is — every service this course has covered shows up as its own line, priced by its own unit of measurement.
+  </div>
+
+  <h2>Build a bill yourself</h2>
+  <p>Toggle the line items below to see how each one contributes to a monthly total — and notice which one is largest.</p>
+
+  <div class="widget" id="bill-widget">
+    <p class="widget-label">Interactive: an itemized monthly bill</p>
+    <div style="display:flex; flex-direction:column; gap:0.5rem; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; font-size:0.92rem;">
+      <label><input type="checkbox" checked data-bill-item="compute" data-cost="120"> Compute — VM hours ($120)</label>
+      <label><input type="checkbox" checked data-bill-item="storage" data-cost="18"> Object storage — GB-months ($18)</label>
+      <label><input type="checkbox" checked data-bill-item="db" data-cost="60"> Managed database — instance hours ($60)</label>
+      <label><input type="checkbox" checked data-bill-item="egress" data-cost="95"> Data transfer out (egress) ($95)</label>
+    </div>
+    <svg class="figure" id="bill-bar-svg" viewBox="0 0 320 34" width="320" height="34" style="margin-top:1rem;"></svg>
+    <p class="plot-readout" data-bill-total></p>
+    <p class="plot-hint">Uncheck "Data transfer out" to see how much of this bill it was actually responsible for.</p>
+  </div>
+
+  <h2>The line that surprises people: egress</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    <strong>Egress</strong> is data leaving a provider's network — to the internet, to users, or sometimes even between the provider's own regions. Most providers charge for egress by the gigabyte, while <strong>ingress</strong> — data coming into the cloud — is usually free. This asymmetry is deliberate: providers want to make it cheap to get data in, and it means a service that seems to cost very little in compute or storage can still generate a surprisingly large bill if it constantly sends large amounts of data back out.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Worked example: the surprise bill</span>
+    A company builds a video analytics microservice that pulls video files from storage in one region, processes them, and repeatedly sends results across to a service running in a different region. Compute and storage costs stay modest and exactly as expected. But because the two services sit in different regions, every one of those cross-region transfers is billed as egress — and by the end of the month, the transfer line dwarfs everything else on the bill. Nothing about this was a bug; it was simply an architecture nobody had priced out in advance.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why understanding line items is a design skill, not just an accounting one</span>
+    Every earlier unit's decisions show up directly on this bill: Lesson 9's storage tier choice changes the storage line; Lesson 16's auto scaling maximum caps the compute line; a chatty design that moves data between regions unnecessarily inflates the egress line. Reading a bill isn't a task for finance to handle after the fact — it's direct feedback on architecture decisions, and the itemization is precisely what makes it possible to trace an unexpectedly high number back to the specific choice that caused it.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. How does a cloud bill differ from a one-time on-prem hardware purchase?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">It's itemized into many separately-metered line items, billed recurringly based on actual usage of each resource.</button>
+      <button class="quiz-choice" data-correct="false">It is always a single flat number with no further breakdown.</button>
+      <button class="quiz-choice" data-correct="false">It is paid once, up front, exactly like buying a server outright.</button>
+      <button class="quiz-choice" data-correct="false">It never changes from month to month regardless of usage.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Itemized, usage-based, recurring billing is the defining trait of a cloud bill, unlike a single CapEx hardware purchase.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. What is "egress," and how is it typically priced compared to "ingress"?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Egress is data leaving the provider's network, typically billed by the gigabyte, while ingress (data coming in) is usually free.</button>
+      <button class="quiz-choice" data-correct="false">Egress is data coming into the cloud, and it is always the more expensive of the two.</button>
+      <button class="quiz-choice" data-correct="false">Egress and ingress are always priced identically.</button>
+      <button class="quiz-choice" data-correct="false">Egress refers only to data stored in object storage, never to network transfer.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Providers typically charge for outbound data (egress) while inbound data (ingress) is free — an asymmetry that surprises newcomers.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. In the video analytics example, why did the bill end up dominated by data transfer costs rather than compute or storage?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">The service repeatedly sent results between two different regions, and each of those cross-region transfers was billed as egress.</button>
+      <button class="quiz-choice" data-correct="false">The company was charged extra because their code contained a bug.</button>
+      <button class="quiz-choice" data-correct="false">Compute and storage are always more expensive than data transfer, so this result was surprising in the wrong direction.</button>
+      <button class="quiz-choice" data-correct="false">Cross-region data transfer is always free, so this scenario is impossible.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>An architecture that moves data between regions frequently can generate egress costs that outweigh a service's compute and storage costs entirely.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="egress">
+    <p class="quiz-prompt">4. Fill in the blank: data leaving a cloud provider's network — to the internet, users, or between regions — is called ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Egress is typically the metered, billed direction of data transfer, unlike free ingress.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="itemized|itemization">
+    <p class="quiz-prompt">5. Fill in the blank: a cloud bill being broken down into individual, separately-metered lines for each resource used is described as being ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Itemization is what makes it possible to trace a bill's total back to specific architecture decisions.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: AWS's <a href="https://aws.amazon.com/ec2/pricing/on-demand/">EC2 On-Demand Pricing</a> page and its data transfer pricing page together show real, itemized per-hour and per-gigabyte rates of exactly the kind covered in this lesson.</p>
+
+  <p class="ask-teacher">Curious how a company forecasts next month's bill before it arrives? Ask your teacher — that's what I'm here for. Next up: the last major reliability idea in this course — designing a system that keeps working even when a piece of it inevitably fails.</p>
+
+  <footer class="lesson-footer">STEM+ · Cloud Computing A · Lesson 17 of the course sequence</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var svgNS = 'http://www.w3.org/2000/svg';
+  var svg = document.getElementById('bill-bar-svg');
+  var checkboxes = document.querySelectorAll('#bill-widget [data-bill-item]');
+  var totalEl = document.querySelector('[data-bill-total]');
+  var colors = { compute: 'var(--accent)', storage: 'var(--correct)', db: 'var(--muted)', egress: 'var(--incorrect)' };
+  var labels = { compute: 'Compute', storage: 'Storage', db: 'Managed database', egress: 'Data transfer out' };
+
+  function render() {
+    svg.innerHTML = '';
+    var items = [];
+    var total = 0;
+    checkboxes.forEach(function (cb) {
+      if (cb.checked) {
+        var cost = Number(cb.getAttribute('data-cost'));
+        var key = cb.getAttribute('data-bill-item');
+        items.push({ key: key, cost: cost });
+        total += cost;
+      }
+    });
+
+    var x = 0;
+    var fullWidth = 320;
+    items.forEach(function (item) {
+      var w = total > 0 ? (item.cost / total) * fullWidth : 0;
+      var rect = document.createElementNS(svgNS, 'rect');
+      rect.setAttribute('x', x);
+      rect.setAttribute('y', 0);
+      rect.setAttribute('width', w);
+      rect.setAttribute('height', 34);
+      rect.style.fill = colors[item.key];
+      svg.appendChild(rect);
+      x += w;
+    });
+
+    if (total === 0) {
+      totalEl.textContent = 'No line items selected — total: $0/month.';
+    } else {
+      var breakdown = items.map(function (item) {
+        return labels[item.key] + ' $' + item.cost + ' (' + Math.round((item.cost / total) * 100) + '%)';
+      }).join(' · ');
+      totalEl.textContent = 'Total: $' + total + '/month — ' + breakdown;
+    }
+  }
+
+  checkboxes.forEach(function (cb) { cb.addEventListener('change', render); });
+  render();
+});
+</script>

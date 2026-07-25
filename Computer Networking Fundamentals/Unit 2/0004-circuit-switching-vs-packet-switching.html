@@ -1,0 +1,98 @@
+<meta charset="UTF-8">
+<title>Lesson 4: Circuit Switching vs. Packet Switching — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · Computer Networking Fundamentals · Unit 2 · Lesson 4</span>
+  <h1>Circuit Switching vs. Packet Switching</h1>
+  <p class="subtitle">Before the internet, the phone network already solved "connect two distant points" — just not in a way that scales to billions of independent conversations sharing the same wires.</p>
+  <p class="nav-links"><a href="../Unit%201/0003-bandwidth-latency-and-throughput.html" class="nav-prev">← Lesson 3</a> <a href="0005-the-layered-model-osi-and-tcpip-side-by-side.html" class="nav-next">Lesson 5 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Unit 1 established what a network is; this unit is about how data actually moves through one. The first fork in the road is old: long before computers, telephone networks needed to connect two people across a city, and they solved it with an approach the internet deliberately does <em>not</em> use. Understanding why that older approach was abandoned is the fastest way to understand what makes the internet's approach work.</p>
+
+  <h2>Circuit switching: reserve the whole path first</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    <strong>Circuit switching</strong> sets up a dedicated, exclusive path between sender and receiver before any data is sent, and holds that entire path reserved for the full duration of the conversation — even during silence. The classic phone system worked this way: dialing a number caused switches along the route to physically (later, electronically) connect a continuous circuit from your phone to the other person's, and that circuit belonged only to your call until you hung up.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why circuit switching wastes capacity</span>
+    A typical phone conversation is roughly half silence — one person talks while the other listens. But a circuit-switched connection reserves its full capacity for the entire call regardless, silence included, because the whole point is a guaranteed, unchanging, dedicated path. That reserved-but-idle capacity can't be lent out to anyone else's call even for a second, because the circuit is exclusively yours until you disconnect. Multiply that waste by millions of simultaneous calls and it's an enormous amount of unused capacity, permanently locked up.
+  </div>
+
+  <h2>Packet switching: break the message into independent pieces</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    <strong>Packet switching</strong> breaks data into small, independently addressed chunks called <strong>packets</strong>, and sends each one across the network separately — with no dedicated path reserved in advance. Each packet carries the destination address and finds its own way, potentially via a different route than the packet before or after it, and the network only uses capacity for links that actually have a packet on them <em>right now</em>. The internet is built entirely on packet switching.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">A postal analogy</span>
+    Circuit switching is like renting a private, dedicated truck-and-driver that sits idle in your driveway for as long as you might need to send letters, even if you're only writing one every few minutes. Packet switching is like dropping individual letters in a shared public mail system: each letter (packet) has its own address, travels independently, might go through a different sorting facility than the letter before it, and the same trucks and facilities serve everyone's letters at once — capacity is shared, not reserved.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why packet switching wins for computer networks</span>
+    Computer traffic is bursty in exactly the way phone calls aren't: a web page loads in a sudden burst, then the connection sits idle while you read, then bursts again when you click a link. Reserving a dedicated circuit for that pattern would waste capacity almost identically to the phone-silence problem — except computer idle periods are typically far longer than conversational pauses. Packet switching lets that idle capacity be used by someone else's packets in the meantime, and lets thousands of independent conversations share the same physical links efficiently, because no single conversation is holding a link hostage while it isn't actively sending anything.
+  </div>
+
+  <h2>What packet switching costs you</h2>
+  <p>Nothing is free. Because packets from the same message can take different paths and arrive in a different order than they were sent — or not arrive at all, if a link along one packet's path gets congested or fails — packet-switched networks need extra mechanisms the old circuit-switched phone system never had to worry about: a way to reassemble packets in the correct order, and a way to detect and recover from a packet that never showed up. Unit 5's coverage of TCP is largely the story of solving exactly those two problems on top of a packet-switched network.</p>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What's the defining trait of circuit switching?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">A dedicated path is reserved for the full duration of the conversation, even during silence.</button>
+      <button class="quiz-choice" data-correct="false">Data is broken into small, independently routed packets.</button>
+      <button class="quiz-choice" data-correct="false">It was invented specifically for the internet.</button>
+      <button class="quiz-choice" data-correct="false">It only works over wireless connections.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Circuit switching reserves the entire path exclusively for one conversation, unlike packet switching's shared, on-demand approach.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why is circuit switching considered wasteful for a typical phone conversation?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">The circuit stays reserved at full capacity even during the roughly half of the call that's silence, and that idle capacity can't be lent to anyone else.</button>
+      <button class="quiz-choice" data-correct="false">Circuit switching cannot carry voice data at all.</button>
+      <button class="quiz-choice" data-correct="false">Circuit-switched calls always cost more bandwidth than the human voice requires.</button>
+      <button class="quiz-choice" data-correct="false">It requires more physical wires than any home actually has.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Reserved-but-idle capacity during silence can't be shared with any other call under circuit switching.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why does packet switching fit bursty computer traffic (like loading a web page, then sitting idle) better than circuit switching?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Packet switching only uses network capacity when a packet is actually being sent, letting idle periods be used by other traffic instead of being reserved and wasted.</button>
+      <button class="quiz-choice" data-correct="false">Packet switching guarantees packets always arrive in the order they were sent, unlike circuit switching.</button>
+      <button class="quiz-choice" data-correct="false">Packet switching requires a dedicated path be reserved in advance, just like circuit switching.</button>
+      <button class="quiz-choice" data-correct="false">Bursty traffic is impossible to send over a packet-switched network.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>No dedicated reservation means idle time on a link is immediately available to other traffic — a good match for connections that are mostly quiet punctuated by bursts.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="packet|packets">
+    <p class="quiz-prompt">4. Fill in the blank: a small, independently addressed chunk of data sent across a packet-switched network is called a ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Each packet carries its own destination address and can travel a route independent of other packets from the same message.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: the Computer History Museum's overview of packet switching's invention traces how Paul Baran, Donald Davies, and the ARPANET team independently arrived at the same core idea in the 1960s — useful context for why this specific design choice, and not some other one, became the internet's foundation.</p>
+
+  <p class="ask-teacher">Curious why some real-time systems, like certain phone networks, still use circuit-switching-like reservations even today? Ask your teacher — that's what I'm here for. Next up: now that data travels as independent packets, how does a receiving computer make sense of what's inside one — the layered model that organizes every protocol in this course.</p>
+
+  <footer class="lesson-footer">STEM+ · Computer Networking Fundamentals · Lesson 4 of the course sequence</footer>
+</div>

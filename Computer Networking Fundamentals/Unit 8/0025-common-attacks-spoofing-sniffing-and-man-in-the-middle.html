@@ -1,0 +1,101 @@
+<meta charset="UTF-8">
+<title>Lesson 25: Common Attacks — Spoofing, Sniffing, and Man-in-the-Middle — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · Computer Networking Fundamentals · Unit 8 · Lesson 25</span>
+  <h1>Common Attacks — Spoofing, Sniffing, and Man-in-the-Middle</h1>
+  <p class="subtitle">Every one of these attacks works by exploiting a trust assumption this course made along the way — mostly the assumption that headers and network positions can be taken at face value.</p>
+  <p class="nav-links"><a href="0024-firewalls-and-network-security-basics.html" class="nav-prev">← Lesson 24</a> <a href="0026-diagnosing-a-broken-connection-ping-traceroute-and-reading-the-layers.html" class="nav-next">Lesson 26 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Nearly everything this course has covered assumes good faith: that a packet's source address is honest, that nobody's quietly reading traffic that isn't addressed to them, and that a server presenting a valid-looking certificate really is who it claims. Those assumptions mostly hold — but every one of them can be deliberately broken, and this lesson names the three most common ways that happens.</p>
+
+  <h2>Spoofing</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    <strong>Spoofing</strong> is forging the source information in a packet — most commonly the source IP address — to make traffic appear to come from somewhere (or someone) it didn't actually come from. Nothing in the basic IP protocol from Unit 3 requires the source address field to be truthful; a sender can simply write a different address into that field, and, absent additional verification, the network will forward it as if it were genuine.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why spoofing works at all</span>
+    Recall Lesson 11: a router forwards based on the <em>destination</em> address, and generally has no built-in way to verify the <em>source</em> address is honest — checking that would mean confirming a packet actually originated from where it claims, which the basic protocol was never designed to do. Spoofing exploits exactly this gap. It's used both to hide an attacker's real identity, and in some denial-of-service attacks, to make it look like an attack is coming from many different (fake) sources at once, complicating any attempt to simply block "the" attacker's address.
+  </div>
+
+  <h2>Sniffing</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    <strong>Sniffing</strong> (packet sniffing) is capturing and reading network traffic that isn't addressed to the reader, using a <strong>packet sniffer</strong> — software that puts a network interface into a mode where it captures traffic on the local network segment rather than only what's addressed to that specific device. On an unencrypted connection, anyone in a position to sniff traffic can read it in plain text — exactly the vulnerability Lesson 19's HTTPS/TLS exists to close.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Worked example: a public Wi-Fi network</span>
+    On a shared public Wi-Fi network, traffic between other users' devices and the router can, depending on the network's configuration, be visible to a sniffer running on any other device connected to that same network. If a website is loaded over plain HTTP instead of HTTPS, anything sent — a password, a search, a message — can be captured and read in plain text by anyone sniffing that network segment. This is precisely why every lesson in Unit 6 emphasized HTTPS: encryption means a sniffer can still capture the traffic, but what they capture is unreadable scrambled bytes instead of your actual data.
+  </div>
+
+  <h2>Man-in-the-middle</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    A <strong>man-in-the-middle attack</strong> (MITM) is when an attacker secretly positions themselves between two communicating parties, intercepting (and potentially altering) traffic passing between them, while both original parties believe they're communicating directly with each other. It's a step beyond passive sniffing: instead of only reading traffic that happens to pass by, the attacker actively inserts themselves into the path the traffic takes.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why this is exactly the scenario Lesson 19's certificate check defends against</span>
+    Recall the man-in-the-middle scenario Lesson 19 described directly: an attacker intercepts a connection and presents themselves as the real server, potentially having a perfectly encrypted — but entirely compromised — conversation with an unsuspecting victim, reading everything before forwarding it (or not) to the real destination. TLS's certificate verification is the specific countermeasure: your browser checks that the certificate presented actually belongs to the domain you're trying to reach, issued by a trusted third party, and refuses to proceed silently if it doesn't check out. This is why a browser's certificate warning should never be casually clicked through — it exists specifically to catch this attack in progress.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What does IP spoofing exploit?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">The fact that the basic IP protocol doesn't require or verify that a packet's source address field is truthful.</button>
+      <button class="quiz-choice" data-correct="false">A flaw specific only to IPv6, never IPv4.</button>
+      <button class="quiz-choice" data-correct="false">A bug in TCP's three-way handshake that has since been fully patched everywhere.</button>
+      <button class="quiz-choice" data-correct="false">A weakness in DNS caching exclusively.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Nothing in basic IP forwarding verifies the source address is honest — routers forward based on destination, not source truthfulness.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why does HTTPS meaningfully limit what a packet sniffer on a shared network can actually learn?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">A sniffer can still capture encrypted traffic, but the captured bytes are scrambled and unreadable without the correct key, unlike plain HTTP.</button>
+      <button class="quiz-choice" data-correct="false">HTTPS makes it technically impossible for any traffic to be captured at all.</button>
+      <button class="quiz-choice" data-correct="false">HTTPS only encrypts headers, leaving the body fully readable to a sniffer.</button>
+      <button class="quiz-choice" data-correct="false">HTTPS has no effect on what a sniffer can read.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Encryption doesn't stop capture — it makes what's captured unreadable without the key, unlike plain-text HTTP.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. What specifically distinguishes a man-in-the-middle attack from simple passive sniffing?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">The attacker actively positions themselves between the two parties, intercepting and potentially altering traffic, rather than only passively reading traffic that happens to pass by.</button>
+      <button class="quiz-choice" data-correct="false">Man-in-the-middle attacks never involve reading any traffic at all.</button>
+      <button class="quiz-choice" data-correct="false">Sniffing requires physical access to a device, while man-in-the-middle never does.</button>
+      <button class="quiz-choice" data-correct="false">There is no meaningful difference between the two.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>MITM is active positioning within the traffic's path, beyond just passively reading traffic that happens to be visible.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="certificate">
+    <p class="quiz-prompt">4. Fill in the blank: TLS's specific countermeasure against a man-in-the-middle attacker impersonating a real server is verifying that server's ___, refusing to proceed if it doesn't check out.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Certificate verification, from Lesson 19, is exactly the defense against this attack.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: the U.S. Cybersecurity and Infrastructure Security Agency's (CISA) public guidance on securing network traffic covers spoofing, sniffing, and MITM defenses in a practical, non-academic style.</p>
+
+  <p class="ask-teacher">Curious how to tell whether a specific certificate warning is worth taking seriously? Ask your teacher — that's what I'm here for. Next up: the final lesson — diagnosing a real broken connection, using exactly the layered vocabulary this entire course has built up.</p>
+
+  <footer class="lesson-footer">STEM+ · Computer Networking Fundamentals · Lesson 25 of the course sequence</footer>
+</div>

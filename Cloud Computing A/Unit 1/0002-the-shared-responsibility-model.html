@@ -1,0 +1,192 @@
+<meta charset="UTF-8">
+<title>Lesson 2: The Shared Responsibility Model — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · Cloud Computing A · Unit 1 · Lesson 2</span>
+  <h1>The Shared Responsibility Model</h1>
+  <p class="subtitle">Moving to the cloud doesn't mean the provider handles everything. It means you and the provider draw a line, and everything on your side of it is still entirely your problem.</p>
+  <p class="nav-links"><a href="0001-from-servers-under-a-desk-to-someone-elses-computer.html" class="nav-prev">← Lesson 1</a> <a href="0003-public-private-and-hybrid-cloud.html" class="nav-next">Lesson 3 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>A dangerously common misconception among people new to the cloud is that "the cloud" means security and reliability become someone else's job entirely. They don't. What changes is <em>which</em> layers are someone else's job. Get this wrong and you'll ship a database with no password, assume "the cloud" backed it up for you, and find out otherwise during an outage.</p>
+
+  <h2>The line: security "of" the cloud vs. security "in" the cloud</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    The <strong>shared responsibility model</strong> splits every task involved in running a system into two buckets: the provider is responsible for the security and reliability <em>of</em> the cloud — the physical data centers, the underlying hardware, the network backbone, and (depending on the service) the virtualization layer. The customer is responsible for security and correctness <em>in</em> the cloud — everything they configure, deploy, and run on top of that foundation: their operating system patches, their application code, their access permissions, and their own data.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Worked example</span>
+    A provider's data center burns down — that's the provider's problem; they've already built redundant facilities elsewhere and your workload keeps running (Unit 6 covers exactly how). A developer leaves a database open to the entire internet with no password — that's entirely the customer's problem; the provider correctly gave them a fully configurable database and the customer configured it insecurely. Both are "cloud" failures in a loose sense, but only one of them is the provider's fault.
+  </div>
+
+  <h2>Where the line falls depends on the service model</h2>
+  <p>The shared responsibility line isn't fixed — it slides depending on how much of the stack the provider manages for you. The more the provider manages, the less you have to, but the less control you have. Try the tabs below to see how the split changes.</p>
+
+  <div class="widget" id="shared-resp-widget">
+    <p class="widget-label">Interactive: who manages each layer?</p>
+    <div class="fm-tabs">
+      <button class="fm-tab is-active" type="button" data-resp-tab="onprem">On-Prem</button>
+      <button class="fm-tab" type="button" data-resp-tab="iaas">IaaS</button>
+      <button class="fm-tab" type="button" data-resp-tab="paas">PaaS</button>
+      <button class="fm-tab" type="button" data-resp-tab="saas">SaaS</button>
+    </div>
+    <svg class="figure" viewBox="0 0 320 250" width="320" height="250" role="img" aria-label="Stack diagram of infrastructure layers, colored by who manages each one">
+      <g id="resp-layers"></g>
+    </svg>
+    <p class="plot-readout" data-resp-summary></p>
+    <p class="plot-hint">Click a tab to see how the responsibility line shifts as you move from owning everything yourself to consuming a full SaaS product.</p>
+  </div>
+
+  <div class="box">
+    <span class="box-label">Definitions</span>
+    <strong>IaaS (Infrastructure as a Service)</strong> rents you raw virtual machines and networking — you still install and patch the operating system yourself (Lesson 4 covers this in depth). <strong>PaaS (Platform as a Service)</strong> additionally manages the operating system and runtime for you — you just deploy your application code. <strong>SaaS (Software as a Service)</strong> is a complete, ready-to-use application — you only manage your own data and account configuration inside it. Gmail is SaaS; a virtual machine you rent and configure yourself is IaaS; a platform where you push code and it runs without you touching a server is PaaS.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why this matters more than it looks like it should</span>
+    Every real security incident involving "the cloud" that makes the news is almost always a shared responsibility failure on the customer's side of the line — an exposed storage bucket, an unpatched application dependency, an overly broad access permission — not a failure of the provider's physical data center. Understanding exactly where the line sits for whatever service you're using is the single most important habit this unit can give you, because assuming the provider handles something it doesn't is how real breaches happen.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. Under the shared responsibility model, who is responsible for the physical security of a cloud provider's data center building?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">The provider — this falls under security "of" the cloud.</button>
+      <button class="quiz-choice" data-correct="false">The customer — every customer must independently secure the physical building.</button>
+      <button class="quiz-choice" data-correct="false">No one — physical security is not part of the shared responsibility model.</button>
+      <button class="quiz-choice" data-correct="false">A separate government agency, unrelated to the provider or customer.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Physical facilities and hardware are always the provider's responsibility, regardless of service model.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. A developer using an IaaS virtual machine forgets to install a critical operating system security patch, and the machine is compromised. Whose failure is this under the shared responsibility model?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">The provider's — they should have patched every customer's operating system automatically.</button>
+      <button class="quiz-choice" data-correct="true">The customer's — in the IaaS model, the customer is responsible for patching their own operating system.</button>
+      <button class="quiz-choice" data-correct="false">Neither — operating system patches are irrelevant to security.</button>
+      <button class="quiz-choice" data-correct="false">It cannot be determined without knowing which cloud provider is involved.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>IaaS leaves OS management, including patching, on the customer's side of the line.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Moving from IaaS to PaaS to SaaS generally does what to the customer's share of responsibility?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">It shrinks, as the provider takes on more of the stack — but it never reaches zero.</button>
+      <button class="quiz-choice" data-correct="false">It stays exactly the same at every service model.</button>
+      <button class="quiz-choice" data-correct="false">It grows, because SaaS products require more customer configuration than IaaS.</button>
+      <button class="quiz-choice" data-correct="false">It disappears entirely once a service is labeled SaaS.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The customer's slice shrinks moving from IaaS to SaaS, but some responsibility — at minimum for their own data and account access — always remains.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="paas|platform as a service">
+    <p class="quiz-prompt">4. Fill in the blank: the service model where the provider manages the operating system and runtime, and the customer just deploys application code, is called ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>PaaS sits between IaaS (customer manages the OS) and SaaS (customer manages neither OS nor application) on the shared responsibility spectrum.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="shared responsibility model|shared responsibility">
+    <p class="quiz-prompt">5. Fill in the blank: the framework that splits every task into "the provider's job" and "the customer's job," with the exact split depending on the service model in use, is called the ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>This is the exact term providers themselves use to describe the split.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: Amazon Web Services' <a href="https://aws.amazon.com/compliance/shared-responsibility-model/">"Shared Responsibility Model"</a> page lays out the real diagram this lesson's widget is based on, with the exact split for their own services.</p>
+
+  <p class="ask-teacher">Not sure which side of the line a specific task falls on for a service you've used? Ask your teacher — that's what I'm here for. Next up: the three ways a cloud can be deployed, and why some organizations still keep some of it private.</p>
+
+  <footer class="lesson-footer">STEM+ · Cloud Computing A · Lesson 2 of the course sequence</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var layers = [
+    { key: 'data', label: 'Data' },
+    { key: 'app', label: 'Application Code' },
+    { key: 'runtime', label: 'Runtime' },
+    { key: 'os', label: 'Operating System' },
+    { key: 'virt', label: 'Virtualization' },
+    { key: 'hw', label: 'Hardware & Network' },
+    { key: 'fac', label: 'Facilities' }
+  ];
+  var responsibility = {
+    onprem: { data: true, app: true, runtime: true, os: true, virt: true, hw: true, fac: true },
+    iaas:   { data: true, app: true, runtime: true, os: true, virt: false, hw: false, fac: false },
+    paas:   { data: true, app: true, runtime: false, os: false, virt: false, hw: false, fac: false },
+    saas:   { data: true, app: false, runtime: false, os: false, virt: false, hw: false, fac: false }
+  };
+
+  var svgNS = 'http://www.w3.org/2000/svg';
+  var g = document.getElementById('resp-layers');
+  var rectH = 26, gap = 6, step = rectH + gap, x = 60, w = 200, top = 8;
+
+  layers.forEach(function (layer, i) {
+    var y = top + i * step;
+    var rect = document.createElementNS(svgNS, 'rect');
+    rect.setAttribute('x', x);
+    rect.setAttribute('y', y);
+    rect.setAttribute('width', w);
+    rect.setAttribute('height', rectH);
+    rect.setAttribute('rx', 4);
+    rect.setAttribute('data-layer-key', layer.key);
+    rect.setAttribute('stroke-width', 1.5);
+    g.appendChild(rect);
+
+    var text = document.createElementNS(svgNS, 'text');
+    text.setAttribute('x', x + w / 2);
+    text.setAttribute('y', y + rectH / 2 + 4);
+    text.setAttribute('text-anchor', 'middle');
+    text.setAttribute('class', 'fig-label');
+    text.setAttribute('font-style', 'normal');
+    text.textContent = layer.label;
+    g.appendChild(text);
+  });
+
+  var tabs = document.querySelectorAll('#shared-resp-widget [data-resp-tab]');
+  var summary = document.querySelector('#shared-resp-widget [data-resp-summary]');
+  var rootStyle = getComputedStyle(document.documentElement);
+
+  function paint(mode) {
+    var map = responsibility[mode];
+    var customerCount = 0;
+    layers.forEach(function (layer) {
+      var rect = g.querySelector('[data-layer-key="' + layer.key + '"]');
+      var mine = map[layer.key];
+      if (mine) customerCount++;
+      rect.style.fill = mine ? 'var(--accent-soft)' : 'var(--code-bg)';
+      rect.style.stroke = mine ? 'var(--accent)' : 'var(--border)';
+    });
+    if (summary) {
+      summary.textContent = 'You manage ' + customerCount + ' of ' + layers.length + ' layers; the provider manages the rest.';
+    }
+  }
+
+  tabs.forEach(function (tab) {
+    tab.addEventListener('click', function () {
+      tabs.forEach(function (t) { t.classList.remove('is-active'); });
+      tab.classList.add('is-active');
+      paint(tab.getAttribute('data-resp-tab'));
+    });
+  });
+
+  paint('onprem');
+});
+</script>

@@ -1,0 +1,127 @@
+<meta charset="UTF-8">
+<title>Lesson 17: HTTP Requests and Responses — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<script src="../../assets/interactive.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · Computer Networking Fundamentals · Unit 6 · Lesson 17</span>
+  <h1>HTTP Requests and Responses</h1>
+  <p class="subtitle">Everything below this point in the stack — packets, ports, TCP connections — exists to deliver one plain-text message: an HTTP request, and the response that answers it.</p>
+  <p class="nav-links"><a href="../Unit%205/0016-udp-fast-unreliable-and-why-thats-sometimes-the-point.html" class="nav-prev">← Lesson 16</a> <a href="0018-status-codes-headers-and-statelessness.html" class="nav-next">Lesson 18 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Lesson 5 put HTTP at the top of the stack, in the Application layer — the layer that defines what the actual data <em>means</em>, once every layer below has finished the job of getting bits to the right place. <strong>HTTP</strong> (HyperText Transfer Protocol) is the request-response protocol nearly every website is built on, and — refreshingly, compared to the binary headers of earlier units — it's just structured, human-readable text.</p>
+
+  <h2>The request-response pattern</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    HTTP follows a strict <strong>request-response</strong> pattern: a client sends one <strong>request</strong> over an already-established TCP connection (Lesson 15), and the server sends back exactly one <strong>response</strong>. The client always initiates; a server never sends data to a client that hasn't asked for it first. Every request specifies a <strong>method</strong> (what action to perform — <code>GET</code> to retrieve data, <code>POST</code> to submit new data, among others covered fully in Lesson 20) and a <strong>URL</strong> (which resource on the server it wants).
+  </div>
+
+  <div class="widget" id="http-tabs">
+    <div class="widget-label">A Real Request and Its Response</div>
+    <div class="fm-tabs">
+      <button class="fm-tab is-active" data-tab="req">Request</button>
+      <button class="fm-tab" data-tab="res">Response</button>
+    </div>
+    <div class="fm-panel" data-panel="req">
+      <pre class="code-block"><code><span class="code-comment">&lt;- request line: method, path, HTTP version</span>
+GET /articles/networking-basics HTTP/1.1
+<span class="code-comment">&lt;- headers: metadata about the request</span>
+Host: example.com
+Accept: text/html
+User-Agent: Mozilla/5.0
+<span class="code-comment">&lt;- blank line marks the end of headers</span>
+
+<span class="code-comment">&lt;- body: empty for a GET request</span></code></pre>
+    </div>
+    <div class="fm-panel" data-panel="res" hidden>
+      <pre class="code-block"><code><span class="code-comment">&lt;- status line: HTTP version, status code, reason</span>
+HTTP/1.1 200 OK
+<span class="code-comment">&lt;- headers: metadata about the response</span>
+Content-Type: text/html
+Content-Length: 1583
+<span class="code-comment">&lt;- blank line marks the end of headers</span>
+
+<span class="code-comment">&lt;- body: the actual content being returned</span>
+&lt;html&gt;&lt;body&gt;&lt;h1&gt;Networking Basics&lt;/h1&gt;...&lt;/body&gt;&lt;/html&gt;</code></pre>
+    </div>
+  </div>
+
+  <h2>Every HTTP message has the same shape</h2>
+  <div class="box">
+    <span class="box-label">Structure</span>
+    Whether it's a request or a response, an HTTP message has the same four parts, in the same order: a <strong>start line</strong> (the request line for a request, or the status line for a response — Lesson 18 covers status codes in full), one or more <strong>headers</strong> (key-value metadata about the message), a required blank line marking the end of the headers, and an optional <strong>body</strong> (the actual content, if any — a GET request typically has none, but a response usually does).
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why the header/body split matters</span>
+    Separating headers from the body means a receiving program can read just the metadata first — enough to decide, say, how large the body is (<code>Content-Length</code>) or what format it's in (<code>Content-Type</code>) — before it has to process a single byte of the actual content. This is the same principle Lesson 6's encapsulation relied on: read your own layer's header, act on it, without needing to fully understand the payload underneath it. HTTP headers give an Application-layer program the exact same convenience within its own message format.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Worked example: what happens when you load a web page</span>
+    Your browser opens a TCP connection to the server (Lesson 15's three-way handshake), then sends an HTTP GET request for <code>/</code> (the site's homepage). The server processes the request, and sends back an HTTP response: a status line (<code>200 OK</code>, meaning success), headers describing the content, a blank line, and finally the actual HTML that becomes the page you see. Every image, stylesheet, and script the page references triggers its own separate GET request-response exchange — a single "page load" is really many independent HTTP round trips happening in quick succession.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. In the HTTP request-response pattern, who is allowed to initiate sending data?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Only the client — a server never sends a response the client didn't first request.</button>
+      <button class="quiz-choice" data-correct="false">Only the server, which pushes data to clients whenever it wants.</button>
+      <button class="quiz-choice" data-correct="false">Either side may initiate at any time, with no fixed pattern.</button>
+      <button class="quiz-choice" data-correct="false">Neither — HTTP requires a third-party server to initiate every exchange.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>HTTP is strictly request-then-response; the client always initiates.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. What four parts make up every HTTP message, request or response, in order?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Start line, headers, a blank line, and an optional body.</button>
+      <button class="quiz-choice" data-correct="false">IP address, port number, MAC address, and payload.</button>
+      <button class="quiz-choice" data-correct="false">Method, sequence number, acknowledgment, and checksum.</button>
+      <button class="quiz-choice" data-correct="false">Only a body — headers are optional and rarely used.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The start line, headers, blank line, and optional body are consistent across every HTTP request and response.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why does separating headers from the body matter for a program processing an HTTP message?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">It lets a program read the metadata (like content length or type) first, and decide how to handle the body, before processing a single byte of the actual content.</button>
+      <button class="quiz-choice" data-correct="false">It's purely a stylistic convention with no functional benefit.</button>
+      <button class="quiz-choice" data-correct="false">It allows headers to be sent over a completely separate network connection.</button>
+      <button class="quiz-choice" data-correct="false">It makes the body impossible to read without special software.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The header/body split mirrors the same "read your own metadata first" principle Lesson 6 introduced for encapsulation.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="get">
+    <p class="quiz-prompt">4. Fill in the blank: the HTTP method used to retrieve data from a server, with no body of its own, is ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>GET is the standard method for retrieving a resource; Lesson 20 covers POST and other methods for submitting or modifying data.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: MDN's "<a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Overview">An Overview of HTTP</a>" includes real captured request and response examples from an actual browser, useful for comparing against the widget above.</p>
+
+  <p class="ask-teacher">Want to open a browser's developer tools together and watch real HTTP requests happen as a page loads? Ask your teacher — that's what I'm here for. Next up: the status line's number, in full — what the common codes mean, what headers commonly appear, and why HTTP itself has no memory of your last request.</p>
+
+  <footer class="lesson-footer">STEM+ · Computer Networking Fundamentals · Lesson 17 of the course sequence</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  STEMPlus.mountTabs(document.getElementById('http-tabs'), 'data-tab', 'data-panel');
+});
+</script>

@@ -1,0 +1,95 @@
+<meta charset="UTF-8">
+<title>Lesson 10: Virtual Private Clouds and Subnets — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · Cloud Computing A · Unit 4 · Lesson 10</span>
+  <h1>Virtual Private Clouds and Subnets</h1>
+  <p class="subtitle">A VM sitting on a shared physical server (Lesson 4) still needs its own private network — otherwise every customer's traffic would be tangled together on the same wires. This lesson is about how a provider gives every customer their own isolated network, virtually.</p>
+  <p class="nav-links"><a href="../Unit%203/0009-choosing-the-right-storage-for-the-job.html" class="nav-prev">← Unit 3, Lesson 9</a> <a href="0011-load-balancers-spreading-traffic-across-many-servers.html" class="nav-next">Lesson 11 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Unit 2's VMs and Unit 3's storage don't do much good in isolation — they need to talk to each other, and usually to the internet. But "just connect everything to everything" is a security nightmare: a database should never be directly reachable from a stranger's browser, even though a web server needs to be. Networking in the cloud starts with drawing boundaries before anything is even wired up.</p>
+
+  <h2>The virtual private cloud: your own isolated network</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    A <strong>Virtual Private Cloud (VPC)</strong> is a logically isolated section of a provider's network, dedicated to one customer, where that customer defines their own private IP address ranges, routing rules, and which resources can talk to which other resources — and to the internet. Even though the underlying physical network hardware is shared across many customers (the same multi-tenancy idea from Lesson 4's hypervisor), a VPC makes it behave, from the inside, like a private network no other customer can see into or reach.
+  </div>
+
+  <h2>Subnets: dividing a VPC into smaller zones</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    A <strong>subnet</strong> is a smaller slice of a VPC's IP address range, used to group resources that should share the same routing and access rules. The most common split is <strong>public</strong> subnets, which have a route to the internet (through an "internet gateway") and hold resources meant to be reachable from outside, and <strong>private</strong> subnets, which have no such route and hold resources that should only ever be reached from inside the VPC.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Worked example: a typical three-tier web app</span>
+    A web application's servers sit in a public subnet, with a route to the internet, so users' browsers can reach them. Its database sits in a private subnet with no internet route at all — it can only be reached by the web servers inside the same VPC, over the internal network. Even if an attacker somehow learns the database's internal address, there is no path from the public internet into that private subnet to reach it; the subnet boundary itself blocks the connection before any password or firewall rule is even checked.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What is a Virtual Private Cloud (VPC)?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">A logically isolated section of a provider's network, dedicated to one customer, where they control IP ranges, routing, and access.</button>
+      <button class="quiz-choice" data-correct="false">A physical, dedicated network cable connecting one customer's data center to the provider.</button>
+      <button class="quiz-choice" data-correct="false">A type of virtual machine used only for networking tasks.</button>
+      <button class="quiz-choice" data-correct="false">A public website hosted by the cloud provider.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A VPC is a software-defined, logically isolated network — not a dedicated physical cable or a VM type.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. What is the key difference between a public subnet and a private subnet?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">A public subnet has a route to the internet through an internet gateway; a private subnet has no such route.</button>
+      <button class="quiz-choice" data-correct="false">A public subnet is free; a private subnet always costs extra.</button>
+      <button class="quiz-choice" data-correct="false">A private subnet can hold more resources than a public subnet.</button>
+      <button class="quiz-choice" data-correct="false">There is no functional difference — the names are purely cosmetic.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The presence or absence of an internet route is the defining, functional difference between the two subnet types.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. In the three-tier web app example, why can't an attacker reach the database directly from the public internet, even knowing its internal address?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">The database sits in a private subnet with no route to the internet at all, so there's no network path in from outside.</button>
+      <button class="quiz-choice" data-correct="false">The database has no IP address, so it cannot be reached by anything.</button>
+      <button class="quiz-choice" data-correct="false">Only the database's own password can prevent any connection attempt.</button>
+      <button class="quiz-choice" data-correct="false">Web servers are physically incapable of connecting to databases.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The private subnet's lack of an internet route blocks the connection at the network level, before any credential check happens.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="vpc|virtual private cloud">
+    <p class="quiz-prompt">4. Fill in the blank: a logically isolated section of a provider's network, dedicated to one customer's own IP ranges and routing rules, is called a ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A VPC gives one customer their own private-feeling network on shared underlying hardware.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="subnet">
+    <p class="quiz-prompt">5. Fill in the blank: a smaller slice of a VPC's IP address range, grouping resources that share the same routing and access rules, is called a ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Subnets divide a VPC into smaller, differently-accessible zones, like public-facing versus internal-only.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: AWS's <a href="https://docs.aws.amazon.com/vpc/latest/userguide/what-is-amazon-vpc.html">"What is Amazon VPC?"</a> documentation diagrams exactly this public-subnet/private-subnet split on a real product.</p>
+
+  <p class="ask-teacher">Curious how many subnets a real production application typically has? Ask your teacher — that's what I'm here for. Next up: once traffic reaches a public subnet, how it gets spread across many servers instead of overwhelming just one.</p>
+
+  <footer class="lesson-footer">STEM+ · Cloud Computing A · Lesson 10 of the course sequence</footer>
+</div>

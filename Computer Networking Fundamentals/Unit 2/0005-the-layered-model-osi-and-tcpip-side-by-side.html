@@ -1,0 +1,140 @@
+<meta charset="UTF-8">
+<title>Lesson 5: The Layered Model — OSI and TCP/IP Side by Side — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<script src="../../assets/interactive.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · Computer Networking Fundamentals · Unit 2 · Lesson 5</span>
+  <h1>The Layered Model — OSI and TCP/IP Side by Side</h1>
+  <p class="subtitle">No single protocol handles "send data across the internet." The job is split into stacked layers, each solving one narrow piece and trusting the layer below it to handle everything beneath that.</p>
+  <p class="nav-links"><a href="0004-circuit-switching-vs-packet-switching.html" class="nav-prev">← Lesson 4</a> <a href="0006-encapsulation-how-one-message-becomes-many-envelopes.html" class="nav-next">Lesson 6 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Think back to Lesson 1's flashlight problem: addressing, formatting, ordering, error recovery — that's a lot of separate concerns for one protocol to handle at once. Real networking software doesn't try. Instead, the problem is split into <strong>layers</strong>, each one responsible for a narrow slice of the job, each one only talking to the layers directly above and below it, and each one trusting that the layer beneath it already solved its own piece correctly. This lesson introduces two competing (but closely related) ways of naming those layers — the OSI model and the TCP/IP model — because you'll see both used in the wild, sometimes in the same conversation.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    A <strong>layer</strong> is a self-contained slice of the networking problem, with a defined job and a defined interface to the layers immediately above and below it. Layering means a change inside one layer — say, switching from Wi-Fi to a wired connection — doesn't require the layers above it to know or care, as long as the interface between layers stays the same.
+  </div>
+
+  <h2>The OSI model: seven layers, mostly used as a reference</h2>
+  <p>The <strong>OSI model</strong> (Open Systems Interconnection) is a seven-layer reference model, developed in the 1980s, that describes networking in maximum conceptual detail. It's rarely implemented exactly as specified, but its vocabulary — especially "Layer 3" for addressing and "Layer 7" for applications — is used constantly by working engineers, so it's worth knowing even though the internet itself doesn't literally run on it.</p>
+
+  <h2>The TCP/IP model: four layers, what the internet actually runs</h2>
+  <p>The <strong>TCP/IP model</strong> is a simpler, four-layer model that describes what the internet's actual protocol suite does. It's less detailed than OSI but it's the model this course's later units follow directly, because it maps onto real, deployed protocols rather than a theoretical ideal.</p>
+
+  <div class="widget" id="layer-tabs">
+    <div class="widget-label">Explore Each TCP/IP Layer</div>
+    <div class="fm-tabs">
+      <button class="fm-tab is-active" data-tab="link">Link</button>
+      <button class="fm-tab" data-tab="internet">Internet</button>
+      <button class="fm-tab" data-tab="transport">Transport</button>
+      <button class="fm-tab" data-tab="application">Application</button>
+    </div>
+    <div class="fm-panel" data-panel="link">
+      <p><strong>Job:</strong> get bits across one physical hop — one wire, one Wi-Fi signal, one cable segment — between two directly connected devices.</p>
+      <p><strong>Addresses using:</strong> MAC addresses (Lesson 7).</p>
+      <p><strong>OSI equivalent:</strong> combines OSI's Physical (Layer 1) and Data Link (Layer 2).</p>
+      <p><strong>Example protocols:</strong> Ethernet, Wi-Fi (802.11).</p>
+    </div>
+    <div class="fm-panel" data-panel="internet" hidden>
+      <p><strong>Job:</strong> get a packet from its source device to its destination device, potentially across many intermediate hops and networks.</p>
+      <p><strong>Addresses using:</strong> IP addresses (Lessons 8-10).</p>
+      <p><strong>OSI equivalent:</strong> OSI's Network layer (Layer 3).</p>
+      <p><strong>Example protocols:</strong> IP (IPv4, IPv6).</p>
+    </div>
+    <div class="fm-panel" data-panel="transport" hidden>
+      <p><strong>Job:</strong> deliver data between the correct <em>programs</em> running on the source and destination devices (not just the correct devices), and optionally guarantee reliable, ordered delivery.</p>
+      <p><strong>Addresses using:</strong> port numbers (Lesson 14).</p>
+      <p><strong>OSI equivalent:</strong> OSI's Transport layer (Layer 4).</p>
+      <p><strong>Example protocols:</strong> TCP, UDP (Unit 5).</p>
+    </div>
+    <div class="fm-panel" data-panel="application" hidden>
+      <p><strong>Job:</strong> define the actual meaning and format of the data two programs exchange — what a request looks like, what a response looks like, what each field means.</p>
+      <p><strong>Addresses using:</strong> nothing new — it relies entirely on the layers below for delivery.</p>
+      <p><strong>OSI equivalent:</strong> combines OSI's Session (5), Presentation (6), and Application (7) layers.</p>
+      <p><strong>Example protocols:</strong> HTTP, DNS (Units 4 and 6).</p>
+    </div>
+  </div>
+
+  <table>
+    <thead><tr><th>OSI (7 layers)</th><th>TCP/IP (4 layers)</th><th>What it handles</th></tr></thead>
+    <tbody>
+      <tr><td>7. Application<br>6. Presentation<br>5. Session</td><td>Application</td><td>Meaning of the data — HTTP, DNS</td></tr>
+      <tr><td>4. Transport</td><td>Transport</td><td>Program-to-program delivery — TCP, UDP</td></tr>
+      <tr><td>3. Network</td><td>Internet</td><td>Device-to-device delivery — IP</td></tr>
+      <tr><td>2. Data Link<br>1. Physical</td><td>Link</td><td>One physical hop — Ethernet, Wi-Fi</td></tr>
+    </tbody>
+  </table>
+
+  <div class="box why">
+    <span class="box-label">Why layering, instead of one protocol that does everything</span>
+    Layering means each layer can change independently without breaking the others. Your laptop can switch from Wi-Fi to a wired Ethernet cable — a Link-layer change — and every website you're loading (an Application-layer concern) keeps working without modification, because the Internet, Transport, and Application layers never had to know or care which physical medium was carrying their data. The same IP address, the same TCP connection logic, and the same HTTP requests work identically whether the Link layer underneath is Wi-Fi, Ethernet, or a cellular signal. Without layering, every application would need its own code for every possible physical medium — an unmanageable combinatorial mess.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">A layer only talks to its neighbors</span>
+    When your browser (Application layer) wants to send an HTTP request, it hands the request down to the Transport layer and doesn't think about IP addresses or Wi-Fi signals at all — that's not its job. The Transport layer wraps it and hands it to the Internet layer, which wraps it and hands it to the Link layer, which is the only layer that actually knows or cares whether it's talking to a Wi-Fi radio or an Ethernet cable. Each layer's world is deliberately small.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What is the core idea behind organizing networking into layers?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">It makes every protocol run faster.</button>
+      <button class="quiz-choice" data-correct="true">Each layer handles a narrow, self-contained job and only interacts with the layers immediately above and below it, so a change in one layer doesn't require changes in the others.</button>
+      <button class="quiz-choice" data-correct="false">It reduces the total number of protocols needed to just one.</button>
+      <button class="quiz-choice" data-correct="false">It ensures every network uses the exact same physical cabling.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Isolation between layers is the whole point — it's what lets, e.g., Wi-Fi swap for Ethernet without breaking web browsing.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Which model does this course's later units follow directly, and why?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">The OSI model, because it has more layers and is therefore more accurate.</button>
+      <button class="quiz-choice" data-correct="true">The TCP/IP model, because it maps onto the real, deployed protocols the internet actually runs, rather than a theoretical reference.</button>
+      <button class="quiz-choice" data-correct="false">Neither — the internet does not use any layered model.</button>
+      <button class="quiz-choice" data-correct="false">Both models are identical, so it doesn't matter.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>OSI's vocabulary is still widely used, but TCP/IP is the model that corresponds to real, running protocols like IP, TCP, and HTTP.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. A laptop switches from Wi-Fi to a wired Ethernet connection, and every website keeps loading normally with no changes needed elsewhere. What does this demonstrate?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Layering — the Link-layer change (Wi-Fi to Ethernet) is isolated from the Internet, Transport, and Application layers above it.</button>
+      <button class="quiz-choice" data-correct="false">That Wi-Fi and Ethernet are actually the exact same protocol.</button>
+      <button class="quiz-choice" data-correct="false">That the Application layer had to be reconfigured to match the new Link layer.</button>
+      <button class="quiz-choice" data-correct="false">That IP addresses change automatically whenever the Link layer changes.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>This is exactly the isolation layering is designed to provide — a lower-layer swap doesn't ripple upward.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="transport">
+    <p class="quiz-prompt">4. Fill in the blank: the TCP/IP layer responsible for delivering data to the correct program (not just the correct device), addressed using port numbers, is the ___ layer.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The Transport layer (TCP or UDP) is what distinguishes between programs on the same device, using port numbers.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: Cloudflare's "<a href="https://www.cloudflare.com/learning/ddos/glossary/open-systems-interconnection-model-osi/">The OSI Model Explained</a>" walks through all seven OSI layers individually and includes its own OSI-to-TCP/IP mapping table to compare against the one above.</p>
+
+  <p class="ask-teacher">Want to walk through which layer a specific networking term you've heard — like "Layer 2 switch" or "Layer 7 firewall" — actually refers to? Ask your teacher — that's what I'm here for. Next up: watching one message get wrapped in a header from each layer on its way out, and unwrapped in reverse on the way in.</p>
+
+  <footer class="lesson-footer">STEM+ · Computer Networking Fundamentals · Lesson 5 of the course sequence</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  STEMPlus.mountTabs(document.getElementById('layer-tabs'), 'data-tab', 'data-panel');
+});
+</script>

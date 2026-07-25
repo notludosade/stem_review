@@ -1,0 +1,174 @@
+<meta charset="UTF-8">
+<title>Lesson 8: Durability, Availability, and the 9s — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · Cloud Computing A · Unit 3 · Lesson 8</span>
+  <h1>Durability, Availability, and the 9s</h1>
+  <p class="subtitle">A cloud provider's storage page is covered in numbers like "99.999999999%." They sound almost identical. The gap between them is the difference between losing a file once every 10,000 years and never losing one at all in the lifetime of the universe.</p>
+  <p class="nav-links"><a href="0007-object-vs-block-vs-file-storage.html" class="nav-prev">← Lesson 7</a> <a href="0009-choosing-the-right-storage-for-the-job.html" class="nav-next">Lesson 9 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Cloud storage marketing loves the phrase "eleven nines." That's a durability number, and it answers a genuinely different question than the "99.99% availability" number sitting right next to it on the same page. Confusing the two — thinking one number tells you both whether your data survives and whether you can reach it right now — is an easy, and consequential, mistake.</p>
+
+  <h2>Durability: will the data survive at all?</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    <strong>Durability</strong> is the probability that stored data survives over a given period without being lost or corrupted — usually expressed as a percentage with many 9s, like Amazon S3's famous "99.999999999%" (eleven 9s) annual durability. Providers achieve this by automatically storing multiple redundant copies of every object across physically separate hardware, so a single disk failure, or even a whole facility failure, doesn't lose the data.
+  </div>
+
+  <h2>Availability: can you reach it right now?</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    <strong>Availability</strong> is the percentage of time a service is actually reachable and responding correctly, typically measured over a month or a year. A storage service can have essentially perfect durability — your data is never lost — while still being briefly <em>unavailable</em> during a network issue or maintenance window, the same way a book that's safely sitting on a shelf in a locked library is still "unavailable" to you while the library is closed.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Worked example: two very different guarantees</span>
+    A storage service advertising 99.999999999% durability and 99.9% availability is telling you two separate things: your data is astronomically unlikely to ever be permanently lost, but the service might still be briefly unreachable for roughly 8.77 hours total across an entire year, cumulatively. Both numbers matter, and neither one implies the other.
+  </div>
+
+  <h2>What each additional 9 actually buys you</h2>
+  <p>Because these percentages are so close to 100%, it's easy to misjudge how much they differ in practice. The tool below converts an availability percentage into actual downtime per year — drag the slider and watch how fast the allowed downtime shrinks.</p>
+
+  <div class="widget" id="nines-widget">
+    <p class="widget-label">Interactive: how much downtime does each additional 9 buy you?</p>
+    <div class="slider-row">
+      <label for="nines-slider">Availability target</label>
+      <input type="range" id="nines-slider" min="0" max="5" step="1" value="0">
+      <span class="slider-value" data-nines-label>99%</span>
+    </div>
+    <p class="plot-readout" data-nines-readout></p>
+    <table>
+      <thead><tr><th>Availability</th><th>Downtime allowed per year</th></tr></thead>
+      <tbody id="nines-table"></tbody>
+    </table>
+    <p class="plot-hint">Each extra 9 doesn't just shave off "a little more" downtime — it cuts the allowed downtime by roughly 90% each step.</p>
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why the last 9 is disproportionately expensive</span>
+    Going from 99% to 99.9% availability cuts allowed downtime from days to hours — usually achievable with reasonably solid engineering practice. Going from 99.99% to 99.999% cuts it from under an hour to about five minutes a year — which typically requires serious redundancy, automated failover (Unit 6), and constant monitoring across multiple independent facilities. Each additional 9 costs disproportionately more engineering effort than the one before it, for a shrinking absolute benefit, which is exactly why almost no real system chases 100% — the cost curve becomes irrational long before you get there. Choosing an availability target is a real engineering and cost decision, not a "more is always better" checkbox.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What does "durability" measure, as distinct from availability?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">The probability that stored data survives over time without being lost or corrupted.</button>
+      <button class="quiz-choice" data-correct="false">The percentage of time a service is currently reachable.</button>
+      <button class="quiz-choice" data-correct="false">The total storage capacity a provider offers.</button>
+      <button class="quiz-choice" data-correct="false">The speed at which data can be read from disk.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Durability is about data survival over time, not real-time reachability — that's availability's job.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. A storage service has near-perfect durability but only 99.9% availability. What does this combination actually mean?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">The data is essentially never permanently lost, but the service can still be briefly unreachable for roughly hours total across a year.</button>
+      <button class="quiz-choice" data-correct="false">The data will definitely be lost within a year.</button>
+      <button class="quiz-choice" data-correct="false">The service is always instantly reachable with zero downtime, ever.</button>
+      <button class="quiz-choice" data-correct="false">Durability and availability always move together, so this combination is impossible.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Durability and availability are independent guarantees — high durability does not imply high (or perfect) availability.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why does going from 99.99% to 99.999% availability typically require much more engineering effort than going from 99% to 99.9%?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Each additional 9 cuts allowed downtime by a similar large percentage, but starting from an already much smaller number, demanding serious redundancy and automated failover to achieve.</button>
+      <button class="quiz-choice" data-correct="false">99.999% actually allows more downtime than 99.99%, so it requires less effort.</button>
+      <button class="quiz-choice" data-correct="false">Cloud providers do not offer any availability above 99.99%.</button>
+      <button class="quiz-choice" data-correct="false">Every additional 9 requires exactly the same fixed amount of engineering effort.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Each additional 9 demands proportionally more engineering investment for a shrinking absolute gain — the classic diminishing-returns curve.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="durability">
+    <p class="quiz-prompt">4. Fill in the blank: a provider's claim of "eleven 9s" of ___ describes the probability that stored data is never lost or corrupted, not whether it's reachable right now.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Durability is the data-survival guarantee; availability is the separate reachability guarantee.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="availability">
+    <p class="quiz-prompt">5. Fill in the blank: the percentage of time a service is actually reachable and responding correctly, typically measured over a month or year, is called ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Availability measures real-time reachability, distinct from the long-term data-survival guarantee of durability.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: AWS's <a href="https://aws.amazon.com/s3/storage-classes/">Amazon S3 storage classes</a> page publishes real durability and availability figures side by side for each storage tier, showing exactly this distinction on a live product.</p>
+
+  <p class="ask-teacher">Curious how a provider actually calculates a durability figure like eleven 9s? Ask your teacher — that's what I'm here for. Next up: pulling object, block, and file storage together with durability and availability into one decision framework for picking storage on a real project.</p>
+
+  <footer class="lesson-footer">STEM+ · Cloud Computing A · Lesson 8 of the course sequence</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var tiers = [
+    { label: '99%', availability: 0.99 },
+    { label: '99.9%', availability: 0.999 },
+    { label: '99.95%', availability: 0.9995 },
+    { label: '99.99%', availability: 0.9999 },
+    { label: '99.999%', availability: 0.99999 },
+    { label: '99.9999%', availability: 0.999999 }
+  ];
+  var MINUTES_PER_YEAR = 365.25 * 24 * 60;
+
+  function formatDowntime(minutes) {
+    if (minutes >= 60 * 24) {
+      return (minutes / (60 * 24)).toFixed(2) + ' days';
+    }
+    if (minutes >= 60) {
+      return (minutes / 60).toFixed(2) + ' hours';
+    }
+    if (minutes >= 1) {
+      return minutes.toFixed(1) + ' minutes';
+    }
+    return (minutes * 60).toFixed(1) + ' seconds';
+  }
+
+  var tbody = document.getElementById('nines-table');
+  tiers.forEach(function (tier, i) {
+    var downtime = (1 - tier.availability) * MINUTES_PER_YEAR;
+    var row = document.createElement('tr');
+    row.setAttribute('data-tier-row', i);
+    row.innerHTML = '<td>' + tier.label + '</td><td>' + formatDowntime(downtime) + '</td>';
+    tbody.appendChild(row);
+  });
+
+  var slider = document.getElementById('nines-slider');
+  var label = document.querySelector('[data-nines-label]');
+  var readout = document.querySelector('[data-nines-readout]');
+  var rows = tbody.querySelectorAll('tr');
+
+  function render() {
+    var i = Number(slider.value);
+    var tier = tiers[i];
+    var downtime = (1 - tier.availability) * MINUTES_PER_YEAR;
+    label.textContent = tier.label;
+    readout.textContent = 'At ' + tier.label + ' availability, a service is allowed up to ' + formatDowntime(downtime) + ' of downtime per year.';
+    rows.forEach(function (row, j) {
+      row.style.background = j === i ? 'var(--accent-soft)' : '';
+      row.style.fontWeight = j === i ? '600' : '';
+    });
+  }
+
+  slider.addEventListener('input', render);
+  render();
+});
+</script>

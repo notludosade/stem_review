@@ -1,0 +1,136 @@
+<meta charset="UTF-8">
+<title>Lesson 21: Sockets — The Programming Interface to the Network — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<script src="../../assets/interactive.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · Computer Networking Fundamentals · Unit 7 · Lesson 21</span>
+  <h1>Sockets — The Programming Interface to the Network</h1>
+  <p class="subtitle">Six units built the vocabulary. This lesson is where it turns into code you can actually write, using the skills from Computer Programming 1.</p>
+  <p class="nav-links"><a href="../Unit%206/0020-rest-apis-http-as-an-interface-between-programs.html" class="nav-prev">← Lesson 20</a> <a href="0022-client-server-vs-peer-to-peer.html" class="nav-next">Lesson 22 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Every protocol this course has covered — TCP, UDP, HTTP — is ultimately just a set of rules. Somewhere, actual code has to open a connection, send bytes, and receive bytes, obeying those rules. That code talks to the operating system through a <strong>socket</strong> — and once you understand what a socket actually is, writing a simple networked program is a lot closer to the functions and loops you already know from Computer Programming 1 than it might sound.</p>
+
+  <h2>What a socket is</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    A <strong>socket</strong> is the operating system's programming interface for network communication — an object your code creates and uses to send and receive data over a network, hiding the actual packet-building, addressing, and Transport-layer bookkeeping from Units 2 through 5 behind a much simpler set of function calls. Creating a socket is conceptually similar to opening a file: you get a handle back, you read from and write to it, and you close it when you're done — except a socket's other end is a network connection instead of a location on disk.
+  </div>
+
+  <h2>The basic socket operations</h2>
+  <div class="box">
+    <span class="box-label">Definitions</span>
+    <strong>Bind</strong> associates a socket with a specific local port number (Lesson 14), telling the operating system "traffic addressed to this port belongs to this program." <strong>Listen</strong> puts a socket into a state where it's waiting for incoming connection attempts, used only by a server. <strong>Connect</strong> is what a client calls to actually initiate a connection to a specific address and port — for a TCP socket, this is the call that triggers Lesson 15's three-way handshake to happen, entirely behind the scenes.
+  </div>
+
+  <div class="widget" id="socket-tabs">
+    <div class="widget-label">A Minimal TCP Server and Client, Side by Side</div>
+    <div class="fm-tabs">
+      <button class="fm-tab is-active" data-tab="server">Server</button>
+      <button class="fm-tab" data-tab="client">Client</button>
+    </div>
+    <div class="fm-panel" data-panel="server">
+      <span class="code-label">Python</span>
+      <pre class="code-block"><code><span class="code-comment"># create a TCP socket</span>
+sock = socket(AF_INET, SOCK_STREAM)
+
+<span class="code-comment"># bind to a local port, then listen for connections</span>
+sock.bind(("0.0.0.0", 5050))
+sock.listen()
+
+<span class="code-comment"># accept() blocks until a client connects</span>
+conn, addr = sock.accept()
+data = conn.recv(1024)
+conn.send(b"Hello, " + data)
+conn.close()</code></pre>
+    </div>
+    <div class="fm-panel" data-panel="client" hidden>
+      <span class="code-label">Python</span>
+      <pre class="code-block"><code><span class="code-comment"># create a TCP socket</span>
+sock = socket(AF_INET, SOCK_STREAM)
+
+<span class="code-comment"># connect() triggers the three-way handshake</span>
+sock.connect(("127.0.0.1", 5050))
+
+sock.send(b"World")
+reply = sock.recv(1024)
+print(reply)  <span class="code-comment"># prints: Hello, World</span>
+sock.close()</code></pre>
+    </div>
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Reading the example against what you already know</span>
+    <code>sock.bind(("0.0.0.0", 5050))</code> is Lesson 14's port concept, made literal in code — this program is now the one listening on port 5050 for this device. <code>sock.listen()</code> and <code>sock.accept()</code> are the server side of Lesson 15's handshake: <code>accept()</code> blocks (pauses execution) until a client's <code>connect()</code> call completes the three-way handshake, then returns a new connection object to actually use. <code>send()</code> and <code>recv()</code> are just writing to and reading from that connection — and because this is TCP, everything Lesson 15 covered (ordering, reliability, retransmission) is happening underneath these two calls automatically, without a single extra line of code from you.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why the socket API hides so much</span>
+    Every concept from Units 2 through 5 — encapsulation, IP addresses, TCP's handshake and retransmission — is still happening every time this code runs. The socket API's entire value is that none of it needs to be written by hand: <code>connect()</code> alone triggers packet construction, routing, and a full three-way handshake, and <code>send()</code>/<code>recv()</code> alone handle sequencing and retransmission. This is layering (Lesson 5) paying off directly for you as a programmer — your code only has to think at the Application layer, in terms of "send these bytes, receive those bytes," while the operating system's networking stack handles every layer underneath.
+  </div>
+
+  <h2>TCP sockets vs. UDP sockets</h2>
+  <p>Everything above used <code>SOCK_STREAM</code>, which creates a TCP socket — connection-oriented, reliable, exactly matching Lesson 15. A UDP socket (<code>SOCK_DGRAM</code>) skips <code>connect()</code>, <code>listen()</code>, and <code>accept()</code> entirely, since UDP is connectionless (Lesson 16): a UDP socket just sends and receives individual datagrams, each one addressed independently, with no handshake and no guarantee any particular one arrives.</p>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What is a socket, at a high level?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">The operating system's programming interface for network communication — an object your code uses to send and receive data, hiding the lower-layer details.</button>
+      <button class="quiz-choice" data-correct="false">A physical port on the back of a router.</button>
+      <button class="quiz-choice" data-correct="false">A synonym for an IP address.</button>
+      <button class="quiz-choice" data-correct="false">A type of DNS record.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A socket is the software handle a program uses for network I/O, similar in spirit to a file handle.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. What actually happens, in terms of earlier lessons, when a client's code calls connect() on a TCP socket?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">It triggers the three-way handshake (SYN, SYN-ACK, ACK) from Lesson 15, entirely behind the scenes.</button>
+      <button class="quiz-choice" data-correct="false">It immediately sends the entire message with no setup of any kind.</button>
+      <button class="quiz-choice" data-correct="false">It performs a DNS lookup and nothing else.</button>
+      <button class="quiz-choice" data-correct="false">It permanently reserves a dedicated circuit, like circuit switching.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>connect() is the client-side trigger for TCP's full three-way handshake, hidden behind one function call.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why does a UDP socket skip listen(), accept(), and connect() entirely?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">UDP is connectionless — there's no handshake or ongoing connection state to set up, so those calls have nothing to do.</button>
+      <button class="quiz-choice" data-correct="false">UDP sockets are not allowed to send more than one datagram.</button>
+      <button class="quiz-choice" data-correct="false">UDP requires a completely different operating system to function.</button>
+      <button class="quiz-choice" data-correct="false">UDP always uses the same port number as TCP.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>UDP's connectionless nature (Lesson 16) means there's no handshake step for those socket calls to perform.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="bind">
+    <p class="quiz-prompt">4. Fill in the blank: the socket operation that associates a socket with a specific local port number, telling the OS which program owns that port, is ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Bind is what a server calls to claim a specific port before listening on it.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: Python's official <a href="https://docs.python.org/3/howto/sockets.html">Socket Programming HOWTO</a> walks through the exact bind/listen/accept/connect calls used above in more depth, with a complete working example to run yourself.</p>
+
+  <p class="ask-teacher">Want to actually run a server and client like the one above on your own machine together? Ask your teacher — that's what I'm here for. Next up: the code above had one obvious client and one obvious server — but that split isn't the only way two programs can be arranged on a network.</p>
+
+  <footer class="lesson-footer">STEM+ · Computer Networking Fundamentals · Lesson 21 of the course sequence</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  STEMPlus.mountTabs(document.getElementById('socket-tabs'), 'data-tab', 'data-panel');
+});
+</script>

@@ -1,0 +1,100 @@
+<meta charset="UTF-8">
+<title>Lesson 14: Managed Queues and Messaging — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · Cloud Computing A · Unit 5 · Lesson 14</span>
+  <h1>Managed Queues and Messaging</h1>
+  <p class="subtitle">Not every part of an application needs to talk to every other part immediately. Sometimes the fastest, most resilient move is to hand off a task and walk away — as long as something reliably holds onto it until it's picked up.</p>
+  <p class="nav-links"><a href="0013-managed-databases-letting-someone-else-run-the-backups.html" class="nav-prev">← Lesson 13</a> <a href="0015-identity-and-access-management.html" class="nav-next">Lesson 15 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Lesson 11's load balancer routes a request to a server that answers it right away — a <strong>synchronous</strong> interaction, where the caller waits for a response before moving on. Plenty of real work doesn't need to happen that fast. When a user places an order, charging their card, updating inventory, and emailing a receipt don't all need to finish before the user sees "Order confirmed" — they just need to happen <em>eventually</em>, reliably. That gap between "immediately" and "eventually, reliably" is exactly what a message queue fills.</p>
+
+  <h2>What a message queue does</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    A <strong>message queue</strong> (Amazon SQS, Azure Queue Storage) is a managed service that temporarily holds messages sent by one part of a system (a <strong>producer</strong>) until another part (a <strong>consumer</strong>) is ready to process them. The producer and consumer never talk to each other directly — the producer drops a message in the queue and moves on immediately; the consumer picks messages up whenever it's ready, at its own pace. This is called <strong>decoupling</strong>: neither side needs to know the other exists, be online at the same moment, or run at the same speed.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Worked example: an order-processing pipeline</span>
+    A user checks out. The web server (producer) immediately writes a message like "process order #1234" onto a queue and responds "Order confirmed" to the user — all in a fraction of a second. Separately, a fleet of worker servers (consumers) continuously pulls messages off that queue, and for each one, charges the card, updates inventory, and sends a receipt email — work that might take a few seconds per order. The user never waits for any of that; the web server never needs to know or care how the workers are doing their job, only that the message was safely queued.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why decoupling this way makes a system more resilient, not just faster</span>
+    If the order-processing workers crash entirely, in a directly-connected (synchronous) design, every checkout attempt would fail immediately. With a queue in between, checkouts keep succeeding — messages simply accumulate safely in the queue — and once the workers recover, they work through the backlog exactly as if nothing had happened, with zero orders lost. The queue absorbs the mismatch between how fast orders arrive and how fast they can be processed, which is also exactly the kind of traffic-spike protection Unit 6's elasticity builds on: a burst of orders just makes the queue temporarily longer, not the web server slower.
+  </div>
+
+  <h2>One consumer per message, or every subscriber gets a copy?</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    A plain queue delivers each message to exactly <em>one</em> consumer, which is right for work that should only happen once (like charging a card once). A <strong>publish/subscribe (pub/sub)</strong> service (Amazon SNS, Google Pub/Sub) instead broadcasts each message to <em>every</em> subscriber listening on a given topic — right for an event that multiple independent parts of a system all need to react to. A new-order event, for instance, might need to trigger inventory-update, receipt-email, and analytics-logging all at once, independently — a pub/sub "fan-out" to three separate consumers, each getting its own copy of the same message.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What does "decoupling" mean in the context of a message queue?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">The producer and consumer don't need to know about each other, be online simultaneously, or run at the same pace.</button>
+      <button class="quiz-choice" data-correct="false">The producer and consumer must run on the exact same physical server.</button>
+      <button class="quiz-choice" data-correct="false">Messages are deleted the instant they're written to the queue.</button>
+      <button class="quiz-choice" data-correct="false">The consumer must respond before the producer is allowed to continue.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Decoupling means the producer and consumer are independent in time, pace, and knowledge of each other.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. In the order-processing example, what happens to checkout attempts if the worker fleet crashes entirely, thanks to the queue?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Checkouts keep succeeding — messages simply accumulate in the queue until workers recover and process the backlog.</button>
+      <button class="quiz-choice" data-correct="false">Every checkout attempt fails immediately, exactly as it would without a queue.</button>
+      <button class="quiz-choice" data-correct="false">The queue automatically deletes all pending messages.</button>
+      <button class="quiz-choice" data-correct="false">The web server crashes along with the worker fleet.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The queue absorbs the outage, letting the producer keep succeeding while messages wait safely for consumers to recover.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. A new-order event needs to independently trigger inventory updates, a receipt email, and analytics logging. Which pattern fits best, and why?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Publish/subscribe, because every subscriber needs its own copy of the same event, unlike a plain queue's one-consumer-per-message delivery.</button>
+      <button class="quiz-choice" data-correct="false">A plain queue, because only one of the three systems should ever receive the event.</button>
+      <button class="quiz-choice" data-correct="false">Neither — this task requires a synchronous, direct connection between all three systems.</button>
+      <button class="quiz-choice" data-correct="false">A load balancer, since it is designed for fanning out events to multiple subscribers.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Pub/sub's fan-out to every subscriber is exactly right when multiple independent systems must all react to the same event.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="message queue|queue">
+    <p class="quiz-prompt">4. Fill in the blank: a managed service that temporarily holds messages from a producer until a consumer is ready to process them is called a ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A message queue decouples producer and consumer by holding messages between them until they're picked up.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="publish/subscribe|pub/sub|publish subscribe">
+    <p class="quiz-prompt">5. Fill in the blank: the messaging pattern where every subscriber to a topic receives its own copy of each message, unlike a plain queue's one-consumer delivery, is called ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Pub/sub's fan-out delivery is the defining trait that separates it from a plain queue.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: AWS's <a href="https://docs.aws.amazon.com/sqs/">Amazon SQS documentation</a> covers the producer/consumer queue model in depth, on the managed queueing service that popularized this pattern in the cloud.</p>
+
+  <p class="ask-teacher">Curious how a queue guarantees a message doesn't get processed twice by accident? Ask your teacher — that's what I'm here for. Next up: a different kind of managed service — one that decides who's even allowed to send or receive any of these messages in the first place.</p>
+
+  <footer class="lesson-footer">STEM+ · Cloud Computing A · Lesson 14 of the course sequence</footer>
+</div>

@@ -1,0 +1,159 @@
+<meta charset="UTF-8">
+<title>Lesson 3: Bandwidth, Latency, and Throughput — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · Computer Networking Fundamentals · Unit 1 · Lesson 3</span>
+  <h1>Bandwidth, Latency, and Throughput</h1>
+  <p class="subtitle">"My internet is slow" can mean three completely different problems, and the fix for one does nothing for the other two.</p>
+  <p class="nav-links"><a href="0002-lans-wans-and-the-internet-as-a-network-of-networks.html" class="nav-prev">← Lesson 2</a> <a href="../Unit%202/0004-circuit-switching-vs-packet-switching.html" class="nav-next">Unit 2, Lesson 4 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>"Fast internet" gets used as if it's one number, but a network connection actually has (at least) three separate performance properties, and they don't move together. Upgrading one can leave the other two completely unchanged — which is why "I paid for faster internet and video calls still lag" is a real, common, and completely explainable complaint.</p>
+
+  <h2>Bandwidth: the size of the pipe</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    <strong>Bandwidth</strong> is the maximum rate at which data <em>could</em> be sent over a link, measured in bits per second (commonly Mbps — megabits per second, or Gbps — gigabits per second). It's a theoretical ceiling on capacity, not a guarantee of actual speed.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">The garden hose analogy</span>
+    Bandwidth is the diameter of a garden hose. A wider hose can carry more water per second at a given water pressure — but the diameter alone doesn't tell you how long it takes a single drop of water to travel from the faucet to the nozzle. That's a separate property, covered next.
+  </div>
+
+  <h2>Latency: the delay before anything arrives</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    <strong>Latency</strong> is the time it takes a single piece of data to travel from sender to receiver — the delay, usually measured in milliseconds (ms). It's dominated by physical distance (even at the speed of light, New York to Tokyo takes real time) and by the number of intermediate hops the data passes through, each adding a small processing delay.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Back to the hose</span>
+    Latency is how long it takes the very first drop of water to travel the length of the hose after you turn the tap — determined by the hose's length, not its width. A short, narrow hose can deliver that first drop faster than a long, wide one, even though the wide hose can move more total water per second once it's flowing.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why bandwidth can't fix latency</span>
+    A video call feels laggy when there's a noticeable delay between someone speaking and you hearing it — that's a latency problem: the round trip between your two devices is simply slow, most likely because of physical distance or too many intermediate hops. Buying a bandwidth upgrade (a wider pipe) doesn't shorten that distance or remove those hops, so it does nothing for the lag. What it <em>does</em> fix is a video call that's blurry or freezes because too much data is being squeezed through too narrow a pipe. Diagnosing "is this a bandwidth problem or a latency problem" — which Lesson 26 returns to directly — starts with knowing these are two different numbers in the first place.
+  </div>
+
+  <h2>Throughput: what you actually got</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    <strong>Throughput</strong> is the rate of data actually successfully transferred in practice, measured the same way as bandwidth (bits per second) but almost always lower than the bandwidth ceiling. The gap between the two is caused by real-world overhead: protocol headers (Unit 2), congestion from other traffic sharing the link, retransmitted data lost along the way (Unit 5), and processing delays at every hop.
+  </div>
+
+  <p>A useful shorthand: bandwidth is the speed limit posted on the road; throughput is the speed you actually drove, after accounting for traffic, red lights, and the time spent merging. They're related, but throughput is never higher than bandwidth, and it's often meaningfully lower.</p>
+
+  <div class="widget" id="blt-widget">
+    <div class="widget-label">Try It — Bandwidth vs. Latency on a Download</div>
+    <p>A fixed 50 MB file is being downloaded. Drag each slider and watch how the total download time responds differently.</p>
+    <div class="slider-row">
+      <label for="blt-bandwidth">bandwidth</label>
+      <input type="range" id="blt-bandwidth" min="1" max="200" step="1" value="20">
+      <span class="slider-value" id="blt-bandwidth-label">20 Mbps</span>
+    </div>
+    <div class="slider-row">
+      <label for="blt-latency">latency (one-way)</label>
+      <input type="range" id="blt-latency" min="5" max="400" step="5" value="40">
+      <span class="slider-value" id="blt-latency-label">40 ms</span>
+    </div>
+    <p class="plot-readout" id="blt-readout">—</p>
+    <p class="plot-hint">Notice: dragging bandwidth way down barely moves a tiny 1 KB request's time, but dominates the 50 MB download. Dragging latency up does the opposite — it barely touches the big download, but can double or triple the tiny request's time.</p>
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Worked example, done by hand</span>
+    A 50 MB file (400 megabits, since 1 byte = 8 bits) over a 20 Mbps connection with 40 ms one-way latency: transfer time ≈ 400 ÷ 20 = 20 seconds, plus roughly 0.04 s of latency to start receiving the first bit — latency is completely negligible next to a 20-second transfer. Now consider a tiny 1 KB (0.008 megabit) request-response, like asking a server "are you there?": transfer time ≈ 0.008 ÷ 20 = 0.0004 s, but the round trip still has to cross that same 40 ms of latency twice (there and back) ≈ 0.08 s. For the small exchange, latency is over 99% of the total time; bandwidth barely matters at all.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. A user upgrades their internet plan from 20 Mbps to 500 Mbps but video calls are still just as laggy as before. What does this suggest?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">The upgrade didn't actually take effect, since more bandwidth always fixes lag.</button>
+      <button class="quiz-choice" data-correct="true">The lag is likely a latency problem (distance/hops), which a bandwidth upgrade — a wider pipe — doesn't address at all.</button>
+      <button class="quiz-choice" data-correct="false">Bandwidth and latency are two names for the same thing, so this shouldn't be possible.</button>
+      <button class="quiz-choice" data-correct="false">Video calls never use bandwidth.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Bandwidth is pipe width; latency is the delay before data arrives at all — a wider pipe doesn't shorten the physical distance or hop count causing lag.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why is throughput typically lower than bandwidth?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Throughput and bandwidth are always exactly equal in a correctly configured network.</button>
+      <button class="quiz-choice" data-correct="true">Bandwidth is a theoretical ceiling; throughput reflects real-world overhead like protocol headers, congestion, and retransmitted data.</button>
+      <button class="quiz-choice" data-correct="false">Throughput only measures wireless connections, never wired ones.</button>
+      <button class="quiz-choice" data-correct="false">Bandwidth is measured in bytes while throughput is measured in bits, making them impossible to compare.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Bandwidth is the posted speed limit; throughput is what you actually achieved once real-world overhead is accounted for.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. For a very large file transfer, why does latency end up being nearly irrelevant to the total time?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Latency is a small, mostly fixed one-time delay, while transfer time scales with file size — so for a large enough file, bandwidth dominates the total.</button>
+      <button class="quiz-choice" data-correct="false">Latency only affects video calls, not file transfers.</button>
+      <button class="quiz-choice" data-correct="false">Large files are always sent over connections with zero latency.</button>
+      <button class="quiz-choice" data-correct="false">Latency decreases as file size increases.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Latency is paid once (roughly); transfer time grows with the amount of data, so it swamps a fixed latency delay once the file is large enough.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="throughput">
+    <p class="quiz-prompt">4. Fill in the blank: the rate of data actually, successfully transferred in real-world conditions — always at or below the bandwidth ceiling — is called ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Throughput is what you actually got, in practice, after overhead — bandwidth is only the theoretical maximum.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: Cloudflare's "<a href="https://www.cloudflare.com/learning/performance/glossary/what-is-bandwidth/">What is Bandwidth?</a>" learning-center page, which covers the same bandwidth/latency/throughput distinction with additional real-world benchmarks.</p>
+
+  <p class="ask-teacher">Not sure whether a specific slow connection you've dealt with was a bandwidth or a latency problem? Ask your teacher — that's what I'm here for. Unit 1 is complete. Next up: Unit 2 opens the actual mechanics of how data moves — starting with two fundamentally different ways a network can route a conversation, circuit switching and packet switching.</p>
+
+  <footer class="lesson-footer">STEM+ · Computer Networking Fundamentals · Lesson 3 of the course sequence</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var bwSlider = document.getElementById('blt-bandwidth');
+  var latSlider = document.getElementById('blt-latency');
+  var bwLabel = document.getElementById('blt-bandwidth-label');
+  var latLabel = document.getElementById('blt-latency-label');
+  var readout = document.getElementById('blt-readout');
+  var FILE_MEGABITS = 50 * 8; // 50 MB -> megabits
+  var SMALL_MEGABITS = 1 / 125; // 1 KB -> megabits (1 KB = 8000 bits = 0.008 Mb)
+
+  function fmt(sec) {
+    if (sec < 1) return (sec * 1000).toFixed(0) + ' ms';
+    return sec.toFixed(2) + ' s';
+  }
+
+  function render() {
+    var bw = parseFloat(bwSlider.value);
+    var latMs = parseFloat(latSlider.value);
+    var latSec = latMs / 1000;
+    bwLabel.textContent = bw + ' Mbps';
+    latLabel.textContent = latMs + ' ms';
+
+    var bigTime = latSec + FILE_MEGABITS / bw;
+    var smallTime = 2 * latSec + SMALL_MEGABITS / bw; // round trip for a tiny request
+
+    readout.textContent = '50 MB download: ' + fmt(bigTime) + ' total. Tiny 1 KB round trip: ' + fmt(smallTime) + ' total.';
+  }
+
+  bwSlider.addEventListener('input', render);
+  latSlider.addEventListener('input', render);
+  render();
+});
+</script>

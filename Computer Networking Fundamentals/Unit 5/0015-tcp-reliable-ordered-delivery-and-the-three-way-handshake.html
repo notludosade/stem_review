@@ -1,0 +1,143 @@
+<meta charset="UTF-8">
+<title>Lesson 15: TCP — Reliable, Ordered Delivery and the Three-Way Handshake — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · Computer Networking Fundamentals · Unit 5 · Lesson 15</span>
+  <h1>TCP — Reliable, Ordered Delivery and the Three-Way Handshake</h1>
+  <p class="subtitle">Lesson 4 pointed out that packet switching means packets can arrive late, out of order, or not at all. TCP is the protocol that quietly fixes all three problems before your program ever sees the data.</p>
+  <p class="nav-links"><a href="0014-ports-and-multiplexing.html" class="nav-prev">← Lesson 14</a> <a href="0016-udp-fast-unreliable-and-why-thats-sometimes-the-point.html" class="nav-next">Lesson 16 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p><strong>TCP</strong> (Transmission Control Protocol) is one of the two Transport-layer protocols this course covers (UDP, its opposite in almost every way, is Lesson 16). TCP's entire reason for existing is turning an unreliable, packet-switched network into something that behaves, from a program's point of view, like a reliable, ordered stream of bytes — even though nothing about the underlying network actually guarantees that on its own.</p>
+
+  <h2>What "reliable" and "ordered" actually mean here</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    TCP is <strong>connection-oriented</strong>: before any data is exchanged, both sides perform a setup process (the handshake, below) to establish a shared connection. Every byte TCP sends is tracked using a <strong>sequence number</strong>, which lets the receiving side reassemble data in the correct order even if segments arrive out of order, and detect if any segment never arrived at all. When the receiver successfully gets data, it sends back an <strong>acknowledgment</strong> (ACK) confirming what it received; if the sender doesn't get an acknowledgment within an expected time, it assumes the segment was lost and performs a <strong>retransmission</strong> — sending it again.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why this matters to you as a programmer, even though you never write this code yourself</span>
+    When you write code that opens a TCP connection and reads data from it, you get to assume — correctly — that the bytes you read arrive in the exact order they were sent, with nothing missing and nothing duplicated. That guarantee is not free; it's TCP doing real, continuous work underneath your program: numbering, acknowledging, and retransmitting as needed, entirely invisibly. Lesson 16's UDP deliberately skips all of this — understanding what TCP is actually doing for you here is what makes it possible to understand why a program would ever choose to give that guarantee up.
+  </div>
+
+  <h2>The three-way handshake</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    The <strong>three-way handshake</strong> is the fixed three-message exchange TCP uses to establish a connection before any actual data is sent, confirming both sides are ready and synchronizing their starting sequence numbers: the client sends a <strong>SYN</strong> (synchronize) message; the server responds with a combined <strong>SYN-ACK</strong> (acknowledging the client's SYN while sending its own SYN back); and the client responds with a final <strong>ACK</strong>, at which point the connection is considered established and either side may begin sending actual data.
+  </div>
+
+  <div class="widget" id="handshake-widget">
+    <div class="widget-label">Try It — Walk Through the Three-Way Handshake</div>
+    <div id="handshake-log" style="min-height: 6.5rem; font-family:'SF Mono',Menlo,Consolas,monospace; font-size:0.85rem;"></div>
+    <div style="display:flex; gap:0.5rem; flex-wrap:wrap; margin-top:0.9rem;">
+      <button class="widget-btn" id="handshake-next">Next Message →</button>
+      <button class="widget-btn" id="handshake-reset">Reset</button>
+    </div>
+    <p class="plot-readout" id="handshake-readout">—</p>
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Why three messages, not two</span>
+    A connection is between two independent programs, and each side needs to both propose <em>and</em> confirm its own starting sequence number. Two messages (SYN, then ACK) would only let the client confirm the server's number — the server would never get confirmation that its own SYN was received. The middle message is deliberately combined (SYN-ACK) purely as an efficiency shortcut — the server's own SYN and its acknowledgment of the client's SYN are sent together in a single message instead of two separate ones — but conceptually, both sides are still proposing and confirming a starting number each, which is why it's routinely described as three-way even though only three messages, not four, are needed.
+  </div>
+
+  <h2>Closing a connection</h2>
+  <p>Ending a TCP connection is a comparable, similarly deliberate exchange (commonly a four-message sequence, since either side might have more data to finish sending before it's ready to close), rather than either side just silently going quiet. That deliberateness is the same theme running through this whole lesson: TCP treats "did we actually agree this happened" as something worth spending a few extra messages on, at both the start and the end of a connection, in exchange for the reliability guarantee described above.</p>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What does TCP's sequence number let the receiving side do?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Reassemble data in the correct order even if segments arrive out of order, and detect if a segment never arrived at all.</button>
+      <button class="quiz-choice" data-correct="false">Encrypt the data being transmitted.</button>
+      <button class="quiz-choice" data-correct="false">Compress the data to save bandwidth.</button>
+      <button class="quiz-choice" data-correct="false">Choose which port the connection uses.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Sequence numbers are what make reordering and loss detection possible, both essential to TCP's reliability guarantee.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. What triggers a TCP retransmission?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">The sender doesn't receive an acknowledgment for a segment within an expected time, so it assumes the segment was lost and sends it again.</button>
+      <button class="quiz-choice" data-correct="false">The receiver requests a completely new connection.</button>
+      <button class="quiz-choice" data-correct="false">Every segment is automatically sent twice, regardless of whether it arrived.</button>
+      <button class="quiz-choice" data-correct="false">The sender's IP address changes mid-connection.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Missing acknowledgment within the expected window is what triggers TCP to assume loss and retransmit.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why is the three-way handshake called "three-way" even though both sides are proposing and confirming a sequence number, which sounds like it should need four messages?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">The server's own SYN and its acknowledgment of the client's SYN are combined into a single SYN-ACK message, reducing four logical steps to three actual messages.</button>
+      <button class="quiz-choice" data-correct="false">The fourth message is optional and skipped in most real connections.</button>
+      <button class="quiz-choice" data-correct="false">Only the client needs to confirm anything; the server's confirmation isn't required.</button>
+      <button class="quiz-choice" data-correct="false">"Three-way" refers to three separate devices being involved, not three messages.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Combining the server's SYN and ACK into one SYN-ACK message is an efficiency shortcut that reduces the exchange to three actual messages.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="connection-oriented">
+    <p class="quiz-prompt">4. Fill in the blank: a protocol like TCP that requires a setup process (like a handshake) before any data is exchanged is described as ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Connection-oriented protocols establish a shared connection state before exchanging data — the opposite of Lesson 16's connectionless UDP.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: Cloudflare's "<a href="https://www.cloudflare.com/learning/ddos/glossary/tcp-ip/">What is the TCP/IP Model?</a>" section on TCP includes its own handshake diagram with sequence number values filled in, useful for comparing against the widget above.</p>
+
+  <p class="ask-teacher">Want to watch a real TCP handshake happen using a packet-capture tool together? Ask your teacher — that's what I'm here for. Next up: the protocol that skips almost everything covered in this lesson on purpose — UDP, and why giving up TCP's guarantees is sometimes exactly the right trade.</p>
+
+  <footer class="lesson-footer">STEM+ · Computer Networking Fundamentals · Lesson 15 of the course sequence</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var log = document.getElementById('handshake-log');
+  var nextBtn = document.getElementById('handshake-next');
+  var resetBtn = document.getElementById('handshake-reset');
+  var readout = document.getElementById('handshake-readout');
+  var step = 0;
+
+  var messages = [
+    { dir: 'right', text: 'Client → Server: SYN (seq=100)', note: 'The client proposes a starting sequence number (100) and asks to open a connection.' },
+    { dir: 'left', text: 'Server → Client: SYN-ACK (seq=500, ack=101)', note: 'The server acknowledges the client’s SYN (ack=101, meaning "I received up through 100") and proposes its own starting sequence number (500), combined into one message.' },
+    { dir: 'right', text: 'Client → Server: ACK (ack=501)', note: 'The client acknowledges the server’s SYN (ack=501). Both sides have now proposed and confirmed a sequence number — the connection is established.' }
+  ];
+
+  function render() {
+    var html = '';
+    for (var i = 0; i < step; i++) {
+      var m = messages[i];
+      var align = m.dir === 'right' ? 'left' : 'right';
+      html += '<div style="text-align:' + align + '; margin:0.4rem 0; padding:0.4rem 0.7rem; background:var(--code-bg); border-radius:4px; display:inline-block; max-width:100%;">' + m.text + '</div><br>';
+    }
+    log.innerHTML = html || '<span style="color:var(--muted);">Click "Next Message" to begin the handshake.</span>';
+    readout.textContent = step > 0 ? messages[step - 1].note : 'No messages sent yet.';
+    nextBtn.disabled = step >= messages.length;
+    if (step >= messages.length) {
+      readout.textContent += ' Connection established — data can now flow in either direction.';
+    }
+  }
+
+  nextBtn.addEventListener('click', function () {
+    if (step < messages.length) { step++; render(); }
+  });
+  resetBtn.addEventListener('click', function () {
+    step = 0; render();
+  });
+
+  render();
+});
+</script>

@@ -1,0 +1,98 @@
+<meta charset="UTF-8">
+<title>Lesson 8: IPv4 Addresses and Dotted-Decimal Notation — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · Computer Networking Fundamentals · Unit 3 · Lesson 8</span>
+  <h1>IPv4 Addresses and Dotted-Decimal Notation</h1>
+  <p class="subtitle">The address that actually gets a packet from one side of the world to the other — and the arithmetic hiding just underneath its familiar dotted-decimal look.</p>
+  <p class="nav-links"><a href="0007-mac-addresses-and-the-physical-link-layer.html" class="nav-prev">← Lesson 7</a> <a href="0009-subnetting-and-cidr-notation.html" class="nav-next">Lesson 9 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Lesson 7 drew the line: MAC addresses handle one hop; something else has to handle the whole end-to-end journey. That something is the <strong>IP address</strong> — the Internet layer's addressing system, and the address that actually shows up in the header a router reads to decide where to forward a packet next.</p>
+
+  <h2>What an IPv4 address is</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    An <strong>IPv4 address</strong> is a 32-bit number, almost always written in <strong>dotted-decimal notation</strong> — four numbers between 0 and 255, separated by dots, like <code>192.168.1.14</code>. Each of the four numbers is called an <strong>octet</strong>, because it represents exactly 8 bits (1 byte) of the full 32-bit address. "IPv4" means "Internet Protocol version 4" — the version this lesson covers, and the version that's been the internet's dominant addressing system since the 1980s (Lesson 10 covers why a newer version, IPv6, exists at all).
+  </div>
+
+  <div class="box example">
+    <span class="box-label">From binary to dotted-decimal, by hand</span>
+    The 32-bit binary address <code>11000000.10101000.00000001.00001110</code> splits naturally into four 8-bit chunks (that's exactly what the dots in dotted-decimal notation mark). Converting each 8-bit chunk to decimal: <code>11000000</code> = 192, <code>10101000</code> = 168, <code>00000001</code> = 1, <code>00001110</code> = 14. Written in dotted-decimal: <code>192.168.1.14</code>. This is precisely why each octet's decimal value is capped at 255 — that's <code>11111111</code>, the largest value 8 bits can represent.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why the 0-255 ceiling isn't arbitrary</span>
+    An octet is 8 bits, and 8 bits can represent exactly 2⁸ = 256 distinct values — 0 through 255. Seeing "300" or "256" anywhere in a supposed IP address is an immediate signal that something is malformed, because no single octet can ever hold a value that large. Recognizing this ceiling instantly, without doing the binary math every time, is worth building as a reflex — Lesson 9's subnetting math leans on the same fact constantly.
+  </div>
+
+  <h2>Public vs. private IP addresses</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    A <strong>public IP address</strong> is globally unique and routable across the open internet — no two devices on the public internet can share one at the same time. A <strong>private IP address</strong> is only meaningful inside one local network (like a home or office LAN) and is reused by millions of different private networks simultaneously, because private addresses are never routed across the public internet at all. Three specific ranges are reserved for private use: <code>10.0.0.0–10.255.255.255</code>, <code>172.16.0.0–172.31.255.255</code>, and <code>192.168.0.0–192.168.255.255</code> — if a device's address starts with <code>192.168</code>, it's almost certainly a private address on someone's home network, not a globally unique one.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Worked example: why address reuse is fine here</span>
+    Your neighbor's laptop and your own laptop might both have the private address <code>192.168.1.14</code> at the exact same moment, on their own separate home networks, with zero conflict — because private addresses are never used to route traffic across the public internet; they only need to be unique <em>within</em> their own local network. Lesson 12 (NAT) explains the exact mechanism that lets every device on your private home network share your ISP's single public address when talking to the outside world.
+  </div>
+
+  <h2>Every IPv4 address has two parts</h2>
+  <p>An IPv4 address isn't one flat, arbitrary number — part of it identifies which network a device belongs to, and part of it identifies that specific device within that network. Exactly how that split is drawn is the entire subject of Lesson 9's subnetting and CIDR notation; this lesson is only establishing what the raw address itself looks like and where its 0-255-per-octet limit comes from.</p>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What does each of the four numbers in a dotted-decimal IPv4 address (like the "192" in 192.168.1.14) represent?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">One octet — 8 bits of the full 32-bit address.</button>
+      <button class="quiz-choice" data-correct="false">A separate, independent IP address.</button>
+      <button class="quiz-choice" data-correct="false">A port number.</button>
+      <button class="quiz-choice" data-correct="false">A MAC address segment.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Four 8-bit octets make up the full 32-bit IPv4 address, with dots marking the boundary between them.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why can no single octet in an IPv4 address ever exceed 255?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">An octet is 8 bits, and 8 bits can represent at most 256 distinct values — 0 through 255.</button>
+      <button class="quiz-choice" data-correct="false">255 is an arbitrary limit chosen for readability, unrelated to binary.</button>
+      <button class="quiz-choice" data-correct="false">Values above 255 are reserved exclusively for private addresses.</button>
+      <button class="quiz-choice" data-correct="false">255 is the maximum number of devices allowed on any network.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>255 in binary is 11111111 — the largest value 8 bits can hold, which is exactly one octet's worth.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Two devices on two completely different home networks both have the address 192.168.1.14 at the same time. Is this a problem?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">No — 192.168.x.x is a private address range, and private addresses only need to be unique within their own local network, not globally.</button>
+      <button class="quiz-choice" data-correct="false">Yes — every IPv4 address, public or private, must be globally unique.</button>
+      <button class="quiz-choice" data-correct="false">No, because 192.168.1.14 is not a valid IPv4 address to begin with.</button>
+      <button class="quiz-choice" data-correct="false">Yes, but only because both networks are on the same ISP.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Private ranges are reused across millions of separate networks simultaneously since they're never routed on the public internet.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="octet">
+    <p class="quiz-prompt">4. Fill in the blank: each of the four dot-separated, 8-bit segments of an IPv4 address is called an ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Four octets — 32 bits total — make up a full IPv4 address.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: the IANA (Internet Assigned Numbers Authority) special-purpose address registry lists every reserved IPv4 range, including the private ranges above, straight from the organization responsible for allocating them.</p>
+
+  <p class="ask-teacher">Want to practice converting a few binary addresses to dotted-decimal by hand together, or find your own device's current IP address? Ask your teacher — that's what I'm here for. Next up: how the split between "network part" and "device part" of an address actually works — subnetting and CIDR notation.</p>
+
+  <footer class="lesson-footer">STEM+ · Computer Networking Fundamentals · Lesson 8 of the course sequence</footer>
+</div>

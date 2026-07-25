@@ -1,0 +1,93 @@
+<meta charset="UTF-8">
+<title>Lesson 24: Firewalls and Network Security Basics — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · Computer Networking Fundamentals · Unit 8 · Lesson 24</span>
+  <h1>Firewalls and Network Security Basics</h1>
+  <p class="subtitle">Every concept in this course — ports, addresses, protocols — is also exactly what a firewall inspects to decide what traffic gets to exist at all.</p>
+  <p class="nav-links"><a href="../Unit%207/0023-a-minimal-client-server-exchange-traced-end-to-end.html" class="nav-prev">← Lesson 23</a> <a href="0025-common-attacks-spoofing-sniffing-and-man-in-the-middle.html" class="nav-next">Lesson 25 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Everything so far in this course has been about getting traffic <em>through</em> a network reliably. This final unit flips the question: how does a network decide which traffic shouldn't get through at all, and how does it recognize when something has gone wrong along the way? A firewall is where that first question gets answered, sitting at nearly every network boundary this course has described.</p>
+
+  <h2>What a firewall does</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    A <strong>firewall</strong> is a system that inspects network traffic crossing a boundary (often between a private network and the internet) and decides, based on a configured set of rules, whether to allow or block it. <strong>Packet filtering</strong> is the most basic firewall technique: examining each packet's header fields — source and destination IP address (Unit 3), source and destination port (Lesson 14), and protocol — against a rule set, without inspecting the actual payload at all.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Worked example: a home router's default firewall rules</span>
+    A typical home router's firewall allows outbound connections initiated from inside the network (you visiting a website) and allows the corresponding inbound replies, but blocks unsolicited inbound connection attempts from the outside internet by default — nobody on the internet can just reach out and connect directly to a random port on your laptop. This single rule, largely invisible to most users, is a major reason home devices aren't constantly probed and attacked directly by anyone who happens to know their public IP address (which, recall from Lesson 12, they usually share via NAT anyway).
+  </div>
+
+  <h2>Allowlists and denylists</h2>
+  <div class="box">
+    <span class="box-label">Definitions</span>
+    An <strong>allowlist</strong> (default-deny) approach blocks all traffic except what's explicitly permitted — the most restrictive, and generally most secure, starting point. A <strong>denylist</strong> (default-allow) approach permits all traffic except what's explicitly blocked — more permissive, and only as good as how complete the list of known-bad traffic is kept.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why default-deny is the stronger security posture</span>
+    A denylist can only block threats someone already thought to add to the list — it does nothing against something new. An allowlist flips the burden entirely: nothing gets through unless it was specifically planned for, so an unanticipated threat that was never on anyone's radar still gets blocked by default, simply because it wasn't explicitly permitted. The trade-off is inconvenience: a legitimate new use of the network also needs an explicit rule added before it works, which is real ongoing maintenance work — but for anything genuinely security-critical, that cost is usually judged worth paying.
+  </div>
+
+  <h2>Where firewalls sit, connected back to this course</h2>
+  <p>A firewall's packet-filtering rules operate directly on concepts from earlier units: blocking by IP address uses Unit 3's addressing; blocking by port (say, blocking all inbound traffic to port 23, an old and insecure remote-login protocol) uses Lesson 14's port numbers directly; and more advanced firewalls can inspect further up the stack, even reading Application-layer content (Unit 6) to block specific kinds of HTTP requests. A firewall isn't a separate, unrelated piece of networking — it's this course's entire vocabulary, reused as the basis for a decision: let it through, or don't.</p>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What does basic packet filtering examine to decide whether to allow or block a packet?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Header fields like source/destination IP address, source/destination port, and protocol — without inspecting the payload itself.</button>
+      <button class="quiz-choice" data-correct="false">The actual content of every packet's payload, word by word.</button>
+      <button class="quiz-choice" data-correct="false">Only the packet's TTL value.</button>
+      <button class="quiz-choice" data-correct="false">The physical location of the sending device.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Basic packet filtering works purely on header fields, reusing exactly the addressing and port concepts from earlier units.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. A typical home router blocks unsolicited inbound connections from the internet by default, while allowing outbound connections you initiate and their replies. What does this demonstrate?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">A default firewall rule that helps protect home devices from being directly reached and probed by anyone on the internet.</button>
+      <button class="quiz-choice" data-correct="false">That home routers cannot connect to the internet at all.</button>
+      <button class="quiz-choice" data-correct="false">That NAT and firewalls are mutually exclusive and can never coexist.</button>
+      <button class="quiz-choice" data-correct="false">That outbound traffic is always blocked by home routers.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>This default-block-inbound rule is a major reason home devices aren't constantly probed directly from the internet.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why is a default-deny (allowlist) firewall approach generally considered stronger security than default-allow (denylist)?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">A denylist can only block threats someone already anticipated; an allowlist blocks anything not explicitly permitted, including entirely new, unanticipated threats.</button>
+      <button class="quiz-choice" data-correct="false">Default-deny requires no configuration or maintenance at all.</button>
+      <button class="quiz-choice" data-correct="false">Default-allow is always faster and has no security trade-off.</button>
+      <button class="quiz-choice" data-correct="false">A denylist can block every possible future threat automatically.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Default-deny doesn't require anticipating every specific threat — anything not explicitly allowed is blocked by default.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="firewall">
+    <p class="quiz-prompt">4. Fill in the blank: a system that inspects traffic crossing a network boundary and decides, based on configured rules, whether to allow or block it, is called a ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A firewall enforces rules at a network boundary, commonly using IP addresses, ports, and protocols as filtering criteria.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: Cloudflare's "<a href="https://www.cloudflare.com/learning/security/what-is-a-firewall/">What Is a Firewall?</a>" covers packet-filtering firewalls alongside more advanced types, useful background before Lesson 25 covers the specific attacks firewalls are one layer of defense against.</p>
+
+  <p class="ask-teacher">Want to look at your own home router's or computer's firewall settings together? Ask your teacher — that's what I'm here for. Next up: specific attacks that exploit exactly the trust assumptions this course has been building — spoofing, sniffing, and the man-in-the-middle.</p>
+
+  <footer class="lesson-footer">STEM+ · Computer Networking Fundamentals · Lesson 24 of the course sequence</footer>
+</div>

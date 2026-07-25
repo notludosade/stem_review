@@ -1,0 +1,104 @@
+<meta charset="UTF-8">
+<title>Lesson 12: CDNs — Caching Content Close to the User — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · Cloud Computing A · Unit 4 · Lesson 12</span>
+  <h1>CDNs — Caching Content Close to the User</h1>
+  <p class="subtitle">A load balancer solves how traffic is spread across your servers. It does nothing about the fact that a user on the other side of the planet still has to wait for their request to physically travel there and back.</p>
+  <p class="nav-links"><a href="0011-load-balancers-spreading-traffic-across-many-servers.html" class="nav-prev">← Lesson 11</a> <a href="../Unit%205/0013-managed-databases-letting-someone-else-run-the-backups.html" class="nav-next">Unit 5, Lesson 13 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Data doesn't travel instantly, even on the internet. A request from a user in Tokyo to a server in Virginia has to physically cross an ocean and back before a response arrives — tens to hundreds of milliseconds of pure travel time, no matter how fast the server itself responds. Unit 4 has covered getting requests to your servers efficiently; this closing lesson is about not sending every request that far in the first place.</p>
+
+  <h2>What a CDN does</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    A <strong>Content Delivery Network (CDN)</strong> is a globally distributed network of caching servers — called <strong>edge locations</strong> (or points of presence) — that store copies of content physically close to users all over the world. The server that holds the actual, authoritative copy of the content is the <strong>origin server</strong>. When a user requests something, the CDN routes them to whichever edge location is geographically nearest, which serves a cached copy directly if it has one, avoiding the long round trip to the origin entirely.
+  </div>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    A <strong>cache hit</strong> is when the nearby edge location already has a valid copy of the requested content and serves it immediately. A <strong>cache miss</strong> is when it doesn't (the first request for something new, or a cached copy that's expired) — in that case, the edge location fetches a fresh copy from the origin server once, caches it, and serves it, so every subsequent nearby request becomes a fast cache hit.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Worked example</span>
+    A company's origin server for its website sits in a data center in Virginia. Without a CDN, a user in Tokyo waits through the full round-trip travel time to Virginia and back for every single image, script, and stylesheet on the page. With a CDN, that same user's browser instead talks to a nearby edge location — say, in Tokyo itself — which, after the very first request from any nearby user warms its cache, serves those same files in a fraction of the time, without ever touching the Virginia origin server again until the cached copy expires.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why CDNs help the origin server too, not just the user</span>
+    A CDN doesn't just make requests faster for users far from the origin — it also shields the origin server itself from most of the traffic. Once content is cached at the edge, the vast majority of requests for it never reach the origin server at all, dramatically reducing the load Unit 4's load balancer and Unit 2's compute fleet have to absorb. This is also a real resilience benefit (Unit 6 covers this more directly): if the origin server briefly goes down, cached content at the edge can often keep serving users completely unaffected in the meantime.
+  </div>
+
+  <div class="box">
+    <span class="box-label">The limit: CDNs love static content, not personalized content</span>
+    CDNs work best for content that's the same for every user and doesn't change often — images, videos, scripts, stylesheets. Content that's personalized per user (a logged-in dashboard showing someone's private data) or that must always be perfectly fresh (a live stock price) generally can't be cached at the edge the same way, and still has to reach the origin server or a database close to it. A real application usually uses a CDN for its static assets while routing dynamic, personalized requests straight through — not one strategy for everything.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What problem does a CDN primarily solve?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">The physical travel-time delay between a user and a server located far away.</button>
+      <button class="quiz-choice" data-correct="false">The need to write application code at all.</button>
+      <button class="quiz-choice" data-correct="false">The cost of block storage attached to a database.</button>
+      <button class="quiz-choice" data-correct="false">The need for a load balancer to distribute traffic.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A CDN reduces the distance data has to physically travel by caching it closer to users.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. What is the difference between a cache hit and a cache miss?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">A cache hit means a nearby edge location already has a valid copy to serve immediately; a cache miss means it has to fetch a fresh copy from the origin first.</button>
+      <button class="quiz-choice" data-correct="false">A cache hit means the request failed entirely; a cache miss means it succeeded.</button>
+      <button class="quiz-choice" data-correct="false">A cache hit only happens at the origin server, never at an edge location.</button>
+      <button class="quiz-choice" data-correct="false">Cache hits and misses only apply to database queries, not web content.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A hit is served instantly from the edge cache; a miss requires one trip back to the origin before it can be cached and served quickly afterward.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why is a live, constantly-changing stock price a poor fit for CDN caching, unlike a website's logo image?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">It must always be perfectly fresh, so a cached copy at the edge could quickly become outdated and misleading.</button>
+      <button class="quiz-choice" data-correct="false">CDNs are physically incapable of storing any numeric data.</button>
+      <button class="quiz-choice" data-correct="false">Stock prices are always personalized per user, unlike any other data.</button>
+      <button class="quiz-choice" data-correct="false">Logo images cannot be cached by a CDN under any circumstances.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Content that must stay perfectly current is a poor match for caching, which inherently serves a snapshot from some earlier moment.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="origin server|origin">
+    <p class="quiz-prompt">4. Fill in the blank: the server holding the actual, authoritative copy of content — as opposed to a cached copy at an edge location — is called the ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The origin server is the authoritative source a CDN's edge locations cache copies from.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="edge location|edge locations|point of presence|points of presence">
+    <p class="quiz-prompt">5. Fill in the blank: a CDN's globally distributed caching servers, positioned physically close to users, are called ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Edge locations are what let a CDN serve users from nearby instead of routing every request to a single distant origin.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: Cloudflare's <a href="https://www.cloudflare.com/learning/cdn/what-is-a-cdn/">"What is a CDN?"</a> explainer illustrates the edge-location and cache-hit concepts from this lesson with real network diagrams.</p>
+
+  <p class="ask-teacher">Curious how a CDN decides when a cached copy has gone stale and needs refreshing? Ask your teacher — that's what I'm here for. Next up: Unit 5 moves from raw infrastructure to managed services — starting with letting a provider run your database for you.</p>
+
+  <footer class="lesson-footer">STEM+ · Cloud Computing A · Lesson 12 of the course sequence</footer>
+</div>

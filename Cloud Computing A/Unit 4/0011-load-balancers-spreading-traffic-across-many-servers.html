@@ -1,0 +1,220 @@
+<meta charset="UTF-8">
+<title>Lesson 11: Load Balancers — Spreading Traffic Across Many Servers — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · Cloud Computing A · Unit 4 · Lesson 11</span>
+  <h1>Load Balancers — Spreading Traffic Across Many Servers</h1>
+  <p class="subtitle">Instead of buying one enormous server, the cloud way to handle more traffic is usually many small, identical servers with something out front deciding which one handles each request.</p>
+  <p class="nav-links"><a href="0010-virtual-private-clouds-and-subnets.html" class="nav-prev">← Lesson 10</a> <a href="0012-cdns-caching-content-close-to-the-user.html" class="nav-next">Lesson 12 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Lesson 10's public subnet can hold more than one web server. In fact, running several identical, smaller servers instead of one giant one is usually both cheaper and safer — cheaper because smaller instances are easier to size precisely (Lesson 4), and safer because one server crashing doesn't take the whole application down with it. But that only works if something out front is deciding, for every single incoming request, which of those servers actually handles it.</p>
+
+  <h2>What a load balancer does</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    A <strong>load balancer</strong> is a service that sits in front of a group of servers, receives all incoming traffic, and distributes each request among the servers behind it according to some algorithm — so no single server gets overwhelmed while others sit idle. Clients only ever talk to the load balancer's address; they have no idea, and don't need to know, which specific backend server actually handled their request.
+  </div>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    Load balancers also run continuous <strong>health checks</strong> — small automated pings to each server, checking that it's still responding correctly — and stop routing traffic to any server that fails them, automatically. A crashed server doesn't take the application down; it just quietly stops receiving new requests until it recovers, while the healthy servers keep serving everyone else.
+  </div>
+
+  <h2>See it in action: two different routing algorithms</h2>
+  <p>Not every routing algorithm behaves the same when servers aren't all equally fast. Try sending requests below with a normal fleet, then check the box to make one server slow and watch how each algorithm reacts differently.</p>
+
+  <div class="widget" id="lb-widget">
+    <p class="widget-label">Interactive: round robin vs. least connections</p>
+    <div class="fm-tabs">
+      <button class="fm-tab is-active" type="button" data-lb-algo="roundrobin">Round Robin</button>
+      <button class="fm-tab" type="button" data-lb-algo="leastconn">Least Connections</button>
+    </div>
+    <p class="fm-row"><label><input type="checkbox" id="lb-slow-toggle"> Server 2 is running slow (finishes requests 3× slower than the others)</label></p>
+    <div class="dual-plot" id="lb-servers">
+      <div style="flex:1 1 80px; text-align:center;">
+        <div class="widget-label" style="margin-bottom:0.3rem;">Server 1</div>
+        <div style="height:120px; width:40px; margin:0 auto; border:1px solid var(--border); border-radius:4px; display:flex; align-items:flex-end; overflow:hidden; background:var(--bg);">
+          <div class="lb-bar" data-bar="1" style="width:100%; height:0%; background:var(--accent); transition:height 0.2s;"></div>
+        </div>
+        <div data-count="1" style="margin-top:0.4rem; font-weight:700; color:var(--accent); font-family:'Cambria Math',Georgia,serif;">0</div>
+      </div>
+      <div style="flex:1 1 80px; text-align:center;">
+        <div class="widget-label" style="margin-bottom:0.3rem;">Server 2</div>
+        <div style="height:120px; width:40px; margin:0 auto; border:1px solid var(--border); border-radius:4px; display:flex; align-items:flex-end; overflow:hidden; background:var(--bg);">
+          <div class="lb-bar" data-bar="2" style="width:100%; height:0%; background:var(--accent); transition:height 0.2s;"></div>
+        </div>
+        <div data-count="2" style="margin-top:0.4rem; font-weight:700; color:var(--accent); font-family:'Cambria Math',Georgia,serif;">0</div>
+      </div>
+      <div style="flex:1 1 80px; text-align:center;">
+        <div class="widget-label" style="margin-bottom:0.3rem;">Server 3</div>
+        <div style="height:120px; width:40px; margin:0 auto; border:1px solid var(--border); border-radius:4px; display:flex; align-items:flex-end; overflow:hidden; background:var(--bg);">
+          <div class="lb-bar" data-bar="3" style="width:100%; height:0%; background:var(--accent); transition:height 0.2s;"></div>
+        </div>
+        <div data-count="3" style="margin-top:0.4rem; font-weight:700; color:var(--accent); font-family:'Cambria Math',Georgia,serif;">0</div>
+      </div>
+    </div>
+    <p class="fm-row" style="margin-top:1rem;">
+      <button class="widget-btn" type="button" data-lb-send>Send Request</button>
+      <button class="widget-btn" type="button" data-lb-send5>Send 5 Requests</button>
+      <button class="widget-btn" type="button" data-lb-reset>Reset</button>
+    </p>
+    <p class="plot-readout" data-lb-summary></p>
+    <p class="plot-hint">Bars show each server's current active connections, which drain over time as requests "finish." With Round Robin, a slow server still gets an equal share of new requests and backs up. Least Connections routes new requests away from whichever server is already busiest.</p>
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why this matters more with a slow server, not less</span>
+    When every server is equally healthy and fast, round robin's simple "take turns" approach works fine. The moment one server is slower, overloaded, or partially degraded — a real and common situation — round robin keeps sending it an equal share of new traffic anyway, making a bad situation worse. Least connections adapts, favoring whichever server currently has room, which is exactly the kind of self-correcting behavior a production load balancer needs. This is also precisely how a load balancer supports Unit 6's elasticity: as new servers join a growing fleet, the load balancer routes traffic to them automatically, with no manual reconfiguration required.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What is the core job of a load balancer?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">To sit in front of multiple servers and distribute incoming requests among them so no single server is overwhelmed.</button>
+      <button class="quiz-choice" data-correct="false">To permanently store an application's data.</button>
+      <button class="quiz-choice" data-correct="false">To compress images before they are sent to a browser.</button>
+      <button class="quiz-choice" data-correct="false">To replace the need for more than one server entirely.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Distributing incoming requests across a group of servers is the load balancer's defining job.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. What does a load balancer's health check accomplish?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">It detects a failing server and stops routing new traffic to it automatically.</button>
+      <button class="quiz-choice" data-correct="false">It permanently deletes any server that has ever failed once.</button>
+      <button class="quiz-choice" data-correct="false">It encrypts traffic between the client and the server.</button>
+      <button class="quiz-choice" data-correct="false">It slows down healthy servers to match the speed of unhealthy ones.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Health checks let the load balancer route around a failing server automatically, without any manual intervention.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why does round robin routing handle a slow server worse than least connections routing does?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Round robin sends an equal share of new requests to every server regardless of current load, while least connections routes new requests away from an already-busy server.</button>
+      <button class="quiz-choice" data-correct="false">Round robin only sends requests to the fastest server, ignoring the others entirely.</button>
+      <button class="quiz-choice" data-correct="false">Least connections cannot detect a slow server at all.</button>
+      <button class="quiz-choice" data-correct="false">There is no real difference between the two algorithms.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Round robin ignores current server load entirely; least connections actively adapts to it.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="load balancer">
+    <p class="quiz-prompt">4. Fill in the blank: a service that sits in front of a group of servers and distributes incoming requests among them is called a ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Load balancers are the entry point that spreads traffic across a fleet of servers.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="least connections">
+    <p class="quiz-prompt">5. Fill in the blank: the routing algorithm that always sends the next request to whichever server currently has the fewest active connections is called ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Least connections adapts to real-time server load, unlike round robin's fixed rotation.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: AWS's <a href="https://docs.aws.amazon.com/elasticloadbalancing/latest/userguide/what-is-load-balancing.html">"What Is Elastic Load Balancing?"</a> documentation covers real routing algorithms and health check configuration on a production load balancing service.</p>
+
+  <p class="ask-teacher">Curious what happens if the load balancer itself fails? Ask your teacher — that's what I'm here for. Next up: speeding up traffic even before it reaches your servers at all, by caching content physically closer to the people requesting it.</p>
+
+  <footer class="lesson-footer">STEM+ · Cloud Computing A · Lesson 11 of the course sequence</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var counts = { 1: 0, 2: 0, 3: 0 };
+  var MAX_BAR = 10;
+  var algo = 'roundrobin';
+  var rrIndex = 0;
+  var totalSent = 0;
+  var slow = false;
+
+  var tabs = document.querySelectorAll('#lb-widget [data-lb-algo]');
+  var slowToggle = document.getElementById('lb-slow-toggle');
+  var summary = document.querySelector('#lb-widget [data-lb-summary]');
+
+  function render() {
+    [1, 2, 3].forEach(function (i) {
+      var bar = document.querySelector('#lb-widget [data-bar="' + i + '"]');
+      var countEl = document.querySelector('#lb-widget [data-count="' + i + '"]');
+      var pct = Math.min(100, (counts[i] / MAX_BAR) * 100);
+      bar.style.height = pct + '%';
+      countEl.textContent = counts[i];
+    });
+    var algoName = algo === 'roundrobin' ? 'Round Robin' : 'Least Connections';
+    summary.textContent = totalSent + ' request' + (totalSent === 1 ? '' : 's') + ' sent so far using ' + algoName + (slow ? ' — Server 2 is slow.' : '.');
+  }
+
+  function pickServer() {
+    if (algo === 'roundrobin') {
+      rrIndex = (rrIndex % 3) + 1;
+      return rrIndex;
+    }
+    // least connections: pick the server with the fewest active connections
+    var best = 1;
+    [1, 2, 3].forEach(function (i) {
+      if (counts[i] < counts[best]) best = i;
+    });
+    return best;
+  }
+
+  function sendRequest() {
+    var chosen = pickServer();
+    counts[chosen]++;
+    totalSent++;
+    render();
+  }
+
+  document.querySelector('#lb-widget [data-lb-send]').addEventListener('click', sendRequest);
+  document.querySelector('#lb-widget [data-lb-send5]').addEventListener('click', function () {
+    for (var k = 0; k < 5; k++) sendRequest();
+  });
+  document.querySelector('#lb-widget [data-lb-reset]').addEventListener('click', function () {
+    counts = { 1: 0, 2: 0, 3: 0 };
+    totalSent = 0;
+    rrIndex = 0;
+    render();
+  });
+
+  tabs.forEach(function (tab) {
+    tab.addEventListener('click', function () {
+      tabs.forEach(function (t) { t.classList.remove('is-active'); });
+      tab.classList.add('is-active');
+      algo = tab.getAttribute('data-lb-algo');
+      render();
+    });
+  });
+
+  slowToggle.addEventListener('change', function () {
+    slow = slowToggle.checked;
+    render();
+  });
+
+  // Requests "finish" and drain off the bars over time — server 2 drains slower when marked slow.
+  setInterval(function () {
+    [1, 2, 3].forEach(function (i) {
+      if (counts[i] <= 0) return;
+      var drainChance = (slow && i === 2) ? 0.15 : 0.45;
+      if (Math.random() < drainChance) counts[i]--;
+    });
+    render();
+  }, 700);
+
+  render();
+});
+</script>

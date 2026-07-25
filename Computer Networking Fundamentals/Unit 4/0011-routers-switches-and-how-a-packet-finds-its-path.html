@@ -1,0 +1,161 @@
+<meta charset="UTF-8">
+<title>Lesson 11: Routers, Switches, and How a Packet Finds Its Path — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · Computer Networking Fundamentals · Unit 4 · Lesson 11</span>
+  <h1>Routers, Switches, and How a Packet Finds Its Path</h1>
+  <p class="subtitle">Nobody plans a packet's entire route in advance. Each device it passes through makes its own local decision about where to send it next — and that's enough to get it anywhere.</p>
+  <p class="nav-links"><a href="../Unit%203/0010-ipv6-why-we-needed-more-addresses.html" class="nav-prev">← Lesson 10</a> <a href="0012-nat-sharing-one-public-address.html" class="nav-next">Lesson 12 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Units 2 and 3 built the vocabulary; this lesson puts it to work. A packet, addressed with an IP address, leaves your device with no pre-planned map of the entire route to its destination. Instead, it's handed off from device to device, and each device along the way makes an independent, local decision: "given this destination address, which direction should I send this next?" Do that correctly enough times in a row, and the packet arrives — potentially having crossed a dozen networks that never coordinated a route in advance.</p>
+
+  <h2>Switches: forwarding within one network</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    A <strong>switch</strong> operates at the Link layer, connecting multiple devices within the same local network and forwarding frames between them based on MAC addresses. A switch learns which MAC address lives on which of its physical ports by watching traffic, and forwards each frame only out the specific port where its destination actually lives — instead of blasting every frame out every port, which is how older, simpler hardware (a hub) used to work.
+  </div>
+
+  <h2>Routers: forwarding between networks</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    A <strong>router</strong> operates at the Internet layer, connecting separate networks together and forwarding packets between them based on IP addresses. Every router maintains a <strong>routing table</strong> — a list of known destination networks and which direction ("next hop") to send a packet to reach each one. When a packet arrives, the router checks its destination IP address against its routing table, finds the best matching entry, and forwards the packet out toward that next hop — it does not need to know the entire remaining path, only the single next step.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why "know only the next step" is enough to reach anywhere</span>
+    This might sound too simple to work reliably, but it's exactly the same idea as highway signage: a sign doesn't tell you the entire turn-by-turn route to a city 2,000 miles away — it just tells you which direction to go right now to eventually get closer. Follow enough correctly-placed signs in a row, each only responsible for one local decision, and you arrive, even though no single sign (or router) ever had the whole picture. Routers exchange information with their neighboring routers about which networks they can reach, which is how each router's local routing table stays accurate without any router needing global knowledge of the internet's entire topology.
+  </div>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    A <strong>default gateway</strong> is the specific router a device sends a packet to whenever the destination isn't on the device's own local network — it's the "exit door" out of your local network and onto the wider path toward everywhere else. Your home router is almost always your own devices' default gateway.
+  </div>
+
+  <div class="widget" id="hop-widget">
+    <div class="widget-label">Try It — Trace a Packet Hop by Hop</div>
+    <div id="hop-track" style="display:flex; flex-wrap:wrap; gap:0.5rem; justify-content:center; margin-bottom:0.9rem;"></div>
+    <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
+      <button class="widget-btn" id="hop-next">Next Hop →</button>
+      <button class="widget-btn" id="hop-reset">Reset</button>
+    </div>
+    <p class="plot-readout" id="hop-readout">—</p>
+  </div>
+
+  <h2>TTL: a safety net against infinite loops</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    <strong>TTL</strong> (Time to Live) is a counter in every IP packet's header, set by the sender and decreased by exactly 1 at every router it passes through. If a router ever decreases a packet's TTL to 0, it discards the packet instead of forwarding it, and sends a message back to the sender reporting what happened. TTL exists purely as a safety net: if a routing misconfiguration ever created a loop (packet bounces between two routers forever), TTL guarantees that packet gets discarded eventually instead of circling the internet forever, consuming capacity endlessly.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Worked example</span>
+    A packet leaves your laptop with TTL = 64. It passes through your home router (TTL becomes 63), your ISP's first router (62), a backbone router (61), and two more routers before reaching the destination server (58). If, instead, a misconfiguration caused the packet to bounce between two routers indefinitely, its TTL would hit 0 after 64 hops of bouncing and get discarded — rather than looping forever.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What's the key difference between what a switch and a router forward on, and where?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">A switch forwards frames within one network using MAC addresses; a router forwards packets between separate networks using IP addresses.</button>
+      <button class="quiz-choice" data-correct="false">A switch and a router do exactly the same job, just with different names.</button>
+      <button class="quiz-choice" data-correct="false">A switch forwards based on IP addresses; a router forwards based on MAC addresses.</button>
+      <button class="quiz-choice" data-correct="false">Switches only exist on wireless networks; routers only exist on wired ones.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Switches operate at the Link layer within a network; routers operate at the Internet layer, connecting separate networks together.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why can a router get a packet to its destination without knowing the entire remaining route in advance?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Each router only needs to know the single next hop for a given destination; forwarding correctly at each of many independent hops in sequence is enough to reach anywhere, like following highway signs.</button>
+      <button class="quiz-choice" data-correct="false">Every router actually does maintain a complete map of the entire internet's topology.</button>
+      <button class="quiz-choice" data-correct="false">Packets randomly guess their route until they happen to arrive.</button>
+      <button class="quiz-choice" data-correct="false">Routers only forward packets to devices on the exact same network.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Local, next-hop-only decisions, repeated correctly at each hop, are sufficient — no router needs the full path.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. What is TTL protecting against?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">A misconfigured routing loop causing a packet to circle forever, consuming capacity indefinitely — TTL guarantees it eventually gets discarded instead.</button>
+      <button class="quiz-choice" data-correct="false">A packet being read by an unauthorized device.</button>
+      <button class="quiz-choice" data-correct="false">A packet's payload being corrupted in transit.</button>
+      <button class="quiz-choice" data-correct="false">A packet arriving before it was sent.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>TTL is a safety net against infinite loops, not a security or corruption-detection mechanism.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="default gateway">
+    <p class="quiz-prompt">4. Fill in the blank: the specific router a device sends a packet to whenever the destination isn't on its own local network is called the ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The default gateway is the exit point out of a local network toward everywhere else.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: Cloudflare's "<a href="https://www.cloudflare.com/learning/network-layer/what-does-a-router-do/">What Does a Router Do?</a>" walks through routing tables and next-hop forwarding with additional diagrams to compare against the widget above.</p>
+
+  <p class="ask-teacher">Want to look at your own home router's actual routing table together, or trace a real route to a specific website? Ask your teacher — that's what I'm here for, and Lesson 26's traceroute tool will let you do exactly that yourself. Next up: how an entire household of devices, each with a private address, shares one single public IP address on the way out to the internet.</p>
+
+  <footer class="lesson-footer">STEM+ · Computer Networking Fundamentals · Lesson 11 of the course sequence</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var track = document.getElementById('hop-track');
+  var nextBtn = document.getElementById('hop-next');
+  var resetBtn = document.getElementById('hop-reset');
+  var readout = document.getElementById('hop-readout');
+
+  var hops = [
+    { name: 'Laptop', ttl: 64, note: 'Packet built with destination 198.51.100.20 and TTL set to 64 by the sending device.' },
+    { name: 'Home Router', ttl: 63, note: 'Home router checks its routing table: destination isn’t local, so it forwards toward the default gateway’s next hop. TTL decremented to 63.' },
+    { name: 'ISP Router', ttl: 62, note: 'ISP’s router matches the destination against a larger routing table and forwards it toward a backbone network. TTL decremented to 62.' },
+    { name: 'Backbone Router', ttl: 61, note: 'A long-haul backbone router forwards the packet toward the destination’s ISP. TTL decremented to 61.' },
+    { name: 'Destination Server', ttl: 61, note: 'Packet arrives at the destination server’s network — no more forwarding needed, TTL no longer matters.' }
+  ];
+
+  var step = 0;
+
+  function render() {
+    track.innerHTML = '';
+    hops.forEach(function (hop, i) {
+      var box = document.createElement('div');
+      var isCurrent = i === step;
+      var isPast = i < step;
+      box.style.cssText = 'border:2px solid ' + (isCurrent ? 'var(--accent)' : 'var(--border)') +
+        '; border-radius:6px; padding:0.6rem 0.8rem; min-width:6.5rem; text-align:center; font-size:0.85rem;' +
+        (isCurrent ? ' background:var(--accent-soft); font-weight:700;' : (isPast ? ' opacity:0.55;' : ''));
+      box.innerHTML = hop.name + (i > 0 ? '<br><span style="font-family:\'Cambria Math\',Georgia,serif;">TTL ' + hop.ttl + '</span>' : '');
+      track.appendChild(box);
+      if (i < hops.length - 1) {
+        var arrow = document.createElement('div');
+        arrow.style.cssText = 'align-self:center; color:var(--muted); font-size:1.1rem;';
+        arrow.textContent = '→';
+        track.appendChild(arrow);
+      }
+    });
+    readout.textContent = hops[step].note;
+    nextBtn.disabled = step >= hops.length - 1;
+  }
+
+  nextBtn.addEventListener('click', function () {
+    if (step < hops.length - 1) { step++; render(); }
+  });
+  resetBtn.addEventListener('click', function () {
+    step = 0; render();
+  });
+
+  render();
+});
+</script>

@@ -1,0 +1,109 @@
+<meta charset="UTF-8">
+<title>Lesson 18: Status Codes, Headers, and Statelessness — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · Computer Networking Fundamentals · Unit 6 · Lesson 18</span>
+  <h1>Status Codes, Headers, and Statelessness</h1>
+  <p class="subtitle">The three-digit number at the top of every response, the metadata riding alongside it, and the surprising fact that HTTP forgets you the instant a response is sent.</p>
+  <p class="nav-links"><a href="0017-http-requests-and-responses.html" class="nav-prev">← Lesson 17</a> <a href="0019-https-and-tls-encrypting-the-conversation.html" class="nav-next">Lesson 19 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Lesson 17 showed a response starting with <code>HTTP/1.1 200 OK</code>. This lesson is what that number actually communicates, what the headers alongside it typically carry, and a property of HTTP that surprises almost everyone the first time they learn it: the protocol has no memory at all.</p>
+
+  <h2>Status codes</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    A <strong>status code</strong> is the three-digit number in a response's status line, summarizing what happened to the request, grouped by its first digit: <strong>2xx</strong> means success; <strong>3xx</strong> means redirection (the resource has moved, follow a different URL); <strong>4xx</strong> means a client error (the request itself was wrong somehow); and <strong>5xx</strong> means a server error (the request was fine, but the server failed to handle it).
+  </div>
+
+  <table>
+    <thead><tr><th>Code</th><th>Meaning</th><th>Category</th></tr></thead>
+    <tbody>
+      <tr><td>200 OK</td><td>The request succeeded</td><td>2xx success</td></tr>
+      <tr><td>301 Moved Permanently</td><td>Resource moved to a new URL — follow it</td><td>3xx redirection</td></tr>
+      <tr><td>404 Not Found</td><td>No resource exists at this URL</td><td>4xx client error</td></tr>
+      <tr><td>403 Forbidden</td><td>The server understood, but refuses to allow it</td><td>4xx client error</td></tr>
+      <tr><td>500 Internal Server Error</td><td>Something went wrong on the server's own side</td><td>5xx server error</td></tr>
+    </tbody>
+  </table>
+
+  <div class="box why">
+    <span class="box-label">Why the first-digit grouping matters more than memorizing every code</span>
+    There are dozens of specific status codes, but a program (or a person) doesn't need to memorize all of them to react sensibly — the first digit alone tells you the general category of what happened, which is often enough to decide the next move. A well-written program checking a response can reasonably say "if it's in the 2xx range, proceed; if it's 4xx, my request was wrong somehow and retrying identically won't help; if it's 5xx, the problem is on the server's end and retrying later might work" — useful logic derived entirely from one digit, without needing to look up the exact meaning of, say, 418 versus 429.
+  </div>
+
+  <h2>Headers, revisited</h2>
+  <p>Lesson 17 introduced headers as key-value metadata. A few show up constantly enough to be worth naming directly: <code>Content-Type</code> tells the receiver what kind of data the body contains (like <code>text/html</code> or <code>application/json</code>), so it knows how to interpret it; <code>Content-Length</code> tells the receiver exactly how many bytes the body contains, so it knows when the message ends; and <code>Cookie</code> — the mechanism this lesson's next section leans on — lets a client send back a small piece of data the server previously asked it to store.</p>
+
+  <h2>Statelessness</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    HTTP is <strong>stateless</strong>: the server does not automatically remember anything about a previous request when handling a new one, even from the exact same client. Each request is processed as a completely independent event, with no built-in memory linking it to any request that came before it.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why this is genuinely surprising, and how sites "remember" you anyway</span>
+    If HTTP has no memory, how does a website keep you logged in as you click from page to page? The answer is a workaround, not a built-in HTTP feature: after you log in, the server sends back a <strong>cookie</strong> — a small piece of data, via the <code>Set-Cookie</code> header — that your browser then automatically re-sends with every subsequent request to that same site, via the <code>Cookie</code> header. The server isn't remembering you between requests at all; instead, <em>you</em> (via your browser) are re-presenting proof of who you are on every single request, and the server checks that proof fresh, every single time. What feels like a continuous, remembered session is actually hundreds of individually stateless requests, each one carrying its own repeated evidence.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Worked example: logging in, request by request</span>
+    You submit a login form: a POST request with your username and password. The server verifies them and responds with <code>Set-Cookie: session=abc123</code>. Every later request your browser makes to that site — clicking a link, loading an image — automatically includes <code>Cookie: session=abc123</code>, and the server checks that value fresh on every single one of those independent, stateless requests to confirm you're still logged in. Delete that cookie, and the very next request arrives with no proof of anything — the server has no separate memory of you to fall back on.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. A response comes back with status code 404. What general category does this fall into, and what does that mean?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">4xx, a client error — the request itself referred to something that doesn't exist.</button>
+      <button class="quiz-choice" data-correct="false">2xx, meaning the request succeeded.</button>
+      <button class="quiz-choice" data-correct="false">5xx, a server error unrelated to the request itself.</button>
+      <button class="quiz-choice" data-correct="false">3xx, meaning the resource moved to a new URL.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>404 (Not Found) is a 4xx client error — the requested resource simply doesn't exist at that URL.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. What does HTTP being "stateless" mean?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">The server doesn't automatically remember anything about a previous request when handling a new one, even from the same client.</button>
+      <button class="quiz-choice" data-correct="false">HTTP cannot be used to build websites that require logging in.</button>
+      <button class="quiz-choice" data-correct="false">Every HTTP request must include a state machine diagram.</button>
+      <button class="quiz-choice" data-correct="false">A stateless server crashes after every single request.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Each HTTP request is processed as an independent event with no built-in memory of prior requests.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Given that HTTP has no built-in memory, how does a website actually keep you "logged in" across many page loads?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">A cookie, sent by the server once and automatically re-sent by the browser on every later request, lets the client re-present proof of identity fresh on each independent, stateless request.</button>
+      <button class="quiz-choice" data-correct="false">HTTP secretly does remember state between requests, contradicting its stateless definition.</button>
+      <button class="quiz-choice" data-correct="false">The server keeps a permanently open TCP connection for the entire duration of your visit.</button>
+      <button class="quiz-choice" data-correct="false">Login sessions are impossible under HTTP and require a completely different protocol.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Cookies are a workaround built on top of stateless HTTP, not a violation of statelessness — the server still checks fresh proof on every request.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="content-type">
+    <p class="quiz-prompt">4. Fill in the blank: the header telling the receiver what kind of data the body contains (like text/html or application/json) is ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Content-Type tells the receiver how to interpret the bytes in the body.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: MDN's "<a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Status">HTTP Response Status Codes</a>" reference lists every standard code grouped exactly by the 2xx/3xx/4xx/5xx categories covered above.</p>
+
+  <p class="ask-teacher">Curious what cookies are currently stored for a site you're logged into, or want to trace a specific 404 error together? Ask your teacher — that's what I'm here for. Next up: everything covered so far in this unit has been in plain, readable text — HTTPS and TLS cover how that gets encrypted so no one along the path can read it.</p>
+
+  <footer class="lesson-footer">STEM+ · Computer Networking Fundamentals · Lesson 18 of the course sequence</footer>
+</div>

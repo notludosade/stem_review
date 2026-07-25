@@ -1,0 +1,202 @@
+<meta charset="UTF-8">
+<title>Lesson 5: Containers vs. Virtual Machines — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · Cloud Computing A · Unit 2 · Lesson 5</span>
+  <h1>Containers vs. Virtual Machines</h1>
+  <p class="subtitle">A VM gives an application its own entire operating system. A container gives it almost as much isolation for a fraction of the overhead — by sharing the one thing a VM insists on duplicating.</p>
+  <p class="nav-links"><a href="0004-virtual-machines-slicing-up-a-physical-server.html" class="nav-prev">← Lesson 4</a> <a href="0006-serverless-paying-only-for-the-milliseconds-you-use.html" class="nav-next">Lesson 6 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Lesson 4's VM gives an application a completely isolated, full operating system to run in — which is powerful, but expensive: every single VM boots and runs its own copy of a guest operating system, with all the memory and startup time that implies, even if ten VMs on the same host are all running the exact same Linux distribution. Containers ask a pointed question: if every workload is already running the same OS anyway, why duplicate it?</p>
+
+  <h2>What a container actually is</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    A <strong>container</strong> is an isolated, packaged unit containing an application and everything it needs to run (code, libraries, dependencies) — but, unlike a VM, it shares the host machine's operating system kernel instead of running its own. A <strong>container engine</strong> (Docker is the best-known) enforces isolation between containers at the process level: each container sees only its own filesystem and processes, even though they're all ultimately processes running on one shared OS kernel underneath.
+  </div>
+
+  <h2>See the difference: what gets duplicated</h2>
+  <p>The clearest way to see the difference is to watch what happens to the stack as you add more workloads to the same physical machine. Try it below.</p>
+
+  <div class="widget" id="vm-container-widget">
+    <p class="widget-label">Interactive: adding workloads to a VM host vs. a container host</p>
+    <div class="dual-plot">
+      <div>
+        <h3>Virtual Machines</h3>
+        <svg class="plot-wrap-svg figure" id="vm-stack" viewBox="0 0 200 260" width="200" height="260"></svg>
+      </div>
+      <div>
+        <h3>Containers</h3>
+        <svg class="plot-wrap-svg figure" id="container-stack" viewBox="0 0 200 260" width="200" height="260"></svg>
+      </div>
+    </div>
+    <p class="fm-row">
+      <button class="widget-btn" type="button" data-vc-add>Add another workload</button>
+      <button class="widget-btn" type="button" data-vc-reset>Reset</button>
+    </p>
+    <p class="plot-readout" data-vc-summary></p>
+    <p class="plot-hint">Each workload you add gives the VM host a full new guest OS to boot and hold in memory. The container host just adds one more process sharing the OS it already has running.</p>
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Worked example</span>
+    A host runs four small workloads. As four VMs, that's four separate guest operating systems booted, patched, and held in memory — commonly hundreds of megabytes to a few gigabytes of pure OS overhead each, before the application itself uses a single byte. As four containers on one shared host OS, there's exactly one operating system running, and each workload adds only its own application process and files — typically megabytes, not gigabytes, of added overhead per workload.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why containers start in milliseconds and VMs start in tens of seconds</span>
+    Starting a VM means booting an entire operating system from scratch — the same slow process as turning on a physical computer, just virtualized. Starting a container means asking an OS that's <em>already running</em> to start one more isolated process, which is a fast, lightweight operation the OS was already built to do quickly. That startup-time gap — tens of seconds versus tens or hundreds of milliseconds — is the single biggest reason containers, not VMs, became the default packaging format for modern application deployment, and it's the gap Lesson 6's serverless computing pushes to its logical extreme.
+  </div>
+
+  <div class="box">
+    <span class="box-label">The tradeoff, honestly stated</span>
+    Containers aren't strictly better — they're a different isolation boundary. A VM's isolation is enforced by the hypervisor at the hardware level, which is a stronger, harder-to-breach boundary; a container's isolation is enforced by the shared OS kernel at the process level, which is lighter-weight but depends on that one kernel being correctly secured for every container running on it. Sensitive multi-tenant workloads sometimes still run inside a VM specifically for that stronger boundary — often with containers running <em>inside</em> that VM, combining both. (Deploying and orchestrating containers at scale — the tools and practices for running many containers together in production — is a deliberately deeper topic than this course covers; it's exactly what a follow-on DevOps course would pick up from here.)
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What is the key architectural difference between a container and a virtual machine?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">A container shares the host's operating system kernel; a VM runs its own separate guest operating system.</button>
+      <button class="quiz-choice" data-correct="false">A container can only run one line of code; a VM can run an entire application.</button>
+      <button class="quiz-choice" data-correct="false">A VM shares the host OS kernel; a container runs its own separate OS.</button>
+      <button class="quiz-choice" data-correct="false">There is no meaningful difference between the two.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Sharing (container) versus duplicating (VM) the operating system is the defining architectural difference.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why do containers typically start in milliseconds while VMs take tens of seconds?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Containers use faster physical hardware than VMs.</button>
+      <button class="quiz-choice" data-correct="true">A container just starts one more process on an OS that's already running; a VM has to boot an entire operating system from scratch.</button>
+      <button class="quiz-choice" data-correct="false">VMs are always billed by the hour, forcing a slow startup.</button>
+      <button class="quiz-choice" data-correct="false">Containers skip loading the application code entirely.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Booting a full OS is inherently slower than starting one more process on an OS that's already booted.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why might a sensitive multi-tenant workload still run inside a VM, even with containers being lighter-weight?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because containers cannot run any application code at all.</button>
+      <button class="quiz-choice" data-correct="true">Because a VM's hypervisor-level isolation is a stronger security boundary than a container's shared-kernel isolation.</button>
+      <button class="quiz-choice" data-correct="false">Because VMs are always cheaper than containers at any scale.</button>
+      <button class="quiz-choice" data-correct="false">Because containers require a physical server dedicated to a single customer.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Stronger isolation is the specific tradeoff a VM offers in exchange for its heavier overhead.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="kernel">
+    <p class="quiz-prompt">4. Fill in the blank: what containers on the same host share, instead of each running their own copy, is the operating system ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The shared kernel is exactly what lets containers skip the overhead of a full duplicated OS.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="container engine|docker">
+    <p class="quiz-prompt">5. Fill in the blank: the software (Docker being the best-known example) that enforces isolation between containers at the process level on a shared OS is called a ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The container engine is the software layer that manages and isolates containers, analogous to the hypervisor's role for VMs.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: Docker's own <a href="https://docs.docker.com/get-started/docker-overview/">"What is a container?"</a> overview illustrates the shared-kernel architecture this lesson's widget is built around, straight from the tool that popularized it.</p>
+
+  <p class="ask-teacher">Wondering how a container knows which files belong to it if it's sharing the host's OS? Ask your teacher — that's what I'm here for. Next up: taking the container's "share more, own less" idea to its logical extreme — code that doesn't run on a server you manage at all.</p>
+
+  <footer class="lesson-footer">STEM+ · Cloud Computing A · Lesson 5 of the course sequence</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var svgNS = 'http://www.w3.org/2000/svg';
+  var vmSvg = document.getElementById('vm-stack');
+  var containerSvg = document.getElementById('container-stack');
+  var summary = document.querySelector('#vm-container-widget [data-vc-summary]');
+  var addBtn = document.querySelector('#vm-container-widget [data-vc-add]');
+  var resetBtn = document.querySelector('#vm-container-widget [data-vc-reset]');
+  var count = 1;
+  var MAX = 4;
+
+  function rect(svg, x, y, w, h, fillVar, strokeVar, label) {
+    var r = document.createElementNS(svgNS, 'rect');
+    r.setAttribute('x', x); r.setAttribute('y', y);
+    r.setAttribute('width', w); r.setAttribute('height', h);
+    r.setAttribute('rx', 3);
+    r.style.fill = fillVar; r.style.stroke = strokeVar;
+    r.setAttribute('stroke-width', 1.5);
+    svg.appendChild(r);
+    if (label) {
+      var t = document.createElementNS(svgNS, 'text');
+      t.setAttribute('x', x + w / 2);
+      t.setAttribute('y', y + h / 2 + 4);
+      t.setAttribute('text-anchor', 'middle');
+      t.setAttribute('class', 'fig-label');
+      t.setAttribute('font-style', 'normal');
+      t.setAttribute('font-size', '11');
+      t.textContent = label;
+      svg.appendChild(t);
+    }
+  }
+
+  function drawVM(n) {
+    vmSvg.innerHTML = '';
+    var w = 170, x = 15, y = 254, baseH = 22;
+    ['Physical Hardware', 'Host OS', 'Hypervisor'].forEach(function (label) {
+      y -= baseH;
+      rect(vmSvg, x, y, w, baseH, 'var(--code-bg)', 'var(--border)', label);
+    });
+    for (var i = 1; i <= n; i++) {
+      y -= 20;
+      rect(vmSvg, x, y, w, 20, 'var(--incorrect-soft)', 'var(--incorrect)', 'Guest OS #' + i);
+      y -= 20;
+      rect(vmSvg, x, y, w, 20, 'var(--accent-soft)', 'var(--accent)', 'App #' + i);
+    }
+  }
+
+  function drawContainers(n) {
+    containerSvg.innerHTML = '';
+    var w = 170, x = 15, y = 254, baseH = 22;
+    ['Physical Hardware', 'Host OS', 'Container Engine'].forEach(function (label) {
+      y -= baseH;
+      rect(containerSvg, x, y, w, baseH, 'var(--code-bg)', 'var(--border)', label);
+    });
+    for (var i = 1; i <= n; i++) {
+      y -= 20;
+      rect(containerSvg, x, y, w, 20, 'var(--accent-soft)', 'var(--accent)', 'App #' + i);
+    }
+  }
+
+  function render() {
+    drawVM(count);
+    drawContainers(count);
+    if (summary) {
+      summary.textContent = count + ' workload' + (count === 1 ? '' : 's') + ' running → the VM host has booted ' + count + ' separate guest operating system' + (count === 1 ? '' : 's') + '; the container host still has exactly one.';
+    }
+    addBtn.disabled = count >= MAX;
+  }
+
+  addBtn.addEventListener('click', function () {
+    if (count < MAX) { count++; render(); }
+  });
+  resetBtn.addEventListener('click', function () {
+    count = 1; render();
+  });
+
+  render();
+});
+</script>

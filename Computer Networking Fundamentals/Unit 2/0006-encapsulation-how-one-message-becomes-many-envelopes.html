@@ -1,0 +1,155 @@
+<meta charset="UTF-8">
+<title>Lesson 6: Encapsulation — How One Message Becomes Many Envelopes — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · Computer Networking Fundamentals · Unit 2 · Lesson 6</span>
+  <h1>Encapsulation — How One Message Becomes Many Envelopes</h1>
+  <p class="subtitle">Lesson 5 said each layer only talks to its neighbors. This lesson is the mechanism that makes that true: every layer wraps the data it's handed in its own envelope before passing it down.</p>
+  <p class="nav-links"><a href="0005-the-layered-model-osi-and-tcpip-side-by-side.html" class="nav-prev">← Lesson 5</a> <a href="../Unit%203/0007-mac-addresses-and-the-physical-link-layer.html" class="nav-next">Unit 3, Lesson 7 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Your browser wants to send one HTTP request. By the time it actually leaves your computer as electrical signals on a wire, that single request has been wrapped in three separate layers of extra information, one from each layer below Application. This lesson watches that wrapping happen step by step, then watches it get undone in reverse order when it arrives.</p>
+
+  <h2>Headers, payloads, and PDUs</h2>
+  <div class="box">
+    <span class="box-label">Definitions</span>
+    A <strong>header</strong> is a small block of structured metadata that a layer adds to the front of the data it's given — things like addresses, sizes, and sequence information, whose exact format is defined by that layer's protocol. The <strong>payload</strong> is the data being carried — from any given layer's point of view, everything handed to it by the layer above, including that layer's own header, counts as an opaque payload it doesn't need to understand. The combination of a layer's own header plus its payload is called a <strong>PDU</strong> (Protocol Data Unit) — each layer has its own name for its PDU (a Transport-layer PDU is called a <strong>segment</strong>, an Internet-layer PDU is called a <strong>packet</strong>, and a Link-layer PDU is called a <strong>frame</strong>).
+  </div>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    <strong>Encapsulation</strong> is the process of each layer wrapping the data from the layer above inside its own header (and, at the Link layer, sometimes a trailer at the end too) as the data travels down the stack on its way out. <strong>Decapsulation</strong> is the reverse: each layer on the receiving end strips off its own header, reading just enough of it to know what to do next, then hands the remaining payload up to the next layer.
+  </div>
+
+  <div class="widget" id="encap-widget">
+    <div class="widget-label">Try It — Encapsulate an HTTP Request</div>
+    <div id="encap-display" style="padding: 0.4rem;"></div>
+    <div style="display:flex; gap:0.5rem; flex-wrap:wrap; margin-top:0.9rem;">
+      <button class="widget-btn" id="encap-next">Add Next Header →</button>
+      <button class="widget-btn" id="encap-reset">Reset</button>
+    </div>
+    <p class="plot-readout" id="encap-readout">—</p>
+  </div>
+
+  <p>Click through the widget above: each click wraps the message in one more layer's envelope, exactly the way it actually happens as your browser's request travels down your own machine's networking stack, on its way out the door.</p>
+
+  <div class="box example">
+    <span class="box-label">Following the trip out, layer by layer</span>
+    Application layer builds the raw HTTP request (the innermost payload). Transport layer (Lesson 15) wraps it in a TCP header carrying source and destination <em>port numbers</em> — the result is called a segment. Internet layer (Unit 3) wraps that segment in an IP header carrying source and destination <em>IP addresses</em> — the result is called a packet. Link layer (Lesson 7) wraps that packet in an Ethernet (or Wi-Fi) header carrying source and destination <em>MAC addresses</em>, plus a trailer at the very end — the result is called a frame, and it's the frame that actually goes out over the wire as electrical signals.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why each layer only reads its own header</span>
+    When a frame arrives at a router, the router only needs to read the Link-layer header (enough to know it arrived, and sometimes not even fully decapsulate it if just forwarding) and the Internet-layer header underneath (to know where the packet is ultimately headed) to do its job — it has no need to open the TCP header or look at the HTTP request inside. This is Lesson 5's layer isolation in action: a router operates entirely at the Internet layer and below, is completely indifferent to what protocol or application generated the payload, and can forward IP packets belonging to HTTP, DNS, or literally any other application equally well, because it never looks past its own layer's header.
+  </div>
+
+  <h2>Decapsulation: the exact reverse, on the way in</h2>
+  <p>At the destination, the process runs backward. The Link layer receives the frame, strips its Ethernet header and trailer, and hands the packet up. The Internet layer strips the IP header and hands the segment up. The Transport layer strips the TCP header, using the port number inside to figure out which specific program on the destination machine should receive it, and hands the original HTTP request up to that program's Application layer — arriving as the exact same request your browser built, unwrapped one envelope at a time in the opposite order it was wrapped.</p>
+
+  <div class="box example">
+    <span class="box-label">The nesting-doll analogy</span>
+    Encapsulation is a set of Russian nesting dolls being assembled from the inside out — smallest doll (the HTTP request) placed inside a slightly bigger one (TCP segment), placed inside a bigger one still (IP packet), placed inside the biggest, outermost one (Ethernet frame). Decapsulation is simply opening that assembled doll from the outside in, removing exactly one shell at a time, until only the original smallest doll is left.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What is a header, in the encapsulation sense?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Structured metadata a layer adds to the front of the data it's handling — addresses, sizes, and similar information defined by that layer's protocol.</button>
+      <button class="quiz-choice" data-correct="false">The entire message a user typed, with nothing added.</button>
+      <button class="quiz-choice" data-correct="false">A separate file sent alongside the main data.</button>
+      <button class="quiz-choice" data-correct="false">Something only the Application layer ever adds.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Every layer that participates adds its own header, formatted according to its own protocol's rules.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. What does a router need to look at to forward a packet, and what does that reveal about layering?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Only the Link- and Internet-layer headers — it never needs to open the TCP header or the application data inside, since forwarding only requires its own layer's information.</button>
+      <button class="quiz-choice" data-correct="false">The full original HTTP request, to decide how to route it.</button>
+      <button class="quiz-choice" data-correct="false">Only the Application-layer header.</button>
+      <button class="quiz-choice" data-correct="false">Nothing — routers forward data without reading any headers.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A router operates at the Internet layer and below and is indifferent to whatever application or protocol produced the payload it's carrying.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. In what order does decapsulation strip headers, relative to the order they were added during encapsulation?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">The exact reverse order — the last header added (Link layer) is the first one stripped, and the first header added (Transport layer) is the last one stripped.</button>
+      <button class="quiz-choice" data-correct="false">The exact same order headers were added, unchanged.</button>
+      <button class="quiz-choice" data-correct="false">A random order, chosen by the receiving device.</button>
+      <button class="quiz-choice" data-correct="false">All headers are stripped simultaneously by a single layer.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Like opening nesting dolls from the outside in, decapsulation removes the outermost (most recently added) envelope first.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="pdu|protocol data unit">
+    <p class="quiz-prompt">4. Fill in the blank: the general name for "a layer's own header plus its payload," which gets a more specific name at each layer (segment, packet, frame), is a ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>PDU is the umbrella term; segment, packet, and frame are the layer-specific names for a PDU at the Transport, Internet, and Link layers respectively.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: Cloudflare's "<a href="https://www.cloudflare.com/learning/network-layer/what-is-encapsulation/">What Is Encapsulation?</a>" walks through the same header-by-header wrapping process with its own diagram to compare against the widget above.</p>
+
+  <p class="ask-teacher">Want to trace a specific real request — like loading this very page — through every encapsulation step by hand? Ask your teacher — that's what I'm here for. Unit 2 is complete. Next up: Unit 3 tackles the addresses that go inside every one of those headers, starting with the Link layer's MAC addresses.</p>
+
+  <footer class="lesson-footer">STEM+ · Computer Networking Fundamentals · Lesson 6 of the course sequence</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var display = document.getElementById('encap-display');
+  var nextBtn = document.getElementById('encap-next');
+  var resetBtn = document.getElementById('encap-reset');
+  var readout = document.getElementById('encap-readout');
+  var step = 0;
+  var MAX_STEP = 3;
+
+  var layers = [
+    { label: 'Transport header (TCP) — src port 51772 → dst port 80', color: '#8a4f2b', note: 'The Transport layer wrapped the request in a TCP segment, adding port numbers so the destination knows which program should receive it.' },
+    { label: 'Internet header (IP) — src 203.0.113.5 → dst 198.51.100.20', color: '#2c5f8a', note: 'The Internet layer wrapped the segment in an IP packet, adding the source and destination IP addresses that get it to the right device.' },
+    { label: 'Link header (Ethernet) — src MAC → dst MAC (+ trailer)', color: '#6b675f', note: 'The Link layer wrapped the packet in an Ethernet frame for the very next physical hop — this is what actually goes out over the wire.' }
+  ];
+
+  function wrap(inner, label, color) {
+    return '<div style="border:2px solid ' + color + '; border-radius:8px; padding:0.9rem; margin:0.35rem;">' +
+      '<div style="font-family:-apple-system,BlinkMacSystemFont,\'Segoe UI\',sans-serif; font-size:0.72rem; letter-spacing:0.06em; text-transform:uppercase; font-weight:700; color:' + color + '; margin-bottom:0.5rem;">' + label + '</div>' +
+      inner + '</div>';
+  }
+
+  function render() {
+    var html = '<div style="border:2px solid var(--border); border-radius:6px; padding:0.9rem; background:var(--code-bg); font-family:\'SF Mono\',Menlo,Consolas,monospace; font-size:0.82rem;">Payload: <code>GET /index.html HTTP/1.1</code> (the original HTTP request)</div>';
+    for (var i = 0; i < step; i++) {
+      html = wrap(html, layers[i].label, layers[i].color);
+    }
+    display.innerHTML = html;
+    if (step === 0) {
+      readout.textContent = 'This is the raw Application-layer message — nothing wrapped around it yet.';
+    } else {
+      readout.textContent = layers[step - 1].note;
+    }
+    nextBtn.disabled = step >= MAX_STEP;
+  }
+
+  nextBtn.addEventListener('click', function () {
+    if (step < MAX_STEP) { step++; render(); }
+  });
+  resetBtn.addEventListener('click', function () {
+    step = 0; render();
+  });
+
+  render();
+});
+</script>

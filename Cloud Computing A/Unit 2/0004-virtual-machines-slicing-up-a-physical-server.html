@@ -1,0 +1,111 @@
+<meta charset="UTF-8">
+<title>Lesson 4: Virtual Machines — Slicing Up a Physical Server — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · Cloud Computing A · Unit 2 · Lesson 4</span>
+  <h1>Virtual Machines — Slicing Up a Physical Server</h1>
+  <p class="subtitle">When you "rent a server" from a cloud provider, you almost never get a whole physical machine to yourself. You get a slice of one — and the technology that makes that slicing possible is the foundation of everything else in this unit.</p>
+  <p class="nav-links"><a href="../Unit%201/0003-public-private-and-hybrid-cloud.html" class="nav-prev">← Unit 1, Lesson 3</a> <a href="0005-containers-vs-virtual-machines.html" class="nav-next">Lesson 5 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>A single physical server in a cloud provider's data center might have 128 processor cores and half a terabyte of memory — vastly more than almost any one customer needs. Selling that whole machine to one small customer would waste most of its capacity, which contradicts everything Unit 1 said about the cloud's efficiency advantage. The fix is virtualization: carving one big physical machine into many smaller, independent-feeling ones.</p>
+
+  <h2>What a virtual machine actually is</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    A <strong>virtual machine (VM)</strong> is a software-based emulation of a complete computer — its own virtual CPU, memory, disk, and network interface — running on top of a physical machine, alongside other VMs it has no awareness of. From inside a VM, an operating system boots up, runs, and behaves exactly as if it had a real, dedicated computer beneath it, even though it's actually sharing physical hardware with several (sometimes hundreds of) other VMs.
+  </div>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    The software layer that makes this possible is the <strong>hypervisor</strong>: a program that runs directly on the physical hardware and creates, manages, and strictly isolates multiple VMs on top of it. The hypervisor decides how much of the physical CPU, memory, and disk each VM is allowed to use, and — critically — prevents any VM from reading another VM's memory or affecting its performance beyond its allotted share, even though they're running on the exact same physical chip.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Worked example</span>
+    A physical server with 128 cores and 512 GB of memory runs a hypervisor that carves it into eight virtual machines, each allotted 16 cores and 64 GB. Customer A rents one of those VMs to run a database; Customer B, a total stranger to Customer A, rents another VM on that exact same physical machine to run a web server. Neither customer can see, access, or even detect the other's VM — as far as either of them can tell, they each have a dedicated computer.
+  </div>
+
+  <h2>Instance types: paying for a specific slice</h2>
+  <p>Cloud providers sell VMs (often called "instances") in predefined sizes, each with a fixed amount of virtual CPU (vCPU) and memory, so a customer can pick a slice that fits their workload instead of negotiating a custom carve-up every time.</p>
+
+  <table>
+    <thead><tr><th>Example instance size</th><th>vCPUs</th><th>Memory</th><th>Good fit for</th></tr></thead>
+    <tbody>
+      <tr><td>Small</td><td>2</td><td>4 GB</td><td>A low-traffic internal tool</td></tr>
+      <tr><td>Medium</td><td>4</td><td>16 GB</td><td>A typical production web server</td></tr>
+      <tr><td>Large</td><td>16</td><td>64 GB</td><td>A busy database or batch data job</td></tr>
+    </tbody>
+  </table>
+
+  <div class="box why">
+    <span class="box-label">Why virtualization is the foundation of everything in Unit 1</span>
+    Virtualization is the specific technology that makes the public cloud's economics work. Because a hypervisor can safely and invisibly share one physical machine across many unrelated customers, a provider can sell precisely-sized slices instead of whole machines — which is what lets a small startup rent 2 vCPUs for a few dollars a month instead of being forced to buy (or rent) an entire server. It's also what makes elasticity possible: spinning up a new VM takes seconds, because the hypervisor is just allocating another slice of hardware that's often already running, not provisioning a brand-new physical machine from scratch.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What is a virtual machine?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">A software-based emulation of a complete computer, running alongside other VMs on shared physical hardware.</button>
+      <button class="quiz-choice" data-correct="false">A physical computer dedicated entirely to one customer.</button>
+      <button class="quiz-choice" data-correct="false">A program that can only run one specific application, never a full operating system.</button>
+      <button class="quiz-choice" data-correct="false">A backup copy of a hard drive stored offsite.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A VM emulates a whole computer in software, letting a full OS run on it as though it had dedicated hardware.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. What role does the hypervisor play?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">It is the operating system that runs inside a single VM.</button>
+      <button class="quiz-choice" data-correct="true">It runs on the physical hardware, creating and strictly isolating multiple VMs from each other.</button>
+      <button class="quiz-choice" data-correct="false">It is a networking cable that physically connects two servers.</button>
+      <button class="quiz-choice" data-correct="false">It is a billing tool that calculates a customer's monthly cloud invoice.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The hypervisor is the layer between physical hardware and the VMs, responsible for allocation and isolation.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. In the worked example, why can't Customer B see or affect Customer A's VM, even though both run on the same physical machine?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because the two VMs run on physically separate machines despite being billed together.</button>
+      <button class="quiz-choice" data-correct="true">Because the hypervisor strictly isolates each VM's memory and resource allocation from every other VM.</button>
+      <button class="quiz-choice" data-correct="false">Because Customer A paid extra for a "privacy upgrade."</button>
+      <button class="quiz-choice" data-correct="false">Because only one VM can run on a physical machine at any given time.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Isolation is the hypervisor's core job — many VMs genuinely do share one physical machine, safely.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="hypervisor">
+    <p class="quiz-prompt">4. Fill in the blank: the software layer that runs directly on physical hardware and creates, manages, and isolates multiple virtual machines on top of it is called the ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The hypervisor sits between the physical hardware and every VM running on top of it.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="instance|instances">
+    <p class="quiz-prompt">5. Fill in the blank: cloud providers commonly refer to a rented virtual machine as an ___, sold in predefined sizes with a fixed amount of vCPU and memory.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>"Instance" is the industry-standard term for a provisioned VM, sized by vCPU and memory.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: Amazon's <a href="https://docs.aws.amazon.com/ec2/">Amazon EC2 documentation</a> ("Elastic Compute Cloud") shows real instance type families and sizes for the VM service the rest of this unit's comparisons are built against.</p>
+
+  <p class="ask-teacher">Curious how many VMs a real physical server in a data center actually runs at once? Ask your teacher — that's what I'm here for. Next up: a second, lighter way to isolate workloads on shared hardware — the container — and exactly how it differs from what you just learned.</p>
+
+  <footer class="lesson-footer">STEM+ · Cloud Computing A · Lesson 4 of the course sequence</footer>
+</div>

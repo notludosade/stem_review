@@ -1,0 +1,111 @@
+<meta charset="UTF-8">
+<title>Lesson 9: Choosing the Right Storage for the Job — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · Cloud Computing A · Unit 3 · Lesson 9</span>
+  <h1>Choosing the Right Storage for the Job</h1>
+  <p class="subtitle">Lessons 7 and 8 gave you the vocabulary — storage model, durability, availability. This lesson puts it together into an actual decision, plus one more variable: how often the data even gets touched.</p>
+  <p class="nav-links"><a href="0008-durability-availability-and-the-9s.html" class="nav-prev">← Lesson 8</a> <a href="../Unit%204/0010-virtual-private-clouds-and-subnets.html" class="nav-next">Unit 4, Lesson 10 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Real storage decisions aren't made in a vacuum — they're made against an actual workload, with a real access pattern and a real budget. This lesson walks through the questions worth asking, in order, and introduces the last major lever: how frequently data is actually accessed, which turns out to be one of the biggest cost knobs in all of cloud storage.</p>
+
+  <h2>Question 1: what's the access pattern?</h2>
+  <p>This is Lesson 7's question, and it comes first because it usually narrows the choice down immediately. Is the data read/written as whole files by many clients over the internet (object)? Does it need low-latency, small, random reads and writes from one machine (block)? Does it need to be a shared filesystem mounted by many machines at once (file)?</p>
+
+  <h2>Question 2: how much durability and availability does it actually need?</h2>
+  <p>This is Lesson 8's question. Not every dataset deserves eleven 9s of durability or five-nines availability — those guarantees cost real engineering effort and money. A cache that can be rebuilt from a database in seconds doesn't need the same durability guarantee as the only copy of a company's financial records.</p>
+
+  <h2>Question 3: how often is the data actually accessed?</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    Cloud storage services commonly offer multiple <strong>storage tiers</strong> (or storage classes) for the same underlying model — trading retrieval speed for cost. A "hot" tier keeps data instantly accessible at a higher price per gigabyte; a "cold" or "archive" tier costs a small fraction as much per gigabyte, but retrieving a file can take from minutes to hours instead of milliseconds. The data doesn't change model (it might stay in object storage the whole time) — only which tier of that model it lives in.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Worked example: a video streaming service</span>
+    A newly uploaded video gets watched heavily in its first week, so it sits in object storage's standard, instantly-retrievable tier. Six months later, almost nobody watches it — but deleting it isn't an option, since a handful of viewers still might. Moving it to a cold archive tier cuts its storage cost dramatically, at the price of a multi-minute delay the rare viewer experiences before the video plays. A <strong>lifecycle policy</strong> — a rule the storage service enforces automatically, like "move any object untouched for 90 days to the archive tier" — makes this transition happen without an engineer manually tracking every file's access pattern by hand.
+  </div>
+
+  <h2>Putting it together</h2>
+  <table>
+    <thead><tr><th>Scenario</th><th>Model</th><th>Tier</th></tr></thead>
+    <tbody>
+      <tr><td>User profile photos, viewed constantly</td><td>Object</td><td>Hot / standard</td></tr>
+      <tr><td>Seven-year-old compliance backups, almost never opened</td><td>Object</td><td>Cold / archive</td></tr>
+      <tr><td>A production database's live data files</td><td>Block</td><td>N/A — always hot by nature</td></tr>
+      <tr><td>A shared media library read by 30 render servers</td><td>File</td><td>Hot / standard</td></tr>
+    </tbody>
+  </table>
+
+  <div class="box why">
+    <span class="box-label">Why this three-question framework beats guessing</span>
+    Skipping straight to "which service has the cheapest price per gigabyte" without asking these three questions in order is how teams end up with a slow database on the wrong storage model, or a storage bill three times higher than necessary because nothing ever gets moved to a cheaper tier. Access pattern narrows the model; required durability and availability narrow the guarantee level; access frequency narrows the tier and the price. Answer all three, in that order, and the right choice is usually obvious rather than a guess.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What is the purpose of a storage tier (like "hot" vs. "cold" or "archive")?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">To trade retrieval speed for cost within the same storage model, without changing the model itself.</button>
+      <button class="quiz-choice" data-correct="false">To switch data from object storage to block storage automatically.</button>
+      <button class="quiz-choice" data-correct="false">To permanently delete data that hasn't been accessed recently.</button>
+      <button class="quiz-choice" data-correct="false">To increase a dataset's durability guarantee at no additional cost.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Tiers trade access speed for price within one storage model — they don't change the underlying model or automatically delete anything.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. In the video streaming example, why does moving an old, rarely-watched video to a cold archive tier make sense instead of deleting it?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">It cuts storage cost dramatically while still keeping the video available for the rare viewer, at the cost of a longer retrieval delay.</button>
+      <button class="quiz-choice" data-correct="false">Cold storage tiers make retrieval faster than the standard tier.</button>
+      <button class="quiz-choice" data-correct="false">Archive tiers are required by law for any file older than six months.</button>
+      <button class="quiz-choice" data-correct="false">Deleting old videos is technically impossible in cloud storage.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Archiving keeps rarely-needed data available at much lower cost, accepting slower retrieval as the tradeoff — a middle ground between paying full price and deleting it outright.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why is a lifecycle policy useful for managing storage tiers?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">It automatically moves data between tiers based on a rule, instead of requiring an engineer to track every file's access pattern manually.</button>
+      <button class="quiz-choice" data-correct="false">It permanently prevents any data from ever being deleted.</button>
+      <button class="quiz-choice" data-correct="false">It converts block storage into object storage automatically.</button>
+      <button class="quiz-choice" data-correct="false">It is required before any data can be written to storage at all.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Lifecycle policies automate tier transitions based on rules like "untouched for 90 days," removing the need for manual tracking.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="storage tier|tier|storage class">
+    <p class="quiz-prompt">4. Fill in the blank: within the same storage model, a "hot" or "cold" option trading retrieval speed for cost per gigabyte is called a storage ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Storage tiers let the same model (like object storage) offer different price/speed tradeoffs for the same data.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="lifecycle policy|lifecycle">
+    <p class="quiz-prompt">5. Fill in the blank: an automated rule, such as "move any object untouched for 90 days to the archive tier," is called a ___ policy.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Lifecycle policies automate the tier-migration decision instead of requiring manual tracking of every object's access pattern.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: AWS's <a href="https://aws.amazon.com/s3/storage-classes/">Amazon S3 storage classes</a> page (the same one from Lesson 8) lists real hot, infrequent-access, and archive tiers with their actual retrieval-time tradeoffs.</p>
+
+  <p class="ask-teacher">Have a project of your own where you're not sure which storage model or tier fits? Ask your teacher — that's what I'm here for. Next up: Unit 4 leaves storage behind and covers how all these pieces — compute and storage alike — actually talk to each other and to the outside world.</p>
+
+  <footer class="lesson-footer">STEM+ · Cloud Computing A · Lesson 9 of the course sequence</footer>
+</div>

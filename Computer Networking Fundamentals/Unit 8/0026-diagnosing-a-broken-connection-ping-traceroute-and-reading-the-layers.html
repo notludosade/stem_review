@@ -1,0 +1,134 @@
+<meta charset="UTF-8">
+<title>Lesson 26: Diagnosing a Broken Connection — ping, traceroute, and Reading the Layers — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<script src="../../assets/interactive.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · Computer Networking Fundamentals · Unit 8 · Lesson 26</span>
+  <h1>Diagnosing a Broken Connection — ping, traceroute, and Reading the Layers</h1>
+  <p class="subtitle">"The internet is down" is never actually the problem. Some specific layer, at some specific point along the path, failed — and this course's entire vocabulary is what lets you find out which one.</p>
+  <p class="nav-links"><a href="0025-common-attacks-spoofing-sniffing-and-man-in-the-middle.html" class="nav-prev">← Lesson 25</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>This is the last lesson of the course, and it's deliberately not a new topic — it's a method for using everything already covered. "My connection isn't working" could mean a dozen different specific failures at a dozen different specific layers, and guessing randomly wastes time. The two tools below, plus Lesson 2's LAN/WAN/internet framing and Unit 2's layered model, turn a vague complaint into a precise diagnosis.</p>
+
+  <h2>ping: is the destination reachable at all?</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    <strong>ping</strong> is a diagnostic tool that sends a small message to a target address and measures whether — and how quickly — a reply comes back, using <strong>ICMP</strong> (Internet Control Message Protocol), a lightweight Internet-layer protocol built specifically for network diagnostics and error reporting rather than carrying application data. A successful ping confirms basic Internet-layer reachability: the target exists, is reachable, and the round-trip path currently works (and reports the round-trip latency, connecting directly back to Lesson 3). A failed ping means something is broken somewhere on the IP path between you and the target — but not yet exactly where.
+  </div>
+
+  <h2>traceroute: which specific hop is the problem?</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    <strong>traceroute</strong> is a diagnostic tool that reveals every router hop between you and a destination, along with the round-trip time to each one, by cleverly exploiting Lesson 11's TTL mechanism: it sends a series of packets with TTL set to 1, then 2, then 3, and so on, and each router that discards a TTL-expired packet sends back an ICMP message identifying itself — building up the full hop-by-hop path one router at a time. Where ping only tells you "reachable" or "not reachable," traceroute tells you exactly how far the packet actually got before something went wrong.
+  </div>
+
+  <div class="widget" id="tr-widget">
+    <div class="widget-label">Try It — Read a Simulated traceroute</div>
+    <div class="fm-tabs">
+      <button class="fm-tab is-active" data-tab="working">Working connection</button>
+      <button class="fm-tab" data-tab="broken">Broken mid-path</button>
+      <button class="fm-tab" data-tab="dns">DNS failure</button>
+    </div>
+    <div class="fm-panel" data-panel="working">
+      <pre class="code-block"><code>1  home-router.local        1 ms
+2  isp-gateway.net           8 ms
+3  backbone-1.example.net   14 ms
+4  backbone-2.example.net   22 ms
+5  destination.example.com  25 ms
+Trace complete.</code></pre>
+      <p><strong>Reading it:</strong> every hop replied, and latency climbed smoothly and only slightly, hop by hop — a healthy path, matching Lesson 3's expectation that latency grows with distance and hop count, not a sign of anything broken.</p>
+    </div>
+    <div class="fm-panel" data-panel="broken" hidden>
+      <pre class="code-block"><code>1  home-router.local        1 ms
+2  isp-gateway.net           9 ms
+3  * * * Request timed out
+4  * * * Request timed out
+5  * * * Request timed out
+Trace incomplete.</code></pre>
+      <p><strong>Reading it:</strong> the first two hops replied normally, but nothing beyond hop 2 ever responds. The problem isn't your device or your home network (both hops there worked) — it's somewhere at or just past your ISP's gateway. This narrows a vague "the internet is down" complaint down to one specific, nameable segment of the path.</p>
+    </div>
+    <div class="fm-panel" data-panel="dns" hidden>
+      <pre class="code-block"><code>&gt; ping example.com
+ping: cannot resolve example.com: Unknown host
+
+&gt; ping 8.8.8.8
+Reply from 8.8.8.8: time=12ms
+Reply from 8.8.8.8: time=11ms</code></pre>
+      <p><strong>Reading it:</strong> pinging a known-good IP address directly (8.8.8.8, a well-known public DNS server) succeeds — so the Internet layer and everything below it is working fine. Pinging the domain name fails at the resolution step itself, before any packet even attempts to leave for a destination. This isolates the failure to DNS (Lesson 13) specifically, not routing, not the Link layer, not the destination server.</p>
+    </div>
+  </div>
+
+  <h2>Reading the layers: a diagnostic order, not a random guess</h2>
+  <div class="box why">
+    <span class="box-label">Why working bottom-up through the layers is the efficient approach</span>
+    Unit 2's layered model isn't just a way to organize protocols — it's a checklist for troubleshooting, worked from the bottom up: is the Link layer even connected (is Wi-Fi on, is the cable plugged in)? Does ping succeed to a known-good IP address (Internet layer reachability, ruling out DNS entirely)? Does ping succeed to the actual domain name (DNS, Lesson 13)? Does a connection succeed on the specific port the service uses (Transport layer, Lesson 14 — a device can be perfectly reachable overall while one specific service's port is closed or blocked)? Finally, does the application itself respond sensibly (Application layer, Unit 6 — checking, for instance, the actual HTTP status code returned)? Each step rules out an entire layer's worth of possible causes before moving to the next, instead of guessing at the answer directly — the same "narrow it down systematically" logic behind Unit 4's DNS delegation and Unit 4's routing, now pointed at a human problem instead of a protocol's own internal design.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Worked example: "the website won't load"</span>
+    Step 1: Wi-Fi icon shows connected — Link layer is fine. Step 2: <code>ping 8.8.8.8</code> succeeds — Internet layer and routing are fine. Step 3: <code>ping example.com</code> fails to resolve — the problem is isolated to DNS. The fix (switching to a different DNS resolver, or waiting out a temporary outage at the current one) is now obvious, because the layered checklist ruled out every other explanation along the way, instead of leaving "something's wrong with the internet" as the only available diagnosis.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What does a successful ping confirm?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Basic Internet-layer reachability — the target exists and the round-trip path currently works — plus the round-trip latency.</button>
+      <button class="quiz-choice" data-correct="false">That the destination's specific application (like a web server) is running correctly.</button>
+      <button class="quiz-choice" data-correct="false">That DNS resolution for a domain name is working.</button>
+      <button class="quiz-choice" data-correct="false">That a specific TCP port is open on the destination.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Ping only confirms Internet-layer reachability and round-trip time — it says nothing about DNS, ports, or the application itself.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. How does traceroute reveal each individual router along a path?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">It sends packets with increasing TTL values (1, 2, 3...), and each router that discards a TTL-expired packet sends back an identifying ICMP message.</button>
+      <button class="quiz-choice" data-correct="false">It asks a DNS server to list every router in the world.</button>
+      <button class="quiz-choice" data-correct="false">It requires physical access to each router along the path.</button>
+      <button class="quiz-choice" data-correct="false">Every router voluntarily broadcasts its identity constantly, whether or not traceroute is run.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Traceroute cleverly exploits TTL expiration (Lesson 11) to reveal one hop at a time.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why does working through the layers from bottom to top (Link, then Internet, then DNS, then Transport, then Application) make sense as a diagnostic order?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Each step rules out an entire layer's worth of possible causes before moving on, narrowing down a vague problem systematically instead of guessing.</button>
+      <button class="quiz-choice" data-correct="false">Higher layers must always be checked before lower layers can be tested at all.</button>
+      <button class="quiz-choice" data-correct="false">Only the Application layer can ever be the actual cause of a connection problem.</button>
+      <button class="quiz-choice" data-correct="false">The order doesn't actually matter for troubleshooting efficiency.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Systematically ruling out layers one at a time, from the bottom up, avoids wasted effort chasing the wrong explanation.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="icmp">
+    <p class="quiz-prompt">4. Fill in the blank: the lightweight Internet-layer protocol built specifically for diagnostics and error reporting, used by both ping and traceroute, is ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>ICMP carries the diagnostic messages both ping and traceroute rely on, rather than carrying application data.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Cloudflare's "<a href="https://www.cloudflare.com/learning/network-layer/what-is-traceroute/">What is Traceroute?</a>" walks through a real traceroute output hop by hop, worth comparing directly against the simulated widget above.</p>
+
+  <p class="ask-teacher">Want to run a real ping and traceroute against a site of your choosing, together, and read the output using this lesson's checklist? Ask your teacher — that's what I'm here for. That's the whole course: from "what is a network" to diagnosing one that's broken, using the same vocabulary the entire way through. The <a href="../course-exam.html">course exam</a> covers all eight units once every unit test is cleared.</p>
+
+  <footer class="lesson-footer">STEM+ · Computer Networking Fundamentals · Lesson 26 of the course sequence — final lesson</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  STEMPlus.mountTabs(document.getElementById('tr-widget'), 'data-tab', 'data-panel');
+});
+</script>

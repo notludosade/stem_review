@@ -1,0 +1,131 @@
+<meta charset="UTF-8">
+<title>Lesson 20: REST APIs — HTTP as an Interface Between Programs — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<script src="../../assets/interactive.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · Computer Networking Fundamentals · Unit 6 · Lesson 20</span>
+  <h1>REST APIs — HTTP as an Interface Between Programs</h1>
+  <p class="subtitle">Every lesson in this unit assumed a browser and a human on one end. Swap the browser for a program you wrote yourself, and HTTP becomes something else entirely: a general-purpose way for two programs to talk.</p>
+  <p class="nav-links"><a href="0019-https-and-tls-encrypting-the-conversation.html" class="nav-prev">← Lesson 19</a> <a href="../Unit%207/0021-sockets-the-programming-interface-to-the-network.html" class="nav-next">Unit 7, Lesson 21 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Nothing about HTTP requires the client to be a web browser or the response to be an HTML page for a human to read. A program you write can send a GET request just as easily as a browser can — and instead of getting back HTML, it's common to get back structured data a program can parse directly. This is what an <strong>API</strong> built on HTTP looks like, and it's the direct bridge from this unit's browser-and-webpage framing to Unit 7's "write your own networked program."</p>
+
+  <h2>APIs and REST</h2>
+  <div class="box">
+    <span class="box-label">Definitions</span>
+    An <strong>API</strong> (Application Programming Interface) is a defined way for one piece of software to interact with another. A <strong>REST API</strong> (Representational State Transfer) is an API built directly on top of standard HTTP, treating each URL as an <strong>endpoint</strong> representing a specific <strong>resource</strong> (a piece of data, like "a specific user" or "a list of orders"), and using HTTP's existing methods to act on that resource, rather than inventing a whole new protocol from scratch.
+  </div>
+
+  <div class="widget" id="rest-tabs">
+    <div class="widget-label">Try It — HTTP Methods as CRUD Operations</div>
+    <div class="fm-tabs">
+      <button class="fm-tab is-active" data-tab="get">GET</button>
+      <button class="fm-tab" data-tab="post">POST</button>
+      <button class="fm-tab" data-tab="put">PUT</button>
+      <button class="fm-tab" data-tab="delete">DELETE</button>
+    </div>
+    <div class="fm-panel" data-panel="get">
+      <p><strong>CRUD action:</strong> Read</p>
+      <pre class="code-block"><code>GET /users/42 HTTP/1.1
+Host: api.example.com</code></pre>
+      <p>Retrieves the current data for user 42, with no side effects — sending the same GET request a hundred times just returns the same data a hundred times.</p>
+    </div>
+    <div class="fm-panel" data-panel="post" hidden>
+      <p><strong>CRUD action:</strong> Create</p>
+      <pre class="code-block"><code>POST /users HTTP/1.1
+Host: api.example.com
+Content-Type: application/json
+
+{"name": "Amara", "email": "amara@example.com"}</code></pre>
+      <p>Creates a brand-new user resource, sent in the request body. Unlike GET, sending this same request twice creates two separate new users.</p>
+    </div>
+    <div class="fm-panel" data-panel="put" hidden>
+      <p><strong>CRUD action:</strong> Update</p>
+      <pre class="code-block"><code>PUT /users/42 HTTP/1.1
+Host: api.example.com
+Content-Type: application/json
+
+{"name": "Amara Okafor", "email": "amara@example.com"}</code></pre>
+      <p>Replaces user 42's existing data with the data in the request body — an update to a resource that already exists, addressed directly by its own URL.</p>
+    </div>
+    <div class="fm-panel" data-panel="delete" hidden>
+      <p><strong>CRUD action:</strong> Delete</p>
+      <pre class="code-block"><code>DELETE /users/42 HTTP/1.1
+Host: api.example.com</code></pre>
+      <p>Removes user 42's resource entirely. Like GET, no request body is needed — the URL alone identifies exactly what to delete.</p>
+    </div>
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why reusing HTTP's methods, instead of inventing new verbs</span>
+    A REST API could, in principle, define its own custom action names instead of reusing GET/POST/PUT/DELETE — but doing so would throw away everything HTTP already provides for free: every web browser, every programming language, every piece of network infrastructure already knows how to send these four methods, handle these status codes, and route this traffic. By mapping create/read/update/delete onto POST/GET/PUT/DELETE, a REST API gets to reuse the entire HTTP ecosystem — caching behavior, status codes (Lesson 18), and even HTTPS's encryption (Lesson 19) — instead of building any of that from scratch.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Worked example: a weather app calling an API</span>
+    A weather app on your phone sends <code>GET https://api.weather.example.com/forecast?city=Austin</code>. The server responds with status <code>200 OK</code>, a <code>Content-Type: application/json</code> header, and a body like <code>{"city": "Austin", "high": 91, "low": 74}</code> — structured data the app's code parses directly and displays as a forecast, with no HTML and no human ever looking at the raw response. Same request-response pattern as loading a web page (Lesson 17); the only difference is who's on the receiving end and what they do with the response.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What does a REST API build directly on top of?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Standard HTTP — its existing methods, status codes, and URL structure.</button>
+      <button class="quiz-choice" data-correct="false">A completely custom protocol unrelated to HTTP.</button>
+      <button class="quiz-choice" data-correct="false">UDP, for lower overhead.</button>
+      <button class="quiz-choice" data-correct="false">DNS records directly.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>REST reuses standard HTTP entirely, treating URLs as resources and HTTP methods as actions on them.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Which HTTP method typically corresponds to creating a brand-new resource?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">GET</button>
+      <button class="quiz-choice" data-correct="true">POST</button>
+      <button class="quiz-choice" data-correct="false">DELETE</button>
+      <button class="quiz-choice" data-correct="false">HEAD</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>POST is conventionally used to create a new resource, distinct from GET's read-only retrieval.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why do REST APIs reuse HTTP's existing methods (GET, POST, PUT, DELETE) instead of inventing entirely new custom actions?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Reusing HTTP means the API automatically benefits from everything already built to support it — browsers, languages, infrastructure, status codes, and HTTPS encryption — instead of having to build all of that from scratch.</button>
+      <button class="quiz-choice" data-correct="false">Custom action names are technically impossible to implement over a network.</button>
+      <button class="quiz-choice" data-correct="false">HTTP only supports exactly four possible actions in total, with no room for more.</button>
+      <button class="quiz-choice" data-correct="false">REST APIs cannot use HTTPS, so reusing plain HTTP methods is the only option.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Reusing HTTP's existing, universally supported machinery is far more practical than reinventing an equivalent from scratch.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="endpoint">
+    <p class="quiz-prompt">4. Fill in the blank: a specific URL in a REST API, representing one resource that can be acted on, is called an ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>An endpoint is the specific URL a REST API exposes for a given resource, like /users/42.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: MDN's "<a href="https://developer.mozilla.org/en-US/docs/Learn_web_development/Extensions/Client-side_APIs/Introduction">Introduction to Web APIs</a>" is a practical companion covering how client-side code actually calls an API like the one shown above.</p>
+
+  <p class="ask-teacher">Want to try calling a real, public API together and look at the JSON that comes back? Ask your teacher — that's what I'm here for. Unit 6 is complete. Next up: Unit 7 moves from using someone else's networked program to writing your own — starting with sockets, the actual programming interface underneath everything this course has covered so far.</p>
+
+  <footer class="lesson-footer">STEM+ · Computer Networking Fundamentals · Lesson 20 of the course sequence</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  STEMPlus.mountTabs(document.getElementById('rest-tabs'), 'data-tab', 'data-panel');
+});
+</script>

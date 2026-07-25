@@ -1,0 +1,106 @@
+<meta charset="UTF-8">
+<title>Lesson 18: Redundancy, Failover, and Designing for Failure — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · Cloud Computing A · Unit 6 · Lesson 18</span>
+  <h1>Redundancy, Failover, and Designing for Failure</h1>
+  <p class="subtitle">Every piece of hardware in every cloud provider's data center will eventually fail — a disk, a power supply, an entire building's cooling system. The goal was never to prevent that. It's to make sure no single failure takes the whole system down with it.</p>
+  <p class="nav-links"><a href="0017-understanding-a-cloud-bill.html" class="nav-prev">← Lesson 17</a> <a href="../Unit%207/0019-choosing-a-cloud-architecture-for-a-real-app.html" class="nav-next">Unit 7, Lesson 19 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Lesson 8 measured availability in fractions of a percent. This lesson is about the actual architectural technique that earns those numbers: never letting any one failure — a crashed server, a dead disk, an entire building losing power — be the thing standing between your application and staying online.</p>
+
+  <h2>Regions and availability zones</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    A cloud provider's global footprint is organized into <strong>regions</strong> (broad geographic areas, like "US East" or "Southeast Asia"), and each region contains multiple <strong>availability zones (AZs)</strong> — physically separate data center facilities within that region, each with its own independent power, cooling, and networking, but connected to each other by low-latency links. The physical separation matters: a fire, a power grid failure, or a cooling system malfunction in one AZ's building has no way to reach a different AZ's building.
+  </div>
+
+  <h2>Redundancy: never just one</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    <strong>Redundancy</strong> means running more than one independent copy of anything critical, so that one copy failing doesn't take down the whole system. This is a generalization of an idea already in this course: Lesson 8's durability came from storing multiple copies of data across separate hardware; Lesson 11's load balancer only works because there's more than one server behind it; Lesson 13's managed database failover depends on a standby copy existing in the first place.
+  </div>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    <strong>Failover</strong> is the automatic process of switching from a failed component to a healthy redundant one — with the emphasis on <em>automatic</em>. A failover process that requires a human to notice the outage and manually intervene is much slower, and much less reliable, than one a system performs on its own within seconds.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Worked example: surviving a whole availability zone going down</span>
+    An application deploys its web server fleet (Lesson 16's auto scaling group) across three separate availability zones instead of one, all behind a single load balancer (Lesson 11). If one entire AZ loses power, every server in it fails its health check simultaneously — and the load balancer, already built to route around any unhealthy server, simply stops sending traffic to that AZ and continues serving all users from the remaining two. Users experience, at most, a few seconds of elevated latency while the load balancer detects the failure — not an outage. Nothing about this required an engineer to be paged, let alone to intervene.
+  </div>
+
+  <h2>The mindset: no single point of failure</h2>
+  <div class="box why">
+    <span class="box-label">Why "design for failure" beats "try to prevent failure"</span>
+    At the scale a cloud provider operates, hardware failures aren't rare edge cases — they're a routine, expected, daily occurrence somewhere across a provider's global footprint. Trying to build a system that never experiences a single failed disk or server is not a realistic goal. The realistic goal is ensuring no <strong>single point of failure</strong> — no one component whose failure, alone, is capable of taking the whole system down — exists anywhere in the architecture. Every reliability technique in this course, from Lesson 8's storage durability through this lesson's multi-AZ redundancy, is really the same idea applied at a different layer: assume failure will happen, and make sure it's never fatal on its own.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What is the relationship between a region and an availability zone?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">A region is a broad geographic area containing multiple availability zones, each a physically separate data center facility with independent power and cooling.</button>
+      <button class="quiz-choice" data-correct="false">A region and an availability zone are exactly the same thing.</button>
+      <button class="quiz-choice" data-correct="false">An availability zone contains multiple entire regions.</button>
+      <button class="quiz-choice" data-correct="false">Availability zones share a single power and cooling system across an entire region.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A region is the broader area; AZs are the physically independent facilities within it that avoid sharing critical infrastructure.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why does physical separation between availability zones matter?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">A failure like a power outage or cooling malfunction in one AZ's building has no way to reach a different AZ's building.</button>
+      <button class="quiz-choice" data-correct="false">Physical separation has no real effect on reliability.</button>
+      <button class="quiz-choice" data-correct="false">Availability zones are actually located in the same building, just on different floors.</button>
+      <button class="quiz-choice" data-correct="false">Physical separation only matters for reducing network latency, not reliability.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Independent physical infrastructure is exactly what prevents one AZ's failure from cascading into another's.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why does automatic failover matter more than a failover process that requires manual intervention?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Automatic failover responds within seconds, while waiting for a human to notice and intervene is much slower and less reliable.</button>
+      <button class="quiz-choice" data-correct="false">Manual failover is always faster than automatic failover.</button>
+      <button class="quiz-choice" data-correct="false">Automatic failover eliminates the need for redundancy entirely.</button>
+      <button class="quiz-choice" data-correct="false">There is no meaningful difference in speed between the two approaches.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Speed and reliability are exactly why automatic failover is preferred — human response time is a real bottleneck.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="single point of failure|spof">
+    <p class="quiz-prompt">4. Fill in the blank: a single component whose failure alone is capable of taking down an entire system is called a ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Eliminating single points of failure, not preventing every possible failure, is the realistic goal of resilient design.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="redundancy">
+    <p class="quiz-prompt">5. Fill in the blank: running more than one independent copy of a critical component, so that one copy failing doesn't take down the whole system, is called ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Redundancy is the general principle behind storage durability, load balancing, and database failover alike.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: AWS's <a href="https://aws.amazon.com/about-aws/global-infrastructure/regions_az/">"Regions and Availability Zones"</a> page shows a real provider's physical global infrastructure layout underlying everything in this lesson.</p>
+
+  <p class="ask-teacher">Curious how many availability zones a real production application typically spans? Ask your teacher — that's what I'm here for. Next up: Unit 7 pulls every unit of this course together into one real architecture decision, starting with choosing an actual design for a real app.</p>
+
+  <footer class="lesson-footer">STEM+ · Cloud Computing A · Lesson 18 of the course sequence</footer>
+</div>

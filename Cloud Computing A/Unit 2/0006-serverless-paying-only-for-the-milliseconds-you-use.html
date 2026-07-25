@@ -1,0 +1,108 @@
+<meta charset="UTF-8">
+<title>Lesson 6: Serverless — Paying Only for the Milliseconds You Use — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · Cloud Computing A · Unit 2 · Lesson 6</span>
+  <h1>Serverless — Paying Only for the Milliseconds You Use</h1>
+  <p class="subtitle">A VM runs whether or not anyone's using it. A container is faster to start but still something you keep running. Serverless asks: what if nothing runs at all until the exact moment it's needed?</p>
+  <p class="nav-links"><a href="0005-containers-vs-virtual-machines.html" class="nav-prev">← Lesson 5</a> <a href="../Unit%203/0007-object-vs-block-vs-file-storage.html" class="nav-next">Unit 3, Lesson 7 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Every VM in Lesson 4 and every container in Lesson 5 shares one trait: once started, it keeps running — and costing money — whether or not it's doing anything useful at that exact second. A web server handling one request a minute still occupies its full VM or container the other 59 seconds. Serverless computing removes that idle time from the bill entirely, by removing the always-on server from the picture altogether.</p>
+
+  <h2>What "serverless" actually means (there are still servers)</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    <strong>Serverless computing</strong> — most concretely, <strong>Function as a Service (FaaS)</strong>, like AWS Lambda, Azure Functions, or Google Cloud Functions — lets a developer upload a single function's worth of code, without provisioning or managing any server, VM, or container themselves. The provider runs that code only when a triggering event happens (an API request, a file upload, a scheduled time), spins up just enough capacity to execute it, and then shuts it back down. There genuinely are servers running the code underneath — "serverless" describes the developer's experience of never having to think about them, not the actual absence of hardware.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Worked example</span>
+    A photo-sharing app needs to generate a thumbnail every time a user uploads a photo. As a serverless function, that resizing code sits completely dormant — and free — until an upload event triggers it. The provider spins up an execution environment, runs the function for the roughly 200 milliseconds it takes to resize the image, returns the result, and shuts the environment down. If uploads happen once a minute or a thousand times a second, the same code handles both cases automatically, and the bill is proportional to the actual milliseconds of execution — not to any server sitting idle between uploads.
+  </div>
+
+  <h2>Scale-to-zero and billing by the millisecond</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    <strong>Scale-to-zero</strong> means capacity drops all the way to nothing — and costs nothing — when there's no work to do, in contrast to a VM or container that keeps running (and billing) at some baseline even at zero traffic. Serverless billing follows directly from this: instead of paying per hour a machine exists, you pay per invocation plus the actual execution time consumed, typically metered in milliseconds.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why this is a fundamentally different economic bet, not just a smaller VM</span>
+    A workload that runs constantly at high, predictable volume is often <em>cheaper</em> on a VM or container you provision once and keep busy, because serverless's per-invocation pricing carries a premium for that on-demand convenience. But a workload that's spiky, unpredictable, or mostly idle — like the thumbnail generator, which might sit dormant for hours between uploads — is often dramatically cheaper serverless, because there's no idle VM burning money the other 23 hours and 59 minutes of the day it isn't needed. Choosing serverless is a bet about your workload's traffic shape, not a universal upgrade over Lessons 4 and 5.
+  </div>
+
+  <h2>The tradeoffs: cold starts and short-lived execution</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    A <strong>cold start</strong> is the delay — often a few hundred milliseconds to a few seconds — a serverless function incurs the first time it runs after being idle, while the provider spins up a fresh execution environment for it. A function invoked constantly stays "warm" and skips this delay; one invoked rarely pays it on nearly every call. Serverless functions are also typically limited to short maximum execution times (commonly minutes, not hours) and don't preserve memory or state between separate invocations, which makes them a poor fit for long-running processes or workloads that need to hold large amounts of data in memory across requests.
+  </div>
+
+  <p>These constraints are exactly why serverless doesn't replace VMs and containers outright — it's a third option, best suited to short, event-triggered, spiky workloads, sitting alongside the always-on flexibility of a VM and the lighter-weight-but-still-running nature of a container.</p>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What does "serverless" actually mean, given that servers are still physically involved?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">The developer never provisions or manages any server, VM, or container themselves — the provider handles it entirely behind the scenes.</button>
+      <button class="quiz-choice" data-correct="false">The code runs without using any physical hardware whatsoever.</button>
+      <button class="quiz-choice" data-correct="false">The application has no backend logic at all.</button>
+      <button class="quiz-choice" data-correct="false">The code can only run on the user's own device, not in the cloud.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Servers still run the code — "serverless" describes not having to manage them, not their literal absence.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. In the thumbnail-generator example, why is serverless likely cheaper than an always-on VM for this specific workload?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Serverless functions are always cheaper than VMs for every workload, with no exceptions.</button>
+      <button class="quiz-choice" data-correct="true">The workload is spiky and mostly idle, so scale-to-zero avoids paying for an idle VM sitting unused between uploads.</button>
+      <button class="quiz-choice" data-correct="false">Image resizing is technically impossible to run on a VM.</button>
+      <button class="quiz-choice" data-correct="false">Serverless functions do not require any billing at all.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Serverless's economic advantage is specific to idle, spiky workloads — not a universal rule.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why might a constantly busy, high-volume workload actually be cheaper on a provisioned VM than as a serverless function?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Serverless's per-invocation pricing carries a premium for on-demand convenience that a fully utilized, already-paid-for VM doesn't need to pay.</button>
+      <button class="quiz-choice" data-correct="false">VMs cannot run continuously for more than an hour at a time.</button>
+      <button class="quiz-choice" data-correct="false">Serverless functions are incapable of handling high request volumes.</button>
+      <button class="quiz-choice" data-correct="false">Cloud providers do not allow high-volume workloads to run serverless.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>At high, constant utilization, a VM you're already paying for around the clock can beat serverless's per-invocation premium.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="cold start">
+    <p class="quiz-prompt">4. Fill in the blank: the extra delay a serverless function experiences the first time it runs after being idle, while a fresh execution environment spins up, is called a ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A cold start is avoided only when a function has been invoked recently enough to still have a warm environment ready.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="scale-to-zero|scale to zero">
+    <p class="quiz-prompt">5. Fill in the blank: capacity (and cost) dropping all the way to nothing when there's no work to do, rather than maintaining some baseline like an idle VM, is called ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Scale-to-zero is the property that makes serverless billing proportional to actual usage rather than uptime.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: AWS's <a href="https://docs.aws.amazon.com/lambda/latest/dg/welcome.html">"What Is AWS Lambda?"</a> documentation page walks through the same event-trigger, scale-to-zero, per-millisecond-billing model this lesson describes, on the FaaS product that made the pattern mainstream.</p>
+
+  <p class="ask-teacher">Curious whether a specific app feature you use is probably built as a serverless function? Ask your teacher — that's what I'm here for. Next up: Unit 3 leaves compute behind and starts on storage — where all this application data actually lives when nothing is running.</p>
+
+  <footer class="lesson-footer">STEM+ · Cloud Computing A · Lesson 6 of the course sequence</footer>
+</div>

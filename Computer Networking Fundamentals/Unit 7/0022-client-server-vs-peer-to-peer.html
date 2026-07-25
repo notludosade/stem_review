@@ -1,0 +1,95 @@
+<meta charset="UTF-8">
+<title>Lesson 22: Client-Server vs. Peer-to-Peer — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · Computer Networking Fundamentals · Unit 7 · Lesson 22</span>
+  <h1>Client-Server vs. Peer-to-Peer</h1>
+  <p class="subtitle">Every example so far had one obvious client and one obvious server. That's a design choice, not a law of networking — and the alternative shows up more often than you'd expect.</p>
+  <p class="nav-links"><a href="0021-sockets-the-programming-interface-to-the-network.html" class="nav-prev">← Lesson 21</a> <a href="0023-a-minimal-client-server-exchange-traced-end-to-end.html" class="nav-next">Lesson 23 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Lesson 21's example had a clear asymmetry: one program called <code>listen()</code> and <code>accept()</code> and waited; the other called <code>connect()</code> and initiated. That asymmetry has a name — client-server — and it's been the assumed shape of nearly every example in this entire course. It's worth pausing to name it explicitly, and to meet the alternative model that doesn't share that asymmetry at all.</p>
+
+  <h2>The client-server model</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    In the <strong>client-server model</strong>, roles are fixed and asymmetric: a <strong>server</strong> runs continuously, listens for connections, and responds to requests; a <strong>client</strong> initiates connections and makes requests. A web server (Units 6) is a server in this exact sense — always running, always listening on port 80/443, waiting for browsers (clients) to connect. This is the model nearly every example in this course has quietly assumed, because it's also, by far, the most common real-world arrangement.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why client-server is the default choice</span>
+    Centralizing the server side has real practical advantages: one place to update the software, one place to enforce access rules, one place to keep data consistent and backed up, and a predictable address (that DNS name from Lesson 13) that never changes even as clients come and go constantly. The trade-off is equally real: the server becomes a single point that every client depends on — if it goes down, every client relying on it loses service simultaneously, and its owner bears the full cost of enough capacity to serve every client at once.
+  </div>
+
+  <h2>The peer-to-peer model</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    In the <strong>peer-to-peer model</strong> (P2P), there's no fixed client/server asymmetry — every participating device (a <strong>peer</strong>) can act as both a client and a server simultaneously, initiating connections to other peers while also accepting connections from them. File-sharing protocols are the classic example: instead of one central server storing an entire file and serving it to every downloader, peers who already have pieces of the file serve those pieces directly to other peers who don't, while simultaneously downloading pieces they're still missing from others.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Worked example: downloading the same file two ways</span>
+    Client-server: 10,000 people download a large file from one company's server. That server's single connection to the internet must supply the full file, potentially 10,000 separate times, and if that server goes offline, nobody can download it anymore, regardless of how many of the 10,000 people already have a full copy sitting on their own machine. Peer-to-peer: those same 10,000 people, once they've downloaded pieces of the file, start serving those pieces to each other directly — the "load" of distributing the file spreads out across many peers instead of concentrating on one server, and the file remains available as long as at least one peer with a complete copy is still online, even if the original source disappears entirely.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why P2P isn't simply "the better option"</span>
+    P2P trades away exactly the advantages client-server offered: there's no single place to guarantee data is accurate or up to date, no central authority enforcing who can access what, and coordinating "who has which piece of what" across potentially thousands of independent, unreliable peers is a genuinely harder engineering problem than a server just answering requests directly from its own data. P2P shines specifically when the goal is distributing the <em>same</em> content to many participants resiliently and cheaply; it's a poor fit for something like a bank's account balances, where a single, centrally controlled, always-consistent source of truth is exactly what you want.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What's the defining asymmetry of the client-server model?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">The server runs continuously and listens for connections; the client initiates connections and makes requests.</button>
+      <button class="quiz-choice" data-correct="false">The client and server always run on the exact same physical device.</button>
+      <button class="quiz-choice" data-correct="false">There's no asymmetry — the terms are interchangeable.</button>
+      <button class="quiz-choice" data-correct="false">The server always initiates every connection to a client.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The server listens and waits; the client connects and requests — a fixed, asymmetric relationship.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. What's the key structural difference in a peer-to-peer network, compared to client-server?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Every participating device can act as both a client and a server simultaneously, instead of the roles being fixed to two different types of devices.</button>
+      <button class="quiz-choice" data-correct="false">Peer-to-peer networks cannot use TCP or UDP sockets.</button>
+      <button class="quiz-choice" data-correct="false">Peer-to-peer requires exactly two devices total.</button>
+      <button class="quiz-choice" data-correct="false">Peer-to-peer networks have no addressing of any kind.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>P2P removes the fixed client/server asymmetry — every peer can initiate and accept connections.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why would a bank's account-balance system be a poor fit for a peer-to-peer design?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">It needs a single, centrally controlled, always-consistent source of truth — exactly what a client-server model provides and P2P's distributed, uncoordinated structure makes harder to guarantee.</button>
+      <button class="quiz-choice" data-correct="false">Peer-to-peer networks cannot transmit numeric data.</button>
+      <button class="quiz-choice" data-correct="false">Banks are legally required to use only UDP sockets.</button>
+      <button class="quiz-choice" data-correct="false">Client-server systems are always slower than peer-to-peer for any use case.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Centralized consistency and access control are exactly what client-server offers and P2P sacrifices.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="peer">
+    <p class="quiz-prompt">4. Fill in the blank: in a peer-to-peer network, each participating device that can act as both client and server is called a ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A peer plays both roles at once, unlike the fixed client/server split.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: Cloudflare's "<a href="https://www.cloudflare.com/learning/network-layer/what-is-p2p/">What Is Peer-to-Peer (P2P)?</a>" covers additional real-world P2P applications and their specific trade-offs beyond file sharing.</p>
+
+  <p class="ask-teacher">Curious whether a specific app you use is client-server or peer-to-peer under the hood? Ask your teacher — that's what I'm here for. Next up: back to client-server, one last time — tracing a complete minimal exchange between them, end to end, tying every layer this course has covered into one concrete example.</p>
+
+  <footer class="lesson-footer">STEM+ · Computer Networking Fundamentals · Lesson 22 of the course sequence</footer>
+</div>

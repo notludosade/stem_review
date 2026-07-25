@@ -1,0 +1,93 @@
+<meta charset="UTF-8">
+<title>Lesson 7: MAC Addresses and the Physical/Link Layer — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · Computer Networking Fundamentals · Unit 3 · Lesson 7</span>
+  <h1>MAC Addresses and the Physical/Link Layer</h1>
+  <p class="subtitle">Every networked device ships from the factory with an address burned into it before it ever joins a network. This lesson is what that address is for, and — just as importantly — what it isn't for.</p>
+  <p class="nav-links"><a href="../Unit%202/0006-encapsulation-how-one-message-becomes-many-envelopes.html" class="nav-prev">← Lesson 6</a> <a href="0008-ipv4-addresses-and-dotted-decimal-notation.html" class="nav-next">Lesson 8 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Lesson 5 named the Link layer's job: get bits across a single physical hop between two directly connected devices. To do that, the Link layer needs its own way to address devices — completely separate from the IP addresses Lessons 8 through 10 cover. This lesson is that Link-layer address, and why the internet needs two entirely different addressing systems instead of just one.</p>
+
+  <h2>What a MAC address is</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    A <strong>MAC address</strong> (Media Access Control address) is a 48-bit identifier, permanently assigned to a device's <strong>NIC</strong> (Network Interface Card — the physical hardware that lets a device join a network), typically written as six pairs of hexadecimal digits separated by colons, like <code>3C:5A:B4:1E:9D:07</code>. Every network-capable device — every laptop's Wi-Fi chip, every phone's Wi-Fi and cellular radio, every Ethernet port — has its own MAC address, assigned by its manufacturer and, in principle, globally unique.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Reading a MAC address</span>
+    <code>3C:5A:B4:1E:9D:07</code> — the first three pairs (<code>3C:5A:B4</code>) identify the manufacturer (an ID block assigned to that company); the last three pairs (<code>1E:9D:07</code>) are a serial number the manufacturer assigns within its own block, guaranteeing no two devices from that manufacturer share an address.
+  </div>
+
+  <h2>Why MAC addresses only matter for one hop at a time</h2>
+  <div class="box why">
+    <span class="box-label">Why a MAC address can't get a packet across the internet</span>
+    A MAC address only means something to devices on the <em>same</em> physical network segment — the same Wi-Fi network, the same office LAN. A router doesn't forward based on MAC addresses at all; when a packet crosses from one network to the next, its Link-layer header (with its MAC addresses) gets stripped off and replaced with a brand-new one for the next hop, addressed to the next physical device along the path — the router or switch on the other side of that particular link. Your laptop's MAC address is completely meaningless to a server on the other side of the world; the IP address in the layer above is what actually gets a packet there, across many hops, while a fresh MAC address gets re-assigned locally at every single hop along the way.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Worked example: MAC addresses changing hop by hop</span>
+    Your laptop sends a packet to a website. On the first hop (laptop to home router), the frame's destination MAC address is your home router's Wi-Fi MAC address. The router decapsulates that frame, looks at the IP packet inside, decides where to forward it next (toward your ISP), and builds a brand-new frame with a brand-new destination MAC address — this time addressed to the very next device on the path, not to the website. This repeats at every single hop. The IP addresses inside stay the same the whole trip; the MAC addresses in the outermost header get completely replaced at every hop.
+  </div>
+
+  <h2>Two address systems, two different jobs</h2>
+  <p>It's worth being explicit about the division of labor, because it's the single most common source of confusion for anyone new to networking: a <strong>MAC address</strong> identifies a device for the purposes of the very next physical hop only, and is essentially permanent, burned in at manufacture. An <strong>IP address</strong> (Lesson 8) identifies a device for the purposes of the entire end-to-end journey across possibly many networks, and — unlike a MAC address — can change depending on which network a device is currently connected to. Neither one is a substitute for the other; a packet's journey across the internet needs both working together, one hop-local and one end-to-end.</p>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. Where is a MAC address assigned, and how permanent is it?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">It's assigned by the manufacturer and burned into the device's NIC, essentially permanent.</button>
+      <button class="quiz-choice" data-correct="false">It's assigned by your ISP and changes every time you connect to a new network.</button>
+      <button class="quiz-choice" data-correct="false">It's chosen by the user the first time the device connects to Wi-Fi.</button>
+      <button class="quiz-choice" data-correct="false">It's randomly regenerated by the operating system every few minutes.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>MAC addresses are assigned by the manufacturer at production time, unlike IP addresses, which can change per network.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why can't a MAC address, on its own, get a packet across the entire internet?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">A MAC address only has meaning on the same physical network segment — it gets replaced with a new one at every hop along the way, unlike an IP address, which stays the same for the whole trip.</button>
+      <button class="quiz-choice" data-correct="false">MAC addresses are too short to represent every device on the internet.</button>
+      <button class="quiz-choice" data-correct="false">MAC addresses can only be used on wired connections, never Wi-Fi.</button>
+      <button class="quiz-choice" data-correct="false">MAC addresses are encrypted and cannot be read by routers.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A MAC address is meaningful only for the immediate next hop; the IP layer handles the full end-to-end journey.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. As a packet travels from your laptop to a distant server through several routers, what happens to the frame's destination MAC address at each hop?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">It's stripped off and replaced with a new MAC address for the next device along the path, at every single hop.</button>
+      <button class="quiz-choice" data-correct="false">It stays exactly the same, addressed to your laptop's own MAC address, for the entire trip.</button>
+      <button class="quiz-choice" data-correct="false">It's set to the destination server's MAC address from the very first hop.</button>
+      <button class="quiz-choice" data-correct="false">MAC addresses are removed entirely and never reappear until the final hop.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Each hop rebuilds the Link-layer frame with a fresh destination MAC address for that specific hop, while the IP addresses inside remain unchanged.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="mac address|mac">
+    <p class="quiz-prompt">4. Fill in the blank: a 48-bit identifier permanently assigned to a device's network hardware, meaningful only on its local network segment, is called a ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>MAC addresses handle the "one hop" problem; IP addresses handle the end-to-end problem across many hops.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: the IEEE Standards Association's public page on MAC address assignment (the same organization that hands out manufacturer ID blocks) shows how those first three address pairs get allocated to real companies.</p>
+
+  <p class="ask-teacher">Curious how to find your own device's MAC address, or what a "randomized MAC address" privacy setting on your phone actually changes? Ask your teacher — that's what I'm here for. Next up: the address system that actually gets a packet across the entire internet — IP addresses.</p>
+
+  <footer class="lesson-footer">STEM+ · Computer Networking Fundamentals · Lesson 7 of the course sequence</footer>
+</div>

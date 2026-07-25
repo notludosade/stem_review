@@ -1,0 +1,101 @@
+<meta charset="UTF-8">
+<title>Lesson 16: UDP — Fast, Unreliable, and Why That's Sometimes the Point — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · Computer Networking Fundamentals · Unit 5 · Lesson 16</span>
+  <h1>UDP — Fast, Unreliable, and Why That's Sometimes the Point</h1>
+  <p class="subtitle">TCP's reliability isn't free — it costs a handshake, sequence tracking, and retransmission delay. UDP skips all of it, and for some applications, that's exactly the correct trade.</p>
+  <p class="nav-links"><a href="0015-tcp-reliable-ordered-delivery-and-the-three-way-handshake.html" class="nav-prev">← Lesson 15</a> <a href="../Unit%206/0017-http-requests-and-responses.html" class="nav-next">Unit 6, Lesson 17 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p><strong>UDP</strong> (User Datagram Protocol) is the internet's other Transport-layer protocol, and it's built on an almost aggressively opposite philosophy from TCP: no handshake, no sequence numbers, no acknowledgments, no retransmission. A program using UDP just sends a chunk of data — called a <strong>datagram</strong> — addressed with a destination IP and port, and hopes it arrives. If it doesn't, UDP itself will never know or tell anyone.</p>
+
+  <h2>Connectionless, by design</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    UDP is <strong>connectionless</strong>: there's no setup process before sending data, no ongoing connection state tracked between the two sides, and no built-in mechanism to detect or recover from a lost datagram. Each datagram is sent completely independently — one datagram's loss has no effect on any other, because UDP never links them together the way TCP's sequence numbers do.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">A postcard analogy</span>
+    A TCP connection is like a phone call with a formal check-in ("Can you hear me?" "Yes, go ahead") before either side speaks, and both sides confirming receipt of everything said. A UDP datagram is like dropping a postcard in a mailbox: you write it, send it, and move on — no confirmation it arrived, no resending it if it gets lost, and each postcard is completely independent of any other postcard you've sent.
+  </div>
+
+  <h2>Why anyone would choose UDP over TCP's guarantees</h2>
+  <div class="box why">
+    <span class="box-label">Why "unreliable" is sometimes exactly what you want</span>
+    Consider a live video call. If one tiny fraction of a second of video data is lost, the right move is to skip it and keep playing the next frame in real time — a viewer barely notices a flicker. TCP's response to lost data is the opposite: pause, wait, retransmit, and deliver everything in perfect order — which for a live call means a noticeable freeze while old data is recovered, even though by the time it arrives it's already useless (nobody wants a half-second-old video frame delivered late; they want the current one, dropped frame or not). UDP's willingness to simply lose data and move on, instead of pausing to guarantee delivery, is a genuine feature for real-time applications where a late, perfectly-reliable packet is worse than a dropped one. Live video and voice calls, competitive online games, and DNS lookups (Lesson 13 — a single small, fast lookup where retrying at the application level is simpler and cheaper than TCP's full connection overhead) all commonly use UDP for exactly this reason.
+  </div>
+
+  <table>
+    <thead><tr><th></th><th>TCP</th><th>UDP</th></tr></thead>
+    <tbody>
+      <tr><td>Connection setup</td><td>Three-way handshake required</td><td>None — just send</td></tr>
+      <tr><td>Delivery guarantee</td><td>Reliable — lost data is retransmitted</td><td>None — lost data stays lost</td></tr>
+      <tr><td>Ordering</td><td>Guaranteed, via sequence numbers</td><td>Not guaranteed</td></tr>
+      <tr><td>Speed/overhead</td><td>Higher overhead, added latency from acknowledgments and retransmission</td><td>Minimal overhead, lower latency</td></tr>
+      <tr><td>Good fit for</td><td>Web pages, file transfer, email — anywhere missing data is unacceptable</td><td>Live video/voice, gaming, DNS — anywhere a late packet is worse than a lost one</td></tr>
+    </tbody>
+  </table>
+
+  <div class="box example">
+    <span class="box-label">Worked example: choosing between them</span>
+    Downloading a software update: TCP is the only reasonable choice, because a single corrupted or missing byte could make the whole program fail to run — reliability matters more than raw speed here. A live multiplayer game reporting a player's position 60 times per second: UDP is the better fit, because a single dropped position update is irrelevant once the 61st update arrives a fraction of a second later — waiting to retransmit an old, already-outdated position would only make the game feel laggier.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What does "connectionless" mean about UDP?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">There's no setup process before sending data and no ongoing connection state tracked — each datagram is sent independently.</button>
+      <button class="quiz-choice" data-correct="false">UDP cannot be used over the internet, only on local networks.</button>
+      <button class="quiz-choice" data-correct="false">UDP requires a longer handshake than TCP.</button>
+      <button class="quiz-choice" data-correct="false">UDP automatically retries every failed datagram.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>UDP skips connection setup entirely — there's no handshake and no persistent state between sender and receiver.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why might a live video call prefer UDP's "just drop it" behavior over TCP's guaranteed, in-order delivery?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">For real-time video, a late-but-complete packet is worse than a dropped one — by the time TCP finished retransmitting old data, it would already be too outdated to be useful.</button>
+      <button class="quiz-choice" data-correct="false">TCP is technically incapable of transmitting video data.</button>
+      <button class="quiz-choice" data-correct="false">UDP guarantees perfect video quality with no loss at all.</button>
+      <button class="quiz-choice" data-correct="false">Video calls never lose any data regardless of protocol.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Waiting for retransmission of outdated real-time data is worse than simply skipping the lost frame and moving on.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Downloading a critical software update, where a single corrupted byte could break the program, should use which protocol?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">TCP — the reliability guarantee (nothing missing, nothing corrupted) matters far more here than the extra overhead it costs.</button>
+      <button class="quiz-choice" data-correct="false">UDP — speed always matters more than reliability for any download.</button>
+      <button class="quiz-choice" data-correct="false">Neither protocol can be used for file downloads.</button>
+      <button class="quiz-choice" data-correct="false">It doesn't matter — TCP and UDP behave identically for file transfer.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Correctness matters far more than raw speed for a file where any missing or corrupted byte can break the whole thing.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="datagram">
+    <p class="quiz-prompt">4. Fill in the blank: a single, independently sent chunk of data in UDP, with no relationship tracked to any other chunk, is called a ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Each UDP datagram is sent and handled completely independently of any other, unlike TCP's sequenced, connected stream.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: Cloudflare's "<a href="https://www.cloudflare.com/learning/ddos/glossary/user-datagram-protocol-udp/">What is UDP?</a>" page includes real-world examples of UDP-based applications beyond the ones covered above, and contrasts them against TCP's guarantees directly.</p>
+
+  <p class="ask-teacher">Curious which protocol a specific app you use daily is actually built on? Ask your teacher — that's what I'm here for. Unit 5 is complete. Next up: Unit 6 moves up to the Application layer, where TCP most commonly gets put to work — starting with HTTP, the protocol underneath nearly every website.</p>
+
+  <footer class="lesson-footer">STEM+ · Computer Networking Fundamentals · Lesson 16 of the course sequence</footer>
+</div>

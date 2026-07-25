@@ -1,0 +1,98 @@
+<meta charset="UTF-8">
+<title>Lesson 10: IPv6 — Why We Needed More Addresses — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · Computer Networking Fundamentals · Unit 3 · Lesson 10</span>
+  <h1>IPv6 — Why We Needed More Addresses</h1>
+  <p class="subtitle">32 bits sounded like plenty of addresses in the 1980s. It wasn't, and the fix required starting over with a completely different-sized address rather than patching the old one.</p>
+  <p class="nav-links"><a href="0009-subnetting-and-cidr-notation.html" class="nav-prev">← Lesson 9</a> <a href="../Unit%204/0011-routers-switches-and-how-a-packet-finds-its-path.html" class="nav-next">Unit 4, Lesson 11 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Lesson 8 mentioned IPv4 has been around since the 1980s. It also has a hard ceiling: a 32-bit address can represent at most 2³² addresses — about 4.3 billion. That sounded effectively unlimited when IPv4 was designed, decades before phones, smart thermostats, and billions of new internet users existed. It isn't unlimited anymore, and this lesson is both why that ceiling became a real problem and the address system built to blow past it entirely.</p>
+
+  <h2>Address exhaustion</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    <strong>Address exhaustion</strong> is what happens when the pool of available IPv4 addresses to assign runs out. It's not a hypothetical — the major regional registries responsible for allocating new public IPv4 address blocks (like ARIN in North America and RIPE NCC in Europe) have already exhausted their main pools, forcing them to rely on smaller reclaimed blocks and increasingly aggressive address-sharing techniques (Lesson 12's NAT is one of the biggest reasons IPv4 has lasted as long as it has despite this).
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why 4.3 billion addresses wasn't actually enough</span>
+    4.3 billion sounds huge until you account for how addresses actually get consumed: every phone, laptop, smart TV, thermostat, and industrial sensor connected to the internet typically wants its own address (or at least a share of one via NAT); address blocks get allocated in large, sometimes inefficiently-sized chunks to organizations and countries, not doled out one at a time with perfect efficiency; and the number of connected devices has grown from a research-lab curiosity in the 1980s to tens of billions of devices worldwide today. NAT (Lesson 12) bought IPv4 a lot of extra runway by letting many private devices share one public address, but it's a workaround, not a permanent fix — it adds real complexity and breaks some kinds of direct device-to-device connections that a truly unique address for every device would support natively.
+  </div>
+
+  <h2>IPv6: the same idea, a vastly bigger address</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    <strong>IPv6</strong> (Internet Protocol version 6) is the successor address system, using 128-bit addresses instead of IPv4's 32 bits — a jump from about 4.3 billion possible addresses to roughly 340 undecillion (that's 3.4 × 10³⁸, a number so large it's effectively meant to never run out, even accounting for inefficient allocation). Rather than IPv4's four dotted-decimal octets, an IPv6 address is written as eight groups of four hexadecimal digits, separated by colons — like <code>2001:0db8:85a3:0000:0000:8a2e:0370:7334</code>. Each of those eight groups is sometimes called a <strong>hextet</strong> (16 bits each, mirroring what an octet is to IPv4).
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Shortening an IPv6 address</span>
+    IPv6 addresses are long enough that two shorthand rules are standard: leading zeros within a group can be dropped (<code>0db8</code> becomes <code>db8</code>), and exactly one run of consecutive all-zero groups can be replaced with a double colon <code>::</code> (used at most once per address, so it stays unambiguous). Applying both to the address above: <code>2001:0db8:85a3:0000:0000:8a2e:0370:7334</code> shortens to <code>2001:db8:85a3::8a2e:370:7334</code> — noticeably more compact, and the form you'll actually see in practice far more often than the fully written-out version.
+  </div>
+
+  <h2>Why IPv6 needed a bigger address, not just a bigger IPv4</h2>
+  <p>It's a fair question: why not just extend IPv4 from 32 bits to, say, 64 bits, instead of designing an entirely new protocol? The honest answer is that changing the address size at all breaks compatibility with every existing device and every piece of network hardware built around a fixed 32-bit address field — there's no way to patch the number of bits in an address without it being effectively a new protocol regardless. Given that a new protocol was unavoidable either way, IPv6's designers went big enough (128 bits) that address exhaustion realistically never becomes a problem again, rather than risking having to repeat the same overhaul a second time down the road.</p>
+
+  <div class="box why">
+    <span class="box-label">Why IPv4 hasn't simply disappeared yet</span>
+    IPv6 has existed as a standard since the late 1990s, but IPv4 still carries a large share of internet traffic today, because the two protocols aren't directly compatible — a pure-IPv4 device can't natively talk to a pure-IPv6 address — and upgrading the entire world's networking hardware and software simultaneously was never realistic. Most modern networks run both protocols side by side (called dual-stack), and the two only fully coexist through years of gradual, overlapping transition rather than a single cutover date.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. Roughly how many addresses can IPv4's 32-bit address space hold?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">About 4.3 billion</button>
+      <button class="quiz-choice" data-correct="false">About 340 undecillion</button>
+      <button class="quiz-choice" data-correct="false">Exactly 256</button>
+      <button class="quiz-choice" data-correct="false">An unlimited number</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>32 bits caps IPv4 at 2^32, roughly 4.3 billion addresses — 340 undecillion is IPv6's vastly larger 128-bit space.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why did 4.3 billion addresses turn out not to be enough?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">The number of connected devices grew enormously since the 1980s, and address blocks are often allocated in large, imperfectly efficient chunks rather than one at a time.</button>
+      <button class="quiz-choice" data-correct="false">IPv4 addresses expire and must be replaced every few years.</button>
+      <button class="quiz-choice" data-correct="false">Most IPv4 addresses were reserved exclusively for government use.</button>
+      <button class="quiz-choice" data-correct="false">4.3 billion was always known to be far too small even in the 1980s.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Explosive device growth plus imperfect allocation efficiency, not any single cause, drove address exhaustion.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why couldn't engineers just extend IPv4 to use more bits instead of designing an entirely new protocol (IPv6)?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Changing the address size at all breaks compatibility with existing hardware and software built around IPv4's fixed 32-bit field, making it effectively a new protocol regardless.</button>
+      <button class="quiz-choice" data-correct="false">It's technically impossible to represent more than 32 bits in any digital system.</button>
+      <button class="quiz-choice" data-correct="false">Extending IPv4 would have made every address exactly the same.</button>
+      <button class="quiz-choice" data-correct="false">128-bit numbers cannot be transmitted over a network.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Any change to the address size requires new, incompatible handling everywhere — so IPv6's designers went large enough to avoid needing to repeat the overhaul.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="hextet">
+    <p class="quiz-prompt">4. Fill in the blank: each of the eight 16-bit groups in an IPv6 address, separated by colons, is sometimes called a ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A hextet is IPv6's equivalent of IPv4's octet — a named chunk of the full address.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: the American Registry for Internet Numbers (ARIN) maintains a running public page on IPv4 exhaustion status, showing exactly how depleted the remaining pools are in real time.</p>
+
+  <p class="ask-teacher">Curious whether your own home network is currently using IPv4, IPv6, or both at once? Ask your teacher — that's what I'm here for. Unit 3 is complete. Next up: Unit 4 covers how a packet, address in hand, actually finds its way across every hop between source and destination — starting with routers and switches.</p>
+
+  <footer class="lesson-footer">STEM+ · Computer Networking Fundamentals · Lesson 10 of the course sequence</footer>
+</div>

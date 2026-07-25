@@ -1,0 +1,167 @@
+<meta charset="UTF-8">
+<title>Lesson 15: Identity and Access Management — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · Cloud Computing A · Unit 5 · Lesson 15</span>
+  <h1>Identity and Access Management</h1>
+  <p class="subtitle">Every managed service in this unit assumes one thing is already solved: the system knows exactly who's asking, and exactly what they're allowed to do. That system is IAM, and it's the single most consequential piece of "security in the cloud" from Lesson 2.</p>
+  <p class="nav-links"><a href="0014-managed-queues-and-messaging.html" class="nav-prev">← Lesson 14</a> <a href="../Unit%206/0016-elasticity-scaling-up-and-down-with-demand.html" class="nav-next">Unit 6, Lesson 16 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Lesson 2 drew a line: the provider secures the cloud, the customer secures what they build in it. Nowhere is that customer-side responsibility more consequential than access control — deciding exactly who, or what, is allowed to touch each of the compute, storage, and managed service resources this course has covered. Get this wrong, and every other lesson's careful architecture is one leaked credential away from a very bad day.</p>
+
+  <h2>What IAM actually manages</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    <strong>Identity and Access Management (IAM)</strong> is a system for defining <strong>identities</strong> (a specific human user, or a non-human identity like an application or service) and <strong>permissions</strong> (exactly which actions that identity is allowed to take on which resources), and enforcing that rule set on every single request, automatically. A request to delete a storage bucket, deploy new code, or read a database isn't just "does this credential work" — it's checked against IAM's rules for whether this specific identity is allowed to do this specific action on this specific resource, every time.
+  </div>
+
+  <h2>Roles and policies: bundling permissions sensibly</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    A <strong>policy</strong> is the actual rule set defining which actions are allowed or denied. A <strong>role</strong> is a named bundle of policies assigned to an identity — instead of granting permissions one at a time to every individual user, an administrator defines roles like "Developer" or "Billing Viewer" once, each with an appropriate bundle of permissions, and then assigns identities to whichever role fits their job.
+  </div>
+
+  <h2>Try it: what can each role actually do?</h2>
+  <p>Pick a role below, then try each action against it. Notice that a role's permissions are fixed in advance — nothing about clicking the button itself changes what's allowed.</p>
+
+  <div class="widget" id="iam-widget">
+    <p class="widget-label">Interactive: role-based access in action</p>
+    <div class="fm-tabs" id="iam-role-tabs">
+      <button class="fm-tab is-active" type="button" data-iam-role="admin">Admin</button>
+      <button class="fm-tab" type="button" data-iam-role="developer">Developer</button>
+      <button class="fm-tab" type="button" data-iam-role="readonly">Read-Only Analyst</button>
+      <button class="fm-tab" type="button" data-iam-role="billing">Billing Viewer</button>
+    </div>
+    <div class="fm-row" style="flex-wrap:wrap; gap:0.6rem; margin-top:0.8rem;">
+      <button class="widget-btn" type="button" data-iam-action="read">Read Data</button>
+      <button class="widget-btn" type="button" data-iam-action="write">Write Data</button>
+      <button class="widget-btn" type="button" data-iam-action="delete">Delete Resource</button>
+      <button class="widget-btn" type="button" data-iam-action="deploy">Deploy Code</button>
+      <button class="widget-btn" type="button" data-iam-action="billing">View Billing</button>
+      <button class="widget-btn" type="button" data-iam-action="policy">Modify IAM Policies</button>
+    </div>
+    <p class="verdict" data-iam-verdict>Pick a role, then try an action.</p>
+    <p class="plot-hint">A stolen credential can only do what its role was ever allowed to do — that's the whole point of the next section.</p>
+  </div>
+
+  <h2>The principle of least privilege</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    The <strong>principle of least privilege</strong> means granting every identity only the minimum permissions it actually needs to do its job, and nothing more. A "Read-Only Analyst" role that genuinely cannot delete anything, deploy code, or view billing isn't being overly cautious for no reason — it's a deliberate limit on how much damage a single mistake, or a single stolen credential, can possibly cause.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why IAM misconfiguration is the most common real-world cloud breach</span>
+    Lesson 2's worked example — a database left open with no password — is a shared responsibility failure, but the deeper, more common version of that same mistake is an IAM policy granting far more access than a role actually needs: a marketing analytics tool with permission to delete production databases, or every employee's laptop holding admin-level credentials "just in case." When (not if) a credential eventually leaks — through a phishing email, a misplaced API key, or a compromised laptop — least privilege is what limits the blast radius to whatever that one over-permissioned identity could reach, instead of the entire cloud account.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What does IAM check on every single request, not just once at login?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Whether the specific identity making the request is allowed to take that specific action on that specific resource.</button>
+      <button class="quiz-choice" data-correct="false">Only whether the user's password is spelled correctly.</button>
+      <button class="quiz-choice" data-correct="false">Only whether the request came from a human, never a service.</button>
+      <button class="quiz-choice" data-correct="false">Only how much the request will cost to process.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>IAM evaluates identity, action, and resource together on every request, not just credentials at login.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. What is the relationship between a role and a policy?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">A role is a named bundle of policies assigned to an identity; a policy is the actual rule set defining what's allowed or denied.</button>
+      <button class="quiz-choice" data-correct="false">A role and a policy are exactly the same thing with two different names.</button>
+      <button class="quiz-choice" data-correct="false">A policy is assigned only to roles named "Admin."</button>
+      <button class="quiz-choice" data-correct="false">A role defines billing costs, while a policy defines compute capacity.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Roles bundle policies together so permissions can be assigned by job function instead of one at a time.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why does the principle of least privilege reduce the damage from a single stolen credential?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">The stolen credential can only do whatever its role was ever allowed to do, limiting the blast radius instead of exposing the entire account.</button>
+      <button class="quiz-choice" data-correct="false">It prevents credentials from ever being stolen in the first place.</button>
+      <button class="quiz-choice" data-correct="false">It automatically changes every employee's password daily.</button>
+      <button class="quiz-choice" data-correct="false">It has no effect on stolen credentials, only on IAM's cost.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Least privilege doesn't prevent theft — it limits what a stolen credential can actually do once compromised.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="iam|identity and access management">
+    <p class="quiz-prompt">4. Fill in the blank: the system for defining identities and permissions, and enforcing them on every resource request, is called ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Identity and Access Management (IAM) governs who can do what to which resource.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="least privilege|principle of least privilege">
+    <p class="quiz-prompt">5. Fill in the blank: the principle of granting every identity only the minimum permissions it actually needs, and nothing more, is called the principle of ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Least privilege limits how much damage any single mistake or compromised credential can cause.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: AWS's <a href="https://docs.aws.amazon.com/IAM/latest/UserGuide/introduction.html">"What Is IAM?"</a> documentation covers identities, roles, and policies on the service that popularized this exact model.</p>
+
+  <p class="ask-teacher">Curious how a role gets assigned to a non-human identity, like a piece of application code itself? Ask your teacher — that's what I'm here for. Next up: Unit 6 turns from "who's allowed to do what" to "how big should all of this be" — starting with scaling a fleet automatically as demand changes.</p>
+
+  <footer class="lesson-footer">STEM+ · Cloud Computing A · Lesson 15 of the course sequence</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var permissions = {
+    admin:    { read: true, write: true, delete: true, deploy: true, billing: true, policy: true },
+    developer:{ read: true, write: true, delete: false, deploy: true, billing: false, policy: false },
+    readonly: { read: true, write: false, delete: false, deploy: false, billing: false, policy: false },
+    billing:  { read: false, write: false, delete: false, deploy: false, billing: true, policy: false }
+  };
+  var actionLabels = {
+    read: 'Read Data', write: 'Write Data', delete: 'Delete Resource',
+    deploy: 'Deploy Code', billing: 'View Billing', policy: 'Modify IAM Policies'
+  };
+  var roleLabels = {
+    admin: 'Admin', developer: 'Developer', readonly: 'Read-Only Analyst', billing: 'Billing Viewer'
+  };
+
+  var currentRole = 'admin';
+  var tabs = document.querySelectorAll('#iam-role-tabs [data-iam-role]');
+  var actionButtons = document.querySelectorAll('#iam-widget [data-iam-action]');
+  var verdict = document.querySelector('#iam-widget [data-iam-verdict]');
+
+  tabs.forEach(function (tab) {
+    tab.addEventListener('click', function () {
+      tabs.forEach(function (t) { t.classList.remove('is-active'); });
+      tab.classList.add('is-active');
+      currentRole = tab.getAttribute('data-iam-role');
+      verdict.textContent = roleLabels[currentRole] + ' selected. Try an action.';
+      verdict.classList.remove('is-pass', 'is-fail');
+    });
+  });
+
+  actionButtons.forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var action = btn.getAttribute('data-iam-action');
+      var allowed = permissions[currentRole][action];
+      verdict.classList.remove('is-pass', 'is-fail');
+      verdict.classList.add(allowed ? 'is-pass' : 'is-fail');
+      verdict.textContent = roleLabels[currentRole] + ' → ' + actionLabels[action] + ': ' + (allowed ? 'Allowed' : 'Denied');
+    });
+  });
+});
+</script>

@@ -1,0 +1,87 @@
+<meta charset="UTF-8">
+<title>Lesson 12: NAT — Sharing One Public Address — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · Computer Networking Fundamentals · Unit 4 · Lesson 12</span>
+  <h1>NAT — Sharing One Public Address</h1>
+  <p class="subtitle">Your laptop, phone, smart TV, and thermostat all have their own private IP address — and every one of them shares exactly one public IP address with the outside world. Here's the trick that makes that work.</p>
+  <p class="nav-links"><a href="0011-routers-switches-and-how-a-packet-finds-its-path.html" class="nav-prev">← Lesson 11</a> <a href="0013-dns-turning-names-into-addresses.html" class="nav-next">Lesson 13 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Lesson 8 introduced private IP addresses and noted they're never routed on the public internet. That raises an obvious question: if your laptop's actual address (say, <code>192.168.1.14</code>) can't be used on the public internet, how does it ever successfully talk to a public web server at all? The answer is a piece of infrastructure sitting quietly in nearly every home router, translating addresses on the fly.</p>
+
+  <h2>What NAT does</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    <strong>NAT</strong> (Network Address Translation) is a technique, almost always performed by a router at the edge of a private network, that rewrites the private source IP address (and typically the source port too) of outgoing packets to the router's single public IP address before sending them onward — and rewrites the reverse for any response that comes back, sending it to the correct private device inside the network. From the outside internet's perspective, every device behind that router appears to share one single public IP address, because as far as any external server can tell, that's exactly what's happening.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Worked example: a request leaving a home network</span>
+    Your laptop (private address <code>192.168.1.14</code>) sends a request to a web server. It leaves your laptop addressed from <code>192.168.1.14</code>, arrives at your home router, and the router's NAT rewrites the source address to its own public address (say, <code>203.0.113.9</code>) before forwarding it onward — also noting, in an internal translation table, that this particular connection belongs to <code>192.168.1.14</code>. The web server only ever sees <code>203.0.113.9</code> as the sender and replies to that address. When the reply arrives back at your home router, NAT checks its translation table, sees the reply belongs to the connection originally from <code>192.168.1.14</code>, and rewrites the destination address back to your laptop's private address before delivering it — all without your laptop or the web server ever being aware translation happened at all.
+  </div>
+
+  <h2>How NAT tells devices apart with only one public address</h2>
+  <p>A household might have a dozen devices making internet requests simultaneously, but only one public IP address to share among them. NAT's translation table doesn't just track IP addresses — it tracks the combination of address <em>and port number</em> (Lesson 14 covers ports in full) for every active connection, so it can distinguish "this reply belongs to the laptop's web browser" from "this reply belongs to the phone's video call" even though both are sharing the exact same public IP address at the exact same moment.</p>
+
+  <div class="box why">
+    <span class="box-label">Why NAT mattered so much for IPv4's survival</span>
+    Lesson 10 covered IPv4's address exhaustion problem directly: only about 4.3 billion addresses exist, but far more than 4.3 billion devices are connected to the internet today. NAT is the single biggest reason that gap hasn't already broken the internet — an entire household, office, or even a whole country's mobile carrier network can operate behind relatively few public addresses, with NAT translating for potentially thousands of private devices simultaneously. It's a genuinely clever workaround, but it is a workaround: NAT adds real translation overhead, complicates some kinds of direct device-to-device connections (a topic Lesson 22 touches on), and doesn't actually create any new address space — it just lets existing addresses be shared more efficiently. IPv6's vastly larger address space (Lesson 10) is the actual long-term fix; NAT bought IPv4 time, not permanence.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What does NAT actually do to an outgoing packet?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">It rewrites the packet's private source address (and typically port) to the router's public address before sending it onward, tracking the swap so replies can be routed back correctly.</button>
+      <button class="quiz-choice" data-correct="false">It encrypts the packet's contents so outside observers can't read it.</button>
+      <button class="quiz-choice" data-correct="false">It deletes the packet's destination address entirely.</button>
+      <button class="quiz-choice" data-correct="false">It converts the packet from IPv4 to IPv6.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>NAT swaps the source address (and usually port) on the way out, and reverses that swap for the matching reply on the way back in.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. A dozen devices on a home network are all sharing one public IP address through NAT. How does the router know which internal device a given reply belongs to?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Its translation table tracks address-and-port combinations for each active connection, distinguishing replies for different devices even though they share the same public IP address.</button>
+      <button class="quiz-choice" data-correct="false">It sends every incoming reply to every device on the network at once.</button>
+      <button class="quiz-choice" data-correct="false">Only one device on a home network can use the internet at a time under NAT.</button>
+      <button class="quiz-choice" data-correct="false">It guesses randomly, and each device discards replies that aren't for it.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Tracking address-port pairs is what lets NAT correctly distinguish many simultaneous connections sharing one public address.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why is NAT described as a workaround rather than a permanent fix for IPv4 address exhaustion?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">NAT lets existing addresses be shared more efficiently, but it doesn't create any new address space, adds translation overhead, and complicates some direct device-to-device connections.</button>
+      <button class="quiz-choice" data-correct="false">NAT actually increases the total number of available IPv4 addresses.</button>
+      <button class="quiz-choice" data-correct="false">NAT only works for IPv6 networks, not IPv4.</button>
+      <button class="quiz-choice" data-correct="false">NAT was deprecated and is no longer used on any modern network.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>NAT is a genuinely useful sharing mechanism, but it doesn't solve address exhaustion at the root — IPv6's larger address space does.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="nat|network address translation">
+    <p class="quiz-prompt">4. Fill in the blank: the technique that rewrites a private device's address to a router's shared public address for outgoing traffic, and reverses it for replies, is called ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>NAT is what lets an entire private network share a single public IP address transparently.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: Cloudflare's "<a href="https://www.cloudflare.com/learning/network-layer/what-is-nat/">What Is NAT?</a>" includes its own step-by-step diagram of a translated request and reply, useful for double-checking the worked example above against a second explanation.</p>
+
+  <p class="ask-teacher">Curious how to find both your device's private address and your network's public address, and see NAT's translation in action? Ask your teacher — that's what I'm here for. Next up: addresses are only useful if you can remember them — DNS, the system that turns human-friendly names into the IP addresses this unit has been all about.</p>
+
+  <footer class="lesson-footer">STEM+ · Computer Networking Fundamentals · Lesson 12 of the course sequence</footer>
+</div>

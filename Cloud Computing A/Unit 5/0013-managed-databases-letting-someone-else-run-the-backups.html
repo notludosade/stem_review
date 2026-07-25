@@ -1,0 +1,99 @@
+<meta charset="UTF-8">
+<title>Lesson 13: Managed Databases — Letting Someone Else Run the Backups — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · Cloud Computing A · Unit 5 · Lesson 13</span>
+  <h1>Managed Databases — Letting Someone Else Run the Backups</h1>
+  <p class="subtitle">You could install a database on a VM yourself and manage every part of it. Almost nobody chooses to anymore — and this unit is about why "managed" versions of common software became the default.</p>
+  <p class="nav-links"><a href="../Unit%204/0012-cdns-caching-content-close-to-the-user.html" class="nav-prev">← Unit 4, Lesson 12</a> <a href="0014-managed-queues-and-messaging.html" class="nav-next">Lesson 14 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Nothing in Units 2 through 4 stops you from renting a plain VM (Lesson 4), installing a database engine on it yourself, and managing it exactly the way you would on-prem. Plenty of teams do. But a database has an unusually long list of ongoing chores — patching, backups, replication, failover — and most of that list has nothing to do with the actual business problem a team is trying to solve. Managed services exist to take that list away.</p>
+
+  <h2>What a managed database actually changes</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    A <strong>managed database</strong> (sometimes called Database as a Service, or DBaaS — Amazon RDS, Google Cloud SQL, Azure Database are examples) is a database engine the provider installs, patches, backs up, and monitors on your behalf, on infrastructure you never directly touch. You still design your schema, write your queries, and tune performance — the database itself works exactly like the one you'd run yourself — but the operational upkeep around it is the provider's job, not yours.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Worked example: self-managed vs. managed, side by side</span>
+    Running a database on a self-managed VM means personally scheduling nightly backups (and testing that they actually restore correctly), watching for the database engine's next security patch and applying it without breaking anything in production, and building your own failover plan for when the VM crashes at 3 a.m. Running the same database as a managed service means the provider takes automatic backups on a schedule you configure, applies patches during a maintenance window you choose, and — depending on the tier — automatically fails over to a standby copy if the primary crashes, often within seconds, with no engineer paged at all.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why this is the shared responsibility model, applied to one specific piece of software</span>
+    This is the exact same line Lesson 2 drew for IaaS vs. PaaS vs. SaaS, just applied to a database specifically instead of the whole stack. A self-managed database on a VM is closer to IaaS: you own everything above the hypervisor, including the database engine's patches and backups. A managed database moves the operating system, the database engine's installation, and its operational upkeep onto the provider's side of the line — much closer to PaaS — while your schema design, queries, and data remain entirely yours, the same way they would under any service model.
+  </div>
+
+  <div class="box">
+    <span class="box-label">The tradeoff, honestly stated</span>
+    A managed database is usually more expensive per hour than the equivalent raw VM, and it takes away some low-level control — you typically can't SSH into the machine running it, install arbitrary extensions, or tune every obscure configuration flag. For most teams, the operational time saved is worth the premium and the reduced control. For a small number of highly specialized, unusual, or extremely cost-sensitive workloads, self-managing is still the right call — this is a real tradeoff, not a strictly dominant choice.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What does a managed database service take over, compared to running a database yourself on a VM?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Installation, patching, backups, and monitoring of the database engine itself.</button>
+      <button class="quiz-choice" data-correct="false">Designing the database schema and writing every query.</button>
+      <button class="quiz-choice" data-correct="false">Every part of the application's business logic.</button>
+      <button class="quiz-choice" data-correct="false">Nothing — a managed database is functionally identical to a self-managed one in every way.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Schema design and query writing remain the customer's job; operational upkeep of the engine moves to the provider.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. How does the managed database concept relate to Lesson 2's IaaS/PaaS/SaaS shared responsibility spectrum?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">A managed database shifts a self-managed VM database's responsibility (closer to IaaS) toward the provider handling the OS and engine (closer to PaaS), for that one piece of software.</button>
+      <button class="quiz-choice" data-correct="false">Managed databases have nothing to do with the shared responsibility model.</button>
+      <button class="quiz-choice" data-correct="false">A managed database is always classified as SaaS, with no customer responsibility remaining at all.</button>
+      <button class="quiz-choice" data-correct="false">The shared responsibility model only applies to compute, never to databases.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The same responsibility-shifting logic from Lesson 2 applies here, scoped down to one specific piece of software.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. What is a genuine tradeoff a team gives up by choosing a managed database over a self-managed one?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Lower-level control, such as SSH access to the underlying machine or tuning obscure configuration flags, usually for a higher hourly cost.</button>
+      <button class="quiz-choice" data-correct="false">The ability to write any queries against their own data.</button>
+      <button class="quiz-choice" data-correct="false">Nothing — managed databases have no real tradeoffs compared to self-managed ones.</button>
+      <button class="quiz-choice" data-correct="false">The ability to design their own database schema.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Reduced low-level control and a cost premium are the honest tradeoffs — schema and query control stay with the customer either way.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="managed database|dbaas|database as a service">
+    <p class="quiz-prompt">4. Fill in the blank: a database engine the provider installs, patches, backs up, and monitors on the customer's behalf is called a ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A managed database (DBaaS) handles operational upkeep automatically, while the customer keeps control of schema and queries.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="failover">
+    <p class="quiz-prompt">5. Fill in the blank: a managed database automatically switching to a standby copy when the primary crashes, often within seconds and with no engineer paged, is called automatic ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Automatic failover is one of the operational tasks a managed database service takes on for the customer.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: AWS's <a href="https://docs.aws.amazon.com/rds/">Amazon RDS documentation</a> describes exactly this automated backup, patching, and failover model on a real, widely used managed database product.</p>
+
+  <p class="ask-teacher">Curious whether a specific app you use runs on a managed or self-managed database? Ask your teacher — that's what I'm here for. Next up: applying this same "let the provider run it" idea to the messages passing between different parts of an application.</p>
+
+  <footer class="lesson-footer">STEM+ · Cloud Computing A · Lesson 13 of the course sequence</footer>
+</div>

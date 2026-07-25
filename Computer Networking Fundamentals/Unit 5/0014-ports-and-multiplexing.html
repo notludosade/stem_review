@@ -1,0 +1,113 @@
+<meta charset="UTF-8">
+<title>Lesson 14: Ports and Multiplexing — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · Computer Networking Fundamentals · Unit 5 · Lesson 14</span>
+  <h1>Ports and Multiplexing</h1>
+  <p class="subtitle">An IP address gets data to the right computer. It says nothing about which of the dozens of programs running on that computer should actually receive it — that's a separate address, one layer up.</p>
+  <p class="nav-links"><a href="../Unit%204/0013-dns-turning-names-into-addresses.html" class="nav-prev">← Lesson 13</a> <a href="0015-tcp-reliable-ordered-delivery-and-the-three-way-handshake.html" class="nav-next">Lesson 15 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Right now, your computer is probably running a browser with several tabs open, a video call, a background sync tool, and an email client — all sending and receiving data over the internet, at the same time, over the same single network connection and the same single IP address. Unit 3's addresses can't distinguish between any of these; they only get data to the right <em>device</em>. This lesson is the piece that finishes the job: getting data to the right <em>program</em>.</p>
+
+  <h2>Ports</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    A <strong>port</strong> is a 16-bit number (0 to 65,535) that identifies a specific program or service on a device, used alongside an IP address to fully address a network conversation. Every Transport-layer connection is really identified by the combination of an IP address <em>and</em> a port number together — the IP address says which device, and the port says which program on that device.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">An apartment building analogy</span>
+    An IP address is like a building's street address — it gets mail to the correct building, but says nothing about which apartment inside. A port number is the apartment number: the same street address serves many different apartments, each receiving only the mail addressed specifically to it. A letter addressed to "123 Main St." with no apartment number would leave the building's front desk with no idea which resident it's for — exactly the problem a port number solves for network traffic arriving at one IP address serving many different programs.
+  </div>
+
+  <h2>Multiplexing: many conversations, one connection</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    <strong>Multiplexing</strong> is the process of combining multiple separate conversations onto one shared connection (or, in this context, one shared IP address), and <strong>demultiplexing</strong> is sorting an incoming stream of traffic back out to the correct individual program based on its port number. Your device's Transport layer demultiplexes every arriving segment by looking at its destination port and handing it to whichever program is listening on that specific port.
+  </div>
+
+  <h2>Well-known ports</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    <strong>Well-known ports</strong> are a reserved range (0-1023) of port numbers assigned by convention to specific, common services, so that a client doesn't need to be told in advance which port to connect to for a standard service. A web browser, for example, always tries port 80 for plain HTTP and port 443 for HTTPS (Lesson 19) by default, without a human ever needing to specify it.
+  </div>
+
+  <table>
+    <thead><tr><th>Port</th><th>Service</th></tr></thead>
+    <tbody>
+      <tr><td>20/21</td><td>FTP (file transfer)</td></tr>
+      <tr><td>22</td><td>SSH (secure remote login)</td></tr>
+      <tr><td>25</td><td>SMTP (sending email)</td></tr>
+      <tr><td>53</td><td>DNS (Lesson 13)</td></tr>
+      <tr><td>80</td><td>HTTP (Unit 6)</td></tr>
+      <tr><td>443</td><td>HTTPS (Lesson 19)</td></tr>
+    </tbody>
+  </table>
+
+  <div class="box why">
+    <span class="box-label">Why well-known ports matter for interoperability</span>
+    Imagine every web server picked a random port number for HTTP. Every browser would need to somehow discover the right port before it could even ask for a web page — an extra lookup step for literally every connection, for every website, every time. By convention, "web servers listen on port 80 (or 443 for HTTPS)" is simply assumed by every browser and every web server in existence, eliminating that discovery step entirely. This is exactly the same kind of pre-agreed rule Lesson 1 described as the essence of a protocol — just applied to "which door to knock on" instead of "how to format the message."
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Worked example: three simultaneous connections, one IP address</span>
+    Your laptop (IP address <code>203.0.113.9</code>, after NAT) has a browser tab open to a website (using local port 51772, connecting to the server's port 443), a video call running (local port 54210), and an email client checking for new mail (local port 58901). All three share the exact same IP address. When a reply arrives at your laptop, the Transport layer looks at which local port the reply is addressed to and hands it to the correct program — the browser never sees the video call's traffic, and vice versa, even though all three shared the same underlying IP address the entire time.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What does a port number identify, on top of what an IP address already identifies?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">The specific program or service on a device, letting many programs share the same IP address without their traffic getting mixed up.</button>
+      <button class="quiz-choice" data-correct="false">A separate physical network the device is connected to.</button>
+      <button class="quiz-choice" data-correct="false">The manufacturer of the device's network hardware.</button>
+      <button class="quiz-choice" data-correct="false">The exact geographic location of the device.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>An IP address identifies the device; a port number identifies which program on that device the data belongs to.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. In the apartment building analogy, what does the port number represent?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">The apartment number — distinguishing individual residents within one building (device) sharing a single street address (IP address).</button>
+      <button class="quiz-choice" data-correct="false">The street address itself.</button>
+      <button class="quiz-choice" data-correct="false">The building's owner.</button>
+      <button class="quiz-choice" data-correct="false">The city the building is located in.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>IP address = street address (the building); port number = apartment number (the specific resident within it).</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why do web browsers not need to be told which port to connect to for a standard website?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Well-known ports assign HTTP to port 80 and HTTPS to port 443 by convention, so every browser and server assume the same default without any discovery step.</button>
+      <button class="quiz-choice" data-correct="false">Browsers try every possible port number until one responds.</button>
+      <button class="quiz-choice" data-correct="false">Port numbers are optional and can be safely ignored for web traffic.</button>
+      <button class="quiz-choice" data-correct="false">DNS automatically supplies the correct port for every request.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Well-known ports are a pre-agreed convention that eliminates the need for a separate port-discovery step.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="port">
+    <p class="quiz-prompt">4. Fill in the blank: a 16-bit number identifying a specific program on a device, used alongside an IP address, is called a ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A port lets multiple programs on the same device share one IP address without their traffic getting mixed up.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: the IANA (Internet Assigned Numbers Authority) maintains the full, official registry of well-known and registered port numbers, straight from the organization responsible for assigning them.</p>
+
+  <p class="ask-teacher">Want to see which ports the programs on your own device are currently using? Ask your teacher — that's what I'm here for. Next up: now that data can be addressed all the way down to a specific program, TCP — the protocol that makes sure it actually arrives, in order, intact.</p>
+
+  <footer class="lesson-footer">STEM+ · Computer Networking Fundamentals · Lesson 14 of the course sequence</footer>
+</div>

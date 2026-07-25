@@ -1,0 +1,115 @@
+<meta charset="UTF-8">
+<title>Lesson 7: Object Storage vs. Block Storage vs. File Storage — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · Cloud Computing A · Unit 3 · Lesson 7</span>
+  <h1>Object Storage vs. Block Storage vs. File Storage</h1>
+  <p class="subtitle">A VM's disk, a database's data files, and a bucket of user-uploaded photos are all "storage" — but they need three genuinely different kinds of storage underneath, and picking the wrong one shows up immediately as either terrible performance or needless cost.</p>
+  <p class="nav-links"><a href="../Unit%202/0006-serverless-paying-only-for-the-milliseconds-you-use.html" class="nav-prev">← Unit 2, Lesson 6</a> <a href="0008-durability-availability-and-the-9s.html" class="nav-next">Lesson 8 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>A VM in Unit 2 is often ephemeral — stop it, and whatever was only in its memory is gone. Data that needs to survive past any one VM's lifetime, or be shared across many of them, has to live in a separate storage service. Cloud providers offer three distinct storage models, and they are not interchangeable: each is optimized for a different access pattern, and using the wrong one for a given job is one of the most common early cloud-architecture mistakes.</p>
+
+  <h2>Object storage: flat, massive, and accessed as whole files</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    <strong>Object storage</strong> (Amazon S3, Google Cloud Storage, Azure Blob Storage) stores data as discrete "objects" — a file plus its metadata — in a flat namespace, retrieved and written as whole units through a simple HTTP-based API, not mounted as a traditional filesystem. It scales to effectively unlimited size and is built for durability (Lesson 8) at very low cost per gigabyte, but it's not designed for editing a small piece of a large file in place — you replace the whole object.
+  </div>
+
+  <h2>Block storage: raw disks, attached to one machine</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    <strong>Block storage</strong> (Amazon EBS, Azure Managed Disks) presents raw storage as fixed-size blocks, functioning as a virtual hard disk attached to a single VM at a time. The VM's operating system formats it with a normal filesystem and reads/writes small chunks of it constantly and with very low latency — exactly what a database or a VM's own boot disk needs, since both make frequent, small, random reads and writes rather than replacing whole files at once.
+  </div>
+
+  <h2>File storage: one shared filesystem, many machines at once</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    <strong>File storage</strong> (Amazon EFS, Azure Files) provides a traditional hierarchical filesystem — folders and files, accessed with normal file operations — but over the network, so multiple VMs can mount and read/write the same filesystem concurrently. Block storage, by contrast, normally attaches to only one VM at a time.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Matching each to a real job</span>
+    A photo-sharing app storing millions of user-uploaded images, each written once and read many times, belongs in <strong>object storage</strong> — cheap, durable, and never needs in-place editing. A production database's data files, constantly read and rewritten in small chunks with strict low-latency demands, belong on <strong>block storage</strong> attached directly to the database server's VM. A fleet of 50 web servers that all need to read and write the same shared configuration directory or content library simultaneously needs <strong>file storage</strong>, since block storage can't be attached to 50 machines at once.
+  </div>
+
+  <table>
+    <thead><tr><th>Model</th><th>Unit of access</th><th>Attaches to</th><th>Typical use</th></tr></thead>
+    <tbody>
+      <tr><td>Object</td><td>Whole object, via API</td><td>Any number of clients, over HTTP</td><td>User uploads, backups, static assets</td></tr>
+      <tr><td>Block</td><td>Fixed-size blocks</td><td>One VM at a time</td><td>Database data files, VM boot disks</td></tr>
+      <tr><td>File</td><td>Files and folders</td><td>Many VMs at once</td><td>Shared directories, content libraries</td></tr>
+    </tbody>
+  </table>
+
+  <div class="box why">
+    <span class="box-label">Why the wrong choice hurts immediately</span>
+    Put a busy database's data files on object storage and every write becomes a slow whole-object replacement instead of a fast small in-place update — the database grinds to a crawl. Put millions of rarely-changed user photos on block storage and you're paying for an always-attached virtual disk sized for your whole photo library, plus you still need to build your own way to serve those files to the internet, reinventing what object storage already does for free. The three models aren't ranked best-to-worst; they're matched to genuinely different access patterns.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. Which storage model is the best fit for millions of user-uploaded photos, each written once and read many times?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Object storage</button>
+      <button class="quiz-choice" data-correct="false">Block storage</button>
+      <button class="quiz-choice" data-correct="false">File storage</button>
+      <button class="quiz-choice" data-correct="false">None of these — photos cannot be stored in the cloud</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Object storage is built exactly for large volumes of whole files written once and read often.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why is block storage a better fit than object storage for a busy production database's data files?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Databases make frequent, small, random reads and writes, which block storage handles with low latency; object storage replaces whole objects at a time.</button>
+      <button class="quiz-choice" data-correct="false">Object storage cannot technically store any data related to databases.</button>
+      <button class="quiz-choice" data-correct="false">Block storage is always cheaper per gigabyte than object storage.</button>
+      <button class="quiz-choice" data-correct="false">Databases are not allowed to run in the cloud at all.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The access pattern — small, frequent, random reads/writes — is exactly what block storage is optimized for.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. A fleet of 50 web servers all need to read and write the same shared content directory at the same time. Which storage model fits, and why?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Block storage, because it can attach to all 50 VMs simultaneously.</button>
+      <button class="quiz-choice" data-correct="true">File storage, because it's designed to be mounted by many machines concurrently, unlike block storage.</button>
+      <button class="quiz-choice" data-correct="false">Object storage, because it behaves exactly like a normal mounted filesystem.</button>
+      <button class="quiz-choice" data-correct="false">None of these — shared directories cannot exist in cloud environments.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>File storage is specifically built for concurrent, multi-machine access to one shared filesystem — block storage normally attaches to only one VM at a time.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="object storage|object">
+    <p class="quiz-prompt">4. Fill in the blank: storage that keeps data as discrete files-plus-metadata in a flat namespace, accessed as whole units through an HTTP API, is called ___ storage.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Object storage's flat namespace and whole-object API access set it apart from block and file storage.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="block storage|block">
+    <p class="quiz-prompt">5. Fill in the blank: storage that presents raw, fixed-size storage as a virtual hard disk attached to a single VM at a time is called ___ storage.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Block storage's single-VM attachment and raw-block access make it the right fit for a database's data files.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: AWS's <a href="https://aws.amazon.com/what-is/storage/">"What is Cloud Storage?"</a> overview page compares object, block, and file storage side by side with the same use-case framing used here.</p>
+
+  <p class="ask-teacher">Not sure which model a specific app feature you use is built on? Ask your teacher — that's what I'm here for. Next up: once you know which model fits, how confident can you actually be that the data survives — and stays reachable?</p>
+
+  <footer class="lesson-footer">STEM+ · Cloud Computing A · Lesson 7 of the course sequence</footer>
+</div>

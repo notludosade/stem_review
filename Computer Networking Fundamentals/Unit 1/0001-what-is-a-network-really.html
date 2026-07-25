@@ -1,0 +1,99 @@
+<meta charset="UTF-8">
+<title>Lesson 1: What Is a Network, Really? — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · Computer Networking Fundamentals · Unit 1 · Lesson 1</span>
+  <h1>What Is a Network, Really?</h1>
+  <p class="subtitle">You already know how to write a program that runs on one computer. This course is about the much stranger problem of getting two programs on two different computers, anywhere in the world, to talk to each other reliably.</p>
+  <p class="nav-links"><a href="0002-lans-wans-and-the-internet-as-a-network-of-networks.html" class="nav-next">Lesson 2 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Every program you've written in Computer Programming 1 lived inside one machine. A function called another function, a loop read a variable, everything happened at the speed of the same processor touching the same memory. Networking blows that assumption up: now the "function call" has to survive being converted into electrical signals, sent across a wire (or through the air) it doesn't control, possibly through a dozen intermediate machines it's never heard of, and reassembled correctly on the other end — sometimes thousands of miles away, sometimes in a fraction of a second, sometimes not at all if something breaks along the way. This course is the vocabulary and mental model for that whole problem, building up from "what even is a network" to writing your own simple networked program by Unit 7.</p>
+
+  <h2>A network, defined plainly</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    A <strong>network</strong> is a collection of devices (called <strong>nodes</strong>) connected by communication pathways (called <strong>links</strong>) that allow them to exchange data. That's it — two laptops connected by a single cable already qualify as a network. The internet is a network too; it's just an enormous one, built out of millions of smaller networks connected together.
+  </div>
+
+  <p>A node doesn't have to be a computer in the traditional sense. Your phone is a node. A printer is a node. A smart thermostat is a node. A router sitting in a closet, whose entire job is forwarding other devices' data, is a node. What makes something a node is simply that it has an address on the network and can send or receive data over it.</p>
+
+  <h2>Links carry bits, but bits alone aren't enough</h2>
+  <p>A link — a copper cable, a fiber-optic strand, a radio signal — is just a physical or wireless path capable of carrying a stream of bits (1s and 0s) from one node toward another. But a raw stream of bits, on its own, communicates nothing. If your computer sends <code>01001000 01101001</code> down a wire, the receiving computer has no way to know whether that's meant to be text, a number, part of an image, or garbage from a corrupted transmission — unless both sides have <em>agreed in advance</em> on what the bits mean and how they're organized.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    A <strong>protocol</strong> is an agreed-upon set of rules that specifies exactly how data is formatted, sent, and interpreted so that two independently built pieces of software can understand each other. A protocol is to networking what a shared language and a shared set of conversational customs are to two strangers meeting for the first time — without them, sound comes out of one mouth and reaches the other person's ears, but nothing is actually communicated.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why "just send the bits" isn't a real answer</span>
+    Imagine you and a friend agree to communicate only by flashing a flashlight on and off. A raw stream of flashes is meaningless until you also agree: does a short flash mean a dot and a long flash mean a dash (Morse code)? How do you mark the start and end of a letter? What if a flash is missed — does the receiver ask for it again, or just guess? Every one of those questions has to be answered by a rule both sides commit to <em>before</em> any flashing starts. A network protocol answers the exact same category of questions for bits on a wire instead of light through the air. Nearly everything in this course — addresses, packets, headers, handshakes — is really just "which rules did the engineers agree on to solve this specific piece of the flashlight problem."
+  </div>
+
+  <p>You'll meet dozens of specific protocols in this course — IP, TCP, HTTP, DNS, and more — and it's easy to get lost in acronyms. Come back to this lesson's core idea whenever that happens: a protocol is just an agreed rulebook, and every rulebook exists to solve a specific, nameable problem (how do we address a message? how do we know if it arrived? how do we mark where it ends?). Learning networking is mostly learning which problem each protocol was invented to solve.</p>
+
+  <div class="box example">
+    <span class="box-label">A network you already use without thinking about it</span>
+    Sending a text message involves a network the whole way: your phone (a node) sends data over a cellular link to a cell tower (another node), which forwards it through your carrier's internal network, out onto the wider internet, through several more intermediate nodes, and finally to your friend's phone (the destination node). Every single hop along that path has to agree on the same protocols, or the message never arrives intact — and it typically takes well under a second.
+  </div>
+
+  <h2>Why this course starts here instead of with IP addresses</h2>
+  <p>It's tempting to jump straight to "here's an IP address, here's a port number" — those are concrete and countable. But every one of those concepts is downstream of the two ideas in this lesson: nodes need a way to be distinguished from each other (addressing, which Unit 3 covers in depth), and any two nodes that want to exchange meaningful data need to agree on a protocol for doing so (which every later unit is really about, one layer at a time). Get comfortable with "network = nodes + links + protocols" now, and the rest of this course is filling in the details of that one sentence.</p>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What is the minimum required for two devices to form a network?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Both devices must be running the same operating system.</button>
+      <button class="quiz-choice" data-correct="true">The devices (nodes) must be connected by a communication pathway (a link) that lets them exchange data.</button>
+      <button class="quiz-choice" data-correct="false">There must be at least three devices connected together.</button>
+      <button class="quiz-choice" data-correct="false">One of the devices must be a router.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Even two laptops connected by a single cable already satisfy the definition — a network is just nodes plus links.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why is a raw stream of bits, by itself, not enough for two computers to communicate?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Bits can only travel over fiber-optic cable, never copper or radio.</button>
+      <button class="quiz-choice" data-correct="true">Without an agreed-upon protocol, the receiving computer has no way to know how to interpret what the bits mean.</button>
+      <button class="quiz-choice" data-correct="false">Bits are too slow to be useful for real communication.</button>
+      <button class="quiz-choice" data-correct="false">Modern computers can only send one bit per second.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Meaning comes from a shared rulebook (a protocol) both sides agree to in advance — the bits alone are just electrical or optical signals.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. In the flashlight analogy, what does agreeing on "a short flash means a dot, a long flash means a dash" represent in real networking?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">A protocol — a rule both sides commit to in advance so raw signals can carry actual meaning.</button>
+      <button class="quiz-choice" data-correct="false">A node.</button>
+      <button class="quiz-choice" data-correct="false">A link.</button>
+      <button class="quiz-choice" data-correct="false">Bandwidth.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The flashlight itself is the link; the flashing pattern is the raw signal; the dot/dash rule is the protocol that makes the signal meaningful.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="node|nodes">
+    <p class="quiz-prompt">4. Fill in the blank: any addressable device on a network — a laptop, a phone, a printer, a router — is called a ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A node just needs an address and the ability to send or receive data — it doesn't have to be a general-purpose computer.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: the Internet Society's short primer "<a href="https://www.internetsociety.org/internet/how-it-works/">How Does the Internet Work?</a>" covers the same nodes-links-protocols framing from a slightly different angle, useful for cementing it before this course adds more vocabulary on top.</p>
+
+  <p class="ask-teacher">Want a real-world example traced through — like what actually happens, node by node, when you open a web page? Ask your teacher — that's what I'm here for. Next up: not every network is the same size or shape — LANs, WANs, and how the internet stitches smaller networks into one enormous one.</p>
+
+  <footer class="lesson-footer">STEM+ · Computer Networking Fundamentals · Lesson 1 of the course sequence</footer>
+</div>
