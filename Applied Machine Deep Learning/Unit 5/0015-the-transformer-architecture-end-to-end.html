@@ -1,0 +1,169 @@
+<meta charset="UTF-8">
+<title>Lesson 15: The Transformer Architecture End to End — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="advanced">
+  <span class="kicker">STEM+ · Applied Machine/Deep Learning · Unit 5 · Lesson 15</span>
+  <h1>The Transformer Architecture End to End</h1>
+  <p class="subtitle">Lesson 14 built multi-head attention. That's the centerpiece, but a real Transformer block needs three more pieces around it before it's an architecture you could actually stack and train — this lesson assembles all of it.</p>
+  <p class="nav-links"><a href="0014-self-attention-and-multi-head-attention.html" class="nav-prev">← Lesson 14</a> <a href="../Unit%206/0016-gpus-and-why-deep-learning-needs-parallel-hardware.html" class="nav-next">Unit 6, Lesson 16 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Attention has one blind spot: <code class="inline-code">Q @ K.T</code> is completely symmetric with respect to position — shuffle the input tokens, and the same relevance scores come out shuffled right along with them, with nothing in the math itself encoding "this token came third." <strong>Positional encoding</strong> fixes this directly: a fixed pattern of values, one per position, added elementwise to each token's embedding before attention ever runs, giving the model something position-dependent to work with despite attention itself having no built-in sense of order.</p>
+
+  <span class="code-label">Python — one full Transformer block</span>
+  <pre class="code-block"><code>import torch.nn as nn
+
+class TransformerBlock(nn.Module):
+    def __init__(self, d_model, num_heads, d_ff):
+        super().__init__()
+        self.attn = nn.MultiheadAttention(d_model, num_heads, batch_first=True)
+        self.norm1 = nn.LayerNorm(d_model)
+        self.ffn = nn.Sequential(
+            nn.Linear(d_model, d_ff), nn.ReLU(), nn.Linear(d_ff, d_model)
+        )
+        self.norm2 = nn.LayerNorm(d_model)
+
+    def forward(self, x):
+        attn_out, _ = self.attn(x, x, x)          # self-attention: x attends to itself
+        x = self.norm1(x + attn_out)               # residual connection, then normalize
+        ffn_out = self.ffn(x)                       # same small MLP, applied per token
+        x = self.norm2(x + ffn_out)                 # residual connection again
+        return x</code></pre>
+
+  <p>Two <code class="inline-code">x + …</code> lines are <strong>residual connections</strong> — the exact same additive shortcut Lesson 12's LSTM cell state used to keep gradients from vanishing, applied here across depth instead of across time. Each one is immediately followed by <strong>layer normalization</strong>, which rescales each token's vector to have a stable mean and variance before the next sub-layer sees it — keeping values in a well-behaved range so a stack of dozens of these blocks doesn't drift toward instability as depth increases. The <strong>feed-forward network</strong> is an ordinary two-layer MLP, exactly Unit 1's shape, applied independently to every token's vector — it's where each token gets to process what attention just gathered, on its own, without looking at any other token. Stack this whole block N times (real models commonly use dozens), and the model's final output is one context-aware vector per input token, ready for whatever the task needs — Lesson 1's softmax for next-token prediction, a classification head, or anything else.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    <strong>Positional encoding</strong> injects position information into token embeddings, since attention itself is order-agnostic. A <strong>residual connection</strong> adds a sub-layer's input back onto its output. <strong>Layer normalization</strong> rescales each token's vector to a stable range after each residual addition. The <strong>feed-forward network</strong> is a small MLP applied independently, per token, after attention.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why residual connections matter more as Transformers get deeper</span>
+    A 96-layer Transformer stacks the block above 96 times. Without residual connections, that's a 96-layer-deep chain a gradient would have to backpropagate through using nothing but Unit 2's ordinary chain rule — exactly the setup that produces vanishing gradients, just across depth instead of across an RNN's time steps. The <code class="inline-code">x + attn_out</code> and <code class="inline-code">x + ffn_out</code> lines give the gradient a direct, unobstructed path backward through every block, parallel to whatever the attention and feed-forward sub-layers are doing — the same additive trick Lesson 12's cell state used, reapplied to make depth itself survivable.
+  </div>
+
+  <h2>Try it: walk one Transformer block, stage by stage</h2>
+
+  <div class="widget" id="transformer-widget">
+    <p class="widget-label">Interactive: one Transformer block, end to end</p>
+    <p class="plot-readout" data-tx-stage>Stage 0 of 7 — click "Next stage" to begin.</p>
+    <div class="fm-row">
+      <button class="widget-btn" type="button" data-tx-next>Next stage →</button>
+      <button class="widget-btn" type="button" data-tx-reset>Reset</button>
+    </div>
+    <p class="plot-hint" data-tx-trail></p>
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. Why does a Transformer need positional encoding at all?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Attention's matrix math is symmetric with respect to position, so nothing about it inherently encodes token order.</button>
+      <button class="quiz-choice" data-correct="false">Positional encoding is required to compute the loss function.</button>
+      <button class="quiz-choice" data-correct="false">Without it, the model could not process more than one token at all.</button>
+      <button class="quiz-choice" data-correct="false">Positional encoding replaces the need for token embeddings entirely.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Shuffling input tokens shuffles Q @ K.T's output right along with them — order has to be injected separately.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. What role do the two "x + …" residual connections play in a Transformer block?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">They give the gradient a direct, unobstructed path backward through the block, helping deep stacks train.</button>
+      <button class="quiz-choice" data-correct="false">They double the number of attention heads used in the block.</button>
+      <button class="quiz-choice" data-correct="false">They remove the need for layer normalization entirely.</button>
+      <button class="quiz-choice" data-correct="false">They have no effect on training at all, purely a stylistic choice.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>This is the same additive trick behind Lesson 12's LSTM cell state, applied across depth instead of time.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. What does the feed-forward network (FFN) sub-layer do that self-attention doesn't?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Processes each token's vector independently, without looking at any other token, after attention has already gathered context.</button>
+      <button class="quiz-choice" data-correct="false">Gathers information from every other token in the sequence.</button>
+      <button class="quiz-choice" data-correct="false">Computes the positional encoding for every token.</button>
+      <button class="quiz-choice" data-correct="false">Replaces the residual connections used elsewhere in the block.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>self.ffn(x) is applied to each token's vector independently — the opposite of attention's cross-token mixing.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="layer normalization|layer norm">
+    <p class="quiz-prompt">4. Fill in the blank: rescaling each token's vector to a stable mean and variance after a residual addition is called ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>See the definition box above.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="positional encoding">
+    <p class="quiz-prompt">5. Fill in the blank: a fixed, position-dependent pattern added to token embeddings before attention runs is called ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>See the definition box above.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Jay Alammar's <a href="https://jalammar.github.io/illustrated-transformer/">"The Illustrated Transformer"</a> walks through this exact block, diagram by diagram, and remains one of the clearest visual references for how all these pieces fit together.</p>
+
+  <p class="ask-teacher">Curious how a decoder-only model like the ones behind AI Developer's Unit 6 API calls differs from this block? Ask your teacher — the main addition is a causal mask, preventing a token from attending to positions that come after it, so generation stays honest about what it "knew" at each step. That closes Unit 5. Next: what it actually takes, hardware-wise, to train something built from dozens of these blocks stacked together.</p>
+
+  <footer class="lesson-footer">STEM+ · Applied Machine/Deep Learning · Lesson 15 of the course sequence</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var STAGES = [
+    { name: 'Input tokens', note: '["The", "cat", "sat"] — raw tokens, not yet numeric.' },
+    { name: 'Token embedding', note: 'each token becomes a vector, e.g. 512 numbers.' },
+    { name: '+ Positional encoding', note: 'a fixed, position-dependent pattern added elementwise — order now matters.' },
+    { name: 'Multi-head self-attention', note: 'every token gathers weighted context from every other token (Lesson 14).' },
+    { name: 'Add & Norm', note: 'residual connection (x + attn_out), then layer normalization.' },
+    { name: 'Feed-forward network', note: 'a small 2-layer MLP applied independently to each token’s vector.' },
+    { name: 'Add & Norm (again)', note: 'residual connection (x + ffn_out), then layer normalization.' },
+    { name: 'Output of this block', note: 'stack this whole block N times; the final output feeds the task’s own output layer.' }
+  ];
+
+  var idx = 0;
+  var trail = [];
+  var stageEl = document.querySelector('[data-tx-stage]');
+  var trailEl = document.querySelector('[data-tx-trail]');
+  var nextBtn = document.querySelector('[data-tx-next]');
+  var resetBtn = document.querySelector('[data-tx-reset]');
+
+  function render() {
+    if (idx === 0) {
+      stageEl.textContent = 'Stage 0 of ' + (STAGES.length - 1) + ' — click "Next stage" to begin.';
+    } else {
+      var s = STAGES[idx];
+      stageEl.textContent = 'Stage ' + idx + ' of ' + (STAGES.length - 1) + ' — ' + s.name + ': ' + s.note;
+    }
+    trailEl.textContent = trail.length ? ('Path so far: ' + trail.join(' → ')) : '';
+  }
+
+  nextBtn.addEventListener('click', function () {
+    if (idx >= STAGES.length - 1) return;
+    idx++;
+    trail.push(STAGES[idx].name);
+    render();
+  });
+
+  resetBtn.addEventListener('click', function () {
+    idx = 0;
+    trail = [];
+    render();
+  });
+
+  render();
+});
+</script>

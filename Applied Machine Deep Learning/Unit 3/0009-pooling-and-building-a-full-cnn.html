@@ -1,0 +1,267 @@
+<meta charset="UTF-8">
+<title>Lesson 9: Pooling and Building a Full CNN — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="advanced">
+  <span class="kicker">STEM+ · Applied Machine/Deep Learning · Unit 3 · Lesson 9</span>
+  <h1>Pooling and Building a Full CNN</h1>
+  <p class="subtitle">Lesson 8 computed one feature map. A real CNN stacks many convolutional layers with something shrinking the data between them — this lesson covers that shrinking step, and assembles the whole architecture end to end.</p>
+  <p class="nav-links"><a href="0008-convolutions-filters-and-feature-maps.html" class="nav-prev">← Lesson 8</a> <a href="../Unit%204/0010-why-sequences-need-memory.html" class="nav-next">Unit 4, Lesson 10 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>AI Developer's Lesson 15 named pooling as something that "keeps the strongest signal in each region." Concretely: <strong>max pooling</strong> divides a feature map into small non-overlapping regions (2×2 is standard) and keeps only the largest value in each one, discarding the rest. <strong>Average pooling</strong> does the same division but keeps the mean of each region instead of its maximum. Either way, a 4×4 feature map pooled with 2×2 regions comes out as a 2×2 map — a factor-of-4 reduction in data, with no new weights to learn at all.</p>
+
+  <span class="code-label">Python — PyTorch, both pooling types</span>
+  <pre class="code-block"><code>import torch.nn as nn
+
+max_pool = nn.MaxPool2d(kernel_size=2)   # keeps the largest value per 2x2 region
+avg_pool = nn.AvgPool2d(kernel_size=2)   # keeps the mean value per 2x2 region
+
+# A minimal full CNN: two conv+pool blocks, then a classifier head
+model = nn.Sequential(
+    nn.Conv2d(3, 16, kernel_size=3, padding=1), nn.ReLU(), nn.MaxPool2d(2),   # 32x32x3 -> 16x16x16
+    nn.Conv2d(16, 32, kernel_size=3, padding=1), nn.ReLU(), nn.MaxPool2d(2),  # 16x16x16 -> 8x8x32
+    nn.Flatten(),                                                             # 8x8x32 -> 2048
+    nn.Linear(8 * 8 * 32, 128), nn.ReLU(),
+    nn.Linear(128, 10)                                                        # 10-class output
+)</code></pre>
+
+  <p>Notice the pattern repeating: convolution extracts local features, ReLU keeps only the useful signal, pooling shrinks the map. Each conv+pool block after the first is working on an already-pooled, already-abstracted version of the image, so a small 3×3 filter in the second block effectively "sees" a much larger patch of the <em>original</em> image than a 3×3 filter in the first block does. That effective coverage is a layer's <strong>receptive field</strong>, and it grows with every conv+pool block stacked — which is exactly why deeper layers in a real CNN tend to respond to increasingly large, increasingly abstract patterns (edges, then textures, then shapes, then whole objects), while the earliest layers stay focused on small local detail.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    <strong>Max pooling</strong> keeps the largest value in each small region of a feature map; <strong>average pooling</strong> keeps the mean. A layer's <strong>receptive field</strong> is how much of the original input a single value in that layer's output is actually influenced by — it grows with every convolutional or pooling layer stacked before it.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why pooling adds a little tolerance for exact pixel position</span>
+    If a recognizable feature shifts by a pixel or two between two images of the same object, the raw feature map values shift too — but max pooling over a small region often keeps returning the same maximum regardless of exactly which pixel within that region held it. That small amount of positional slack is separate from, and stacks on top of, the translation invariance Lesson 7 covered from weight sharing itself — one comes from reusing the same filter everywhere, the other from tolerating small shifts within each pooled region.
+  </div>
+
+  <h2>Try it: pool a feature map, then build the full stack</h2>
+
+  <div class="widget" id="pool-widget">
+    <p class="widget-label">Interactive: max vs. average pooling</p>
+    <div class="fm-tabs">
+      <button class="fm-tab is-active" type="button" data-pool-mode="max">Max pooling</button>
+      <button class="fm-tab" type="button" data-pool-mode="avg">Average pooling</button>
+    </div>
+    <div class="dual-plot">
+      <div>
+        <h3>Feature map (4×4)</h3>
+        <div id="pool-input-grid" style="display:grid; grid-template-columns:repeat(4, 38px); gap:2px; justify-content:center;"></div>
+      </div>
+      <div>
+        <h3>Pooled output (2×2)</h3>
+        <div id="pool-output-grid" style="display:grid; grid-template-columns:repeat(2, 38px); gap:2px; justify-content:center;"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="widget" id="cnn-stack-widget">
+    <p class="widget-label">Interactive: walk through a full CNN stack</p>
+    <p class="plot-readout" data-cnn-stage>Stage 0 of 9 — click "Next layer" to begin.</p>
+    <div class="fm-row">
+      <button class="widget-btn" type="button" data-cnn-next>Next layer →</button>
+      <button class="widget-btn" type="button" data-cnn-reset>Reset</button>
+    </div>
+    <p class="plot-hint" data-cnn-trail></p>
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What does max pooling do to a feature map?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Divides it into small regions and keeps only the largest value from each one.</button>
+      <button class="quiz-choice" data-correct="false">Adds new learnable weights to the feature map.</button>
+      <button class="quiz-choice" data-correct="false">Replaces every value with the value 1.</button>
+      <button class="quiz-choice" data-correct="false">Increases the feature map's size by a factor of 4.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>MaxPool2d(kernel_size=2) keeps the largest of each 2x2 region, shrinking the map with no new weights.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why does a 3×3 filter in a network's second conv+pool block effectively cover more of the original image than one in the first block?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">It's operating on an already-pooled, already-abstracted map, so its receptive field over the original input has grown.</button>
+      <button class="quiz-choice" data-correct="false">The filter's own size physically changes between blocks.</button>
+      <button class="quiz-choice" data-correct="false">Later layers always use a larger stride than earlier ones by definition.</button>
+      <button class="quiz-choice" data-correct="false">There is no actual difference in coverage between the two blocks.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Receptive field grows with depth even though each individual filter stays the same small size.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. In the example model above, what does nn.Flatten() do right before the classifier head?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Reshapes the final 8×8×32 feature maps into one long vector so a fully-connected layer can process it.</button>
+      <button class="quiz-choice" data-correct="false">Deletes every feature map produced by the convolutional layers.</button>
+      <button class="quiz-choice" data-correct="false">Applies another round of convolution to the data.</button>
+      <button class="quiz-choice" data-correct="false">Increases the number of channels from 32 to 128.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>nn.Linear expects a flat vector, so Flatten reshapes the 3D feature maps into one dimension first.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="receptive field">
+    <p class="quiz-prompt">4. Fill in the blank: how much of the original input a single output value is actually influenced by is called that layer's ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>See the definition box above.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="average pooling|avg pooling">
+    <p class="quiz-prompt">5. Fill in the blank: pooling that keeps the mean value of each region, instead of the maximum, is called ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>See the definition box above.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>The <a href="https://poloclub.github.io/cnn-explainer/">CNN Explainer</a> interactive visualization (Georgia Tech / Oregon State) lets you watch a full real CNN's feature maps, pooling, and classifier head all animate together on a live image.</p>
+
+  <p class="ask-teacher">Curious how a real architecture like ResNet stacks dozens of these blocks without the receptive field or vanishing gradients from Unit 2 becoming a problem? Ask your teacher — skip connections are the specific trick, worth a look once this stack makes sense. That closes Unit 3. Next: a completely different shape of data, where order — not spatial position — is what carries the meaning.</p>
+
+  <footer class="lesson-footer">STEM+ · Applied Machine/Deep Learning · Lesson 9 of the course sequence</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var FEATURE_MAP = [
+    [1, 3, 2, 4],
+    [5, 6, 1, 2],
+    [4, 2, 7, 8],
+    [3, 1, 0, 9]
+  ];
+  var mode = 'max';
+
+  var inputGrid = document.getElementById('pool-input-grid');
+  var outputGrid = document.getElementById('pool-output-grid');
+  var modeButtons = document.querySelectorAll('[data-pool-mode]');
+
+  var REGION_COLORS = ['#8a4f2b22', '#3d3a7a22', '#2f6d3f22', '#a3352d22'];
+
+  function regionIndex(r, c) {
+    var rb = r < 2 ? 0 : 1;
+    var cb = c < 2 ? 0 : 1;
+    return rb * 2 + cb;
+  }
+
+  function cellStyle(el) {
+    el.style.width = '38px';
+    el.style.height = '38px';
+    el.style.display = 'flex';
+    el.style.alignItems = 'center';
+    el.style.justifyContent = 'center';
+    el.style.fontFamily = '"SF Mono", Menlo, Consolas, monospace';
+    el.style.fontSize = '0.85rem';
+    el.style.border = '1px solid var(--border)';
+    el.style.borderRadius = '3px';
+  }
+
+  function buildInput() {
+    inputGrid.innerHTML = '';
+    for (var r = 0; r < 4; r++) {
+      for (var c = 0; c < 4; c++) {
+        var cell = document.createElement('div');
+        cell.textContent = FEATURE_MAP[r][c];
+        cellStyle(cell);
+        cell.style.background = REGION_COLORS[regionIndex(r, c)];
+        inputGrid.appendChild(cell);
+      }
+    }
+  }
+
+  function pooledValue(rb, cb) {
+    var vals = [];
+    for (var i = 0; i < 2; i++) {
+      for (var j = 0; j < 2; j++) {
+        vals.push(FEATURE_MAP[rb * 2 + i][cb * 2 + j]);
+      }
+    }
+    if (mode === 'max') return Math.max.apply(null, vals);
+    return vals.reduce(function (a, b) { return a + b; }, 0) / vals.length;
+  }
+
+  function renderOutput() {
+    outputGrid.innerHTML = '';
+    for (var rb = 0; rb < 2; rb++) {
+      for (var cb = 0; cb < 2; cb++) {
+        var cell = document.createElement('div');
+        var v = pooledValue(rb, cb);
+        cell.textContent = mode === 'max' ? v : v.toFixed(2);
+        cellStyle(cell);
+        cell.style.background = REGION_COLORS[rb * 2 + cb];
+        outputGrid.appendChild(cell);
+      }
+    }
+  }
+
+  modeButtons.forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      modeButtons.forEach(function (b) { b.classList.remove('is-active'); });
+      btn.classList.add('is-active');
+      mode = btn.getAttribute('data-pool-mode');
+      renderOutput();
+    });
+  });
+
+  buildInput();
+  renderOutput();
+
+  // CNN stack stepper
+  var STAGES = [
+    { name: 'Input', shape: '32×32×3', note: 'a small color image, three channels.' },
+    { name: 'Conv1 (16 filters, 3×3, same padding)', shape: '32×32×16', note: 'each filter finds one kind of local pattern; padding keeps size unchanged.' },
+    { name: 'ReLU', shape: '32×32×16', note: 'shape unchanged — only negative values get zeroed.' },
+    { name: 'Pool1 (max, 2×2)', shape: '16×16×16', note: 'spatial size cut in half; no new weights.' },
+    { name: 'Conv2 (32 filters, 3×3, same padding)', shape: '16×16×32', note: 'operating on already-pooled data — its receptive field over the original image is now much larger.' },
+    { name: 'ReLU', shape: '16×16×32', note: 'shape unchanged again.' },
+    { name: 'Pool2 (max, 2×2)', shape: '8×8×32', note: 'spatial size cut in half again.' },
+    { name: 'Flatten', shape: '2048', note: '8 × 8 × 32 reshaped into one long vector.' },
+    { name: 'FC (128 units)', shape: '128', note: 'an ordinary Unit 1 fully-connected layer, exactly like before.' },
+    { name: 'Output (softmax, 10 classes)', shape: '10', note: 'a probability distribution over 10 possible classes.' }
+  ];
+
+  var stageIdx = 0;
+  var trail = [];
+  var stageEl = document.querySelector('[data-cnn-stage]');
+  var trailEl = document.querySelector('[data-cnn-trail]');
+  var nextBtn = document.querySelector('[data-cnn-next]');
+  var resetBtn = document.querySelector('[data-cnn-reset]');
+
+  function renderStage() {
+    if (stageIdx === 0) {
+      stageEl.textContent = 'Stage 0 of ' + (STAGES.length - 1) + ' — click "Next layer" to begin.';
+    } else {
+      var s = STAGES[stageIdx];
+      stageEl.textContent = 'Stage ' + stageIdx + ' of ' + (STAGES.length - 1) + ' — ' + s.name + ': shape ' + s.shape + '. ' + s.note;
+    }
+    trailEl.textContent = trail.length ? ('Path so far: ' + trail.join(' → ')) : '';
+  }
+
+  nextBtn.addEventListener('click', function () {
+    if (stageIdx >= STAGES.length - 1) return;
+    stageIdx++;
+    trail.push(STAGES[stageIdx].name + ' (' + STAGES[stageIdx].shape + ')');
+    renderStage();
+  });
+
+  resetBtn.addEventListener('click', function () {
+    stageIdx = 0;
+    trail = [];
+    renderStage();
+  });
+
+  renderStage();
+});
+</script>

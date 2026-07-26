@@ -1,0 +1,185 @@
+<meta charset="UTF-8">
+<title>Lesson 17: Transfer Learning and Fine-Tuning — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="advanced">
+  <span class="kicker">STEM+ · Applied Machine/Deep Learning · Unit 6 · Lesson 17</span>
+  <h1>Transfer Learning and Fine-Tuning</h1>
+  <p class="subtitle">AI Developer's Unit 6 covered fine-tuning versus RAG for an LLM accessed through an API — weights you can't see, let alone choose which ones update. This lesson is about a network you trained yourself, where that choice is completely explicit, layer by layer.</p>
+  <p class="nav-links"><a href="0016-gpus-and-why-deep-learning-needs-parallel-hardware.html" class="nav-prev">← Lesson 16</a> <a href="0018-hyperparameter-tuning-what-actually-matters.html" class="nav-next">Lesson 18 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p><strong>Transfer learning</strong> starts from a network already trained on a large, different dataset instead of training from scratch. For a CNN (Unit 3), this works because of what Lesson 9's receptive field argument implied: early convolutional layers tend to learn genuinely generic features — edges, corners, color gradients, simple textures — useful for almost any visual task, while later layers learn increasingly task-specific combinations of those features. A network trained on a million general photos has already learned those early-layer basics; a new, smaller, more specific dataset doesn't need to re-teach them.</p>
+
+  <span class="code-label">Python — PyTorch, two different transfer strategies</span>
+  <pre class="code-block"><code>import torchvision.models as models
+import torch.nn as nn
+
+model = models.resnet18(weights='IMAGENET1K_V1')   # pretrained on ImageNet
+
+# Strategy 1: feature extraction -- freeze everything pretrained
+for param in model.parameters():
+    param.requires_grad = False
+model.fc = nn.Linear(model.fc.in_features, num_classes)   # only this new layer trains
+
+# Strategy 2: fine-tuning -- unfreeze the later layers too, train with a small LR
+for param in model.layer4.parameters():
+    param.requires_grad = True
+optimizer = torch.optim.Adam([
+    {'params': model.layer4.parameters(), 'lr': 1e-5},   # small — don't wreck pretrained features
+    {'params': model.fc.parameters(), 'lr': 1e-3},        # larger — this part is brand new
+])</code></pre>
+
+  <p><strong>Feature extraction</strong> freezes every pretrained weight and trains only a new head attached on top — fast, needs little data, and works well when the new task is visually similar to what the pretrained model already saw. <strong>Fine-tuning</strong> goes further, unfreezing some of the later pretrained layers so they can adjust too, for tasks that differ more from the original training data. The learning rate on unfrozen pretrained layers is deliberately kept small — a large update could wreck weights that already encode something genuinely useful, a failure called <strong>catastrophic forgetting</strong>: aggressively training on new data overwrites what the network already knew, instead of building on it.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    <strong>Transfer learning</strong> starts from a network already trained on a different, usually larger dataset. <strong>Feature extraction</strong> freezes all pretrained weights and trains only a new head. <strong>Fine-tuning</strong> also unfreezes some pretrained layers, typically with a small learning rate. <strong>Catastrophic forgetting</strong> is losing previously learned, useful weights by updating them too aggressively on new data.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why the choice depends on how similar — and how large — the new dataset is</span>
+    A small new dataset, similar to the pretrained model's original data, favors feature extraction: there isn't enough new data to safely retrain deeper layers without overfitting (Unit 2), and the pretrained features already fit well. A larger new dataset, or one meaningfully different in domain (medical scans versus everyday photos, for instance), can afford — and often needs — fine-tuning further into the network, since the pretrained model's task-specific later layers may not transfer as cleanly as its generic early ones. Dataset size and similarity, not a fixed rule, decide how deep to unfreeze.
+  </div>
+
+  <h2>Try it: choose what to freeze</h2>
+  <p>Click a layer to toggle it frozen or trainable, and watch the trainable parameter count — and the strategy this counts as — update live.</p>
+
+  <div class="widget" id="transfer-widget">
+    <p class="widget-label">Interactive: freeze or unfreeze a pretrained network</p>
+    <div id="transfer-layers" style="display:flex; flex-direction:column; gap:0.4rem;"></div>
+    <p class="verdict" data-transfer-verdict>—</p>
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. Why do early CNN layers transfer well to a completely new visual task?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">They tend to learn generic features — edges, textures, gradients — useful across nearly any visual task, not specific to the original one.</button>
+      <button class="quiz-choice" data-correct="false">Early layers are always randomly re-initialized before transfer learning begins.</button>
+      <button class="quiz-choice" data-correct="false">Early layers contain no learned weights at all.</button>
+      <button class="quiz-choice" data-correct="false">Early layers are identical in every trained network regardless of dataset.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Generic low-level features like edges are broadly useful, unlike a later layer's task-specific combinations of them.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. What is the key difference between feature extraction and fine-tuning?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Feature extraction freezes all pretrained weights and trains only a new head; fine-tuning also unfreezes some pretrained layers.</button>
+      <button class="quiz-choice" data-correct="false">Feature extraction always trains every single weight in the network from scratch.</button>
+      <button class="quiz-choice" data-correct="false">Fine-tuning never uses any pretrained weights at all.</button>
+      <button class="quiz-choice" data-correct="false">The two techniques are identical in every respect.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Feature extraction keeps the pretrained network entirely fixed; fine-tuning allows some of it to keep learning.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why is the learning rate kept small when fine-tuning unfrozen pretrained layers?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">A large update could overwrite already-useful pretrained weights, causing catastrophic forgetting.</button>
+      <button class="quiz-choice" data-correct="false">A small learning rate is required by the definition of transfer learning itself.</button>
+      <button class="quiz-choice" data-correct="false">Pretrained layers cannot process gradients larger than a fixed size.</button>
+      <button class="quiz-choice" data-correct="false">It has no effect on the outcome one way or the other.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Small updates let pretrained weights adjust gently instead of being aggressively overwritten.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="catastrophic forgetting">
+    <p class="quiz-prompt">4. Fill in the blank: losing previously learned, useful weights by updating them too aggressively on new data is called ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>See the definition box above.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="feature extraction">
+    <p class="quiz-prompt">5. Fill in the blank: freezing every pretrained weight and training only a new head on top is called ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>See the definition box above.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>PyTorch's official <a href="https://pytorch.org/tutorials/beginner/transfer_learning_tutorial.html">"Transfer Learning for Computer Vision Tutorial"</a> builds both strategies from this lesson on a real dataset, with the exact code pattern shown above.</p>
+
+  <p class="ask-teacher">Curious how this connects back to AI Developer's fine-tuning-vs-RAG lesson for LLMs? Ask your teacher — an LLM API's fine-tuning option is this exact idea, just with the "which layers unfreeze" decision made for you by whoever hosts the model. Next: once you know what to train, how to actually choose the settings training runs on.</p>
+
+  <footer class="lesson-footer">STEM+ · Applied Machine/Deep Learning · Lesson 17 of the course sequence</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var LAYERS = [
+    { name: 'Conv1 (pretrained)', params: 896, frozen: true, locked: false },
+    { name: 'Conv2 (pretrained)', params: 4640, frozen: true, locked: false },
+    { name: 'Conv3 (pretrained)', params: 18496, frozen: true, locked: false },
+    { name: 'Conv4 (pretrained)', params: 73856, frozen: true, locked: false },
+    { name: 'New classifier head', params: 128000, frozen: false, locked: true }
+  ];
+
+  var container = document.getElementById('transfer-layers');
+  var verdict = document.querySelector('[data-transfer-verdict]');
+
+  function totalParams() { return LAYERS.reduce(function (s, l) { return s + l.params; }, 0); }
+
+  function render() {
+    container.innerHTML = '';
+    LAYERS.forEach(function (layer, idx) {
+      var row = document.createElement('div');
+      row.style.display = 'flex';
+      row.style.justifyContent = 'space-between';
+      row.style.alignItems = 'center';
+      row.style.padding = '0.5rem 0.8rem';
+      row.style.border = '1px solid var(--border)';
+      row.style.borderRadius = '5px';
+      row.style.cursor = layer.locked ? 'default' : 'pointer';
+      row.style.background = layer.frozen ? 'var(--code-bg)' : 'var(--correct-soft)';
+
+      var label = document.createElement('span');
+      label.textContent = layer.name + ' — ' + layer.params.toLocaleString() + ' params';
+      var state = document.createElement('span');
+      state.style.fontFamily = '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+      state.style.fontSize = '0.8rem';
+      state.style.fontWeight = '700';
+      state.textContent = layer.locked ? 'always trainable (new)' : (layer.frozen ? 'frozen' : 'trainable');
+      state.style.color = layer.frozen && !layer.locked ? 'var(--muted)' : 'var(--correct)';
+
+      row.appendChild(label);
+      row.appendChild(state);
+
+      if (!layer.locked) {
+        row.addEventListener('click', function () {
+          layer.frozen = !layer.frozen;
+          render();
+        });
+      }
+      container.appendChild(row);
+    });
+
+    var trainable = LAYERS.filter(function (l) { return !l.frozen; }).reduce(function (s, l) { return s + l.params; }, 0);
+    var total = totalParams();
+    var pct = (trainable / total * 100).toFixed(1);
+
+    var pretrainedUnfrozen = LAYERS.filter(function (l) { return !l.locked && !l.frozen; }).length;
+    var pretrainedTotal = LAYERS.filter(function (l) { return !l.locked; }).length;
+    var strategy;
+    if (pretrainedUnfrozen === 0) strategy = 'Feature extraction — only the new head trains.';
+    else if (pretrainedUnfrozen === pretrainedTotal) strategy = 'Full fine-tuning — every pretrained layer is unfrozen.';
+    else strategy = 'Partial fine-tuning — ' + pretrainedUnfrozen + ' of ' + pretrainedTotal + ' pretrained layers unfrozen.';
+
+    verdict.textContent = trainable.toLocaleString() + ' of ' + total.toLocaleString() + ' parameters trainable (' + pct + '%). ' + strategy;
+  }
+
+  render();
+});
+</script>

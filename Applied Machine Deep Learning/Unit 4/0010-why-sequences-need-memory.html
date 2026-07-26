@@ -1,0 +1,180 @@
+<meta charset="UTF-8">
+<title>Lesson 10: Why Sequences Need Memory — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="advanced">
+  <span class="kicker">STEM+ · Applied Machine/Deep Learning · Unit 4 · Lesson 10</span>
+  <h1>Why Sequences Need Memory</h1>
+  <p class="subtitle">Unit 3 built an architecture around an assumption that fit images: spatial locality and translation invariance. Text, audio, and time series break that assumption in a specific way — order itself carries meaning, and nothing about a CNN or a plain fully-connected layer is built to track it.</p>
+  <p class="nav-links"><a href="../Unit%203/0009-pooling-and-building-a-full-cnn.html" class="nav-prev">← Lesson 9</a> <a href="0011-rnns-and-the-vanishing-gradient-problem.html" class="nav-next">Lesson 11 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>"The dog bit the mail carrier" and "The mail carrier bit the dog" use exactly the same six words. A <strong>bag-of-words</strong> representation — treating a sentence as an unordered collection of words, ignoring order entirely — produces the identical representation for both, despite them describing opposite events. Any model built only from Unit 1 and Unit 3's tools, applied naively to text, inherits this same blindness unless something is specifically added to track order.</p>
+
+  <span class="code-label">Python — the problem, made concrete</span>
+  <pre class="code-block"><code>from collections import Counter
+
+sentence_a = "the dog bit the mail carrier".split()
+sentence_b = "the mail carrier bit the dog".split()
+
+bag_a = Counter(sentence_a)
+bag_b = Counter(sentence_b)
+
+print(bag_a == bag_b)   # True — identical bag-of-words, opposite meaning</code></pre>
+
+  <p>There's a second, separate problem beyond order: sentences have <strong>variable-length</strong> input. Unit 1's weight matrices and Unit 3's convolutional filters both assume a fixed input shape — a fixed number of pixels, a fixed number of features. A 4-word sentence and a 40-word sentence can't both feed cleanly into the same fixed-size fully-connected layer without padding or truncating, which is a workaround bolted on afterward, not something the architecture handles natively. A genuine <strong>sequence model</strong> needs to process elements one at a time, in order, carrying forward whatever it's learned from earlier elements — and needs to do that regardless of how long the sequence happens to be.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    A <strong>bag-of-words</strong> representation treats input as an unordered collection, discarding sequence order entirely. <strong>Variable-length</strong> input means different examples can have different numbers of elements, unlike a fixed-size image or feature vector. A <strong>sequence model</strong> is built to process elements in order, one at a time, regardless of how many there are.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why padding a sentence to a fixed length doesn't actually fix the order problem</span>
+    Padding every sentence out to, say, 40 words and feeding the result into a fully-connected layer solves the variable-length problem well enough — but it does nothing for order. That fixed-size layer still has one independent set of weights per word position, with none of Unit 3's weight sharing built in: "dog" appearing in position 2 and "dog" appearing in position 15 would be handled by completely unrelated weights, learned separately, with nothing forcing the network to recognize them as the same word. Sequence models fix both problems together, deliberately — Lesson 11 is exactly that fix.
+  </div>
+
+  <h2>Try it: order versus a bag of words</h2>
+  <p>Reveal a sentence one word at a time and watch a running summary build up. Then compare each sentence's bag-of-words — notice what survives, and what doesn't.</p>
+
+  <div class="widget" id="seq-widget">
+    <p class="widget-label">Interactive: order versus bag-of-words</p>
+    <div class="fm-tabs">
+      <button class="fm-tab is-active" type="button" data-seq-sentence="A">Sentence A</button>
+      <button class="fm-tab" type="button" data-seq-sentence="B">Sentence B</button>
+    </div>
+    <p class="plot-readout" data-seq-tokens>—</p>
+    <div class="fm-row">
+      <button class="widget-btn" type="button" data-seq-reveal>Reveal next word (build memory) →</button>
+      <button class="widget-btn" type="button" data-seq-reset>Reset</button>
+    </div>
+    <p class="plot-readout" data-seq-memory>Memory so far: (nothing revealed yet)</p>
+    <p class="plot-hint" data-seq-bow>—</p>
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. Why do "the dog bit the mail carrier" and "the mail carrier bit the dog" produce the same bag-of-words representation?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Bag-of-words discards order entirely, and both sentences contain the exact same set of words.</button>
+      <button class="quiz-choice" data-correct="false">The two sentences actually contain completely different words.</button>
+      <button class="quiz-choice" data-correct="false">Bag-of-words representations always produce a unique result for every sentence.</button>
+      <button class="quiz-choice" data-correct="false">One of the sentences is grammatically invalid and gets discarded.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Counter(sentence_a) == Counter(sentence_b) is True precisely because order isn't part of what a Counter captures.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. What problem does padding every sentence to a fixed length solve, and what does it leave unsolved?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">It solves the variable-length input problem, but does nothing to give the network any real sense of word order.</button>
+      <button class="quiz-choice" data-correct="false">It solves both the length problem and the order problem simultaneously.</button>
+      <button class="quiz-choice" data-correct="false">It solves the order problem but breaks the network's ability to process any input at all.</button>
+      <button class="quiz-choice" data-correct="false">It has no effect on either problem.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Padding only addresses the fixed-size input requirement, leaving a fully-connected layer's per-position weights still unrelated to each other.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why does a fully-connected layer over a padded, fixed-length sentence still fail to recognize the same word in two different positions as related?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Each position has its own independent set of weights, with no weight sharing across positions the way a CNN shares filter weights across an image.</button>
+      <button class="quiz-choice" data-correct="false">Fully-connected layers cannot process word data under any circumstances.</button>
+      <button class="quiz-choice" data-correct="false">Every word in a sentence is automatically treated as identical regardless of position.</button>
+      <button class="quiz-choice" data-correct="false">Padding removes all words from the sentence except the first one.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Without something like Unit 3's parameter sharing applied across time steps, position-specific weights learn independently of each other.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="bag-of-words|bag of words">
+    <p class="quiz-prompt">4. Fill in the blank: a representation that treats input as an unordered collection, discarding sequence order entirely, is called ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>See the definition box above.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="variable-length|variable length">
+    <p class="quiz-prompt">5. Fill in the blank: input where different examples can have different numbers of elements, unlike a fixed-size image, is called ___ input.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>See the definition box above.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>The <a href="https://web.stanford.edu/~jurafsky/slp3/">"Speech and Language Processing" (Jurafsky &amp; Martin)</a> draft chapter on N-gram and bag-of-words models lays out exactly what these order-blind representations can and can't capture, before sequence models enter the picture.</p>
+
+  <p class="ask-teacher">Curious whether bag-of-words representations are ever still useful today, given everything they throw away? Ask your teacher — for tasks like spam filtering, where order matters far less than which words show up at all, they're still a reasonable, cheap baseline. Next: the specific architecture that reads a sequence in order and carries memory forward.</p>
+
+  <footer class="lesson-footer">STEM+ · Applied Machine/Deep Learning · Lesson 10 of the course sequence</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var SENTENCES = {
+    A: 'the dog bit the mail carrier'.split(' '),
+    B: 'the mail carrier bit the dog'.split(' ')
+  };
+
+  var current = 'A';
+  var revealed = 0;
+
+  var tabButtons = document.querySelectorAll('[data-seq-sentence]');
+  var tokensEl = document.querySelector('[data-seq-tokens]');
+  var memoryEl = document.querySelector('[data-seq-memory]');
+  var bowEl = document.querySelector('[data-seq-bow]');
+  var revealBtn = document.querySelector('[data-seq-reveal]');
+  var resetBtn = document.querySelector('[data-seq-reset]');
+
+  function bagOfWords(tokens) {
+    return tokens.slice().sort().join(', ');
+  }
+
+  function render() {
+    var tokens = SENTENCES[current];
+    tokensEl.innerHTML = tokens.map(function (t, i) {
+      var style = i < revealed ? 'color:var(--accent); font-weight:600;' : 'color:var(--muted);';
+      return '<span style="' + style + '">' + t + '</span>';
+    }).join(' ');
+
+    memoryEl.textContent = revealed === 0
+      ? 'Memory so far: (nothing revealed yet)'
+      : 'Memory so far: "' + tokens.slice(0, revealed).join(' ') + '"';
+
+    var bowA = bagOfWords(SENTENCES.A);
+    var bowB = bagOfWords(SENTENCES.B);
+    bowEl.textContent = 'Bag-of-words, A: [' + bowA + ']  ·  Bag-of-words, B: [' + bowB + ']  — identical, despite opposite meaning.';
+  }
+
+  tabButtons.forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      tabButtons.forEach(function (b) { b.classList.remove('is-active'); });
+      btn.classList.add('is-active');
+      current = btn.getAttribute('data-seq-sentence');
+      revealed = 0;
+      render();
+    });
+  });
+
+  revealBtn.addEventListener('click', function () {
+    if (revealed < SENTENCES[current].length) revealed++;
+    render();
+  });
+
+  resetBtn.addEventListener('click', function () {
+    revealed = 0;
+    render();
+  });
+
+  render();
+});
+</script>

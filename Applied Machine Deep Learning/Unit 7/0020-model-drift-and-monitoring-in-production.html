@@ -1,0 +1,195 @@
+<meta charset="UTF-8">
+<title>Lesson 20: Model Drift and Monitoring in Production — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="advanced">
+  <span class="kicker">STEM+ · Applied Machine/Deep Learning · Unit 7 · Lesson 20 · Course Capstone</span>
+  <h1>Model Drift and Monitoring in Production</h1>
+  <p class="subtitle">AI Developer's Unit 8 covered drift from the outside — logging an API's inputs and outputs over time. This closing lesson covers it from the inside: a model whose weights you trained yourself, whose accuracy you can no longer just re-measure the way Lesson 19 did, because the labels stopped arriving the moment it shipped.</p>
+  <p class="nav-links"><a href="0019-evaluation-metrics-beyond-accuracy.html" class="nav-prev">← Lesson 19</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Every metric Lesson 19 computed needed one thing this lesson has to reckon with directly: true labels. A test set has them. Production traffic, the moment a model actually ships, usually doesn't — nobody is manually confirming whether each new prediction was correct, in real time, forever. Drift has to be caught largely without that ground truth, which is why it splits into two genuinely different things to watch for.</p>
+
+  <span class="code-label">Python — the two kinds of drift, and how each shows up without labels</span>
+  <pre class="code-block"><code>import numpy as np
+
+def input_distribution_shift(training_features, live_features):
+    # Data drift: the *inputs* look different than what the model trained on --
+    # detectable without any labels at all, just by comparing distributions.
+    return abs(training_features.mean() - live_features.mean())
+
+def prediction_distribution_shift(training_predictions, live_predictions):
+    # A proxy for concept drift: the relationship between input and correct
+    # output may have changed, even if inputs still look familiar. Without
+    # labels, a shifting prediction distribution is often the first hint.
+    return abs(training_predictions.mean() - live_predictions.mean())</code></pre>
+
+  <p><strong>Data drift</strong> is a change in the input distribution itself — a fraud model trained mostly on desktop transactions suddenly seeing a surge of mobile ones, or a vision model trained on daytime photos starting to see far more low-light images. This is detectable without any new labels: just compare the statistical distribution of live inputs against training-time inputs. <strong>Concept drift</strong> is subtler and more dangerous — the actual relationship between input and correct output changes, even though the inputs still look statistically familiar. A spam model trained before a new scam template became popular can face emails that look structurally ordinary yet are now, in reality, spam; the mapping from features to true label shifted, not the features themselves.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    <strong>Data drift</strong> is a change in the distribution of input features compared to training time, detectable by comparing input statistics alone. <strong>Concept drift</strong> is a change in the true relationship between input and correct output, often invisible until new labels eventually arrive. A <strong>retraining trigger</strong> is a defined threshold — a metric crossing a set value, or a fixed time interval — that starts a new training run automatically, rather than leaving the decision to whenever someone happens to notice.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why this lesson closes the course exactly where the course began</span>
+    Unit 1 opened with a single perceptron computing a weighted sum against fixed weights. Every unit since built on top of that: a real loss surface, a real training loop, an architecture matched to the data's shape, the hardware to train it at scale, and now — the honest final piece — the recognition that "trained" is not "finished." A model's weights are a frozen snapshot of one moment's data. Lesson 19's evaluation metrics are only as current as the last labeled batch they were computed against; monitoring for drift is what stands in for that evaluation, continuously, once labels stop arriving on their own. The math in Unit 1 never changes. The world the model is applied to never stops changing. Monitoring is the discipline built entirely around that mismatch.
+  </div>
+
+  <h2>Try it: watch drift erode a model, and retraining fix it</h2>
+  <p>Advance week by week and watch simulated accuracy drift downward as the real world moves on. Retrain when it crosses your comfort threshold.</p>
+
+  <div class="widget" id="drift-widget">
+    <p class="widget-label">Interactive: drift and retraining over time</p>
+    <div class="fm-tabs">
+      <button class="fm-tab" type="button" data-drift-severity="low">Low drift</button>
+      <button class="fm-tab is-active" type="button" data-drift-severity="medium">Medium drift</button>
+      <button class="fm-tab" type="button" data-drift-severity="high">High drift</button>
+    </div>
+    <div class="fm-row" style="margin-top:0.6rem;">
+      <button class="widget-btn" type="button" data-drift-advance>Advance 1 week</button>
+      <button class="widget-btn" type="button" data-drift-retrain>Retrain model</button>
+      <button class="widget-btn" type="button" data-drift-reset>Reset</button>
+    </div>
+    <div id="drift-chart" style="display:flex; align-items:flex-end; gap:2px; height:120px; margin:0.9rem 0; border-bottom:1px solid var(--border);"></div>
+    <p class="plot-hint">Darker bars: normal weeks. Bordered bars: a retraining event.</p>
+    <p class="verdict" data-drift-verdict>Week 0. Accuracy = 95.0%.</p>
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What is the key difference between data drift and concept drift?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Data drift is a change in input distribution; concept drift is a change in the true relationship between input and correct output.</button>
+      <button class="quiz-choice" data-correct="false">The two terms describe exactly the same phenomenon.</button>
+      <button class="quiz-choice" data-correct="false">Data drift only happens to text models; concept drift only happens to image models.</button>
+      <button class="quiz-choice" data-correct="false">Concept drift is always detectable without any new labels, unlike data drift.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Data drift is about the inputs themselves; concept drift is about the mapping from input to correct output changing.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why is concept drift harder to detect than data drift?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">The inputs can still look statistically familiar even while the correct output for them has changed, so it often stays invisible until new labels arrive.</button>
+      <button class="quiz-choice" data-correct="false">Concept drift always causes an immediate, obvious crash in the deployed system.</button>
+      <button class="quiz-choice" data-correct="false">Concept drift is mathematically impossible to define precisely.</button>
+      <button class="quiz-choice" data-correct="false">Data drift never actually occurs in real deployed systems.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Unlike data drift, concept drift can hide behind inputs that still look perfectly ordinary.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why can't Lesson 19's evaluation metrics simply be recomputed continuously in production the way they were during development?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Those metrics require true labels, and production traffic usually doesn't arrive with labels attached the way a test set does.</button>
+      <button class="quiz-choice" data-correct="false">Precision, recall, and F1 are only mathematically valid during initial training, never afterward.</button>
+      <button class="quiz-choice" data-correct="false">Production models never make any predictions once deployed.</button>
+      <button class="quiz-choice" data-correct="false">There is no actual obstacle — these metrics are trivially recomputed in real time.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The lack of continuously arriving ground truth is exactly why monitoring has to rely on proxies like distribution shifts.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="concept drift">
+    <p class="quiz-prompt">4. Fill in the blank: a change in the true relationship between input and correct output, often invisible until new labels arrive, is called ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>See the definition box above.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="data drift">
+    <p class="quiz-prompt">5. Fill in the blank: a change in the distribution of input features, detectable by comparing statistics alone without new labels, is called ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>See the definition box above.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Chip Huyen's <a href="https://huyenchip.com/2022/02/07/data-distribution-shifts-and-monitoring.html">"Data Distribution Shifts and Monitoring"</a> — the same source AI Developer's Unit 8 pointed to — covers data drift and concept drift as distinct, formally named categories in far more depth than this lesson's introduction.</p>
+
+  <p class="ask-teacher">Curious how a team decides on a retraining trigger's exact threshold, instead of just picking a number? Ask your teacher — it usually comes down to weighing the cost of a stale model against the cost and risk of a retraining run itself, the same kind of tradeoff Lesson 19 asked about precision versus recall. That closes this course. From a single perceptron in Unit 1 to a model you can keep honest in production — the mechanics behind everything AI Developer only named are yours now.</p>
+
+  <footer class="lesson-footer">STEM+ · Applied Machine/Deep Learning · Lesson 20 of the course sequence — course complete</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var week = 0;
+  var accuracy = 95.0;
+  var severity = 'medium';
+  var SEVERITY_RATE = { low: 0.6, medium: 1.5, high: 3.2 };
+
+  var chart = document.getElementById('drift-chart');
+  var verdict = document.querySelector('[data-drift-verdict]');
+  var severityButtons = document.querySelectorAll('[data-drift-severity]');
+  var advanceBtn = document.querySelector('[data-drift-advance]');
+  var retrainBtn = document.querySelector('[data-drift-retrain]');
+  var resetBtn = document.querySelector('[data-drift-reset]');
+
+  function addBar(acc, isRetrain) {
+    var bar = document.createElement('div');
+    var h = Math.max(2, Math.min(120, (acc / 100) * 120));
+    bar.style.width = '8px';
+    bar.style.height = h + 'px';
+    bar.style.background = isRetrain ? 'var(--correct)' : 'var(--accent)';
+    bar.style.border = isRetrain ? '2px solid var(--text)' : 'none';
+    bar.title = 'week ' + week + ': ' + acc.toFixed(1) + '%' + (isRetrain ? ' (retrained)' : '');
+    chart.appendChild(bar);
+  }
+
+  function renderVerdict() {
+    verdict.classList.remove('is-pass', 'is-fail');
+    if (accuracy < 80) {
+      verdict.classList.add('is-fail');
+      verdict.textContent = 'Week ' + week + '. Accuracy = ' + accuracy.toFixed(1) + '% — below threshold. Retraining recommended.';
+    } else {
+      verdict.classList.add('is-pass');
+      verdict.textContent = 'Week ' + week + '. Accuracy = ' + accuracy.toFixed(1) + '% — healthy.';
+    }
+  }
+
+  advanceBtn.addEventListener('click', function () {
+    week++;
+    var rate = SEVERITY_RATE[severity];
+    var drop = rate * (0.6 + Math.random() * 0.8);
+    accuracy = Math.max(30, accuracy - drop);
+    addBar(accuracy, false);
+    renderVerdict();
+  });
+
+  retrainBtn.addEventListener('click', function () {
+    week++;
+    accuracy = Math.min(96, 93 + Math.random() * 3);
+    addBar(accuracy, true);
+    renderVerdict();
+  });
+
+  resetBtn.addEventListener('click', function () {
+    week = 0;
+    accuracy = 95.0;
+    chart.innerHTML = '';
+    renderVerdict();
+  });
+
+  severityButtons.forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      severityButtons.forEach(function (b) { b.classList.remove('is-active'); });
+      btn.classList.add('is-active');
+      severity = btn.getAttribute('data-drift-severity');
+    });
+  });
+
+  renderVerdict();
+});
+</script>

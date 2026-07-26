@@ -1,0 +1,289 @@
+<meta charset="UTF-8">
+<title>Applied Machine/Deep Learning Glossary — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<div class="page" data-tier="advanced">
+  <span class="kicker">STEM+ · Applied Machine/Deep Learning · Reference</span>
+  <h1>Glossary</h1>
+  <p class="subtitle">Definitions in the exact form used across lessons. When a lesson introduces a new term, it gets added here — this file is the single source of truth for wording.</p>
+  <p class="nav-links"><a href="../Unit%207/0020-model-drift-and-monitoring-in-production.html" class="nav-prev">← Lesson 20: Model Drift and Monitoring in Production</a> <a href="../index.html" class="nav-toc">Contents</a></p>
+
+  <h2>Unit 1 — The Perceptron and Gradient Descent</h2>
+  <div class="term-grid">
+    <div class="term-card">
+      <p class="term-name">Weight matrix</p>
+      <p>Holds one row of weights per neuron in a layer, so <code class="inline-code">W @ x</code> computes every neuron's weighted sum in one matrix multiply, instead of neuron by neuron.</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">Hidden layer / output layer</p>
+      <p>A hidden layer sits between input and output and is never read directly from outside the network; the output layer produces the network's final answer, shaped to whatever the task needs.</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">ReLU / sigmoid / tanh / softmax</p>
+      <p>ReLU is <code class="inline-code">max(0, z)</code>, the default for hidden layers since it doesn't saturate for positive inputs; sigmoid squashes to (0, 1); tanh squashes to (−1, 1); softmax turns a vector of scores into a probability distribution across classes that sums to 1.</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">Loss function</p>
+      <p>Takes a prediction and the true value and returns one number describing how bad that prediction was — the thing every training loop in this course minimizes.</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">Mean Squared Error (MSE)</p>
+      <p>The squared difference between prediction and true value, <code class="inline-code">(prediction − true)²</code> — the standard loss for regression.</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">Cross-entropy loss</p>
+      <p>Built from negative log-probability, the standard loss for classification — grows sharply as a confident prediction turns out to be wrong, unlike MSE's comparatively mild penalty.</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">Gradient vector</p>
+      <p>For a network with many weights, one partial derivative per weight — how much that weight alone would change the loss, holding every other weight fixed.</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">Local minimum / saddle point</p>
+      <p>A local minimum is a point where loss is lower than every nearby point, but not necessarily the lowest possible overall; a saddle point curves downward in some directions and upward in others, so the gradient is zero there without it being a minimum.</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">Momentum</p>
+      <p>Accumulates a running average of recent gradients, smoothing out zig-zagging across narrow valleys and speeding up consistent downhill progress compared to plain gradient descent.</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">Adam</p>
+      <p>The optimizer used in most real training scripts, building on momentum by giving every individual weight its own effectively adapted learning rate.</p>
+    </div>
+  </div>
+
+  <h2>Unit 2 — Training a Neural Network</h2>
+  <div class="term-grid">
+    <div class="term-card">
+      <p class="term-name">Backpropagation</p>
+      <p>Computes the loss gradient for every weight by walking backward through a network, layer by layer, from the output.</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">Chain rule</p>
+      <p>The calculus rule that makes each layer's already-computed local gradient a valid, reusable ingredient for the gradient of the layer before it.</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">Local gradient</p>
+      <p>A small derivative computed at a single point in the network, using only values already available there, rather than borrowed from elsewhere.</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">Batch / stochastic / mini-batch gradient descent</p>
+      <p>Batch gradient descent computes a gradient from the entire training set before every update; stochastic gradient descent (SGD) updates from just one example at a time; mini-batch gradient descent, the practical default, updates from a small chunk of examples at a time.</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">Batch size</p>
+      <p>How many examples are in one mini-batch — small batches give noisier but more frequent updates, large batches give smoother but more expensive ones.</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">Iteration (step)</p>
+      <p>One single weight update, using one mini-batch's gradient.</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">Epoch</p>
+      <p>One full pass through the entire training set — made up of many iterations, one per mini-batch processed.</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">Regularization</p>
+      <p>Any technique that trades away a little training accuracy on purpose, in exchange for a network that generalizes better to data it hasn't seen.</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">Dropout</p>
+      <p>Randomly zeroes out a different fraction of a layer's activations on every training step; active only during training, forcing the network to spread a pattern redundantly instead of relying on one neuron.</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">Weight decay</p>
+      <p>Adds a penalty proportional to squared weight size directly into the loss (L2 regularization), pulling weights toward smaller values alongside minimizing prediction error.</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">Early stopping</p>
+      <p>Halts training once validation loss stops improving, even if training loss is still falling.</p>
+    </div>
+  </div>
+
+  <h2>Unit 3 — Convolutional Neural Networks</h2>
+  <div class="term-grid">
+    <div class="term-card">
+      <p class="term-name">Fully-connected layer</p>
+      <p>Connects every input to every neuron independently, with no assumption about structure — the direct but parameter-heavy alternative to a convolutional layer over image data.</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">Spatial locality</p>
+      <p>The assumption that nearby pixels are more related to each other than to distant pixels — what a small local filter matches.</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">Translation invariance</p>
+      <p>The assumption that a pattern like an edge means the same thing regardless of where in the image it appears — what licenses reusing the same filter weights at every position.</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">Stride</p>
+      <p>How many positions a convolutional filter moves between each computed value.</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">Padding</p>
+      <p>Adds a border of zeros around an input before convolving, most often to keep the output the same size as the input ("same" padding) instead of shrinking it ("valid" padding).</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">Max pooling / average pooling</p>
+      <p>Max pooling keeps the largest value in each small region of a feature map; average pooling keeps the mean — either way shrinking the map with no new weights to learn.</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">Receptive field</p>
+      <p>How much of the original input a single value in a layer's output is actually influenced by — grows with every convolutional or pooling layer stacked before it.</p>
+    </div>
+  </div>
+
+  <h2>Unit 4 — Recurrent and Sequence Models</h2>
+  <div class="term-grid">
+    <div class="term-card">
+      <p class="term-name">Bag-of-words</p>
+      <p>A representation that treats input as an unordered collection, discarding sequence order entirely — two sentences with the same words but different order look identical to it.</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">Variable-length input</p>
+      <p>Input where different examples can have different numbers of elements, unlike a fixed-size image or feature vector.</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">Sequence model</p>
+      <p>An architecture built to process elements in order, one at a time, regardless of how many there are — fixing both the order problem and the variable-length problem natively.</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">Backpropagation through time (BPTT)</p>
+      <p>Unrolls a recurrence across time steps and backpropagates through the result like an ordinary deep network, one layer per time step.</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">Vanishing gradient / exploding gradient</p>
+      <p>A vanishing gradient results from multiplying many per-step factors under 1 together across many time steps; an exploding gradient is the same compounding effect with factors over 1.</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">Gradient clipping</p>
+      <p>Caps a gradient's magnitude before it's used to update weights — a direct fix for exploding gradients specifically.</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">Cell state</p>
+      <p>An LSTM's separate long-term memory, distinct from its hidden state, updated additively rather than through repeated multiplication.</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">Forget gate / input gate / output gate</p>
+      <p>An LSTM's three gates: the forget gate controls how much of the old cell state survives, the input gate controls how much new candidate information is written in, and the output gate controls how much of the cell state is exposed as the hidden state.</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">GRU (Gated Recurrent Unit) / update gate / reset gate</p>
+      <p>A simplified gated architecture using two gates — an update gate (merging forget and input) and a reset gate — with no separate cell state, and fewer parameters than an LSTM.</p>
+    </div>
+  </div>
+
+  <h2>Unit 5 — Attention and Transformers</h2>
+  <div class="term-grid">
+    <div class="term-card">
+      <p class="term-name">Encoder-decoder architecture</p>
+      <p>Uses one network to read an input sequence and a separate network to generate an output sequence from it.</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">Context vector</p>
+      <p>A fixed-size summary the encoder compresses its entire input into — the information bottleneck attention was built to remove.</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">Attention</p>
+      <p>Replaces reliance on a single fixed context vector with direct, weighted access to every encoder hidden state.</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">Attention head</p>
+      <p>One full query/key/value attention computation, producing one relevance weighting per token.</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">Multi-head attention</p>
+      <p>Runs several attention heads in parallel, each with its own learned projections working in a smaller subspace, then concatenates their outputs back together.</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">Positional encoding</p>
+      <p>A fixed, position-dependent pattern added to token embeddings before attention runs, since attention's own math has no built-in sense of order.</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">Residual connection</p>
+      <p>Adds a sub-layer's input back onto its output, giving the gradient a direct path backward through a deep stack of blocks.</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">Layer normalization</p>
+      <p>Rescales each token's vector to a stable mean and variance after a residual addition, keeping values well-behaved across many stacked blocks.</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">Feed-forward network</p>
+      <p>A small two-layer MLP applied independently to each token's vector, after attention has already gathered context across tokens.</p>
+    </div>
+  </div>
+
+  <h2>Unit 6 — Training at Scale</h2>
+  <div class="term-grid">
+    <div class="term-card">
+      <p class="term-name">Serial computation</p>
+      <p>Processes operations one at a time, in sequence — total time scales directly with the number of operations.</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">Parallel computation</p>
+      <p>Processes many independent operations simultaneously across multiple cores — total time depends far more on available cores than operation count.</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">Throughput</p>
+      <p>Total work completed per unit time, not the speed of any single operation — the metric parallel hardware like a GPU is built to maximize.</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">Transfer learning</p>
+      <p>Starts from a network already trained on a different, usually larger dataset, instead of training from scratch.</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">Feature extraction</p>
+      <p>Freezes all pretrained weights and trains only a newly added head on top.</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">Fine-tuning</p>
+      <p>Also unfreezes some pretrained layers, typically with a small learning rate, in addition to training a new head.</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">Catastrophic forgetting</p>
+      <p>Losing previously learned, useful weights by updating them too aggressively on new data.</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">Hyperparameter</p>
+      <p>A setting fixed before training and chosen by the practitioner — learning rate, batch size, dropout rate — rather than learned automatically by gradient descent.</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">Grid search</p>
+      <p>Exhaustively tries every combination from fixed value sets — thorough, but the trial count grows multiplicatively with every added hyperparameter.</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">Random search</p>
+      <p>Samples each hyperparameter's value independently at random, using the same total trial budget — often outperforms grid search by covering each dimension more broadly.</p>
+    </div>
+  </div>
+
+  <h2>Unit 7 — Evaluating and Deploying Models</h2>
+  <div class="term-grid">
+    <div class="term-card">
+      <p class="term-name">Confusion matrix</p>
+      <p>A table counting true positives, false positives, false negatives, and true negatives — every metric in this unit is computed from just these four counts.</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">Precision</p>
+      <p>Of everything the model predicted as positive, how much actually was — a low precision means a lot of false alarms.</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">Recall</p>
+      <p>Of everything that actually was positive, how much the model caught — a low recall means a lot of real cases slipping through undetected.</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">F1 score</p>
+      <p>The harmonic mean of precision and recall — stays closer to whichever is lower, so a model can't score well by excelling at one while neglecting the other.</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">Data drift</p>
+      <p>A change in the distribution of input features compared to training time, detectable by comparing input statistics alone, without new labels.</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">Concept drift</p>
+      <p>A change in the true relationship between input and correct output, often invisible until new labels eventually arrive, even when inputs still look statistically familiar.</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">Retraining trigger</p>
+      <p>A defined threshold — a metric crossing a set value, or a fixed time interval — that starts a new training run automatically, rather than leaving the decision to whenever someone happens to notice.</p>
+    </div>
+  </div>
+</div>

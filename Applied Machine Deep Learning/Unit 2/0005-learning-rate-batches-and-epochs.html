@@ -1,0 +1,193 @@
+<meta charset="UTF-8">
+<title>Lesson 5: Learning Rate, Batches, and Epochs — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="advanced">
+  <span class="kicker">STEM+ · Applied Machine/Deep Learning · Unit 2 · Lesson 5</span>
+  <h1>Learning Rate, Batches, and Epochs</h1>
+  <p class="subtitle">Lesson 4's tiny network computed a gradient from one example. Real training sets have thousands or millions of examples — this lesson covers how much of that data gets looked at before each update, and the vocabulary every real training script's output is printed in.</p>
+  <p class="nav-links"><a href="0004-backpropagation-how-error-flows-backward.html" class="nav-prev">← Lesson 4</a> <a href="0006-overfitting-and-regularization.html" class="nav-next">Lesson 6 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Computing a gradient from every single training example before taking one step — <strong>batch gradient descent</strong> — gives the most accurate gradient possible, but on a large dataset it's painfully slow: one update per full pass over everything. The opposite extreme, <strong>stochastic gradient descent (SGD)</strong>, updates after just one example at a time — fast per update, but each individual gradient is a noisy, unreliable estimate of the true downhill direction. Almost nobody uses either extreme. Real training uses <strong>mini-batch gradient descent</strong>: split the dataset into small chunks, compute one averaged gradient per chunk, and update once per chunk.</p>
+
+  <span class="code-label">Python — the training loop's actual shape</span>
+  <pre class="code-block"><code>batch_size = 32
+num_epochs = 10
+
+for epoch in range(num_epochs):
+    shuffle(training_data)
+    for batch in split_into_batches(training_data, batch_size):
+        predictions = forward_pass(batch)
+        loss = compute_loss(predictions, batch.labels)
+        gradients = backward_pass(loss)   # Lesson 4, averaged over the whole batch
+        update_weights(gradients, learning_rate)   # Lesson 3
+        # this one update is one "iteration" or "step"</code></pre>
+
+  <p>One full pass through the entire training set is an <strong>epoch</strong> — with 10,000 examples and a <strong>batch size</strong> of 32, one epoch takes 313 <strong>iterations</strong> (also called steps), each one a single weight update. Training almost always runs for many epochs, since one pass rarely drives the loss anywhere near its minimum. Batch size sits in a real tradeoff: a small batch (say, 8) gives a noisier gradient estimate — closer to SGD — but fits easily in memory and updates weights often; a large batch (say, 512) gives a smoother, more reliable gradient closer to full batch descent, but costs more memory per step and updates less frequently for the same amount of data seen.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    A <strong>mini-batch</strong> is a small subset of the training set used to compute one averaged gradient. <strong>Batch size</strong> is how many examples are in it. An <strong>iteration</strong> (or step) is one weight update, using one mini-batch's gradient. An <strong>epoch</strong> is one full pass through the entire training set. <strong>Stochastic gradient descent (SGD)</strong> is the batch-size-1 extreme case.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why a noisier gradient isn't purely a downside</span>
+    A small batch's noisy gradient estimate sounds like a defect, but it isn't only that — the same randomness that makes any one step less accurate can also help a network step past a shallow local minimum or saddle point (Lesson 3) that a perfectly smooth, large-batch gradient would settle into and get stuck at. In practice, batch size is chosen less for "which gradient is more correct" and more for what fits in memory and what Unit 6's hardware can process efficiently in parallel — accuracy of any single gradient estimate turns out to matter less than it initially seems.
+  </div>
+
+  <h2>Try it: watch batch size and learning rate shape a training curve</h2>
+  <p>Set a batch size and learning rate, then train epoch by epoch and watch how each choice shows up in the loss curve.</p>
+
+  <div class="widget" id="training-widget">
+    <p class="widget-label">Interactive: simulated training curve</p>
+    <div class="slider-row">
+      <label for="bs-slider">Batch size</label>
+      <input type="range" id="bs-slider" min="8" max="256" step="8" value="32">
+      <span class="slider-value" data-bs-value>32</span>
+    </div>
+    <div class="slider-row">
+      <label for="tr-lr-slider">Learning rate</label>
+      <input type="range" id="tr-lr-slider" min="0.05" max="1.4" step="0.05" value="0.3">
+      <span class="slider-value" data-tr-lr-value>0.30</span>
+    </div>
+    <div class="fm-row">
+      <button class="widget-btn" type="button" data-tr-step>Train 1 epoch</button>
+      <button class="widget-btn" type="button" data-tr-reset>Reset</button>
+    </div>
+    <div id="lr-chart" style="display:flex; align-items:flex-end; gap:2px; height:120px; margin:0.9rem 0; border-bottom:1px solid var(--border);"></div>
+    <p class="plot-readout" data-tr-readout>Epoch 0: loss = 2.50. Click "Train 1 epoch."</p>
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. Why does almost no real training use full batch gradient descent on a large dataset?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Computing a gradient from every example before a single update makes each update painfully slow to reach.</button>
+      <button class="quiz-choice" data-correct="false">Full batch gradient descent is mathematically impossible to compute.</button>
+      <button class="quiz-choice" data-correct="false">It always produces a completely incorrect gradient.</button>
+      <button class="quiz-choice" data-correct="false">It requires no memory at all, unlike mini-batches.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Full batch descent gives the most accurate gradient, but only one update per full pass over the data.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. With 10,000 training examples and a batch size of 32, roughly how many iterations happen in one epoch?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">About 313 — 10,000 divided by 32.</button>
+      <button class="quiz-choice" data-correct="false">Exactly 1 — one epoch is always one iteration.</button>
+      <button class="quiz-choice" data-correct="false">Exactly 10,000, one iteration per example regardless of batch size.</button>
+      <button class="quiz-choice" data-correct="false">Exactly 32, one iteration per item in a single batch.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>One iteration processes one batch; the number of batches per epoch is dataset size divided by batch size.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. What is a genuine upside of a small batch size's noisier gradient estimate?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">The randomness can help a network step past a shallow local minimum or saddle point that a smoother gradient might settle into.</button>
+      <button class="quiz-choice" data-correct="false">It guarantees the gradient is always perfectly accurate.</button>
+      <button class="quiz-choice" data-correct="false">It eliminates the need for a learning rate entirely.</button>
+      <button class="quiz-choice" data-correct="false">It removes the need to ever compute more than one epoch.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Noise from small batches can act like a useful nudge away from getting stuck, not purely a downside.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="epoch">
+    <p class="quiz-prompt">4. Fill in the blank: one full pass through the entire training set is called one ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>See the definition box above.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="mini-batch|mini batch">
+    <p class="quiz-prompt">5. Fill in the blank: a small subset of the training set used to compute one averaged gradient before a single weight update is a ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>See the definition box above.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p><a href="https://www.deeplearning.ai/ai-notes/optimization/">DeepLearning.AI's "Optimization" interactive notes</a> visualize how batch size and learning rate actually shape a real training curve, beyond this lesson's simulation.</p>
+
+  <p class="ask-teacher">Wondering how to actually pick a batch size and learning rate for a real project instead of guessing? Ask your teacher — Unit 6 covers a systematic approach directly. Next: what happens when a network trains for too many epochs on the same data.</p>
+
+  <footer class="lesson-footer">STEM+ · Applied Machine/Deep Learning · Lesson 5 of the course sequence</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var START_LOSS = 2.5;
+  var loss = START_LOSS;
+  var epoch = 0;
+
+  var bsSlider = document.getElementById('bs-slider');
+  var bsVal = document.querySelector('[data-bs-value]');
+  var lrSlider = document.getElementById('tr-lr-slider');
+  var lrVal = document.querySelector('[data-tr-lr-value]');
+  var chart = document.getElementById('lr-chart');
+  var readout = document.querySelector('[data-tr-readout]');
+  var stepBtn = document.querySelector('[data-tr-step]');
+  var resetBtn = document.querySelector('[data-tr-reset]');
+
+  function addBar(v) {
+    var bar = document.createElement('div');
+    var h = Math.max(2, Math.min(120, (v / 3.0) * 120));
+    bar.style.width = '6px';
+    bar.style.height = h + 'px';
+    bar.style.background = 'var(--accent)';
+    bar.title = 'loss ' + v.toFixed(3);
+    chart.appendChild(bar);
+  }
+
+  function trainEpoch() {
+    var batchSize = parseInt(bsSlider.value, 10);
+    var lr = parseFloat(lrSlider.value);
+    epoch++;
+
+    var noiseScale = 0.5 / Math.sqrt(batchSize / 8);   // smaller batch -> more noise
+    var noise = (Math.random() - 0.5) * noiseScale * loss;
+
+    var next;
+    if (lr > 1.15) {
+      // learning rate too high: loss trends upward, unstable
+      next = loss * (1 + (lr - 1.15) * 1.5) + noise;
+    } else {
+      var decay = Math.min(0.9, lr * 0.7);
+      next = loss * (1 - decay) + noise;
+    }
+    loss = Math.max(0.02, next);
+    addBar(loss);
+
+    var note;
+    if (lr > 1.15) note = 'learning rate too high — loss is trending up, not down.';
+    else if (batchSize <= 16) note = 'small batch — notice how jumpy the loss is epoch to epoch.';
+    else if (batchSize >= 128) note = 'large batch — smoother curve, but fewer updates per epoch.';
+    else note = 'a reasonable batch size and learning rate for this data.';
+
+    readout.textContent = 'Epoch ' + epoch + ': loss = ' + loss.toFixed(3) + ' (batch size ' + batchSize + ', lr ' + lr.toFixed(2) + ') — ' + note;
+  }
+
+  stepBtn.addEventListener('click', trainEpoch);
+
+  resetBtn.addEventListener('click', function () {
+    loss = START_LOSS;
+    epoch = 0;
+    chart.innerHTML = '';
+    readout.textContent = 'Epoch 0: loss = ' + START_LOSS.toFixed(2) + '. Click "Train 1 epoch."';
+  });
+
+  bsSlider.addEventListener('input', function () { bsVal.textContent = bsSlider.value; });
+  lrSlider.addEventListener('input', function () { lrVal.textContent = parseFloat(lrSlider.value).toFixed(2); });
+});
+</script>

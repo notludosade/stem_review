@@ -1,0 +1,207 @@
+<meta charset="UTF-8">
+<title>Lesson 2: Loss Functions — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="advanced">
+  <span class="kicker">STEM+ · Applied Machine/Deep Learning · Unit 1 · Lesson 2</span>
+  <h1>Loss Functions: Measuring How Wrong a Prediction Is</h1>
+  <p class="subtitle">AI Developer's Lesson 13 used <code class="inline-code">loss(w) = (w − 3) ** 2</code> as a stand-in and moved on. Before gradient descent can do anything real, that stand-in needs to become an actual, deliberately chosen function — and the choice depends entirely on what kind of answer the network is producing.</p>
+  <p class="nav-links"><a href="0001-from-a-single-neuron-to-a-network.html" class="nav-prev">← Lesson 1</a> <a href="0003-gradient-descent-finding-the-downhill-direction.html" class="nav-next">Lesson 3 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>A <strong>loss function</strong> takes a prediction and the true answer and returns one number: how bad that prediction was. Every training loop in this course minimizes some loss function — the only question, lesson to lesson, is which one, and that answer depends on what the output layer is actually predicting.</p>
+
+  <span class="code-label">Python — the two workhorse losses</span>
+  <pre class="code-block"><code>import numpy as np
+
+def mse(prediction, true_value):
+    return (prediction - true_value) ** 2
+
+def cross_entropy(predicted_prob, true_label):
+    # true_label is 0 or 1; predicted_prob is the model's P(class = 1)
+    p = np.clip(predicted_prob, 1e-9, 1 - 1e-9)   # avoid log(0)
+    return -(true_label * np.log(p) + (1 - true_label) * np.log(1 - p))
+
+print(mse(0.9, 1.0))              # 0.01  — small, close prediction
+print(cross_entropy(0.9, 1))      # 0.105 — small, close prediction
+print(cross_entropy(0.01, 1))     # 4.605 — confidently wrong, punished hard</code></pre>
+
+  <p><strong>Mean Squared Error (MSE)</strong> — squared difference between prediction and truth — is the standard loss for regression, predicting a continuous number, exactly as it was for AI Developer's linear regression. <strong>Cross-entropy loss</strong> is the standard for classification instead, and it is not just MSE with a different name: look at the last two lines above. A prediction of 0.9 versus a true label of 1 scores fine under either loss. But a confidently <em>wrong</em> prediction — 0.01 when the answer was 1 — gets a mild MSE penalty of about 0.98, while cross-entropy explodes toward infinity as a wrong prediction's confidence approaches 0 or 1. That's deliberate: cross-entropy is built from log-probability, so it punishes overconfident mistakes far more severely than a middling one.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    A <strong>loss function</strong> scores how wrong a single prediction was against the true value. <strong>Mean Squared Error (MSE)</strong>, <code class="inline-code">(prediction − true)²</code>, is the standard loss for regression. <strong>Cross-entropy loss</strong>, built from negative log-probability, is the standard loss for classification, and grows sharply as a confident prediction turns out to be wrong.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why cross-entropy pairs with sigmoid and softmax specifically</span>
+    Lesson 1's sigmoid and softmax both squash their output toward 0 or 1 for large inputs — recall that near-flat region. Pairing a squashed output with MSE can leave gradient descent almost nothing to follow: MSE's own slope also flattens out exactly where the prediction is most confidently wrong, compounding the saturation problem instead of cutting through it. Cross-entropy's log term does the opposite — it stays steep exactly where a confident prediction is wrong, which is precisely where a network most needs a strong training signal. This is why virtually no real classifier pairs sigmoid or softmax with MSE.
+  </div>
+
+  <h2>Try it: same prediction, two different losses</h2>
+  <p>Set the true label, then slide the model's predicted probability and watch how far apart MSE and cross-entropy pull apart as the prediction gets confidently wrong.</p>
+
+  <div class="widget" id="loss-widget">
+    <p class="widget-label">Interactive: loss function comparison</p>
+    <div class="fm-tabs">
+      <button class="fm-tab is-active" type="button" data-loss-y="1">True label: 1</button>
+      <button class="fm-tab" type="button" data-loss-y="0">True label: 0</button>
+    </div>
+    <div class="dual-plot">
+      <div>
+        <h3>Mean Squared Error</h3>
+        <div class="plot-wrap">
+          <svg viewBox="0 0 260 150" width="260" height="150" role="img" aria-label="MSE loss curve against predicted probability">
+            <line class="fig-axis" x1="20" y1="130" x2="240" y2="130"></line>
+            <line class="fig-axis" x1="20" y1="10" x2="20" y2="130"></line>
+            <polyline class="fig-curve" data-mse-curve points=""></polyline>
+            <circle class="fig-point" data-mse-point cx="20" cy="130" r="5"></circle>
+          </svg>
+        </div>
+      </div>
+      <div>
+        <h3>Cross-Entropy</h3>
+        <div class="plot-wrap">
+          <svg viewBox="0 0 260 150" width="260" height="150" role="img" aria-label="Cross-entropy loss curve against predicted probability">
+            <line class="fig-axis" x1="20" y1="130" x2="240" y2="130"></line>
+            <line class="fig-axis" x1="20" y1="10" x2="20" y2="130"></line>
+            <polyline class="fig-curve" data-ce-curve points=""></polyline>
+            <circle class="fig-point" data-ce-point cx="20" cy="130" r="5"></circle>
+          </svg>
+        </div>
+      </div>
+    </div>
+    <div class="slider-row">
+      <label for="loss-p">Predicted P(class=1)</label>
+      <input type="range" id="loss-p" min="0.02" max="0.98" step="0.01" value="0.7">
+      <span class="slider-value" data-loss-p-value>0.70</span>
+    </div>
+    <p class="plot-readout" data-loss-readout>—</p>
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. Which loss function is standard for a regression task predicting a continuous number?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Mean Squared Error</button>
+      <button class="quiz-choice" data-correct="false">Cross-entropy loss</button>
+      <button class="quiz-choice" data-correct="false">Softmax</button>
+      <button class="quiz-choice" data-correct="false">ReLU</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>MSE, the squared difference between prediction and truth, is the standard regression loss.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. What makes cross-entropy behave differently from MSE on a confidently wrong prediction?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Cross-entropy's loss grows sharply toward infinity as confidence in the wrong answer increases; MSE's penalty stays comparatively mild.</button>
+      <button class="quiz-choice" data-correct="false">The two functions always return exactly the same value for any prediction.</button>
+      <button class="quiz-choice" data-correct="false">Cross-entropy ignores confidently wrong predictions entirely.</button>
+      <button class="quiz-choice" data-correct="false">MSE cannot be computed unless the prediction equals exactly 0 or 1.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>cross_entropy(0.01, 1) above returns roughly 4.6, versus mse(0.01, 1) returning roughly 0.98.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why does pairing a saturating output activation (sigmoid or softmax) with MSE tend to work poorly?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">MSE's own slope also flattens where the prediction is most confidently wrong, compounding the saturation problem instead of cutting through it.</button>
+      <button class="quiz-choice" data-correct="false">MSE cannot be applied to any output between 0 and 1.</button>
+      <button class="quiz-choice" data-correct="false">Sigmoid and softmax are mathematically incompatible with any loss function.</button>
+      <button class="quiz-choice" data-correct="false">There is no real difference in how the two combinations train.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Cross-entropy's steep log term stays strong exactly where a saturated activation's own gradient goes flat.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="loss function|loss">
+    <p class="quiz-prompt">4. Fill in the blank: a function that takes a prediction and the true value and returns one number describing how bad that prediction was is called a ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>See the definition box above.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="cross-entropy|cross entropy">
+    <p class="quiz-prompt">5. Fill in the blank: the standard loss function for classification, built from negative log-probability, is ___ loss.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>See the definition box above.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p><a href="https://ml-cheatsheet.readthedocs.io/en/latest/loss_functions.html">The Machine Learning Cheatsheet's "Loss Functions" page</a> lays out MSE, cross-entropy, and several other real loss functions side by side, with their formulas and typical use cases.</p>
+
+  <p class="ask-teacher">Wondering why cross-entropy specifically uses a logarithm rather than some other steep function? Ask your teacher — it connects to information theory and how "surprise" gets measured mathematically. Next: now that wrongness has a number, how does a network actually use it to improve?</p>
+
+  <footer class="lesson-footer">STEM+ · Applied Machine/Deep Learning · Lesson 2 of the course sequence</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var trueY = 1;
+  var mseCurve = document.querySelector('[data-mse-curve]');
+  var msePoint = document.querySelector('[data-mse-point]');
+  var ceCurve = document.querySelector('[data-ce-curve]');
+  var cePoint = document.querySelector('[data-ce-point]');
+  var slider = document.getElementById('loss-p');
+  var pVal = document.querySelector('[data-loss-p-value]');
+  var readout = document.querySelector('[data-loss-readout]');
+  var yButtons = document.querySelectorAll('[data-loss-y]');
+
+  var MSE_MAX = 1.0;
+  var CE_MAX = 4.5;
+
+  function xToPx(p) { return 20 + p * 220; }
+  function yToPxMse(v) { return 130 - (v / MSE_MAX) * 120; }
+  function yToPxCe(v) { return 130 - (Math.min(v, CE_MAX) / CE_MAX) * 120; }
+
+  function mse(p, y) { return (p - y) * (p - y); }
+  function ce(p, y) { var pc = Math.min(Math.max(p, 0.001), 0.999); return -(y * Math.log(pc) + (1 - y) * Math.log(1 - pc)); }
+
+  function drawCurves() {
+    var msePts = [], cePts = [];
+    for (var p = 0.02; p <= 0.981; p += 0.02) {
+      msePts.push(xToPx(p).toFixed(1) + ',' + yToPxMse(mse(p, trueY)).toFixed(1));
+      cePts.push(xToPx(p).toFixed(1) + ',' + yToPxCe(ce(p, trueY)).toFixed(1));
+    }
+    mseCurve.setAttribute('points', msePts.join(' '));
+    ceCurve.setAttribute('points', cePts.join(' '));
+  }
+
+  function updatePoint() {
+    var p = parseFloat(slider.value);
+    pVal.textContent = p.toFixed(2);
+    var mv = mse(p, trueY);
+    var cv = ce(p, trueY);
+    msePoint.setAttribute('cx', xToPx(p).toFixed(1));
+    msePoint.setAttribute('cy', yToPxMse(mv).toFixed(1));
+    cePoint.setAttribute('cx', xToPx(p).toFixed(1));
+    cePoint.setAttribute('cy', yToPxCe(cv).toFixed(1));
+    readout.textContent = 'p = ' + p.toFixed(2) + ', true label = ' + trueY + ' → MSE = ' + mv.toFixed(3) + ', cross-entropy = ' + cv.toFixed(3) + '.';
+  }
+
+  yButtons.forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      yButtons.forEach(function (b) { b.classList.remove('is-active'); });
+      btn.classList.add('is-active');
+      trueY = parseInt(btn.getAttribute('data-loss-y'), 10);
+      drawCurves();
+      updatePoint();
+    });
+  });
+
+  slider.addEventListener('input', updatePoint);
+
+  drawCurves();
+  updatePoint();
+});
+</script>

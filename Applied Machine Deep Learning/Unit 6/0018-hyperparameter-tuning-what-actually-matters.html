@@ -1,0 +1,177 @@
+<meta charset="UTF-8">
+<title>Lesson 18: Hyperparameter Tuning — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="advanced">
+  <span class="kicker">STEM+ · Applied Machine/Deep Learning · Unit 6 · Lesson 18</span>
+  <h1>Hyperparameter Tuning: What Actually Matters</h1>
+  <p class="subtitle">This course has handed you a learning rate, a batch size, a dropout rate, and an architecture in almost every widget so far. This lesson is about how those numbers actually get chosen for a real project, instead of assumed.</p>
+  <p class="nav-links"><a href="0017-transfer-learning-and-fine-tuning.html" class="nav-prev">← Lesson 17</a> <a href="../Unit%207/0019-evaluation-metrics-beyond-accuracy.html" class="nav-next">Unit 7, Lesson 19 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>A <strong>hyperparameter</strong> is any setting chosen before training starts and left fixed throughout it — learning rate, batch size, dropout rate, weight decay strength, number of layers — as opposed to a parameter (a weight or bias), which gradient descent adjusts automatically. Of every hyperparameter across this entire course, learning rate has consistently mattered the most: too small and training crawls, too large and it diverges outright, and Lesson 3, Lesson 5, and Lesson 16's widgets all demonstrated some version of exactly this same sensitivity.</p>
+
+  <span class="code-label">Python — two ways to search a hyperparameter space</span>
+  <pre class="code-block"><code>import itertools, random
+
+learning_rates = [0.001, 0.01, 0.1]
+dropout_rates = [0.0, 0.3, 0.5]
+
+# Grid search: every combination, exhaustively
+grid_trials = list(itertools.product(learning_rates, dropout_rates))   # 9 trials
+
+# Random search: the same budget, sampled instead of enumerated
+random_trials = [
+    (random.uniform(0.001, 0.1), random.uniform(0.0, 0.5))
+    for _ in range(9)
+]</code></pre>
+
+  <p><strong>Grid search</strong> tries every combination of a fixed set of values per hyperparameter — thorough, but the number of trials explodes multiplicatively with every hyperparameter added, and it wastes trials re-testing every value of a hyperparameter that barely matters, combined with every value of one that matters a great deal. <strong>Random search</strong>, given the identical trial budget, instead samples each hyperparameter's value independently and randomly on every trial. Counterintuitively, this usually finds a better configuration for the same budget — because it never repeats the exact same value for an unimportant hyperparameter, it ends up testing far more distinct values of whichever hyperparameter actually matters, without knowing in advance which one that is.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    A <strong>hyperparameter</strong> is a setting fixed before training, chosen by the practitioner rather than learned by gradient descent. <strong>Grid search</strong> exhaustively tries every combination from fixed value sets. <strong>Random search</strong> samples each hyperparameter's value independently at random, using the same total trial budget.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why random search tends to beat grid search on equal budgets</span>
+    With 9 trials split across a 3×3 grid, grid search only ever tests 3 distinct learning rate values, no matter how many dropout values it pairs each one with — if learning rate turns out to be the hyperparameter that actually matters and dropout barely does, most of that budget was effectively wasted re-testing dropout. Random search's same 9 trials sample 9 distinct learning rate values and 9 distinct dropout values, with no advance assumption about which one deserved more attention. Bergstra and Bengio's 2012 result formalized exactly this: when only a few hyperparameters really drive the outcome — nearly always true in practice — random search's broader per-dimension coverage outperforms grid search's exhaustive but shallow coverage, for the same cost.
+  </div>
+
+  <h2>Try it: feel the learning rate's sensitivity directly</h2>
+  <p>Slide the learning rate and watch the same simulated training curve from Lesson 3 and Lesson 5 respond — this is the single hyperparameter this course has stressed the most, for good reason.</p>
+
+  <div class="widget" id="hp-widget">
+    <p class="widget-label">Interactive: learning rate sensitivity</p>
+    <div class="plot-wrap">
+      <svg viewBox="0 0 320 160" width="320" height="160" role="img" aria-label="Simulated loss curve over training steps, responding to the learning rate slider">
+        <line class="fig-axis" x1="20" y1="150" x2="300" y2="150"></line>
+        <line class="fig-axis" x1="20" y1="10" x2="20" y2="150"></line>
+        <polyline class="fig-curve" data-hp-curve points=""></polyline>
+      </svg>
+    </div>
+    <div class="slider-row">
+      <label for="hp-lr">Learning rate</label>
+      <input type="range" id="hp-lr" min="0.01" max="1.3" step="0.01" value="0.3">
+      <span class="slider-value" data-hp-lr-value>0.30</span>
+    </div>
+    <p class="verdict" data-hp-verdict>—</p>
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What distinguishes a hyperparameter from a parameter?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">A hyperparameter is fixed before training and chosen by the practitioner; a parameter is learned automatically by gradient descent.</button>
+      <button class="quiz-choice" data-correct="false">Parameters are always set manually; hyperparameters are always learned automatically.</button>
+      <button class="quiz-choice" data-correct="false">There is no real distinction between the two terms.</button>
+      <button class="quiz-choice" data-correct="false">A hyperparameter only exists for classical machine learning, never for neural networks.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Learning rate, batch size, and dropout rate are all chosen ahead of time; weights and biases are what gradient descent actually updates.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why does grid search's trial count explode as more hyperparameters are added?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">It tries every combination of every hyperparameter's values, so the total grows multiplicatively with each added hyperparameter.</button>
+      <button class="quiz-choice" data-correct="false">Grid search always uses exactly 9 trials, regardless of how many hyperparameters are involved.</button>
+      <button class="quiz-choice" data-correct="false">Adding hyperparameters has no effect on the number of trials grid search needs.</button>
+      <button class="quiz-choice" data-correct="false">Grid search can only ever tune a single hyperparameter at a time.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>itertools.product's combination count multiplies across every additional hyperparameter's value list.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why can random search outperform grid search on the same trial budget?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">It tests more distinct values of whichever hyperparameter actually matters, without needing to know in advance which one that is.</button>
+      <button class="quiz-choice" data-correct="false">Random search always uses far more total trials than grid search.</button>
+      <button class="quiz-choice" data-correct="false">Grid search is incapable of testing more than one hyperparameter combination.</button>
+      <button class="quiz-choice" data-correct="false">Random search guarantees finding the mathematically optimal configuration every time.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Since most trials don't repeat exact values, random search covers each individual dimension more broadly for the same total budget.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="hyperparameter">
+    <p class="quiz-prompt">4. Fill in the blank: a setting fixed before training starts, chosen by the practitioner rather than learned, is a ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>See the definition box above.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="random search">
+    <p class="quiz-prompt">5. Fill in the blank: sampling each hyperparameter's value independently at random, rather than enumerating every fixed combination, is called ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>See the definition box above.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Bergstra and Bengio's <a href="https://www.jmlr.org/papers/v13/bergstra12a.html">"Random Search for Hyper-Parameter Optimization"</a> (JMLR, 2012) is the original, widely-cited result behind this lesson's central claim.</p>
+
+  <p class="ask-teacher">Curious what Bayesian optimization adds on top of random search? Ask your teacher — it uses each trial's result to intelligently choose the next one, instead of sampling blindly, and is common in more automated tuning tools. That closes Unit 6. Next: once a model is trained and tuned, how to actually judge whether it's any good.</p>
+
+  <footer class="lesson-footer">STEM+ · Applied Machine/Deep Learning · Lesson 18 of the course sequence</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var curveEl = document.querySelector('[data-hp-curve]');
+  var slider = document.getElementById('hp-lr');
+  var lrVal = document.querySelector('[data-hp-lr-value]');
+  var verdict = document.querySelector('[data-hp-verdict]');
+
+  var START = 2.5;
+  var STEPS = 30;
+
+  function xToPx(step) { return 20 + (step / STEPS) * 280; }
+  function yToPx(loss) { return 150 - (Math.min(loss, 6) / 6) * 140; }
+
+  function computeCurve(lr) {
+    var loss = START;
+    var pts = [xToPx(0).toFixed(1) + ',' + yToPx(loss).toFixed(1)];
+    for (var s = 1; s <= STEPS; s++) {
+      if (lr <= 0.9) {
+        loss = loss * (1 - lr * 0.6);
+      } else {
+        loss = loss * (1 + (lr - 0.9) * 1.2);
+      }
+      loss = Math.max(0.02, loss);
+      pts.push(xToPx(s).toFixed(1) + ',' + yToPx(loss).toFixed(1));
+    }
+    curveEl.setAttribute('points', pts.join(' '));
+    return loss;
+  }
+
+  function render() {
+    var lr = parseFloat(slider.value);
+    lrVal.textContent = lr.toFixed(2);
+    var finalLoss = computeCurve(lr);
+
+    verdict.classList.remove('is-pass', 'is-fail');
+    if (lr < 0.05) {
+      verdict.classList.add('is-fail');
+      verdict.textContent = 'lr = ' + lr.toFixed(2) + ': too low — barely moving after ' + STEPS + ' steps (loss ≈ ' + finalLoss.toFixed(2) + ').';
+    } else if (lr <= 0.9) {
+      verdict.classList.add('is-pass');
+      verdict.textContent = 'lr = ' + lr.toFixed(2) + ': converging steadily (loss ≈ ' + finalLoss.toFixed(2) + ' after ' + STEPS + ' steps).';
+    } else {
+      verdict.classList.add('is-fail');
+      verdict.textContent = 'lr = ' + lr.toFixed(2) + ': too high — diverging instead of converging.';
+    }
+  }
+
+  slider.addEventListener('input', render);
+  render();
+});
+</script>

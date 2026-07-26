@@ -1,0 +1,200 @@
+<meta charset="UTF-8">
+<title>Lesson 19: Evaluation Metrics Beyond Accuracy — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="advanced">
+  <span class="kicker">STEM+ · Applied Machine/Deep Learning · Unit 7 · Lesson 19</span>
+  <h1>Evaluation Metrics Beyond Accuracy</h1>
+  <p class="subtitle">AI Developer's Unit 3 named precision and recall once, briefly. Every model this course has built since deserves the full picture — the single object every one of these metrics is actually computed from, and exactly when accuracy alone goes badly wrong.</p>
+  <p class="nav-links"><a href="../Unit%206/0018-hyperparameter-tuning-what-actually-matters.html" class="nav-prev">← Lesson 18</a> <a href="0020-model-drift-and-monitoring-in-production.html" class="nav-next">Lesson 20 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Every binary classification result falls into exactly one of four buckets, and a <strong>confusion matrix</strong> is simply a table counting how many predictions landed in each one: a true positive (predicted positive, actually positive), a false positive (predicted positive, actually negative), a false negative (predicted negative, actually positive), and a true negative (predicted negative, actually negative). Every metric in this lesson is computed from just these four counts.</p>
+
+  <span class="code-label">Python — every metric, derived from the same four numbers</span>
+  <pre class="code-block"><code>tp, fp, fn, tn = 50, 10, 5, 935   # a spam filter's results on 1,000 emails
+
+accuracy = (tp + tn) / (tp + fp + fn + tn)
+precision = tp / (tp + fp)          # of predicted positives, how many were right?
+recall = tp / (tp + fn)             # of actual positives, how many did it catch?
+f1 = 2 * precision * recall / (precision + recall)   # harmonic mean of the two
+
+print(accuracy, precision, recall, f1)
+# 0.985  0.833  0.909  0.870</code></pre>
+
+  <p><strong>Precision</strong> answers "of everything the model called positive, how much actually was?" — a low precision means a lot of false alarms. <strong>Recall</strong> answers "of everything that actually was positive, how much did the model catch?" — a low recall means a lot of real cases slipping through undetected. These two usually trade off against each other: a model that predicts "positive" more freely tends to catch more real cases (higher recall) at the cost of more false alarms (lower precision), and vice versa. The <strong>F1 score</strong> is the harmonic mean of the two — closer to whichever of precision or recall is lower, so a model can't earn a good F1 score by excelling at one while badly neglecting the other.</p>
+
+  <div class="box example">
+    <span class="box-label">Worked example — why accuracy alone misleads</span>
+    A rare disease affects 1% of patients. A "model" that always predicts "healthy," never once actually looking at the input, still scores 99% accuracy — and is completely useless, with 0% recall for the disease it exists to catch. Accuracy alone can't tell these two situations apart: a genuinely excellent model, and a lazy one exploiting a heavily imbalanced dataset. Precision, recall, and F1 can.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why precision and recall aren't equally important for every task</span>
+    A spam filter's false positive — a real email marked spam — is actively costly, so it's usually tuned to favor precision. A cancer-screening model's false negative — a real case missed entirely — can be far worse than a false alarm that just leads to an unnecessary follow-up test, so it's usually tuned to favor recall instead. Neither task is wrong to make that tradeoff; "beyond accuracy" doesn't mean one correct metric exists. It means the actual cost of each kind of mistake has to be part of choosing which metric to optimize.
+  </div>
+
+  <h2>Try it: build a confusion matrix and watch every metric respond</h2>
+  <p>Adjust each count directly, or load the imbalanced disease-screening example, and watch how differently accuracy behaves compared to recall.</p>
+
+  <div class="widget" id="confusion-widget">
+    <p class="widget-label">Interactive: confusion matrix and derived metrics</p>
+    <div id="confusion-grid" style="display:grid; grid-template-columns:auto auto; gap:0.6rem; max-width:26rem;"></div>
+    <div class="fm-row" style="margin-top:0.8rem;">
+      <button class="widget-btn" type="button" data-cm-example>Load: rare-disease example</button>
+      <button class="widget-btn" type="button" data-cm-reset>Reset to balanced example</button>
+    </div>
+    <p class="plot-readout" data-cm-readout>—</p>
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What question does precision answer?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Of everything the model predicted as positive, how much actually was positive?</button>
+      <button class="quiz-choice" data-correct="false">Of everything that was actually positive, how much did the model catch?</button>
+      <button class="quiz-choice" data-correct="false">What fraction of all predictions, positive or negative, were correct?</button>
+      <button class="quiz-choice" data-correct="false">How many total training examples the model was trained on.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>precision = tp / (tp + fp) — it's about the quality of positive predictions specifically.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why can a model that always predicts "healthy" for a rare disease still score 99% accuracy?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">The dataset is heavily imbalanced, so predicting the majority class alone gets most predictions right by default.</button>
+      <button class="quiz-choice" data-correct="false">Accuracy cannot be computed for a rare disease dataset at all.</button>
+      <button class="quiz-choice" data-correct="false">The model has perfect recall for the disease it's meant to detect.</button>
+      <button class="quiz-choice" data-correct="false">99% accuracy is mathematically impossible without genuine skill.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>With only 1% of cases actually diseased, always guessing "healthy" is right 99% of the time by default.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why is F1 score the harmonic mean of precision and recall, rather than their plain average?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">The harmonic mean stays closer to whichever of the two is lower, so a model can't earn a good score by excelling at one while badly neglecting the other.</button>
+      <button class="quiz-choice" data-correct="false">The harmonic mean always equals whichever of the two values is higher.</button>
+      <button class="quiz-choice" data-correct="false">A plain average would be mathematically impossible to compute here.</button>
+      <button class="quiz-choice" data-correct="false">There is no actual difference between the harmonic mean and a plain average in this case.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The harmonic mean penalizes a large gap between precision and recall more than a plain average would.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="confusion matrix">
+    <p class="quiz-prompt">4. Fill in the blank: a table counting true positives, false positives, false negatives, and true negatives is called a ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>See the definition box above.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="recall">
+    <p class="quiz-prompt">5. Fill in the blank: the metric answering "of everything that actually was positive, how much did the model catch?" is ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>See the definition box above.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Google's <a href="https://developers.google.com/machine-learning/crash-course/classification/precision-and-recall">Machine Learning Crash Course, "Classification: Precision and Recall"</a> covers the same confusion matrix and precision/recall tradeoff with additional real-world worked examples.</p>
+
+  <p class="ask-teacher">Curious how ROC curves and AUC fit alongside precision, recall, and F1? Ask your teacher — they summarize the same precision/recall-style tradeoff across every possible decision threshold at once, rather than just one. Next: what happens to all of these metrics once a model is actually deployed and the real world keeps changing underneath it.</p>
+
+  <footer class="lesson-footer">STEM+ · Applied Machine/Deep Learning · Lesson 19 of the course sequence</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var state = { tp: 50, fp: 10, fn: 5, tn: 935 };
+
+  var grid = document.getElementById('confusion-grid');
+  var readout = document.querySelector('[data-cm-readout]');
+  var exampleBtn = document.querySelector('[data-cm-example]');
+  var resetBtn = document.querySelector('[data-cm-reset]');
+
+  var CELLS = [
+    { key: 'tp', label: 'True Positive' },
+    { key: 'fp', label: 'False Positive' },
+    { key: 'fn', label: 'False Negative' },
+    { key: 'tn', label: 'True Negative' }
+  ];
+
+  function render() {
+    grid.innerHTML = '';
+    CELLS.forEach(function (c) {
+      var box = document.createElement('div');
+      box.style.border = '1px solid var(--border)';
+      box.style.borderRadius = '5px';
+      box.style.padding = '0.6rem 0.8rem';
+
+      var label = document.createElement('div');
+      label.textContent = c.label;
+      label.style.fontFamily = '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+      label.style.fontSize = '0.75rem';
+      label.style.color = 'var(--muted)';
+
+      var row = document.createElement('div');
+      row.style.display = 'flex';
+      row.style.alignItems = 'center';
+      row.style.gap = '0.5rem';
+      row.style.marginTop = '0.3rem';
+
+      var minus = document.createElement('button');
+      minus.className = 'widget-btn';
+      minus.type = 'button';
+      minus.textContent = '−';
+      minus.addEventListener('click', function () { state[c.key] = Math.max(0, state[c.key] - 5); render(); });
+
+      var value = document.createElement('span');
+      value.textContent = state[c.key];
+      value.style.fontWeight = '700';
+      value.style.minWidth = '3rem';
+      value.style.textAlign = 'center';
+
+      var plus = document.createElement('button');
+      plus.className = 'widget-btn';
+      plus.type = 'button';
+      plus.textContent = '+';
+      plus.addEventListener('click', function () { state[c.key] += 5; render(); });
+
+      row.appendChild(minus);
+      row.appendChild(value);
+      row.appendChild(plus);
+      box.appendChild(label);
+      box.appendChild(row);
+      grid.appendChild(box);
+    });
+
+    var tp = state.tp, fp = state.fp, fn = state.fn, tn = state.tn;
+    var total = tp + fp + fn + tn;
+    var accuracy = total ? (tp + tn) / total : 0;
+    var precision = (tp + fp) ? tp / (tp + fp) : 0;
+    var recall = (tp + fn) ? tp / (tp + fn) : 0;
+    var f1 = (precision + recall) ? 2 * precision * recall / (precision + recall) : 0;
+
+    readout.textContent = 'Accuracy = ' + (accuracy * 100).toFixed(1) + '%  ·  Precision = ' + (precision * 100).toFixed(1) + '%  ·  Recall = ' + (recall * 100).toFixed(1) + '%  ·  F1 = ' + (f1 * 100).toFixed(1) + '%';
+  }
+
+  exampleBtn.addEventListener('click', function () {
+    state = { tp: 1, fp: 1, fn: 9, tn: 989 };
+    render();
+  });
+
+  resetBtn.addEventListener('click', function () {
+    state = { tp: 50, fp: 10, fn: 5, tn: 935 };
+    render();
+  });
+
+  render();
+});
+</script>

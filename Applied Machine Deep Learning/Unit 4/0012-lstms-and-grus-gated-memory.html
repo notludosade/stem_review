@@ -1,0 +1,176 @@
+<meta charset="UTF-8">
+<title>Lesson 12: LSTMs and GRUs — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="advanced">
+  <span class="kicker">STEM+ · Applied Machine/Deep Learning · Unit 4 · Lesson 12</span>
+  <h1>LSTMs and GRUs: Gated Memory</h1>
+  <p class="subtitle">AI Developer's Lesson 16 said LSTM gates "decide what to keep, forget, and output" without the formulas. This lesson writes them out, and finally answers that lesson's closing question about what a GRU actually is.</p>
+  <p class="nav-links"><a href="0011-rnns-and-the-vanishing-gradient-problem.html" class="nav-prev">← Lesson 11</a> <a href="../Unit%205/0013-the-problem-attention-solves.html" class="nav-next">Unit 5, Lesson 13 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>An LSTM keeps two running values instead of an RNN's one: the hidden state, and a separate <strong>cell state</strong> that acts as its actual long-term memory. Three gates — each just a small sigmoid layer, outputting a value between 0 and 1 per memory slot — control what happens to it at every step.</p>
+
+  <span class="code-label">Python — one LSTM step, written out explicitly</span>
+  <pre class="code-block"><code>import numpy as np
+
+def sigmoid(z): return 1 / (1 + np.exp(-z))
+
+def lstm_step(x, h_prev, c_prev, params):
+    combined = np.concatenate([h_prev, x])
+
+    f = sigmoid(params['Wf'] @ combined + params['bf'])   # forget gate: what to erase
+    i = sigmoid(params['Wi'] @ combined + params['bi'])   # input gate: what to add
+    o = sigmoid(params['Wo'] @ combined + params['bo'])   # output gate: what to expose
+    c_candidate = np.tanh(params['Wc'] @ combined + params['bc'])
+
+    c_new = f * c_prev + i * c_candidate    # cell state: erase some, add some
+    h_new = o * np.tanh(c_new)              # hidden state: a filtered view of memory
+
+    return h_new, c_new</code></pre>
+
+  <p>The <strong>forget gate</strong> f decides, per memory slot, how much of the old cell state survives — near 1 keeps it, near 0 erases it. The <strong>input gate</strong> i decides how much of the new candidate value gets written in. The <strong>output gate</strong> o decides how much of the (now-updated) cell state actually gets exposed as this step's hidden state — the cell can keep remembering something internally without necessarily surfacing it every single step. The line that actually fixes Lesson 11's vanishing gradient is <code class="inline-code">c_new = f * c_prev + i * c_candidate</code>: it's an <em>addition</em>, not a repeated multiplication through a squashing nonlinearity. When f stays close to 1 across many steps, the gradient can flow backward through the cell state largely unchanged — no compounding shrinkage the way a plain RNN's hidden state update forced.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    An LSTM's <strong>cell state</strong> is its long-term memory, separate from the hidden state. The <strong>forget gate</strong>, <strong>input gate</strong>, and <strong>output gate</strong> each output a 0–1 value per memory slot, controlling erasure, writing, and exposure respectively. A <strong>GRU (Gated Recurrent Unit)</strong> simplifies this into two gates — an <strong>update gate</strong> (merging forget and input into one) and a <strong>reset gate</strong> — and merges cell state and hidden state into a single vector, with fewer parameters and often comparable performance.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why "addition, not multiplication" is the whole trick</span>
+    Lesson 11's vanishing gradient came specifically from many multiplicative factors under 1 compounding across time. An addition doesn't compound that way — adding a small, bounded correction to c_prev at every step doesn't shrink c_prev's own gradient path exponentially the way passing it through a tanh and a weight matrix, repeatedly, does. This is the same shortcut-connection idea that shows up under different names all over deep learning (residual connections in very deep CNNs are the same trick, applied to depth instead of time) — give the gradient at least one path that isn't forced through a squashing nonlinearity at every single step.
+  </div>
+
+  <h2>Try it: move the gates and watch memory update</h2>
+  <p>The cell's previous state is fixed at 1.0. Move each gate and watch exactly how much of it survives, versus how much new information gets written in.</p>
+
+  <div class="widget" id="lstm-widget">
+    <p class="widget-label">Interactive: LSTM gates, live</p>
+    <p class="plot-hint">Previous cell state (C_prev) = 1.00, fixed for this demo.</p>
+    <div class="slider-row">
+      <label for="gate-f">Forget gate (f)</label>
+      <input type="range" id="gate-f" min="0" max="1" step="0.05" value="0.8">
+      <span class="slider-value" data-gate-f-value>0.80</span>
+    </div>
+    <div class="slider-row">
+      <label for="gate-i">Input gate (i)</label>
+      <input type="range" id="gate-i" min="0" max="1" step="0.05" value="0.3">
+      <span class="slider-value" data-gate-i-value>0.30</span>
+    </div>
+    <div class="slider-row">
+      <label for="gate-c">Candidate (C̃)</label>
+      <input type="range" id="gate-c" min="-1" max="1" step="0.05" value="0.6">
+      <span class="slider-value" data-gate-c-value>0.60</span>
+    </div>
+    <div class="slider-row">
+      <label for="gate-o">Output gate (o)</label>
+      <input type="range" id="gate-o" min="0" max="1" step="0.05" value="0.9">
+      <span class="slider-value" data-gate-o-value>0.90</span>
+    </div>
+    <p class="plot-readout" data-gate-readout>—</p>
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What does the forget gate control?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">How much of the previous cell state survives into the new cell state.</button>
+      <button class="quiz-choice" data-correct="false">How many new training examples get added to the dataset.</button>
+      <button class="quiz-choice" data-correct="false">The learning rate used for the next weight update.</button>
+      <button class="quiz-choice" data-correct="false">Which activation function the output layer uses.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>f * c_prev in the cell state update controls exactly how much of the old memory is retained.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why does c_new = f * c_prev + i * c_candidate help avoid a vanishing gradient, compared to a plain RNN's hidden state update?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">It's an addition, not a repeated multiplication through a squashing nonlinearity, so the gradient path through the cell state doesn't automatically compound-shrink.</button>
+      <button class="quiz-choice" data-correct="false">It removes the need for any gradient to be computed at all.</button>
+      <button class="quiz-choice" data-correct="false">It guarantees the gradient can never shrink under any circumstances.</button>
+      <button class="quiz-choice" data-correct="false">It replaces backpropagation through time with an entirely different algorithm.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>An addition with f near 1 lets the cell state's gradient largely pass through, unlike a chain of multiplicative, squashed updates.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. How does a GRU differ structurally from an LSTM?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">It uses two gates instead of three, and merges the cell state and hidden state into a single vector.</button>
+      <button class="quiz-choice" data-correct="false">It removes all gating mechanisms entirely, functioning as a plain RNN.</button>
+      <button class="quiz-choice" data-correct="false">It requires a completely separate loss function from an LSTM.</button>
+      <button class="quiz-choice" data-correct="false">It can only be used for image data, not sequences.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A GRU's update gate merges the forget and input roles, and it drops the separate cell state entirely.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="cell state">
+    <p class="quiz-prompt">4. Fill in the blank: an LSTM's separate long-term memory, distinct from its hidden state, is called its ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>See the definition box above.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="gru|gated recurrent unit">
+    <p class="quiz-prompt">5. Fill in the blank: the simplified gated architecture with an update gate and a reset gate, and no separate cell state, is the ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>See the definition box above.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Christopher Olah's <a href="https://colah.github.io/posts/2015-08-Understanding-LSTMs/">"Understanding LSTM Networks"</a> — the same source AI Developer pointed to — covers the GRU comparison directly, with the same diagram style applied to both.</p>
+
+  <p class="ask-teacher">Curious how an LSTM's three gates compare, parameter-for-parameter, against a GRU's two on a real task? Ask your teacher — in practice the two are often close enough that GRU's smaller size settles the choice. That closes Unit 4. Next: an approach that sidesteps recurrence's step-by-step bottleneck altogether.</p>
+
+  <footer class="lesson-footer">STEM+ · Applied Machine/Deep Learning · Lesson 12 of the course sequence</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var C_PREV = 1.0;
+
+  var fSlider = document.getElementById('gate-f');
+  var iSlider = document.getElementById('gate-i');
+  var cSlider = document.getElementById('gate-c');
+  var oSlider = document.getElementById('gate-o');
+  var fVal = document.querySelector('[data-gate-f-value]');
+  var iVal = document.querySelector('[data-gate-i-value]');
+  var cVal = document.querySelector('[data-gate-c-value]');
+  var oVal = document.querySelector('[data-gate-o-value]');
+  var readout = document.querySelector('[data-gate-readout]');
+
+  function render() {
+    var f = parseFloat(fSlider.value);
+    var i = parseFloat(iSlider.value);
+    var c = parseFloat(cSlider.value);
+    var o = parseFloat(oSlider.value);
+
+    fVal.textContent = f.toFixed(2);
+    iVal.textContent = i.toFixed(2);
+    cVal.textContent = c.toFixed(2);
+    oVal.textContent = o.toFixed(2);
+
+    var cNew = f * C_PREV + i * c;
+    var hNew = o * Math.tanh(cNew);
+
+    readout.textContent = 'C_new = (' + f.toFixed(2) + ' × ' + C_PREV.toFixed(2) + ') + (' + i.toFixed(2) + ' × ' + c.toFixed(2) + ') = ' + cNew.toFixed(3) + '  →  h_new = ' + o.toFixed(2) + ' × tanh(' + cNew.toFixed(3) + ') = ' + hNew.toFixed(3) + '.';
+  }
+
+  [fSlider, iSlider, cSlider, oSlider].forEach(function (s) {
+    s.addEventListener('input', render);
+  });
+
+  render();
+});
+</script>

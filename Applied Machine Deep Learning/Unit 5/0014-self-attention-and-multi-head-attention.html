@@ -1,0 +1,205 @@
+<meta charset="UTF-8">
+<title>Lesson 14: Self-Attention and Multi-Head Attention — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="advanced">
+  <span class="kicker">STEM+ · Applied Machine/Deep Learning · Unit 5 · Lesson 14</span>
+  <h1>Self-Attention and Multi-Head Attention</h1>
+  <p class="subtitle">AI Developer's Lesson 17 computed one attention pass and asked what "multi-head" meant without answering. This lesson answers it — and shows why one attention computation per layer usually isn't enough.</p>
+  <p class="nav-links"><a href="0013-the-problem-attention-solves.html" class="nav-prev">← Lesson 13</a> <a href="0015-the-transformer-architecture-end-to-end.html" class="nav-next">Lesson 15 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Recall the shape: every token produces a query, a key, and a value; <code class="inline-code">softmax(Q @ K.T / sqrt(d)) @ V</code> blends every token's value according to how relevant each one is to each query. That single computation is one <strong>attention head</strong>. The problem: a sentence has more than one kind of relationship happening between its words at once — grammatical agreement, which word modifies which, which pronoun refers to which noun — and a single attention head has to average all of those into one weighted blend per token. Some of that gets lost in the average.</p>
+
+  <span class="code-label">Python — NumPy, splitting into multiple heads</span>
+  <pre class="code-block"><code>import numpy as np
+
+def softmax(x):
+    e = np.exp(x - np.max(x, axis=-1, keepdims=True))
+    return e / e.sum(axis=-1, keepdims=True)
+
+def attention(Q, K, V):
+    scores = Q @ K.T / np.sqrt(Q.shape[-1])
+    return softmax(scores) @ V
+
+seq_len, d_model, num_heads = 4, 8, 2
+d_head = d_model // num_heads   # each head works in a smaller subspace
+
+x = np.random.rand(seq_len, d_model)
+
+head_outputs = []
+for h in range(num_heads):
+    Wq, Wk, Wv = (np.random.randn(d_model, d_head) * 0.1 for _ in range(3))
+    Q, K, V = x @ Wq, x @ Wk, x @ Wv     # each head gets its own learned projection
+    head_outputs.append(attention(Q, K, V))
+
+multi_head_output = np.concatenate(head_outputs, axis=-1)   # back to shape (seq_len, d_model)</code></pre>
+
+  <p><strong>Multi-head attention</strong> runs several smaller attention computations in parallel instead of one large one — here, 2 heads, each working in a 4-dimensional subspace instead of one head working in the full 8-dimensional space. Each head has its own learned <code class="inline-code">Wq</code>, <code class="inline-code">Wk</code>, <code class="inline-code">Wv</code> projections, so nothing forces two heads to learn the same kind of relevance; in practice, different heads in a trained Transformer often specialize — one attending mostly to a word's immediate neighbor, another tracking a pronoun back to the noun it refers to, several places away. The heads' outputs get concatenated back together at the end, landing back at the model's original dimension, so the rest of the network never has to know how many heads were involved.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    An <strong>attention head</strong> is one full query/key/value attention computation. <strong>Multi-head attention</strong> runs several attention heads in parallel, each with its own learned projections working in a smaller subspace, then concatenates their outputs back together.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why splitting into smaller heads isn't just "more capacity"</span>
+    Splitting one 8-dimensional head into two 4-dimensional heads doesn't meaningfully increase the total parameter count or computation — it's roughly the same total budget, spent differently. The actual gain is representational diversity: one head's softmax necessarily produces one weighting per token, forcing every kind of relevance into a single blend, while several smaller, independently-learned heads can each specialize in a different relationship without competing with each other for the same weights.
+  </div>
+
+  <h2>Try it: hover a real attention weight matrix</h2>
+  <p>Switch between two heads from the same layer and hover any cell to see exactly how strongly one token attends to another.</p>
+
+  <div class="widget" id="attn-widget">
+    <p class="widget-label">Interactive: attention weight heatmap</p>
+    <div class="fm-tabs">
+      <button class="fm-tab is-active" type="button" data-attn-head="1">Head 1</button>
+      <button class="fm-tab" type="button" data-attn-head="2">Head 2</button>
+    </div>
+    <div id="attn-grid" style="display:grid; grid-template-columns:repeat(6, 46px); gap:2px; justify-content:center; margin:0.9rem 0;"></div>
+    <p class="plot-readout" data-attn-readout>Hover a cell — rows are the "query" token, columns are the "key" token being attended to.</p>
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What is one "attention head," concretely?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">One full query/key/value attention computation, producing one weighting per token.</button>
+      <button class="quiz-choice" data-correct="false">A single number representing the entire sentence's meaning.</button>
+      <button class="quiz-choice" data-correct="false">A separate, entirely independent neural network with its own loss function.</button>
+      <button class="quiz-choice" data-correct="false">The final output layer of a Transformer.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>softmax(Q @ K.T / sqrt(d)) @ V computed once, with one set of Q/K/V, is one attention head.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why might a single attention head struggle to capture more than one kind of relationship between words?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Its softmax produces one weighting per token, forcing every kind of relevance to be averaged into that single blend.</button>
+      <button class="quiz-choice" data-correct="false">A single attention head can only ever process exactly one word total.</button>
+      <button class="quiz-choice" data-correct="false">Attention heads are incapable of using a softmax function.</button>
+      <button class="quiz-choice" data-correct="false">There is no actual limitation — one head always captures everything perfectly.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>One softmax output per token means one combined weighting, not several independent ones.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. What happens to multiple attention heads' outputs at the end of a multi-head attention layer?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">They're concatenated back together, landing at the model's original dimension.</button>
+      <button class="quiz-choice" data-correct="false">Only the single best-performing head's output is kept; the rest are discarded.</button>
+      <button class="quiz-choice" data-correct="false">They're averaged down to a single scalar number.</button>
+      <button class="quiz-choice" data-correct="false">They are passed to entirely separate, unrelated networks.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>np.concatenate(head_outputs, axis=-1) restores the model's original dimensionality after the heads run in parallel.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="multi-head attention|multi head attention">
+    <p class="quiz-prompt">4. Fill in the blank: running several smaller attention computations in parallel, each with its own learned projections, is called ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>See the definition box above.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="attention head">
+    <p class="quiz-prompt">5. Fill in the blank: one full query/key/value attention computation, before any splitting into multiple parallel ones, is called an ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>See the definition box above.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Jesse Vig's <a href="https://github.com/jessevig/bertviz">BertViz</a> visualizes real, trained attention heads on real sentences, showing exactly the kind of per-head specialization this lesson describes, on actual model output rather than a simulation.</p>
+
+  <p class="ask-teacher">Curious how many heads a real Transformer typically uses, and why that specific number? Ask your teacher — it's usually a tradeoff between per-head subspace size and total head count, tuned per model rather than fixed by any hard rule. Next: assembling self-attention into the full Transformer block, end to end.</p>
+
+  <footer class="lesson-footer">STEM+ · Applied Machine/Deep Learning · Lesson 14 of the course sequence</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var TOKENS = ['The', 'cat', 'sat', 'on', 'mat'];
+  var HEADS = {
+    '1': [
+      [0.60, 0.20, 0.10, 0.05, 0.05],
+      [0.50, 0.30, 0.10, 0.05, 0.05],
+      [0.10, 0.50, 0.25, 0.10, 0.05],
+      [0.05, 0.10, 0.55, 0.20, 0.10],
+      [0.05, 0.05, 0.10, 0.60, 0.20]
+    ],
+    '2': [
+      [0.20, 0.10, 0.55, 0.10, 0.05],
+      [0.10, 0.15, 0.60, 0.10, 0.05],
+      [0.05, 0.10, 0.60, 0.15, 0.10],
+      [0.10, 0.10, 0.55, 0.15, 0.10],
+      [0.05, 0.05, 0.60, 0.20, 0.10]
+    ]
+  };
+
+  var currentHead = '1';
+  var grid = document.getElementById('attn-grid');
+  var readout = document.querySelector('[data-attn-readout]');
+  var headButtons = document.querySelectorAll('[data-attn-head]');
+
+  function headerCell(text) {
+    var el = document.createElement('div');
+    el.textContent = text;
+    el.style.width = '46px';
+    el.style.height = '30px';
+    el.style.display = 'flex';
+    el.style.alignItems = 'center';
+    el.style.justifyContent = 'center';
+    el.style.fontFamily = '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+    el.style.fontSize = '0.72rem';
+    el.style.fontWeight = '600';
+    el.style.color = 'var(--muted)';
+    return el;
+  }
+
+  function buildGrid() {
+    grid.innerHTML = '';
+    grid.appendChild(headerCell(''));
+    TOKENS.forEach(function (t) { grid.appendChild(headerCell(t)); });
+
+    var weights = HEADS[currentHead];
+    TOKENS.forEach(function (rowToken, i) {
+      grid.appendChild(headerCell(rowToken));
+      TOKENS.forEach(function (colToken, j) {
+        var cell = document.createElement('div');
+        cell.style.width = '46px';
+        cell.style.height = '30px';
+        cell.style.border = '1px solid var(--border)';
+        cell.style.borderRadius = '3px';
+        cell.style.background = 'var(--accent)';
+        cell.style.opacity = Math.max(0.08, weights[i][j]);
+        cell.addEventListener('mouseenter', function () {
+          readout.textContent = '"' + rowToken + '" attends to "' + colToken + '": weight ' + weights[i][j].toFixed(2) + '.';
+        });
+        grid.appendChild(cell);
+      });
+    });
+  }
+
+  headButtons.forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      headButtons.forEach(function (b) { b.classList.remove('is-active'); });
+      btn.classList.add('is-active');
+      currentHead = btn.getAttribute('data-attn-head');
+      buildGrid();
+      readout.textContent = 'Hover a cell — rows are the "query" token, columns are the "key" token being attended to.';
+    });
+  });
+
+  buildGrid();
+});
+</script>

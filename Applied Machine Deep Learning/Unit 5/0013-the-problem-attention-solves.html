@@ -1,0 +1,162 @@
+<meta charset="UTF-8">
+<title>Lesson 13: The Problem Attention Solves — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="advanced">
+  <span class="kicker">STEM+ · Applied Machine/Deep Learning · Unit 5 · Lesson 13</span>
+  <h1>The Problem Attention Solves</h1>
+  <p class="subtitle">AI Developer's Lesson 17 opened with attention already in hand, solving a bottleneck it never named. This lesson names it — the specific failure of the architecture attention actually replaced.</p>
+  <p class="nav-links"><a href="../Unit%204/0012-lstms-and-grus-gated-memory.html" class="nav-prev">← Lesson 12</a> <a href="0014-self-attention-and-multi-head-attention.html" class="nav-next">Lesson 14 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Before attention, sequence-to-sequence tasks like translation used an <strong>encoder-decoder architecture</strong>: an encoder LSTM reads the entire input sentence, one word at a time, and compresses everything it read into a single fixed-size final hidden state — a <strong>context vector</strong>. A separate decoder LSTM then generates the output sentence using only that one vector as its summary of the entire input. Every word the encoder ever read has to be squeezed through that same fixed-size bottleneck before the decoder can use any of it.</p>
+
+  <span class="code-label">Python — the bottleneck, made concrete</span>
+  <pre class="code-block"><code>import torch.nn as nn
+
+encoder = nn.LSTM(input_size=256, hidden_size=512, batch_first=True)
+decoder = nn.LSTM(input_size=256, hidden_size=512, batch_first=True)
+
+# Encoding: read the whole input, keep only the final hidden state
+_, (context, _) = encoder(input_sequence)   # context has shape (1, 512) -- always, regardless of length
+
+# Decoding: generate output using only that one fixed-size vector as its summary
+output, _ = decoder(output_so_far, (context, cell_state))</code></pre>
+
+  <p><code class="inline-code">context</code>'s shape never changes — 512 numbers, whether the input sentence was 5 words or 50. For a short sentence, that's plenty of room. For a long one, cramming 50 words of meaning into the same fixed 512 numbers a 5-word sentence used means something has to get compressed away, and in practice, translation quality from this architecture degrades noticeably as sentences get longer — exactly the pattern you'd expect from an information bottleneck, not from the LSTM's mechanics being wrong. <strong>Attention</strong> is the fix, and its actual idea is closer than it might sound to something already familiar: instead of forcing everything through one fixed-size summary, let the decoder look directly back at <em>every</em> encoder hidden state, at every single output step, weighted by how relevant each one is right now.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    An <strong>encoder-decoder architecture</strong> uses one network to read an input sequence and another to generate an output sequence from it. A <strong>context vector</strong> is a fixed-size summary the encoder compresses its entire input into. <strong>Attention</strong> replaces reliance on that one fixed vector with direct, weighted access to every one of the encoder's hidden states.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why this reframes what AI Developer's Lesson 17 already said</span>
+    "Lets a model directly relate any two positions in a sequence... without passing information step by step through everything in between" is a description of attention's mechanism. This lesson supplies the motivation underneath it: the "everything in between" it's avoiding isn't merely a slow relay race between time steps, like Lesson 11's vanishing gradients across many steps — it's a hard information ceiling, one fixed-size vector, that no amount of clever gating could ever fully get around. Attention doesn't shrink the ceiling. It removes it.
+  </div>
+
+  <h2>Try it: watch a fixed context vector strain as sentences get longer</h2>
+  <p>Increase the sentence length, with and without attention, and watch the simulated decoding quality respond very differently.</p>
+
+  <div class="widget" id="bottleneck-widget">
+    <p class="widget-label">Interactive: the fixed-context bottleneck</p>
+    <div class="fm-tabs">
+      <button class="fm-tab is-active" type="button" data-bn-mode="fixed">Fixed context vector (no attention)</button>
+      <button class="fm-tab" type="button" data-bn-mode="attention">With attention</button>
+    </div>
+    <div class="slider-row">
+      <label for="bn-length">Sentence length (words)</label>
+      <input type="range" id="bn-length" min="3" max="18" step="1" value="5">
+      <span class="slider-value" data-bn-length-value>5</span>
+    </div>
+    <div style="height:18px; background:var(--code-bg); border:1px solid var(--border); border-radius:3px; overflow:hidden; margin:0.8rem 0;">
+      <div data-bn-bar style="height:100%; width:95%; background:var(--correct); transition:width 0.2s, background 0.2s;"></div>
+    </div>
+    <p class="verdict" data-bn-verdict>—</p>
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. In an encoder-decoder architecture without attention, what does the decoder use as its summary of the entire input sentence?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">A single fixed-size context vector, the encoder's final hidden state.</button>
+      <button class="quiz-choice" data-correct="false">Every individual word of the input sentence, kept separately.</button>
+      <button class="quiz-choice" data-correct="false">A freshly re-read copy of the input sentence at every output step.</button>
+      <button class="quiz-choice" data-correct="false">Nothing — the decoder generates output with no reference to the input at all.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>context, the encoder's final hidden state, is the only summary the decoder receives in this architecture.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why does translation quality from a fixed-context encoder-decoder tend to degrade on longer sentences specifically?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">The context vector's size never changes, so more input has to be compressed into the same fixed amount of space.</button>
+      <button class="quiz-choice" data-correct="false">Longer sentences are technically impossible for an LSTM encoder to read at all.</button>
+      <button class="quiz-choice" data-correct="false">The context vector grows automatically with sentence length, causing instability.</button>
+      <button class="quiz-choice" data-correct="false">Sentence length has no real effect on translation quality in this architecture.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A fixed-size vector holding more and more compressed information is a genuine information bottleneck.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. How does attention change what the decoder has access to, compared to the fixed-context approach?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">It gives the decoder direct, weighted access to every encoder hidden state, at every output step, instead of just one fixed summary.</button>
+      <button class="quiz-choice" data-correct="false">It removes the decoder's access to the input sentence entirely.</button>
+      <button class="quiz-choice" data-correct="false">It forces the decoder to use an even smaller context vector than before.</button>
+      <button class="quiz-choice" data-correct="false">It has no effect on what information the decoder can access.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Attention removes the single-vector bottleneck by exposing every encoder hidden state directly, weighted by relevance.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="context vector">
+    <p class="quiz-prompt">4. Fill in the blank: a fixed-size summary the encoder compresses its entire input sequence into is called a ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>See the definition box above.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="encoder-decoder|encoder decoder">
+    <p class="quiz-prompt">5. Fill in the blank: an architecture that uses one network to read an input sequence and a separate network to generate an output sequence is called ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>See the definition box above.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Bahdanau, Cho, and Bengio's <a href="https://arxiv.org/abs/1409.0473">"Neural Machine Translation by Jointly Learning to Align and Translate"</a> (2014) is the original paper that introduced attention specifically to fix this fixed-context bottleneck.</p>
+
+  <p class="ask-teacher">Curious how "align and translate" in that paper's title connects to the query/key/value math AI Developer's Lesson 17 showed? Ask your teacher — "alignment" is an older name for almost exactly the same relevance-weighting idea. Next: the actual mechanics behind that weighting, worked through as real matrix math.</p>
+
+  <footer class="lesson-footer">STEM+ · Applied Machine/Deep Learning · Lesson 13 of the course sequence</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var mode = 'fixed';
+  var modeButtons = document.querySelectorAll('[data-bn-mode]');
+  var lengthSlider = document.getElementById('bn-length');
+  var lengthVal = document.querySelector('[data-bn-length-value]');
+  var bar = document.querySelector('[data-bn-bar]');
+  var verdict = document.querySelector('[data-bn-verdict]');
+
+  function render() {
+    var length = parseInt(lengthSlider.value, 10);
+    lengthVal.textContent = length;
+
+    var accuracy;
+    if (mode === 'fixed') {
+      accuracy = Math.max(28, 96 - (length - 3) * 4.6);
+    } else {
+      accuracy = Math.max(85, 96 - (length - 3) * 0.6);
+    }
+
+    bar.style.width = accuracy + '%';
+    bar.style.background = accuracy > 80 ? 'var(--correct)' : (accuracy > 55 ? 'var(--accent)' : 'var(--incorrect)');
+
+    verdict.textContent = (mode === 'fixed' ? 'Fixed context vector' : 'With attention') + ', ' + length + '-word sentence: simulated decoding quality ≈ ' + accuracy.toFixed(0) + '%.';
+  }
+
+  modeButtons.forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      modeButtons.forEach(function (b) { b.classList.remove('is-active'); });
+      btn.classList.add('is-active');
+      mode = btn.getAttribute('data-bn-mode');
+      render();
+    });
+  });
+
+  lengthSlider.addEventListener('input', render);
+  render();
+});
+</script>

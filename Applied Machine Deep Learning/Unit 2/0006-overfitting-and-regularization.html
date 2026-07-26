@@ -1,0 +1,199 @@
+<meta charset="UTF-8">
+<title>Lesson 6: Overfitting and Regularization — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="advanced">
+  <span class="kicker">STEM+ · Applied Machine/Deep Learning · Unit 2 · Lesson 6</span>
+  <h1>Overfitting and Regularization</h1>
+  <p class="subtitle">AI Developer's Unit 2 defined overfitting once, in general: memorizing training data instead of learning the pattern. Neural networks overfit unusually easily — millions of weights are more than enough to just memorize — so this closes Unit 2 with the specific tools built to fight it.</p>
+  <p class="nav-links"><a href="0005-learning-rate-batches-and-epochs.html" class="nav-prev">← Lesson 5</a> <a href="../Unit%203/0007-why-images-need-a-different-architecture.html" class="nav-next">Unit 3, Lesson 7 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>A large enough network has enough weights to essentially memorize a training set outright — driving training loss toward zero while validation loss quietly climbs back up. <strong>Regularization</strong> is any technique that trades away a little training accuracy on purpose, in exchange for a network that generalizes better to data it hasn't seen. Two techniques do almost all of the real work in practice.</p>
+
+  <span class="code-label">Python — PyTorch, both techniques in one model</span>
+  <pre class="code-block"><code>import torch.nn as nn
+
+model = nn.Sequential(
+    nn.Linear(784, 256),
+    nn.ReLU(),
+    nn.Dropout(p=0.5),     # randomly zeroes 50% of activations, only during training
+    nn.Linear(256, 10)
+)
+
+optimizer = torch.optim.SGD(
+    model.parameters(),
+    lr=0.01,
+    weight_decay=1e-4      # penalizes large weights directly in the loss
+)</code></pre>
+
+  <p><strong>Dropout</strong> randomly zeroes out a fraction of a layer's activations on every training step — a different random subset each time — which prevents any single neuron from becoming so specialized that the network only works with that exact neuron intact. It's active only during training; at inference time every neuron participates, scaled to compensate. <strong>Weight decay</strong> (L2 regularization) adds a penalty term to the loss function itself, proportional to the sum of the squared weights, so gradient descent is now pulling weights toward being smaller at the same time it's minimizing prediction error — large weights have to be worth their cost. A network with mostly small weights tends to produce smoother, less erratic predictions than one where a few weights have grown huge to fit training data's noise exactly.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    <strong>Regularization</strong> trades training accuracy for better generalization. <strong>Dropout</strong> randomly zeroes a fraction of activations during training only. <strong>Weight decay</strong> (L2 regularization) adds a penalty proportional to squared weight size directly into the loss. <strong>Early stopping</strong> halts training once validation loss stops improving, even if training loss is still falling.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why dropout works: it removes a shortcut, not information</span>
+    Without dropout, a network can quietly lean on one specific neuron (or a small clique of them) to handle a pattern, the way a group project can lean on one person who happens to be good at a particular part. Zeroing that neuron out at random, unpredictably, on different training steps forces every other neuron to be able to pick up the slack — the network ends up spreading the same task across more of its weights redundantly, instead of concentrating it fragile-ly in one place. That redundancy is what tends to generalize better to new data.
+  </div>
+
+  <h2>Try it: watch the train/validation gap open — or not</h2>
+  <p>Train epoch by epoch with dropout and weight decay off, and watch validation loss pull away from training loss. Then turn them on and watch the gap change.</p>
+
+  <div class="widget" id="reg-widget">
+    <p class="widget-label">Interactive: overfitting simulator</p>
+    <div class="fm-row">
+      <label><input type="checkbox" id="dropout-toggle"> Dropout</label>
+      <label>Weight decay: <input type="range" id="wd-slider" min="0" max="1" step="0.1" value="0"> <span class="slider-value" data-wd-value>0.0</span></label>
+    </div>
+    <div class="fm-row">
+      <button class="widget-btn" type="button" data-reg-step>Train 1 epoch</button>
+      <button class="widget-btn" type="button" data-reg-reset>Reset</button>
+    </div>
+    <div id="reg-chart" style="display:flex; align-items:flex-end; gap:6px; height:120px; margin:0.9rem 0; border-bottom:1px solid var(--border);"></div>
+    <p class="plot-hint">Darker bar = training loss. Lighter bar = validation loss.</p>
+    <p class="verdict" data-reg-verdict>Epoch 0. Click "Train 1 epoch" to begin.</p>
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What does dropout actually do during training?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Randomly zeroes out a different fraction of a layer's activations on every training step.</button>
+      <button class="quiz-choice" data-correct="false">Permanently deletes a fixed set of neurons from the network forever.</button>
+      <button class="quiz-choice" data-correct="false">Removes a fixed fraction of the training dataset before training begins.</button>
+      <button class="quiz-choice" data-correct="false">Doubles the learning rate for every remaining neuron.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The random subset changes every step, and dropout is active only during training, not at inference time.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. How does weight decay change what gradient descent optimizes?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">It adds a penalty proportional to squared weight size into the loss, pulling weights toward smaller values alongside minimizing prediction error.</button>
+      <button class="quiz-choice" data-correct="false">It removes the loss function from training entirely.</button>
+      <button class="quiz-choice" data-correct="false">It forces every weight in the network to become exactly zero.</button>
+      <button class="quiz-choice" data-correct="false">It only affects the very first layer of a network.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>weight_decay adds a squared-weight penalty term directly into what's being minimized.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why can dropout improve generalization even though it seems to make training strictly harder?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">It prevents the network from over-relying on any single neuron, spreading a pattern redundantly across more weights instead.</button>
+      <button class="quiz-choice" data-correct="false">Dropout has no real effect on how the network generalizes.</button>
+      <button class="quiz-choice" data-correct="false">Dropout increases the total number of weights in the network.</button>
+      <button class="quiz-choice" data-correct="false">Dropout removes the need for a validation set entirely.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Redundant, spread-out representations tend to be more robust to data the network hasn't seen before.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="weight decay">
+    <p class="quiz-prompt">4. Fill in the blank: adding a penalty proportional to squared weight size directly into the loss function is called ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>See the definition box above.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="early stopping">
+    <p class="quiz-prompt">5. Fill in the blank: halting training once validation loss stops improving, even while training loss keeps falling, is called ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>See the definition box above.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Srivastava et al.'s <a href="https://jmlr.org/papers/v15/srivastava14a.html">original dropout paper, "Dropout: A Simple Way to Prevent Neural Networks from Overfitting"</a> (JMLR, 2014) is the primary source that introduced the exact technique above.</p>
+
+  <p class="ask-teacher">Curious whether dropout and weight decay are ever used together, or if it's usually one or the other? Ask your teacher — combining them is common, and the widget above lets you try exactly that. That closes Unit 2 — the full training loop is complete end to end. Next: the first specialized architecture, built for a specific shape of data instead of a generic vector.</p>
+
+  <footer class="lesson-footer">STEM+ · Applied Machine/Deep Learning · Lesson 6 of the course sequence</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var epoch = 0;
+  var trainLoss = 2.5;
+  var gap = 0;
+
+  var dropoutToggle = document.getElementById('dropout-toggle');
+  var wdSlider = document.getElementById('wd-slider');
+  var wdVal = document.querySelector('[data-wd-value]');
+  var chart = document.getElementById('reg-chart');
+  var verdict = document.querySelector('[data-reg-verdict]');
+  var stepBtn = document.querySelector('[data-reg-step]');
+  var resetBtn = document.querySelector('[data-reg-reset]');
+
+  function addBars(train, val) {
+    var group = document.createElement('div');
+    group.style.display = 'flex';
+    group.style.gap = '2px';
+    group.style.alignItems = 'flex-end';
+
+    var b1 = document.createElement('div');
+    b1.style.width = '7px';
+    b1.style.height = Math.max(2, Math.min(120, (train / 3.0) * 120)) + 'px';
+    b1.style.background = 'var(--accent)';
+    b1.title = 'train loss ' + train.toFixed(3);
+
+    var b2 = document.createElement('div');
+    b2.style.width = '7px';
+    b2.style.height = Math.max(2, Math.min(120, (val / 3.0) * 120)) + 'px';
+    b2.style.background = 'var(--accent-soft)';
+    b2.style.border = '1px solid var(--accent)';
+    b2.title = 'validation loss ' + val.toFixed(3);
+
+    group.appendChild(b1);
+    group.appendChild(b2);
+    chart.appendChild(group);
+  }
+
+  function trainEpoch() {
+    epoch++;
+    var dropout = dropoutToggle.checked;
+    var wd = parseFloat(wdSlider.value);
+
+    trainLoss = Math.max(0.05, trainLoss * 0.85);
+
+    var baseGrowth = 0.16;
+    var growth = baseGrowth * (dropout ? 0.4 : 1) * (1 - wd * 0.65);
+    gap = Math.max(0, gap + growth);
+
+    var valLoss = trainLoss + gap;
+    addBars(trainLoss, valLoss);
+
+    verdict.classList.remove('is-pass', 'is-fail');
+    if (gap > 0.6) {
+      verdict.classList.add('is-fail');
+      verdict.textContent = 'Epoch ' + epoch + ': train = ' + trainLoss.toFixed(2) + ', val = ' + valLoss.toFixed(2) + ' — the gap is widening. Overfitting.';
+    } else {
+      verdict.classList.add('is-pass');
+      verdict.textContent = 'Epoch ' + epoch + ': train = ' + trainLoss.toFixed(2) + ', val = ' + valLoss.toFixed(2) + ' — gap staying under control.';
+    }
+  }
+
+  stepBtn.addEventListener('click', trainEpoch);
+
+  resetBtn.addEventListener('click', function () {
+    epoch = 0; trainLoss = 2.5; gap = 0;
+    chart.innerHTML = '';
+    verdict.classList.remove('is-pass', 'is-fail');
+    verdict.textContent = 'Epoch 0. Click "Train 1 epoch" to begin.';
+  });
+
+  wdSlider.addEventListener('input', function () { wdVal.textContent = parseFloat(wdSlider.value).toFixed(1); });
+});
+</script>

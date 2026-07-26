@@ -1,0 +1,200 @@
+<meta charset="UTF-8">
+<title>Lesson 1: From a Single Neuron to a Network — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="advanced">
+  <span class="kicker">STEM+ · Applied Machine/Deep Learning · Unit 1 · Lesson 1</span>
+  <h1>From a Single Neuron to a Network</h1>
+  <p class="subtitle">AI Developer's Unit 4 built one perceptron and stacked a few into a layer. This course starts exactly there and goes further: real weight matrices, every activation function you'll actually meet in practice, and why the choice among them is never cosmetic.</p>
+  <p class="nav-links"><a href="0002-loss-functions-measuring-how-wrong-a-prediction-is.html" class="nav-next">Lesson 2 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Recall the shape: a perceptron takes inputs, multiplies each by a weight, adds a bias, sums it all, and passes that sum through an activation function. A real network is nothing more than many of these computed at once, arranged in layers, each layer's output feeding the next layer's input. The part AI Developer left as a loop over individual neurons is, in practice, a handful of matrix operations — and the specific activation function attached to each layer isn't a footnote, it's one of the first real design decisions in building a network by hand.</p>
+
+  <span class="code-label">Python — NumPy, a full layer at once</span>
+  <pre class="code-block"><code>import numpy as np
+
+# One layer of 3 neurons, each taking 4 inputs.
+# W has shape (3, 4): one row of weights per neuron.
+W1 = np.random.randn(3, 4) * 0.1
+b1 = np.zeros(3)
+
+x = np.array([0.5, -1.2, 0.3, 0.8])   # 4 input features
+
+def relu(z):
+    return np.maximum(0, z)
+
+hidden = relu(W1 @ x + b1)   # all 3 neurons' weighted sums, in one matrix multiply
+
+# A second layer turns those 3 hidden values into 1 output.
+W2 = np.random.randn(1, 3) * 0.1
+b2 = np.zeros(1)
+
+def sigmoid(z):
+    return 1 / (1 + np.exp(-z))
+
+output = sigmoid(W2 @ hidden + b2)
+print(output)   # a single number between 0 and 1</code></pre>
+
+  <p><code class="inline-code">W1 @ x + b1</code> computes every neuron's weighted sum in <code class="inline-code">hidden</code>'s layer in one operation — <code class="inline-code">W1</code> is a <strong>weight matrix</strong>, with one row of weights per neuron in that layer, so a matrix-vector multiply is exactly "every neuron computes its own weighted sum," done all at once instead of neuron by neuron. <code class="inline-code">hidden</code> here is a <strong>hidden layer</strong>: it sits between the raw input and the network's final answer, and nothing outside the network ever looks at its values directly. <code class="inline-code">output</code> is the <strong>output layer</strong> — whatever shape the task actually needs, one number for a yes/no prediction here, more for anything else.</p>
+
+  <p>Notice the two layers above use two different activation functions on purpose. <strong>ReLU</strong> (<code class="inline-code">max(0, z)</code>) is the default choice for hidden layers in almost every modern network: it's cheap to compute, and unlike <strong>sigmoid</strong> or <strong>tanh</strong>, it doesn't squash large positive inputs into a narrow range — a neuron firing strongly stays informative instead of getting flattened toward 1.0. Sigmoid and tanh both saturate at their extremes (their curves go nearly flat for large |z|), which — as Unit 2 shows once gradients enter the picture — becomes a real problem for training deep networks, not just an aesthetic one. Sigmoid still earns its place at an output layer for yes/no predictions, since squashing to (0, 1) is exactly what a probability needs. For predicting one class out of several, the output layer instead uses <strong>softmax</strong>, which turns a whole vector of raw scores into a probability distribution — every value between 0 and 1, all of them summing to exactly 1 — rather than squashing each score independently the way sigmoid does.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    A <strong>weight matrix</strong> holds one row of weights per neuron in a layer, so <code class="inline-code">W @ x</code> computes every neuron's weighted sum in one matrix multiply. A <strong>hidden layer</strong> sits between input and output and is never read directly; the <strong>output layer</strong> produces the network's final answer, shaped to the task. <strong>ReLU</strong> is <code class="inline-code">max(0, z)</code>; <strong>sigmoid</strong> squashes to (0, 1); <strong>tanh</strong> squashes to (−1, 1); <strong>softmax</strong> turns a vector of scores into a probability distribution that sums to 1.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why the activation choice isn't cosmetic</span>
+    Swapping ReLU for sigmoid in every hidden layer of a real network doesn't just change the numbers slightly — it can change whether the network trains at all. Unit 2 shows exactly why: gradient descent needs a real, non-flat slope to follow backward through every layer, and a saturated sigmoid's near-zero slope is precisely where that signal starts to disappear. Filing that away now makes Lesson 4's backpropagation land as an explanation, not a surprise.
+  </div>
+
+  <h2>Try it: watch each activation function's shape</h2>
+  <p>Pick a function, then slide the input and watch where the output lands. Notice how flat sigmoid and tanh get once |x| passes about 3 — that flatness is the detail to keep in mind for later.</p>
+
+  <div class="widget" id="activation-widget">
+    <p class="widget-label">Interactive: activation function explorer</p>
+    <div class="fm-tabs">
+      <button class="fm-tab is-active" type="button" data-act-fn="sigmoid">Sigmoid</button>
+      <button class="fm-tab" type="button" data-act-fn="tanh">Tanh</button>
+      <button class="fm-tab" type="button" data-act-fn="relu">ReLU</button>
+      <button class="fm-tab" type="button" data-act-fn="step">Step</button>
+    </div>
+    <div class="plot-wrap">
+      <svg viewBox="0 0 320 160" width="320" height="160" role="img" aria-label="Plot of the selected activation function, with a movable point showing the current input and output">
+        <line class="fig-axis" x1="20" y1="150" x2="300" y2="150"></line>
+        <line class="fig-axis" x1="160" y1="10" x2="160" y2="150"></line>
+        <polyline class="fig-curve" data-act-curve points=""></polyline>
+        <circle class="fig-point" data-act-point cx="160" cy="150" r="5"></circle>
+      </svg>
+    </div>
+    <div class="slider-row">
+      <label for="act-x">Input x</label>
+      <input type="range" id="act-x" min="-6" max="6" step="0.1" value="1">
+      <span class="slider-value" data-act-x-value>1.0</span>
+    </div>
+    <p class="plot-readout" data-act-readout>—</p>
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What does a weight matrix's shape represent for a layer of neurons?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">One row of weights per neuron in the layer, so a single matrix multiply computes every neuron's weighted sum at once.</button>
+      <button class="quiz-choice" data-correct="false">The total number of training examples the network has seen.</button>
+      <button class="quiz-choice" data-correct="false">A record of every activation function used anywhere in the network.</button>
+      <button class="quiz-choice" data-correct="false">The learning rate applied to every neuron in that layer.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden><code>W1 @ x</code> above computes all 3 neurons' weighted sums in one operation because W1 has one row per neuron.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why is ReLU the default choice for hidden layers in most modern networks, instead of sigmoid?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">It's cheap to compute and doesn't saturate for large positive inputs the way sigmoid does.</button>
+      <button class="quiz-choice" data-correct="false">ReLU always outputs a value strictly between 0 and 1.</button>
+      <button class="quiz-choice" data-correct="false">Sigmoid cannot be computed on negative inputs at all.</button>
+      <button class="quiz-choice" data-correct="false">ReLU requires no weights or biases to function.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Sigmoid flattens toward 1.0 for large inputs; ReLU stays linear (and informative) for any positive input.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why does a multi-class output layer use softmax instead of applying sigmoid to each output independently?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Softmax turns the whole vector of scores into a probability distribution that sums to exactly 1 across all classes.</button>
+      <button class="quiz-choice" data-correct="false">Softmax is only mathematically defined for a single output value.</button>
+      <button class="quiz-choice" data-correct="false">Sigmoid cannot be applied more than once in the same network.</button>
+      <button class="quiz-choice" data-correct="false">There is no real difference between the two approaches.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Independent sigmoids wouldn't necessarily sum to 1; softmax is built specifically to produce one coherent distribution over classes.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="hidden layer|hidden">
+    <p class="quiz-prompt">4. Fill in the blank: a layer that sits between the input and the network's final answer, never read directly from outside the network, is called a ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>See the definition box above.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="relu">
+    <p class="quiz-prompt">5. Fill in the blank: the activation function computed as max(0, z), and used as the default in most hidden layers today, is ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>See the definition box above.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Stanford's <a href="https://cs231n.github.io/neural-networks-1/">CS231n notes, "Commonly used activation functions"</a> cover sigmoid, tanh, and ReLU's real tradeoffs in more depth, including the "dying ReLU" failure mode worth knowing about once you're choosing one for a real network.</p>
+
+  <p class="ask-teacher">Curious what actually goes wrong when a network is built entirely out of saturating sigmoids? Ask your teacher — it's the exact problem Lesson 4 names directly. Next: before a network can learn anything, it needs a number that says how wrong its current guess is.</p>
+
+  <footer class="lesson-footer">STEM+ · Applied Machine/Deep Learning · Lesson 1 of the course sequence</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var FUNCS = {
+    sigmoid: { name: 'sigmoid', yMin: -0.15, yMax: 1.15, f: function (x) { return 1 / (1 + Math.exp(-x)); } },
+    tanh:    { name: 'tanh',    yMin: -1.25, yMax: 1.25, f: function (x) { return Math.tanh(x); } },
+    relu:    { name: 'ReLU',    yMin: -0.6,  yMax: 6.3,  f: function (x) { return Math.max(0, x); } },
+    step:    { name: 'step',    yMin: -0.25, yMax: 1.25, f: function (x) { return x > 0 ? 1 : 0; } }
+  };
+  var current = 'sigmoid';
+
+  var curveEl = document.querySelector('[data-act-curve]');
+  var pointEl = document.querySelector('[data-act-point]');
+  var slider = document.getElementById('act-x');
+  var xVal = document.querySelector('[data-act-x-value]');
+  var readout = document.querySelector('[data-act-readout]');
+  var buttons = document.querySelectorAll('[data-act-fn]');
+
+  function xToPx(x) { return 20 + (x + 6) / 12 * 280; }
+  function yToPx(y, spec) { return 150 - (y - spec.yMin) / (spec.yMax - spec.yMin) * 140; }
+
+  function drawCurve() {
+    var spec = FUNCS[current];
+    var pts = [];
+    for (var x = -6; x <= 6.001; x += 0.15) {
+      pts.push(xToPx(x).toFixed(1) + ',' + yToPx(spec.f(x), spec).toFixed(1));
+    }
+    curveEl.setAttribute('points', pts.join(' '));
+  }
+
+  function updatePoint() {
+    var spec = FUNCS[current];
+    var x = parseFloat(slider.value);
+    var y = spec.f(x);
+    pointEl.setAttribute('cx', xToPx(x).toFixed(1));
+    pointEl.setAttribute('cy', yToPx(y, spec).toFixed(1));
+    xVal.textContent = x.toFixed(1);
+    readout.textContent = spec.name + '(' + x.toFixed(1) + ') = ' + y.toFixed(3) + '.';
+  }
+
+  buttons.forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      buttons.forEach(function (b) { b.classList.remove('is-active'); });
+      btn.classList.add('is-active');
+      current = btn.getAttribute('data-act-fn');
+      drawCurve();
+      updatePoint();
+    });
+  });
+
+  slider.addEventListener('input', updatePoint);
+
+  drawCurve();
+  updatePoint();
+});
+</script>

@@ -1,0 +1,200 @@
+<meta charset="UTF-8">
+<title>Lesson 16: GPUs and Parallel Hardware — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="advanced">
+  <span class="kicker">STEM+ · Applied Machine/Deep Learning · Unit 6 · Lesson 16</span>
+  <h1>GPUs and Why Deep Learning Needs Parallel Hardware</h1>
+  <p class="subtitle">Every lesson so far has quietly assumed training happens fast enough to iterate on. This lesson is about the specific hardware fact that makes that assumption true — and why it wasn't always true.</p>
+  <p class="nav-links"><a href="../Unit%205/0015-the-transformer-architecture-end-to-end.html" class="nav-prev">← Lesson 15</a> <a href="0017-transfer-learning-and-fine-tuning.html" class="nav-next">Lesson 17 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Look back across this entire course: a layer's forward pass (Unit 1) is a matrix multiply. A convolution (Unit 3) is many small, independent multiply-add operations repeated across an image. Attention (Unit 5) is <code class="inline-code">Q @ K.T</code> and <code class="inline-code">weights @ V</code> — matrix multiplies again. Nearly everything a neural network does, forward or backward, reduces to enormous numbers of multiply-add operations that don't depend on each other's results within the same layer. That independence is the entire story.</p>
+
+  <span class="code-label">Python — the same computation, framed two ways</span>
+  <pre class="code-block"><code># Serial: one operation waits for the previous one to finish
+total_time_cpu = num_operations * time_per_operation
+
+# Parallel: operations that don't depend on each other run at the same time
+total_time_gpu = time_per_operation * ceil(num_operations / num_cores)
+# with enough cores, this collapses toward roughly one operation's worth of time</code></pre>
+
+  <p>A CPU has a handful of powerful cores, each excellent at running a long, branching, sequential program — exactly what most software needs. A GPU has thousands of much simpler cores, built originally to compute the same operation on millions of independent pixels at once for rendering graphics — and a matrix multiply's independent multiply-add operations are, structurally, the exact same shape of problem. <strong>Serial computation</strong> processes operations one after another, so total time scales with how many operations there are; <strong>parallel computation</strong> processes many independent operations simultaneously, so total time depends far more on how many cores are available than on the operation count itself. This is why <strong>throughput</strong> — total work completed per unit time, not the speed of any single operation — is the number that actually matters for training, and it's why a modern GPU can train in hours what would take a CPU weeks, despite no single GPU core being faster than a CPU core on its own.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    <strong>Serial computation</strong> processes operations one at a time, in sequence. <strong>Parallel computation</strong> processes many independent operations simultaneously across multiple cores. <strong>Throughput</strong> is total work completed per unit time — the metric parallel hardware is built to maximize, even when no individual core is unusually fast.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why "independent" is the load-bearing word</span>
+    Parallelism only helps when operations genuinely don't depend on each other's results. A single layer's weighted sums are independent of one another — that's exactly why they parallelize beautifully on a GPU. But Unit 2's training loop, one iteration after another, is inherently sequential: iteration 50 needs the weights iteration 49 just updated. A GPU speeds up the (massively parallel) work inside each iteration; it does nothing to make the (inherently sequential) count of iterations themselves go any faster. Every lesson in this course that assumed "just run more epochs" was quietly assuming that iteration-to-iteration sequential cost, not the within-iteration cost a GPU parallelizes away.
+  </div>
+
+  <h2>Try it: the same operations, serial versus parallel</h2>
+  <p>Run the same batch of independent operations two ways and watch how differently the time adds up.</p>
+
+  <div class="widget" id="gpu-widget">
+    <p class="widget-label">Interactive: serial versus parallel execution</p>
+    <div class="slider-row">
+      <label for="gpu-n">Independent operations</label>
+      <input type="range" id="gpu-n" min="8" max="48" step="4" value="24">
+      <span class="slider-value" data-gpu-n-value>24</span>
+    </div>
+    <div id="gpu-cells" style="display:flex; flex-wrap:wrap; gap:4px; margin:0.9rem 0;"></div>
+    <div class="fm-row">
+      <button class="widget-btn" type="button" data-gpu-cpu>Run serially (CPU-style)</button>
+      <button class="widget-btn" type="button" data-gpu-gpu>Run in parallel (GPU-style)</button>
+      <button class="widget-btn" type="button" data-gpu-reset>Reset</button>
+    </div>
+    <p class="verdict" data-gpu-verdict>Set the operation count, then run it both ways.</p>
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. Why is a matrix multiply well suited to GPU hardware specifically?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">It consists of enormous numbers of independent multiply-add operations, matching the many-simple-cores design a GPU was built around.</button>
+      <button class="quiz-choice" data-correct="false">Matrix multiplication cannot be computed on a CPU under any circumstances.</button>
+      <button class="quiz-choice" data-correct="false">GPUs have exactly one core, making them ideal for a single large computation.</button>
+      <button class="quiz-choice" data-correct="false">Matrix multiplies are inherently sequential, one entry depending on the last.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A GPU's thousands of simple cores match the independent, repeated structure of matrix multiplication almost exactly.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. What does throughput actually measure?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Total work completed per unit time, not the speed of any single individual operation.</button>
+      <button class="quiz-choice" data-correct="false">The exact clock speed of one CPU core, measured in isolation.</button>
+      <button class="quiz-choice" data-correct="false">The total number of weights in a trained network.</button>
+      <button class="quiz-choice" data-correct="false">How many epochs a training run completed before stopping.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Throughput is about aggregate completed work, which is exactly what many parallel cores boost even without any single core being fast.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why doesn't a GPU speed up the sequential nature of a training loop's iterations themselves?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Each iteration genuinely depends on the previous one's updated weights, so that dependency can't be parallelized away.</button>
+      <button class="quiz-choice" data-correct="false">GPUs are incapable of running any training loop at all.</button>
+      <button class="quiz-choice" data-correct="false">Training iterations have no relationship to matrix multiplication.</button>
+      <button class="quiz-choice" data-correct="false">A GPU can only process exactly one epoch total, regardless of settings.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Parallelism helps within an iteration's independent operations, not across genuinely dependent, sequential iterations.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="throughput">
+    <p class="quiz-prompt">4. Fill in the blank: total work completed per unit time, the metric that actually matters for training speed, is called ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>See the definition box above.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="parallel computation|parallel">
+    <p class="quiz-prompt">5. Fill in the blank: processing many independent operations simultaneously across multiple cores is called ___ computation.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>See the definition box above.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>NVIDIA's <a href="https://developer.nvidia.com/blog/cuda-refresher-reviewing-the-origins-of-gpu-computing/">"CUDA Refresher: Reviewing the Origins of GPU Computing"</a> traces exactly how graphics rendering's parallel design ended up being repurposed for the matrix math behind deep learning.</p>
+
+  <p class="ask-teacher">Curious what a Tensor Core or a TPU adds on top of a general-purpose GPU? Ask your teacher — both are hardware built even more specifically around the exact matrix-multiply-and-accumulate pattern this lesson described, at the cost of being less flexible for anything else. Next: once training is fast enough to actually run, how much of it can be skipped by starting from a model someone else already trained.</p>
+
+  <footer class="lesson-footer">STEM+ · Applied Machine/Deep Learning · Lesson 16 of the course sequence</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var slider = document.getElementById('gpu-n');
+  var nVal = document.querySelector('[data-gpu-n-value]');
+  var cellsEl = document.getElementById('gpu-cells');
+  var verdict = document.querySelector('[data-gpu-verdict]');
+  var cpuBtn = document.querySelector('[data-gpu-cpu]');
+  var gpuBtn = document.querySelector('[data-gpu-gpu]');
+  var resetBtn = document.querySelector('[data-gpu-reset]');
+
+  var running = false;
+
+  function buildCells() {
+    var n = parseInt(slider.value, 10);
+    nVal.textContent = n;
+    cellsEl.innerHTML = '';
+    for (var i = 0; i < n; i++) {
+      var cell = document.createElement('div');
+      cell.style.width = '16px';
+      cell.style.height = '16px';
+      cell.style.border = '1px solid var(--border)';
+      cell.style.borderRadius = '2px';
+      cell.style.background = 'var(--code-bg)';
+      cellsEl.appendChild(cell);
+    }
+  }
+
+  function setButtonsDisabled(disabled) {
+    cpuBtn.disabled = disabled;
+    gpuBtn.disabled = disabled;
+    slider.disabled = disabled;
+  }
+
+  cpuBtn.addEventListener('click', function () {
+    if (running) return;
+    running = true;
+    setButtonsDisabled(true);
+    var cells = cellsEl.children;
+    var n = cells.length;
+    var start = Date.now();
+    var i = 0;
+    function step() {
+      if (i > 0) cells[i - 1].style.background = 'var(--accent)';
+      if (i >= n) {
+        var elapsed = Date.now() - start;
+        verdict.textContent = 'CPU (serial): ' + n + ' operations, one after another. Elapsed ≈ ' + elapsed + 'ms.';
+        setButtonsDisabled(false);
+        running = false;
+        return;
+      }
+      cells[i].style.background = 'var(--correct)';
+      i++;
+      setTimeout(step, 45);
+    }
+    step();
+  });
+
+  gpuBtn.addEventListener('click', function () {
+    if (running) return;
+    running = true;
+    setButtonsDisabled(true);
+    var cells = cellsEl.children;
+    var n = cells.length;
+    var start = Date.now();
+    setTimeout(function () {
+      for (var i = 0; i < n; i++) cells[i].style.background = 'var(--correct)';
+      var elapsed = Date.now() - start;
+      verdict.textContent = 'GPU (parallel): all ' + n + ' operations at once, assuming enough cores. Elapsed ≈ ' + elapsed + 'ms.';
+      setButtonsDisabled(false);
+      running = false;
+    }, 45);
+  });
+
+  resetBtn.addEventListener('click', function () {
+    buildCells();
+    verdict.textContent = 'Set the operation count, then run it both ways.';
+  });
+
+  buildCells();
+  slider.addEventListener('input', buildCells);
+});
+</script>

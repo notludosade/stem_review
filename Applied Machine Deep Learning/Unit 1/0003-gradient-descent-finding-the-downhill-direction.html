@@ -1,0 +1,195 @@
+<meta charset="UTF-8">
+<title>Lesson 3: Gradient Descent — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="advanced">
+  <span class="kicker">STEM+ · Applied Machine/Deep Learning · Unit 1 · Lesson 3</span>
+  <h1>Gradient Descent: Finding the Downhill Direction</h1>
+  <p class="subtitle">AI Developer's Lesson 13 walked one weight downhill. A real network has thousands of weights moving at once, the learning rate has real failure modes in both directions, and "just use gradient descent" quietly hides a few practical refinements worth naming.</p>
+  <p class="nav-links"><a href="0002-loss-functions-measuring-how-wrong-a-prediction-is.html" class="nav-prev">← Lesson 2</a> <a href="../Unit%202/0004-backpropagation-how-error-flows-backward.html" class="nav-next">Unit 2, Lesson 4 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>With thousands of weights instead of one, the gradient stops being a single slope and becomes a <strong>gradient vector</strong>: one partial derivative per weight, each one saying how that specific weight's tiny nudge would change the loss, holding every other weight fixed. Gradient descent still does the same thing Lesson 2's loss function set up — step every weight a little in the direction that reduces loss the most — just simultaneously, across every entry in that vector, every step.</p>
+
+  <span class="code-label">Python — gradient descent on two weights at once</span>
+  <pre class="code-block"><code>import numpy as np
+
+def loss(w):
+    return (w[0] - 3) ** 2 + (w[1] + 1) ** 2   # minimized at w = [3, -1]
+
+def gradient(w):
+    return np.array([2 * (w[0] - 3), 2 * (w[1] + 1)])   # one partial derivative per weight
+
+w = np.array([0.0, 0.0])
+learning_rate = 0.1
+
+for step in range(30):
+    w = w - learning_rate * gradient(w)   # every weight steps at once
+
+print(w)   # converges toward [3.0, -1.0]</code></pre>
+
+  <p>Nothing here is conceptually new next to Lesson 13's single-weight version — <code class="inline-code">gradient(w)</code> just returns a whole array instead of one number, and the update line applies to all of it at once via NumPy's elementwise subtraction. What <em>is</em> new at this scale is how much more the learning rate's size matters. Too small, and thousands of tiny, correct steps still take forever to add up. Too large, and a weight doesn't just converge slowly — it can overshoot the minimum, land further from it than where it started, and diverge outward step after step, each one worse than the last.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    The <strong>gradient vector</strong> holds one partial derivative per weight — how much that weight alone would change the loss. Gradient descent steps every weight opposite its own entry in that vector. A <strong>local minimum</strong> is a point where loss is lower than every nearby point but not necessarily the lowest possible; a <strong>saddle point</strong> curves downward in some directions and upward in others, so the gradient there is technically zero without actually being a minimum at all.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why real training rarely uses plain gradient descent as shown above</span>
+    Plain gradient descent tends to zig-zag across narrow, steep-sided valleys in the loss surface instead of moving smoothly toward the minimum. <strong>Momentum</strong> fixes this by accumulating a running average of recent gradients — like a ball with real inertia rather than one that stops and recalculates from scratch at every step — which smooths out the zig-zag and speeds up consistent downhill progress. <strong>Adam</strong>, the optimizer used in most real training scripts, builds on momentum further by giving every individual weight its own effectively adapted learning rate, based on how that weight's gradient has behaved recently. Both are refinements on exactly the loop above, not a different idea.
+  </div>
+
+  <h2>Try it: take gradient descent steps yourself</h2>
+  <p>Watch the ball descend loss(w) = (w − 3)² one step at a time. Try a small learning rate, a good one, and then push it past where it stops converging at all.</p>
+
+  <div class="widget" id="gd-widget">
+    <p class="widget-label">Interactive: gradient descent step visualizer</p>
+    <div class="plot-wrap">
+      <svg viewBox="0 0 320 160" width="320" height="160" role="img" aria-label="Parabola showing loss against weight w, with a ball marking the current weight">
+        <line class="fig-axis" x1="20" y1="150" x2="300" y2="150"></line>
+        <polyline class="fig-curve" data-gd-curve points=""></polyline>
+        <circle class="fig-point" data-gd-point r="6"></circle>
+      </svg>
+    </div>
+    <div class="slider-row">
+      <label for="gd-lr">Learning rate</label>
+      <input type="range" id="gd-lr" min="0.05" max="1.15" step="0.05" value="0.3">
+      <span class="slider-value" data-gd-lr-value>0.30</span>
+    </div>
+    <div class="fm-row">
+      <button class="widget-btn" type="button" data-gd-step>Take a step</button>
+      <button class="widget-btn" type="button" data-gd-reset>Reset</button>
+    </div>
+    <p class="plot-readout" data-gd-readout>w = 0.30, loss = 7.29. Click "Take a step."</p>
+    <p class="plot-hint" data-gd-log></p>
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What does the gradient vector contain for a network with many weights?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">One partial derivative per weight, describing how that weight alone would change the loss.</button>
+      <button class="quiz-choice" data-correct="false">A single number shared identically by every weight in the network.</button>
+      <button class="quiz-choice" data-correct="false">The total count of weights in the network.</button>
+      <button class="quiz-choice" data-correct="false">The value of the loss function itself, with no reference to any weight.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden><code>gradient(w)</code> above returns one entry per weight in the array.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. What can happen if the learning rate is set too large?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">A weight can overshoot the minimum and diverge, landing farther away with every subsequent step.</button>
+      <button class="quiz-choice" data-correct="false">Training becomes perfectly accurate after exactly one step.</button>
+      <button class="quiz-choice" data-correct="false">The gradient vector stops having any entries.</button>
+      <button class="quiz-choice" data-correct="false">Nothing changes — learning rate size has no effect on convergence.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Overshooting the minimum by more than the original distance makes each subsequent step worse, not better.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. What does momentum add to plain gradient descent?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">A running average of recent gradients, smoothing out zig-zagging and speeding up consistent downhill progress.</button>
+      <button class="quiz-choice" data-correct="false">A guarantee that training will always reach the true global minimum.</button>
+      <button class="quiz-choice" data-correct="false">A way to skip computing the gradient entirely.</button>
+      <button class="quiz-choice" data-correct="false">A fixed learning rate that never needs tuning.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Momentum behaves like inertia, carrying recent direction forward rather than recalculating from scratch each step.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="saddle point|saddle">
+    <p class="quiz-prompt">4. Fill in the blank: a point where the gradient is zero, but the surface curves downward in some directions and upward in others, is a ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>See the definition box above.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="adam">
+    <p class="quiz-prompt">5. Fill in the blank: the optimizer used in most real training scripts, which builds on momentum by adapting each weight's effective learning rate individually, is called ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>See the "why" box above.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Sebastian Ruder's <a href="https://www.ruder.io/optimizing-gradient-descent/">"An Overview of Gradient Descent Optimization Algorithms"</a> — the same source AI Developer pointed to — covers momentum and Adam directly, with the full math behind both.</p>
+
+  <p class="ask-teacher">Curious what the loss surface actually looks like for a network with thousands of weights, instead of just one or two? Ask your teacher — nobody can draw it, but the zig-zagging and saddle-point intuition from a 2D or 3D case still holds up surprisingly well. That closes Unit 1. Next: the piece that makes any of this possible at scale — computing that entire gradient vector without a separate calculation for every single weight.</p>
+
+  <footer class="lesson-footer">STEM+ · Applied Machine/Deep Learning · Lesson 3 of the course sequence</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var w = 0.3;
+  var log = [];
+  var curveEl = document.querySelector('[data-gd-curve]');
+  var pointEl = document.querySelector('[data-gd-point]');
+  var lrSlider = document.getElementById('gd-lr');
+  var lrVal = document.querySelector('[data-gd-lr-value]');
+  var readout = document.querySelector('[data-gd-readout]');
+  var logEl = document.querySelector('[data-gd-log]');
+  var stepBtn = document.querySelector('[data-gd-step]');
+  var resetBtn = document.querySelector('[data-gd-reset]');
+
+  // domain: w in [0, 6], loss in [0, 9] -- loss(w) = (w - 3)^2
+  function xToPx(wv) { return 20 + (wv / 6) * 280; }
+  function yToPx(lv) { return 150 - (Math.min(lv, 9) / 9) * 140; }
+  function loss(wv) { return (wv - 3) * (wv - 3); }
+  function grad(wv) { return 2 * (wv - 3); }
+
+  function drawCurve() {
+    var pts = [];
+    for (var wv = 0; wv <= 6.01; wv += 0.15) {
+      pts.push(xToPx(wv).toFixed(1) + ',' + yToPx(loss(wv)).toFixed(1));
+    }
+    curveEl.setAttribute('points', pts.join(' '));
+  }
+
+  function render() {
+    pointEl.setAttribute('cx', xToPx(w).toFixed(1));
+    pointEl.setAttribute('cy', yToPx(loss(w)).toFixed(1));
+    readout.classList.remove('is-pass', 'is-fail');
+    var dist = Math.abs(w - 3);
+    if (dist < 6) { readout.classList.add(dist < 1 ? 'is-pass' : ''); }
+    readout.textContent = 'w = ' + w.toFixed(3) + ', loss = ' + loss(w).toFixed(3) + ', gradient = ' + grad(w).toFixed(3) + '.';
+    logEl.textContent = log.slice(0, 4).join('  ·  ');
+  }
+
+  stepBtn.addEventListener('click', function () {
+    var lr = parseFloat(lrSlider.value);
+    var prevDist = Math.abs(w - 3);
+    var g = grad(w);
+    w = w - lr * g;
+    var newDist = Math.abs(w - 3);
+    var verdict = newDist < prevDist ? 'converging' : 'diverging — try a smaller learning rate';
+    log.unshift('step: w → ' + w.toFixed(2) + ' (' + verdict + ')');
+    render();
+  });
+
+  resetBtn.addEventListener('click', function () {
+    w = 0.3;
+    log = [];
+    render();
+  });
+
+  lrSlider.addEventListener('input', function () {
+    lrVal.textContent = parseFloat(lrSlider.value).toFixed(2);
+  });
+
+  drawCurve();
+  render();
+});
+</script>

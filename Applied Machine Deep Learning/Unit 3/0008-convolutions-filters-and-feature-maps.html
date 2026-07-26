@@ -1,0 +1,276 @@
+<meta charset="UTF-8">
+<title>Lesson 8: Convolutions, Filters, and Feature Maps — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="advanced">
+  <span class="kicker">STEM+ · Applied Machine/Deep Learning · Unit 3 · Lesson 8</span>
+  <h1>Convolutions, Filters, and Feature Maps</h1>
+  <p class="subtitle">Lesson 7 established why a filter's weights get reused across an entire image. This lesson is the actual arithmetic of "reused" — computing a real feature map, by hand, one position at a time.</p>
+  <p class="nav-links"><a href="0007-why-images-need-a-different-architecture.html" class="nav-prev">← Lesson 7</a> <a href="0009-pooling-and-building-a-full-cnn.html" class="nav-next">Lesson 9 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>A convolution slides a small filter across an input, and at every position, computes one number: the elementwise product of the filter and whatever patch of input it's currently sitting on top of, summed. That single number goes into the corresponding position of the output — the feature map.</p>
+
+  <span class="code-label">Python — a convolution, one position at a time</span>
+  <pre class="code-block"><code>import numpy as np
+
+image = np.array([
+    [1, 2, 0, 1, 3],
+    [0, 1, 2, 3, 1],
+    [2, 0, 1, 2, 0],
+    [1, 3, 0, 1, 2],
+    [0, 1, 2, 0, 1],
+])
+
+filt = np.array([          # a vertical-edge-detecting filter
+    [1, 0, -1],
+    [1, 0, -1],
+    [1, 0, -1],
+])
+
+def conv_at(img, f, row, col):
+    patch = img[row:row+3, col:col+3]
+    return np.sum(patch * f)   # elementwise multiply, then sum
+
+print(conv_at(image, filt, 0, 0))   # 1*1+2*0+0*-1 + 0*1+1*0+2*-1 + 2*1+0*0+1*-1 = 0
+print(conv_at(image, filt, 0, 1))   # slide one column right, same filter</code></pre>
+
+  <p>How far the filter moves between positions is the <strong>stride</strong>. A stride of 1 checks every possible position; a stride of 2 skips every other one, producing a smaller feature map faster, at the cost of some spatial resolution. With a 5×5 input, a 3×3 filter, and stride 1, the filter fits in 3 positions per row and 3 per column — a 3×3 output. In general, output size is <span class="expr">⌊(W − F) / S⌋ + 1</span>, where W is input width, F is filter width, and S is stride. Notice this shrinks the output relative to the input every time — a real cost for deep networks stacking many convolutional layers. <strong>Padding</strong> — adding a border of zeros around the input before sliding the filter — is the fix: "same" padding adds just enough zeros that the output comes out the same size as the input, letting a network stack convolutional layers without silently losing spatial size at every one.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    <strong>Stride</strong> is how many positions the filter moves between computations. <strong>Padding</strong> adds a border of zeros around the input before convolving, most often to keep the output the same size as the input ("same" padding) instead of shrinking it ("valid" padding, no border at all).
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why stride and padding are chosen together, not independently</span>
+    Stride 2 is a cheap way to downsample — Lesson 9's pooling does something similar with a different mechanism — but it also throws away detail the way skipping every other row of a scan would. Padding doesn't add any real information either; it's zeros. Real architectures combine both deliberately: "same" padding with stride 1 in early layers to preserve detail while the network is still building up basic features, and stride 2 (or Lesson 9's pooling) later on, once the network can afford to trade spatial precision for a more compact, higher-level representation.
+  </div>
+
+  <h2>Try it: step a filter across an image</h2>
+  <p>Click through every position this filter visits, and watch the feature map fill in one value at a time. Switch the stride and watch how many positions actually get visited.</p>
+
+  <div class="widget" id="conv-widget">
+    <p class="widget-label">Interactive: convolution, step by step</p>
+    <div class="fm-tabs">
+      <button class="fm-tab is-active" type="button" data-conv-stride="1">Stride 1</button>
+      <button class="fm-tab" type="button" data-conv-stride="2">Stride 2</button>
+    </div>
+    <div class="dual-plot">
+      <div>
+        <h3>Input (5×5), current patch highlighted</h3>
+        <div id="conv-input-grid" style="display:grid; grid-template-columns:repeat(5, 34px); gap:2px; justify-content:center;"></div>
+      </div>
+      <div>
+        <h3>Feature map (filling in)</h3>
+        <div id="conv-output-grid" style="display:grid; gap:2px; justify-content:center;"></div>
+      </div>
+    </div>
+    <div class="fm-row">
+      <button class="widget-btn" type="button" data-conv-step>Step →</button>
+      <button class="widget-btn" type="button" data-conv-reset>Reset</button>
+    </div>
+    <p class="plot-readout" data-conv-readout>Click "Step" to compute the first position.</p>
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What single number does a convolution compute at one position?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">The elementwise product of the filter and the input patch it's over, summed into one value.</button>
+      <button class="quiz-choice" data-correct="false">The average brightness of the entire image, regardless of position.</button>
+      <button class="quiz-choice" data-correct="false">A random number unrelated to the filter's weights.</button>
+      <button class="quiz-choice" data-correct="false">The total count of pixels in the input image.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>conv_at above computes exactly patch * filter, summed — one number per position.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. With a 7×7 input, a 3×3 filter, and stride 1, what size is the output feature map?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">5×5 — ⌊(7 − 3) / 1⌋ + 1 = 5.</button>
+      <button class="quiz-choice" data-correct="false">7×7, always identical to the input.</button>
+      <button class="quiz-choice" data-correct="false">3×3, always identical to the filter.</button>
+      <button class="quiz-choice" data-correct="false">10×10, larger than the input.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The output-size formula ⌊(W − F) / S⌋ + 1 gives 5 for W=7, F=3, S=1.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. What does "same" padding accomplish?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Adds enough zero border around the input so the output feature map matches the input's spatial size.</button>
+      <button class="quiz-choice" data-correct="false">Deletes every pixel along the border of the image.</button>
+      <button class="quiz-choice" data-correct="false">Forces the filter's weights to all become identical to each other.</button>
+      <button class="quiz-choice" data-correct="false">Doubles the number of channels in the input.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Same padding is specifically calibrated to keep output size equal to input size.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="stride">
+    <p class="quiz-prompt">4. Fill in the blank: how many positions a filter moves between each computation is called its ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>See the definition box above.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="padding">
+    <p class="quiz-prompt">5. Fill in the blank: adding a border of zeros around an input before convolving it is called ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>See the definition box above.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Vincent Dumoulin and Francesco Visin's <a href="https://arxiv.org/abs/1603.07285">"A guide to convolution arithmetic for deep learning"</a> has animated diagrams of stride and padding covering every case this lesson introduced.</p>
+
+  <p class="ask-teacher">Curious what happens with a filter deeper than the input's channel count — like the 3-channel filters from Lesson 7's parameter count? Ask your teacher — each filter still produces one number per position, just summed across all channels at once, not one output per channel. Next: shrinking these feature maps back down, and assembling the full stack.</p>
+
+  <footer class="lesson-footer">STEM+ · Applied Machine/Deep Learning · Lesson 8 of the course sequence</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var IMAGE = [
+    [1, 2, 0, 1, 3],
+    [0, 1, 2, 3, 1],
+    [2, 0, 1, 2, 0],
+    [1, 3, 0, 1, 2],
+    [0, 1, 2, 0, 1]
+  ];
+  var FILTER = [
+    [1, 0, -1],
+    [1, 0, -1],
+    [1, 0, -1]
+  ];
+
+  var stride = 1;
+  var positions = [];
+  var stepIndex = -1;
+
+  var inputGrid = document.getElementById('conv-input-grid');
+  var outputGrid = document.getElementById('conv-output-grid');
+  var readout = document.querySelector('[data-conv-readout]');
+  var stepBtn = document.querySelector('[data-conv-step]');
+  var resetBtn = document.querySelector('[data-conv-reset]');
+  var strideButtons = document.querySelectorAll('[data-conv-stride]');
+
+  function cellStyle(el, filled) {
+    el.style.width = '34px';
+    el.style.height = '34px';
+    el.style.display = 'flex';
+    el.style.alignItems = 'center';
+    el.style.justifyContent = 'center';
+    el.style.fontFamily = '"SF Mono", Menlo, Consolas, monospace';
+    el.style.fontSize = '0.85rem';
+    el.style.border = '1px solid var(--border)';
+    el.style.borderRadius = '3px';
+    el.style.background = filled ? 'var(--bg)' : 'var(--code-bg)';
+  }
+
+  function buildInputGrid() {
+    inputGrid.innerHTML = '';
+    for (var r = 0; r < 5; r++) {
+      for (var c = 0; c < 5; c++) {
+        var cell = document.createElement('div');
+        cell.textContent = IMAGE[r][c];
+        cell.id = 'in-' + r + '-' + c;
+        cellStyle(cell, true);
+        inputGrid.appendChild(cell);
+      }
+    }
+  }
+
+  function buildOutputGrid() {
+    var outSize = Math.floor((5 - 3) / stride) + 1;
+    outputGrid.style.gridTemplateColumns = 'repeat(' + outSize + ', 34px)';
+    outputGrid.innerHTML = '';
+    for (var r = 0; r < outSize; r++) {
+      for (var c = 0; c < outSize; c++) {
+        var cell = document.createElement('div');
+        cell.textContent = '?';
+        cell.id = 'out-' + r + '-' + c;
+        cellStyle(cell, false);
+        outputGrid.appendChild(cell);
+      }
+    }
+    positions = [];
+    for (var pr = 0; pr < outSize; pr++) {
+      for (var pc = 0; pc < outSize; pc++) {
+        positions.push([pr * stride, pc * stride, pr, pc]);
+      }
+    }
+  }
+
+  function clearHighlights() {
+    for (var r = 0; r < 5; r++) {
+      for (var c = 0; c < 5; c++) {
+        document.getElementById('in-' + r + '-' + c).style.background = 'var(--code-bg)';
+      }
+    }
+  }
+
+  function convAt(row, col) {
+    var sum = 0;
+    for (var i = 0; i < 3; i++) {
+      for (var j = 0; j < 3; j++) {
+        sum += IMAGE[row + i][col + j] * FILTER[i][j];
+      }
+    }
+    return sum;
+  }
+
+  function reset() {
+    stepIndex = -1;
+    buildOutputGrid();
+    clearHighlights();
+    readout.textContent = 'Click "Step" to compute the first position.';
+  }
+
+  stepBtn.addEventListener('click', function () {
+    if (stepIndex >= positions.length - 1) {
+      readout.textContent = 'Every position has been computed — the feature map is complete.';
+      return;
+    }
+    stepIndex++;
+    var pos = positions[stepIndex];
+    var row = pos[0], col = pos[1], outR = pos[2], outC = pos[3];
+
+    clearHighlights();
+    for (var i = 0; i < 3; i++) {
+      for (var j = 0; j < 3; j++) {
+        document.getElementById('in-' + (row + i) + '-' + (col + j)).style.background = 'var(--accent-soft)';
+      }
+    }
+
+    var value = convAt(row, col);
+    document.getElementById('out-' + outR + '-' + outC).textContent = value;
+
+    readout.textContent = 'Position (' + row + ',' + col + '): sum of filter × patch = ' + value + '. Written to feature map (' + outR + ',' + outC + ').';
+  });
+
+  resetBtn.addEventListener('click', reset);
+
+  strideButtons.forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      strideButtons.forEach(function (b) { b.classList.remove('is-active'); });
+      btn.classList.add('is-active');
+      stride = parseInt(btn.getAttribute('data-conv-stride'), 10);
+      reset();
+    });
+  });
+
+  buildInputGrid();
+  reset();
+});
+</script>

@@ -1,0 +1,212 @@
+<meta charset="UTF-8">
+<title>Lesson 4: Backpropagation — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="advanced">
+  <span class="kicker">STEM+ · Applied Machine/Deep Learning · Unit 2 · Lesson 4</span>
+  <h1>Backpropagation: How Error Flows Backward</h1>
+  <p class="subtitle">AI Developer's Lesson 14 showed backpropagation's shape in code, output layer to input, reusing each layer's gradient in the one before it. This lesson runs that exact process by hand, with real numbers, on a network small enough to compute every single value yourself.</p>
+  <p class="nav-links"><a href="../Unit%201/0003-gradient-descent-finding-the-downhill-direction.html" class="nav-prev">← Lesson 3</a> <a href="0005-learning-rate-batches-and-epochs.html" class="nav-next">Lesson 5 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Take the smallest network that still has something to backpropagate through: two inputs, one hidden neuron, one output neuron, both using sigmoid. A forward pass produces a prediction and a loss, exactly as Unit 1 covered. <strong>Backpropagation</strong> is what happens next — walking back through that same network, computing how much each individual weight contributed to the final loss, using the <strong>chain rule</strong> to reuse work instead of repeating it.</p>
+
+  <span class="code-label">Python — the same tiny network, forward and backward</span>
+  <pre class="code-block"><code>import numpy as np
+
+def sigmoid(z): return 1 / (1 + np.exp(-z))
+
+x1, x2, y = 1.0, 0.0, 1.0
+w1, w2, b_h = 0.5, -0.6, 0.1     # weights/bias into the hidden neuron
+w_o, b_o = 0.8, -0.2             # weight/bias from hidden to output
+
+# Forward pass
+z_h = w1 * x1 + w2 * x2 + b_h
+a_h = sigmoid(z_h)
+z_o = w_o * a_h + b_o
+a_o = sigmoid(z_o)
+loss = (a_o - y) ** 2
+
+# Backward pass — the chain rule, one factor at a time
+dL_dao = 2 * (a_o - y)               # d(loss)/d(output)
+dao_dzo = a_o * (1 - a_o)            # sigmoid's own local derivative
+dL_dzo = dL_dao * dao_dzo            # reused below, twice
+
+dL_dwo = dL_dzo * a_h                # gradient for w_o
+dL_dah = dL_dzo * w_o                # error passed back to the hidden neuron
+
+dah_dzh = a_h * (1 - a_h)
+dL_dzh = dL_dah * dah_dzh
+dL_dw1 = dL_dzh * x1                 # gradient for w1
+dL_dw2 = dL_dzh * x2                 # gradient for w2</code></pre>
+
+  <p>Every line under "Backward pass" is one <strong>local gradient</strong> — a small, self-contained derivative computed using only values already sitting in memory from the forward pass — multiplied by whatever arrived from the layer just processed. Notice <code class="inline-code">dL_dzo</code> gets used twice: once to compute <code class="inline-code">dL_dwo</code> directly, and once more, unmodified, as the starting point for everything the hidden layer needs. That reuse is the entire efficiency argument for backpropagation over computing each weight's gradient from scratch — with two weights it barely matters, but the same pattern is what makes a network with fifty million weights trainable at all.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    <strong>Backpropagation</strong> computes the loss gradient for every weight by walking backward through a network, layer by layer, from the output. The <strong>chain rule</strong> is the calculus rule that makes each layer's gradient a valid ingredient for the one before it. A <strong>local gradient</strong> is one small derivative computed at a single point in the network, using only values already available there.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why dL_dzo appears in two different gradients</span>
+    dL_dzo answers one specific question: "if the output neuron's pre-activation sum changed slightly, how much would loss change?" That answer doesn't depend on which weight you're about to compute a gradient for — it's a property of the output neuron alone. Both <code class="inline-code">dL_dwo</code> (this neuron's own weight) and <code class="inline-code">dL_dah</code> (the error signal handed to the previous layer) are legitimately built from it. Backpropagation is, at its core, computing exactly one local gradient per neuron and reusing it everywhere that neuron's output was used.
+  </div>
+
+  <h2>Try it: run the forward and backward pass yourself</h2>
+  <p>Step through this exact tiny network's math, one line at a time — forward first, then backward.</p>
+
+  <div class="widget" id="backprop-widget">
+    <p class="widget-label">Interactive: forward and backward pass, step by step</p>
+    <p class="plot-readout" data-bp-progress>Step 0 of 8. Click "Next step" to begin the forward pass.</p>
+    <div class="fm-row">
+      <button class="widget-btn" type="button" data-bp-next>Next step →</button>
+      <button class="widget-btn" type="button" data-bp-reset>Reset</button>
+    </div>
+    <p class="plot-hint" data-bp-log></p>
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. In the worked example, what is dL_dzo used for besides computing dL_dwo?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">It becomes the starting point for dL_dah, the error signal passed back to the hidden layer.</button>
+      <button class="quiz-choice" data-correct="false">It is discarded immediately after computing dL_dwo.</button>
+      <button class="quiz-choice" data-correct="false">It is recomputed from scratch for every other gradient in the network.</button>
+      <button class="quiz-choice" data-correct="false">It has no further use anywhere in the backward pass.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>dL_dah = dL_dzo * w_o reuses dL_dzo directly, exactly the reuse backpropagation is built around.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. What is a "local gradient," as used in this lesson?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">A small derivative computed at one specific point in the network, using only values already available there.</button>
+      <button class="quiz-choice" data-correct="false">The single gradient value shared by every weight in the whole network.</button>
+      <button class="quiz-choice" data-correct="false">The total loss summed across every training example.</button>
+      <button class="quiz-choice" data-correct="false">A gradient that only exists for the very first layer of a network.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>dao_dzo = a_o * (1 - a_o) is exactly this — computable from a_o alone, with nothing borrowed from elsewhere.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why does dL_dwo need a_h as one of its factors, and not just dL_dzo alone?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">w_o's effect on z_o scales with a_h, since z_o = w_o * a_h + b_o — the chain rule requires that factor too.</button>
+      <button class="quiz-choice" data-correct="false">a_h is included purely by convention and has no mathematical necessity.</button>
+      <button class="quiz-choice" data-correct="false">dL_dwo does not actually depend on a_h in any way.</button>
+      <button class="quiz-choice" data-correct="false">a_h replaces dL_dzo entirely in this computation.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The chain rule multiplies dL_dzo by dzo_dwo, and dzo_dwo is exactly a_h given how z_o is defined.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="backpropagation">
+    <p class="quiz-prompt">4. Fill in the blank: computing the loss gradient for every weight by walking backward through a network from the output is called ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>See the definition box above.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="local gradient">
+    <p class="quiz-prompt">5. Fill in the blank: a small derivative computed at a single point in the network, from values already available there, is a ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>See the definition box above.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Andrej Karpathy's <a href="https://cs231n.github.io/optimization-2/">"Backpropagation, Intuitions"</a> (CS231n) works through several small computational graphs by hand, exactly like the widget above, and builds toward larger ones.</p>
+
+  <p class="ask-teacher">Curious how this generalizes when a neuron's output feeds into more than one place, not just a single path forward like this tiny example? Ask your teacher — the gradients from every path it feeds simply add together. Next: once every gradient is known, how big a step to actually take, and how much data to look at before taking it.</p>
+
+  <footer class="lesson-footer">STEM+ · Applied Machine/Deep Learning · Lesson 4 of the course sequence</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var x1 = 1.0, x2 = 0.0, y = 1.0;
+  var w1 = 0.5, w2 = -0.6, bh = 0.1;
+  var wo = 0.8, bo = -0.2;
+
+  function sigmoid(z) { return 1 / (1 + Math.exp(-z)); }
+
+  var s = {};
+  var idx = 0;
+  var lines = [];
+
+  var steps = [
+    function () {
+      s.zh = w1 * x1 + w2 * x2 + bh;
+      return 'Forward 1/4 — hidden pre-activation: z_h = (' + w1 + ')(' + x1 + ') + (' + w2 + ')(' + x2 + ') + ' + bh + ' = ' + s.zh.toFixed(4) + '.';
+    },
+    function () {
+      s.ah = sigmoid(s.zh);
+      return 'Forward 2/4 — hidden activation: a_h = sigmoid(' + s.zh.toFixed(4) + ') = ' + s.ah.toFixed(4) + '.';
+    },
+    function () {
+      s.zo = wo * s.ah + bo;
+      return 'Forward 3/4 — output pre-activation: z_o = (' + wo + ')(' + s.ah.toFixed(4) + ') + (' + bo + ') = ' + s.zo.toFixed(4) + '.';
+    },
+    function () {
+      s.ao = sigmoid(s.zo);
+      s.loss = (s.ao - y) * (s.ao - y);
+      return 'Forward 4/4 — output & loss: a_o = sigmoid(' + s.zo.toFixed(4) + ') = ' + s.ao.toFixed(4) + '; loss = (a_o − ' + y + ')² = ' + s.loss.toFixed(4) + '.';
+    },
+    function () {
+      var dL_dao = 2 * (s.ao - y);
+      var dao_dzo = s.ao * (1 - s.ao);
+      s.dL_dzo = dL_dao * dao_dzo;
+      return 'Backward 1/4 — output gradient: dL/da_o = ' + dL_dao.toFixed(4) + '; dL/dz_o = dL/da_o · a_o(1−a_o) = ' + s.dL_dzo.toFixed(4) + '.';
+    },
+    function () {
+      s.dL_dwo = s.dL_dzo * s.ah;
+      var dL_dbo = s.dL_dzo;
+      return 'Backward 2/4 — output weight gradient: dL/dw_o = dL/dz_o · a_h = ' + s.dL_dwo.toFixed(4) + ' (and dL/db_o = ' + dL_dbo.toFixed(4) + ').';
+    },
+    function () {
+      var dL_dah = s.dL_dzo * wo;
+      var dah_dzh = s.ah * (1 - s.ah);
+      s.dL_dzh = dL_dah * dah_dzh;
+      return 'Backward 3/4 — error reaches the hidden neuron: dL/da_h = dL/dz_o · w_o = ' + dL_dah.toFixed(4) + '; dL/dz_h = ' + s.dL_dzh.toFixed(4) + '.';
+    },
+    function () {
+      var dL_dw1 = s.dL_dzh * x1;
+      var dL_dw2 = s.dL_dzh * x2;
+      return 'Backward 4/4 — hidden weight gradients: dL/dw1 = dL/dz_h · x1 = ' + dL_dw1.toFixed(4) + '; dL/dw2 = dL/dz_h · x2 = ' + dL_dw2.toFixed(4) + '. Every weight now has a gradient.';
+    }
+  ];
+
+  var progress = document.querySelector('[data-bp-progress]');
+  var logEl = document.querySelector('[data-bp-log]');
+  var nextBtn = document.querySelector('[data-bp-next]');
+  var resetBtn = document.querySelector('[data-bp-reset]');
+
+  function render() {
+    progress.textContent = 'Step ' + idx + ' of ' + steps.length + (idx === steps.length ? ' — complete.' : '.');
+    logEl.innerHTML = lines.map(function (l) { return '• ' + l; }).join('<br>');
+  }
+
+  nextBtn.addEventListener('click', function () {
+    if (idx >= steps.length) return;
+    lines.push(steps[idx]());
+    idx++;
+    render();
+  });
+
+  resetBtn.addEventListener('click', function () {
+    idx = 0; lines = []; s = {};
+    render();
+  });
+
+  render();
+});
+</script>

@@ -1,0 +1,158 @@
+<meta charset="UTF-8">
+<title>Lesson 7: Why Images Need a Different Architecture — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="advanced">
+  <span class="kicker">STEM+ · Applied Machine/Deep Learning · Unit 3 · Lesson 7</span>
+  <h1>Why Images Need a Different Architecture</h1>
+  <p class="subtitle">AI Developer's Lesson 15 introduced CNNs by naming the pieces. Before wiring any of them together, it's worth actually doing the arithmetic on the alternative — a plain fully-connected network on raw pixels — to see exactly why nobody does that.</p>
+  <p class="nav-links"><a href="../Unit%202/0006-overfitting-and-regularization.html" class="nav-prev">← Lesson 6</a> <a href="0008-convolutions-filters-and-feature-maps.html" class="nav-next">Lesson 8 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>The most direct way to feed an image into Unit 1's network is to flatten it into one long vector of pixel values and run it through an ordinary <strong>fully-connected layer</strong> — every input connected to every neuron, exactly like every layer built so far. It works, technically. It also doesn't scale.</p>
+
+  <span class="code-label">Python — counting parameters, the direct way</span>
+  <pre class="code-block"><code># A modest 224x224 color image, flattened
+image_inputs = 224 * 224 * 3          # 150,528 pixel values
+
+# One fully-connected hidden layer of 1,024 neurons
+fc_weights = image_inputs * 1024      # 154,140,672
+fc_params = fc_weights + 1024         # + one bias per neuron
+print(fc_params)                      # over 154 million, for one layer
+
+# A convolutional layer instead: 32 filters, each 3x3 over 3 color channels
+conv_weights = 32 * (3 * 3 * 3)       # 864
+conv_params = conv_weights + 32       # + one bias per filter
+print(conv_params)                    # 896 — for a layer covering the same image</code></pre>
+
+  <p>One fully-connected hidden layer over a single modest image needs more parameters than most classical machine learning models will ever see, and that's before adding a second layer or a larger image. A convolutional layer covering that exact same image needs 896. The 170,000-times difference isn't a rounding error — it comes from two assumptions a fully-connected layer refuses to make, and an image happens to satisfy both of them.</p>
+
+  <p>The first is <strong>spatial locality</strong>: a pixel is most related to the pixels immediately around it, not to a pixel on the opposite corner of the image. A filter that only ever looks at a small local neighborhood — say, 3×3 pixels — isn't throwing away useful structure; it's matching the structure that's actually there. The second is <strong>translation invariance</strong>: an edge, a curve, or a patch of texture means the same thing regardless of where in the image it happens to sit. A fully-connected layer would need to learn to recognize "vertical edge" separately at every single position in the image, spending a huge number of independent weights re-learning the same pattern over and over. A convolutional filter learns it once and reuses those same weights everywhere the filter slides — the parameter sharing AI Developer named without deriving the actual arithmetic behind it.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    A <strong>fully-connected layer</strong> connects every input to every neuron independently, with no assumption about structure. <strong>Spatial locality</strong> is the assumption that nearby pixels are more related than distant ones. <strong>Translation invariance</strong> is the assumption that a pattern means the same thing no matter where in the image it appears.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why these two assumptions don't transfer to arbitrary tabular data</span>
+    A row in a spreadsheet — age, income, zip code — has no meaningful "neighboring" column the way a pixel has neighboring pixels, and shuffling its columns doesn't preserve any real-world structure the way sliding a pattern across an image does. That's precisely why classical models and Unit 1's plain fully-connected layers remain the right tool for tabular data, while CNNs exist specifically for data where locality and translation invariance are actually true. Choosing an architecture, this course keeps demonstrating, is about matching the shape of the assumption to the shape of the data — never a default.
+  </div>
+
+  <h2>Try it: watch the parameter gap widen</h2>
+  <p>Change the image size and the fully-connected layer's width, and watch how fast the fully-connected parameter count outpaces a fixed convolutional layer's.</p>
+
+  <div class="widget" id="param-widget">
+    <p class="widget-label">Interactive: parameter count calculator</p>
+    <div class="slider-row">
+      <label for="img-size">Image size (px)</label>
+      <input type="range" id="img-size" min="16" max="256" step="8" value="224">
+      <span class="slider-value" data-img-size-value>224</span>
+    </div>
+    <div class="slider-row">
+      <label for="fc-units">FC hidden units</label>
+      <input type="range" id="fc-units" min="32" max="2048" step="32" value="1024">
+      <span class="slider-value" data-fc-units-value>1024</span>
+    </div>
+    <p class="plot-readout" data-param-fc>—</p>
+    <p class="plot-readout" data-param-conv>Convolutional layer (32 filters, 3×3, 3 channels): 896 parameters — fixed, regardless of image size.</p>
+    <p class="verdict" data-param-verdict>—</p>
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. Why does a fully-connected layer over a raw image need so many more parameters than a convolutional layer?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">It connects every pixel independently to every neuron, with no shared or reused weights across positions.</button>
+      <button class="quiz-choice" data-correct="false">Fully-connected layers are only capable of processing black-and-white images.</button>
+      <button class="quiz-choice" data-correct="false">Convolutional layers secretly discard most of the image before processing.</button>
+      <button class="quiz-choice" data-correct="false">There is no real parameter count difference between the two.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Every pixel-to-neuron connection in a fully-connected layer is its own independent weight, with nothing reused.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. What does "translation invariance" mean, in the context of image data?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">A pattern like an edge means the same thing regardless of where in the image it appears.</button>
+      <button class="quiz-choice" data-correct="false">Every image must be translated into a different language before processing.</button>
+      <button class="quiz-choice" data-correct="false">Pixels on opposite corners of an image are always identical.</button>
+      <button class="quiz-choice" data-correct="false">An image's size can never change once training begins.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The same filter weights are reused at every position specifically because a pattern's meaning doesn't depend on its location.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why don't spatial locality and translation invariance generally apply to a spreadsheet of tabular features?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">There's no meaningful "neighboring" column the way pixels have neighboring pixels, and shuffling columns doesn't preserve real structure.</button>
+      <button class="quiz-choice" data-correct="false">Tabular data always has exactly one column, so the question doesn't apply.</button>
+      <button class="quiz-choice" data-correct="false">Spreadsheets are technically incapable of being used with machine learning.</button>
+      <button class="quiz-choice" data-correct="false">Spatial locality and translation invariance apply equally well to any kind of data.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Tabular columns don't have the kind of spatial relationship pixels do, so a CNN's assumptions don't fit that shape of data.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="spatial locality">
+    <p class="quiz-prompt">4. Fill in the blank: the assumption that nearby pixels are more related than distant ones is called ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>See the definition box above.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="fully-connected layer|fully connected layer">
+    <p class="quiz-prompt">5. Fill in the blank: a layer that connects every input to every neuron independently, with no assumption about structure, is a ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>See the definition box above.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Stanford's <a href="https://cs231n.github.io/convolutional-networks/">CS231n "Convolutional Neural Networks"</a> notes open with this exact parameter-count argument before deriving the convolution operation itself.</p>
+
+  <p class="ask-teacher">Curious whether any real network still uses a fully-connected layer on raw pixels anyway, for a good reason? Ask your teacher — for genuinely tiny images it's occasionally done, but it stops scaling almost immediately. Next: the actual arithmetic behind how a filter slides across an image and what it computes at each position.</p>
+
+  <footer class="lesson-footer">STEM+ · Applied Machine/Deep Learning · Lesson 7 of the course sequence</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var imgSlider = document.getElementById('img-size');
+  var imgVal = document.querySelector('[data-img-size-value]');
+  var fcSlider = document.getElementById('fc-units');
+  var fcVal = document.querySelector('[data-fc-units-value]');
+  var fcReadout = document.querySelector('[data-param-fc]');
+  var verdict = document.querySelector('[data-param-verdict]');
+
+  var CONV_PARAMS = 32 * (3 * 3 * 3) + 32;
+
+  function render() {
+    var size = parseInt(imgSlider.value, 10);
+    var units = parseInt(fcSlider.value, 10);
+    imgVal.textContent = size;
+    fcVal.textContent = units;
+
+    var inputs = size * size * 3;
+    var fcParams = inputs * units + units;
+
+    fcReadout.textContent = 'Fully-connected layer (' + size + '×' + size + ' image → ' + units + ' hidden units): ' + fcParams.toLocaleString() + ' parameters.';
+
+    var ratio = fcParams / CONV_PARAMS;
+    verdict.textContent = 'The fully-connected layer uses ' + ratio.toFixed(0) + '× more parameters than the fixed convolutional layer — for covering the exact same image.';
+  }
+
+  imgSlider.addEventListener('input', render);
+  fcSlider.addEventListener('input', render);
+  render();
+});
+</script>

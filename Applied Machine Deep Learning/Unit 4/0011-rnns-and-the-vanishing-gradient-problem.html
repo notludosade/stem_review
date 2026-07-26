@@ -1,0 +1,173 @@
+<meta charset="UTF-8">
+<title>Lesson 11: RNNs and the Vanishing Gradient Problem — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="advanced">
+  <span class="kicker">STEM+ · Applied Machine/Deep Learning · Unit 4 · Lesson 11</span>
+  <h1>RNNs and the Vanishing Gradient Problem</h1>
+  <p class="subtitle">AI Developer's Lesson 16 named vanishing gradients as the "historically important problem" behind why LSTMs exist, without deriving why they actually happen. This lesson does the derivation — the same backpropagation from Unit 2, just run across time instead of across layers.</p>
+  <p class="nav-links"><a href="0010-why-sequences-need-memory.html" class="nav-prev">← Lesson 10</a> <a href="0012-lstms-and-grus-gated-memory.html" class="nav-next">Lesson 12 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>A recurrent neural network updates its hidden state at every time step with the same recurrence, applied over and over: <span class="expr">h_t = tanh(W_hh · h_{t−1} + W_xh · x_t + b)</span>. Same weights, every step — exactly the parameter sharing Lesson 7 introduced for images, just shared across time instead of across space. Training this requires <strong>backpropagation through time (BPTT)</strong>: unroll the recurrence into what looks like an ordinary deep network, one layer per time step, and backpropagate through all of it, exactly as Unit 2 covered.</p>
+
+  <span class="code-label">Python — why the gradient shrinks over many steps</span>
+  <pre class="code-block"><code>import numpy as np
+
+def tanh_derivative(h):
+    return 1 - h ** 2   # tanh'(z) = 1 - tanh(z)^2, maximum value 1, at z = 0
+
+# Backpropagating the loss gradient back through 20 time steps
+gradient = 1.0
+for step_back in range(20):
+    local_factor = tanh_derivative(0.5) * 0.9   # a typical per-step factor, well under 1
+    gradient *= local_factor
+    if step_back in (0, 4, 9, 19):
+        print(step_back + 1, 'steps back:', gradient)
+
+# 1 steps back:  0.675
+# 5 steps back:  0.1385
+# 10 steps back: 0.01917
+# 20 steps back: 0.0003676   -- already nearly zero</code></pre>
+
+  <p>Every step back through time multiplies the running gradient by another local factor — tanh's own derivative, times whatever the recurrent weight matrix contributes. tanh's derivative maxes out at exactly 1 (at input 0) and is smaller everywhere else, so a typical per-step factor lands well under 1. Multiplying dozens of numbers under 1 together is exactly how a <strong>vanishing gradient</strong> happens: not from any single broken step, but from BPTT's chain rule compounding many small shrinkages into one that's effectively zero by the time it reaches an early time step. The opposite failure, an <strong>exploding gradient</strong>, happens the same way in reverse — if the per-step factor exceeds 1, the product grows without bound instead. <strong>Gradient clipping</strong> — capping a gradient's magnitude before it's used to update weights — is a direct, practical fix for exploding gradients specifically; vanishing gradients need a different kind of fix, which is exactly what Lesson 12 covers.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    <strong>Backpropagation through time (BPTT)</strong> unrolls a recurrence across time steps and backpropagates through the result like an ordinary deep network. A <strong>vanishing gradient</strong> results from multiplying many per-step factors under 1 together across many time steps. An <strong>exploding gradient</strong> is the same compounding effect with factors over 1. <strong>Gradient clipping</strong> caps a gradient's magnitude before the weight update, directly addressing exploding gradients.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why a plain RNN's failure mode is usually vanishing, not exploding</span>
+    tanh's derivative can never exceed 1, and most of the time it's meaningfully smaller than that (its output is only near 0, where the derivative peaks, for part of training). That caps the typical per-step factor below 1 far more often than above it, which is why plain RNNs earned their reputation for effectively forgetting long-range context specifically — not for the more dramatic instability of exploding, which tends to show up only when the recurrent weight matrix itself has grown unusually large, and is comparatively easy to catch and clip.
+  </div>
+
+  <h2>Try it: watch a gradient compound across time steps</h2>
+  <p>Set a per-step factor, then step backward through time one step at a time and watch the running product.</p>
+
+  <div class="widget" id="vanish-widget">
+    <p class="widget-label">Interactive: gradient compounding through BPTT</p>
+    <div class="slider-row">
+      <label for="vanish-factor">Per-step factor</label>
+      <input type="range" id="vanish-factor" min="0.5" max="1.5" step="0.05" value="0.85">
+      <span class="slider-value" data-vanish-factor-value>0.85</span>
+    </div>
+    <div class="fm-row">
+      <button class="widget-btn" type="button" data-vanish-step>Step one more time step backward →</button>
+      <button class="widget-btn" type="button" data-vanish-reset>Reset</button>
+    </div>
+    <div style="height:18px; background:var(--code-bg); border:1px solid var(--border); border-radius:3px; overflow:hidden; margin:0.8rem 0;">
+      <div data-vanish-bar style="height:100%; width:100%; background:var(--accent); transition:width 0.2s;"></div>
+    </div>
+    <p class="verdict" data-vanish-verdict>0 steps back. Running product = 1.0000.</p>
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What does backpropagation through time (BPTT) do, conceptually?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Unrolls the recurrence across time steps and backpropagates through the result like an ordinary deep network.</button>
+      <button class="quiz-choice" data-correct="false">Deletes every time step except the very first one before training.</button>
+      <button class="quiz-choice" data-correct="false">Computes a completely new loss function unrelated to the one from Unit 1.</button>
+      <button class="quiz-choice" data-correct="false">Trains a separate, independent network for each individual time step.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>BPTT treats each time step like a layer, applying the same backpropagation ideas from Unit 2 across the unrolled sequence.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why does multiplying many per-step factors under 1 together cause a vanishing gradient?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Repeated multiplication of numbers under 1 shrinks the product toward zero, faster the more steps are involved.</button>
+      <button class="quiz-choice" data-correct="false">Any single factor under 1 immediately sets the entire gradient to exactly zero.</button>
+      <button class="quiz-choice" data-correct="false">Multiplying numbers under 1 always increases their product over time.</button>
+      <button class="quiz-choice" data-correct="false">Vanishing gradients have nothing to do with multiplication at all.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The code example shows the running product shrinking from 0.675 after 1 step to 0.00037 after 20 steps.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. What does gradient clipping directly address?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Exploding gradients, by capping a gradient's magnitude before it's used to update weights.</button>
+      <button class="quiz-choice" data-correct="false">Vanishing gradients, by amplifying a gradient's magnitude before use.</button>
+      <button class="quiz-choice" data-correct="false">The choice of batch size used during training.</button>
+      <button class="quiz-choice" data-correct="false">The specific activation function used in the output layer.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Clipping caps an oversized gradient directly, which addresses exploding gradients specifically, not vanishing ones.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="backpropagation through time|bptt">
+    <p class="quiz-prompt">4. Fill in the blank: unrolling a recurrence across time steps and backpropagating through the result is called ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>See the definition box above.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="exploding gradient">
+    <p class="quiz-prompt">5. Fill in the blank: when per-step factors exceed 1, the compounding effect across many time steps causes an ___ instead of a vanishing one.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>See the definition box above.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Pascanu, Mikolov, and Bengio's <a href="https://arxiv.org/abs/1211.5063">"On the difficulty of training Recurrent Neural Networks"</a> derives both vanishing and exploding gradients rigorously and is the paper most credited with popularizing gradient clipping as a fix.</p>
+
+  <p class="ask-teacher">Wondering why gradient clipping is a full fix for exploding gradients but only a partial one for vanishing gradients? Ask your teacher — capping a gradient that's too large is a straightforward ceiling, but there's no equivalent floor that can inject real signal back into a gradient that's already collapsed toward zero. Next: an architecture that fixes the vanishing side directly, with actual mechanisms built for it.</p>
+
+  <footer class="lesson-footer">STEM+ · Applied Machine/Deep Learning · Lesson 11 of the course sequence</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var steps = 0;
+  var product = 1.0;
+
+  var factorSlider = document.getElementById('vanish-factor');
+  var factorVal = document.querySelector('[data-vanish-factor-value]');
+  var bar = document.querySelector('[data-vanish-bar]');
+  var verdict = document.querySelector('[data-vanish-verdict]');
+  var stepBtn = document.querySelector('[data-vanish-step]');
+  var resetBtn = document.querySelector('[data-vanish-reset]');
+
+  function render() {
+    var pct = Math.max(0, Math.min(100, product * 100));
+    bar.style.width = pct + '%';
+    verdict.classList.remove('is-pass', 'is-fail');
+    var label;
+    if (product < 0.01) { label = 'effectively vanished.'; verdict.classList.add('is-fail'); }
+    else if (product > 3) { label = 'exploding — would overflow in a real network.'; verdict.classList.add('is-fail'); }
+    else { label = 'still a usable signal.'; verdict.classList.add('is-pass'); }
+    verdict.textContent = steps + ' step(s) back. Running product = ' + product.toFixed(6) + ' — ' + label;
+  }
+
+  stepBtn.addEventListener('click', function () {
+    var factor = parseFloat(factorSlider.value);
+    product *= factor;
+    steps++;
+    render();
+  });
+
+  resetBtn.addEventListener('click', function () {
+    steps = 0;
+    product = 1.0;
+    render();
+  });
+
+  factorSlider.addEventListener('input', function () {
+    factorVal.textContent = parseFloat(factorSlider.value).toFixed(2);
+  });
+
+  render();
+});
+</script>
