@@ -1,0 +1,183 @@
+<meta charset="UTF-8">
+<title>Lesson 1: What Actually Happens When You Run a Program — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="advanced">
+  <span class="kicker">STEM+ · Systems Programming &amp; Architecture: CS · Unit 1 · Lesson 1</span>
+  <h1>What Actually Happens When You Run a Program</h1>
+  <p class="subtitle">Computer Programming 1 and 2 taught you to write correct programs. This course is about what happens the instant after you hit "run" — the machinery underneath every language you already know, starting with the split between two fundamentally different ways a program can execute at all.</p>
+  <p class="nav-links"><a href="0002-the-compilation-pipeline-preprocessor-compiler-assembler-linker.html" class="nav-next">Lesson 2 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Every program you've written so far — in Python, JavaScript, Java, or C++ — you ran the same way: save the file, run a command, watch it work. What that command actually did underneath was completely different depending on the language, and this course exists because that difference matters a great deal once you start asking why programs crash, why some run a hundred times faster than others, and what a computer is actually doing between "run" and "output."</p>
+
+  <h2>Two ways to turn source code into a running program</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    <strong>Source code</strong> is the human-readable text you write in a programming language. A computer's processor cannot execute source code directly — it only executes <strong>machine code</strong>, raw binary instructions specific to that processor's design. Something has to bridge that gap, and there are two fundamentally different ways to do it: <strong>compiling</strong> the whole program into machine code ahead of time, or <strong>interpreting</strong> it line by line as it runs.
+  </div>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    A <strong>compiler</strong> translates an entire program's source code into machine code once, producing a standalone <strong>executable</strong> file. Running the program later means the processor runs that machine code directly — no translation happens at run time. An <strong>interpreter</strong>, by contrast, reads and executes source code (or a lightweight intermediate form of it) one piece at a time, translating as it goes, every single time the program runs.
+  </div>
+
+  <h2>Where Python and JavaScript actually sit</h2>
+  <p>"Compiled vs. interpreted" is usually taught as a clean split between languages, but the honest picture is a little messier — and worth being precise about now, since the rest of this course lives on the compiled side of that line.</p>
+
+  <div class="box example">
+    <span class="box-label">Worked example: three languages, three strategies</span>
+    <strong>C</strong> is compiled ahead of time by a program like <code class="inline-code">gcc</code>: source code goes in, a standalone executable full of machine code comes out, and that executable runs directly on the processor with no C toolchain present at all. <strong>Python</strong> is interpreted: the <code class="inline-code">python</code> program reads your <code class="inline-code">.py</code> file and executes it on the spot, translating as it goes — nothing you can hand someone else and run without Python installed. <strong>JavaScript</strong>, run by V8 (the engine inside Chrome and Node), is more subtle still: V8 starts by interpreting, then compiles the "hot" parts of your code into machine code on the fly, while the program is already running — a strategy called just-in-time (JIT) compilation, blurring the line between the two categories.
+  </div>
+
+  <h2>Try it: watch each strategy run the same three lines</h2>
+  <p>Pick a strategy, then step through what happens when it encounters <code class="inline-code">x = 2 + 3</code>, <code class="inline-code">y = x * 4</code>, and <code class="inline-code">print(y)</code>.</p>
+
+  <div class="widget" id="strategy-widget">
+    <p class="widget-label">Interactive: compiled vs. interpreted execution</p>
+    <div class="fm-tabs" id="strategy-tabs">
+      <button class="fm-tab is-active" type="button" data-strategy="compiled">Compiled (like C)</button>
+      <button class="fm-tab" type="button" data-strategy="interpreted">Interpreted (like Python)</button>
+    </div>
+    <p class="plot-readout" data-strategy-readout>Ready. Press Step to translate/run the first line.</p>
+    <div class="fm-row">
+      <button class="widget-btn" type="button" data-strategy-step>Step →</button>
+      <button class="widget-btn" type="button" data-strategy-reset>Reset</button>
+    </div>
+    <p class="plot-hint" data-strategy-hint></p>
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why this course lives on the compiled side</span>
+    An interpreter is itself a program — one that has already been compiled, usually written in C. Every time you run a Python script, you're running a compiled C program (the Python interpreter) that reads and executes your source code for you. That means there is always a bottom layer where translation happens once, ahead of time, into raw machine code with no further translation layer underneath — and understanding that bottom layer is what this entire course is about. C sits at that bottom layer directly, which is why it's this course's language for looking at what a computer is actually doing.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What is the core difference between how a compiler and an interpreter turn source code into something a processor can run?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">A compiler translates the whole program into machine code once, ahead of time; an interpreter translates and executes it piece by piece, every time it runs.</button>
+      <button class="quiz-choice" data-correct="false">A compiler only works on Python code, while an interpreter only works on C code.</button>
+      <button class="quiz-choice" data-correct="false">An interpreter produces a standalone executable, while a compiler does not.</button>
+      <button class="quiz-choice" data-correct="false">There is no real difference — the terms are interchangeable.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Ahead-of-time, one-time translation into a standalone executable is what defines compiling; repeated, on-the-fly translation is what defines interpreting.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why can a compiled C executable run on a machine with no C compiler installed, while a Python script cannot run without Python installed?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">C's compiler already translated the whole program into standalone machine code ahead of time, while Python's interpreter must be present to translate the script every time it runs.</button>
+      <button class="quiz-choice" data-correct="false">Python is a faster language than C, so it needs extra software to slow it down.</button>
+      <button class="quiz-choice" data-correct="false">C executables are actually plain text files, just like Python scripts.</button>
+      <button class="quiz-choice" data-correct="false">Machine code and Python source code are the same format underneath.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Compiling removes the need for the original toolchain at run time; interpreting requires the interpreter every single time.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. What does it mean that V8's JIT compilation "blurs the line" between compiled and interpreted execution?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">V8 starts by interpreting JavaScript, then compiles frequently-run parts into machine code while the program is still running.</button>
+      <button class="quiz-choice" data-correct="false">JavaScript has no execution strategy at all and simply does not run.</button>
+      <button class="quiz-choice" data-correct="false">V8 compiles JavaScript into Python source code before running it.</button>
+      <button class="quiz-choice" data-correct="false">JIT compilation only happens before the program is written, not while it runs.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>JIT compilation mixes both strategies: interpret first, then compile the hot paths on the fly, during execution rather than strictly before or instead of it.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="machine code">
+    <p class="quiz-prompt">4. Fill in the blank: the raw binary instructions a processor executes directly, specific to that processor's design, are called ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Machine code is the only thing a processor can actually run — every language ultimately has to become this.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="interpreter">
+    <p class="quiz-prompt">5. Fill in the blank: a Python script is executed by a program, itself already compiled into machine code, called an ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The interpreter itself has to be a compiled program somewhere at the bottom, which is exactly why this course studies that bottom layer directly.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: the V8 team's <a href="https://v8.dev/blog/launching-ignition-and-turbofan">"Launching Ignition and TurboFan"</a> post walks through, in real engineering detail, how a modern JavaScript engine actually mixes interpreting and just-in-time compiling.</p>
+
+  <p class="ask-teacher">Curious whether your favorite language is compiled, interpreted, or something JIT-based like JavaScript? Ask your teacher — that's what I'm here for. Next up: what a compiler like C's actually does internally — it isn't one step, it's four.</p>
+
+  <footer class="lesson-footer">STEM+ · Systems Programming &amp; Architecture: CS · Lesson 1 of the course sequence</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var lines = {
+    compiled: [
+      'Compiling x = 2 + 3 → machine code instruction (not run yet).',
+      'Compiling y = x * 4 → machine code instruction (not run yet).',
+      'Compiling print(y) → machine code instruction (not run yet).',
+      'Compilation finished. Now the executable actually runs — all three instructions execute directly on the processor, instantly, with no further translation.'
+    ],
+    interpreted: [
+      'Interpreter reads x = 2 + 3, translates it, and executes it immediately: x is now 5.',
+      'Interpreter reads y = x * 4, translates it, and executes it immediately: y is now 20.',
+      'Interpreter reads print(y), translates it, and executes it immediately: prints 20.',
+      'Done. Notice translation and execution happened together, line by line — run this script again tomorrow, and every line gets translated all over again.'
+    ]
+  };
+  var hints = {
+    compiled: 'Nothing actually ran until every line was fully translated first — that\'s ahead-of-time compilation.',
+    interpreted: 'Each line ran the moment it was translated — no separate "finished compiling" step ever happens.'
+  };
+
+  var strategy = 'compiled';
+  var step = 0;
+  var tabs = document.querySelectorAll('#strategy-tabs [data-strategy]');
+  var readout = document.querySelector('[data-strategy-readout]');
+  var hint = document.querySelector('[data-strategy-hint]');
+  var stepBtn = document.querySelector('[data-strategy-step]');
+  var resetBtn = document.querySelector('[data-strategy-reset]');
+
+  function render() {
+    if (step === 0) {
+      readout.textContent = 'Ready. Press Step to translate/run the first line.';
+      hint.textContent = '';
+      return;
+    }
+    var seq = lines[strategy];
+    readout.textContent = seq[Math.min(step, seq.length) - 1];
+    hint.textContent = step >= seq.length ? hints[strategy] : '';
+  }
+
+  tabs.forEach(function (tab) {
+    tab.addEventListener('click', function () {
+      tabs.forEach(function (t) { t.classList.remove('is-active'); });
+      tab.classList.add('is-active');
+      strategy = tab.getAttribute('data-strategy');
+      step = 0;
+      render();
+    });
+  });
+
+  stepBtn.addEventListener('click', function () {
+    if (step < lines[strategy].length) step++;
+    render();
+  });
+
+  resetBtn.addEventListener('click', function () {
+    step = 0;
+    render();
+  });
+
+  render();
+});
+</script>

@@ -1,0 +1,148 @@
+<meta charset="UTF-8">
+<title>Lesson 18: Locks, Mutexes, and Synchronization — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="advanced">
+  <span class="kicker">STEM+ · Systems Programming &amp; Architecture: CS · Unit 6 · Lesson 18</span>
+  <h1>Locks, Mutexes, and Synchronization</h1>
+  <p class="subtitle">Lesson 17 showed exactly how a shared counter loses updates. This lesson shows the standard fix: force the three-step read-add-write sequence to run as one uninterruptible unit, by making every other thread wait its turn.</p>
+  <p class="nav-links"><a href="0017-race-conditions-and-why-shared-state-is-dangerous.html" class="nav-prev">← Lesson 17</a> <a href="../Unit%207/0019-inside-the-cpu-registers-alu-and-the-fetch-decode-execute-cycle.html" class="nav-next">Unit 7, Lesson 19 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>The lost-update bug happened because two threads' read-add-write sequences interleaved. The fix isn't to make increment faster — it's to guarantee that once one thread starts its read-add-write, no other thread can touch the counter until it finishes.</p>
+
+  <h2>Mutex: mutual exclusion, enforced</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    A <strong>mutex</strong> (mutual exclusion lock) is an object one thread can <strong>lock</strong> before touching shared data, and must <strong>unlock</strong> afterward. If a thread tries to lock a mutex another thread currently holds, it <strong>blocks</strong> — pauses and waits — until the mutex is unlocked. The block of code between lock and unlock is called a <strong>critical section</strong>: the shared-data operation that needs to run as one uninterrupted unit, exactly like the increment from Lesson 17.
+  </div>
+
+  <h2>Try it: lock the counter and try to race it anyway</h2>
+  <p>Same two threads, same shared counter as Lesson 17 — but this time, wrap the critical section in a mutex, and see what a second thread trying to jump in gets forced to do.</p>
+
+  <div class="widget" id="mutex-widget">
+    <p class="widget-label">Interactive: a mutex-protected increment</p>
+    <div id="mutex-display"></div>
+    <p class="plot-readout" data-mutex-readout>Counter = 0, mutex unlocked. Press Step to begin.</p>
+    <div class="fm-row">
+      <button class="widget-btn" type="button" data-mutex-step>Step →</button>
+      <button class="widget-btn" type="button" data-mutex-reset>Reset</button>
+    </div>
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Worked example</span>
+    Thread A calls <code class="inline-code">lock(&amp;m)</code>, succeeds immediately since the mutex is free, and begins its read-add-write. Thread B calls <code class="inline-code">lock(&amp;m)</code> right in the middle of A's work — but the mutex is already held, so B blocks, doing nothing until A finishes. A completes its full read-add-write and calls <code class="inline-code">unlock(&amp;m)</code>. Only now does B's blocked <code class="inline-code">lock</code> call succeed, and B performs its own complete read-add-write from the now-correct, updated value. Both increments count — the counter correctly ends at 2, because the two critical sections were forced to run one at a time instead of interleaving.
+  </div>
+
+  <h2>Deadlock: the cost of getting locking wrong</h2>
+  <div class="box why">
+    <span class="box-label">Why more locking isn't automatically safer</span>
+    A <strong>deadlock</strong> happens when two or more threads are each waiting on a lock the other one holds, and neither can ever proceed — the classic case is Thread A holding lock 1 and waiting for lock 2, while Thread B holds lock 2 and waits for lock 1, forever. Locks solve race conditions, but they introduce a brand-new failure mode that didn't exist before: a program can be perfectly race-free and still hang permanently, frozen at exactly the moment two threads locked in the wrong order. The standard defense is simple to state and easy to violate under pressure: always acquire multiple locks in the same, agreed-upon order, everywhere in the codebase, with no exceptions.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What does a thread do if it tries to lock a mutex that another thread currently holds?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">It blocks — pauses and waits — until the mutex is unlocked.</button>
+      <button class="quiz-choice" data-correct="false">It proceeds immediately, ignoring the lock entirely.</button>
+      <button class="quiz-choice" data-correct="false">It automatically terminates the entire program.</button>
+      <button class="quiz-choice" data-correct="false">It force-unlocks the mutex on the other thread's behalf.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Blocking is exactly how a mutex enforces that only one thread's critical section runs at a time.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. What is a critical section?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">The block of code, between locking and unlocking a mutex, that needs to run as one uninterrupted unit.</button>
+      <button class="quiz-choice" data-correct="false">Any line of code that never touches shared data.</button>
+      <button class="quiz-choice" data-correct="false">The part of a program that runs only once, at startup.</button>
+      <button class="quiz-choice" data-correct="false">A section of code that always runs faster than the rest of the program.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The critical section is exactly the shared-data operation the mutex protects from interleaving.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. What is a deadlock?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Two or more threads each waiting on a lock the other holds, so neither can ever proceed.</button>
+      <button class="quiz-choice" data-correct="false">A program that runs correctly but somewhat slower than expected.</button>
+      <button class="quiz-choice" data-correct="false">A mutex that has been locked and unlocked too many times.</button>
+      <button class="quiz-choice" data-correct="false">The normal, expected state of a mutex when no thread is using it.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A deadlock is a permanent standoff — neither thread's wait ever resolves.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="mutex">
+    <p class="quiz-prompt">4. Fill in the blank: an object a thread must lock before touching shared data, and unlock afterward, forcing other threads to wait their turn, is called a ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A mutex (mutual exclusion lock) is the standard tool for protecting a critical section.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="deadlock">
+    <p class="quiz-prompt">5. Fill in the blank: acquiring multiple locks in inconsistent order across a codebase can produce a ___, where threads wait on each other forever.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Consistent lock ordering everywhere in a codebase is the standard defense against deadlock.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: the Linux manual page for <a href="https://man7.org/linux/man-pages/man3/pthread_mutex_lock.3p.html">pthread_mutex_lock(3p)</a> documents the real POSIX mutex API, including its blocking behavior, straight from the standard.</p>
+
+  <p class="ask-teacher">Curious how a real deadlock looks when a program freezes because of one? Ask your teacher — that's what I'm here for. Next up: Unit 7 leaves concurrency behind and goes to the very bottom of this course — inside the CPU itself, executing one instruction at a time.</p>
+
+  <footer class="lesson-footer">STEM+ · Systems Programming &amp; Architecture: CS · Lesson 18 of the course sequence</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var steps = [
+    { a: '—', b: '—', mutex: 'unlocked', counter: 0, desc: 'Counter = 0, mutex unlocked. Neither thread has started.' },
+    { a: 'lock(&m) — acquired', b: '—', mutex: 'held by A', counter: 0, desc: 'Thread A locks the mutex successfully — it was free.' },
+    { a: 'reads counter (0), adds 1', b: 'lock(&m) — BLOCKS', mutex: 'held by A', counter: 0, desc: 'Thread B tries to lock the same mutex mid-critical-section and blocks, doing nothing, since A already holds it.' },
+    { a: 'writes counter = 1, unlock(&m)', b: '(still blocked)', mutex: 'unlocked', counter: 1, desc: "Thread A finishes its critical section and unlocks — counter is correctly 1." },
+    { a: '(finished)', b: 'lock(&m) — acquired', mutex: 'held by B', counter: 1, desc: "Only now does Thread B's blocked lock() call succeed." },
+    { a: '(finished)', b: 'reads counter (1), adds 1, writes counter = 2', mutex: 'held by B', counter: 2, desc: 'Thread B reads the up-to-date value 1 (not stale) and correctly increments to 2.' },
+    { a: '(finished)', b: 'unlock(&m)', mutex: 'unlocked', counter: 2, desc: 'Thread B unlocks. Final counter = 2 — both increments counted. No lost update.' }
+  ];
+  var idx = 0;
+  var display = document.getElementById('mutex-display');
+  var readout = document.querySelector('[data-mutex-readout]');
+  var stepBtn = document.querySelector('[data-mutex-step]');
+
+  function render() {
+    var s = steps[idx];
+    display.innerHTML =
+      '<div class="box" style="margin:0.3rem 0; padding:0.5rem 0.8rem;"><strong>Thread A:</strong> ' + s.a + '</div>' +
+      '<div class="box" style="margin:0.3rem 0; padding:0.5rem 0.8rem;"><strong>Thread B:</strong> ' + s.b + '</div>' +
+      '<div class="box why" style="margin:0.3rem 0; padding:0.5rem 0.8rem;"><strong>Mutex:</strong> ' + s.mutex + '</div>';
+    readout.textContent = 'Counter = ' + s.counter + '.   ' + s.desc;
+    stepBtn.disabled = idx >= steps.length - 1;
+  }
+
+  stepBtn.addEventListener('click', function () {
+    if (idx < steps.length - 1) idx++;
+    render();
+  });
+
+  document.querySelector('[data-mutex-reset]').addEventListener('click', function () {
+    idx = 0;
+    render();
+  });
+
+  render();
+});
+</script>

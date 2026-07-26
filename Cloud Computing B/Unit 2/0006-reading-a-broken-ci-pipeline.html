@@ -1,0 +1,206 @@
+<meta charset="UTF-8">
+<title>Lesson 6: Reading a Broken CI Pipeline — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · Cloud Computing B / DevOps · Unit 2 · Lesson 6</span>
+  <h1>Reading a Broken CI Pipeline</h1>
+  <p class="subtitle">Lesson 5 covered the easy case: green means safe, red means look. This lesson is about actually looking — reading a build log to tell a real bug apart from a test that was never trustworthy in the first place.</p>
+  <p class="nav-links"><a href="0005-automated-builds-and-test-suites-in-ci.html" class="nav-prev">← Lesson 5</a> <a href="../Unit%203/0007-continuous-delivery-vs-continuous-deployment.html" class="nav-next">Unit 3, Lesson 7 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>A red build tells you something failed. It doesn't tell you why, and "why" determines what happens next: a real bug needs a code fix, a broken test needs a test fix, and a flaky test needs something else entirely — usually just clicking retry and moving on, which is a far less satisfying answer than it sounds.</p>
+
+  <h2>Reading the build log</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    A <strong>build log</strong> is the recorded output of every stage the CI server ran, in order, including exactly where it stopped and why. Reading one well means starting at the first failure, not the last line of output — later stages often never ran at all (Lesson 5's fail-fast ordering), and later error messages are frequently just noise caused by the first real failure.
+  </div>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    A <strong>flaky test</strong> is a test that sometimes passes and sometimes fails against the exact same code, with nothing about the code actually changing between runs — usually caused by timing assumptions, shared state between tests, or a dependency on something outside the test's control (like the current time or network latency). A flaky test is worse than a test that's simply wrong: a wrong test is at least consistently wrong, while a flaky one slowly teaches everyone on the team to distrust red builds and start ignoring them.
+  </div>
+
+  <h2>Try it: diagnose the failure</h2>
+  <p>Each build log excerpt below points to a different cause. Pick the diagnosis that fits.</p>
+
+  <div class="widget" id="ci-diagnose-widget">
+    <p class="widget-label">Interactive: diagnose a broken build</p>
+    <pre class="fm-output" data-diag-log style="white-space:pre-wrap;"></pre>
+    <div class="fm-row" style="flex-wrap:wrap; gap:0.6rem;" id="ci-diagnose-choices"></div>
+    <p class="verdict" data-diag-verdict></p>
+    <p class="plot-hint" data-diag-note></p>
+    <p class="fm-row" style="margin-top:0.6rem;">
+      <button class="widget-btn" type="button" data-diag-next hidden>Next log →</button>
+      <button class="widget-btn" type="button" data-diag-restart hidden>Start Over</button>
+    </p>
+    <p class="plot-readout" data-diag-score></p>
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why "root cause, not symptom" matters most on a broken pipeline</span>
+    It's tempting to fix whatever the last error message says, but the last message is frequently a symptom of an earlier one — a database connection failure three stages in might just be fallout from a config change that broke at build time, long before any test ran. Diagnosing from the first failure backward, instead of the last failure forward, is usually the difference between a five-minute fix and an hour spent chasing an effect instead of its cause.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. When reading a build log, why should you generally start at the first failure rather than the last line of output?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Later stages may never have run, and later error messages are often just downstream noise caused by the first real failure.</button>
+      <button class="quiz-choice" data-correct="false">Build logs always print in reverse chronological order.</button>
+      <button class="quiz-choice" data-correct="false">The last line is always the most accurate description of the problem.</button>
+      <button class="quiz-choice" data-correct="false">There is no meaningful difference between the first and last failure.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The first failure is usually the actual root cause; everything after it can be fallout.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. What makes a flaky test different from a test that's simply wrong?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">It passes and fails inconsistently against the exact same code, unlike a wrong test that's consistently wrong.</button>
+      <button class="quiz-choice" data-correct="false">A flaky test always passes and never fails.</button>
+      <button class="quiz-choice" data-correct="false">A wrong test is impossible to ever fix.</button>
+      <button class="quiz-choice" data-correct="false">There is no real difference between the two.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Inconsistency, not just incorrectness, is what defines flakiness — and it's what erodes trust in red builds over time.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why is a flaky test arguably more dangerous than a test that's simply, consistently wrong?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">It slowly teaches the team to distrust red builds and start ignoring them, which erodes the whole point of CI.</button>
+      <button class="quiz-choice" data-correct="false">Flaky tests are technically impossible to identify.</button>
+      <button class="quiz-choice" data-correct="false">Flaky tests always run slower than any other kind of test.</button>
+      <button class="quiz-choice" data-correct="false">It has no meaningful downside compared to any other kind of bug.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Eroded trust in red builds undermines the entire purpose of automated checks.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="build log">
+    <p class="quiz-prompt">4. Fill in the blank: the recorded output of every stage a CI server ran, including exactly where it stopped and why, is called a ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The build log is the primary evidence for diagnosing any pipeline failure.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="flaky test|flaky">
+    <p class="quiz-prompt">5. Fill in the blank: a test that sometimes passes and sometimes fails against the exact same, unchanged code is called a ___ test.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Flaky tests are usually caused by timing assumptions, shared state, or dependencies outside the test's control.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: Google's <a href="https://testing.googleblog.com/2016/05/flaky-tests-at-google-and-how-we.html">"Flaky Tests at Google and How We Mitigate Them"</a> covers this exact problem at a scale where even a small flake rate becomes a constant, real cost.</p>
+
+  <p class="ask-teacher">Curious how a team decides when to quarantine a flaky test instead of just fixing it? Ask your teacher — that's what I'm here for. Next up: Unit 3 leaves "is this build correct" behind and asks the next question — even a fully green build can still fail once it actually reaches production.</p>
+
+  <footer class="lesson-footer">STEM+ · Cloud Computing B / DevOps · Lesson 6 of the course sequence</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var scenarios = [
+    {
+      log: '$ npm run build\n> tsc --noEmit\nsrc/pricing.ts:42:11 - error TS2339: Property \'total\' does not exist on type \'Cart\'.\n\nBuild step failed. Tests never ran.',
+      choices: ['A genuine bug — the code doesn\'t compile', 'A flaky test', 'An environment/infrastructure problem'],
+      correct: 0,
+      note: 'The build step itself failed before any test could even run — this is a real compile error that needs a code fix.'
+    },
+    {
+      log: '$ npm test -- checkout.test.js\n✗ checkout completes within 200ms (243ms) — FAIL\n✓ checkout completes within 200ms (118ms) — PASS (rerun, unchanged code)',
+      choices: ['A genuine bug in checkout logic', 'A flaky test', 'A missing build artifact'],
+      correct: 1,
+      note: 'Same code, two different results — a timing-based assertion like this is a classic source of flakiness, not a real regression.'
+    },
+    {
+      log: '$ npm test -- inventory.test.js\n✗ getStockLevel returns 12 for SKU-004 — FAIL\n  Expected: 12\n  Received: 9\n(consistent across 5 reruns)',
+      choices: ['A genuine bug — the function returns the wrong value', 'A flaky test', 'A network timeout'],
+      correct: 0,
+      note: 'Consistently wrong, every single run — this is a real logic bug, not flakiness.'
+    },
+    {
+      log: '$ docker pull ci-runner-base:latest\nError: connection timed out reaching registry.internal.example.com\nBuild step failed before any application code ran.',
+      choices: ['A genuine bug in application code', 'A flaky test', 'An environment/infrastructure problem'],
+      correct: 2,
+      note: 'The failure happened before the application\'s own code was even touched — this is an infrastructure issue (the CI runner itself), not a code or test problem.'
+    }
+  ];
+
+  var index = 0, score = 0, answered = false;
+  var logEl = document.querySelector('[data-diag-log]');
+  var choicesEl = document.getElementById('ci-diagnose-choices');
+  var verdict = document.querySelector('[data-diag-verdict]');
+  var note = document.querySelector('[data-diag-note]');
+  var scoreEl = document.querySelector('[data-diag-score]');
+  var nextBtn = document.querySelector('[data-diag-next]');
+  var restartBtn = document.querySelector('[data-diag-restart]');
+
+  function renderScenario() {
+    if (index >= scenarios.length) {
+      logEl.textContent = 'Done!';
+      choicesEl.innerHTML = '';
+      verdict.textContent = '';
+      verdict.className = 'verdict';
+      note.textContent = '';
+      nextBtn.hidden = true;
+      restartBtn.hidden = false;
+      scoreEl.textContent = 'Final score: ' + score + ' of ' + scenarios.length + ' diagnosed correctly.';
+      return;
+    }
+    var s = scenarios[index];
+    logEl.textContent = s.log;
+    verdict.textContent = '';
+    verdict.className = 'verdict';
+    note.textContent = '';
+    answered = false;
+    nextBtn.hidden = true;
+    scoreEl.textContent = 'Log ' + (index + 1) + ' of ' + scenarios.length + ' — score so far: ' + score + '.';
+
+    choicesEl.innerHTML = '';
+    s.choices.forEach(function (choiceText, i) {
+      var btn = document.createElement('button');
+      btn.className = 'widget-btn';
+      btn.type = 'button';
+      btn.textContent = choiceText;
+      btn.addEventListener('click', function () {
+        if (answered) return;
+        answered = true;
+        var correct = i === s.correct;
+        if (correct) score++;
+        verdict.classList.add(correct ? 'is-pass' : 'is-fail');
+        verdict.textContent = correct ? 'Correct.' : 'Not quite.';
+        note.textContent = s.note;
+        nextBtn.hidden = false;
+        Array.from(choicesEl.children).forEach(function (b) { b.disabled = true; });
+      });
+      choicesEl.appendChild(btn);
+    });
+  }
+
+  nextBtn.addEventListener('click', function () {
+    index++;
+    renderScenario();
+  });
+
+  restartBtn.addEventListener('click', function () {
+    index = 0;
+    score = 0;
+    restartBtn.hidden = true;
+    renderScenario();
+  });
+
+  renderScenario();
+});
+</script>

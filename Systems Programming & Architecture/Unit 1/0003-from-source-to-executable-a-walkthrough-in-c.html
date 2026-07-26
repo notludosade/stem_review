@@ -1,0 +1,163 @@
+<meta charset="UTF-8">
+<title>Lesson 3: From Source to Executable: A Walkthrough in C — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="advanced">
+  <span class="kicker">STEM+ · Systems Programming &amp; Architecture: CS · Unit 1 · Lesson 3</span>
+  <h1>From Source to Executable: A Walkthrough in C</h1>
+  <p class="subtitle">Lesson 2 named the four stages. This lesson runs them, one real gcc command at a time, on one real C program — and uses the pipeline to figure out which stage would catch which kind of mistake.</p>
+  <p class="nav-links"><a href="0002-the-compilation-pipeline-preprocessor-compiler-assembler-linker.html" class="nav-prev">← Lesson 2</a> <a href="../Unit%202/0004-the-process-address-space.html" class="nav-next">Unit 2, Lesson 4 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Start with the smallest real C program that does something:</p>
+
+  <pre class="code-block"><code><span class="code-comment">// hello.c</span>
+#include &lt;stdio.h&gt;
+
+int main(void) {
+    printf("Hello, world!\n");
+    return 0;
+}</code></pre>
+
+  <p>Compare this to Computer Programming 1's Python or JavaScript "hello world" — no <code class="inline-code">#include</code>, no type on <code class="inline-code">main</code>, no semicolons. C requires more upfront ceremony because, unlike Python, nothing about C assumes an interpreter is standing by to figure things out at run time. Every type, every included capability, has to be nailed down before the pipeline can even start.</p>
+
+  <h2>Running each stage by hand</h2>
+  <div class="box example">
+    <span class="box-label">Worked example: four commands, four outputs</span>
+    <code class="inline-code">gcc -E hello.c -o hello.i</code> stops after the preprocessor — open <code class="inline-code">hello.i</code> and you'll find hundreds of lines from <code class="inline-code">stdio.h</code> pasted in above your two-line <code class="inline-code">main</code>. <code class="inline-code">gcc -S hello.c -o hello.s</code> stops after the compiler — <code class="inline-code">hello.s</code> is short, readable assembly with instructions like <code class="inline-code">call printf</code>. <code class="inline-code">gcc -c hello.c -o hello.o</code> stops after the assembler — <code class="inline-code">hello.o</code> is binary and unreadable as text, containing real machine code with an unresolved reference to <code class="inline-code">printf</code>. Finally, <code class="inline-code">gcc hello.c -o hello</code>, with no stage-stopping flag, runs the whole pipeline through the linker and produces <code class="inline-code">hello</code> — an executable you run with <code class="inline-code">./hello</code>.
+  </div>
+
+  <h2>Which stage catches which mistake?</h2>
+  <p>Every one of the four tools only looks for its own category of problem. A mistake that's invisible to one stage might sail right through it and get caught — or missed entirely — by the next.</p>
+
+  <div class="widget" id="stage-diagnosis-widget">
+    <p class="widget-label">Interactive: which stage would catch this?</p>
+    <div id="stage-diagnosis-body">
+      <p class="quiz-prompt" data-diagnosis-prompt></p>
+      <div class="fm-row" style="flex-wrap:wrap; gap:0.6rem;">
+        <button class="widget-btn" type="button" data-diagnosis-guess="preprocessor">Preprocessor</button>
+        <button class="widget-btn" type="button" data-diagnosis-guess="compiler">Compiler</button>
+        <button class="widget-btn" type="button" data-diagnosis-guess="assembler">Assembler</button>
+        <button class="widget-btn" type="button" data-diagnosis-guess="linker">Linker</button>
+      </div>
+      <p class="verdict" data-diagnosis-verdict></p>
+    </div>
+    <div class="fm-row">
+      <button class="widget-btn" type="button" data-diagnosis-next>Next scenario →</button>
+    </div>
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why "it compiled" doesn't mean "it will run"</span>
+    In Python, a typo in a function name you never call is invisible until that line actually executes — the interpreter never looks ahead. In C, <code class="inline-code">gcc hello.c -o hello</code> either succeeds all the way through the linker, producing a runnable file, or it doesn't produce anything runnable at all. But "it compiled" still isn't the same guarantee as "it's correct": the pipeline only checks that your code is well-formed and every reference resolves — it says nothing about whether the logic is right. A program with a serious logic bug can sail through all four stages without a single complaint, then produce the wrong answer instantly, or crash on some input the pipeline had no way to anticipate. Later units — especially Unit 8 — are about exactly that gap between "compiles cleanly" and "behaves correctly."
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What does the gcc flag -c actually do?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Stops the pipeline after the assembler, producing an object file (.o) instead of a complete executable.</button>
+      <button class="quiz-choice" data-correct="false">Stops the pipeline after the preprocessor only.</button>
+      <button class="quiz-choice" data-correct="false">Runs the entire pipeline including the linker, same as no flag at all.</button>
+      <button class="quiz-choice" data-correct="false">Deletes the source file after compiling.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>-c means "compile and assemble only" — stop right before linking.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why does C's "hello world" require #include &lt;stdio.h&gt; while Python's doesn't need an equivalent import for print()?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">C has no interpreter resolving things at run time, so printf's declaration must be pulled in and known before the pipeline can even compile the call correctly.</button>
+      <button class="quiz-choice" data-correct="false">Python's print() function does not actually exist anywhere in Python's own source.</button>
+      <button class="quiz-choice" data-correct="false">C programs are not allowed to print any output under any circumstances.</button>
+      <button class="quiz-choice" data-correct="false">stdio.h is only needed for programs that never call any functions.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>C's ahead-of-time pipeline needs every function's signature known before compiling, unlike an interpreter that resolves names as it goes.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. A C program compiles and links with zero errors, but produces the wrong output when run. What does this tell you?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">The pipeline only checks that the code is well-formed and every reference resolves — it says nothing about whether the program's logic is correct.</button>
+      <button class="quiz-choice" data-correct="false">This is impossible — a program that compiles cleanly is always logically correct.</button>
+      <button class="quiz-choice" data-correct="false">The linker must have silently ignored a syntax error.</button>
+      <button class="quiz-choice" data-correct="false">The preprocessor must not have run at all.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A clean build guarantees structural correctness, not logical correctness — those are separate concerns entirely.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="-e">
+    <p class="quiz-prompt">4. Fill in the blank: the gcc flag that stops the pipeline after only the preprocessor stage is ___ (lowercase is fine).</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>-E stops right after preprocessing, outputting expanded C source rather than assembly, an object file, or an executable.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="./hello">
+    <p class="quiz-prompt">5. Fill in the blank: after running gcc hello.c -o hello successfully, the command used to actually run the resulting program on the same machine is ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The leading ./ tells the shell to run the executable sitting right here, rather than searching for a system-wide command of the same name.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: the GCC manual's <a href="https://gcc.gnu.org/onlinedocs/gcc/Invoking-GCC.html">"Compiling C Programs"</a> overview documents every one of these flags directly from the compiler's own reference.</p>
+
+  <p class="ask-teacher">Curious what a real linker error message looks like on your own machine? Ask your teacher — that's what I'm here for. Next up: Unit 2 goes inside the running program itself, starting with exactly where in memory all of this — code, variables, everything — actually lives.</p>
+
+  <footer class="lesson-footer">STEM+ · Systems Programming &amp; Architecture: CS · Lesson 3 of the course sequence</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var scenarios = [
+    { text: 'A missing semicolon at the end of a line inside main().', answer: 'compiler', why: 'The compiler stage parses C grammar and catches syntax errors like this one.' },
+    { text: 'A misspelled #include filename, like #include <stdioo.h>.', answer: 'preprocessor', why: 'The preprocessor is what actually opens and pastes in included files — a bad filename fails right there.' },
+    { text: 'Calling a function that is declared (in a header) but never actually implemented anywhere.', answer: 'linker', why: 'Nothing about this is a syntax error, so it sails through the compiler and assembler — only the linker discovers the missing implementation while resolving references.' },
+    { text: 'Using a variable that was never declared anywhere in the file.', answer: 'compiler', why: 'The compiler checks that every name is properly declared before it is used — this is a classic compile-time error.' },
+    { text: 'Forgetting to link against the math library when calling sqrt(), producing "undefined reference to sqrt".', answer: 'linker', why: 'The call itself is syntactically fine; the linker just can\'t find sqrt\'s actual machine code without being told which library to search.' }
+  ];
+  var idx = 0;
+  var answered = false;
+  var prompt = document.querySelector('[data-diagnosis-prompt]');
+  var verdict = document.querySelector('[data-diagnosis-verdict]');
+  var buttons = document.querySelectorAll('[data-diagnosis-guess]');
+  var nextBtn = document.querySelector('[data-diagnosis-next]');
+
+  function render() {
+    answered = false;
+    verdict.textContent = '';
+    verdict.classList.remove('is-pass', 'is-fail');
+    prompt.textContent = (idx + 1) + '. ' + scenarios[idx].text;
+  }
+
+  buttons.forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      if (answered) return;
+      answered = true;
+      var guess = btn.getAttribute('data-diagnosis-guess');
+      var correct = guess === scenarios[idx].answer;
+      verdict.classList.remove('is-pass', 'is-fail');
+      verdict.classList.add(correct ? 'is-pass' : 'is-fail');
+      verdict.textContent = (correct ? 'Correct — ' : 'Not quite — the answer is the ' + scenarios[idx].answer + '. ') + scenarios[idx].why;
+    });
+  });
+
+  nextBtn.addEventListener('click', function () {
+    idx = (idx + 1) % scenarios.length;
+    render();
+  });
+
+  render();
+});
+</script>

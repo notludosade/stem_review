@@ -1,0 +1,146 @@
+<meta charset="UTF-8">
+<title>Lesson 17: Race Conditions — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="advanced">
+  <span class="kicker">STEM+ · Systems Programming &amp; Architecture: CS · Unit 6 · Lesson 17</span>
+  <h1>Race Conditions and Why Shared State Is Dangerous</h1>
+  <p class="subtitle">Lesson 16 said two threads can read and write the same variable with no coordination required. This lesson shows exactly why that "no coordination required" is also the problem — using the simplest possible example: two threads, one shared counter, and a bug you can't see by reading the code alone.</p>
+  <p class="nav-links"><a href="0016-threads-vs-processes.html" class="nav-prev">← Lesson 16</a> <a href="0018-locks-mutexes-and-synchronization.html" class="nav-next">Lesson 18 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>"Increment a shared counter" sounds like the simplest possible operation. It's actually three separate steps at the machine level — read the current value, add one, write the new value back — and if two threads interleave those three steps badly, one entire increment can vanish without a trace.</p>
+
+  <h2>An increment is not one step</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    A <strong>race condition</strong> is a bug where a program's correctness depends on the precise timing or interleaving of operations across multiple threads, so the outcome differs depending on execution order that isn't controlled or guaranteed. <code class="inline-code">counter++</code> looks atomic (indivisible) in source code, but compiles down to three separate machine steps: read <code class="inline-code">counter</code> into a register, add 1 to the register, write the register back to <code class="inline-code">counter</code>. Any of those three steps can be interrupted by the other thread doing its own read/add/write in between.
+  </div>
+
+  <h2>Try it: watch an update get lost</h2>
+  <p>Two threads both try to increment the same shared counter, starting at 0. Step through a bad interleaving by hand and watch one increment vanish.</p>
+
+  <div class="widget" id="race-widget">
+    <p class="widget-label">Interactive: a lost update</p>
+    <div id="race-display"></div>
+    <p class="plot-readout" data-race-readout>Shared counter = 0. Press Step to begin the interleaving.</p>
+    <div class="fm-row">
+      <button class="widget-btn" type="button" data-race-step>Step →</button>
+      <button class="widget-btn" type="button" data-race-reset>Reset</button>
+    </div>
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Worked example: the exact interleaving that loses an update</span>
+    Counter starts at 0. Thread A reads <code class="inline-code">counter</code> (gets 0). Before A writes anything back, Thread B also reads <code class="inline-code">counter</code> (also gets 0 — A hasn't written yet). Thread A adds 1 to its register (1) and writes it back — <code class="inline-code">counter</code> is now 1. Thread B, working from the stale value it already read, adds 1 to its own register (also 1) and writes <em>that</em> back — <code class="inline-code">counter</code> is still 1. Two threads each incremented once, but the counter only went up by 1 instead of 2 — Thread A's update was completely overwritten, with no error, no crash, and nothing in the source code that looks wrong.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why race conditions are uniquely hard to debug</span>
+    A race condition often doesn't show up every run — most of the time, threads happen to interleave in a way that produces the right answer, and the bad interleaving only strikes occasionally, under specific timing that's hard to reproduce on purpose. A test suite can pass a thousand times in a row and still contain a race condition that shows up once in ten thousand runs in production, often under heavier load, where more threads are competing and interleavings become more varied. This is exactly what makes concurrency bugs feel different from every other bug category in this course — the code can look completely correct, read top to bottom, and still be wrong.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. Why is counter++ not actually a single atomic step at the machine level?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">It compiles into three separate steps — read, add, write — any of which can be interleaved with another thread's steps.</button>
+      <button class="quiz-choice" data-correct="false">It compiles to exactly one machine instruction that cannot be interrupted under any circumstances.</button>
+      <button class="quiz-choice" data-correct="false">Incrementing is handled entirely by the compiler before the program ever runs.</button>
+      <button class="quiz-choice" data-correct="false">counter++ is only meaningful in single-threaded programs and has no machine-level steps.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Read-add-write is the hidden three-step sequence that a race condition can interleave badly.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. In the lost-update example, why did the counter only end up at 1 instead of 2 after two increments?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Thread B read the counter's value before Thread A's write was visible, so B's write overwrote A's increment with a stale computation.</button>
+      <button class="quiz-choice" data-correct="false">Thread B is not permitted to increment a counter that Thread A has already touched.</button>
+      <button class="quiz-choice" data-correct="false">The counter automatically resets to 1 whenever two threads access it.</button>
+      <button class="quiz-choice" data-correct="false">One of the threads must have crashed silently mid-increment.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Both threads read the same stale value, and the second write simply clobbered the first.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why can a race condition pass a test suite a thousand times and still be a real bug?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">The bad interleaving depends on precise timing that may only occur rarely, so most runs happen to produce the correct result by luck.</button>
+      <button class="quiz-choice" data-correct="false">Race conditions cannot be detected by any testing method, ever, under any circumstances.</button>
+      <button class="quiz-choice" data-correct="false">A test suite passing a thousand times mathematically guarantees no race condition exists.</button>
+      <button class="quiz-choice" data-correct="false">Race conditions only affect programs that use no threads at all.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Timing-dependent bugs can hide behind mostly-correct interleavings for a long time before surfacing.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="race condition">
+    <p class="quiz-prompt">4. Fill in the blank: a bug where correctness depends on the precise, uncontrolled timing or interleaving of operations across threads is called a ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Race conditions depend on the exact order in which threads' steps happen to interleave.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="lost update">
+    <p class="quiz-prompt">5. Fill in the blank: the specific outcome where two threads each increment a shared counter, but one increment is silently overwritten by the other's stale write, is called a ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A lost update is the classic, concrete symptom of an unprotected shared counter race condition.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: the Go team's <a href="https://go.dev/blog/race-detector">"Introducing the Go Race Detector"</a> post explains, from a real production language, why race conditions are common enough in practice to justify building automated tooling specifically to catch them.</p>
+
+  <p class="ask-teacher">Curious how a real race detector tool actually catches this kind of bug automatically? Ask your teacher — that's what I'm here for. Next up: the fix — a mechanism that forces threads to take turns instead of interleaving freely.</p>
+
+  <footer class="lesson-footer">STEM+ · Systems Programming &amp; Architecture: CS · Lesson 17 of the course sequence</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var steps = [
+    { a: '—', b: '—', counter: 0, desc: 'Counter = 0. Neither thread has started yet.' },
+    { a: 'reads counter (0)', b: '—', counter: 0, desc: 'Thread A reads counter into its own register: A has 0.' },
+    { a: 'reads counter (0)', b: 'reads counter (0)', counter: 0, desc: "Thread B also reads counter, before A has written anything back: B also has 0 (stale)." },
+    { a: 'adds 1 → 1', b: 'reads counter (0)', counter: 0, desc: 'Thread A adds 1 to its register: A now holds 1 (not yet written to counter).' },
+    { a: 'writes counter = 1', b: 'reads counter (0)', counter: 1, desc: 'Thread A writes its register back: counter is now 1.' },
+    { a: 'writes counter = 1', b: 'adds 1 → 1', counter: 1, desc: "Thread B adds 1 to its own (stale) register: B now holds 1 too." },
+    { a: 'writes counter = 1', b: 'writes counter = 1', counter: 1, desc: "Thread B writes its register back: counter is STILL 1. Thread A's increment is gone — a lost update." }
+  ];
+  var idx = 0;
+  var display = document.getElementById('race-display');
+  var readout = document.querySelector('[data-race-readout]');
+  var stepBtn = document.querySelector('[data-race-step]');
+
+  function render() {
+    var s = steps[idx];
+    display.innerHTML =
+      '<div class="box" style="margin:0.3rem 0; padding:0.5rem 0.8rem;"><strong>Thread A:</strong> ' + s.a + '</div>' +
+      '<div class="box" style="margin:0.3rem 0; padding:0.5rem 0.8rem;"><strong>Thread B:</strong> ' + s.b + '</div>';
+    readout.textContent = 'Shared counter = ' + s.counter + '.   ' + s.desc;
+    stepBtn.disabled = idx >= steps.length - 1;
+  }
+
+  stepBtn.addEventListener('click', function () {
+    if (idx < steps.length - 1) idx++;
+    render();
+  });
+
+  document.querySelector('[data-race-reset]').addEventListener('click', function () {
+    idx = 0;
+    render();
+  });
+
+  render();
+});
+</script>

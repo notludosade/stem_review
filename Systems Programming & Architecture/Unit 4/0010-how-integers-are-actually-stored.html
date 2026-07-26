@@ -1,0 +1,158 @@
+<meta charset="UTF-8">
+<title>Lesson 10: How Integers Are Actually Stored — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="advanced">
+  <span class="kicker">STEM+ · Systems Programming &amp; Architecture: CS · Unit 4 · Lesson 10</span>
+  <h1>How Integers Are Actually Stored (Two's Complement, Overflow)</h1>
+  <p class="subtitle">Units 2 and 3 treated an int as an opaque four-byte value. This unit opens it up. First question: how does a fixed number of bits represent negative numbers at all — and what happens when a number gets too big to fit?</p>
+  <p class="nav-links"><a href="../Unit%203/0009-dangling-pointers-memory-leaks-and-use-after-free.html" class="nav-prev">← Unit 3, Lesson 9</a> <a href="0011-floating-point-and-rounding-error.html" class="nav-next">Lesson 11 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>A 32-bit <code class="inline-code">int</code> is exactly 32 bits — no more, no less — no matter what value it holds. Every representation scheme has to answer two questions inside that fixed budget: how do you represent a negative number using only 0s and 1s, and what happens the instant a calculation's true answer needs one more bit than you have?</p>
+
+  <h2>Unsigned: the easy case</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    An <strong>unsigned integer</strong> stores only non-negative values, interpreting its bits directly as a plain binary number. An 8-bit unsigned value ranges from <code class="inline-code">00000000</code> (0) to <code class="inline-code">11111111</code> (255) — 2<sup>8</sup> = 256 distinct values, all non-negative.
+  </div>
+
+  <h2>Two's complement: how negatives actually work</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    <strong>Two's complement</strong> is the representation essentially every modern processor uses for signed integers. The leading bit still participates in the value's magnitude, but it's weighted <em>negative</em>: for an 8-bit value, the bits represent −128, 64, 32, 16, 8, 4, 2, 1 from left to right, instead of unsigned's 128, 64, 32, 16, 8, 4, 2, 1. To negate a value, flip every bit and add 1 — <code class="inline-code">00000101</code> (5) becomes <code class="inline-code">11111010</code>, plus 1 is <code class="inline-code">11111011</code> (−5). The huge practical payoff: addition works identically whether the processor is treating the bits as signed or unsigned — one adder circuit handles both, with no special-casing for negative numbers at all.
+  </div>
+
+  <h2>Try it: flip bits, watch the value change</h2>
+  <p>Toggle bits in an 8-bit value and watch its two's-complement (signed) and unsigned readings update together.</p>
+
+  <div class="widget" id="twoscomp-widget">
+    <p class="widget-label">Interactive: two's complement, 8 bits</p>
+    <div id="bits-display" style="font-family:monospace; font-size:1.4rem; letter-spacing:0.15em;"></div>
+    <p class="plot-readout" data-twoscomp-readout>Click a bit to flip it.</p>
+    <div class="fm-row">
+      <button class="widget-btn" type="button" data-twoscomp-reset>Reset to 00000000</button>
+    </div>
+  </div>
+
+  <h2>Overflow: running out of bits</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    <strong>Integer overflow</strong> happens when the true mathematical result of an operation needs more bits than the type has. For an 8-bit signed value, the maximum is 127 (<code class="inline-code">01111111</code>); adding 1 produces <code class="inline-code">10000000</code> — which, read as two's complement, is −128, not 128. The bits did exactly what addition always does; there simply weren't enough of them to hold the true answer, so the result silently wrapped around.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Worked example</span>
+    In C, <code class="inline-code">int8_t x = 127; x = x + 1;</code> gives <code class="inline-code">x</code> the value <code class="inline-code">-128</code> — not an error, not a crash, just a wrong-looking number that is nonetheless exactly what two's complement arithmetic produces from those bits. Signed overflow in C is technically undefined behavior (Unit 8) rather than a guaranteed wraparound, which is precisely why compilers are allowed to optimize code as if it never happens — a real and recurring source of subtle bugs in C code that assumes wraparound is safe to rely on.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why this isn't just trivia — it causes real bugs</span>
+    A loop counter of type <code class="inline-code">unsigned int</code> that's decremented past zero doesn't go negative — it wraps around to a huge positive number (4,294,967,295 for a 32-bit unsigned int), instantly turning a "loop until this reaches zero" into an effectively infinite loop that reads or writes memory far outside where it should. This exact bug class has caused real, shipped security vulnerabilities: an attacker supplies a length value designed to overflow a size calculation, and code that trusted the wrapped-around result ends up allocating far less memory than it thinks it did.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. In two's complement, what makes it possible to add signed and unsigned numbers with the exact same hardware circuit?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">The bit pattern for a given addition is identical either way — only how the result is interpreted (signed or unsigned) differs.</button>
+      <button class="quiz-choice" data-correct="false">Signed numbers are converted to unsigned before every addition, then converted back.</button>
+      <button class="quiz-choice" data-correct="false">Two's complement does not support addition at all, only subtraction.</button>
+      <button class="quiz-choice" data-correct="false">Processors use two entirely separate adder circuits and pick one at run time.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>This is the core engineering payoff of two's complement — one adder, no special-casing for sign.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. An 8-bit signed value holding 127 (01111111) has 1 added to it. What is the result?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">-128 — the bits wrap around to 10000000, which two's complement reads as the most negative value.</button>
+      <button class="quiz-choice" data-correct="false">128, since C automatically widens the type to fit.</button>
+      <button class="quiz-choice" data-correct="false">0, since overflow always resets the value to zero.</button>
+      <button class="quiz-choice" data-correct="false">A guaranteed compiler error that stops the program from running.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Overflow wraps the bit pattern around; the same bits mean something very different once reinterpreted.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why is an unsigned loop counter decrementing past zero a genuinely dangerous bug?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">It wraps around to a huge positive value instead of going negative, which can turn a bounded loop into one that runs far too many times.</button>
+      <button class="quiz-choice" data-correct="false">Unsigned integers cannot be used in loops under any circumstances.</button>
+      <button class="quiz-choice" data-correct="false">The program automatically detects this and exits cleanly every time.</button>
+      <button class="quiz-choice" data-correct="false">This has no real consequence beyond a slightly wrong printed value.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The wraparound value is enormous, not negative, which is exactly what makes this bug class so dangerous.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="two's complement|twos complement">
+    <p class="quiz-prompt">4. Fill in the blank: the representation essentially every modern processor uses for signed integers, where the leading bit is weighted negative, is called ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Two's complement lets one adder circuit correctly handle both signed and unsigned addition.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="overflow|integer overflow">
+    <p class="quiz-prompt">5. Fill in the blank: when an operation's true result needs more bits than a type has, and the value silently wraps around, this is called integer ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Overflow is the fixed-width consequence of a result that needed one more bit than was available.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: the CERT C Coding Standard's <a href="https://wiki.sei.cmu.edu/confluence/display/c/INT30-C.+Ensure+that+unsigned+integer+operations+do+not+wrap">"Ensure that unsigned integer operations do not wrap"</a> rule documents this exact bug class as a real, industry-tracked security concern, not just a classroom example.</p>
+
+  <p class="ask-teacher">Curious how to check for overflow before it happens in real C code? Ask your teacher — that's what I'm here for. Next up: integers were the easy case — floating-point numbers trade exactness for range, and the tradeoff shows up the very first time you add two decimals.</p>
+
+  <footer class="lesson-footer">STEM+ · Systems Programming &amp; Architecture: CS · Lesson 10 of the course sequence</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var bits = [0, 0, 0, 0, 0, 0, 0, 0];
+  var weights = [-128, 64, 32, 16, 8, 4, 2, 1];
+  var display = document.getElementById('bits-display');
+  var readout = document.querySelector('[data-twoscomp-readout]');
+
+  function render() {
+    display.innerHTML = '';
+    bits.forEach(function (b, i) {
+      var span = document.createElement('span');
+      span.textContent = b;
+      span.style.cursor = 'pointer';
+      span.style.padding = '0.1em 0.15em';
+      span.style.borderRadius = '3px';
+      span.style.background = b ? 'var(--accent-soft)' : 'transparent';
+      span.addEventListener('click', function () {
+        bits[i] = bits[i] ? 0 : 1;
+        render();
+      });
+      display.appendChild(span);
+    });
+
+    var signedVal = 0, unsignedVal = 0;
+    bits.forEach(function (b, i) {
+      signedVal += b * weights[i];
+      unsignedVal += b * [128, 64, 32, 16, 8, 4, 2, 1][i];
+    });
+    readout.textContent = 'Bits: ' + bits.join('') + '   —   as two\'s complement (signed): ' + signedVal + '   —   as plain unsigned: ' + unsignedVal;
+  }
+
+  document.querySelector('[data-twoscomp-reset]').addEventListener('click', function () {
+    bits = [0, 0, 0, 0, 0, 0, 0, 0];
+    render();
+  });
+
+  render();
+});
+</script>

@@ -1,0 +1,165 @@
+<meta charset="UTF-8">
+<title>Lesson 7: Pointers — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="advanced">
+  <span class="kicker">STEM+ · Systems Programming &amp; Architecture: CS · Unit 3 · Lesson 7</span>
+  <h1>Pointers: Variables That Hold Addresses</h1>
+  <p class="subtitle">Unit 2 kept saying "a pointer to X" without stopping to define what a pointer actually is. This lesson stops. A pointer is nothing exotic — it's just a variable, like any other, whose value happens to be a memory address.</p>
+  <p class="nav-links"><a href="../Unit%202/0006-the-heap-dynamic-allocation-and-why-it-can-go-wrong.html" class="nav-prev">← Unit 2, Lesson 6</a> <a href="0008-pointer-arithmetic-and-arrays.html" class="nav-next">Lesson 8 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Every variable you've ever declared, in any language, lives at some address in memory — you just never had to write that address down or think about it. C is different only in that it lets you: a pointer is a variable that stores an address instead of an ordinary value, and gives you a way to write it down, pass it around, and use it to reach the data it points to.</p>
+
+  <h2>Declaring, and the two core operators</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    A <strong>pointer</strong> is a variable whose value is a memory address, declared with an asterisk: <code class="inline-code">int *p;</code> declares <code class="inline-code">p</code> as "a pointer to an int." The <strong>address-of operator</strong> <code class="inline-code">&amp;</code> takes an ordinary variable and produces its address: <code class="inline-code">int x = 5; int *p = &amp;x;</code> makes <code class="inline-code">p</code> hold <code class="inline-code">x</code>'s address. The <strong>dereference operator</strong> <code class="inline-code">*</code>, applied to a pointer, means "go to the address it holds, and give me the value stored there": <code class="inline-code">*p</code> reads (or, on the left of an assignment, writes) the int that <code class="inline-code">x</code> itself occupies.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Worked example</span>
+    <code class="inline-code">int x = 5;</code> creates an int somewhere in memory — say, address <code class="inline-code">0x7ffee2a</code>, holding the value <code class="inline-code">5</code>. <code class="inline-code">int *p = &amp;x;</code> creates a second variable, <code class="inline-code">p</code>, holding the value <code class="inline-code">0x7ffee2a</code> — <code class="inline-code">p</code>'s own address is somewhere else entirely. <code class="inline-code">*p = 10;</code> doesn't change what <code class="inline-code">p</code> points to; it follows <code class="inline-code">p</code>'s address to <code class="inline-code">0x7ffee2a</code> and overwrites the <code class="inline-code">5</code> stored there with <code class="inline-code">10</code>. After this line, both <code class="inline-code">x</code> and <code class="inline-code">*p</code> read as <code class="inline-code">10</code> — because they're the exact same four bytes in memory, viewed two different ways.
+  </div>
+
+  <h2>Try it: follow a pointer to its value</h2>
+  <p>Build up the worked example above one line at a time, and watch exactly which memory changes at each step.</p>
+
+  <div class="widget" id="pointer-widget">
+    <p class="widget-label">Interactive: pointers and dereferencing</p>
+    <div class="fm-row" style="gap:1.2rem; align-items:flex-start;">
+      <div class="box" style="flex:1; min-width:140px;">
+        <span class="box-label">Variable x</span>
+        <p data-ptr-x-addr style="font-family:monospace;">address: —</p>
+        <p data-ptr-x-val style="font-family:monospace; font-size:1.3rem;">value: —</p>
+      </div>
+      <div class="box" style="flex:1; min-width:140px;">
+        <span class="box-label">Variable p (int *)</span>
+        <p data-ptr-p-addr style="font-family:monospace;">address: —</p>
+        <p data-ptr-p-val style="font-family:monospace; font-size:1.3rem;">holds: —</p>
+      </div>
+    </div>
+    <p class="plot-readout" data-ptr-readout>Press Step to declare x.</p>
+    <div class="fm-row">
+      <button class="widget-btn" type="button" data-ptr-step>Step →</button>
+      <button class="widget-btn" type="button" data-ptr-reset>Reset</button>
+    </div>
+  </div>
+
+  <h2>Pointer types matter</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    A pointer's declared type — the <code class="inline-code">int</code> in <code class="inline-code">int *p</code> — tells the compiler how many bytes to read or write when the pointer is dereferenced, and how far to move for pointer arithmetic (Lesson 8). <code class="inline-code">int *</code> and <code class="inline-code">double *</code> both just hold an address underneath, but dereferencing one reads 4 bytes as an int, while the other reads 8 bytes as a double starting from the same address — the type is what tells C how to interpret the bytes it finds there.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why pointers exist at all, instead of just passing values</span>
+    Passing a large struct, or an array, by value would mean copying every byte of it every time it's handed to a function — slow, and wasteful when the function only needs to read or modify a small part of it. Passing a pointer instead means handing over just one address, however large the actual data is, letting the function reach and modify the original data directly instead of a copy. This is also exactly how a function can "return" more than one value in C: pass pointers to several variables, and let the function write results directly into the caller's own memory through them.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What is a pointer, fundamentally?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">A variable whose value is a memory address.</button>
+      <button class="quiz-choice" data-correct="false">A special kind of function that cannot return a value.</button>
+      <button class="quiz-choice" data-correct="false">A variable that can only ever hold the number zero.</button>
+      <button class="quiz-choice" data-correct="false">A region of the heap reserved automatically at compile time.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A pointer is an ordinary variable, just one whose stored value happens to be an address.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Given int x = 5; int *p = &amp;x; *p = 10;, what is x after the third line?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">10 — *p and x refer to the exact same memory.</button>
+      <button class="quiz-choice" data-correct="false">5 — p is a separate copy and cannot affect x.</button>
+      <button class="quiz-choice" data-correct="false">0 — dereferencing always resets the target to zero first.</button>
+      <button class="quiz-choice" data-correct="false">This causes a compile error, since p was never declared.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Writing through *p writes to x's own memory, since p holds x's address.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why does a pointer's declared type (int * vs. double *) matter, even though both just store an address?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">The type tells the compiler how many bytes to read or write on dereference, and how far to move for pointer arithmetic.</button>
+      <button class="quiz-choice" data-correct="false">The type has no effect on anything and exists only for documentation.</button>
+      <button class="quiz-choice" data-correct="false">Only int pointers are allowed to be dereferenced.</button>
+      <button class="quiz-choice" data-correct="false">The type determines which region of the address space the pointer itself lives in.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The type is how the compiler knows how to interpret the bytes found at that address, and how far one "step" of pointer arithmetic should move.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="&|address-of|address-of operator">
+    <p class="quiz-prompt">4. Fill in the blank: the operator that takes an ordinary variable and produces its memory address is the ___ operator.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The address-of operator (&) is the counterpart to dereferencing (*).</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="dereference|dereferencing|dereference operator">
+    <p class="quiz-prompt">5. Fill in the blank: following a pointer to the address it holds, to read or write the value stored there, is called ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Dereferencing with * is how a pointer is actually used to reach its target's value.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: Brian Kernighan and Dennis Ritchie's <a href="https://en.wikipedia.org/wiki/The_C_Programming_Language">"The C Programming Language"</a> is the original, canonical text on C from the language's own creators, and its pointer chapter is still the reference most working C programmers eventually read.</p>
+
+  <p class="ask-teacher">Curious why C uses the same * symbol for both declaring a pointer and dereferencing it? Ask your teacher — that's what I'm here for. Next up: pointers and arrays turn out to be far more closely related than they look at first.</p>
+
+  <footer class="lesson-footer">STEM+ · Systems Programming &amp; Architecture: CS · Lesson 7 of the course sequence</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var steps = [
+    { desc: 'Press Step to declare x.', xAddr: '—', xVal: '—', pAddr: '—', pVal: '—' },
+    { desc: 'int x = 5; — x is created at address 0x7ffee2a, holding 5.', xAddr: '0x7ffee2a', xVal: '5', pAddr: '—', pVal: '—' },
+    { desc: 'int *p = &x; — p is created at its own address, holding x\'s address.', xAddr: '0x7ffee2a', xVal: '5', pAddr: '0x7ffee40', pVal: '0x7ffee2a (→ x)' },
+    { desc: '*p = 10; — follow p to 0x7ffee2a, and overwrite the value stored there.', xAddr: '0x7ffee2a', xVal: '10', pAddr: '0x7ffee40', pVal: '0x7ffee2a (→ x)' },
+    { desc: 'Done. x and *p are the same four bytes — both now read 10.', xAddr: '0x7ffee2a', xVal: '10', pAddr: '0x7ffee40', pVal: '0x7ffee2a (→ x)' }
+  ];
+  var step = 0;
+  var readout = document.querySelector('[data-ptr-readout]');
+  var xAddr = document.querySelector('[data-ptr-x-addr]');
+  var xVal = document.querySelector('[data-ptr-x-val]');
+  var pAddr = document.querySelector('[data-ptr-p-addr]');
+  var pVal = document.querySelector('[data-ptr-p-val]');
+  var stepBtn = document.querySelector('[data-ptr-step]');
+
+  function render() {
+    var s = steps[step];
+    readout.textContent = s.desc;
+    xAddr.textContent = 'address: ' + s.xAddr;
+    xVal.textContent = 'value: ' + s.xVal;
+    pAddr.textContent = 'address: ' + s.pAddr;
+    pVal.textContent = 'holds: ' + s.pVal;
+    stepBtn.disabled = step >= steps.length - 1;
+  }
+
+  stepBtn.addEventListener('click', function () {
+    if (step < steps.length - 1) step++;
+    render();
+  });
+
+  document.querySelector('[data-ptr-reset]').addEventListener('click', function () {
+    step = 0;
+    render();
+  });
+
+  render();
+});
+</script>

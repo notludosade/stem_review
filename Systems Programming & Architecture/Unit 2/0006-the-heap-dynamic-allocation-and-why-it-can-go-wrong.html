@@ -1,0 +1,170 @@
+<meta charset="UTF-8">
+<title>Lesson 6: The Heap — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="advanced">
+  <span class="kicker">STEM+ · Systems Programming &amp; Architecture: CS · Unit 2 · Lesson 6</span>
+  <h1>The Heap: Dynamic Allocation and Why It Can Go Wrong</h1>
+  <p class="subtitle">The stack cleans up after itself automatically. The heap does not — and that one difference is responsible for an entire category of bugs that simply cannot happen in a language like Python, where something else is doing this bookkeeping for you.</p>
+  <p class="nav-links"><a href="0005-the-stack-function-calls-frames-and-local-variables.html" class="nav-prev">← Lesson 5</a> <a href="../Unit%203/0007-pointers-variables-that-hold-addresses.html" class="nav-next">Unit 3, Lesson 7 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Every local variable's lifetime is tied to its function, decided automatically by the stack. But plenty of real data needs a lifetime the stack can't express — an array whose size isn't known until the program is running, or data that needs to outlive the function that created it. That's what the heap is for, and it comes with a cost: nothing frees it for you.</p>
+
+  <h2>Requesting memory at run time</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    <strong>Dynamic memory allocation</strong> means requesting a block of memory from the heap while the program is running, of a size decided at run time rather than baked in at compile time. In C, <code class="inline-code">malloc(size)</code> requests <code class="inline-code">size</code> bytes and returns a pointer to the start of that block, or a null pointer if the request fails. That memory is <strong>not</strong> automatically released when the function that requested it returns — unlike a stack local, it stays reserved until the program explicitly gives it back with <code class="inline-code">free(pointer)</code>.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Worked example</span>
+    <code class="inline-code">int *scores = malloc(n * sizeof(int));</code> reserves enough heap space for <code class="inline-code">n</code> integers — where <code class="inline-code">n</code> might come from user input, so the size genuinely couldn't have been known when the code was compiled. That block survives function returns, gets passed around by pointer, and stays valid right up until something calls <code class="inline-code">free(scores)</code>. Forget that call, and the block simply stays reserved forever — the program has no other way to find it again once every pointer to it is gone.
+  </div>
+
+  <h2>Try it: allocate and free heap blocks</h2>
+  <p>Allocate a few blocks, free some of them, and watch what happens to the heap's memory map — including what a leak actually looks like once you lose the only pointer to a block.</p>
+
+  <div class="widget" id="heap-widget">
+    <p class="widget-label">Interactive: a tiny heap allocator</p>
+    <div id="heap-display"></div>
+    <p class="plot-readout" data-heap-readout>Allocate a block to begin.</p>
+    <div class="fm-row" style="flex-wrap:wrap; gap:0.6rem;">
+      <button class="widget-btn" type="button" data-heap-alloc>malloc() a block</button>
+      <button class="widget-btn" type="button" data-heap-free>free() the oldest block</button>
+      <button class="widget-btn" type="button" data-heap-lose>Lose a pointer (simulate a leak)</button>
+      <button class="widget-btn" type="button" data-heap-reset>Reset</button>
+    </div>
+  </div>
+
+  <h2>Memory leaks: reserved forever, reachable by nothing</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    A <strong>memory leak</strong> happens when a program loses every pointer to a heap block without ever calling <code class="inline-code">free</code> on it. The block is still fully reserved — the operating system doesn't reclaim it while the process is running — but nothing in the program can reach it anymore to free it later. A long-running program (a server, not a script that exits in a second) that leaks steadily will keep consuming more and more memory until it's killed or the machine runs out.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why languages like Python and Java don't make you call free()</span>
+    Python and Java use <strong>garbage collection</strong>: a background system that periodically scans for heap objects nothing can reach anymore, and reclaims them automatically, so the programmer never calls anything equivalent to <code class="inline-code">free</code>. That safety isn't free, in the other sense of the word — garbage collection costs CPU time and can pause a program briefly while it runs, and it's part of why those languages generally use more memory and run slower than equivalent C for the same task. C hands that control, and that responsibility, directly to the programmer: total control over exactly when memory is released, in exchange for the fact that forgetting to release it is now entirely possible, and entirely your bug.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What is the key difference between heap memory and stack memory in terms of cleanup?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Stack memory is freed automatically when a function returns; heap memory stays reserved until explicitly freed.</button>
+      <button class="quiz-choice" data-correct="false">Heap memory is always freed automatically; stack memory must be freed manually.</button>
+      <button class="quiz-choice" data-correct="false">Neither region is ever freed for the life of the program.</button>
+      <button class="quiz-choice" data-correct="false">Both regions are freed identically, with no meaningful difference.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>This is the core distinction the whole lesson is built on: automatic (stack) vs. manual (heap) lifetime management.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. What exactly is a memory leak?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">A heap block that's still reserved but has no remaining pointer in the program that can reach it to free it.</button>
+      <button class="quiz-choice" data-correct="false">Any heap allocation that is later correctly freed.</button>
+      <button class="quiz-choice" data-correct="false">A stack frame that grows larger than expected.</button>
+      <button class="quiz-choice" data-correct="false">A bug that only affects programs written in Python or Java.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A leak is specifically about losing the ability to reach and free a block — the memory itself is never automatically reclaimed by the OS while the process runs.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why does garbage collection in Python or Java have a real performance cost?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">It periodically scans for unreachable objects and reclaims them automatically, which uses CPU time and can briefly pause the program.</button>
+      <button class="quiz-choice" data-correct="false">Garbage collection has no cost whatsoever compared to manual memory management.</button>
+      <button class="quiz-choice" data-correct="false">Garbage collection only runs once, at the very start of the program.</button>
+      <button class="quiz-choice" data-correct="false">It replaces the stack entirely, so functions can no longer be called.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Garbage collection trades some CPU time and pause risk for the safety of never having to call free yourself.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="malloc">
+    <p class="quiz-prompt">4. Fill in the blank: the standard C function that requests a block of heap memory of a given size and returns a pointer to it is ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>malloc is the standard dynamic allocation function, paired with free for releasing memory back.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="garbage collection|garbage collector">
+    <p class="quiz-prompt">5. Fill in the blank: the background system in languages like Python and Java that automatically reclaims heap objects nothing can reach anymore is called ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Garbage collection is exactly what removes the need for an explicit free call in those languages.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: the <a href="https://man7.org/linux/man-pages/man3/malloc.3.html">Linux manual page for malloc(3)</a> documents the real function signature, its return value on failure, and its relationship to free, straight from the source every C programmer eventually reads.</p>
+
+  <p class="ask-teacher">Curious how a tool like Valgrind actually finds a leak in a real C program? Ask your teacher — that's what I'm here for. Next up: Unit 3 zooms into the mechanism underneath every heap pointer you just used — what a pointer actually is, and how it holds an address at all.</p>
+
+  <footer class="lesson-footer">STEM+ · Systems Programming &amp; Architecture: CS · Lesson 6 of the course sequence</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var blocks = [];
+  var nextId = 1;
+  var display = document.getElementById('heap-display');
+  var readout = document.querySelector('[data-heap-readout]');
+
+  function render() {
+    display.innerHTML = '';
+    if (blocks.length === 0) {
+      readout.textContent = 'Heap is empty. Allocate a block to begin.';
+      return;
+    }
+    blocks.forEach(function (b) {
+      var el = document.createElement('div');
+      el.className = 'box' + (b.leaked ? ' why' : '');
+      el.style.margin = '0.3rem 0';
+      el.style.padding = '0.5rem 0.8rem';
+      el.innerHTML = '<strong>Block #' + b.id + '</strong> — ' +
+        (b.leaked ? 'LEAKED — reserved, but no pointer in the program can reach it anymore.' : 'reachable via one pointer variable.');
+      display.appendChild(el);
+    });
+    var leaked = blocks.filter(function (b) { return b.leaked; }).length;
+    readout.textContent = blocks.length + ' block(s) currently on the heap' + (leaked ? ', ' + leaked + ' leaked' : '') + '.';
+  }
+
+  document.querySelector('[data-heap-alloc]').addEventListener('click', function () {
+    blocks.push({ id: nextId++, leaked: false });
+    render();
+  });
+
+  document.querySelector('[data-heap-free]').addEventListener('click', function () {
+    var target = blocks.filter(function (b) { return !b.leaked; })[0];
+    if (!target) { readout.textContent = 'Nothing left to free — every remaining block is already leaked (no pointer can reach it to free it).'; return; }
+    blocks = blocks.filter(function (b) { return b.id !== target.id; });
+    render();
+  });
+
+  document.querySelector('[data-heap-lose]').addEventListener('click', function () {
+    var target = blocks.filter(function (b) { return !b.leaked; })[0];
+    if (!target) { readout.textContent = 'No reachable block left to lose a pointer to.'; return; }
+    target.leaked = true;
+    render();
+  });
+
+  document.querySelector('[data-heap-reset]').addEventListener('click', function () {
+    blocks = [];
+    nextId = 1;
+    render();
+  });
+
+  render();
+});
+</script>

@@ -1,0 +1,173 @@
+<meta charset="UTF-8">
+<title>Lesson 7: Continuous Delivery vs. Continuous Deployment — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · Cloud Computing B / DevOps · Unit 3 · Lesson 7</span>
+  <h1>Continuous Delivery vs. Continuous Deployment</h1>
+  <p class="subtitle">Unit 2 got every merge to a green, tested build artifact. This unit is about what happens next — and it turns out "green" and "in production" are two different moments that a team gets to decide whether to merge.</p>
+  <p class="nav-links"><a href="../Unit%202/0006-reading-a-broken-ci-pipeline.html" class="nav-prev">← Unit 2, Lesson 6</a> <a href="0008-deployment-strategies-blue-green-and-canary-releases.html" class="nav-next">Lesson 8 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>A CI pipeline (Unit 2) ending in a green build only proves the code is correctly built and tested — it says nothing about whether that build has actually reached the users it was written for. Getting it the rest of the way is a deliberate choice with two common shapes, and the difference between them is smaller than the names suggest.</p>
+
+  <h2>Two names for one very similar pipeline</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    <strong>Continuous Delivery (CD)</strong> means every change that passes CI is automatically packaged into a release that's <em>ready</em> to deploy at any time — but an actual human still decides when, usually clicking a button to trigger the release. <strong>Continuous Deployment</strong> removes that last manual step: every change that passes CI deploys straight to production automatically, with no human approval gate at all. The pipeline up through "ready to release" is identical either way — the only difference is whether a person or the pipeline itself pulls the final trigger.
+  </div>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    A <strong>release gate</strong> is the manual approval step that separates Continuous Delivery from Continuous Deployment. It can be as small as one click, but its presence is the whole distinction — remove it, and delivery becomes deployment without changing anything else about the pipeline.
+  </div>
+
+  <h2>Try it: ship five changes, with and without a gate</h2>
+  <p>Toggle the release gate, then ship a few changes and watch how many reach production automatically versus how many wait for a human.</p>
+
+  <div class="widget" id="cd-widget">
+    <p class="widget-label">Interactive: Continuous Delivery vs. Continuous Deployment</p>
+    <div class="fm-tabs" id="cd-tabs">
+      <button class="fm-tab is-active" type="button" data-cd-mode="delivery">Release gate ON (Delivery)</button>
+      <button class="fm-tab" type="button" data-cd-mode="deployment">Release gate OFF (Deployment)</button>
+    </div>
+    <p class="fm-row">
+      <button class="widget-btn" type="button" data-cd-ship>Merge a change that passes CI</button>
+      <button class="widget-btn" type="button" data-cd-approve>Approve pending release</button>
+      <button class="widget-btn" type="button" data-cd-reset>Reset</button>
+    </p>
+    <p class="verdict" data-cd-verdict>No changes shipped yet.</p>
+    <p class="plot-readout" data-cd-readout></p>
+    <p class="plot-hint">In Delivery mode, "Approve pending release" is the only way changes reach production. In Deployment mode, it does nothing — merges go straight through.</p>
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why teams keep a release gate at all, if the pipeline can already be trusted</span>
+    Continuous Deployment isn't strictly "more advanced" than Continuous Delivery — it's a trust decision. A team ships Continuous Deployment when its test suite (Unit 2) and deployment strategy (Lesson 8) are trustworthy enough that a human approval step adds delay without adding real safety. A team with regulatory requirements, a less mature test suite, or changes that need business timing (a coordinated marketing launch, say) keeps the gate on purpose — not because their pipeline is worse, but because a human decision genuinely belongs in that spot for reasons the pipeline itself can't evaluate.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What is the core difference between Continuous Delivery and Continuous Deployment?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Delivery keeps a manual approval step before release; Deployment removes it, releasing automatically.</button>
+      <button class="quiz-choice" data-correct="false">Delivery never runs any automated tests at all.</button>
+      <button class="quiz-choice" data-correct="false">Deployment only applies to mobile applications.</button>
+      <button class="quiz-choice" data-correct="false">There is no real difference — the two terms describe identical pipelines.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The presence or absence of a manual release gate is the entire distinction.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. In Continuous Delivery, what does "ready to deploy at any time" actually mean?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Every change that passes CI is automatically packaged as a release a human could trigger immediately, whenever they choose to.</button>
+      <button class="quiz-choice" data-correct="false">The application deploys itself automatically with no human involved.</button>
+      <button class="quiz-choice" data-correct="false">Changes are packaged only once a year, on a fixed schedule.</button>
+      <button class="quiz-choice" data-correct="false">Nothing is ever actually deployable until a full rewrite.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Delivery guarantees a release is always ready — it just waits for a human to pull the trigger.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why might a team deliberately keep a release gate instead of moving to full Continuous Deployment?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">A regulatory requirement or business timing need means a human decision genuinely belongs in that spot, regardless of pipeline trustworthiness.</button>
+      <button class="quiz-choice" data-correct="false">Continuous Deployment is technically impossible for any team to implement.</button>
+      <button class="quiz-choice" data-correct="false">Release gates make the underlying code run faster.</button>
+      <button class="quiz-choice" data-correct="false">Keeping a gate always means the team's test suite is broken.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Keeping the gate is a deliberate trust and timing decision, not a sign of a worse pipeline.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="continuous deployment">
+    <p class="quiz-prompt">4. Fill in the blank: the practice where every change that passes CI deploys straight to production automatically, with no manual approval step, is called ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Continuous Deployment removes the human approval step that Continuous Delivery keeps.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="release gate|gate">
+    <p class="quiz-prompt">5. Fill in the blank: the manual approval step that separates Continuous Delivery from Continuous Deployment is called a ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Removing the release gate is literally the only thing that turns Delivery into Deployment.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: Martin Fowler's <a href="https://martinfowler.com/bliki/ContinuousDelivery.html">"Continuous Delivery"</a> article draws this exact distinction from the practitioner who helped popularize both terms.</p>
+
+  <p class="ask-teacher">Curious how a team decides it's finally ready to remove the release gate? Ask your teacher — that's what I'm here for. Next up: once a release is triggered, how it actually reaches users matters just as much as whether it was approved — starting with two deliberate strategies for making that switch safely.</p>
+
+  <footer class="lesson-footer">STEM+ · Cloud Computing B / DevOps · Lesson 7 of the course sequence</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var mode = 'delivery';
+  var state = {
+    delivery: { shipped: 0, pending: 0, inProd: 0 },
+    deployment: { shipped: 0, pending: 0, inProd: 0 }
+  };
+
+  var tabs = document.querySelectorAll('#cd-tabs [data-cd-mode]');
+  var verdict = document.querySelector('[data-cd-verdict]');
+  var readout = document.querySelector('[data-cd-readout]');
+  var shipBtn = document.querySelector('[data-cd-ship]');
+  var approveBtn = document.querySelector('[data-cd-approve]');
+  var resetBtn = document.querySelector('[data-cd-reset]');
+
+  function render() {
+    var s = state[mode];
+    var modeLabel = mode === 'delivery' ? 'Continuous Delivery (gate ON)' : 'Continuous Deployment (gate OFF)';
+    verdict.textContent = modeLabel + ': ' + s.shipped + ' change(s) merged, ' + s.inProd + ' actually in production, ' + s.pending + ' waiting for approval.';
+    readout.textContent = mode === 'delivery'
+      ? 'Every merge builds a ready release, but it sits waiting until "Approve pending release" is clicked.'
+      : 'Every merge goes straight to production the moment it passes CI — there is no waiting release to approve.';
+  }
+
+  tabs.forEach(function (tab) {
+    tab.addEventListener('click', function () {
+      tabs.forEach(function (t) { t.classList.remove('is-active'); });
+      tab.classList.add('is-active');
+      mode = tab.getAttribute('data-cd-mode');
+      render();
+    });
+  });
+
+  shipBtn.addEventListener('click', function () {
+    var s = state[mode];
+    s.shipped++;
+    if (mode === 'delivery') s.pending++;
+    else s.inProd++;
+    render();
+  });
+
+  approveBtn.addEventListener('click', function () {
+    var s = state[mode];
+    if (mode === 'delivery' && s.pending > 0) {
+      s.pending--;
+      s.inProd++;
+    }
+    render();
+  });
+
+  resetBtn.addEventListener('click', function () {
+    state.delivery = { shipped: 0, pending: 0, inProd: 0 };
+    state.deployment = { shipped: 0, pending: 0, inProd: 0 };
+    render();
+  });
+
+  render();
+});
+</script>

@@ -1,0 +1,196 @@
+<meta charset="UTF-8">
+<title>Lesson 8: Deployment Strategies: Blue-Green and Canary Releases — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · Cloud Computing B / DevOps · Unit 3 · Lesson 8</span>
+  <h1>Deployment Strategies: Blue-Green and Canary Releases</h1>
+  <p class="subtitle">Lesson 7's release gate decides when a change ships. This lesson is about how it actually reaches users — because "deploy the new version" can mean flipping a switch for everyone at once, or something far more careful.</p>
+  <p class="nav-links"><a href="0007-continuous-delivery-vs-continuous-deployment.html" class="nav-prev">← Lesson 7</a> <a href="0009-rollbacks-planning-for-the-deploy-that-goes-wrong.html" class="nav-next">Lesson 9 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>The simplest possible deployment stops the old version and starts the new one in its place. It's also the riskiest: every user hits the new code at the same instant, and if something's wrong, everyone finds out at once. Both strategies below exist to avoid exactly that all-or-nothing moment, using Cloud Computing A's load balancer to control who sees what.</p>
+
+  <h2>Blue-green: two full environments, one switch</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    A <strong>blue-green deployment</strong> runs two identical, complete production environments — "blue" (the current live version) and "green" (the new version) — side by side. The new version is deployed and fully tested on green while blue keeps serving all real traffic. Once green checks out, the load balancer's routing is switched to send all traffic to green instantly. If something's wrong, switching back to blue is just as instant, since it never stopped running.
+  </div>
+
+  <h2>Canary: a small slice of real traffic first</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    A <strong>canary release</strong> sends only a small percentage of real traffic to the new version first — say 5% — while the rest keeps hitting the proven old version, monitoring the canary slice closely for errors. If it looks healthy, the percentage gradually increases (<strong>traffic shifting</strong>) until the new version serves everyone; if it doesn't, traffic shifts back with only a small fraction of users ever having been affected.
+  </div>
+
+  <h2>Try it: run both strategies</h2>
+  <p>Pick a strategy, then advance it forward and watch how many real users are exposed to the new version at each step — and how a bad version gets caught.</p>
+
+  <div class="widget" id="deploy-strategy-widget">
+    <p class="widget-label">Interactive: blue-green vs. canary rollout</p>
+    <div class="fm-tabs" id="strategy-tabs">
+      <button class="fm-tab is-active" type="button" data-strategy="bluegreen">Blue-Green</button>
+      <button class="fm-tab" type="button" data-strategy="canary">Canary</button>
+    </div>
+    <p class="fm-row">
+      <button class="widget-btn" type="button" data-strategy-bad>Toggle: new version has a bug</button>
+      <button class="widget-btn" type="button" data-strategy-advance>Advance rollout</button>
+      <button class="widget-btn" type="button" data-strategy-reset>Reset</button>
+    </p>
+    <p class="verdict" data-strategy-verdict>0% of traffic on the new version.</p>
+    <p class="plot-readout" data-strategy-readout></p>
+    <p class="plot-hint">With the bug toggled on, watch how many real users each strategy exposes before the problem is caught.</p>
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Worked example: the same bug, two different blast radii</span>
+    A new version has a bug that only appears under real production load. Deployed blue-green, 100% of users hit it the instant the switch flips — the bug is caught only after it's already affected everyone, even though rolling back is fast once it's noticed. Deployed as a canary starting at 5%, the same bug only affects the 5% of users in the canary slice; monitoring catches the elevated error rate before traffic ever shifts further, and the other 95% of users never see the bug at all.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why canary costs more effort than blue-green, and isn't always worth it</span>
+    Canary releases need real, per-slice monitoring — the ability to compare the canary's error rate against the stable version's, in real time, at each traffic percentage (Unit 6 covers exactly this). Blue-green just needs a second full environment and a way to flip routing instantly. A team without mature monitoring often reaches for blue-green first, since "the bug either exists or it doesn't" is much simpler to detect than "the bug appears in one thin slice of the traffic and needs to be measured." Neither strategy is strictly better — canary limits blast radius at the cost of needing better monitoring to actually use that advantage.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. In a blue-green deployment, what makes rolling back so fast if the new version has a problem?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">The old environment (blue) never stopped running, so switching traffic back to it is just as instant as the original switch.</button>
+      <button class="quiz-choice" data-correct="false">The new version automatically fixes its own bugs within seconds.</button>
+      <button class="quiz-choice" data-correct="false">Blue-green deployments never actually route real traffic to the new version.</button>
+      <button class="quiz-choice" data-correct="false">Rolling back requires rebuilding the old environment from scratch.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Keeping the old environment alive is exactly what makes an instant switch back possible.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. How does a canary release limit the impact of a bad deployment, compared to switching all traffic at once?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Only a small percentage of real traffic hits the new version first, so a bug affects far fewer users before it's caught.</button>
+      <button class="quiz-choice" data-correct="false">It prevents bugs from ever being deployed in the first place.</button>
+      <button class="quiz-choice" data-correct="false">It sends 100% of traffic to the new version immediately, same as any other strategy.</button>
+      <button class="quiz-choice" data-correct="false">It has no effect on how many users are exposed to a bug.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Limiting exposure to a small traffic slice is exactly what bounds a canary's blast radius.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why might a team choose blue-green over canary, even though canary limits blast radius more effectively?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Canary requires mature, per-slice monitoring to detect a problem in a thin traffic percentage, which blue-green doesn't need.</button>
+      <button class="quiz-choice" data-correct="false">Blue-green deployments are technically incapable of ever being rolled back.</button>
+      <button class="quiz-choice" data-correct="false">Canary releases always cost nothing to implement.</button>
+      <button class="quiz-choice" data-correct="false">Blue-green is illegal in production environments.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Canary's advantage depends on monitoring good enough to actually detect a problem in a small slice of traffic.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="blue-green|blue-green deployment">
+    <p class="quiz-prompt">4. Fill in the blank: running two identical, complete environments and switching all traffic between them instantly is called a ___ deployment.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Blue-green keeps the old environment ready as an instant fallback.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="canary release|canary">
+    <p class="quiz-prompt">5. Fill in the blank: gradually sending an increasing percentage of real traffic to a new version, starting small, is called a ___ release.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A canary release exposes only a slice of users first, expanding only once that slice looks healthy.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: Martin Fowler's <a href="https://martinfowler.com/bliki/BlueGreenDeployment.html">"BlueGreenDeployment"</a> article covers this exact pattern, including how it interacts with database changes.</p>
+
+  <p class="ask-teacher">Curious what happens when the new version's bug involves a database change that can't simply be switched back? Ask your teacher — that's what I'm here for. Next up: even the most careful rollout strategy sometimes still needs to be undone — planning for that ahead of time, instead of improvising it at 3 a.m.</p>
+
+  <footer class="lesson-footer">STEM+ · Cloud Computing B / DevOps · Lesson 8 of the course sequence</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var strategy = 'bluegreen';
+  var bad = false;
+  var state = {
+    bluegreen: { pct: 0, caught: false },
+    canary: { pct: 0, caught: false }
+  };
+  var canarySteps = [0, 5, 25, 50, 100];
+
+  var tabs = document.querySelectorAll('#strategy-tabs [data-strategy]');
+  var verdict = document.querySelector('[data-strategy-verdict]');
+  var readout = document.querySelector('[data-strategy-readout]');
+  var badBtn = document.querySelector('[data-strategy-bad]');
+  var advanceBtn = document.querySelector('[data-strategy-advance]');
+  var resetBtn = document.querySelector('[data-strategy-reset]');
+
+  function render() {
+    var s = state[strategy];
+    verdict.classList.remove('is-pass', 'is-fail');
+    verdict.textContent = s.pct + '% of traffic on the new version.';
+
+    if (bad && s.pct > 0 && !s.caught) {
+      s.caught = true;
+    }
+
+    if (bad && s.caught) {
+      verdict.classList.add('is-fail');
+      readout.textContent = strategy === 'bluegreen'
+        ? 'Bug caught after 100% of users were already exposed — the switch was all-or-nothing.'
+        : 'Bug caught with only ' + s.pct + '% of users ever exposed — monitoring flagged the canary slice before it grew further.';
+    } else if (!bad && s.pct === 100) {
+      verdict.classList.add('is-pass');
+      readout.textContent = 'Fully rolled out with no issues detected.';
+    } else {
+      readout.textContent = strategy === 'bluegreen'
+        ? 'Blue-green has only two states: 0% (all on blue) or 100% (all on green) — there is no partial exposure.'
+        : 'Canary increases gradually: ' + canarySteps.join('% → ') + '%.';
+    }
+  }
+
+  tabs.forEach(function (tab) {
+    tab.addEventListener('click', function () {
+      tabs.forEach(function (t) { t.classList.remove('is-active'); });
+      tab.classList.add('is-active');
+      strategy = tab.getAttribute('data-strategy');
+      render();
+    });
+  });
+
+  advanceBtn.addEventListener('click', function () {
+    var s = state[strategy];
+    if (strategy === 'bluegreen') {
+      s.pct = s.pct === 0 ? 100 : s.pct;
+    } else {
+      var idx = canarySteps.indexOf(s.pct);
+      if (idx < canarySteps.length - 1) s.pct = canarySteps[idx + 1];
+    }
+    render();
+  });
+
+  badBtn.addEventListener('click', function () {
+    bad = !bad;
+    badBtn.textContent = bad ? 'Toggle: new version has a bug (ON)' : 'Toggle: new version has a bug';
+    render();
+  });
+
+  resetBtn.addEventListener('click', function () {
+    state.bluegreen = { pct: 0, caught: false };
+    state.canary = { pct: 0, caught: false };
+    render();
+  });
+
+  render();
+});
+</script>

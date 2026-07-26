@@ -1,0 +1,170 @@
+<meta charset="UTF-8">
+<title>Lesson 11: Declarative vs. Imperative Infrastructure — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · Cloud Computing B / DevOps · Unit 4 · Lesson 11</span>
+  <h1>Declarative vs. Imperative Infrastructure</h1>
+  <p class="subtitle">Lesson 10 established that infrastructure should live in a file. It didn't say what that file actually contains — and the two possible answers behave very differently the second time you run them.</p>
+  <p class="nav-links"><a href="0010-infrastructure-as-code-treating-servers-like-source-code.html" class="nav-prev">← Lesson 10</a> <a href="0012-config-drift-and-why-iac-prevents-it.html" class="nav-next">Lesson 12 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Two IaC files can both provision three servers, and behave completely differently if run twice. The difference isn't the tool — it's whether the file describes a sequence of steps to take, or a final state to reach.</p>
+
+  <h2>Two ways to write the same instruction</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    An <strong>imperative</strong> approach lists the exact steps to take, in order: "create a server, then create another server, then create a third." Running that script twice creates six servers, not three — the script has no idea three already exist, it just executes its steps again. A <strong>declarative</strong> approach instead states the desired end state: "there should be three servers." A declarative tool compares that desired state against what currently exists and only makes the changes needed to close the gap — running it against three already-existing servers does nothing at all, because nothing needs to change.
+  </div>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    An operation is <strong>idempotent</strong> if running it once has the same effect as running it many times. Declarative infrastructure tools are built to be idempotent by design — reapplying the same configuration file is always safe, because the tool only ever acts on the difference between desired and actual state. Most modern IaC tools default to declarative for exactly this reason.
+  </div>
+
+  <h2>Try it: apply the same script twice</h2>
+  <p>Pick a style, then apply its script a few times and watch what the server count actually does.</p>
+
+  <div class="widget" id="declarative-widget">
+    <p class="widget-label">Interactive: imperative vs. declarative, applied repeatedly</p>
+    <div class="fm-tabs" id="declarative-tabs">
+      <button class="fm-tab is-active" type="button" data-decl-mode="imperative">Imperative: "create 3 servers"</button>
+      <button class="fm-tab" type="button" data-decl-mode="declarative">Declarative: "desired count = 3"</button>
+    </div>
+    <p class="fm-row">
+      <button class="widget-btn" type="button" data-decl-apply>Apply script</button>
+      <button class="widget-btn" type="button" data-decl-reset>Reset</button>
+    </p>
+    <p class="verdict" data-decl-verdict>Servers running: 0.</p>
+    <p class="plot-readout" data-decl-readout></p>
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Worked example</span>
+    An engineer accidentally runs the same apply command twice — a genuinely common mistake, especially in an automated pipeline that retries on a network blip. With an imperative "create 3 servers" script, that mistake now means 6 servers are running, quietly doubling the bill until someone notices. With a declarative "desired count: 3" configuration, the second run compares against the 3 servers that already exist, sees no gap, and changes nothing — the exact same mistake has zero effect.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why declarative became the industry default for IaC specifically</span>
+    Imperative scripts aren't wrong — they're just harder to reason about at scale, because understanding the current state means mentally replaying every script ever run against it, in order. Declarative configuration collapses that history into one readable file: the current desired state, in full, independent of how many times it's been applied or in what order. That property — safety under repetition, and a single source of truth for "what should exist" — is also exactly what Lesson 12's config drift problem needs, which is why almost every major IaC tool is declarative first.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What is the key difference between an imperative and a declarative approach to infrastructure?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Imperative lists exact steps to execute; declarative states a desired end state and lets the tool figure out what changes are needed.</button>
+      <button class="quiz-choice" data-correct="false">Imperative and declarative are two names for exactly the same approach.</button>
+      <button class="quiz-choice" data-correct="false">Declarative infrastructure cannot be version-controlled.</button>
+      <button class="quiz-choice" data-correct="false">Imperative approaches never involve writing any code at all.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Steps-to-execute vs. desired-state-to-reach is the defining difference.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why does running an imperative "create 3 servers" script twice typically create 6 servers instead of 3?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">The script just re-executes its listed steps with no awareness that 3 servers already exist.</button>
+      <button class="quiz-choice" data-correct="false">Imperative scripts are technically incapable of running more than once.</button>
+      <button class="quiz-choice" data-correct="false">Cloud providers automatically prevent duplicate servers regardless of script type.</button>
+      <button class="quiz-choice" data-correct="false">6 servers is always the intended, correct result.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Imperative scripts have no concept of current state — they just execute steps.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why do most modern IaC tools default to declarative configuration?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">It's idempotent by design — reapplying the same file is always safe, since the tool only acts on the gap between desired and actual state.</button>
+      <button class="quiz-choice" data-correct="false">Declarative tools are incapable of provisioning more than one server.</button>
+      <button class="quiz-choice" data-correct="false">Declarative configuration cannot be reviewed or version-controlled.</button>
+      <button class="quiz-choice" data-correct="false">Imperative scripts are always faster to write and run.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Safety under repeated application is exactly the property declarative tools are built around.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="idempotent|idempotency">
+    <p class="quiz-prompt">4. Fill in the blank: an operation where running it once has the same effect as running it many times is called ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Idempotency is what makes reapplying a declarative configuration file always safe.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="declarative">
+    <p class="quiz-prompt">5. Fill in the blank: an infrastructure approach that states the desired end state, and lets a tool determine what changes are needed to reach it, is called ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Declarative configuration describes "what should exist," not the sequence of steps to get there.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: Terraform's <a href="https://developer.hashicorp.com/terraform/intro">"What is Terraform?"</a> introduction covers a widely-used declarative IaC tool built entirely around this desired-state model.</p>
+
+  <p class="ask-teacher">Curious whether a declarative tool is ever the wrong choice? Ask your teacher — that's what I'm here for. Next up: what actually happens to a declarative configuration's guarantee once someone makes a manual change outside of it.</p>
+
+  <footer class="lesson-footer">STEM+ · Cloud Computing B / DevOps · Lesson 11 of the course sequence</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var mode = 'imperative';
+  var counts = { imperative: 0, declarative: 0 };
+  var applies = { imperative: 0, declarative: 0 };
+
+  var tabs = document.querySelectorAll('#declarative-tabs [data-decl-mode]');
+  var verdict = document.querySelector('[data-decl-verdict]');
+  var readout = document.querySelector('[data-decl-readout]');
+  var applyBtn = document.querySelector('[data-decl-apply]');
+  var resetBtn = document.querySelector('[data-decl-reset]');
+
+  function render() {
+    verdict.textContent = 'Servers running: ' + counts[mode] + ' (applied ' + applies[mode] + ' time' + (applies[mode] === 1 ? '' : 's') + ').';
+    if (applies[mode] === 0) {
+      readout.textContent = '';
+    } else if (mode === 'imperative') {
+      readout.textContent = counts[mode] > 3
+        ? 'Each apply added 3 more servers — the script has no idea servers already exist.'
+        : 'First apply: 3 servers created as instructed.';
+    } else {
+      readout.textContent = 'Desired state is 3. The tool compares against what already exists and changes nothing once it matches — safe no matter how many times you apply it.';
+    }
+  }
+
+  tabs.forEach(function (tab) {
+    tab.addEventListener('click', function () {
+      tabs.forEach(function (t) { t.classList.remove('is-active'); });
+      tab.classList.add('is-active');
+      mode = tab.getAttribute('data-decl-mode');
+      render();
+    });
+  });
+
+  applyBtn.addEventListener('click', function () {
+    applies[mode]++;
+    if (mode === 'imperative') {
+      counts.imperative += 3;
+    } else {
+      counts.declarative = 3;
+    }
+    render();
+  });
+
+  resetBtn.addEventListener('click', function () {
+    counts.imperative = 0; counts.declarative = 0;
+    applies.imperative = 0; applies.declarative = 0;
+    render();
+  });
+
+  render();
+});
+</script>

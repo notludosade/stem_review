@@ -1,0 +1,161 @@
+<meta charset="UTF-8">
+<title>Lesson 9: Dangling Pointers, Memory Leaks, and Use-After-Free — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="advanced">
+  <span class="kicker">STEM+ · Systems Programming &amp; Architecture: CS · Unit 3 · Lesson 9</span>
+  <h1>Dangling Pointers, Memory Leaks, and Use-After-Free</h1>
+  <p class="subtitle">This unit ends by naming precisely the family of bugs that pointers make possible — the ones garbage-collected languages simply cannot produce, and that a segfault (Unit 8) is often the visible symptom of.</p>
+  <p class="nav-links"><a href="0008-pointer-arithmetic-and-arrays.html" class="nav-prev">← Lesson 8</a> <a href="../Unit%204/0010-how-integers-are-actually-stored.html" class="nav-next">Unit 4, Lesson 10 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Lesson 5 introduced returning a stack address as a mistake. Lesson 6 introduced memory leaks. Both are specific cases of a more general problem: a pointer's value is just an address, and C has no built-in way to know whether the memory at that address is still valid. This lesson names the full family and ties it together.</p>
+
+  <h2>A dangling pointer: an address that's no longer good</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    A <strong>dangling pointer</strong> is a pointer that still holds an address, but the memory at that address is no longer valid to use — either because it belonged to a stack frame that has since been popped (Lesson 5), or because it was heap memory that has already been <code class="inline-code">free</code>d. Critically, C does not clear a pointer's value when the memory it points to becomes invalid — the pointer still looks exactly like a normal, valid pointer, holding the exact same address it always held.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Worked example: use-after-free</span>
+    <code class="inline-code">int *p = malloc(sizeof(int)); *p = 42; free(p);</code> — at this point, <code class="inline-code">p</code> is now a dangling pointer: it still holds the same address, but that memory has been returned to the allocator and may already be handed out again to the next <code class="inline-code">malloc</code> call anywhere else in the program. <code class="inline-code">printf("%d", *p);</code> written right after is a <strong>use-after-free</strong> — dereferencing a dangling pointer. It might print <code class="inline-code">42</code> if nothing has reused that memory yet, print something completely different if something has, or crash — and which of those happens can change from run to run.
+  </div>
+
+  <h2>Try it: diagnose the bug</h2>
+  <p>Each scenario below is a real category of pointer bug this unit has covered. Pick which one it is.</p>
+
+  <div class="widget" id="dangling-diagnosis-widget">
+    <p class="widget-label">Interactive: name the bug</p>
+    <p class="quiz-prompt" data-dangling-prompt></p>
+    <div class="fm-row" style="flex-wrap:wrap; gap:0.6rem;">
+      <button class="widget-btn" type="button" data-dangling-guess="dangling">Dangling pointer / use-after-free</button>
+      <button class="widget-btn" type="button" data-dangling-guess="leak">Memory leak</button>
+      <button class="widget-btn" type="button" data-dangling-guess="double-free">Double free</button>
+      <button class="widget-btn" type="button" data-dangling-guess="ok">Not actually a bug</button>
+    </div>
+    <p class="verdict" data-dangling-verdict></p>
+    <div class="fm-row">
+      <button class="widget-btn" type="button" data-dangling-next>Next scenario →</button>
+    </div>
+  </div>
+
+  <h2>Double free: freeing the same block twice</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    A <strong>double free</strong> happens when <code class="inline-code">free</code> is called twice on the same pointer. The allocator's internal bookkeeping generally isn't designed to be told "this block is free" a second time, and the result is corrupted allocator state — which can crash immediately, or silently corrupt an unrelated future allocation, depending on the allocator and the moment it happens.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why "set it to NULL after freeing" is the standard defense, not a full fix</span>
+    A common, genuinely useful habit is <code class="inline-code">free(p); p = NULL;</code> — dereferencing a null pointer crashes immediately and obviously (a segfault, Unit 8), instead of silently reading or corrupting reused memory. That turns an unpredictable, hard-to-reproduce bug into a loud, easy-to-find one, which is a real improvement. But it only protects the one variable that got set to NULL — if a second pointer variable also held that same address, and nobody set <em>that</em> one to NULL too, it's still a fully live dangling pointer. There is no feature of C that automatically tracks every pointer that happens to hold a given address; that discipline is entirely on the programmer, every single time.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What is a dangling pointer?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">A pointer that still holds an address, but the memory at that address is no longer valid to use.</button>
+      <button class="quiz-choice" data-correct="false">A pointer variable that was never given an initial value.</button>
+      <button class="quiz-choice" data-correct="false">Any pointer that points to the heap instead of the stack.</button>
+      <button class="quiz-choice" data-correct="false">A pointer whose value is automatically set to zero by the compiler.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The defining trait is holding a now-invalid address, indistinguishable in appearance from a valid pointer.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why is a use-after-free bug's behavior unpredictable from run to run?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Whether the freed memory has already been reused by another allocation varies, so the same buggy line can read old data, new data, or crash.</button>
+      <button class="quiz-choice" data-correct="false">C intentionally randomizes the result of every dereference.</button>
+      <button class="quiz-choice" data-correct="false">It is actually perfectly predictable and always produces the exact same result.</button>
+      <button class="quiz-choice" data-correct="false">Use-after-free bugs are only possible in multi-threaded programs.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Whatever else has claimed that freed memory in the meantime determines the outcome, and that's not guaranteed to be consistent.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why does setting a pointer to NULL right after freeing it only partially protect against use-after-free?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">It only updates that one variable — any other pointer variable holding the same now-freed address is still a live dangling pointer.</button>
+      <button class="quiz-choice" data-correct="false">Setting a pointer to NULL has no effect on program behavior whatsoever.</button>
+      <button class="quiz-choice" data-correct="false">It automatically finds and nulls every other pointer to that address too.</button>
+      <button class="quiz-choice" data-correct="false">It prevents the memory from ever being reused by future allocations.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>NULL-after-free is a real, useful habit, but it's per-variable, not a program-wide guarantee.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="use-after-free|use after free">
+    <p class="quiz-prompt">4. Fill in the blank: dereferencing a dangling pointer — one that points to memory already freed — is called a ___ bug.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Use-after-free names the exact act of dereferencing memory after it has already been freed.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="double free|double-free">
+    <p class="quiz-prompt">5. Fill in the blank: calling free() twice on the exact same pointer, corrupting the allocator's internal bookkeeping, is called a ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A double free confuses the allocator about which blocks are actually free, with unpredictable results.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: OWASP's <a href="https://owasp.org/www-community/vulnerabilities/Using_freed_memory">"Using freed memory"</a> reference explains why use-after-free bugs are not just a correctness problem, but a real, exploitable security vulnerability class in deployed software.</p>
+
+  <p class="ask-teacher">Curious how a tool like AddressSanitizer catches these bugs automatically during testing? Ask your teacher — that's what I'm here for. Next up: Unit 4 leaves pointers behind for a while and asks a more basic question — what does a number even look like, in memory, underneath everything this unit has covered?</p>
+
+  <footer class="lesson-footer">STEM+ · Systems Programming &amp; Architecture: CS · Lesson 9 of the course sequence</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var scenarios = [
+    { text: 'int *p = malloc(4); free(p); free(p);', answer: 'double-free', why: 'free() is called twice on the same pointer, corrupting the allocator\'s bookkeeping.' },
+    { text: 'int *p = malloc(4); *p = 7; printf("%d", *p); free(p);', answer: 'ok', why: 'The block is used while still valid, and freed exactly once, afterward. No bug here.' },
+    { text: 'int *p = malloc(4); free(p); printf("%d", *p);', answer: 'dangling', why: 'p is dereferenced after being freed — a classic use-after-free.' },
+    { text: 'A function returns a pointer to one of its own local (stack) variables, and the caller dereferences it.', answer: 'dangling', why: 'The variable\'s frame was popped on return, making the returned address dangling.' },
+    { text: 'A function calls malloc() in a loop, storing each result only in a local variable that gets overwritten on the next iteration, and never calls free().', answer: 'leak', why: 'Every previous block becomes unreachable the moment the loop overwrites the only pointer to it — reserved forever, reachable by nothing.' }
+  ];
+  var idx = 0;
+  var answered = false;
+  var prompt = document.querySelector('[data-dangling-prompt]');
+  var verdict = document.querySelector('[data-dangling-verdict]');
+  var buttons = document.querySelectorAll('[data-dangling-guess]');
+
+  function render() {
+    answered = false;
+    verdict.textContent = '';
+    verdict.classList.remove('is-pass', 'is-fail');
+    prompt.textContent = (idx + 1) + '. ' + scenarios[idx].text;
+  }
+
+  buttons.forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      if (answered) return;
+      answered = true;
+      var guess = btn.getAttribute('data-dangling-guess');
+      var correct = guess === scenarios[idx].answer;
+      verdict.classList.remove('is-pass', 'is-fail');
+      verdict.classList.add(correct ? 'is-pass' : 'is-fail');
+      verdict.textContent = (correct ? 'Correct — ' : 'Not quite. ') + scenarios[idx].why;
+    });
+  });
+
+  document.querySelector('[data-dangling-next]').addEventListener('click', function () {
+    idx = (idx + 1) % scenarios.length;
+    render();
+  });
+
+  render();
+});
+</script>

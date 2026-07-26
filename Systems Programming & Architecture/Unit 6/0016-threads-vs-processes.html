@@ -1,0 +1,151 @@
+<meta charset="UTF-8">
+<title>Lesson 16: Threads vs. Processes — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="advanced">
+  <span class="kicker">STEM+ · Systems Programming &amp; Architecture: CS · Unit 6 · Lesson 16</span>
+  <h1>Threads vs. Processes</h1>
+  <p class="subtitle">Unit 5 covered many processes sharing one machine, fully isolated from each other. This unit is about a different kind of "many things at once" — many threads sharing one process's own memory, on purpose, and everything that makes possible and dangerous.</p>
+  <p class="nav-links"><a href="../Unit%205/0015-system-calls-asking-the-kernel-for-help.html" class="nav-prev">← Unit 5, Lesson 15</a> <a href="0017-race-conditions-and-why-shared-state-is-dangerous.html" class="nav-next">Lesson 17 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>A process's isolation, from Unit 5, is a feature when you want two unrelated programs to never interfere with each other. But it's a real cost when a single program wants to do several things at once and needs them to cooperate closely — say, a web browser rendering a page while still responding to clicks. Threads are the answer.</p>
+
+  <h2>A thread: an independent path of execution inside one process</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    A <strong>thread</strong> is an independent sequence of instructions the CPU can schedule and run, existing inside a process. Every process has at least one thread (the "main" thread); a <strong>multithreaded</strong> process has several, each with its own stack (Lesson 5) and its own set of CPU register values, but — critically — all threads within the same process share that process's heap, its global/data segment, and its open files. Two threads in the same process can both read and write the exact same heap-allocated variable directly, with no special mechanism required to do so — unlike two separate processes, which cannot see each other's memory at all.
+  </div>
+
+  <h2>Try it: what's shared, what's private</h2>
+  <p>Compare what two threads in one process share against what two separate processes share.</p>
+
+  <div class="widget" id="thread-widget">
+    <p class="widget-label">Interactive: threads vs. processes — what's shared?</p>
+    <div class="fm-tabs" id="thread-tabs">
+      <button class="fm-tab is-active" type="button" data-thread-mode="threads">Two Threads, Same Process</button>
+      <button class="fm-tab" type="button" data-thread-mode="processes">Two Separate Processes</button>
+    </div>
+    <div id="thread-display" style="margin-top:0.8rem;"></div>
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Worked example</span>
+    A video game runs rendering on one thread and physics calculations on another, both threads within the same process. They share the same heap-allocated game-world data directly — the physics thread updates a character's position, and the rendering thread reads that exact same memory to draw it, with no copying or message-passing needed. Compare that to running rendering and physics as two separate <em>processes</em>: they'd need some explicit inter-process communication mechanism just to share a single position value, since separate processes cannot see each other's memory at all.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why threads are lighter weight than processes, and why that's also the danger</span>
+    Creating a new thread is cheaper than creating a new process — no new address space to set up, no memory isolation to establish, just a new stack and a new path of execution inside memory that already exists. That's exactly why threads are the standard tool for a program that wants to do several things concurrently without the overhead of full process isolation. But sharing memory directly cuts both ways: nothing stops two threads from reading and writing the exact same variable at the exact same moment, with no coordination at all — and unlike a normal single-threaded bug, the result depends on split-second timing that can differ from run to run. That's the entire subject of the next lesson.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What do multiple threads within the same process share, that separate processes do not?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">The process's heap, global/data segment, and open files.</button>
+      <button class="quiz-choice" data-correct="false">Nothing at all — threads are fully isolated, just like separate processes.</button>
+      <button class="quiz-choice" data-correct="false">Only their own individual stacks, and nothing else.</button>
+      <button class="quiz-choice" data-correct="false">Only the CPU's register values, but no memory of any kind.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Shared heap and data-segment access is exactly what distinguishes threads from separate, isolated processes.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. What does each individual thread still keep private to itself?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Its own stack and its own set of CPU register values.</button>
+      <button class="quiz-choice" data-correct="false">The entire process's heap.</button>
+      <button class="quiz-choice" data-correct="false">Every file the process has open.</button>
+      <button class="quiz-choice" data-correct="false">Nothing — threads share every piece of memory unconditionally.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Each thread still needs its own stack to track its own local variables and call history independently.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why is creating a new thread generally cheaper than creating a new process?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">A thread reuses the existing process's address space, needing only a new stack, instead of setting up an entirely new isolated address space.</button>
+      <button class="quiz-choice" data-correct="false">Threads do not require any CPU scheduling at all.</button>
+      <button class="quiz-choice" data-correct="false">Creating a thread never requires any interaction with the kernel.</button>
+      <button class="quiz-choice" data-correct="false">There is no real cost difference between the two.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Skipping full address-space isolation is exactly what makes thread creation lighter weight.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="thread">
+    <p class="quiz-prompt">4. Fill in the blank: an independent sequence of instructions the CPU can schedule, existing inside a process and sharing that process's heap with any other threads in it, is called a ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A thread is the unit of independent execution within a shared-memory process.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="multithreaded">
+    <p class="quiz-prompt">5. Fill in the blank: a process with more than one thread running inside it is described as ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Every process starts with one main thread; a multithreaded process has added more.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: the POSIX Threads (pthreads) <a href="https://man7.org/linux/man-pages/man7/pthreads.7.html">overview manual page</a> documents the standard C threading API most Unix-like systems implement.</p>
+
+  <p class="ask-teacher">Curious how many threads a real application, like your web browser, is actually running right now? Ask your teacher — that's what I'm here for. Next up: what actually goes wrong when two threads touch the same shared data without coordinating.</p>
+
+  <footer class="lesson-footer">STEM+ · Systems Programming &amp; Architecture: CS · Lesson 16 of the course sequence</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var views = {
+    threads: [
+      { label: 'Heap memory', shared: true },
+      { label: 'Global / data segment', shared: true },
+      { label: 'Open files', shared: true },
+      { label: "Thread's own stack", shared: false },
+      { label: "Thread's own CPU registers", shared: false }
+    ],
+    processes: [
+      { label: 'Heap memory', shared: false },
+      { label: 'Global / data segment', shared: false },
+      { label: 'Open files', shared: false },
+      { label: "Process's own stack", shared: false },
+      { label: "Process's own CPU registers", shared: false }
+    ]
+  };
+  var display = document.getElementById('thread-display');
+  var tabs = document.querySelectorAll('#thread-tabs [data-thread-mode]');
+
+  function paint(mode) {
+    display.innerHTML = '';
+    views[mode].forEach(function (item) {
+      var row = document.createElement('div');
+      row.className = 'box' + (item.shared ? '' : ' why');
+      row.style.margin = '0.3rem 0';
+      row.style.padding = '0.5rem 0.8rem';
+      row.innerHTML = '<strong>' + item.label + '</strong> — ' + (item.shared ? 'shared between the two' : 'separate / private to each');
+      display.appendChild(row);
+    });
+  }
+
+  tabs.forEach(function (tab) {
+    tab.addEventListener('click', function () {
+      tabs.forEach(function (t) { t.classList.remove('is-active'); });
+      tab.classList.add('is-active');
+      paint(tab.getAttribute('data-thread-mode'));
+    });
+  });
+
+  paint('threads');
+});
+</script>

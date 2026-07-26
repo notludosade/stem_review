@@ -1,0 +1,134 @@
+<meta charset="UTF-8">
+<title>Unit 2 Test — Version B — Systems Programming &amp; Architecture: CS — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/tests.js" defer></script>
+<div class="page" data-tier="advanced">
+  <span class="kicker">STEM+ · Systems Programming &amp; Architecture: CS · Unit 2 · Unit Test</span>
+  <h1>Unit 2 Test — Version B</h1>
+  <p class="subtitle">Memory: Stack and Heap. 10 points covering every lesson in this unit. Score 90% or higher to clear this unit.</p>
+  <p class="nav-links"><a href="../index.html" class="nav-toc">← Course Contents</a> <a href="unit-test-a.html" class="nav-toc">← Version A</a></p>
+
+  <div data-test data-course="Systems Programming &amp; Architecture: CS" data-unit="Unit 2" data-kind="unit_test" data-version="B">
+
+    <div class="quiz" data-test-item data-topic="Process Address Space">
+      <p class="quiz-prompt">1. Two separate processes run the same executable at the same time. Why doesn't one process's memory interfere with the other's?</p>
+      <div class="quiz-choices">
+        <button class="quiz-choice" data-correct="true">Each process has its own private address space, isolated from every other process by the operating system.</button>
+        <button class="quiz-choice" data-correct="false">Only one process is ever permitted to run a given executable at once.</button>
+        <button class="quiz-choice" data-correct="false">Every process on a machine shares one single address space at all times.</button>
+        <button class="quiz-choice" data-correct="false">Executables are physically incapable of running more than once.</button>
+      </div>
+      <p class="quiz-feedback" hidden></p>
+      <p class="quiz-explain" hidden>Address space isolation is what makes two instances of the same program independent of each other.</p>
+    </div>
+
+    <div class="quiz" data-test-item data-test-fill data-topic="Data Segment" data-answers="data segment|data">
+      <p class="quiz-prompt">2. Fill in the blank: a global variable declared with an initial value outside of any function is stored in the ___ segment.</p>
+      <div class="quiz-fill-row">
+        <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      </div>
+      <p class="quiz-feedback" hidden></p>
+      <p class="quiz-explain" hidden>The data segment holds globals and statics with a baked-in initial value, for the whole program's lifetime.</p>
+    </div>
+
+    <div class="quiz" data-test-item data-topic="Stack Frames">
+      <p class="quiz-prompt">3. What happens to a function's stack frame the instant it returns?</p>
+      <div class="quiz-choices">
+        <button class="quiz-choice" data-correct="true">It's popped off the stack in one step; its memory is no longer reserved for anything.</button>
+        <button class="quiz-choice" data-correct="false">It moves permanently to the heap for later reuse.</button>
+        <button class="quiz-choice" data-correct="false">It stays on the stack forever, even after the function returns.</button>
+        <button class="quiz-choice" data-correct="false">It is copied into the text segment.</button>
+      </div>
+      <p class="quiz-feedback" hidden></p>
+      <p class="quiz-explain" hidden>Popping a frame is a single operation — its memory simply becomes available for the next call.</p>
+    </div>
+
+    <div class="quiz" data-test-item data-test-fill data-topic="Stack Order" data-answers="last-in-first-out|lifo">
+      <p class="quiz-prompt">4. Fill in the blank: three nested function calls are active at once; the innermost one returns first. This ordering is called ___.</p>
+      <div class="quiz-fill-row">
+        <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      </div>
+      <p class="quiz-feedback" hidden></p>
+      <p class="quiz-explain" hidden>Last-in-first-out describes exactly how nested calls unwind on the stack.</p>
+    </div>
+
+    <div class="quiz" data-test-item data-topic="Returning Stack Addresses">
+      <p class="quiz-prompt">5. A C function returns the address of a local array declared inside it. What is the resulting risk?</p>
+      <div class="quiz-choices">
+        <button class="quiz-choice" data-correct="true">That address may be overwritten by the next function call's frame, since the array's own frame was already popped.</button>
+        <button class="quiz-choice" data-correct="false">There is no risk at all — local arrays are automatically moved to the heap when returned.</button>
+        <button class="quiz-choice" data-correct="false">The array is automatically copied into the caller's own frame at compile time.</button>
+        <button class="quiz-choice" data-correct="false">The program will refuse to compile under any circumstances.</button>
+      </div>
+      <p class="quiz-feedback" hidden></p>
+      <p class="quiz-explain" hidden>The frame is gone once the function returns, so that memory is unsafe to keep using.</p>
+    </div>
+
+    <div class="quiz" data-test-item data-topic="Stack vs Heap Lifetime">
+      <p class="quiz-prompt">6. A function allocates <code class="inline-code">int *buf = malloc(40)</code> and also declares <code class="inline-code">int count = 0;</code>. Answer both parts:</p>
+      <div class="quiz-part" data-part>
+        <p class="quiz-part-label">(a) count's memory is reclaimed...</p>
+        <div class="quiz-choices">
+          <button class="quiz-choice" data-correct="true">Automatically, when the function returns</button>
+          <button class="quiz-choice" data-correct="false">Only if the program calls free(&count)</button>
+        </div>
+      </div>
+      <div class="quiz-part" data-part>
+        <p class="quiz-part-label">(b) The block buf points to is reclaimed...</p>
+        <div class="quiz-choices">
+          <button class="quiz-choice" data-correct="false">Automatically, when the function returns</button>
+          <button class="quiz-choice" data-correct="true">Only if the program explicitly calls free(buf)</button>
+        </div>
+      </div>
+      <p class="quiz-explain" hidden>Stack locals are automatic; heap blocks require an explicit free call.</p>
+    </div>
+
+    <div class="quiz" data-test-item data-test-fill data-topic="malloc and free" data-answers="malloc">
+      <p class="quiz-prompt">7. Fill in the blank: the standard C function that requests a block of heap memory of a given size, returning a pointer to it, is ___.</p>
+      <div class="quiz-fill-row">
+        <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      </div>
+      <p class="quiz-feedback" hidden></p>
+      <p class="quiz-explain" hidden>malloc is the request-side function, paired with free for releasing memory back.</p>
+    </div>
+
+    <div class="quiz" data-test-item data-topic="Memory Leaks">
+      <p class="quiz-prompt">8. A long-running server program allocates heap blocks in a loop but never frees any of them, and never keeps a reference to any block after the loop iteration ends. What happens over time?</p>
+      <div class="quiz-choices">
+        <button class="quiz-choice" data-correct="true">Memory usage keeps growing, since each block stays reserved but unreachable, until the process is killed or the machine runs out.</button>
+        <button class="quiz-choice" data-correct="false">The operating system automatically frees each block once its loop iteration ends.</button>
+        <button class="quiz-choice" data-correct="false">The program's memory usage stays perfectly constant no matter how long it runs.</button>
+        <button class="quiz-choice" data-correct="false">C automatically converts this into garbage-collected memory.</button>
+      </div>
+      <p class="quiz-feedback" hidden></p>
+      <p class="quiz-explain" hidden>This is a textbook memory leak — worse over a long-running process than a short script that exits quickly.</p>
+    </div>
+
+    <div class="quiz" data-test-item data-topic="Garbage Collection">
+      <p class="quiz-prompt">9. Why don't Python or Java programmers write an equivalent of C's free() call?</p>
+      <div class="quiz-choices">
+        <button class="quiz-choice" data-correct="true">A garbage collector periodically scans for unreachable heap objects and reclaims them automatically.</button>
+        <button class="quiz-choice" data-correct="false">Those languages never allocate any memory dynamically.</button>
+        <button class="quiz-choice" data-correct="false">Their programs are incapable of ever running out of memory.</button>
+        <button class="quiz-choice" data-correct="false">Their stack region handles every allocation instead of a heap.</button>
+      </div>
+      <p class="quiz-feedback" hidden></p>
+      <p class="quiz-explain" hidden>Garbage collection automates exactly what free() does manually in C, at the cost of CPU time and possible pauses.</p>
+    </div>
+
+    <div class="quiz" data-test-item data-test-fill data-topic="Stack Overflow" data-answers="stack overflow">
+      <p class="quiz-prompt">10. Fill in the blank: a recursive function with no working base case eventually causes a ___ once it pushes frames past the space reserved for the stack.</p>
+      <div class="quiz-fill-row">
+        <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      </div>
+      <p class="quiz-feedback" hidden></p>
+      <p class="quiz-explain" hidden>A stack overflow is exactly this failure mode — the OS terminates the program before it corrupts adjacent memory.</p>
+    </div>
+
+    <p class="test-warning" data-test-warning hidden></p>
+    <button class="widget-btn" data-test-submit>Submit Test</button>
+    <div class="test-result" data-test-result hidden></div>
+  </div>
+
+  <footer class="lesson-footer">STEM+ · Systems Programming &amp; Architecture: CS · Unit 2 Test — Version B</footer>
+</div>

@@ -1,0 +1,170 @@
+<meta charset="UTF-8">
+<title>Lesson 2: The Compilation Pipeline — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="advanced">
+  <span class="kicker">STEM+ · Systems Programming &amp; Architecture: CS · Unit 1 · Lesson 2</span>
+  <h1>The Compilation Pipeline: Preprocessor, Compiler, Assembler, Linker</h1>
+  <p class="subtitle">Lesson 1 called compiling "one step." It's actually four separate programs running in sequence, each handing its output to the next — and knowing which one is which is exactly what turns a cryptic build error into an obvious one.</p>
+  <p class="nav-links"><a href="0001-what-actually-happens-when-you-run-a-program.html" class="nav-prev">← Lesson 1</a> <a href="0003-from-source-to-executable-a-walkthrough-in-c.html" class="nav-next">Lesson 3 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>When you type <code class="inline-code">gcc hello.c -o hello</code>, it looks like one command does everything. Underneath, four distinct tools run one after another, each doing one specific job and passing a transformed file to the next. Understanding these four stages is the difference between staring blankly at "undefined reference" and knowing immediately which tool complained and why.</p>
+
+  <h2>Stage 1: the preprocessor</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    The <strong>preprocessor</strong> runs first and performs purely textual substitution on the source code, before any real compiling happens. It expands <code class="inline-code">#include</code> directives by literally pasting in the contents of the named file, expands <code class="inline-code">#define</code> macros by substituting their text everywhere they're used, and resolves <code class="inline-code">#if</code>/<code class="inline-code">#ifdef</code> conditional blocks. Its output is still plain C source code — just a much larger, fully expanded version of it.
+  </div>
+
+  <h2>Stage 2: the compiler proper</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    The <strong>compiler</strong> (in this narrower, stage-specific sense) takes the preprocessed C source and translates it into <strong>assembly language</strong> — a human-readable text format that maps closely, roughly one line per instruction, to the processor's actual machine instructions (Unit 7 covers assembly in depth). This is where syntax errors, type errors, and most of what programmers casually call "compiler errors" actually get caught.
+  </div>
+
+  <h2>Stage 3: the assembler</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    The <strong>assembler</strong> takes that human-readable assembly and translates it into an <strong>object file</strong> — actual binary machine code, but not yet a complete, runnable program. An object file's machine code may still reference functions or variables defined somewhere else entirely, like <code class="inline-code">printf</code>, which lives in the C standard library, not in your own source file.
+  </div>
+
+  <h2>Stage 4: the linker</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    The <strong>linker</strong> takes one or more object files, plus any <strong>libraries</strong> they depend on, and stitches them together into one final, complete <strong>executable</strong> — resolving every reference to an outside function or variable by finding where it's actually defined and patching in its real address. A <strong>static library</strong> gets copied directly into the executable at link time; a <strong>dynamic library</strong> stays a separate file on disk, loaded and linked in only when the program actually runs.
+  </div>
+
+  <h2>Watch the pipeline run</h2>
+  <p>Step through all four stages on a single tiny C program, and watch both the file extension and what's actually inside it change at each stage.</p>
+
+  <div class="widget" id="pipeline-widget">
+    <p class="widget-label">Interactive: the four-stage compilation pipeline</p>
+    <div class="fm-row" style="margin-bottom:0.8rem;">
+      <span id="pipeline-progress"></span>
+    </div>
+    <p class="plot-readout" data-pipeline-file></p>
+    <p class="plot-readout" data-pipeline-desc></p>
+    <div class="fm-row">
+      <button class="widget-btn" type="button" data-pipeline-back>← Back</button>
+      <button class="widget-btn" type="button" data-pipeline-next>Next stage →</button>
+    </div>
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Worked example: hello.c through all four stages</span>
+    <code class="inline-code">hello.c</code> (your source) → preprocessor → <code class="inline-code">hello.i</code> (fully expanded C source, every <code class="inline-code">#include</code> pasted in) → compiler → <code class="inline-code">hello.s</code> (assembly text) → assembler → <code class="inline-code">hello.o</code> (an object file — real machine code, but with an unresolved reference to <code class="inline-code">printf</code>) → linker → <code class="inline-code">hello</code> (a complete executable, with <code class="inline-code">printf</code>'s address patched in from the C standard library). Only the very last file is something you can actually run.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why knowing the stages turns a confusing error into an obvious one</span>
+    A misspelled variable name fails at the compiler stage, with a message pointing at your exact source line. Calling a function that's declared but never actually defined anywhere fails at the linker stage instead, with a very different-looking message: <code class="inline-code">undefined reference to 'my_function'</code> — no source line, no syntax complaint, because syntactically nothing is wrong; the linker simply never found where that symbol's actual machine code lives. Without knowing these are two different tools doing two different jobs, both errors just look like "the compiler is broken." Knowing the pipeline turns "undefined reference" into an immediate, specific diagnosis: something is missing at link time, so go check whether that function was actually implemented or the right library was included.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What does the preprocessor stage actually do?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Purely textual substitution — expanding #include files and #define macros — before any real compiling happens.</button>
+      <button class="quiz-choice" data-correct="false">Translating C source directly into a runnable executable in one step.</button>
+      <button class="quiz-choice" data-correct="false">Resolving references to functions defined in other object files.</button>
+      <button class="quiz-choice" data-correct="false">Converting assembly language into binary machine code.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The preprocessor only manipulates text — its output is still C source code, just fully expanded.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why does an object file (.o) still fail to run on its own?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">It may contain unresolved references to functions or variables defined elsewhere, which only the linker resolves.</button>
+      <button class="quiz-choice" data-correct="false">Object files are actually just plain text, not machine code at all.</button>
+      <button class="quiz-choice" data-correct="false">Object files are identical to source code and were never compiled.</button>
+      <button class="quiz-choice" data-correct="false">Object files can only be produced by the preprocessor, never the assembler.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>An object file is real machine code, but it isn't complete until the linker resolves every outside reference and combines everything into one executable.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Which stage is responsible for turning assembly language into an object file's binary machine code?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">The assembler.</button>
+      <button class="quiz-choice" data-correct="false">The preprocessor.</button>
+      <button class="quiz-choice" data-correct="false">The linker.</button>
+      <button class="quiz-choice" data-correct="false">None of these — assembly is run directly by the processor.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The assembler sits between the compiler (which produces assembly) and the linker (which combines object files).</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="linker">
+    <p class="quiz-prompt">4. Fill in the blank: an "undefined reference" error, with no specific source line and no syntax complaint, comes from the ___ stage.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The linker complains this way when it can't find where a referenced symbol is actually defined.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="static library|static">
+    <p class="quiz-prompt">5. Fill in the blank: a ___ library gets copied directly into the final executable at link time, unlike a dynamic library, which stays a separate file loaded at run time.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Static linking bakes the library's code into the executable itself; dynamic linking keeps it external.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: the GCC manual's <a href="https://gcc.gnu.org/onlinedocs/gcc/Overall-Options.html">"Options Controlling the Kind of Output"</a> section documents the exact flags (<code class="inline-code">-E</code>, <code class="inline-code">-S</code>, <code class="inline-code">-c</code>) that stop the pipeline early at each of these four stages.</p>
+
+  <p class="ask-teacher">Curious what a real "undefined reference" error looks like from an actual compiler? Ask your teacher — that's what I'm here for. Next up: running these exact four stages yourself, by hand, on a real C program.</p>
+
+  <footer class="lesson-footer">STEM+ · Systems Programming &amp; Architecture: CS · Lesson 2 of the course sequence</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var stages = [
+    { file: 'hello.c', desc: 'Your source code, as written. Nothing has run yet.' },
+    { file: 'hello.i  (after the preprocessor)', desc: '#include <stdio.h> has been replaced by stdio.h\'s entire contents, pasted in directly. Still plain C source — just much longer.' },
+    { file: 'hello.s  (after the compiler)', desc: 'Translated into assembly language — human-readable text that maps closely to real processor instructions.' },
+    { file: 'hello.o  (after the assembler)', desc: 'Translated into an object file — real binary machine code, but printf\'s address is still an unresolved placeholder.' },
+    { file: 'hello  (after the linker)', desc: 'A complete executable. printf\'s real address has been patched in from the C standard library. This is the only file you can actually run.' }
+  ];
+  var idx = 0;
+  var progress = document.getElementById('pipeline-progress');
+  var fileEl = document.querySelector('[data-pipeline-file]');
+  var descEl = document.querySelector('[data-pipeline-desc]');
+  var backBtn = document.querySelector('[data-pipeline-back]');
+  var nextBtn = document.querySelector('[data-pipeline-next]');
+  var labels = ['Source', 'Preprocessor', 'Compiler', 'Assembler', 'Linker'];
+
+  function render() {
+    var dots = labels.map(function (l, i) {
+      return (i === idx ? '● ' : '○ ') + l;
+    }).join('   ');
+    progress.textContent = dots;
+    fileEl.textContent = 'File: ' + stages[idx].file;
+    descEl.textContent = stages[idx].desc;
+    backBtn.disabled = idx === 0;
+    nextBtn.disabled = idx === stages.length - 1;
+    nextBtn.textContent = idx === stages.length - 1 ? 'Done' : 'Next stage →';
+  }
+
+  backBtn.addEventListener('click', function () {
+    if (idx > 0) idx--;
+    render();
+  });
+  nextBtn.addEventListener('click', function () {
+    if (idx < stages.length - 1) idx++;
+    render();
+  });
+
+  render();
+});
+</script>

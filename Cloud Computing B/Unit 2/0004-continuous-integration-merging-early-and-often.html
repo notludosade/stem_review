@@ -1,0 +1,172 @@
+<meta charset="UTF-8">
+<title>Lesson 4: Continuous Integration: Merging Early and Often — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · Cloud Computing B / DevOps · Unit 2 · Lesson 4</span>
+  <h1>Continuous Integration: Merging Early and Often</h1>
+  <p class="subtitle">Lesson 3 mapped "Commit" as the pipeline's first stage. This lesson is about the practice that makes that first stage actually safe: never letting any one developer's changes drift too far from everyone else's before merging.</p>
+  <p class="nav-links"><a href="../Unit%201/0003-the-deployment-pipeline-end-to-end.html" class="nav-prev">← Unit 1, Lesson 3</a> <a href="0005-automated-builds-and-test-suites-in-ci.html" class="nav-next">Lesson 5 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Every developer on a team edits the same codebase, often the same files, usually at the same time. Left alone for long enough, those parallel edits are guaranteed to collide. The only real question is when the collision gets discovered — the moment it happens, or weeks later when two enormous branches finally meet.</p>
+
+  <h2>What continuous integration actually means</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    <strong>Continuous Integration (CI)</strong> is the practice of merging every developer's code changes into a shared main branch frequently — multiple times a day, not once every few weeks — with each merge automatically built and tested right away. "Continuous" describes the frequency of integration, not that anything runs nonstop; the point is that no single change ever drifts far from what everyone else is doing before it's combined and verified.
+  </div>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    A <strong>merge conflict</strong> happens when two changes touch overlapping code in a way that can't be combined automatically, forcing a human to manually decide how to reconcile them. Conflicts aren't a bug in the tooling — they're an unavoidable consequence of parallel edits. What CI actually controls is their <em>size</em>: a conflict between two hours of work is a quick fix; a conflict between two months of work on a long-lived branch can take days to untangle, if it's even fully resolvable at all.
+  </div>
+
+  <h2>Try it: watch conflict size diverge</h2>
+  <p>Two developers are both editing the same file. Pick a merge strategy, then advance a few days and watch what happens to the size of the eventual merge.</p>
+
+  <div class="widget" id="ci-merge-widget">
+    <p class="widget-label">Interactive: merge frequency vs. accumulated divergence</p>
+    <div class="fm-tabs" id="ci-merge-tabs">
+      <button class="fm-tab is-active" type="button" data-merge-mode="ci">Merge daily (CI)</button>
+      <button class="fm-tab" type="button" data-merge-mode="branch">Long-lived feature branch</button>
+    </div>
+    <p class="fm-row">
+      <button class="widget-btn" type="button" data-merge-advance>Advance one day</button>
+      <button class="widget-btn" type="button" data-merge-reset>Reset</button>
+    </p>
+    <p class="verdict" data-merge-verdict>Day 0 — no changes made yet.</p>
+    <p class="plot-hint">Both developers write the same amount of code each day. The only thing that changes between tabs is how often it gets merged.</p>
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Worked example</span>
+    Two developers each touch the same configuration file over five working days. Under CI, they merge and resolve differences daily — each day's conflict, if any, is small and quick, because it's measured against yesterday's version. Under a long-lived feature branch, neither merges until day five, so the final merge has to reconcile five days of both developers' accumulated, unrelated changes to the same file at once — a conflict that's much larger, much harder to reason about, and much more likely to silently reintroduce a bug one side already fixed.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why "merge early and often" beats "merge when it's ready"</span>
+    It feels safer to finish a feature completely before merging it — fewer half-done things touching shared code at once. But delaying integration doesn't prevent the eventual collision; it just defers it and lets it grow. By the time a long branch finally merges, the codebase it was built against has moved, the conflict spans far more code, and the original author has usually forgotten the exact reasoning behind changes from weeks ago. CI trades that one large, high-stakes merge for many small, low-stakes ones — the same total amount of conflict resolution, done in pieces small enough that no single piece is ever a crisis.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What does "continuous" describe in Continuous Integration?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">The frequency of merging — multiple times a day, not once every few weeks.</button>
+      <button class="quiz-choice" data-correct="false">A server that runs nonstop with no defined stages.</button>
+      <button class="quiz-choice" data-correct="false">A single merge performed exactly once per project.</button>
+      <button class="quiz-choice" data-correct="false">The length of time each developer spends coding without breaks.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>CI is about frequent integration, keeping every change close to what everyone else is doing.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. What does CI actually control about merge conflicts, since conflicts themselves can't be fully prevented?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Their size — frequent small merges keep each conflict small and quick to resolve.</button>
+      <button class="quiz-choice" data-correct="false">It eliminates the possibility of any conflict ever occurring.</button>
+      <button class="quiz-choice" data-correct="false">It has no effect on conflicts one way or the other.</button>
+      <button class="quiz-choice" data-correct="false">It guarantees exactly one conflict per developer per year.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Frequent integration bounds how much divergence can build up before it has to be reconciled.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why does a long-lived feature branch tend to produce a worse merge than daily integration?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Divergence accumulates over the branch's whole lifetime, so the eventual merge reconciles far more changed code at once, often after context is forgotten.</button>
+      <button class="quiz-choice" data-correct="false">Feature branches are technically incapable of ever being merged.</button>
+      <button class="quiz-choice" data-correct="false">Long branches always contain fewer changes than short ones.</button>
+      <button class="quiz-choice" data-correct="false">It doesn't — branch length has no effect on merge difficulty.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The longer changes sit unmerged, the more they diverge from the shared mainline and from each other.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="continuous integration|ci">
+    <p class="quiz-prompt">4. Fill in the blank: merging every developer's changes into a shared main branch frequently, with each merge automatically built and tested, is called ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Continuous Integration keeps every change close to the shared mainline instead of drifting for weeks.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="merge conflict|conflict">
+    <p class="quiz-prompt">5. Fill in the blank: when two changes touch overlapping code in a way that can't be combined automatically, forcing manual reconciliation, this is called a ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A merge conflict is unavoidable in parallel work; CI's real job is keeping each one small.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: Martin Fowler's <a href="https://martinfowler.com/articles/continuousIntegration.html">"Continuous Integration"</a> article is the original, widely-cited description of this exact practice.</p>
+
+  <p class="ask-teacher">Curious how a team decides how small is "small enough" to merge? Ask your teacher — that's what I'm here for. Next up: merging often only helps if every merge is actually checked automatically — what a CI server actually builds and tests on every single one.</p>
+
+  <footer class="lesson-footer">STEM+ · Cloud Computing B / DevOps · Lesson 4 of the course sequence</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var mode = 'ci';
+  var state = {
+    ci: { day: 0, pending: 0 },
+    branch: { day: 0, pending: 0 }
+  };
+
+  var tabs = document.querySelectorAll('#ci-merge-tabs [data-merge-mode]');
+  var verdict = document.querySelector('[data-merge-verdict]');
+  var advanceBtn = document.querySelector('[data-merge-advance]');
+  var resetBtn = document.querySelector('[data-merge-reset]');
+
+  function conflictLabel(pending) {
+    if (pending === 0) return 'no conflict — nothing unmerged yet';
+    if (pending <= 1) return 'a small, quick conflict (about ' + pending + ' day of divergence)';
+    if (pending <= 3) return 'a moderate conflict (' + pending + ' days of divergence) — takes real review time';
+    return 'a large, risky conflict (' + pending + ' days of divergence) — likely to silently reintroduce an already-fixed bug';
+  }
+
+  function render() {
+    var s = state[mode];
+    var modeLabel = mode === 'ci' ? 'Merge daily (CI)' : 'Long-lived feature branch';
+    if (mode === 'ci') {
+      verdict.textContent = modeLabel + ' — day ' + s.day + ': each day merges immediately, so today\'s conflict is ' + conflictLabel(s.day > 0 ? 1 : 0) + '.';
+    } else {
+      verdict.textContent = modeLabel + ' — day ' + s.day + ': still unmerged. If merged today, it would be ' + conflictLabel(s.day) + '.';
+    }
+  }
+
+  tabs.forEach(function (tab) {
+    tab.addEventListener('click', function () {
+      tabs.forEach(function (t) { t.classList.remove('is-active'); });
+      tab.classList.add('is-active');
+      mode = tab.getAttribute('data-merge-mode');
+      render();
+    });
+  });
+
+  advanceBtn.addEventListener('click', function () {
+    var s = state[mode];
+    s.day++;
+    if (mode === 'branch') s.pending++;
+    render();
+  });
+
+  resetBtn.addEventListener('click', function () {
+    state.ci = { day: 0, pending: 0 };
+    state.branch = { day: 0, pending: 0 };
+    render();
+  });
+
+  render();
+});
+</script>

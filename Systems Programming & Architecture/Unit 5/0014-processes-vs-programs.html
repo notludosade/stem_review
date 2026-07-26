@@ -1,0 +1,147 @@
+<meta charset="UTF-8">
+<title>Lesson 14: Processes vs. Programs — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="advanced">
+  <span class="kicker">STEM+ · Systems Programming &amp; Architecture: CS · Unit 5 · Lesson 14</span>
+  <h1>Processes vs. Programs</h1>
+  <p class="subtitle">Unit 2 already used the word "process" a lot, on the assumption you'd pick up the idea by context. This lesson makes it exact — a program is a static file on disk; a process is that program brought to life, with its own state, and the OS is what juggles many of them on one CPU.</p>
+  <p class="nav-links"><a href="0013-what-an-operating-system-actually-does.html" class="nav-prev">← Lesson 13</a> <a href="0015-system-calls-asking-the-kernel-for-help.html" class="nav-next">Lesson 15 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>You can double-click the same game's icon five times and get five separate windows, each with its own score, its own state, all able to crash independently without taking the others down. That's the program/process distinction in one example: one file on disk, five completely separate running instances.</p>
+
+  <h2>A program is a file; a process is that file, running</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    A <strong>program</strong> is a static executable file sitting on disk — the compiled output from Unit 1's pipeline, doing nothing until something runs it. A <strong>process</strong> is a running instance of that program: its own address space (Lesson 4), its own set of open files, its own CPU register values, all tracked by the OS. Running the same program's executable twice creates two entirely independent processes, exactly like the game example above — neither can see or touch the other's memory.
+  </div>
+
+  <h2>The process lifecycle</h2>
+  <p>A process moves through a small set of states as the OS manages it, never running continuously from start to finish on a single-core machine sharing time among many processes.</p>
+
+  <div class="widget" id="process-states-widget">
+    <p class="widget-label">Interactive: a process's life</p>
+    <div id="process-progress"></div>
+    <p class="plot-readout" data-process-desc></p>
+    <div class="fm-row">
+      <button class="widget-btn" type="button" data-process-next>Advance state →</button>
+      <button class="widget-btn" type="button" data-process-reset>Reset</button>
+    </div>
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Worked example</span>
+    You launch a program: the OS creates a process for it in the <strong>new</strong> state, loading its executable and setting up its address space. It moves to <strong>ready</strong> — fully able to run, just waiting for CPU time. The OS's scheduler gives it the CPU, and it becomes <strong>running</strong> — actually executing instructions right now. If it needs to read a file, it moves to <strong>waiting</strong>, giving up the CPU entirely until that slow disk operation finishes, rather than sitting idle on a CPU another process could be using. Once the file read completes it goes back to <strong>ready</strong>, waits its turn again, and eventually finishes and becomes <strong>terminated</strong>.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why "waiting" exists as its own state, instead of just staying "running" until I/O finishes</span>
+    A disk read can take a million times longer than a single CPU instruction. If a process just sat on the CPU doing nothing while waiting for that read, the CPU itself would sit idle for that entire, comparatively enormous stretch of time — a massive waste, since dozens of other processes on the machine may have real work ready to do right now. Moving a waiting process off the CPU entirely, and letting the scheduler hand that time to something ready to actually use it, is exactly why a machine running one CPU-heavy game and twenty background processes still feels responsive: those twenty processes spend almost all their time in the waiting state, barely touching the CPU at all.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What is the difference between a program and a process?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">A program is a static executable file on disk; a process is a running instance of it, with its own address space and state.</button>
+      <button class="quiz-choice" data-correct="false">They are exactly the same thing, just two different names.</button>
+      <button class="quiz-choice" data-correct="false">A process is always the source code, and a program is always the compiled output.</button>
+      <button class="quiz-choice" data-correct="false">A program can only ever have one process running it at a time.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Running the same executable twice creates two separate, independent processes from the one program file.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. What happens to a process's state when it needs to wait for a slow disk read to complete?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">It moves to the waiting state, giving up the CPU entirely until the read finishes.</button>
+      <button class="quiz-choice" data-correct="false">It stays in the running state, occupying the CPU the entire time the disk read is happening.</button>
+      <button class="quiz-choice" data-correct="false">It is immediately terminated and must be relaunched from scratch.</button>
+      <button class="quiz-choice" data-correct="false">It moves permanently to the new state.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Giving up the CPU during slow I/O lets other ready processes actually use it instead of sitting idle.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why does a machine running many background processes at once still feel responsive to the one program you're actively using?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Most background processes spend nearly all their time waiting rather than actually running, leaving the CPU mostly available for the active program.</button>
+      <button class="quiz-choice" data-correct="false">Background processes are not real processes and consume no resources at all.</button>
+      <button class="quiz-choice" data-correct="false">Every process gets an equal, fixed share of the CPU regardless of what it's doing.</button>
+      <button class="quiz-choice" data-correct="false">The OS deletes background processes automatically whenever another program is active.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The waiting state is what frees up the CPU for whatever actually has ready work to do.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="process">
+    <p class="quiz-prompt">4. Fill in the blank: a running instance of a program, with its own address space, open files, and register values, is called a ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A process is a program brought to life, tracked and managed by the OS.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="waiting|blocked">
+    <p class="quiz-prompt">5. Fill in the blank: the process state entered while it's blocked on something slow, like a disk read, having given up the CPU entirely until that operation completes, is called ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The waiting (or blocked) state frees the CPU for other ready processes during slow I/O.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: the Linux manual page for <a href="https://man7.org/linux/man-pages/man1/ps.1.html">ps(1)</a> documents the real command-line tool for listing every running process on a Linux machine, along with its current state.</p>
+
+  <p class="ask-teacher">Curious what running "ps aux" on a real Linux machine actually shows? Ask your teacher — that's what I'm here for. Next up: exactly how a process, which normally can't touch the hardware directly, asks the kernel to do something on its behalf.</p>
+
+  <footer class="lesson-footer">STEM+ · Systems Programming &amp; Architecture: CS · Lesson 14 of the course sequence</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var states = [
+    { label: 'New', desc: 'New: the OS is creating the process — loading its executable, setting up its address space.' },
+    { label: 'Ready', desc: 'Ready: the process is fully able to run, just waiting for the scheduler to give it CPU time.' },
+    { label: 'Running', desc: 'Running: the process is actually executing instructions on the CPU right now.' },
+    { label: 'Waiting', desc: 'Waiting: the process needs a slow disk read to finish, so it gives up the CPU entirely rather than sit idle on it.' },
+    { label: 'Ready', desc: 'Ready again: the disk read finished — back in line for CPU time, same as any other ready process.' },
+    { label: 'Running', desc: 'Running again: the scheduler gave it the CPU once more, and it finishes its remaining work.' },
+    { label: 'Terminated', desc: 'Terminated: the process has finished; the OS reclaims its address space and every resource it held.' }
+  ];
+  var idx = 0;
+  var progress = document.getElementById('process-progress');
+  var desc = document.querySelector('[data-process-desc]');
+  var nextBtn = document.querySelector('[data-process-next]');
+
+  function render() {
+    var dots = states.map(function (s, i) {
+      return (i === idx ? '● ' : '○ ') + s.label;
+    }).join('   →   ');
+    progress.textContent = dots;
+    desc.textContent = states[idx].desc;
+    nextBtn.disabled = idx === states.length - 1;
+    nextBtn.textContent = idx === states.length - 1 ? 'Done' : 'Advance state →';
+  }
+
+  nextBtn.addEventListener('click', function () {
+    if (idx < states.length - 1) idx++;
+    render();
+  });
+
+  document.querySelector('[data-process-reset]').addEventListener('click', function () {
+    idx = 0;
+    render();
+  });
+
+  render();
+});
+</script>

@@ -1,0 +1,170 @@
+<meta charset="UTF-8">
+<title>Lesson 12: Structs, Padding, and Memory Alignment — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="advanced">
+  <span class="kicker">STEM+ · Systems Programming &amp; Architecture: CS · Unit 4 · Lesson 12</span>
+  <h1>Structs, Padding, and Memory Alignment</h1>
+  <p class="subtitle">A C struct's size is not simply the sum of its fields' sizes — the compiler inserts invisible gaps to keep every field aligned, and reordering the exact same fields can shrink a struct without changing a single value it stores.</p>
+  <p class="nav-links"><a href="0011-floating-point-and-rounding-error.html" class="nav-prev">← Lesson 11</a> <a href="../Unit%205/0013-what-an-operating-system-actually-does.html" class="nav-next">Unit 5, Lesson 13 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>A <code class="inline-code">struct</code> groups related fields into one block of memory, the same way a class groups fields in Java or Python — but in C, that block's exact byte layout is something you can reason about directly, and it doesn't always look like what you'd expect from just adding up field sizes.</p>
+
+  <h2>Alignment: why the CPU cares where a value starts</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    <strong>Memory alignment</strong> is a hardware requirement (or at minimum, a strong performance preference) that a value of a given size start at an address that's a multiple of its own size — a 4-byte int should start at an address divisible by 4, an 8-byte double at an address divisible by 8. Misaligned access is at best slower on many processors, since the CPU may need two separate memory reads instead of one, and on some processor architectures, it isn't allowed at all.
+  </div>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    <strong>Padding</strong> is unused filler bytes the compiler silently inserts between struct fields (or after the last one) purely to keep every field properly aligned. Padding bytes hold no meaningful data — they exist only to push the next field's starting address to the correct multiple.
+  </div>
+
+  <h2>Try it: reorder fields, watch the struct shrink</h2>
+  <p>The struct below holds a <code class="inline-code">char</code> (1 byte), an <code class="inline-code">int</code> (4 bytes), and a <code class="inline-code">double</code> (8 bytes) — the same three fields, every time. Try each ordering and compare the total size.</p>
+
+  <div class="widget" id="struct-widget">
+    <p class="widget-label">Interactive: struct field order vs. total size</p>
+    <div class="fm-tabs" id="struct-tabs">
+      <button class="fm-tab is-active" type="button" data-struct-order="cid">char, int, double</button>
+      <button class="fm-tab" type="button" data-struct-order="idc">int, double, char</button>
+      <button class="fm-tab" type="button" data-struct-order="dic">double, int, char</button>
+    </div>
+    <div id="struct-display" style="font-family:monospace; margin-top:0.8rem;"></div>
+    <p class="plot-readout" data-struct-readout></p>
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Worked example</span>
+    <code class="inline-code">struct A { char c; int i; double d; };</code> lays out as: <code class="inline-code">c</code> at offset 0 (1 byte), then 3 padding bytes so <code class="inline-code">i</code> can start at offset 4 (a multiple of 4), then <code class="inline-code">i</code> at offset 4–7, then <code class="inline-code">d</code> at offset 8–15 (already aligned to 8) — total size 16 bytes, with 3 of them pure padding. Reorder to <code class="inline-code">struct B { double d; int i; char c; };</code>: <code class="inline-code">d</code> at offset 0–7, <code class="inline-code">i</code> at offset 8–11, <code class="inline-code">c</code> at offset 12 — total size, after trailing padding to keep the whole struct's size a multiple of its largest field's alignment, comes to 16 bytes too in this particular case, but with only 3 bytes of trailing padding instead of an interior gap. The general lesson holds broadly: ordering fields from largest to smallest alignment requirement tends to minimize wasted padding, and for structs with more fields, or arrays of many struct instances, that savings adds up fast.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why this is a real, practical optimization — not just trivia</span>
+    A struct with wasted padding costs real memory when you allocate an array of thousands or millions of them — a struct that could be 12 bytes but pads out to 16 wastes 25% more memory across the whole array, and worse, it means fewer struct instances fit in a CPU cache line at once (Unit 7 covers exactly why that hurts performance). Reordering fields from largest alignment requirement to smallest is a free, purely mechanical change — it doesn't alter what the struct represents at all — that a systems programmer working with large arrays of structs genuinely does think about.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What is padding, in the context of a C struct?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Unused filler bytes the compiler inserts between or after fields to keep each field's alignment requirement satisfied.</button>
+      <button class="quiz-choice" data-correct="false">Extra copies of a struct's data, stored for backup purposes.</button>
+      <button class="quiz-choice" data-correct="false">A required field that every struct must explicitly declare.</button>
+      <button class="quiz-choice" data-correct="false">Compressed data that reduces the struct's total size below the sum of its fields.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Padding bytes carry no meaningful data — they only exist to satisfy alignment.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why might reordering a struct's fields change its total size, even though the fields themselves are unchanged?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Different orderings can require different amounts of padding to keep every field aligned, changing the total size.</button>
+      <button class="quiz-choice" data-correct="false">C recalculates each field's own size based on its position in the struct.</button>
+      <button class="quiz-choice" data-correct="false">Reordering fields is not legal C and would fail to compile.</button>
+      <button class="quiz-choice" data-correct="false">Struct size is always fixed at exactly the sum of the field sizes, regardless of order.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Padding depends on the order fields are declared in, so reordering can reduce (or increase) total wasted space.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why does minimizing struct padding matter for a large array of struct instances?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Wasted padding multiplies across every instance in the array, increasing total memory use and reducing how many instances fit in a CPU cache line.</button>
+      <button class="quiz-choice" data-correct="false">Padding has no measurable effect on memory use, even at scale.</button>
+      <button class="quiz-choice" data-correct="false">Arrays of structs are not allowed to contain any padding at all.</button>
+      <button class="quiz-choice" data-correct="false">It only matters for structs containing exactly one field.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Padding's cost scales with however many instances exist, and it directly affects cache efficiency, covered in Unit 7.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="alignment|memory alignment">
+    <p class="quiz-prompt">4. Fill in the blank: the requirement that a value start at a memory address that's a multiple of its own size is called ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Alignment is the hardware constraint that padding exists specifically to satisfy.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="padding">
+    <p class="quiz-prompt">5. Fill in the blank: the invisible filler bytes a compiler inserts between struct fields purely to satisfy alignment are called ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Padding holds no meaningful value — it exists purely to keep the next field aligned.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: IBM Developer's <a href="https://developer.ibm.com/articles/pa-dalign/">"Data alignment: Straighten up and fly right"</a> walks through struct padding and alignment with real compiled examples across several architectures.</p>
+
+  <p class="ask-teacher">Curious how to check a real struct's actual size and field offsets on your own machine? Ask your teacher — that's what I'm here for. Next up: Unit 5 zooms all the way out from a single process's own memory to the operating system managing many processes at once.</p>
+
+  <footer class="lesson-footer">STEM+ · Systems Programming &amp; Architecture: CS · Lesson 12 of the course sequence</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var layouts = {
+    cid: { fields: [
+      { name: 'char c', size: 1 }, { name: 'padding', size: 3, pad: true },
+      { name: 'int i', size: 4 }, { name: 'double d', size: 8 }
+    ], total: 16 },
+    idc: { fields: [
+      { name: 'int i', size: 4 }, { name: 'double d', size: 8 },
+      { name: 'char c', size: 1 }, { name: 'padding', size: 3, pad: true }
+    ], total: 16 },
+    dic: { fields: [
+      { name: 'double d', size: 8 }, { name: 'int i', size: 4 },
+      { name: 'char c', size: 1 }, { name: 'padding', size: 3, pad: true }
+    ], total: 16 }
+  };
+
+  var display = document.getElementById('struct-display');
+  var readout = document.querySelector('[data-struct-readout]');
+  var tabs = document.querySelectorAll('#struct-tabs [data-struct-order]');
+
+  function paint(key) {
+    var layout = layouts[key];
+    display.innerHTML = '';
+    var offset = 0;
+    layout.fields.forEach(function (f) {
+      var block = document.createElement('div');
+      block.style.display = 'inline-block';
+      block.style.width = (f.size * 22) + 'px';
+      block.style.textAlign = 'center';
+      block.style.padding = '0.4rem 0';
+      block.style.margin = '0 2px 0.4rem';
+      block.style.border = '1.5px solid ' + (f.pad ? 'var(--border)' : 'var(--accent)');
+      block.style.background = f.pad ? 'repeating-linear-gradient(45deg, var(--code-bg), var(--code-bg) 4px, var(--border) 4px, var(--border) 8px)' : 'var(--accent-soft)';
+      block.style.borderRadius = '3px';
+      block.style.fontSize = '0.8rem';
+      block.textContent = f.name;
+      block.title = 'offset ' + offset + ', ' + f.size + ' byte(s)';
+      display.appendChild(block);
+      offset += f.size;
+    });
+    var wastedPad = layout.fields.filter(function (f) { return f.pad; }).reduce(function (s, f) { return s + f.size; }, 0);
+    readout.textContent = 'Total struct size: ' + layout.total + ' bytes, of which ' + wastedPad + ' byte(s) are pure padding (hatched blocks).';
+  }
+
+  tabs.forEach(function (tab) {
+    tab.addEventListener('click', function () {
+      tabs.forEach(function (t) { t.classList.remove('is-active'); });
+      tab.classList.add('is-active');
+      paint(tab.getAttribute('data-struct-order'));
+    });
+  });
+
+  paint('cid');
+});
+</script>

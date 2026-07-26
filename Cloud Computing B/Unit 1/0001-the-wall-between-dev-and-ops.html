@@ -1,0 +1,187 @@
+<meta charset="UTF-8">
+<title>Lesson 1: The Wall Between Dev and Ops, and Why It Broke Down — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · Cloud Computing B / DevOps · Unit 1 · Lesson 1</span>
+  <h1>The Wall Between Dev and Ops, and Why It Broke Down</h1>
+  <p class="subtitle">Cloud Computing A gave you the building blocks — containers, elastic fleets, redundant regions. This course is about the humans who decide when new code actually lands on top of them, and the wall that used to make that painfully slow.</p>
+  <p class="nav-links"><a href="0002-culture-before-tools-what-devops-actually-changes.html" class="nav-next">Lesson 2 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Cloud Computing A answered "where does code run" — a container, sized by an auto scaling group, spread across availability zones for redundancy. It never answered "how does new code actually get there." For a long time, most organizations answered that question with two separate teams, two separate goals, and a slow, painful handoff between them. This course starts with why that arrangement existed, and why it stopped working.</p>
+
+  <h2>Two teams, one application, opposite incentives</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    <strong>Development ("Dev")</strong> is the team that writes application code and wants to ship changes — new features, fixes — as fast as possible. <strong>Operations ("Ops")</strong> is the team that keeps that code running reliably in production, and is judged on uptime, not feature velocity. Historically these were separate teams with separate managers, separate tools, and separate definitions of success: Dev's incentive was change; Ops's incentive was stability. Every deploy sits exactly on top of that conflict, since every change is also a risk.
+  </div>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    <strong>The wall</strong> (sometimes "throwing it over the wall") is the informal handoff boundary in that arrangement: Dev finishes code and hands it off — often as a ticket, a build artifact, or a deployment request — to Ops, who then has to deploy code they didn't write, understand only from documentation, and be the one paged at 3 a.m. if it breaks. Neither side has full context on the other's half of the job, and neither side is rewarded for making the handoff smoother.
+  </div>
+
+  <h2>Try it: shipping one feature, two ways</h2>
+  <p>Pick a team structure below, then ship the same feature a few times and watch what accumulates.</p>
+
+  <div class="widget" id="wall-widget">
+    <p class="widget-label">Interactive: shipping a feature under two team structures</p>
+    <div class="fm-tabs" id="wall-tabs">
+      <button class="fm-tab is-active" type="button" data-wall-mode="silo">Siloed Dev / Ops</button>
+      <button class="fm-tab" type="button" data-wall-mode="devops">Shared DevOps Team</button>
+    </div>
+    <p class="fm-row">
+      <button class="widget-btn" type="button" data-wall-ship>Ship the Feature</button>
+      <button class="widget-btn" type="button" data-wall-reset>Reset</button>
+    </p>
+    <p class="fm-steps" data-wall-log></p>
+    <p class="plot-readout" data-wall-summary></p>
+    <p class="plot-hint">Same feature, same complexity — the only thing that changed is who owns the handoff, and how many times responsibility for it changes hands.</p>
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why elastic infrastructure made the wall unbearable</span>
+    An auto scaling group from Cloud Computing A, Unit 6 can add ten servers in minutes with nobody manually provisioning anything. That speed is wasted if the code meant to run on those servers still has to cross a multi-day ticket queue between the person who wrote it and the person allowed to deploy it. As infrastructure got faster and cheaper to change, the wall didn't move with it — it became the single slowest, most error-prone step in the entire path from "code written" to "code running," which is exactly the gap DevOps set out to close.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What does "the wall" refer to, in the traditional Dev/Ops split?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">The informal handoff boundary where responsibility for deploying and running code passes from Dev to a separate Ops team.</button>
+      <button class="quiz-choice" data-correct="false">A physical firewall appliance placed between a company's servers and the internet.</button>
+      <button class="quiz-choice" data-correct="false">The maximum number of servers an auto scaling group is allowed to run.</button>
+      <button class="quiz-choice" data-correct="false">A security boundary between two availability zones.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The wall is an organizational handoff, not a technical or network boundary.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why were Dev and Ops's incentives historically in conflict?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Dev was judged on shipping change quickly; Ops was judged on uptime, and every change is also a risk to stability.</button>
+      <button class="quiz-choice" data-correct="false">Dev and Ops were always the exact same team with identical goals.</button>
+      <button class="quiz-choice" data-correct="false">Ops wanted to ship as many features as possible, while Dev wanted zero changes ever.</button>
+      <button class="quiz-choice" data-correct="false">The two teams had no relationship to each other's work at all.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Change (Dev's goal) and stability (Ops's goal) pull in opposite directions on every single deploy.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why did the wall become a bigger problem as cloud infrastructure got more elastic and automated?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Infrastructure could change in minutes, but a manual, ticket-based handoff between teams still took days, making the handoff the slowest part of shipping.</button>
+      <button class="quiz-choice" data-correct="false">Elastic infrastructure made servers slower, which matched the wall's existing slowness.</button>
+      <button class="quiz-choice" data-correct="false">Auto scaling groups eliminated the need for Dev teams entirely.</button>
+      <button class="quiz-choice" data-correct="false">It didn't — the wall was never affected by infrastructure speed.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>As every other step got faster, the human handoff at the wall increasingly stood out as the bottleneck.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="the wall|wall">
+    <p class="quiz-prompt">4. Fill in the blank: the informal handoff boundary where responsibility for deploying code passes from Dev to a separate Ops team is often called ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>"The wall" (or "throwing it over the wall") names exactly this handoff.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="operations|ops">
+    <p class="quiz-prompt">5. Fill in the blank: the team historically judged on uptime and reliability, rather than feature velocity, is called ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Operations (Ops) owns production stability, in contrast to Dev's focus on shipping change.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: Atlassian's <a href="https://www.atlassian.com/devops">"What is DevOps?"</a> overview covers the same Dev/Ops split this lesson opened with, from a team that builds tools for both sides of it.</p>
+
+  <p class="ask-teacher">Curious whether any organizations still run fully siloed Dev and Ops teams today? Ask your teacher — that's what I'm here for. Next up: tearing down the wall turns out to be mostly a culture change, not a tools purchase — and that distinction matters more than it sounds like it should.</p>
+
+  <footer class="lesson-footer">STEM+ · Cloud Computing B / DevOps · Lesson 1 of the course sequence</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var mode = 'silo';
+  var totals = {
+    silo: { handoffs: 0, hours: 0, ships: 0 },
+    devops: { handoffs: 0, hours: 0, ships: 0 }
+  };
+
+  var steps = {
+    silo: {
+      log: [
+        '1. Dev finishes the feature and opens a deployment ticket.',
+        '2. Ticket sits in Ops’s queue behind other teams’ requests.',
+        '3. Ops has a clarifying question; waits a day for Dev to answer.',
+        '4. Ops deploys the change manually, using their own runbook.',
+        '5. It breaks in production — Ops didn’t write it, and pages Dev.'
+      ],
+      handoffs: 4,
+      hours: 60
+    },
+    devops: {
+      log: [
+        '1. Dev commits the change; an automated pipeline builds and tests it.',
+        '2. Dev deploys it themselves, using tooling Ops helped build.',
+        '3. Dev and Ops both watch the same dashboards after release.'
+      ],
+      handoffs: 0,
+      hours: 2
+    }
+  };
+
+  var tabs = document.querySelectorAll('#wall-tabs [data-wall-mode]');
+  var log = document.querySelector('[data-wall-log]');
+  var summary = document.querySelector('[data-wall-summary]');
+  var shipBtn = document.querySelector('[data-wall-ship]');
+  var resetBtn = document.querySelector('[data-wall-reset]');
+
+  function render() {
+    var t = totals[mode];
+    var s = steps[mode];
+    log.textContent = t.ships === 0 ? 'Click "Ship the Feature" to see the steps.' : s.log.join('  ');
+    var modeLabel = mode === 'silo' ? 'Siloed Dev / Ops' : 'Shared DevOps Team';
+    summary.textContent = modeLabel + ': shipped ' + t.ships + ' time' + (t.ships === 1 ? '' : 's') +
+      ' → ' + t.handoffs + ' total handoff' + (t.handoffs === 1 ? '' : 's') +
+      ', about ' + t.hours + ' cumulative hours from "code done" to "code running."';
+  }
+
+  tabs.forEach(function (tab) {
+    tab.addEventListener('click', function () {
+      tabs.forEach(function (t) { t.classList.remove('is-active'); });
+      tab.classList.add('is-active');
+      mode = tab.getAttribute('data-wall-mode');
+      render();
+    });
+  });
+
+  shipBtn.addEventListener('click', function () {
+    var s = steps[mode];
+    var t = totals[mode];
+    t.ships++;
+    t.handoffs += s.handoffs;
+    t.hours += s.hours;
+    render();
+  });
+
+  resetBtn.addEventListener('click', function () {
+    totals.silo = { handoffs: 0, hours: 0, ships: 0 };
+    totals.devops = { handoffs: 0, hours: 0, ships: 0 };
+    render();
+  });
+
+  render();
+});
+</script>

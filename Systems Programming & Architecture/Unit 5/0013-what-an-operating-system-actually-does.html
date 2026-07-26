@@ -1,0 +1,109 @@
+<meta charset="UTF-8">
+<title>Lesson 13: What an Operating System Actually Does — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="advanced">
+  <span class="kicker">STEM+ · Systems Programming &amp; Architecture: CS · Unit 5 · Lesson 13</span>
+  <h1>What an Operating System Actually Does</h1>
+  <p class="subtitle">Units 2 through 4 quietly assumed a lot: that your process gets its own private address space, that memory it asks for is actually there, that it can't peek at another program's data. None of that happens by accident — it's all the operating system's job, and this lesson names exactly what that job is.</p>
+  <p class="nav-links"><a href="../Unit%204/0012-structs-padding-and-memory-alignment.html" class="nav-prev">← Unit 4, Lesson 12</a> <a href="0014-processes-vs-programs.html" class="nav-next">Lesson 14 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Every program in this course so far has quietly relied on something that was never actually there: a single, dedicated computer, entirely for itself. In reality, dozens or hundreds of programs share one machine's CPU, memory, and disk at the same time, and something has to referee that sharing constantly, invisibly, and without the programs' cooperation. That something is the operating system.</p>
+
+  <h2>The operating system as resource manager</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    An <strong>operating system (OS)</strong> is the software that manages a computer's hardware resources — the CPU, memory, storage, and peripheral devices — and provides a controlled, consistent way for programs to use them. It sits directly between every running program and the raw hardware, deciding which program gets the CPU at any given instant, which physical memory backs which process's address space, and which program is allowed to touch which file or device.
+  </div>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    The <strong>kernel</strong> is the operating system's core — the part that runs with full, privileged access to the hardware itself, making the actual resource-allocation decisions. Everything else commonly thought of as "the OS" — a file manager, a settings app, a command-line shell — is ordinary software running on top of the kernel, using the exact same restricted access every other program gets.
+  </div>
+
+  <h2>Three jobs, one referee</h2>
+  <table>
+    <thead><tr><th>Resource</th><th>What the OS decides</th></tr></thead>
+    <tbody>
+      <tr><td>CPU</td><td>Which of many waiting processes actually runs on the processor right now, and for how long, before switching to another (Lesson 14 covers this handoff in detail).</td></tr>
+      <tr><td>Memory</td><td>Which physical memory backs each process's private address space (Lesson 4), and keeping one process from ever reading or writing another's.</td></tr>
+      <tr><td>Devices &amp; files</td><td>Which program is allowed to read or write a given file or device at a given moment, mediating every request rather than letting programs touch hardware directly.</td></tr>
+    </tbody>
+  </table>
+
+  <div class="box example">
+    <span class="box-label">Worked example</span>
+    You have a code editor, a web browser, and a music player all open at once, on a machine with far fewer CPU cores than that. None of those three programs is aware the others exist, let alone coordinating with them. The OS is silently giving each one tiny slices of CPU time, dozens of times per second, switching between them fast enough that all three appear to run simultaneously — and enforcing that the music player's memory is never visible to the browser, even though both are running on the exact same physical machine at the exact same moment.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why every program needs the same referee, and can't be trusted to self-police</span>
+    If ordinary programs were allowed to decide for themselves which memory to use or when to use the CPU, one badly written or malicious program could simply seize everything — read another program's private data, corrupt a shared device, or hog the entire CPU forever. The OS solves this not by asking programs nicely, but by controlling the hardware directly and only ever letting ordinary programs make requests through a narrow, controlled interface (Lesson 15 covers exactly how). This is also why an OS itself has to run with a level of hardware access no ordinary program is ever given — it's the one piece of software actually trusted to enforce the rules everyone else has to follow.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What is the operating system's core job?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Managing a computer's hardware resources and providing programs a controlled way to use them.</button>
+      <button class="quiz-choice" data-correct="false">Writing application code on behalf of every running program.</button>
+      <button class="quiz-choice" data-correct="false">Compiling every program's source code before it can run.</button>
+      <button class="quiz-choice" data-correct="false">Only managing the appearance of the desktop and file icons.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Resource management — CPU, memory, storage, devices — is the OS's fundamental role, beneath any visible desktop interface.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. What is the kernel?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">The core of the OS that runs with full, privileged hardware access and makes the actual resource-allocation decisions.</button>
+      <button class="quiz-choice" data-correct="false">A synonym for any application installed on the computer.</button>
+      <button class="quiz-choice" data-correct="false">The part of the OS responsible only for displaying visual icons.</button>
+      <button class="quiz-choice" data-correct="false">A separate physical chip unrelated to the OS's software.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The kernel is the privileged core; a file manager or shell is ordinary software running on top of it.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why can't ordinary programs be trusted to manage CPU time or memory access among themselves, without the OS?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">A badly written or malicious program could seize all the CPU or read another program's private memory, with nothing to stop it.</button>
+      <button class="quiz-choice" data-correct="false">Programs are technically incapable of ever requesting CPU time.</button>
+      <button class="quiz-choice" data-correct="false">There is no real risk — self-management among programs works fine without an OS.</button>
+      <button class="quiz-choice" data-correct="false">Only programs written in C are capable of misbehaving this way.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The OS enforces fairness and isolation precisely because ordinary programs cannot be relied on to police themselves.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="kernel">
+    <p class="quiz-prompt">4. Fill in the blank: the privileged core of the operating system, with full direct access to the hardware, is called the ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The kernel is the trusted layer making actual resource-allocation decisions.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="operating system|os">
+    <p class="quiz-prompt">5. Fill in the blank: the software that sits between every running program and the raw hardware, deciding CPU time, memory, and device access, is the ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The operating system is exactly this resource-managing layer, referenced throughout this whole unit.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: the opening chapter of <a href="https://pages.cs.wisc.edu/~remzi/OSTEP/">"Operating Systems: Three Easy Pieces"</a>, a widely used free OS textbook, frames virtualization, concurrency, and persistence as the OS's three core responsibilities — the exact structure this unit and the next follow.</p>
+
+  <p class="ask-teacher">Curious how many processes are actually running on your own machine right now? Ask your teacher — that's what I'm here for. Next up: the difference between a program sitting on disk and the same program actually running — a distinction the OS makes constantly.</p>
+
+  <footer class="lesson-footer">STEM+ · Systems Programming &amp; Architecture: CS · Lesson 13 of the course sequence</footer>
+</div>

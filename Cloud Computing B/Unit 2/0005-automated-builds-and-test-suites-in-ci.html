@@ -1,0 +1,167 @@
+<meta charset="UTF-8">
+<title>Lesson 5: Automated Builds and Test Suites in CI — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · Cloud Computing B / DevOps · Unit 2 · Lesson 5</span>
+  <h1>Automated Builds and Test Suites in CI</h1>
+  <p class="subtitle">Merging often, from Lesson 4, only helps if every merge is actually checked. A CI server is the thing that turns "we merge frequently" into "we know within minutes whether each merge actually works."</p>
+  <p class="nav-links"><a href="0004-continuous-integration-merging-early-and-often.html" class="nav-prev">← Lesson 4</a> <a href="0006-reading-a-broken-ci-pipeline.html" class="nav-next">Lesson 6 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Merging code without checking it is really just a faster way to break the shared main branch for everyone at once. What actually makes frequent merging safe is that every single merge automatically triggers the same sequence of checks, in the same order, without anyone having to remember to run them.</p>
+
+  <h2>The CI server's job</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    A <strong>CI server</strong> is the automated system that watches a shared repository and, on every merge, runs a defined <strong>build step</strong> (compiling or bundling the code) followed by a <strong>test suite</strong> — a collection of automated tests that check the code still behaves correctly. Nothing about this requires a human to remember to click anything; the CI server reacts to the merge itself.
+  </div>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    A build's <strong>status</strong> is usually summarized as <strong>green</strong> (the build compiled and every test passed) or <strong>red</strong> (something failed, anywhere in the sequence). A red build is a signal, not a punishment: it means whatever just merged needs attention before anyone builds more work on top of it.
+  </div>
+
+  <h2>Try it: assemble a build and see its status</h2>
+  <p>Toggle each stage below, then see how the overall build status is computed — and which failures would have been caught earliest.</p>
+
+  <div class="widget" id="build-widget">
+    <p class="widget-label">Interactive: build stages and overall status</p>
+    <div class="fm-row" style="flex-wrap:wrap; gap:0.6rem;">
+      <button class="widget-btn" type="button" data-build-stage="lint" data-state="pass">Lint: Pass</button>
+      <button class="widget-btn" type="button" data-build-stage="unit" data-state="pass">Unit Tests: Pass</button>
+      <button class="widget-btn" type="button" data-build-stage="integration" data-state="pass">Integration Tests: Pass</button>
+      <button class="widget-btn" type="button" data-build-stage="e2e" data-state="pass">End-to-End Tests: Pass</button>
+    </div>
+    <p class="plot-hint">Click a stage to toggle it between Pass and Fail. Stages run in the order shown, left to right.</p>
+    <p class="verdict" data-build-verdict>Overall: GREEN — every stage passing.</p>
+    <p class="plot-readout" data-build-readout></p>
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Worked example: why stage order matters</span>
+    Lint checks (fast, seconds) run before unit tests (fast, seconds) which run before integration tests (slower, minutes) which run before end-to-end tests (slowest, sometimes many minutes). Ordering cheap, fast checks first means a build with a trivial typo fails in seconds instead of after waiting for a ten-minute end-to-end suite to grind through first. This ordering is usually called "fail fast" — it doesn't make the code more correct, but it gives the developer their answer as quickly as possible.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why a test suite has to actually be trustworthy to be useful</span>
+    An automated test suite only pays for itself if a green build genuinely means "this is safe to build on" and a red build genuinely means "something is actually wrong." A suite with weak or missing coverage can go green on code that's badly broken, giving false confidence; the opposite failure mode — tests that fail for reasons unrelated to the actual change — is common enough that it gets a name and its own lesson next: a flaky test.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What triggers a CI server's build and test sequence?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">A merge into the shared repository, without requiring a human to manually start it.</button>
+      <button class="quiz-choice" data-correct="false">An engineer manually clicking "run tests" once a week.</button>
+      <button class="quiz-choice" data-correct="false">A calendar reminder set by a project manager.</button>
+      <button class="quiz-choice" data-correct="false">Nothing — CI servers require constant manual triggering.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A CI server reacts automatically to the merge itself, which is what makes frequent merging safe.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why do fast checks like linting typically run before slow checks like end-to-end tests?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">"Fail fast" — a trivial problem is caught in seconds instead of after a much longer suite finishes.</button>
+      <button class="quiz-choice" data-correct="false">Slow tests are technically incapable of running before fast ones.</button>
+      <button class="quiz-choice" data-correct="false">Order has no effect on how quickly a developer learns the result.</button>
+      <button class="quiz-choice" data-correct="false">Linting always requires the end-to-end suite to finish first.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Running cheap checks first gets an answer back as quickly as possible without changing correctness.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. What does a "red" build status mean?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Something failed somewhere in the build or test sequence, and needs attention before more work builds on top of it.</button>
+      <button class="quiz-choice" data-correct="false">The build succeeded and every test passed.</button>
+      <button class="quiz-choice" data-correct="false">The CI server has crashed permanently.</button>
+      <button class="quiz-choice" data-correct="false">A developer is currently on vacation.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Red is a signal to investigate, not a judgment — and it should be addressed before building further on top of it.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="ci server">
+    <p class="quiz-prompt">4. Fill in the blank: the automated system that watches a repository and runs a build and test suite on every merge is called a ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The CI server is the automation layer that makes frequent, unattended checking possible.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="test suite">
+    <p class="quiz-prompt">5. Fill in the blank: a collection of automated tests that check code still behaves correctly is called a ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A test suite is only as useful as its coverage is trustworthy — a theme the next lesson picks up.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: CircleCI's <a href="https://circleci.com/continuous-integration/">"What is Continuous Integration?"</a> overview covers a real CI server's build-and-test pipeline in practice.</p>
+
+  <p class="ask-teacher">Curious how long a "reasonable" CI pipeline should take end to end? Ask your teacher — that's what I'm here for. Next up: green and red are the easy cases — what to do when a pipeline fails in a way that isn't so obvious.</p>
+
+  <footer class="lesson-footer">STEM+ · Cloud Computing B / DevOps · Lesson 5 of the course sequence</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var order = ['lint', 'unit', 'integration', 'e2e'];
+  var labels = { lint: 'Lint', unit: 'Unit Tests', integration: 'Integration Tests', e2e: 'End-to-End Tests' };
+  var state = { lint: 'pass', unit: 'pass', integration: 'pass', e2e: 'pass' };
+
+  var buttons = document.querySelectorAll('#build-widget [data-build-stage]');
+  var verdict = document.querySelector('[data-build-verdict]');
+  var readout = document.querySelector('[data-build-readout]');
+
+  function render() {
+    var firstFail = null;
+    order.forEach(function (stage) {
+      if (state[stage] === 'fail' && firstFail === null) firstFail = stage;
+    });
+
+    buttons.forEach(function (btn) {
+      var stage = btn.getAttribute('data-build-stage');
+      btn.setAttribute('data-state', state[stage]);
+      btn.textContent = labels[stage] + ': ' + (state[stage] === 'pass' ? 'Pass' : 'Fail');
+      btn.classList.toggle('is-pass', state[stage] === 'pass');
+      btn.classList.toggle('is-fail', state[stage] === 'fail');
+    });
+
+    verdict.classList.remove('is-pass', 'is-fail');
+    if (firstFail === null) {
+      verdict.classList.add('is-pass');
+      verdict.textContent = 'Overall: GREEN — every stage passing.';
+      readout.textContent = 'A developer merging right now gets a clean signal: safe to build on.';
+    } else {
+      verdict.classList.add('is-fail');
+      verdict.textContent = 'Overall: RED — failed at "' + labels[firstFail] + '".';
+      var stopIndex = order.indexOf(firstFail);
+      var skipped = order.slice(stopIndex + 1).map(function (s) { return labels[s]; });
+      readout.textContent = skipped.length
+        ? 'In a real fail-fast pipeline, the run would stop here — ' + skipped.join(', ') + ' never even get a chance to run, saving time.'
+        : 'This was the last stage — every earlier check already passed.';
+    }
+  }
+
+  buttons.forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var stage = btn.getAttribute('data-build-stage');
+      state[stage] = state[stage] === 'pass' ? 'fail' : 'pass';
+      render();
+    });
+  });
+
+  render();
+});
+</script>

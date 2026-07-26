@@ -1,0 +1,171 @@
+<meta charset="UTF-8">
+<title>Lesson 15: Scaling and Self-Healing in an Orchestrator — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · Cloud Computing B / DevOps · Unit 5 · Lesson 15</span>
+  <h1>Scaling and Self-Healing in an Orchestrator</h1>
+  <p class="subtitle">Lesson 14 named the pieces an orchestrator schedules. This lesson is about what it does with them the moment reality stops matching what was asked for — a pod crashes, or traffic changes, and nobody has to notice by hand.</p>
+  <p class="nav-links"><a href="0014-core-concepts-pods-nodes-and-clusters.html" class="nav-prev">← Lesson 14</a> <a href="../Unit%206/0016-logs-metrics-and-traces-three-different-windows-into-a-system.html" class="nav-next">Unit 6, Lesson 16 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Unit 4 built a habit worth recognizing again here: declare a desired state, and let a tool continuously reconcile reality against it. An orchestrator applies that exact same idea to running pods, checking constantly, not just when a human remembers to look.</p>
+
+  <h2>Desired state, continuously enforced</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    A <strong>replica count</strong> is the number of identical pod copies an orchestrator is told should be running at all times — the desired state for that workload. The orchestrator continuously compares the actual running count against this number: if a pod crashes and the count drops below it, the orchestrator starts a replacement automatically, without anyone paging anyone. This automatic, unattended recovery is called <strong>self-healing</strong>.
+  </div>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    Scaling a replica count up or down in response to demand is the same <strong>elasticity</strong> idea from Cloud Computing A's auto scaling groups, applied one layer down — instead of adding or removing whole servers, the orchestrator adds or removes pods, often across the same fleet of nodes, based on metrics like CPU usage or request rate.
+  </div>
+
+  <h2>Try it: crash a pod and change demand</h2>
+  <p>Set a desired replica count, then crash pods and shift demand, and watch the orchestrator continuously correct back toward the desired state.</p>
+
+  <div class="widget" id="selfheal-widget">
+    <p class="widget-label">Interactive: self-healing and scaling</p>
+    <div class="fm-row">
+      <button class="widget-btn" type="button" data-heal-set-desired="3">Set desired replicas: 3</button>
+      <button class="widget-btn" type="button" data-heal-set-desired="6">Set desired replicas: 6</button>
+      <button class="widget-btn" type="button" data-heal-crash>Crash a random pod</button>
+      <button class="widget-btn" type="button" data-heal-reset>Reset</button>
+    </div>
+    <p class="verdict" data-heal-verdict>Desired: 0 · Running: 0.</p>
+    <p class="plot-readout" data-heal-log></p>
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Worked example</span>
+    A checkout service is set to 6 replicas. One node hosting 2 of those pods fails entirely — hardware failure, exactly the kind Cloud Computing A's Unit 6 covered. The orchestrator notices the running count drop to 4, compares it against the desired 6, and schedules 2 new pods onto the cluster's remaining healthy nodes within seconds — the same automatic-failover instinct from redundancy and failover, just applied at the pod level instead of the availability-zone level.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why self-healing only works if the desired state was set correctly in the first place</span>
+    An orchestrator has no opinion about whether 6 replicas is actually the right number — it just enforces whatever number it was told, relentlessly. If a deploy accidentally sets the desired count to 0, the orchestrator will just as diligently keep it at 0, "healing" a running service back down to nothing. Self-healing recovers from failures within the declared desired state; it can't recover from a wrong desired state, which is exactly why Unit 4's version-controlled, reviewed configuration matters just as much here as it did for infrastructure.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What does an orchestrator do when a pod crashes and the running count drops below the desired replica count?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">It automatically starts a replacement pod, without requiring a human to notice or intervene.</button>
+      <button class="quiz-choice" data-correct="false">It pages an engineer and waits for manual approval before doing anything.</button>
+      <button class="quiz-choice" data-correct="false">It permanently reduces the desired replica count to match.</button>
+      <button class="quiz-choice" data-correct="false">It takes no action of any kind.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Self-healing means the orchestrator reconciles actual state against desired state automatically.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. How is orchestrator-level scaling similar to Cloud Computing A's auto scaling groups?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">It's the same elasticity idea applied one layer down — adjusting the number of pods instead of whole servers, based on demand.</button>
+      <button class="quiz-choice" data-correct="false">It has nothing in common with auto scaling groups at all.</button>
+      <button class="quiz-choice" data-correct="false">It only ever scales down, never up.</button>
+      <button class="quiz-choice" data-correct="false">It requires manually provisioning new physical hardware for every change.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Both apply the same elastic, demand-driven scaling principle, just at different layers.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why can't self-healing recover from a desired replica count that was set incorrectly, like accidentally set to 0?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">The orchestrator only enforces whatever desired state it's told — it has no way to know that number itself is wrong.</button>
+      <button class="quiz-choice" data-correct="false">Self-healing always overrides any desired count with a safe default.</button>
+      <button class="quiz-choice" data-correct="false">A desired count of 0 is technically impossible to declare.</button>
+      <button class="quiz-choice" data-correct="false">Self-healing only applies to infrastructure, never to pods.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Self-healing enforces the declared state faithfully, including a mistaken one — it can't judge correctness.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="self-healing|self healing">
+    <p class="quiz-prompt">4. Fill in the blank: an orchestrator's automatic, unattended recovery of crashed pods back to the desired replica count is called ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Self-healing continuously reconciles actual state against the declared desired state.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="replica count|replica">
+    <p class="quiz-prompt">5. Fill in the blank: the number of identical pod copies an orchestrator is told should be running at all times is called the ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The replica count is the desired state the orchestrator continuously enforces.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: Kubernetes's <a href="https://kubernetes.io/docs/concepts/workloads/autoscaling/">autoscaling</a> documentation covers replica scaling driven automatically by real workload metrics.</p>
+
+  <p class="ask-teacher">Curious how an orchestrator decides exactly when a pod counts as "crashed" versus just slow to respond? Ask your teacher — that's what I'm here for. Next up: Unit 6 asks how anyone actually knows what a running system is doing right now — starting with the three different signals that answer that question.</p>
+
+  <footer class="lesson-footer">STEM+ · Cloud Computing B / DevOps · Lesson 15 of the course sequence</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var desired = 0;
+  var running = 0;
+  var log = [];
+
+  var verdict = document.querySelector('[data-heal-verdict]');
+  var logEl = document.querySelector('[data-heal-log]');
+  var setButtons = document.querySelectorAll('[data-heal-set-desired]');
+  var crashBtn = document.querySelector('[data-heal-crash]');
+  var resetBtn = document.querySelector('[data-heal-reset]');
+
+  function reconcile() {
+    if (running < desired) {
+      var started = desired - running;
+      log.unshift('Orchestrator noticed ' + running + '/' + desired + ' running — scheduled ' + started + ' replacement pod(s).');
+      running = desired;
+    }
+  }
+
+  function render() {
+    verdict.classList.remove('is-pass', 'is-fail');
+    verdict.classList.add(running === desired ? 'is-pass' : 'is-fail');
+    verdict.textContent = 'Desired: ' + desired + ' · Running: ' + running + '.';
+    logEl.innerHTML = log.slice(0, 5).map(function (l) { return '• ' + l; }).join('<br>');
+  }
+
+  setButtons.forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      desired = parseInt(btn.getAttribute('data-heal-set-desired'), 10);
+      log.unshift('Desired replica count set to ' + desired + '.');
+      reconcile();
+      render();
+    });
+  });
+
+  crashBtn.addEventListener('click', function () {
+    if (running === 0) {
+      log.unshift('No running pods to crash.');
+      render();
+      return;
+    }
+    running--;
+    log.unshift('A pod crashed — running count dropped to ' + running + '.');
+    reconcile();
+    render();
+  });
+
+  resetBtn.addEventListener('click', function () {
+    desired = 0; running = 0; log = [];
+    render();
+  });
+
+  render();
+});
+</script>

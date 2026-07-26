@@ -1,0 +1,144 @@
+<meta charset="UTF-8">
+<title>Lesson 9: Rollbacks: Planning for the Deploy That Goes Wrong — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · Cloud Computing B / DevOps · Unit 3 · Lesson 9</span>
+  <h1>Rollbacks: Planning for the Deploy That Goes Wrong</h1>
+  <p class="subtitle">Lesson 8's canary and blue-green strategies limit how many users see a bad deploy. Neither one decides what to actually do once one's been caught — that's a separate decision, and it needs to be made before the incident, not during it.</p>
+  <p class="nav-links"><a href="0008-deployment-strategies-blue-green-and-canary-releases.html" class="nav-prev">← Lesson 8</a> <a href="../Unit%204/0010-infrastructure-as-code-treating-servers-like-source-code.html" class="nav-next">Unit 4, Lesson 10 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Every deployment strategy in this unit reduces risk — none of them reduces it to zero. Something will eventually pass every test, look clean on a canary slice, and still break in a way nobody predicted. What happens in the next five minutes depends entirely on whether the team decided how to respond back when they were calm, or is deciding it for the first time while the site is down.</p>
+
+  <h2>Three ways to actually respond</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    A <strong>rollback</strong> reverts a deployment to the last known-good version — undoing the bad change rather than fixing it in place. <strong>Roll-forward</strong> is the opposite: instead of reverting, the team ships a new deploy that fixes the problem. Rollback is usually faster, since the previous version is already known to work; roll-forward is sometimes the only real option, if reverting isn't safe (for example, a database migration that already ran can't simply be un-run).
+  </div>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    A <strong>feature flag</strong> is a runtime switch, checked by the running code itself, that turns a specific piece of functionality on or off without a new deployment. Used as a "kill switch," a feature flag can disable exactly the broken feature in seconds — faster than any rollback or roll-forward, since nothing has to be rebuilt, retested, or redeployed at all.
+  </div>
+
+  <h2>Try it: pick a response, see the time to mitigate</h2>
+  <p>A bad deploy just caused an error spike. Try each response and see how quickly it actually stops the bleeding.</p>
+
+  <div class="widget" id="rollback-widget">
+    <p class="widget-label">Interactive: choosing an incident response</p>
+    <p class="fm-row">
+      <button class="widget-btn" type="button" data-response="rollback">Rollback to last known-good version</button>
+      <button class="widget-btn" type="button" data-response="forward">Roll forward with a fix</button>
+      <button class="widget-btn" type="button" data-response="flag">Flip the feature flag off</button>
+    </p>
+    <p class="verdict" data-rollback-verdict>Pick a response to see how it plays out.</p>
+    <p class="plot-hint" data-rollback-note></p>
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Worked example: why a rollback isn't always available</span>
+    A deploy adds a new required column to the production database and starts writing to it immediately. The new code breaks — but rolling back the application code alone now points old code at a database schema it was never written for, which can break just as badly, sometimes worse. Here the safe path is usually roll-forward: ship a fix that doesn't depend on reverting the database change. This is exactly why database migrations get special handling in serious infrastructure as code practice (Unit 4) — they're one of the few changes that a rollback can't cleanly undo.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why the rollback plan has to exist before the deploy, not after</span>
+    Deciding "how would we undo this if it goes wrong" during the incident wastes exactly the time that matters most — every minute spent figuring out whether a rollback is safe, whether a feature flag exists for this code path, or who has permission to trigger either one, is a minute the bad deploy keeps affecting real users. Teams that treat rollback planning as part of writing the deploy, not as an afterthought, turn "the deploy broke something" from a crisis into a five-minute routine.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What is the key difference between a rollback and rolling forward?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">A rollback reverts to the last known-good version; rolling forward ships a new fix instead of reverting.</button>
+      <button class="quiz-choice" data-correct="false">They are two different names for exactly the same action.</button>
+      <button class="quiz-choice" data-correct="false">A rollback always takes longer than writing and testing a new fix.</button>
+      <button class="quiz-choice" data-correct="false">Rolling forward means disabling the application entirely.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Rollback reverts; roll-forward fixes without reverting — they solve the same problem two different ways.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why might a rollback not be safe after a deploy that included a database migration?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Reverting the application code alone can leave old code running against a database schema it was never written for.</button>
+      <button class="quiz-choice" data-correct="false">Database migrations are always automatically undone by any rollback.</button>
+      <button class="quiz-choice" data-correct="false">Rollbacks are technically impossible for any application with a database.</button>
+      <button class="quiz-choice" data-correct="false">Migrations have no relationship to application code whatsoever.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A schema change that already ran can leave reverted code mismatched with the current database state.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why can a feature flag "kill switch" mitigate an incident faster than a rollback or roll-forward?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Flipping a runtime switch requires no rebuilding, retesting, or redeploying at all.</button>
+      <button class="quiz-choice" data-correct="false">Feature flags automatically fix the underlying bug in the code.</button>
+      <button class="quiz-choice" data-correct="false">Feature flags always take longer than a full redeploy.</button>
+      <button class="quiz-choice" data-correct="false">Feature flags can only be used once per application, ever.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A flag flip is nearly instant because it skips the entire build-test-deploy cycle.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="rollback">
+    <p class="quiz-prompt">4. Fill in the blank: reverting a deployment to the last known-good version, rather than fixing the problem in place, is called a ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A rollback is usually faster than a fix, since the previous version is already known to work.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="feature flag">
+    <p class="quiz-prompt">5. Fill in the blank: a runtime switch checked by running code that turns a specific piece of functionality on or off without a new deployment is called a ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Feature flags can disable broken functionality in seconds, without touching the deployment pipeline at all.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: Atlassian's <a href="https://www.atlassian.com/incident-management/kpis/rollback">deployment rollback</a> guide covers rollback strategy as part of a broader incident response process, the same framing this lesson builds on.</p>
+
+  <p class="ask-teacher">Curious how a team decides in advance which of these three responses fits a given change? Ask your teacher — that's what I'm here for. Next up: Unit 4 turns from deploying code to managing the infrastructure code runs on — and treating server configuration with the same rigor as the code itself.</p>
+
+  <footer class="lesson-footer">STEM+ · Cloud Computing B / DevOps · Lesson 9 of the course sequence</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var responses = {
+    rollback: {
+      verdict: 'Rollback triggered — reverted to the last known-good version.',
+      note: 'Mitigated in about 2 minutes. Fast, because the previous version was already proven to work — no new code to trust.'
+    },
+    forward: {
+      verdict: 'Roll-forward triggered — a new fix is being written, tested, and deployed.',
+      note: 'Mitigated in about 25 minutes. Slower, since the fix has to go through CI and deployment again — but sometimes it\'s the only safe option, like after a database migration a rollback can\'t cleanly undo.'
+    },
+    flag: {
+      verdict: 'Feature flag flipped off — the broken feature is disabled at runtime.',
+      note: 'Mitigated in under 10 seconds. Fastest option by far, but only works if a flag already existed around this exact code path — it has to be planned for ahead of time.'
+    }
+  };
+
+  var buttons = document.querySelectorAll('#rollback-widget [data-response]');
+  var verdict = document.querySelector('[data-rollback-verdict]');
+  var note = document.querySelector('[data-rollback-note]');
+
+  buttons.forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var r = responses[btn.getAttribute('data-response')];
+      verdict.textContent = r.verdict;
+      note.textContent = r.note;
+    });
+  });
+});
+</script>

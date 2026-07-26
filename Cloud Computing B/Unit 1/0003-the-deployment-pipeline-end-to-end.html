@@ -1,0 +1,175 @@
+<meta charset="UTF-8">
+<title>Lesson 3: The Deployment Pipeline, End to End — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · Cloud Computing B / DevOps · Unit 1 · Lesson 3</span>
+  <h1>The Deployment Pipeline, End to End</h1>
+  <p class="subtitle">Lessons 1 and 2 argued that DevOps is culture first. Culture still needs a concrete path for code to travel — from a developer's keyboard to a user's screen. This lesson maps that whole path once, so every later unit has a place to slot into.</p>
+  <p class="nav-links"><a href="0002-culture-before-tools-what-devops-actually-changes.html" class="nav-prev">← Lesson 2</a> <a href="../Unit%202/0004-continuous-integration-merging-early-and-often.html" class="nav-next">Unit 2, Lesson 4 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Every practice this course covers — automated builds, deployment strategies, infrastructure as code, orchestration, observability — exists somewhere along one continuous path from a developer committing a change to a user actually experiencing it. Seeing that whole path once, before zooming into any one stage of it, makes every later unit easier to place: each one is really just a deep dive on a single stop along this map.</p>
+
+  <h2>The deployment pipeline, defined</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    A <strong>deployment pipeline</strong> (often called a <strong>CI/CD pipeline</strong>) is the automated sequence of stages a code change passes through between being committed and running in production — typically build, test, package, deploy, and release, with monitoring wrapped around the whole thing. "Automated" is the key word: the same sequence runs the same way every time, without a human manually repeating each step by hand.
+  </div>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    A <strong>build artifact</strong> is the packaged, runnable output of the build stage — a compiled binary, a bundled application, or (as Unit 5 covers) a container image — versioned and stored so that the exact same artifact that passed every test is the one that actually gets deployed, instead of rebuilding from source at each stage and risking something changing in between.
+  </div>
+
+  <h2>Try it: walk the pipeline</h2>
+  <p>Click through each stage below in order. Each one names the unit of this course where you'll go deep on it.</p>
+
+  <div class="widget" id="pipeline-widget">
+    <p class="widget-label">Interactive: the deployment pipeline, stage by stage</p>
+    <div class="fm-tabs" id="pipeline-stages">
+      <button class="fm-tab is-active" type="button" data-stage="commit">1. Commit</button>
+      <button class="fm-tab" type="button" data-stage="build">2. Build &amp; Test</button>
+      <button class="fm-tab" type="button" data-stage="package">3. Package</button>
+      <button class="fm-tab" type="button" data-stage="iac">4. Provision</button>
+      <button class="fm-tab" type="button" data-stage="deploy">5. Deploy &amp; Release</button>
+      <button class="fm-tab" type="button" data-stage="orchestrate">6. Run &amp; Scale</button>
+      <button class="fm-tab" type="button" data-stage="observe">7. Observe &amp; Respond</button>
+    </div>
+    <p class="verdict" data-pipeline-desc>A developer pushes a committed change to a shared repository, kicking off everything that follows.</p>
+    <p class="plot-hint" data-pipeline-unit">Covered in: Unit 1 (this unit) — every later stage assumes a change has already been committed.</p>
+    <p class="plot-readout" data-pipeline-progress>Stages explored: 1 of 7.</p>
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why mapping the whole pipeline first is worth doing</span>
+    It's tempting to treat "CI," "CD," "IaC," and "orchestration" as a pile of unrelated buzzwords to memorize separately. They're not — they're consecutive stops on one path, each one solving the problem the previous stage hands off. CI (Unit 2) exists because merging code without automated checks is risky. Deployment strategies (Unit 3) exist because even correctly-tested code can still fail in production. Infrastructure as code (Unit 4) exists because the environment that code deploys into needs to be as reliable and reviewable as the code itself. Orchestration (Unit 5) exists because a fleet of containers needs to be run, not just built. Observability (Unit 6) exists because "it deployed successfully" and "it's working correctly for users right now" are two different claims. Nothing in this course is a detour — it's all one pipeline, examined one stage at a time.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What makes a deployment pipeline "automated," as opposed to just a documented process?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">The same sequence of stages runs the same way every time without a human manually repeating each step by hand.</button>
+      <button class="quiz-choice" data-correct="false">It requires an engineer to type each deployment command from a checklist.</button>
+      <button class="quiz-choice" data-correct="false">It only runs once, the very first time an application is built.</button>
+      <button class="quiz-choice" data-correct="false">It has no defined stages at all.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Automation, not documentation, is what makes a pipeline consistent and repeatable.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why does a pipeline deploy the same build artifact that passed every test, instead of rebuilding from source at each stage?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Rebuilding risks something changing between stages, so the exact artifact that was tested is the one that should actually run.</button>
+      <button class="quiz-choice" data-correct="false">Rebuilding is always technically impossible after the first build.</button>
+      <button class="quiz-choice" data-correct="false">Artifacts cannot be stored or reused for any reason.</button>
+      <button class="quiz-choice" data-correct="false">It has no effect on reliability one way or the other.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Reusing the tested artifact guarantees what shipped is exactly what was verified.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. According to this lesson, how do CI, deployment strategies, infrastructure as code, orchestration, and observability relate to each other?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">They are consecutive stages of one continuous deployment pipeline, each solving a problem the previous stage hands off.</button>
+      <button class="quiz-choice" data-correct="false">They are unrelated, competing technologies that solve the exact same problem.</button>
+      <button class="quiz-choice" data-correct="false">Only one of them is ever used in a real deployment pipeline at a time.</button>
+      <button class="quiz-choice" data-correct="false">They apply only to companies that don't use cloud computing.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Each later unit is a deep dive on one stop along the same end-to-end pipeline this lesson maps.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="deployment pipeline|ci/cd pipeline|pipeline">
+    <p class="quiz-prompt">4. Fill in the blank: the automated sequence of stages a code change passes through between being committed and running in production is called a ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The deployment (CI/CD) pipeline is the thread connecting every unit of this course.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="build artifact|artifact">
+    <p class="quiz-prompt">5. Fill in the blank: the packaged, runnable, versioned output of the build stage — the exact thing that gets deployed after passing every test — is called a build ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>An artifact is built once, tested, and then carried unchanged through the rest of the pipeline.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: Google Cloud's <a href="https://docs.cloud.google.com/architecture/devops/devops-tech-continuous-delivery">continuous delivery overview</a> walks through the same pipeline shape this lesson mapped, from source commit to production release.</p>
+
+  <p class="ask-teacher">Curious what this pipeline looks like as an actual configuration file, instead of a diagram? Ask your teacher — that's what I'm here for. Next up: Unit 2 starts at the very first stage — what actually happens when a developer's change meets everyone else's.</p>
+
+  <footer class="lesson-footer">STEM+ · Cloud Computing B / DevOps · Lesson 3 of the course sequence</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var stages = {
+    commit: {
+      desc: 'A developer pushes a committed change to a shared repository, kicking off everything that follows.',
+      unit: 'Covered in: Unit 1 (this unit) — every later stage assumes a change has already been committed.'
+    },
+    build: {
+      desc: 'An automated build compiles or bundles the code, then automated test suites run against it, catching problems within minutes of the commit instead of days later.',
+      unit: 'Covered in: Unit 2 — Continuous Integration.'
+    },
+    package: {
+      desc: 'The tested build is packaged into a versioned build artifact — often a container image — so the exact thing that was tested is the exact thing that ships.',
+      unit: 'Covered in: Unit 2 — Continuous Integration (and Unit 5, where that artifact becomes a running container).'
+    },
+    iac: {
+      desc: 'The servers, networking, and environment the artifact will run on are defined as version-controlled configuration, not clicked together by hand.',
+      unit: 'Covered in: Unit 4 — Infrastructure as Code.'
+    },
+    deploy: {
+      desc: 'The artifact is delivered into a real environment using a deliberate deployment strategy, and traffic is shifted to the new version — with a rollback plan ready if it goes wrong.',
+      unit: 'Covered in: Unit 3 — Continuous Delivery & Deployment.'
+    },
+    orchestrate: {
+      desc: 'A fleet of running containers is scheduled, scaled, and kept healthy automatically across many machines, instead of managed one server at a time.',
+      unit: 'Covered in: Unit 5 — Container Orchestration.'
+    },
+    observe: {
+      desc: 'Logs, metrics, and traces reveal whether the deployed change is actually healthy in production, and alert the right person if it isn’t.',
+      unit: 'Covered in: Unit 6 — Observability.'
+    }
+  };
+
+  var order = ['commit', 'build', 'package', 'iac', 'deploy', 'orchestrate', 'observe'];
+  var visited = { commit: true };
+
+  var tabs = document.querySelectorAll('#pipeline-stages [data-stage]');
+  var descEl = document.querySelector('[data-pipeline-desc]');
+  var unitEl = document.querySelector('[data-pipeline-unit]');
+  var progressEl = document.querySelector('[data-pipeline-progress]');
+
+  function render(stage) {
+    descEl.textContent = stages[stage].desc;
+    unitEl.textContent = stages[stage].unit;
+    var count = Object.keys(visited).length;
+    progressEl.textContent = 'Stages explored: ' + count + ' of ' + order.length + (count === order.length ? ' — you’ve walked the whole pipeline.' : '.');
+  }
+
+  tabs.forEach(function (tab) {
+    tab.addEventListener('click', function () {
+      tabs.forEach(function (t) { t.classList.remove('is-active'); });
+      tab.classList.add('is-active');
+      var stage = tab.getAttribute('data-stage');
+      visited[stage] = true;
+      render(stage);
+    });
+  });
+
+  render('commit');
+});
+</script>

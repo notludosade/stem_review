@@ -1,0 +1,153 @@
+<meta charset="UTF-8">
+<title>Lesson 8: Pointer Arithmetic and Arrays — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="advanced">
+  <span class="kicker">STEM+ · Systems Programming &amp; Architecture: CS · Unit 3 · Lesson 8</span>
+  <h1>Pointer Arithmetic and Arrays</h1>
+  <p class="subtitle">In Python, indexing a list and following a linked reference are unrelated ideas. In C, arr[i] and pointer arithmetic are not just related — they're literally the same operation, and seeing why explains a lot about how C actually runs.</p>
+  <p class="nav-links"><a href="0007-pointers-variables-that-hold-addresses.html" class="nav-prev">← Lesson 7</a> <a href="0009-dangling-pointers-memory-leaks-and-use-after-free.html" class="nav-next">Lesson 9 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>A C array is really just a single block of contiguous memory, and a pointer to its first element is enough information to reach every other element in it — as long as you know how big each element is. That's what pointer arithmetic is for.</p>
+
+  <h2>Adding to a pointer moves it by whole elements</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    <strong>Pointer arithmetic</strong> lets you add or subtract an integer from a pointer, and the result moves by that many <em>elements</em>, not bytes — the compiler automatically multiplies by <code class="inline-code">sizeof</code> the pointer's type. If <code class="inline-code">p</code> is an <code class="inline-code">int *</code> pointing at address <code class="inline-code">1000</code> on a system where an int is 4 bytes, then <code class="inline-code">p + 1</code> points at address <code class="inline-code">1004</code>, not <code class="inline-code">1001</code> — one whole int further along, exactly where the next int in an array would sit.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Worked example: arr[i] is *(arr + i)</span>
+    Given <code class="inline-code">int arr[5] = {10, 20, 30, 40, 50};</code>, the name <code class="inline-code">arr</code> decays into a pointer to its first element whenever it's used in an expression. <code class="inline-code">arr[2]</code> and <code class="inline-code">*(arr + 2)</code> are not just equivalent — they compile to the identical machine code: take <code class="inline-code">arr</code>'s address, move forward by 2 elements, and dereference. This is why C array indexing never checks whether the index is in bounds: <code class="inline-code">arr[2]</code> is really just "some arithmetic, then a dereference," and the compiler has no idea whether <code class="inline-code">2</code> is a valid index for this particular array or not.
+  </div>
+
+  <h2>Try it: walk an array with pointer arithmetic</h2>
+  <p>Step through <code class="inline-code">arr</code> using only a pointer and addition, and watch each step's address and dereferenced value.</p>
+
+  <div class="widget" id="ptr-arith-widget">
+    <p class="widget-label">Interactive: pointer arithmetic over an array</p>
+    <div id="ptr-arith-array"></div>
+    <p class="plot-readout" data-ptr-arith-readout>p = arr (pointing at index 0). Step forward to move p.</p>
+    <div class="fm-row">
+      <button class="widget-btn" type="button" data-ptr-arith-next>p = p + 1</button>
+      <button class="widget-btn" type="button" data-ptr-arith-prev>p = p − 1</button>
+      <button class="widget-btn" type="button" data-ptr-arith-reset>Reset</button>
+    </div>
+  </div>
+
+  <h2>Out-of-bounds arithmetic is undefined, not blocked</h2>
+  <div class="box why">
+    <span class="box-label">Why arr[10] on a 5-element array doesn't crash immediately, and why that's worse, not better</span>
+    Nothing about C's array indexing checks bounds at run time — <code class="inline-code">arr[10]</code> on a 5-element array is legal syntax that computes an address 10 elements past <code class="inline-code">arr</code>'s start and dereferences <em>whatever happens to be there</em>. Sometimes that's unused memory and nothing visibly bad happens. Sometimes it's another variable, and you silently corrupt it. Sometimes it crashes. The genuinely dangerous part is that all three outcomes are possible from the exact same buggy line, which is why an out-of-bounds C bug can pass every test on your machine and still corrupt memory on someone else's. Unit 8 covers this exact category of problem — undefined behavior — in full.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. If p is an int * pointing at address 2000 and an int is 4 bytes, what address does p + 3 point to?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">2012 — three whole ints (3 × 4 bytes) further along.</button>
+      <button class="quiz-choice" data-correct="false">2003 — three bytes further along.</button>
+      <button class="quiz-choice" data-correct="false">6000 — the pointer's value is multiplied by 3.</button>
+      <button class="quiz-choice" data-correct="false">2000 — pointer arithmetic never actually changes the address.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Pointer arithmetic moves by whole elements, scaled automatically by the pointed-to type's size.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. What is arr[2] actually equivalent to, given int arr[5]?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">*(arr + 2) — pointer arithmetic followed by a dereference, compiling to identical machine code.</button>
+      <button class="quiz-choice" data-correct="false">A completely unrelated operation that shares no machine code with pointer arithmetic.</button>
+      <button class="quiz-choice" data-correct="false">A function call that looks up the third element in a hash table.</button>
+      <button class="quiz-choice" data-correct="false">arr multiplied by the number 2.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Array indexing and pointer arithmetic are literally the same operation in C, just written differently.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why is an out-of-bounds array access in C especially dangerous, compared to the same mistake in Python?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">C never checks bounds at run time, so the access silently reads or writes whatever memory happens to be at that address, with unpredictable results.</button>
+      <button class="quiz-choice" data-correct="false">C always crashes immediately and identically on every out-of-bounds access.</button>
+      <button class="quiz-choice" data-correct="false">C arrays are not allowed to have a fixed size, so bounds are meaningless.</button>
+      <button class="quiz-choice" data-correct="false">This mistake is actually impossible to make in C due to compiler restrictions.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Python raises an IndexError; C has no such check and simply computes and dereferences whatever address results.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="pointer arithmetic">
+    <p class="quiz-prompt">4. Fill in the blank: adding or subtracting an integer from a pointer, moving it by whole elements rather than raw bytes, is called ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Pointer arithmetic automatically scales by the size of the pointed-to type.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="undefined behavior">
+    <p class="quiz-prompt">5. Fill in the blank: an out-of-bounds C array access has no single guaranteed outcome — it may do nothing visible, corrupt other data, or crash, all from the same line. This category of problem is called ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Undefined behavior is covered in full in Unit 8 — this is your first real preview of it.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: cppreference's <a href="https://en.cppreference.com/w/c/language/operator_arithmetic">"Arithmetic operators"</a> page documents the exact rules C follows for pointer addition, subtraction, and comparison.</p>
+
+  <p class="ask-teacher">Curious how a 2D array's pointer arithmetic works, with two dimensions instead of one? Ask your teacher — that's what I'm here for. Next up: what happens when a pointer keeps pointing somewhere after that memory stops being valid.</p>
+
+  <footer class="lesson-footer">STEM+ · Systems Programming &amp; Architecture: CS · Lesson 8 of the course sequence</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var arr = [10, 20, 30, 40, 50];
+  var idx = 0;
+  var container = document.getElementById('ptr-arith-array');
+  var readout = document.querySelector('[data-ptr-arith-readout]');
+
+  function render() {
+    container.innerHTML = '';
+    arr.forEach(function (val, i) {
+      var cell = document.createElement('span');
+      cell.textContent = val;
+      cell.style.display = 'inline-block';
+      cell.style.minWidth = '2.4rem';
+      cell.style.textAlign = 'center';
+      cell.style.padding = '0.4rem 0.2rem';
+      cell.style.margin = '0.15rem';
+      cell.style.border = '1.5px solid ' + (i === idx ? 'var(--accent)' : 'var(--border)');
+      cell.style.borderRadius = '4px';
+      cell.style.background = i === idx ? 'var(--accent-soft)' : 'var(--code-bg)';
+      cell.style.fontFamily = 'monospace';
+      container.appendChild(cell);
+    });
+    var addr = 1000 + idx * 4;
+    readout.textContent = 'p = arr + ' + idx + '  →  address ' + addr + '  →  *p = ' + arr[idx];
+  }
+
+  document.querySelector('[data-ptr-arith-next]').addEventListener('click', function () {
+    if (idx < arr.length - 1) idx++;
+    render();
+  });
+  document.querySelector('[data-ptr-arith-prev]').addEventListener('click', function () {
+    if (idx > 0) idx--;
+    render();
+  });
+  document.querySelector('[data-ptr-arith-reset]').addEventListener('click', function () {
+    idx = 0;
+    render();
+  });
+
+  render();
+});
+</script>

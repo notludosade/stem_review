@@ -1,0 +1,173 @@
+<meta charset="UTF-8">
+<title>Lesson 13: From One Container to a Fleet: Why Orchestration Exists — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · Cloud Computing B / DevOps · Unit 5 · Lesson 13</span>
+  <h1>From One Container to a Fleet: Why Orchestration Exists</h1>
+  <p class="subtitle">Cloud Computing A's Unit 2 covered what a single container is. Real applications don't run one — they run dozens or hundreds, spread across many machines, and somebody or something has to decide which container runs where.</p>
+  <p class="nav-links"><a href="../Unit%204/0012-config-drift-and-why-iac-prevents-it.html" class="nav-prev">← Unit 4, Lesson 12</a> <a href="0014-core-concepts-pods-nodes-and-clusters.html" class="nav-next">Lesson 14 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Starting one container by hand is a single command. Starting fifty containers across ten servers, making sure each server isn't overloaded, restarting any container that crashes, and doing all of that again every time a new version deploys — that stops being a single command and starts being a full-time job, if a human is the one doing it.</p>
+
+  <h2>What orchestration actually automates</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    <strong>Container orchestration</strong> is the automated scheduling, networking, scaling, and health management of many containers running across many machines. An <strong>orchestrator</strong> is the system that does it: given a fleet of containers and a set of available servers, it decides which container runs on which server, restarts anything that crashes, and adjusts how many copies of each container are running — continuously, without a human manually deciding placement for every single one.
+  </div>
+
+  <h2>Try it: manage a growing fleet by hand vs. with an orchestrator</h2>
+  <p>Add containers one at a time and see what each approach requires to keep them all running correctly.</p>
+
+  <div class="widget" id="orchestration-widget">
+    <p class="widget-label">Interactive: manual container management vs. an orchestrator</p>
+    <div class="fm-tabs" id="orch-tabs">
+      <button class="fm-tab is-active" type="button" data-orch-mode="manual">Manual</button>
+      <button class="fm-tab" type="button" data-orch-mode="orchestrated">Orchestrated</button>
+    </div>
+    <p class="fm-row">
+      <button class="widget-btn" type="button" data-orch-add>Add a container to the fleet</button>
+      <button class="widget-btn" type="button" data-orch-crash>Simulate a random crash</button>
+      <button class="widget-btn" type="button" data-orch-reset>Reset</button>
+    </p>
+    <p class="verdict" data-orch-verdict>Fleet size: 0 containers.</p>
+    <p class="plot-readout" data-orch-readout></p>
+    <p class="plot-hint">Watch what happens to "human tasks required" as the fleet grows, and after a crash.</p>
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Worked example</span>
+    A fleet grows from 3 containers to 30 over a few months. Managed manually, each new container means picking a server with room, starting it, registering it with a load balancer, and watching for crashes across all 30 by hand — the operational effort grows roughly in step with fleet size. Managed by an orchestrator, growing from 3 to 30 means updating one number in a configuration file (Unit 4's declarative style, applied to containers): the orchestrator handles placement, registration, and crash recovery for all 30 exactly the way it did for 3.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why orchestration became necessary at the exact moment containers won</span>
+    Lesson 5 of Cloud Computing A's Unit 2 explained why containers replaced VMs as the default packaging format — they're lightweight enough to run in huge numbers on the same hardware. That same lightness is what makes manual management fall apart: a team running three VMs could reasonably manage them by hand, but a team running three hundred containers, split across dozens of machines and constantly being replaced by new deploys, physically cannot track that by hand without an automated scheduler doing the bookkeeping. Orchestration isn't an optional add-on to containers — it's the tool that makes running containers at real scale possible at all.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What does a container orchestrator actually do?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Automatically schedules, networks, scales, and manages the health of many containers across many machines.</button>
+      <button class="quiz-choice" data-correct="false">Writes application code inside each container automatically.</button>
+      <button class="quiz-choice" data-correct="false">Replaces the need for containers entirely with virtual machines.</button>
+      <button class="quiz-choice" data-correct="false">Only manages a single container at a time, never a fleet.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Orchestration is fundamentally about managing many containers across many machines automatically.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why does manually managing a container fleet become impractical as it grows?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Placement, registration, and crash recovery all have to be tracked by hand for every container, and that effort scales with fleet size.</button>
+      <button class="quiz-choice" data-correct="false">Containers become physically larger in size as a fleet grows.</button>
+      <button class="quiz-choice" data-correct="false">It doesn't — manual management stays equally easy at any scale.</button>
+      <button class="quiz-choice" data-correct="false">Cloud providers technically forbid running more than a few containers manually.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The bookkeeping burden of manual management grows directly with the number of containers.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why does this lesson argue orchestration became necessary at the same moment containers became the default packaging format?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">The lightness that lets containers run in huge numbers is exactly what makes manual, per-container management fall apart at that scale.</button>
+      <button class="quiz-choice" data-correct="false">Containers cannot run at all without an orchestrator present.</button>
+      <button class="quiz-choice" data-correct="false">Orchestration was invented before containers existed.</button>
+      <button class="quiz-choice" data-correct="false">There is no real connection between container adoption and orchestration.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Containers' scale advantage is precisely what makes automated management necessary rather than optional.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="container orchestration|orchestration">
+    <p class="quiz-prompt">4. Fill in the blank: the automated scheduling, networking, scaling, and health management of many containers across many machines is called ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Container orchestration is what makes running containers at real scale possible.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="orchestrator">
+    <p class="quiz-prompt">5. Fill in the blank: the system that decides which container runs on which server, restarts crashed containers, and adjusts running copies is called an ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>An orchestrator does continuously, automatically, what a human would otherwise have to do by hand.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: Kubernetes's own <a href="https://kubernetes.io/docs/concepts/overview/">"What is Kubernetes?"</a> overview covers the most widely-used orchestrator, and the exact problem it was built to solve.</p>
+
+  <p class="ask-teacher">Curious how an orchestrator decides which server has "room" for a new container? Ask your teacher — that's what I'm here for. Next up: the vocabulary an orchestrator actually uses internally — what it's scheduling, and where.</p>
+
+  <footer class="lesson-footer">STEM+ · Cloud Computing B / DevOps · Lesson 13 of the course sequence</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var mode = 'manual';
+  var state = {
+    manual: { count: 0, tasks: 0, crashed: 0 },
+    orchestrated: { count: 0, tasks: 0, crashed: 0 }
+  };
+
+  var tabs = document.querySelectorAll('#orch-tabs [data-orch-mode]');
+  var verdict = document.querySelector('[data-orch-verdict]');
+  var readout = document.querySelector('[data-orch-readout]');
+  var addBtn = document.querySelector('[data-orch-add]');
+  var crashBtn = document.querySelector('[data-orch-crash]');
+  var resetBtn = document.querySelector('[data-orch-reset]');
+
+  function render() {
+    var s = state[mode];
+    verdict.textContent = 'Fleet size: ' + s.count + ' container(s).';
+    if (mode === 'manual') {
+      readout.textContent = 'Human tasks so far: ' + s.tasks + ' (pick a server, start it, register it with the load balancer, watch for crashes — one full task per container, plus manual recovery per crash). Crashes needing manual restart: ' + s.crashed + '.';
+    } else {
+      readout.textContent = 'Human tasks so far: ' + s.tasks + ' (update the desired container count once — the orchestrator handles placement, registration, and crash recovery on its own). Crashes auto-recovered by the orchestrator: ' + s.crashed + '.';
+    }
+  }
+
+  tabs.forEach(function (tab) {
+    tab.addEventListener('click', function () {
+      tabs.forEach(function (t) { t.classList.remove('is-active'); });
+      tab.classList.add('is-active');
+      mode = tab.getAttribute('data-orch-mode');
+      render();
+    });
+  });
+
+  addBtn.addEventListener('click', function () {
+    var s = state[mode];
+    s.count++;
+    if (mode === 'manual') s.tasks++;
+    else if (s.count === 1) s.tasks++;
+    render();
+  });
+
+  crashBtn.addEventListener('click', function () {
+    var s = state[mode];
+    if (s.count === 0) return;
+    s.crashed++;
+    if (mode === 'manual') s.tasks++;
+    render();
+  });
+
+  resetBtn.addEventListener('click', function () {
+    state.manual = { count: 0, tasks: 0, crashed: 0 };
+    state.orchestrated = { count: 0, tasks: 0, crashed: 0 };
+    render();
+  });
+
+  render();
+});
+</script>

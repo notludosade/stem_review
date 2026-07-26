@@ -1,0 +1,166 @@
+<meta charset="UTF-8">
+<title>Lesson 14: Core Concepts: Pods, Nodes, and Clusters — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · Cloud Computing B / DevOps · Unit 5 · Lesson 14</span>
+  <h1>Core Concepts: Pods, Nodes, and Clusters</h1>
+  <p class="subtitle">Lesson 13 established that an orchestrator schedules containers onto machines. This lesson names the actual pieces it's working with — the vocabulary every orchestrator, including the most popular one, is built on.</p>
+  <p class="nav-links"><a href="0013-from-one-container-to-a-fleet-why-orchestration-exists.html" class="nav-prev">← Lesson 13</a> <a href="0015-scaling-and-self-healing-in-an-orchestrator.html" class="nav-next">Lesson 15 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>"The orchestrator schedules containers onto machines" hides three separate concepts worth naming individually: the smallest thing being scheduled, the machine it's scheduled onto, and the whole group of machines being managed together as one system.</p>
+
+  <h2>Pods, nodes, and clusters</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    A <strong>pod</strong> is the smallest deployable unit an orchestrator schedules — usually one container, occasionally a small group of tightly-coupled containers that must always run together on the same machine (like a main application container and a small helper that ships its logs). The orchestrator schedules whole pods, never individual containers separately from the pod they belong to.
+  </div>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    A <strong>node</strong> is a single machine — physical or virtual — that's part of the orchestrator's available capacity, capable of running one or more pods. A <strong>cluster</strong> is the whole collection of nodes managed together as a single system, with the orchestrator's own coordination software (the <strong>control plane</strong>) making scheduling decisions across every node in it, so pods are placed based on total available capacity across the whole cluster, not judged node by node by hand.
+  </div>
+
+  <h2>Try it: build a cluster and schedule pods</h2>
+  <p>Add nodes to the cluster, then schedule pods and watch where the orchestrator places each one.</p>
+
+  <div class="widget" id="cluster-widget">
+    <p class="widget-label">Interactive: scheduling pods onto a cluster</p>
+    <div class="fm-row">
+      <button class="widget-btn" type="button" data-cluster-add-node>Add a node (capacity: 3 pods)</button>
+      <button class="widget-btn" type="button" data-cluster-schedule>Schedule a new pod</button>
+      <button class="widget-btn" type="button" data-cluster-reset>Reset</button>
+    </div>
+    <div class="fm-row" style="flex-wrap:wrap; gap:0.8rem; margin-top:0.8rem;" id="cluster-nodes"></div>
+    <p class="verdict" data-cluster-verdict>No nodes in the cluster yet — add one to begin.</p>
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why a pod, not a container, is the unit of scheduling</span>
+    A logging helper that has to read a main application's log files needs to share that container's filesystem and network address — it only makes sense running on the exact same machine, at the exact same time, as the container it's helping. Scheduling containers individually could scatter these two across different nodes, breaking the whole point of the helper. Grouping them into one pod guarantees the orchestrator always places (and removes) both together, treating "things that must run in the same place" as a single schedulable unit instead of hoping two independent scheduling decisions happen to agree.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What is a pod?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">The smallest deployable unit an orchestrator schedules — usually one container, sometimes a small group that must run together.</button>
+      <button class="quiz-choice" data-correct="false">A physical data center building.</button>
+      <button class="quiz-choice" data-correct="false">A synonym for an entire cluster of machines.</button>
+      <button class="quiz-choice" data-correct="false">A type of load balancer routing algorithm.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A pod is the atomic unit the orchestrator actually schedules, not a container by itself.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. What is the relationship between a node and a cluster?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">A node is a single machine; a cluster is the whole collection of nodes managed together as one system.</button>
+      <button class="quiz-choice" data-correct="false">A node and a cluster are exactly the same thing.</button>
+      <button class="quiz-choice" data-correct="false">A cluster is a single machine inside a larger node.</button>
+      <button class="quiz-choice" data-correct="false">Nodes and clusters have no relationship to each other.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A cluster is the group; a node is one member machine within that group.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why are a main application container and its tightly-coupled logging helper usually grouped into the same pod?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">They need to share the same filesystem and machine, so grouping them guarantees the orchestrator always places them together.</button>
+      <button class="quiz-choice" data-correct="false">Pods are required to contain exactly one container at all times.</button>
+      <button class="quiz-choice" data-correct="false">Grouping them makes both containers run on entirely separate clusters.</button>
+      <button class="quiz-choice" data-correct="false">It has no effect on where either container is ultimately scheduled.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A shared pod is what guarantees co-location for containers that depend on running together.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="node">
+    <p class="quiz-prompt">4. Fill in the blank: a single physical or virtual machine that's part of an orchestrator's available capacity is called a ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A node is one machine capable of running one or more pods.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="cluster">
+    <p class="quiz-prompt">5. Fill in the blank: the whole collection of nodes managed together as a single system by the orchestrator's control plane is called a ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The cluster is the whole managed group of nodes, scheduled as one system rather than node by node.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: Kubernetes's <a href="https://kubernetes.io/docs/concepts/workloads/pods/">"Pods"</a> documentation covers this exact scheduling unit in the orchestrator that made the term standard.</p>
+
+  <p class="ask-teacher">Curious how the control plane actually decides which node has room for a new pod? Ask your teacher — that's what I'm here for. Next up: what actually happens, automatically, when a pod crashes or traffic to the cluster spikes.</p>
+
+  <footer class="lesson-footer">STEM+ · Cloud Computing B / DevOps · Lesson 14 of the course sequence</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var NODE_CAPACITY = 3;
+  var nodes = [];
+
+  var nodesEl = document.getElementById('cluster-nodes');
+  var verdict = document.querySelector('[data-cluster-verdict]');
+  var addNodeBtn = document.querySelector('[data-cluster-add-node]');
+  var scheduleBtn = document.querySelector('[data-cluster-schedule]');
+  var resetBtn = document.querySelector('[data-cluster-reset]');
+
+  function render() {
+    nodesEl.innerHTML = '';
+    nodes.forEach(function (node, i) {
+      var box = document.createElement('div');
+      box.className = 'box';
+      box.style.minWidth = '140px';
+      box.innerHTML = '<span class="box-label">Node ' + (i + 1) + '</span>' +
+        '<p>' + node.pods + ' / ' + NODE_CAPACITY + ' pods scheduled</p>';
+      nodesEl.appendChild(box);
+    });
+  }
+
+  addNodeBtn.addEventListener('click', function () {
+    nodes.push({ pods: 0 });
+    verdict.textContent = 'Cluster now has ' + nodes.length + ' node(s), ' + (nodes.length * NODE_CAPACITY) + ' total pod capacity.';
+    render();
+  });
+
+  scheduleBtn.addEventListener('click', function () {
+    if (nodes.length === 0) {
+      verdict.textContent = 'No nodes available — add a node before scheduling a pod.';
+      return;
+    }
+    var target = null;
+    nodes.forEach(function (node) {
+      if (node.pods < NODE_CAPACITY && (target === null || node.pods < target.pods)) target = node;
+    });
+    if (!target) {
+      verdict.textContent = 'Cluster is at full capacity — add another node to schedule more pods.';
+      return;
+    }
+    target.pods++;
+    var index = nodes.indexOf(target);
+    verdict.textContent = 'Pod scheduled onto Node ' + (index + 1) + ' (had the most free capacity).';
+    render();
+  });
+
+  resetBtn.addEventListener('click', function () {
+    nodes = [];
+    verdict.textContent = 'No nodes in the cluster yet — add one to begin.';
+    render();
+  });
+
+  render();
+});
+</script>

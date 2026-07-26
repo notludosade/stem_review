@@ -1,0 +1,171 @@
+<meta charset="UTF-8">
+<title>Lesson 12: Config Drift and Why IaC Prevents It — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · Cloud Computing B / DevOps · Unit 4 · Lesson 12</span>
+  <h1>Config Drift and Why IaC Prevents It</h1>
+  <p class="subtitle">Lesson 11's declarative file only guarantees state at the moment it's applied. This lesson is about what happens in between applies, when someone changes something the file doesn't know about.</p>
+  <p class="nav-links"><a href="0011-declarative-vs-imperative-infrastructure.html" class="nav-prev">← Lesson 11</a> <a href="../Unit%205/0013-from-one-container-to-a-fleet-why-orchestration-exists.html" class="nav-next">Unit 5, Lesson 13 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>A declarative IaC file (Lesson 11) describes the desired state accurately — right up until someone logs into a server directly and changes a setting by hand to fix an urgent problem at 2 a.m. That fix works. It also just made the IaC file wrong, and nothing about the file itself knows it happened.</p>
+
+  <h2>Drift: when reality quietly stops matching the file</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    <strong>Configuration drift</strong> is the gap that opens up between a system's actual, running configuration and what its IaC file says it should be — caused by any manual change made outside the IaC process: a console click, an emergency SSH fix, a setting changed by another tool entirely. The file isn't automatically wrong when this happens; it's just no longer the truth, and nothing alerts anyone to that fact on its own.
+  </div>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    <strong>Reconciliation</strong> is the process — run manually or on a schedule — of comparing actual state against the declared desired state and correcting any difference found, exactly the way Lesson 11's declarative tool behaves on every apply. Running reconciliation regularly is what actually catches drift: without it, a manual fix from months ago can sit silently until it causes a much more confusing problem down the line.
+  </div>
+
+  <h2>Try it: let drift build up, then reconcile</h2>
+  <p>Advance time and see manual "emergency fixes" accumulate as drift. Then reconcile and watch the IaC tool put things back the way the file says they should be.</p>
+
+  <div class="widget" id="drift-widget">
+    <p class="widget-label">Interactive: configuration drift over time</p>
+    <p class="fm-row">
+      <button class="widget-btn" type="button" data-drift-advance>Advance one week</button>
+      <button class="widget-btn" type="button" data-drift-reconcile>Run reconciliation</button>
+      <button class="widget-btn" type="button" data-drift-reset>Reset</button>
+    </p>
+    <p class="verdict" data-drift-verdict>Week 0 — actual state matches the IaC file exactly.</p>
+    <p class="plot-readout" data-drift-log></p>
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Worked example</span>
+    A server's firewall rule is manually opened on a Friday night to unblock an urgent partner integration, with a mental note to "add it to the IaC file on Monday." Monday gets busy. Three months later, a security audit finds a firewall rule nobody can explain, on a server whose IaC file says it shouldn't exist — because it doesn't, in the file. Regular reconciliation would have either caught and reverted the rule the following week (forcing someone to actually add it to the file if it was meant to stay), or confirmed it was deliberate and current, instead of leaving a three-month-old mystery for an audit to find.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why IaC's real promise isn't "no manual changes ever" — it's "no manual changes survive silently"</span>
+    Emergency fixes will keep happening; no policy stops a 2 a.m. incident from needing an immediate, undocumented change. IaC's actual value is what happens next: a scheduled reconciliation run will either revert that unplanned change back to the file's declared state, or — if the change should stick around — force it to become a reviewed, version-controlled update to the file itself, closing the loop instead of leaving it open. Some teams take this further with <strong>immutable infrastructure</strong>: instead of patching a running server at all, any change replaces it with a freshly-provisioned one built from the current IaC file, making drift structurally impossible rather than just detectable.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What is configuration drift?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">The gap between a system's actual running configuration and what its IaC file declares it should be, caused by changes made outside the IaC process.</button>
+      <button class="quiz-choice" data-correct="false">A bug in the IaC tool itself that corrupts configuration files.</button>
+      <button class="quiz-choice" data-correct="false">The normal, expected result of every IaC apply.</button>
+      <button class="quiz-choice" data-correct="false">A synonym for a merge conflict in application code.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Drift is specifically caused by changes the IaC file doesn't know about, not by the tool itself.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. What does reconciliation actually do?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Compares actual state against the declared desired state and corrects any difference found.</button>
+      <button class="quiz-choice" data-correct="false">Permanently deletes the IaC configuration file.</button>
+      <button class="quiz-choice" data-correct="false">Prevents any engineer from ever making a manual emergency fix.</button>
+      <button class="quiz-choice" data-correct="false">Only runs once, the very first time infrastructure is provisioned.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Reconciliation is what actually catches and corrects drift once it exists.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why does this lesson describe immutable infrastructure as making drift "structurally impossible" rather than just detectable?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Instead of patching a running server, any change replaces it with a freshly-provisioned one built from the current IaC file.</button>
+      <button class="quiz-choice" data-correct="false">Immutable infrastructure forbids any infrastructure from ever changing at all.</button>
+      <button class="quiz-choice" data-correct="false">It relies on engineers simply promising never to make manual changes.</button>
+      <button class="quiz-choice" data-correct="false">It has no real relationship to configuration drift.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Replacing rather than patching removes the very possibility of an untracked manual change persisting.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="configuration drift|config drift|drift">
+    <p class="quiz-prompt">4. Fill in the blank: the gap between a system's actual configuration and what its IaC file declares, caused by changes made outside the IaC process, is called ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Drift happens silently — nothing alerts anyone to it without regular reconciliation.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="reconciliation">
+    <p class="quiz-prompt">5. Fill in the blank: the process of comparing actual state against declared desired state and correcting any difference is called ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Regular reconciliation is what turns an unplanned change into either a reverted mistake or a properly reviewed update.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: AWS's <a href="https://docs.aws.amazon.com/config/latest/developerguide/WhatIsConfig.html">AWS Config</a> documentation covers detecting exactly this kind of drift against a declared baseline in a real provider.</p>
+
+  <p class="ask-teacher">Curious how immutable infrastructure handles a server that's actively serving traffic when it needs to be replaced? Ask your teacher — that's what I'm here for. Next up: Unit 5 leaves single servers behind and asks how to run not one container, but an entire fleet of them, reliably.</p>
+
+  <footer class="lesson-footer">STEM+ · Cloud Computing B / DevOps · Lesson 12 of the course sequence</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var week = 0;
+  var drifts = [];
+  var possibleDrifts = [
+    'Firewall rule opened manually for an urgent partner integration',
+    'Disk size increased by hand after running low on space',
+    'A config value edited directly on the server to work around a bug',
+    'An extra user account created manually for a contractor'
+  ];
+
+  var verdict = document.querySelector('[data-drift-verdict]');
+  var log = document.querySelector('[data-drift-log]');
+  var advanceBtn = document.querySelector('[data-drift-advance]');
+  var reconcileBtn = document.querySelector('[data-drift-reconcile]');
+  var resetBtn = document.querySelector('[data-drift-reset]');
+
+  function render() {
+    verdict.classList.remove('is-pass', 'is-fail');
+    if (drifts.length === 0) {
+      verdict.classList.add('is-pass');
+      verdict.textContent = 'Week ' + week + ' — actual state matches the IaC file exactly.';
+      log.textContent = '';
+    } else {
+      verdict.classList.add('is-fail');
+      verdict.textContent = 'Week ' + week + ' — ' + drifts.length + ' undocumented change(s) have drifted from the IaC file.';
+      log.innerHTML = drifts.map(function (d) { return '• ' + d; }).join('<br>');
+    }
+  }
+
+  advanceBtn.addEventListener('click', function () {
+    week++;
+    if (week % 2 === 0) {
+      drifts.push(possibleDrifts[(drifts.length) % possibleDrifts.length]);
+    }
+    render();
+  });
+
+  reconcileBtn.addEventListener('click', function () {
+    if (drifts.length > 0) {
+      log.innerHTML = 'Reconciliation reverted: <br>' + drifts.map(function (d) { return '• ' + d; }).join('<br>');
+    }
+    drifts = [];
+    verdict.classList.remove('is-fail');
+    verdict.classList.add('is-pass');
+    verdict.textContent = 'Week ' + week + ' — reconciled. Actual state matches the IaC file again.';
+  });
+
+  resetBtn.addEventListener('click', function () {
+    week = 0;
+    drifts = [];
+    render();
+  });
+
+  render();
+});
+</script>

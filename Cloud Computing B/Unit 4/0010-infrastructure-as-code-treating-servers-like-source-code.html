@@ -1,0 +1,169 @@
+<meta charset="UTF-8">
+<title>Lesson 10: Infrastructure as Code: Treating Servers Like Source Code — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · Cloud Computing B / DevOps · Unit 4 · Lesson 10</span>
+  <h1>Infrastructure as Code: Treating Servers Like Source Code</h1>
+  <p class="subtitle">Unit 3 deployed application code carefully — tested, versioned, reversible. This unit asks why the environment underneath that code usually didn't get the same treatment, and what changes when it does.</p>
+  <p class="nav-links"><a href="../Unit%203/0009-rollbacks-planning-for-the-deploy-that-goes-wrong.html" class="nav-prev">← Unit 3, Lesson 9</a> <a href="0011-declarative-vs-imperative-infrastructure.html" class="nav-next">Lesson 11 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Cloud Computing A covered VPCs, load balancers, and managed databases as things you configure. It didn't say how. The traditional answer — an engineer clicking through a provider's web console, one setting at a time — works fine once. It falls apart the second time someone needs to reproduce that exact environment, and it falls apart completely the tenth time.</p>
+
+  <h2>Infrastructure, defined the same way as an application</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    <strong>Infrastructure as Code (IaC)</strong> means defining servers, networking, and every other piece of infrastructure in version-controlled configuration files, then having a tool read those files and provision the actual resources — instead of an engineer manually clicking through a console or running one-off commands. The infrastructure a system runs on gets treated exactly like the application code running on it: reviewed, versioned, and reproducible from the same file every time.
+  </div>
+
+  <h2>Try it: provision the same environment twice</h2>
+  <p>Pick an approach, then provision an environment a few times and see what happens to consistency and speed.</p>
+
+  <div class="widget" id="iac-widget">
+    <p class="widget-label">Interactive: manual console clicks vs. Infrastructure as Code</p>
+    <div class="fm-tabs" id="iac-tabs">
+      <button class="fm-tab is-active" type="button" data-iac-mode="manual">Manual (console clicks)</button>
+      <button class="fm-tab" type="button" data-iac-mode="iac">Infrastructure as Code</button>
+    </div>
+    <p class="fm-row">
+      <button class="widget-btn" type="button" data-iac-provision>Provision the environment</button>
+      <button class="widget-btn" type="button" data-iac-reset>Reset</button>
+    </p>
+    <p class="verdict" data-iac-verdict>No environments provisioned yet.</p>
+    <p class="plot-readout" data-iac-readout></p>
+    <p class="plot-hint">Try provisioning three or four times in a row and compare how identical each result is.</p>
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Worked example</span>
+    A team needs identical staging and production environments. Provisioned manually, an engineer clicks through a console twice, and inevitably picks a slightly different disk size, forgets one security rule, or names a resource differently — the two environments quietly diverge from day one. Provisioned with IaC, the same configuration file is applied twice, once per environment: the tool reads the exact same definition both times, so staging and production start out — and stay — structurally identical, differing only in the values (like environment name) the file was deliberately parameterized to change.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why "it's version-controlled" is the part that matters most</span>
+    A console click leaves no history — no record of who changed a setting, when, or why, and no way to review a change before it takes effect. An IaC configuration file lives in the same kind of repository as application code: every change is a diff, reviewable before merging (Unit 2's CI can even validate it automatically), and revertible with the same rollback tools Unit 3 covered for application deployments. The infrastructure stops being something only one specific engineer remembers how to rebuild, and becomes something the whole team can read, review, and trust.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What does Infrastructure as Code mean?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Defining infrastructure in version-controlled configuration files that a tool reads to provision actual resources.</button>
+      <button class="quiz-choice" data-correct="false">Writing application code that happens to run on a server.</button>
+      <button class="quiz-choice" data-correct="false">Manually clicking through a cloud provider's console faster than usual.</button>
+      <button class="quiz-choice" data-correct="false">A programming language used only for infrastructure diagrams.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>IaC treats infrastructure definitions like source code, provisioned by a tool rather than clicked by hand.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why do two environments provisioned manually through a console tend to diverge over time, even when the intent was identical?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Manual, repeated clicking is error-prone — small inconsistencies like a different disk size or a missed setting creep in each time.</button>
+      <button class="quiz-choice" data-correct="false">Cloud providers intentionally randomize every console click.</button>
+      <button class="quiz-choice" data-correct="false">Manual provisioning is technically incapable of creating two similar environments.</button>
+      <button class="quiz-choice" data-correct="false">It doesn't — manual provisioning always produces identical results.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Human repetition introduces small, easy-to-miss inconsistencies that a configuration file doesn't.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why does putting infrastructure configuration under version control matter, beyond just automating the clicks?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Every change becomes a reviewable, revertible diff instead of an unrecorded console click only one engineer remembers.</button>
+      <button class="quiz-choice" data-correct="false">Version control makes infrastructure provisioning permanently impossible to change.</button>
+      <button class="quiz-choice" data-correct="false">It has no benefit beyond what automation alone already provides.</button>
+      <button class="quiz-choice" data-correct="false">Version control only works for application code, never for infrastructure.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Review history and revertibility are exactly what a console click can never provide on its own.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="infrastructure as code|iac">
+    <p class="quiz-prompt">4. Fill in the blank: defining servers and networking in version-controlled configuration files that a tool provisions automatically is called ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>IaC applies the same rigor to infrastructure that Unit 2 and 3 applied to application code.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="version control|version-controlled">
+    <p class="quiz-prompt">5. Fill in the blank: storing infrastructure configuration files in the same kind of ___ repository as application code is what makes every infrastructure change a reviewable, revertible diff.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Version control is what turns infrastructure changes into something a whole team can review, not just one engineer's memory.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: HashiCorp's <a href="https://www.hashicorp.com/en/resources/what-is-infrastructure-as-code">"What is Infrastructure as Code?"</a> overview covers this exact shift, from a team behind one of the tools that popularized it.</p>
+
+  <p class="ask-teacher">Curious what an actual IaC configuration file looks like for something like a VPC from Cloud Computing A? Ask your teacher — that's what I'm here for. Next up: not every IaC tool describes infrastructure the same way — the difference between saying what you want and saying how to get there.</p>
+
+  <footer class="lesson-footer">STEM+ · Cloud Computing B / DevOps · Lesson 10 of the course sequence</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var mode = 'manual';
+  var results = { manual: [], iac: [] };
+  var manualOutcomes = [
+    '3 servers, 250GB disk, security rule for port 443 only',
+    '3 servers, 300GB disk, security rules for ports 443 and 22',
+    '2 servers (missed one), 250GB disk, security rule for port 443 only',
+    '3 servers, 250GB disk, forgot the security rule entirely'
+  ];
+
+  var tabs = document.querySelectorAll('#iac-tabs [data-iac-mode]');
+  var verdict = document.querySelector('[data-iac-verdict]');
+  var readout = document.querySelector('[data-iac-readout]');
+  var provisionBtn = document.querySelector('[data-iac-provision]');
+  var resetBtn = document.querySelector('[data-iac-reset]');
+
+  function render() {
+    var r = results[mode];
+    if (r.length === 0) {
+      verdict.textContent = 'No environments provisioned yet in this mode.';
+      readout.textContent = '';
+      return;
+    }
+    verdict.textContent = r.length + ' environment(s) provisioned in ' + (mode === 'manual' ? 'Manual' : 'IaC') + ' mode.';
+    readout.innerHTML = r.map(function (line, i) { return 'Attempt ' + (i + 1) + ': ' + line; }).join('<br>');
+  }
+
+  tabs.forEach(function (tab) {
+    tab.addEventListener('click', function () {
+      tabs.forEach(function (t) { t.classList.remove('is-active'); });
+      tab.classList.add('is-active');
+      mode = tab.getAttribute('data-iac-mode');
+      render();
+    });
+  });
+
+  provisionBtn.addEventListener('click', function () {
+    if (mode === 'manual') {
+      var outcome = manualOutcomes[results.manual.length % manualOutcomes.length];
+      results.manual.push(outcome);
+    } else {
+      results.iac.push('3 servers, 250GB disk, security rule for port 443 only');
+    }
+    render();
+  });
+
+  resetBtn.addEventListener('click', function () {
+    results.manual = [];
+    results.iac = [];
+    render();
+  });
+
+  render();
+});
+</script>

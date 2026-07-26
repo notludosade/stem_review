@@ -1,0 +1,172 @@
+<meta charset="UTF-8">
+<title>Lesson 5: The Stack — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="advanced">
+  <span class="kicker">STEM+ · Systems Programming &amp; Architecture: CS · Unit 2 · Lesson 5</span>
+  <h1>The Stack: Function Calls, Frames, and Local Variables</h1>
+  <p class="subtitle">Every function call you've ever written — in Python, Java, or C — used a stack to do it, whether you noticed or not. This lesson makes that machinery visible: what actually gets pushed, what gets popped, and why local variables vanish the instant a function returns.</p>
+  <p class="nav-links"><a href="0004-the-process-address-space.html" class="nav-prev">← Lesson 4</a> <a href="0006-the-heap-dynamic-allocation-and-why-it-can-go-wrong.html" class="nav-next">Lesson 6 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Lesson 4 named the stack as one of the four regions of a process's address space. This lesson opens it up: every time a function is called, something concrete gets added to the stack, and every time a function returns, that same thing gets removed — in strict last-in-first-out order.</p>
+
+  <h2>Stack frames: one per active function call</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    A <strong>stack frame</strong> (or activation record) is a block of memory pushed onto the stack every time a function is called, holding that call's local variables, its parameters, and its <strong>return address</strong> — where execution should resume in the calling function once this one finishes. When the function returns, its entire frame is popped off the stack in one step, and every local variable it held is gone — not zeroed out and cleaned up individually, just no longer considered part of the stack at all.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Worked example</span>
+    Consider <code class="inline-code">main()</code> calling <code class="inline-code">square(3)</code>, which calls <code class="inline-code">multiply(3, 3)</code>. At the deepest point, the stack holds three frames at once, bottom to top: <code class="inline-code">main</code>'s frame, then <code class="inline-code">square</code>'s frame (holding its parameter <code class="inline-code">n = 3</code> and the return address back into <code class="inline-code">main</code>), then <code class="inline-code">multiply</code>'s frame (holding <code class="inline-code">a = 3</code>, <code class="inline-code">b = 3</code>, and the return address back into <code class="inline-code">square</code>). When <code class="inline-code">multiply</code> returns its result, its frame is popped, execution resumes in <code class="inline-code">square</code> exactly where it left off, and the stack is back to two frames.
+  </div>
+
+  <h2>Try it: push and pop frames yourself</h2>
+  <p>Step through the exact call sequence from the worked example above, and watch the stack grow and shrink one frame at a time.</p>
+
+  <div class="widget" id="stack-widget">
+    <p class="widget-label">Interactive: the call stack in action</p>
+    <div id="stack-display"></div>
+    <p class="plot-readout" data-stack-readout>Press "Call" to begin.</p>
+    <div class="fm-row">
+      <button class="widget-btn" type="button" data-stack-call>Call →</button>
+      <button class="widget-btn" type="button" data-stack-return>Return ←</button>
+      <button class="widget-btn" type="button" data-stack-reset>Reset</button>
+    </div>
+  </div>
+
+  <h2>Why local variables can't outlive their function</h2>
+  <div class="box why">
+    <span class="box-label">Why a pointer to a local variable becomes invalid the moment its function returns</span>
+    A local variable's storage <em>is</em> a specific slice of its stack frame. The instant that function returns, its frame is popped — that memory is no longer reserved for anything, and the very next function call can (and often will) immediately overwrite it with a completely different frame. A function that returns the address of one of its own local variables is handing back a pointer to memory that is about to be reused for something else entirely. This exact mistake gets its own name and its own lesson later this unit (Lesson 9) — remember it started here: local variables live and die with their stack frame, full stop.
+  </div>
+
+  <h2>Stack overflow: running out of room</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    A <strong>stack overflow</strong> happens when the stack grows past the space reserved for it — most commonly from recursion that never reaches its base case, pushing a new frame for every call with nothing to stop it. The OS detects the stack running into memory it doesn't own and terminates the program immediately, rather than letting it silently corrupt whatever comes next in memory.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What does a stack frame hold?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">A function call's local variables, parameters, and the return address to resume the caller.</button>
+      <button class="quiz-choice" data-correct="false">Only the program's global variables.</button>
+      <button class="quiz-choice" data-correct="false">Only the compiled machine instructions for the whole program.</button>
+      <button class="quiz-choice" data-correct="false">Dynamically allocated memory requested with malloc.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A frame is per-call bookkeeping: locals, parameters, and where to resume execution afterward.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. In what order are stack frames removed relative to the order they were added?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Last-in-first-out — the most recently called function's frame is always the first one popped.</button>
+      <button class="quiz-choice" data-correct="false">First-in-first-out — frames are removed in the same order they were added.</button>
+      <button class="quiz-choice" data-correct="false">In a random order chosen by the operating system.</button>
+      <button class="quiz-choice" data-correct="false">All frames are removed simultaneously when the program ends.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The stack is strictly last-in-first-out: whichever call is deepest returns, and is popped, first.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why is returning the address of a local variable from a function dangerous?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">That variable's frame is popped the instant the function returns, so the address may already be reused by the next call.</button>
+      <button class="quiz-choice" data-correct="false">Local variables are never assigned any memory address at all.</button>
+      <button class="quiz-choice" data-correct="false">Functions are not allowed to return pointers of any kind in C.</button>
+      <button class="quiz-choice" data-correct="false">It causes an immediate compiler error with no exceptions.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The frame's memory isn't erased, but it's no longer reserved — the next call can overwrite it at any time.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="return address">
+    <p class="quiz-prompt">4. Fill in the blank: the value stored in a stack frame telling execution exactly where to resume in the calling function is called the ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The return address is exactly how the CPU knows where to continue once the called function finishes.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="stack overflow">
+    <p class="quiz-prompt">5. Fill in the blank: when unbounded recursion pushes frames past the space reserved for the stack, and the OS terminates the program, this is called a ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Stack overflow is the OS's way of stopping a runaway stack before it corrupts adjacent memory.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: the x86-64 System V ABI's <a href="https://gitlab.com/x86-psABIs/x86-64-ABI">calling convention specification</a> documents, in exact technical detail, how real compilers lay out stack frames and pass arguments on this architecture.</p>
+
+  <p class="ask-teacher">Curious what a real stack overflow error message looks like on your own machine? Ask your teacher — that's what I'm here for. Next up: the other region from Lesson 4 — the heap — and why, unlike the stack, nothing cleans it up for you automatically.</p>
+
+  <footer class="lesson-footer">STEM+ · Systems Programming &amp; Architecture: CS · Lesson 5 of the course sequence</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var calls = [
+    { name: 'main()', detail: 'return address: (program start)' },
+    { name: 'square(3)', detail: 'n = 3   |   return address: back into main' },
+    { name: 'multiply(3, 3)', detail: 'a = 3, b = 3   |   return address: back into square' }
+  ];
+  var stack = [];
+  var display = document.getElementById('stack-display');
+  var readout = document.querySelector('[data-stack-readout]');
+  var callBtn = document.querySelector('[data-stack-call]');
+  var returnBtn = document.querySelector('[data-stack-return]');
+  var resetBtn = document.querySelector('[data-stack-reset]');
+
+  function render() {
+    display.innerHTML = '';
+    if (stack.length === 0) {
+      readout.textContent = 'Stack is empty. Press "Call" to begin.';
+    } else {
+      for (var i = stack.length - 1; i >= 0; i--) {
+        var frame = document.createElement('div');
+        frame.className = 'box';
+        frame.style.margin = '0.3rem 0';
+        frame.style.padding = '0.5rem 0.8rem';
+        frame.innerHTML = '<strong>' + calls[stack[i]].name + '</strong> — ' + calls[stack[i]].detail;
+        display.appendChild(frame);
+      }
+      readout.textContent = stack.length + ' frame(s) on the stack. Top of stack: ' + calls[stack[stack.length - 1]].name;
+    }
+    callBtn.disabled = stack.length >= calls.length;
+    returnBtn.disabled = stack.length === 0;
+  }
+
+  callBtn.addEventListener('click', function () {
+    if (stack.length < calls.length) {
+      stack.push(stack.length);
+      render();
+    }
+  });
+
+  returnBtn.addEventListener('click', function () {
+    if (stack.length > 0) {
+      var popped = calls[stack.pop()].name;
+      render();
+      readout.textContent = popped + ' returned and its frame was popped. ' + (stack.length ? 'Back in ' + calls[stack.length - 1].name + '.' : 'Stack is now empty.');
+    }
+  });
+
+  resetBtn.addEventListener('click', function () {
+    stack = [];
+    render();
+  });
+
+  render();
+});
+</script>

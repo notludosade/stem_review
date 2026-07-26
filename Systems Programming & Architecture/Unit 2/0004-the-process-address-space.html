@@ -1,0 +1,167 @@
+<meta charset="UTF-8">
+<title>Lesson 4: The Process Address Space — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="advanced">
+  <span class="kicker">STEM+ · Systems Programming &amp; Architecture: CS · Unit 2 · Lesson 4</span>
+  <h1>The Process Address Space</h1>
+  <p class="subtitle">Unit 1 ended with a runnable executable. This lesson asks the next question: once that program is actually running, where does everything — its instructions, its global variables, its function calls, its dynamically allocated data — actually live in memory?</p>
+  <p class="nav-links"><a href="../Unit%201/0003-from-source-to-executable-a-walkthrough-in-c.html" class="nav-prev">← Unit 1, Lesson 3</a> <a href="0005-the-stack-function-calls-frames-and-local-variables.html" class="nav-next">Lesson 5 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>In Python or Java, "memory" is mostly invisible — the interpreter or runtime manages it for you, and you rarely think about where a specific variable actually sits. In C, and in every running program regardless of language, memory has real structure: a fixed layout of regions, each with a different purpose, different lifetime, and different rules for what can go wrong. This lesson is the map for the rest of this unit.</p>
+
+  <h2>A process gets its own private view of memory</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    A <strong>process</strong> is a running instance of a program, given its own private <strong>address space</strong> — a range of memory addresses that only it can see, laid out into distinct regions by the operating system. Two processes running the same executable at once each get their own separate address space; a variable at "address 0x1000" in one process is completely unrelated to whatever sits at that same address in the other. (Unit 5 covers exactly how the OS enforces this isolation.)
+  </div>
+
+  <h2>The four regions, from bottom to top</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    Every process's address space is divided into regions with fixed jobs: the <strong>text segment</strong> (also called the code segment) holds the program's compiled machine instructions, and is normally read-only, so a bug can't accidentally overwrite the program's own code. The <strong>data segment</strong> holds global and static variables that have an initial value baked into the executable. The <strong>heap</strong> holds memory the program requests dynamically while running, and grows upward as more is allocated (Lesson 6). The <strong>stack</strong> holds local variables and function-call bookkeeping, and grows downward as functions call other functions (Lesson 5).
+  </div>
+
+  <h2>Try it: explore the layout</h2>
+  <p>Click each region below to see what actually lives there, and notice the heap and stack are drawn growing toward each other from opposite ends of the same space.</p>
+
+  <div class="widget" id="address-space-widget">
+    <p class="widget-label">Interactive: the process address space</p>
+    <svg class="figure" viewBox="0 0 320 280" width="320" height="280" role="img" aria-label="Diagram of a process address space, from high addresses at the top to low addresses at the bottom">
+      <g id="addr-regions"></g>
+    </svg>
+    <p class="plot-readout" data-addr-readout>Click a region to see what lives there.</p>
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Worked example</span>
+    In this tiny program, <code class="inline-code">int global_count = 0;</code> declared outside <code class="inline-code">main</code> lands in the data segment — it has an initial value and exists for the whole life of the program. Inside <code class="inline-code">main</code>, <code class="inline-code">int local_x = 5;</code> lands on the stack — it only exists while <code class="inline-code">main</code> is running. <code class="inline-code">int *p = malloc(sizeof(int));</code> creates a pointer variable on the stack, but the memory it points <em>to</em> — the four bytes <code class="inline-code">malloc</code> hands back — lives on the heap. And the compiled instructions for <code class="inline-code">main</code> itself live in the text segment, already sitting in memory before <code class="inline-code">main</code> ever runs.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why the stack and heap grow toward each other</span>
+    Placing the stack and heap at opposite ends of the address space, growing toward each other across a large region of unused addresses in between, is a deliberate design: neither region has to commit to a fixed maximum size in advance. A program that allocates very little on the heap but recurses deeply gets a huge stack and a tiny heap; a program that recurses shallowly but allocates gigabytes on the heap gets the opposite — both without the OS having to guess ahead of time which one needs more room. The tradeoff, covered later this unit, is that if they ever actually meet, something has gone seriously wrong.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. Why does the text segment normally get marked read-only?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">So a bug in the program can't accidentally overwrite its own compiled instructions while running.</button>
+      <button class="quiz-choice" data-correct="false">Because the text segment is not allowed to contain any machine code.</button>
+      <button class="quiz-choice" data-correct="false">Because only the heap is permitted to store instructions.</button>
+      <button class="quiz-choice" data-correct="false">Read-only marking has no real purpose and is purely historical.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Making instructions read-only protects the program's own code from being corrupted by a bug elsewhere in the program.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. A global variable declared with an initial value outside of any function lives in which region?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">The stack, because all variables live on the stack.</button>
+      <button class="quiz-choice" data-correct="true">The data segment.</button>
+      <button class="quiz-choice" data-correct="false">The text segment, alongside the compiled instructions.</button>
+      <button class="quiz-choice" data-correct="false">The heap, because it exists for the whole program's lifetime.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Global and static variables with a baked-in initial value belong in the data segment, distinct from stack locals and heap allocations.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why do two separate processes running the same executable not interfere with each other's memory?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Each process gets its own private address space, so the same-looking address in each process refers to entirely separate physical memory.</button>
+      <button class="quiz-choice" data-correct="false">Only one process is ever allowed to run a given executable at a time.</button>
+      <button class="quiz-choice" data-correct="false">Processes share one single address space and simply take turns using it.</button>
+      <button class="quiz-choice" data-correct="false">Executables are not permitted to have more than one running instance.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Address space isolation, enforced by the operating system, is exactly what makes two running instances of the same program independent.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="stack">
+    <p class="quiz-prompt">4. Fill in the blank: the region that holds local variables and function-call bookkeeping, growing downward as functions call other functions, is called the ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The stack is dedicated to local variables and call bookkeeping, covered in full in the next lesson.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="heap">
+    <p class="quiz-prompt">5. Fill in the blank: the region that holds memory a program requests dynamically while running, growing upward as more is allocated, is called the ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The heap is where dynamically allocated memory lives, in contrast to the stack's automatic local variables.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: the <a href="https://www.gnu.org/software/libc/manual/html_node/Memory-Allocation-and-Placement.html">GNU C Library manual's section on memory layout</a> describes exactly how a Linux process's address space is organized underneath the model this lesson introduces.</p>
+
+  <p class="ask-teacher">Curious how large a typical process's address space actually is on a modern 64-bit machine? Ask your teacher — that's what I'm here for. Next up: a close look at the stack — exactly what happens, in memory, every time one function calls another.</p>
+
+  <footer class="lesson-footer">STEM+ · Systems Programming &amp; Architecture: CS · Lesson 4 of the course sequence</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var regions = [
+    { key: 'stack', label: 'Stack', y: 8, h: 60, desc: 'Stack (high addresses, grows downward): local variables, function parameters, and return addresses. Unwound automatically when a function returns.' },
+    { key: 'gap', label: '(unused space)', y: 76, h: 60, desc: 'Unused address space between the stack and the heap. Neither region has to commit to a maximum size in advance — they simply grow toward each other as needed.' },
+    { key: 'heap', label: 'Heap', y: 144, h: 60, desc: 'Heap (grows upward): memory requested dynamically at run time with functions like malloc, and released explicitly with free. Covered in full in Lesson 6.' },
+    { key: 'data', label: 'Data Segment', y: 212, h: 34, desc: 'Data segment: global and static variables with a baked-in initial value, present for the entire life of the program.' },
+    { key: 'text', label: 'Text Segment (Code)', y: 254, h: 20, desc: 'Text segment (low addresses): the program\'s compiled machine instructions, normally marked read-only.' }
+  ];
+
+  var svgNS = 'http://www.w3.org/2000/svg';
+  var g = document.getElementById('addr-regions');
+  var x = 60, w = 200;
+
+  regions.forEach(function (r) {
+    var rect = document.createElementNS(svgNS, 'rect');
+    rect.setAttribute('x', x);
+    rect.setAttribute('y', r.y);
+    rect.setAttribute('width', w);
+    rect.setAttribute('height', r.h);
+    rect.setAttribute('rx', 4);
+    rect.setAttribute('stroke-width', 1.5);
+    rect.setAttribute('data-region-key', r.key);
+    rect.style.cursor = 'pointer';
+    rect.style.fill = 'var(--code-bg)';
+    rect.style.stroke = 'var(--border)';
+    g.appendChild(rect);
+
+    var text = document.createElementNS(svgNS, 'text');
+    text.setAttribute('x', x + w / 2);
+    text.setAttribute('y', r.y + r.h / 2 + 4);
+    text.setAttribute('text-anchor', 'middle');
+    text.setAttribute('class', 'fig-label');
+    text.setAttribute('font-style', 'normal');
+    text.textContent = r.label;
+    g.appendChild(text);
+  });
+
+  var readout = document.querySelector('[data-addr-readout]');
+
+  g.querySelectorAll('rect').forEach(function (rect) {
+    rect.addEventListener('click', function () {
+      g.querySelectorAll('rect').forEach(function (r) {
+        r.style.fill = 'var(--code-bg)';
+        r.style.stroke = 'var(--border)';
+      });
+      rect.style.fill = 'var(--accent-soft)';
+      rect.style.stroke = 'var(--accent)';
+      var key = rect.getAttribute('data-region-key');
+      var region = regions.filter(function (r) { return r.key === key; })[0];
+      readout.textContent = region.desc;
+    });
+  });
+});
+</script>

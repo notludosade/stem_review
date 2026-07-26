@@ -1,0 +1,158 @@
+<meta charset="UTF-8">
+<title>Lesson 15: System Calls — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="advanced">
+  <span class="kicker">STEM+ · Systems Programming &amp; Architecture: CS · Unit 5 · Lesson 15</span>
+  <h1>System Calls: Asking the Kernel for Help</h1>
+  <p class="subtitle">Lesson 13 said ordinary programs can't touch hardware directly, and Lesson 14 mentioned processes waiting on a disk read without ever explaining how a process actually asks for one. This lesson closes that gap: the single narrow doorway every program uses to ask the kernel to do something on its behalf.</p>
+  <p class="nav-links"><a href="0014-processes-vs-programs.html" class="nav-prev">← Lesson 14</a> <a href="../Unit%206/0016-threads-vs-processes.html" class="nav-next">Unit 6, Lesson 16 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Calling <code class="inline-code">printf</code> in C looks like an ordinary function call. Underneath, at some point, that call has to actually write bytes to a terminal or a file — and writing to hardware is exactly the kind of thing Lesson 13 said ordinary programs aren't allowed to do directly. The mechanism that bridges that gap is the system call.</p>
+
+  <h2>Two privilege levels: user mode and kernel mode</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    A processor generally runs in one of two privilege levels: <strong>user mode</strong>, where ordinary program code runs with restricted access — it cannot directly touch hardware devices or another process's memory — and <strong>kernel mode</strong>, where the OS kernel runs with full, unrestricted hardware access. A <strong>system call</strong> is a controlled, deliberate request that switches the CPU from user mode into kernel mode for a moment, lets trusted kernel code perform the privileged operation on the program's behalf, and then switches back.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Worked example</span>
+    A C program calls <code class="inline-code">printf("hi\n")</code>. <code class="inline-code">printf</code> itself is ordinary user-mode library code that formats the string, but eventually it calls <code class="inline-code">write()</code> — a system call. That triggers a switch into kernel mode; the kernel, with full hardware access, actually sends those bytes to the terminal device; then control switches back to user mode, and the program's own code resumes right where it left off. From the program's point of view, it looks like one function call. Underneath, it's a full privilege-level round trip.
+  </div>
+
+  <h2>Try it: who's allowed to do what</h2>
+  <p>Pick a mode, then try each operation, and see which ones are actually permitted directly in that mode.</p>
+
+  <div class="widget" id="syscall-widget">
+    <p class="widget-label">Interactive: user mode vs. kernel mode</p>
+    <div class="fm-tabs" id="syscall-mode-tabs">
+      <button class="fm-tab is-active" type="button" data-syscall-mode="user">User Mode</button>
+      <button class="fm-tab" type="button" data-syscall-mode="kernel">Kernel Mode</button>
+    </div>
+    <div class="fm-row" style="flex-wrap:wrap; gap:0.6rem; margin-top:0.8rem;">
+      <button class="widget-btn" type="button" data-syscall-action="add">Add two local variables</button>
+      <button class="widget-btn" type="button" data-syscall-action="write">Write directly to a disk device</button>
+      <button class="widget-btn" type="button" data-syscall-action="peek">Read another process's private memory</button>
+      <button class="widget-btn" type="button" data-syscall-action="own-mem">Read the current process's own memory</button>
+    </div>
+    <p class="verdict" data-syscall-verdict>Pick a mode, then try an action.</p>
+  </div>
+
+  <h2>System call categories worth knowing by name</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    Common system call categories include: <strong>file I/O</strong> (<code class="inline-code">open</code>, <code class="inline-code">read</code>, <code class="inline-code">write</code>, <code class="inline-code">close</code>), <strong>process control</strong> (<code class="inline-code">fork</code> to create a new process, <code class="inline-code">exit</code> to terminate one), and <strong>memory management</strong> (requesting more address space from the OS — what <code class="inline-code">malloc</code> ultimately relies on when the heap needs to grow). Every one of these does something that requires touching real hardware or another process's data — exactly the category of operation user mode alone cannot perform.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why this narrow doorway matters more than it looks like it should</span>
+    System calls are the only way in or out of kernel mode, and that narrowness is deliberate: every single privileged operation any program on the machine ever performs passes through a small, well-defined, checkable set of entry points, instead of arbitrary code reaching out and touching hardware however it wants. That's what makes it possible for the kernel to enforce every guarantee earlier lessons took for granted — that one process can't read another's memory, that a file's permissions are actually checked before it's opened, that a device isn't accessed by two programs in a way that corrupts it. Remove system calls, and there would be no single place left to enforce any of that.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What is a system call?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">A controlled request that switches the CPU into kernel mode so trusted kernel code can perform a privileged operation on the program's behalf.</button>
+      <button class="quiz-choice" data-correct="false">Any ordinary function call between two user-mode functions.</button>
+      <button class="quiz-choice" data-correct="false">A call that always terminates the calling process immediately.</button>
+      <button class="quiz-choice" data-correct="false">A feature only available in interpreted languages, not in C.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>System calls are the controlled bridge between restricted user-mode code and privileged kernel-mode operations.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why can't a program running in user mode write directly to a disk device?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">User mode restricts direct hardware access; only kernel mode, reached through a system call, is permitted to touch hardware directly.</button>
+      <button class="quiz-choice" data-correct="false">Disk devices are physically incapable of being written to by software.</button>
+      <button class="quiz-choice" data-correct="false">User mode and kernel mode have identical privileges, so this restriction doesn't actually exist.</button>
+      <button class="quiz-choice" data-correct="false">Writing to disk requires no privilege distinction of any kind.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Direct hardware access is exactly the privilege user mode withholds, by design.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why does funneling every privileged operation through a small set of system calls matter for security and isolation?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">It gives the kernel one checkable, well-defined place to enforce every guarantee, instead of arbitrary code touching hardware however it wants.</button>
+      <button class="quiz-choice" data-correct="false">It has no security benefit and exists purely for historical reasons.</button>
+      <button class="quiz-choice" data-correct="false">It makes every program run slower with no corresponding benefit.</button>
+      <button class="quiz-choice" data-correct="false">It removes the need for the kernel to check anything at all.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A single, narrow, checkable doorway is what makes process isolation and permission checks enforceable at all.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="kernel mode">
+    <p class="quiz-prompt">4. Fill in the blank: the privilege level in which the OS kernel runs with full, unrestricted hardware access is called ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Kernel mode is reached only through a controlled system call from user mode.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="system call">
+    <p class="quiz-prompt">5. Fill in the blank: printf ultimately relies on a lower-level ___ named write to actually send bytes to a terminal or file.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>write() is a system call — the actual mechanism behind printf's user-mode-looking function call.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: the Linux manual page for <a href="https://man7.org/linux/man-pages/man2/syscalls.2.html">syscalls(2)</a> lists the real system calls a Linux kernel provides, straight from the kernel's own reference documentation.</p>
+
+  <p class="ask-teacher">Curious how to trace every system call a real program makes, using a tool like strace? Ask your teacher — that's what I'm here for. Next up: Unit 6 moves from one process at a time to many things running at once inside a single process — starting with what a thread actually is.</p>
+
+  <footer class="lesson-footer">STEM+ · Systems Programming &amp; Architecture: CS · Lesson 15 of the course sequence</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var permissions = {
+    user:   { add: true, write: false, peek: false, 'own-mem': true },
+    kernel: { add: true, write: true, peek: true, 'own-mem': true }
+  };
+  var labels = {
+    add: 'Add two local variables', write: 'Write directly to a disk device',
+    peek: "Read another process's private memory", 'own-mem': "Read the current process's own memory"
+  };
+  var modeLabels = { user: 'User Mode', kernel: 'Kernel Mode' };
+
+  var mode = 'user';
+  var tabs = document.querySelectorAll('#syscall-mode-tabs [data-syscall-mode]');
+  var actionButtons = document.querySelectorAll('#syscall-widget [data-syscall-action]');
+  var verdict = document.querySelector('#syscall-widget [data-syscall-verdict]');
+
+  tabs.forEach(function (tab) {
+    tab.addEventListener('click', function () {
+      tabs.forEach(function (t) { t.classList.remove('is-active'); });
+      tab.classList.add('is-active');
+      mode = tab.getAttribute('data-syscall-mode');
+      verdict.textContent = modeLabels[mode] + ' selected. Try an action.';
+      verdict.classList.remove('is-pass', 'is-fail');
+    });
+  });
+
+  actionButtons.forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var action = btn.getAttribute('data-syscall-action');
+      var allowed = permissions[mode][action];
+      verdict.classList.remove('is-pass', 'is-fail');
+      verdict.classList.add(allowed ? 'is-pass' : 'is-fail');
+      var note = (!allowed && mode === 'user') ? ' — this requires a system call to switch into kernel mode first.' : '';
+      verdict.textContent = modeLabels[mode] + ' → ' + labels[action] + ': ' + (allowed ? 'Permitted directly' : 'Not permitted directly') + note;
+    });
+  });
+});
+</script>
