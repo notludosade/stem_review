@@ -1,0 +1,151 @@
+<meta charset="UTF-8">
+<title>Lesson 20: From C to Assembly — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="advanced">
+  <span class="kicker">STEM+ · Systems Programming &amp; Architecture: CS · Unit 7 · Lesson 20</span>
+  <h1>From C to Assembly: Reading Compiled Output</h1>
+  <p class="subtitle">Lesson 2 named "the compiler" as the stage that turns C into assembly, and put off actually looking at it. Lesson 19 gave the vocabulary — registers, the ALU. This lesson finally reads real compiler output, one instruction at a time.</p>
+  <p class="nav-links"><a href="0019-inside-the-cpu-registers-alu-and-the-fetch-decode-execute-cycle.html" class="nav-prev">← Lesson 19</a> <a href="0021-caches-and-why-memory-access-patterns-matter-for-speed.html" class="nav-next">Lesson 21 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Take the smallest possible C function and compile it with <code class="inline-code">gcc -S</code> — stopping the pipeline right after the compiler stage, exactly like Lesson 3 did. What comes out is real, readable assembly, and every line of it maps to something Lesson 19 already gave you the words for.</p>
+
+  <pre class="code-block"><code><span class="code-comment">// add.c</span>
+int add(int a, int b) {
+    return a + b;
+}</code></pre>
+
+  <h2>Reading the output, line by line</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    Each line of assembly is one <strong>mnemonic</strong> — a short, human-readable name standing in for a single machine instruction — followed by its <strong>operands</strong>, the registers or values it acts on. On x86-64, a widely used <strong>calling convention</strong> (a fixed agreement compilers follow, from Lesson 5's ABI link) says the first two integer arguments to a function arrive in specific registers, and the return value goes out in another specific register — no C code has to say this explicitly, the compiler just follows the convention.
+  </div>
+
+  <pre class="code-block"><code><span class="code-comment">; add.s  (gcc -S add.c -o add.s, simplified)</span>
+add:
+    mov  eax, edi     <span class="code-comment">; edi holds argument a — copy it into eax</span>
+    add  eax, esi     <span class="code-comment">; esi holds argument b — ALU adds it into eax</span>
+    ret               <span class="code-comment">; return: eax already holds a + b</span></code></pre>
+
+  <div class="box example">
+    <span class="box-label">Worked example: three lines, three ideas already in your vocabulary</span>
+    <code class="inline-code">mov eax, edi</code> is a fetch-decode-execute cycle on its own (Lesson 19): fetch this instruction, decode it as "copy edi into eax," execute the copy. <code class="inline-code">add eax, esi</code> is another full cycle — this time decode routes it to the ALU, which adds <code class="inline-code">esi</code> into <code class="inline-code">eax</code> and writes the result back into <code class="inline-code">eax</code>. <code class="inline-code">ret</code> returns to the caller, with <code class="inline-code">eax</code> — by calling-convention agreement — already holding the answer the caller expects. No stack frame, no memory access anywhere in this function: every operand this entire function ever touches is a register.
+  </div>
+
+  <h2>Try it: the same function, two optimization levels</h2>
+  <p>Compilers don't produce one fixed translation — how hard they optimize changes the output dramatically, even though both versions compute the exact same thing. Compare <code class="inline-code">gcc -O0</code> (no optimization, close to a literal translation) against <code class="inline-code">gcc -O2</code> (aggressively optimized) for a slightly bigger function.</p>
+
+  <div class="widget" id="opt-widget">
+    <p class="widget-label">Interactive: -O0 vs. -O2 for int compute(int x) { return x * 2 + 1; }</p>
+    <div class="fm-tabs" id="opt-tabs">
+      <button class="fm-tab is-active" type="button" data-opt-level="o0">gcc -O0</button>
+      <button class="fm-tab" type="button" data-opt-level="o2">gcc -O2</button>
+    </div>
+    <pre class="code-block" id="opt-output" style="margin-top:0.6rem;"><code></code></pre>
+    <p class="plot-readout" data-opt-readout></p>
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why reading assembly matters even if you never write it by hand</span>
+    Almost no one writes assembly for a living anymore, but reading it stays genuinely useful: it's the ground truth for what your program actually does, stripped of every abstraction the C source itself provides. It's how you confirm a compiler actually optimized away a bounds check or a redundant computation, how you diagnose a crash a debugger's backtrace (Lesson 22) leaves ambiguous, and how you understand a compiler's optimization decisions instead of just trusting them blindly. Tools like <a href="https://godbolt.org/">Compiler Explorer</a> exist specifically because working systems programmers check this output routinely, not as a rare last resort.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What is a mnemonic, in the context of assembly language?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">A short, human-readable name standing in for a single machine instruction.</button>
+      <button class="quiz-choice" data-correct="false">A comment left by the programmer, ignored by the assembler.</button>
+      <button class="quiz-choice" data-correct="false">The binary encoding of an entire compiled program.</button>
+      <button class="quiz-choice" data-correct="false">A variable name chosen by the C compiler at random.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A mnemonic like mov or add is the readable stand-in for the actual binary opcode the assembler produces.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. In the add function's assembly, why don't edi and esi need to be explicitly declared anywhere in the C source?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">The calling convention is a fixed agreement compilers follow for where arguments go — the C source never has to state it.</button>
+      <button class="quiz-choice" data-correct="false">edi and esi are variable names that must appear literally in the C source.</button>
+      <button class="quiz-choice" data-correct="false">The compiler picks completely different, unpredictable registers on every single build.</button>
+      <button class="quiz-choice" data-correct="false">C functions are not permitted to take more than one argument.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The calling convention is an agreed contract the compiler follows automatically, invisible at the C source level.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why might -O0 and -O2 assembly output for the exact same C function look substantially different?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Different optimization levels make different decisions about instruction count, register use, and memory access, while still computing the same result.</button>
+      <button class="quiz-choice" data-correct="false">-O2 always fails to compile correctly and produces broken output.</button>
+      <button class="quiz-choice" data-correct="false">Optimization levels change what the C source code itself means.</button>
+      <button class="quiz-choice" data-correct="false">There is no real difference — optimization flags are purely cosmetic.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Optimization changes how the same logical computation gets translated into instructions, not what it computes.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="mnemonic">
+    <p class="quiz-prompt">4. Fill in the blank: a short, readable name like mov or add, standing in for a single machine instruction, is called a ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Mnemonics are what make assembly readable at all, compared to raw binary opcodes.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="calling convention">
+    <p class="quiz-prompt">5. Fill in the blank: the fixed, agreed-upon rule for which registers hold a function's arguments and return value is called the ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The calling convention is why compiled functions can call each other correctly without ever agreeing on register use case by case.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: <a href="https://godbolt.org/">Compiler Explorer (godbolt.org)</a> lets you type real C code into a browser and see exactly what gcc, clang, or any other compiler actually produces, at any optimization level, instantly.</p>
+
+  <p class="ask-teacher">Curious what your own C code from earlier units actually compiles down to? Ask your teacher — that's what I'm here for. Next up: why the exact same instructions can run dramatically faster or slower depending on memory access patterns that are completely invisible in the assembly itself.</p>
+
+  <footer class="lesson-footer">STEM+ · Systems Programming &amp; Architecture: CS · Lesson 20 of the course sequence</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var outputs = {
+    o0: {
+      code: 'compute:\n    push  rbp\n    mov   rbp, rsp\n    mov   DWORD PTR [rbp-4], edi   ; spill x to the stack\n    mov   eax, DWORD PTR [rbp-4]  ; reload x from the stack\n    add   eax, eax                 ; x * 2\n    add   eax, 1                   ; + 1\n    pop   rbp\n    ret',
+      note: '-O0: close to a literal translation. x is spilled to the stack and reloaded — a real memory round trip for a value that never needed to leave a register.'
+    },
+    o2: {
+      code: 'compute:\n    lea   eax, [rdi+rdi+1]   ; one instruction: (x + x) + 1\n    ret',
+      note: '-O2: the optimizer recognized x*2+1 as a single address-calculation instruction and never touches memory or the stack at all — same result, one instruction instead of eight.'
+    }
+  };
+  var output = document.querySelector('#opt-output code');
+  var readout = document.querySelector('[data-opt-readout]');
+  var tabs = document.querySelectorAll('#opt-tabs [data-opt-level]');
+
+  function paint(level) {
+    output.textContent = outputs[level].code;
+    readout.textContent = outputs[level].note;
+  }
+
+  tabs.forEach(function (tab) {
+    tab.addEventListener('click', function () {
+      tabs.forEach(function (t) { t.classList.remove('is-active'); });
+      tab.classList.add('is-active');
+      paint(tab.getAttribute('data-opt-level'));
+    });
+  });
+
+  paint('o0');
+});
+</script>

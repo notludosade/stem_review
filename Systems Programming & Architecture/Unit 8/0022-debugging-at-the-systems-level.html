@@ -1,0 +1,171 @@
+<meta charset="UTF-8">
+<title>Lesson 22: Debugging at the Systems Level — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="advanced">
+  <span class="kicker">STEM+ · Systems Programming &amp; Architecture: CS · Unit 8 · Lesson 22</span>
+  <h1>Debugging at the Systems Level</h1>
+  <p class="subtitle">Lesson 9 mentioned that a segfault is often the visible symptom of a dangling pointer. This lesson finally explains exactly what a segfault is, who kills the program and why, and the debugger's basic mental model for finding the line responsible instead of guessing.</p>
+  <p class="nav-links"><a href="../Unit%207/0021-caches-and-why-memory-access-patterns-matter-for-speed.html" class="nav-prev">← Unit 7, Lesson 21</a> <a href="0023-undefined-behavior-and-why-c-trusts-you.html" class="nav-next">Lesson 23 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Every unit so far named a way C code can go wrong: a stack address returned past its frame's lifetime (Lesson 5), a use-after-free (Lesson 9), an out-of-bounds array write (Lesson 8). This lesson is about what actually happens when one of those bugs is triggered, and how to find exactly which line caused it.</p>
+
+  <h2>Segmentation fault: the kernel refusing an illegal access</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    A <strong>segmentation fault</strong> ("segfault") happens when a process tries to access memory outside its own valid address space (Lesson 4) — dereferencing a wild or dangling pointer, or writing far past an array's bounds into unmapped memory. The kernel (Unit 5), which enforces every process's address-space isolation, detects the illegal access and immediately terminates the process, rather than letting it silently corrupt memory it has no right to touch. A <strong>core dump</strong> is an optional file the OS can write at that exact moment, capturing the crashed process's full memory and register state for later inspection — a snapshot of exactly what everything looked like the instant it died.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Worked example</span>
+    Lesson 9's use-after-free — <code class="inline-code">free(p); printf("%d", *p);</code> — dereferences <code class="inline-code">p</code> after its memory has been returned to the allocator. Most of the time this doesn't segfault at all: the freed memory is still mapped, just logically invalid, so the program reads garbage and keeps running. It <em>segfaults</em> specifically when that address happens to fall in memory the process no longer has mapped at all — which is exactly why the same buggy line can run fine a thousand times and then suddenly crash on the thousand-and-first, depending entirely on what the allocator happened to do with that memory in between.
+  </div>
+
+  <h2>Try it: a debugger session, step by step</h2>
+  <p>Set a breakpoint, step through a small buggy program one line at a time, and watch the call stack (Lesson 5, made visible) right up to the crash.</p>
+
+  <div class="widget" id="debug-widget">
+    <p class="widget-label">Interactive: stepping a debugger to a crash</p>
+    <div id="debug-code" style="font-family:monospace; margin-bottom:0.6rem;"></div>
+    <p class="plot-readout" data-debug-readout>Press Step to begin.</p>
+    <p class="plot-hint" data-debug-stack></p>
+    <div class="fm-row">
+      <button class="widget-btn" type="button" data-debug-step>Step →</button>
+      <button class="widget-btn" type="button" data-debug-reset>Reset</button>
+    </div>
+  </div>
+
+  <h2>The debugger's mental model</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    A <strong>breakpoint</strong> pauses a running program at a specific line, handing control to the programmer instead of letting it run to completion or to a crash. Once paused, a <strong>backtrace</strong> (or stack trace) lists every currently active stack frame — literally Lesson 5's stack, made visible — showing the exact chain of function calls that led to this exact point, innermost call first. Reading a backtrace after a crash means starting at the top (where it actually died) and reading downward through who called whom, rather than guessing from the symptom alone.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why "add print statements everywhere" doesn't scale</span>
+    Print-statement debugging works for small, easily reproducible bugs, but it breaks down exactly where it matters most: a bug that only shows up rarely (like Lesson 17's race conditions), or a crash whose cause is several function calls removed from where the symptom appears. A debugger's actual advantage isn't that it's smarter — it's that it lets you pause at the exact moment something is wrong and inspect every variable, every register, and the entire call chain as it genuinely was, instead of only the handful of values you thought in advance to print. That "pause and inspect real state, don't guess" habit is the same instinct this unit's remaining lessons build on directly.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What triggers a segmentation fault?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">A process tries to access memory outside its own valid address space, and the kernel terminates it.</button>
+      <button class="quiz-choice" data-correct="false">A program runs slightly slower than expected.</button>
+      <button class="quiz-choice" data-correct="false">A variable is declared but never used.</button>
+      <button class="quiz-choice" data-correct="false">A function returns a value of the wrong type.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The kernel enforces address-space isolation, and a segfault is exactly that enforcement killing an illegal access.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why does a use-after-free bug sometimes run fine and only segfault occasionally?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">It only segfaults when the stale address happens to fall in memory the process no longer has mapped at all; otherwise it just reads garbage.</button>
+      <button class="quiz-choice" data-correct="false">Use-after-free bugs always segfault immediately, with no exceptions.</button>
+      <button class="quiz-choice" data-correct="false">The kernel randomly decides whether to enforce memory safety on a given run.</button>
+      <button class="quiz-choice" data-correct="false">Segfaults are unrelated to memory access and depend only on program length.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Whether the freed memory's address is still mapped at all is what decides "garbage value" versus "segfault."</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. What is a backtrace?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">A list of every currently active stack frame, showing the exact chain of function calls that led to the current point.</button>
+      <button class="quiz-choice" data-correct="false">A record of every value a variable has ever held.</button>
+      <button class="quiz-choice" data-correct="false">A list of every file a program has open.</button>
+      <button class="quiz-choice" data-correct="false">A count of how many times a program has crashed in total.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A backtrace makes Lesson 5's stack of active calls directly visible, innermost call first.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="core dump">
+    <p class="quiz-prompt">4. Fill in the blank: a file the OS can write at the moment of a crash, capturing the process's full memory and register state for later inspection, is called a ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A core dump preserves exactly what everything looked like the instant the process died.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="breakpoint">
+    <p class="quiz-prompt">5. Fill in the blank: a marker that pauses a running program at a specific line, handing control to the programmer, is called a ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A breakpoint is what lets a debugger pause execution to inspect real state instead of guessing from symptoms.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: the official <a href="https://sourceware.org/gdb/current/onlinedocs/gdb/">"Debugging with GDB"</a> manual documents breakpoints, backtraces, and every other core feature of the standard Linux/Unix C debugger, straight from the source.</p>
+
+  <p class="ask-teacher">Curious how to actually read a real core dump file from a program that crashed on your own machine? Ask your teacher — that's what I'm here for. Next up: exactly why C never stopped you from writing the bug that crashed this program in the first place.</p>
+
+  <footer class="lesson-footer">STEM+ · Systems Programming &amp; Architecture: CS · Lesson 22 of the course sequence</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var lines = [
+    'int *make_bad(void) {',
+    '    int local = 42;',
+    '    return &local;      // dangling: address of a local (Lesson 5)',
+    '}',
+    'int main(void) {',
+    '    int *p = make_bad();',
+    '    printf("%d", *p);   // BREAKPOINT set here',
+    '}'
+  ];
+  var steps = [
+    { line: -1, stack: [], desc: 'Press Step to begin. A breakpoint is set on the printf line inside main.' },
+    { line: 5, stack: ['main()'], desc: 'Program starts. main() begins running — one frame on the stack.' },
+    { line: 5, stack: ['main()', 'make_bad()'], desc: 'main() calls make_bad(). A new frame is pushed (Lesson 5).' },
+    { line: 2, stack: ['main()', 'make_bad()'], desc: "Inside make_bad(): local = 42 is stored in make_bad()'s own frame." },
+    { line: 3, stack: ['main()', 'make_bad()'], desc: "return &local returns local's stack address — already a dangling pointer the instant this frame is popped." },
+    { line: 5, stack: ['main()'], desc: "make_bad() returns. Its frame is popped — p now holds a dangling address. Back to one frame: main()." },
+    { line: 6, stack: ['main()'], desc: 'BREAKPOINT HIT at the printf line. Debugger pauses here — call stack shows just main(), p is a dangling pointer.' },
+    { line: 6, stack: ['main()'], desc: 'Stepping past the breakpoint: *p dereferences a dangling pointer. This may print garbage — or, if that address is unmapped, segfault right here.' }
+  ];
+  var idx = 0;
+  var codeEl = document.getElementById('debug-code');
+  var readout = document.querySelector('[data-debug-readout]');
+  var stackEl = document.querySelector('[data-debug-stack]');
+  var stepBtn = document.querySelector('[data-debug-step]');
+
+  function renderCode(activeLine) {
+    codeEl.innerHTML = lines.map(function (l, i) {
+      var style = i === activeLine ? 'background:var(--accent-soft); color:var(--accent); font-weight:600;' : '';
+      return '<div style="padding:0.05rem 0.3rem; ' + style + '">' + l.replace(/</g, '&lt;') + '</div>';
+    }).join('');
+  }
+
+  function render() {
+    var s = steps[idx];
+    renderCode(s.line);
+    readout.textContent = s.desc;
+    stackEl.textContent = s.stack.length ? 'Call stack (top = innermost): ' + s.stack.slice().reverse().join(' ← ') : 'Call stack: empty.';
+    stepBtn.disabled = idx >= steps.length - 1;
+  }
+
+  stepBtn.addEventListener('click', function () {
+    if (idx < steps.length - 1) idx++;
+    render();
+  });
+
+  document.querySelector('[data-debug-reset]').addEventListener('click', function () {
+    idx = 0;
+    render();
+  });
+
+  render();
+});
+</script>

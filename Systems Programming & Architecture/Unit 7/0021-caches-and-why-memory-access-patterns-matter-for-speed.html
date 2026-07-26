@@ -1,0 +1,186 @@
+<meta charset="UTF-8">
+<title>Lesson 21: Caches — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="advanced">
+  <span class="kicker">STEM+ · Systems Programming &amp; Architecture: CS · Unit 7 · Lesson 21</span>
+  <h1>Caches and Why Memory Access Patterns Matter for Speed</h1>
+  <p class="subtitle">Unit 4's struct lesson promised this: "fewer struct instances fit in a CPU cache line at once — Unit 7 covers exactly why that hurts performance." This is that lesson — the layer of memory between fast registers and slow RAM, and why the order you access memory in can matter more than what you're computing.</p>
+  <p class="nav-links"><a href="0020-from-c-to-assembly-reading-compiled-output.html" class="nav-prev">← Lesson 20</a> <a href="../Unit%208/0022-debugging-at-the-systems-level.html" class="nav-next">Unit 8, Lesson 22 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Lesson 19 showed registers are tiny and blazing fast, while RAM (Unit 2's stack and heap) is enormous but comparatively slow to reach. Real processors don't leave that gap unaddressed — they insert a small amount of much faster memory in between, and how your program accesses memory determines how often it actually benefits from it.</p>
+
+  <h2>The memory hierarchy</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    The <strong>memory hierarchy</strong> is the layered set of storage a CPU can reach, trading size for speed at every step: registers (fastest, smallest) → <strong>cache</strong> (small, very fast, built into or right next to the CPU) → RAM (large, much slower) → disk (enormous, far slower still). A <strong>cache</strong> automatically keeps a copy of recently and nearby-used data close to the CPU, so a repeated or predictable access can be served without ever reaching all the way out to RAM.
+  </div>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    Memory isn't fetched into the cache one byte at a time — it moves in fixed-size chunks called <strong>cache lines</strong> (commonly 64 bytes). Requesting a single byte pulls its entire surrounding cache line in at once. This pays off because of <strong>locality</strong>: <strong>spatial locality</strong> is the tendency for a program to access nearby memory addresses close together in time (like walking an array); <strong>temporal locality</strong> is the tendency to reuse the exact same address again soon (like a loop counter). Programs that exhibit either kind benefit enormously from caching; programs that jump around unpredictably barely benefit at all.
+  </div>
+
+  <h2>Try it: sequential vs. strided access</h2>
+  <p>A 16-element array is laid out with 4 elements per cache line. Step through two different access patterns over it, and watch which accesses are cache hits (the line is already loaded) versus cache misses (a fresh trip out to RAM is required).</p>
+
+  <div class="widget" id="cache-widget">
+    <p class="widget-label">Interactive: sequential vs. strided memory access</p>
+    <div class="fm-tabs" id="cache-tabs">
+      <button class="fm-tab is-active" type="button" data-cache-pattern="sequential">Sequential (index 0, 1, 2, 3…)</button>
+      <button class="fm-tab" type="button" data-cache-pattern="strided">Strided (index 0, 4, 8, 12, 1, 5…)</button>
+    </div>
+    <div id="cache-grid" style="font-family:monospace; margin:0.6rem 0;"></div>
+    <p class="plot-readout" data-cache-readout>Press Step to access the first element.</p>
+    <div class="fm-row">
+      <button class="widget-btn" type="button" data-cache-step>Step →</button>
+      <button class="widget-btn" type="button" data-cache-reset>Reset</button>
+    </div>
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Worked example: closing Unit 4's loop</span>
+    Lesson 12's struct example compared <code class="inline-code">{char, int, double}</code> at 16 bytes to a tighter reordering — here's why that mattered beyond raw memory use: a 64-byte cache line holds 4 instances of a 16-byte struct, but only 3 of a 20-byte one (with 4 bytes wasted per line). Looping over a large array of these structs, the smaller version needs 25% fewer cache-line fetches from RAM to visit the same number of instances — the exact performance cost Lesson 12 promised this unit would explain, now made concrete.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why the same algorithm can run dramatically slower with no change in complexity</span>
+    Two loops with identical Big-O complexity — say, visiting every element of a 2D array once — can differ by ten times or more in actual wall-clock time, purely based on whether they walk memory in the order it's physically laid out (row-major, sequential, cache-friendly) or jump across it (column-major on a row-major array, mostly cache misses). Nothing about this shows up in the assembly from Lesson 20, and nothing about it shows up in a Big-O analysis — it only shows up as measured, real speed, which is exactly why profiling a program's actual behavior matters as much as reasoning about it on paper.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What is the memory hierarchy, from fastest/smallest to slowest/largest?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Registers, then cache, then RAM, then disk.</button>
+      <button class="quiz-choice" data-correct="false">RAM, then registers, then disk, then cache.</button>
+      <button class="quiz-choice" data-correct="false">Disk, then RAM, then cache, then registers.</button>
+      <button class="quiz-choice" data-correct="false">There is no meaningful ordering — all memory is equally fast.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Each layer trades size for speed, with registers fastest/smallest and disk slowest/largest.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why does requesting a single byte pull in an entire 64-byte cache line, not just that one byte?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">It exploits spatial locality — nearby bytes are likely to be accessed soon too, so fetching them together avoids extra trips to RAM.</button>
+      <button class="quiz-choice" data-correct="false">The cache is physically incapable of storing fewer than 64 bytes at a time under any circumstances.</button>
+      <button class="quiz-choice" data-correct="false">This wastes memory with no benefit whatsoever.</button>
+      <button class="quiz-choice" data-correct="false">RAM only allows reads in exact one-byte units, so 64 bytes must come from the cache instead.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Fetching a whole cache line pays off precisely when nearby memory gets accessed soon after — spatial locality.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why can two loops with identical Big-O complexity run at very different real speeds?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">One may access memory in cache-friendly, sequential order while the other jumps around, causing far more cache misses even though the operation count is identical.</button>
+      <button class="quiz-choice" data-correct="false">Big-O complexity always exactly predicts real-world wall-clock time.</button>
+      <button class="quiz-choice" data-correct="false">Identical Big-O complexity guarantees identical cache behavior in every case.</button>
+      <button class="quiz-choice" data-correct="false">Cache behavior has no measurable effect on real program speed.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Cache-friendly vs. cache-hostile access patterns can separate two same-complexity loops by a large real speed gap.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="cache line">
+    <p class="quiz-prompt">4. Fill in the blank: the fixed-size chunk of memory (commonly 64 bytes) moved between RAM and cache at once is called a ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Cache lines are the unit caching actually operates in, not individual bytes.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="spatial locality">
+    <p class="quiz-prompt">5. Fill in the blank: the tendency for a program to access nearby memory addresses close together in time, like walking an array in order, is called ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Spatial locality is exactly what makes sequential access patterns so much more cache-friendly than scattered ones.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: Igor Ostrovsky's <a href="http://igoro.com/archive/gallery-of-processor-cache-effects/">"Gallery of Processor Cache Effects"</a> measures exactly this kind of access-pattern slowdown in real, runnable code, with real timing numbers.</p>
+
+  <p class="ask-teacher">Curious how to actually measure cache misses on your own machine with a real profiler? Ask your teacher — that's what I'm here for. Next up: Unit 8 puts everything together, starting with what actually happens, at the systems level, when a program crashes.</p>
+
+  <footer class="lesson-footer">STEM+ · Systems Programming &amp; Architecture: CS · Lesson 21 of the course sequence</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var patterns = {
+    sequential: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15],
+    strided: [0,4,8,12,1,5,9,13,2,6,10,14,3,7,11,15]
+  };
+  var pattern = 'sequential';
+  var step = -1;
+  var cachedLines = {};
+  var grid = document.getElementById('cache-grid');
+  var readout = document.querySelector('[data-cache-readout]');
+  var stepBtn = document.querySelector('[data-cache-step]');
+  var tabs = document.querySelectorAll('#cache-tabs [data-cache-pattern]');
+
+  function lineOf(idx) { return Math.floor(idx / 4); }
+
+  function renderGrid(highlightIdx) {
+    var cells = [];
+    for (var i = 0; i < 16; i++) {
+      var isCached = cachedLines[lineOf(i)];
+      var isCurrent = i === highlightIdx;
+      var border = isCurrent ? 'var(--accent)' : (isCached ? 'var(--correct)' : 'var(--border)');
+      var bg = isCurrent ? 'var(--accent-soft)' : (isCached ? 'var(--correct-soft)' : 'var(--code-bg)');
+      cells.push('<span style="display:inline-block; min-width:1.8rem; text-align:center; margin:0.1rem; padding:0.3rem 0.2rem; border:1.5px solid ' + border + '; background:' + bg + '; border-radius:4px;">' + i + '</span>');
+    }
+    grid.innerHTML = cells.join('');
+  }
+
+  function render() {
+    if (step < 0) {
+      cachedLines = {};
+      renderGrid(-1);
+      readout.textContent = 'Press Step to access the first element.';
+      return;
+    }
+    var order = patterns[pattern];
+    var idx = order[step];
+    var line = lineOf(idx);
+    var hit = !!cachedLines[line];
+    if (!hit) cachedLines[line] = true;
+    renderGrid(idx);
+    readout.textContent = 'Access #' + (step + 1) + ': index ' + idx + ' (cache line ' + line + ') — ' +
+      (hit ? 'HIT (line already loaded from a previous access).' : 'MISS (fresh trip to RAM to load this whole cache line).');
+    stepBtn.disabled = step >= order.length - 1;
+  }
+
+  stepBtn.addEventListener('click', function () {
+    if (step < patterns[pattern].length - 1) step++;
+    render();
+  });
+
+  document.querySelector('[data-cache-reset]').addEventListener('click', function () {
+    step = -1;
+    render();
+  });
+
+  tabs.forEach(function (tab) {
+    tab.addEventListener('click', function () {
+      tabs.forEach(function (t) { t.classList.remove('is-active'); });
+      tab.classList.add('is-active');
+      pattern = tab.getAttribute('data-cache-pattern');
+      step = -1;
+      render();
+    });
+  });
+
+  render();
+});
+</script>

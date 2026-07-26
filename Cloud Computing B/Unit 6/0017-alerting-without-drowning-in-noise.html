@@ -1,0 +1,175 @@
+<meta charset="UTF-8">
+<title>Lesson 17: Alerting Without Drowning in Noise — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · Cloud Computing B / DevOps · Unit 6 · Lesson 17</span>
+  <h1>Alerting Without Drowning in Noise</h1>
+  <p class="subtitle">Lesson 16 covered three ways to look at a system. None of them help if nobody's actually looking at the right moment — which is exactly what alerting is supposed to fix, and exactly where a well-intentioned setup usually goes wrong.</p>
+  <p class="nav-links"><a href="0016-logs-metrics-and-traces-three-different-windows-into-a-system.html" class="nav-prev">← Lesson 16</a> <a href="0018-on-call-and-incident-response.html" class="nav-next">Lesson 18 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Nobody watches a dashboard around the clock. The whole point of an alert is to replace that impossible task with an automated tripwire — something crosses a line, and the right person finds out immediately instead of whenever they next happen to check. Getting the tripwire right turns out to be much harder than it sounds: set it too sensitive, and it fires constantly for things that don't matter; set it too loose, and it stays silent through something that does.</p>
+
+  <h2>The tripwire, and what happens when it's wrong</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    An <strong>alert</strong> is an automated notification triggered when a monitored signal — a metric crossing a threshold, an error rate spike, a specific log pattern matching — indicates something needs a human's attention right now. The point of an alert is that nobody has to watch a dashboard waiting for it to happen; the system does the watching and interrupts a human only when its defined condition is met.
+  </div>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    <strong>Alert fatigue</strong> is the desensitization that sets in when alerts fire too often, or for conditions nobody can actually do anything about, until people start muting notifications or skimming past them out of habit — including the one alert that actually mattered. It's the alerting equivalent of Unit 2's flaky test eroding trust in a red build: once an alert stops reliably meaning "something needs you," people stop treating it that way.
+  </div>
+
+  <h2>Try it: tune the threshold, watch what happens over a month</h2>
+  <p>Pick a sensitivity, then simulate a month of production traffic and see how many real incidents get caught versus how much noise gets generated along the way.</p>
+
+  <div class="widget" id="alert-widget">
+    <p class="widget-label">Interactive: alert threshold sensitivity</p>
+    <div class="fm-tabs" id="alert-tabs">
+      <button class="fm-tab is-active" type="button" data-alert-mode="loose">Loose threshold</button>
+      <button class="fm-tab" type="button" data-alert-mode="tuned">Well-tuned threshold</button>
+      <button class="fm-tab" type="button" data-alert-mode="tight">Overly sensitive threshold</button>
+    </div>
+    <p class="fm-row">
+      <button class="widget-btn" type="button" data-alert-advance>Simulate one week</button>
+      <button class="widget-btn" type="button" data-alert-reset>Reset</button>
+    </p>
+    <p class="verdict" data-alert-verdict>0 weeks simulated.</p>
+    <p class="plot-readout" data-alert-readout></p>
+    <p class="plot-hint">Each mode has a real incident hiding in the traffic exactly once every 4 weeks. Watch which threshold actually catches it — and at what noise cost.</p>
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why tuning the threshold isn't the whole fix</span>
+    Even a perfectly-tuned threshold doesn't help if the alert it fires isn't <strong>actionable</strong> — one with a specific, known response a human can actually take right now. A CPU-usage alert that pages someone at 3 a.m. with no clear next step just adds fatigue without adding safety; an alert worth waking someone up for should come with an obvious first move, even if that move is just "check whether the on-call runbook covers this." Teams that fix alert fatigue usually do two things at once: tune thresholds to reduce false positives, and delete or downgrade any alert that's technically correct but never actually actionable.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What is the purpose of an alert?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">To automatically notify a human when a monitored condition needs attention, so nobody has to watch a dashboard continuously.</button>
+      <button class="quiz-choice" data-correct="false">To permanently fix the underlying problem without any human involvement.</button>
+      <button class="quiz-choice" data-correct="false">To replace the need for logs, metrics, or traces entirely.</button>
+      <button class="quiz-choice" data-correct="false">To run once per year, during a scheduled review.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>An alert's job is to interrupt a human automatically, at the moment its condition is actually met.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. What is alert fatigue?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Desensitization from alerts firing too often or for non-actionable conditions, until people start ignoring or muting them.</button>
+      <button class="quiz-choice" data-correct="false">A hardware failure that physically disables an alerting system.</button>
+      <button class="quiz-choice" data-correct="false">The state of having zero alerts configured at all.</button>
+      <button class="quiz-choice" data-correct="false">A guarantee that every alert fired is always correct.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Alert fatigue is the erosion of trust that comes from too much noise, not a technical failure of the alerting tool itself.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why isn't tuning a threshold's sensitivity the whole fix for alert fatigue?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">An alert can be well-tuned and still not be actionable — with no specific response a human can actually take, it still adds fatigue without adding safety.</button>
+      <button class="quiz-choice" data-correct="false">Threshold tuning always eliminates every possible source of alert fatigue on its own.</button>
+      <button class="quiz-choice" data-correct="false">Thresholds are technically incapable of being adjusted after an alert is created.</button>
+      <button class="quiz-choice" data-correct="false">Alert fatigue has no relationship to whether an alert is actionable.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>An accurately-firing alert can still be useless noise if there's no actionable response attached to it.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="alert fatigue|fatigue">
+    <p class="quiz-prompt">4. Fill in the blank: the desensitization that sets in when alerts fire too often or for non-actionable conditions, causing people to start ignoring them, is called ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Alert fatigue is the alerting equivalent of a flaky test eroding trust in a red build.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="actionable">
+    <p class="quiz-prompt">5. Fill in the blank: an alert is only worth paging a human for if it's ___ — meaning there's a specific, known response someone can actually take right now.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>An actionable alert comes with an obvious next step, unlike one that's technically correct but useless in practice.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: the Google SRE book's <a href="https://sre.google/sre-book/monitoring-distributed-systems/">"Monitoring Distributed Systems"</a> chapter covers exactly this tradeoff between alert sensitivity and noise, from the team whose practices popularized modern alerting discipline.</p>
+
+  <p class="ask-teacher">Curious how a team decides which alerts should page someone immediately versus just create a ticket for the morning? Ask your teacher — that's what I'm here for. Next up: once a page actually goes out, who gets it, and what happens in the minutes right after.</p>
+
+  <footer class="lesson-footer">STEM+ · Cloud Computing B / DevOps · Lesson 17 of the course sequence</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var mode = 'loose';
+  var state = {
+    loose: { weeks: 0, falseAlarms: 0, caught: 0, missed: 0 },
+    tuned: { weeks: 0, falseAlarms: 0, caught: 0, missed: 0 },
+    tight: { weeks: 0, falseAlarms: 0, caught: 0, missed: 0 }
+  };
+  // Per-week false alarm rate, and whether the incident (which lands on week 4, 8, 12…) gets caught.
+  var profile = {
+    loose: { falseAlarmsPerWeek: 0, catchesIncident: false },
+    tuned: { falseAlarmsPerWeek: 2, catchesIncident: true },
+    tight: { falseAlarmsPerWeek: 10, catchesIncident: true }
+  };
+
+  var tabs = document.querySelectorAll('#alert-tabs [data-alert-mode]');
+  var verdict = document.querySelector('[data-alert-verdict]');
+  var readout = document.querySelector('[data-alert-readout]');
+  var advanceBtn = document.querySelector('[data-alert-advance]');
+  var resetBtn = document.querySelector('[data-alert-reset]');
+
+  function render() {
+    var s = state[mode];
+    var modeLabel = mode === 'loose' ? 'Loose threshold' : mode === 'tuned' ? 'Well-tuned threshold' : 'Overly sensitive threshold';
+    verdict.textContent = modeLabel + ': ' + s.weeks + ' week(s) simulated.';
+    readout.textContent = s.weeks === 0
+      ? 'Click "Simulate one week" to begin.'
+      : s.falseAlarms + ' false alarm(s) fired, ' + s.caught + ' real incident(s) caught, ' + s.missed + ' real incident(s) missed entirely.';
+  }
+
+  tabs.forEach(function (tab) {
+    tab.addEventListener('click', function () {
+      tabs.forEach(function (t) { t.classList.remove('is-active'); });
+      tab.classList.add('is-active');
+      mode = tab.getAttribute('data-alert-mode');
+      render();
+    });
+  });
+
+  advanceBtn.addEventListener('click', function () {
+    var s = state[mode];
+    var p = profile[mode];
+    s.weeks++;
+    s.falseAlarms += p.falseAlarmsPerWeek;
+    if (s.weeks % 4 === 0) {
+      if (p.catchesIncident) s.caught++;
+      else s.missed++;
+    }
+    render();
+  });
+
+  resetBtn.addEventListener('click', function () {
+    state.loose = { weeks: 0, falseAlarms: 0, caught: 0, missed: 0 };
+    state.tuned = { weeks: 0, falseAlarms: 0, caught: 0, missed: 0 };
+    state.tight = { weeks: 0, falseAlarms: 0, caught: 0, missed: 0 };
+    render();
+  });
+
+  render();
+});
+</script>

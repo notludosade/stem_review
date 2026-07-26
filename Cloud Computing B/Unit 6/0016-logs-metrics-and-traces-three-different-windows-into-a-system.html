@@ -1,0 +1,191 @@
+<meta charset="UTF-8">
+<title>Lesson 16: Logs, Metrics, and Traces: Three Different Windows Into a System — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · Cloud Computing B / DevOps · Unit 6 · Lesson 16</span>
+  <h1>Logs, Metrics, and Traces: Three Different Windows Into a System</h1>
+  <p class="subtitle">Lesson 3 mapped "Observe &amp; Respond" as the pipeline's last stage without saying what it actually looks at. A deployed, self-healing service (Unit 5) can still be slow, wrong, or quietly failing for some users — "it deployed" and "it's working right now" are different claims, and this unit is about closing that gap.</p>
+  <p class="nav-links"><a href="../Unit%205/0015-scaling-and-self-healing-in-an-orchestrator.html" class="nav-prev">← Unit 5, Lesson 15</a> <a href="0017-alerting-without-drowning-in-noise.html" class="nav-next">Lesson 17 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>An orchestrator's self-healing (Lesson 15) only reacts to one narrow signal: is the running count below the desired count. It has nothing to say about a service that's fully up, fully healthy by that measure, and still returning the wrong answer, or taking eight seconds to do it. Seeing that requires actually looking at the system while it runs — and "looking" turns out to mean three genuinely different kinds of data, each answering a question the other two can't.</p>
+
+  <h2>Three signals, three different jobs</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    A <strong>log</strong> is a timestamped, discrete record of a single event — a request received, an error thrown, a job completed — usually written as either free-form text or, in modern systems, structured key/value fields that are easy to search and filter later. A log answers "what exactly happened, in this one specific instance," in as much detail as whoever wrote the log line chose to include.
+  </div>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    A <strong>metric</strong> is a numeric measurement, sampled at regular intervals and stored as a running series over time — CPU usage every 15 seconds, request count every minute. Metrics are cheap to store and fast to graph, and they're good at showing trends, but a metric alone can't tell you about any one specific request. A <strong>trace</strong> follows a single request's entire path across multiple services, stitched together into one timeline; a trace is built out of <strong>spans</strong>, and each span records how long that one request spent inside one particular service along the way.
+  </div>
+
+  <h2>Try it: pick the fastest window for the job</h2>
+  <p>Each situation below is answered fastest by exactly one of the three. Pick it.</p>
+
+  <div class="widget" id="window-widget">
+    <p class="widget-label">Interactive: logs, metrics, or traces?</p>
+    <p class="quiz-prompt" data-window-item></p>
+    <p class="fm-row">
+      <button class="widget-btn" type="button" data-window-choose="logs">Logs</button>
+      <button class="widget-btn" type="button" data-window-choose="metrics">Metrics</button>
+      <button class="widget-btn" type="button" data-window-choose="traces">Traces</button>
+    </p>
+    <p class="verdict" data-window-verdict></p>
+    <p class="plot-hint" data-window-note></p>
+    <p class="fm-row" style="margin-top:0.6rem;">
+      <button class="widget-btn" type="button" data-window-next hidden>Next →</button>
+      <button class="widget-btn" type="button" data-window-restart hidden>Start Over</button>
+    </p>
+    <p class="plot-readout" data-window-score></p>
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Worked example</span>
+    A metrics dashboard shows the checkout service's error rate jump from 0.1% to 4% at 2:03 p.m. — a metric caught the trend, fast and cheap, across every request. Confirming that a single one of those failed requests belongs to a real customer, and reading the exact exception it hit, means pulling up the log line for that specific request. If the checkout service calls an inventory service and a payments service to complete one order, a trace is what shows whether the 4% is failing inside checkout itself or inside one of the two services it depends on.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why you need all three, not just the cheapest one</span>
+    Logs alone don't scale: storing and searching a detailed log line for every single event, at real production volume, gets expensive fast, and a log by itself says nothing about a trend across millions of requests. Metrics alone don't explain: they'll tell you latency went up at 2:03 p.m. with no detail on which specific requests, or why. Traces alone are usually sampled, not exhaustive, because capturing a full timeline for every single request is expensive at scale — great for the request you're chasing, useless as a trend line. Each one trades detail for cost differently, which is exactly why real observability stacks run all three side by side instead of picking a favorite.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What question does a log answer that a metric can't?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Exactly what happened in one specific instance, in as much detail as the log line recorded.</button>
+      <button class="quiz-choice" data-correct="false">The average CPU usage across the entire fleet over the last month.</button>
+      <button class="quiz-choice" data-correct="false">Nothing — logs and metrics record the exact same information.</button>
+      <button class="quiz-choice" data-correct="false">Whether a trend is increasing or decreasing over several weeks.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A log's strength is a detailed record of one specific event, not an aggregated trend.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why are metrics cheaper to store than logging every single event in full detail?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">A metric is a compact numeric sample taken at regular intervals, not a full detailed record of every individual event.</button>
+      <button class="quiz-choice" data-correct="false">Metrics require more storage than logs in every case.</button>
+      <button class="quiz-choice" data-correct="false">Metrics and logs store the exact same amount of data per request.</button>
+      <button class="quiz-choice" data-correct="false">Metrics are technically incapable of being stored at all.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Sampling numeric values at intervals is far cheaper than a detailed record of every single event.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why is a trace specifically useful when a request passes through multiple services?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">It stitches the request's path across every service it touched into one timeline, made of spans, showing exactly where time was spent.</button>
+      <button class="quiz-choice" data-correct="false">A trace only ever records a single service in isolation.</button>
+      <button class="quiz-choice" data-correct="false">Traces replace the need for logs and metrics entirely.</button>
+      <button class="quiz-choice" data-correct="false">Traces have no relationship to how many services a request touches.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A trace's whole value is following one request across service boundaries, unlike a log or metric scoped to one place.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="metric">
+    <p class="quiz-prompt">4. Fill in the blank: a numeric measurement sampled at regular intervals and stored as a series over time is called a ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A metric is cheap, fast to graph, and good at showing trends over time.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="span">
+    <p class="quiz-prompt">5. Fill in the blank: within a trace, the record of how long one request spent inside one particular service is called a ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A trace is built from spans, one per service the request passed through.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: OpenTelemetry's <a href="https://opentelemetry.io/docs/concepts/observability-primer/">observability primer</a> covers logs, metrics, and traces as the three signal types this lesson introduced, from a project built specifically to standardize collecting all three.</p>
+
+  <p class="ask-teacher">Curious how much overhead adding tracing to every request actually costs a real service? Ask your teacher — that's what I'm here for. Next up: having all three signals doesn't help if nobody's watching them — how a system decides when a human actually needs to be interrupted.</p>
+
+  <footer class="lesson-footer">STEM+ · Cloud Computing B / DevOps · Lesson 16 of the course sequence</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var items = [
+    { text: 'A specific customer says their checkout failed at 3:14 p.m. today. You need the exact error message and request payload from that one attempt.', correct: 'logs', note: 'Only a log gives you the full detail of one specific event, down to the payload.' },
+    { text: 'You want to know whether p99 response time has been creeping upward over the last two weeks.', correct: 'metrics', note: 'A trend sampled cheaply over time is exactly what metrics are for — no single event shows a two-week trend.' },
+    { text: 'A request is slow, and it touches six different microservices. You need to know which one is actually responsible for the delay.', correct: 'traces', note: 'A trace follows one request across every service it touched, showing exactly which span ate the time.' },
+    { text: 'You want to see CPU usage across the whole fleet over the last month to plan next quarter’s capacity.', correct: 'metrics', note: 'Fleet-wide trend over a month is a metrics job — an aggregated series, not a pile of individual events.' },
+    { text: 'An error rate metric just spiked. Now you need to find the actual stack trace behind it.', correct: 'logs', note: 'A metric tells you something is wrong and roughly when; a log is what actually shows you why, in detail.' }
+  ];
+
+  var index = 0, score = 0, answered = false;
+  var itemEl = document.querySelector('[data-window-item]');
+  var verdict = document.querySelector('[data-window-verdict]');
+  var note = document.querySelector('[data-window-note]');
+  var scoreEl = document.querySelector('[data-window-score]');
+  var nextBtn = document.querySelector('[data-window-next]');
+  var restartBtn = document.querySelector('[data-window-restart]');
+  var chooseBtns = document.querySelectorAll('#window-widget [data-window-choose]');
+
+  function renderItem() {
+    if (index >= items.length) {
+      itemEl.textContent = 'Done!';
+      verdict.textContent = '';
+      verdict.className = 'verdict';
+      note.textContent = '';
+      nextBtn.hidden = true;
+      restartBtn.hidden = false;
+      scoreEl.textContent = 'Final score: ' + score + ' of ' + items.length + ' correct.';
+      chooseBtns.forEach(function (b) { b.disabled = true; });
+      return;
+    }
+    itemEl.textContent = items[index].text;
+    verdict.textContent = '';
+    verdict.className = 'verdict';
+    note.textContent = '';
+    answered = false;
+    nextBtn.hidden = true;
+    chooseBtns.forEach(function (b) { b.disabled = false; });
+    scoreEl.textContent = 'Situation ' + (index + 1) + ' of ' + items.length + ' — score so far: ' + score + '.';
+  }
+
+  chooseBtns.forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      if (answered) return;
+      answered = true;
+      var choice = btn.getAttribute('data-window-choose');
+      var correct = items[index].correct === choice;
+      if (correct) score++;
+      verdict.classList.add(correct ? 'is-pass' : 'is-fail');
+      verdict.textContent = correct ? 'Correct.' : 'Not quite — this one is ' + items[index].correct + '.';
+      note.textContent = items[index].note;
+      nextBtn.hidden = false;
+      chooseBtns.forEach(function (b) { b.disabled = true; });
+    });
+  });
+
+  nextBtn.addEventListener('click', function () {
+    index++;
+    renderItem();
+  });
+
+  restartBtn.addEventListener('click', function () {
+    index = 0;
+    score = 0;
+    restartBtn.hidden = true;
+    renderItem();
+  });
+
+  renderItem();
+});
+</script>

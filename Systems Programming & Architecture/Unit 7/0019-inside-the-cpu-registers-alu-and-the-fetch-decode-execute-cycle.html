@@ -1,0 +1,190 @@
+<meta charset="UTF-8">
+<title>Lesson 19: Inside the CPU — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="advanced">
+  <span class="kicker">STEM+ · Systems Programming &amp; Architecture: CS · Unit 7 · Lesson 19</span>
+  <h1>Inside the CPU: Registers, ALU, and the Fetch-Decode-Execute Cycle</h1>
+  <p class="subtitle">Unit 6 was about many threads sharing one CPU's attention. This lesson asks what that CPU is actually doing, underneath every language and every lesson in this course so far — one instruction at a time, forever, without exception.</p>
+  <p class="nav-links"><a href="../Unit%206/0018-locks-mutexes-and-synchronization.html" class="nav-prev">← Unit 6, Lesson 18</a> <a href="0020-from-c-to-assembly-reading-compiled-output.html" class="nav-next">Lesson 20 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Every abstraction this course has built — processes, the stack, pointers, threads — eventually bottoms out in the same place: a physical CPU executing one machine instruction after another. This lesson looks at that bottom layer directly, with no C code and no operating system in between.</p>
+
+  <h2>Registers: the CPU's own tiny, blazing-fast storage</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    A <strong>register</strong> is a small storage location built directly into the CPU itself — a modern processor has only a few dozen of them, each holding a single value (typically 4 or 8 bytes). Registers are dramatically faster to read and write than RAM, precisely because they sit inside the processor with no memory bus to cross at all. Every arithmetic operation a CPU performs works on values already sitting in registers, not directly on values sitting out in RAM.
+  </div>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    The <strong>ALU</strong> (arithmetic logic unit) is the CPU component that actually performs arithmetic (add, subtract, multiply) and logic (AND, OR, comparison) operations on values held in registers, producing a result that's written back into a register. The ALU doesn't know or care what a "variable" or a "loop" is — it only ever does one small operation on register contents, over and over, as directed by the current instruction.
+  </div>
+
+  <h2>The fetch-decode-execute cycle</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    The <strong>program counter</strong> (PC) is a special register holding the memory address of the next instruction to run. The <strong>fetch-decode-execute cycle</strong> is the CPU's entire job, repeated without stopping: <strong>fetch</strong> the instruction at the address the PC holds; <strong>decode</strong> it to figure out which operation it specifies and which registers it touches; <strong>execute</strong> it, usually via the ALU, updating a register or memory; then advance the PC to the next instruction and repeat. Every program this course has discussed — compiled C, an interpreter's own machine code, anything — runs as this exact cycle, over and over, billions of times a second.
+  </div>
+
+  <h2>Try it: run the cycle yourself</h2>
+  <p>These three tiny instructions compute <code class="inline-code">x = 2 + 3</code> at the register level — the same expression from Lesson 1, but this time watch it as fetch, decode, and execute, one instruction at a time.</p>
+
+  <div class="widget" id="fde-widget">
+    <p class="widget-label">Interactive: the fetch-decode-execute cycle</p>
+    <div id="fde-program" style="font-family:monospace; margin-bottom:0.6rem;"></div>
+    <p class="plot-readout" data-fde-readout>PC = 0. Press Step to fetch the first instruction.</p>
+    <p class="plot-hint" data-fde-registers></p>
+    <div class="fm-row">
+      <button class="widget-btn" type="button" data-fde-step>Step →</button>
+      <button class="widget-btn" type="button" data-fde-reset>Reset</button>
+    </div>
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Worked example</span>
+    <code class="inline-code">LOAD R1, 2</code> — fetch (read this instruction from address in PC), decode (it's a load-immediate into R1), execute (R1 now holds 2), PC advances. <code class="inline-code">LOAD R2, 3</code> — same cycle: R2 now holds 3, PC advances. <code class="inline-code">ADD R3, R1, R2</code> — fetch, decode (an ALU addition, operands R1 and R2, destination R3), execute (the ALU adds R1 and R2, writes 5 into R3), PC advances. Three trips through the exact same cycle, and <code class="inline-code">x</code> — now sitting in R3 — is 5.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why registers are few and RAM is enormous — and why that gap is the rest of this unit</span>
+    A CPU has only a few dozen registers because they're built from expensive, power-hungry, physically-on-die circuitry — there is no way to have millions of them and keep them this fast. RAM (Unit 2's stack and heap) holds gigabytes, but every single access to it is dramatically slower than a register access, because the request has to leave the processor entirely and cross a memory bus. Every instruction that touches memory instead of just registers pays that cost. The next two lessons are about exactly that gap: Lesson 20 shows what real compiled code actually looks like at this level, and Lesson 21 shows the layer of fast-but-limited memory — the cache — that exists specifically to soften the cost of that gap.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. Why are registers dramatically faster to access than RAM?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">They're built directly into the CPU itself, with no memory bus to cross, unlike RAM.</button>
+      <button class="quiz-choice" data-correct="false">Registers and RAM are actually the exact same speed in every modern processor.</button>
+      <button class="quiz-choice" data-correct="false">RAM is physically located closer to the ALU than registers are.</button>
+      <button class="quiz-choice" data-correct="false">Registers can only hold the value zero, so no real access ever happens.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Being built into the processor itself, with no bus crossing required, is exactly what makes register access so fast.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. What does the ALU actually do?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Performs arithmetic and logic operations on values held in registers, writing the result back to a register.</button>
+      <button class="quiz-choice" data-correct="false">Decides which process gets the CPU next.</button>
+      <button class="quiz-choice" data-correct="false">Translates C source code directly into an executable.</button>
+      <button class="quiz-choice" data-correct="false">Stores a process's entire address space.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The ALU is the component that actually carries out an instruction's arithmetic or logic operation.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. What does the program counter hold?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">The memory address of the next instruction to fetch and run.</button>
+      <button class="quiz-choice" data-correct="false">The total number of instructions a program has ever executed.</button>
+      <button class="quiz-choice" data-correct="false">The current value of every register at once.</button>
+      <button class="quiz-choice" data-correct="false">A count of how many processes are currently running.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The PC is what tells the fetch step exactly where in memory to read the next instruction from.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="fetch-decode-execute|fetch decode execute">
+    <p class="quiz-prompt">4. Fill in the blank: the CPU's continuously repeating cycle of reading an instruction, figuring out what it means, and carrying it out is called the ___ cycle.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Fetch, decode, execute, repeat — every running program is this cycle at the hardware level.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="register">
+    <p class="quiz-prompt">5. Fill in the blank: a small, extremely fast storage location built directly into the CPU, of which there are only a few dozen, is called a ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Registers are where the ALU's operands and results actually live during execution.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: Wikipedia's <a href="https://en.wikipedia.org/wiki/Instruction_cycle">"Instruction cycle"</a> article lays out the fetch-decode-execute cycle across real processor designs, with the variations different architectures actually use.</p>
+
+  <p class="ask-teacher">Curious how many fetch-decode-execute cycles your own machine actually runs per second? Ask your teacher — that's what I'm here for. Next up: the assembly language Lesson 2 promised — reading a real compiler's actual output, line by line, using exactly the registers and ALU this lesson just introduced.</p>
+
+  <footer class="lesson-footer">STEM+ · Systems Programming &amp; Architecture: CS · Lesson 19 of the course sequence</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var program = [
+    { text: 'LOAD R1, 2', decode: 'Load the immediate value 2 into register R1.', exec: function (r) { r.R1 = 2; } },
+    { text: 'LOAD R2, 3', decode: 'Load the immediate value 3 into register R2.', exec: function (r) { r.R2 = 3; } },
+    { text: 'ADD R3, R1, R2', decode: 'ALU operation: add R1 and R2, store the result in R3.', exec: function (r) { r.R3 = r.R1 + r.R2; } }
+  ];
+  var registers = { R1: '—', R2: '—', R3: '—' };
+  var pc = 0;
+  var phase = 0; // 0 = about to fetch, 1 = fetched/decoded, 2 = executed
+  var programEl = document.getElementById('fde-program');
+  var readout = document.querySelector('[data-fde-readout]');
+  var regOut = document.querySelector('[data-fde-registers]');
+  var stepBtn = document.querySelector('[data-fde-step]');
+
+  function renderProgram() {
+    programEl.innerHTML = program.map(function (instr, i) {
+      var marker = i === pc ? '→ ' : '&nbsp;&nbsp;';
+      var style = i === pc ? 'color:var(--accent); font-weight:600;' : 'color:var(--muted);';
+      return '<div style="' + style + '">' + marker + i + ':  ' + instr.text + '</div>';
+    }).join('');
+  }
+
+  function renderRegisters() {
+    regOut.textContent = 'Registers — R1: ' + registers.R1 + '   R2: ' + registers.R2 + '   R3: ' + registers.R3;
+  }
+
+  function render() {
+    renderProgram();
+    renderRegisters();
+    if (pc >= program.length) {
+      readout.textContent = 'Done. All three instructions executed — R3 holds the final result of x = 2 + 3.';
+      stepBtn.disabled = true;
+      return;
+    }
+    var instr = program[pc];
+    if (phase === 0) {
+      readout.textContent = 'FETCH: reading instruction at PC = ' + pc + ' (' + instr.text + ') from memory.';
+    } else if (phase === 1) {
+      readout.textContent = 'DECODE: ' + instr.decode;
+    } else {
+      readout.textContent = 'EXECUTE: instruction carried out. PC advances to ' + (pc + 1) + '.';
+    }
+    stepBtn.disabled = false;
+  }
+
+  stepBtn.addEventListener('click', function () {
+    if (pc >= program.length) return;
+    if (phase === 0) {
+      phase = 1;
+    } else if (phase === 1) {
+      program[pc].exec(registers);
+      phase = 2;
+    } else {
+      pc++;
+      phase = 0;
+    }
+    render();
+  });
+
+  document.querySelector('[data-fde-reset]').addEventListener('click', function () {
+    registers = { R1: '—', R2: '—', R3: '—' };
+    pc = 0;
+    phase = 0;
+    render();
+  });
+
+  render();
+});
+</script>

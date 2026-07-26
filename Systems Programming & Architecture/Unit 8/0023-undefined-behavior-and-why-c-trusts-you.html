@@ -1,0 +1,160 @@
+<meta charset="UTF-8">
+<title>Lesson 23: Undefined Behavior and Why C Trusts You — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="advanced">
+  <span class="kicker">STEM+ · Systems Programming &amp; Architecture: CS · Unit 8 · Lesson 23</span>
+  <h1>Undefined Behavior and Why C Trusts You</h1>
+  <p class="subtitle">Lesson 10 called signed integer overflow "technically undefined behavior" and moved on. Lesson 8's out-of-bounds array write and Lesson 9's dangling-pointer dereference are the same category of problem: C's specification simply does not say what happens, and the compiler is free to assume it never will. This lesson names that category and shows exactly how much it costs to ignore.</p>
+  <p class="nav-links"><a href="0022-debugging-at-the-systems-level.html" class="nav-prev">← Lesson 22</a> <a href="0024-choosing-a-language-when-low-level-control-is-worth-the-risk.html" class="nav-next">Lesson 24 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Every previous unit has quietly used the phrase "this is a bug" for things C's compiler will happily accept and compile without complaint. That's not an oversight — it's a defining design choice of the language, and this lesson makes it explicit before Lesson 24 asks whether that choice is worth it.</p>
+
+  <h2>Undefined behavior: the promise C doesn't keep</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    <strong>Undefined behavior (UB)</strong> is any operation the C standard places absolutely no requirement on — not "results in an error," not "produces some unspecified but harmless value," but genuinely anything at all is a conforming result, including a crash, a wrong answer, or a program that appears to work perfectly. Signed integer overflow (Lesson 10), dereferencing a dangling or null pointer (Lesson 9), and writing past the end of an array (Lesson 8) are all undefined behavior. Critically, the compiler is allowed to <em>assume</em> a program never triggers UB — and real compilers use that assumption aggressively when optimizing.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Worked example: the check that vanishes</span>
+    A programmer writes <code class="inline-code">if (x + 1 &lt; x) { /* handle overflow */ }</code> to detect whether <code class="inline-code">x + 1</code> overflowed a signed int. This looks reasonable, but signed overflow is undefined behavior — so the compiler is entitled to assume it never happens, which means it's entitled to assume <code class="inline-code">x + 1</code> is always greater than <code class="inline-code">x</code>, which means the entire <code class="inline-code">if</code> branch can never run, which means an optimizing compiler can legally delete it outright. The overflow check that was supposed to catch the bug is exactly the code that disappears — not because the compiler is broken, but because it's trusting the programmer never to have written overflowing code in the first place.
+  </div>
+
+  <h2>Try it: undefined, well-defined, or implementation-defined?</h2>
+  <p>Not everything C leaves loose is undefined behavior. Classify each scenario below.</p>
+
+  <div class="widget" id="ub-widget">
+    <p class="widget-label">Interactive: classify the behavior</p>
+    <p class="quiz-prompt" data-ub-prompt></p>
+    <div class="fm-row" style="flex-wrap:wrap; gap:0.6rem;">
+      <button class="widget-btn" type="button" data-ub-guess="undefined">Undefined behavior</button>
+      <button class="widget-btn" type="button" data-ub-guess="defined">Well-defined</button>
+      <button class="widget-btn" type="button" data-ub-guess="impl">Implementation-defined</button>
+    </div>
+    <p class="verdict" data-ub-verdict></p>
+    <div class="fm-row">
+      <button class="widget-btn" type="button" data-ub-next>Next scenario →</button>
+    </div>
+  </div>
+
+  <h2>Implementation-defined behavior: still loose, but not chaos</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    <strong>Implementation-defined behavior</strong> is different from UB in one crucial way: the standard requires each compiler to pick a specific, consistent, documented behavior, even though the standard itself doesn't dictate which one. Whether <code class="inline-code">char</code> is signed or unsigned by default, and exactly how many bytes an <code class="inline-code">int</code> occupies, are both implementation-defined — a given compiler on a given platform always answers the same way, and documents that answer, but a different compiler is free to answer differently. Undefined behavior has no such floor: nothing is required, documented, or consistent.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why C trusts you instead of checking</span>
+    Python raises <code class="inline-code">IndexError</code> on an out-of-bounds list access; Java throws on integer overflow in checked contexts far more often than C ever complains. C could have specified all of this — bounds-checked arrays, overflow traps, guaranteed-null-safe dereferences — and simply chose not to, because every one of those checks costs a runtime instruction, every single time, on every single operation, even in code that's already correct. C's governing philosophy is that the programmer, not the language, is responsible for maintaining the invariants the language assumes — Unit 8's whole story, from segfaults to this lesson, is what happens when that trust turns out to be misplaced. Tools like AddressSanitizer and UBSan (mentioned back in Lesson 9's source link) exist precisely to catch these violations during testing, in a build that's allowed to be slower, so the version that ships doesn't have to pay for the check at all.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What does it mean that something is "undefined behavior" in C?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">The C standard places no requirement whatsoever on the result — anything, including a crash or an apparently correct answer, is a conforming outcome.</button>
+      <button class="quiz-choice" data-correct="false">The compiler is required to print an error message and refuse to compile.</button>
+      <button class="quiz-choice" data-correct="false">It means the exact same thing as implementation-defined behavior.</button>
+      <button class="quiz-choice" data-correct="false">It only ever affects how a program's output looks when printed.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>UB is the absence of any requirement at all, which is exactly why compilers can optimize as though it never occurs.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why can an optimizing compiler legally delete an <code class="inline-code">if (x + 1 &lt; x)</code> overflow check on a signed int?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Since signed overflow is UB, the compiler may assume it never happens, so it may assume the condition is always false and the branch unreachable.</button>
+      <button class="quiz-choice" data-correct="false">The compiler cannot actually do this — the check always survives unchanged.</button>
+      <button class="quiz-choice" data-correct="false">The compiler deletes the check because it contains a syntax error.</button>
+      <button class="quiz-choice" data-correct="false">Overflow checks are deleted only when compiling with no optimization at all.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Trusting that UB never occurs is exactly what licenses the optimizer to remove code that only exists to handle it.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Which of these is well-defined by the C standard, not undefined behavior?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Unsigned integer overflow, which is required to wrap around predictably.</button>
+      <button class="quiz-choice" data-correct="false">Dereferencing a pointer after it has been freed.</button>
+      <button class="quiz-choice" data-correct="false">Reading past the last valid index of an array.</button>
+      <button class="quiz-choice" data-correct="false">Signed integer overflow on addition.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Unsigned overflow is one of the rare cases the standard nails down precisely — everything else on this list is undefined.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="undefined behavior|ub">
+    <p class="quiz-prompt">4. Fill in the blank: an operation the C standard places no requirement on at all, which the compiler is free to assume never happens, is called ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Undefined behavior is the category this entire lesson is about naming precisely.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="implementation-defined|implementation defined">
+    <p class="quiz-prompt">5. Fill in the blank: behavior like the exact byte size of an int, which every compiler must pick a specific, documented, consistent answer for even though the standard doesn't dictate which one, is called ___ behavior.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Implementation-defined behavior has a documented floor that undefined behavior simply does not.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: cppreference's <a href="https://en.cppreference.com/w/c/language/behavior">"Undefined behavior"</a> reference page catalogs the actual list the C standard treats this way, far longer than any one course can cover.</p>
+
+  <p class="ask-teacher">Curious how to turn on UBSan or AddressSanitizer for your own C code and watch them catch a bug like this live? Ask your teacher — that's what I'm here for. Next up: the last lesson of the course, tying every unit together into one question — when is trusting C like this actually worth it?</p>
+
+  <footer class="lesson-footer">STEM+ · Systems Programming &amp; Architecture: CS · Lesson 23 of the course sequence</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var scenarios = [
+    { text: 'int8_t x = 127; x = x + 1;', answer: 'undefined', why: 'Signed integer overflow (Lesson 10) is undefined behavior — the compiler may assume it never happens.' },
+    { text: 'uint8_t x = 255; x = x + 1;', answer: 'defined', why: 'Unsigned overflow is required by the standard to wrap around predictably to 0 — no ambiguity at all.' },
+    { text: 'int *p = malloc(sizeof(int)); free(p); printf("%d", *p);', answer: 'undefined', why: 'Dereferencing a dangling pointer (Lesson 9) is undefined behavior, exactly why the result varies run to run.' },
+    { text: 'printf("%zu", sizeof(int));', answer: 'impl', why: 'The exact byte size of int is implementation-defined: fixed and documented per compiler/platform, but not dictated by the standard.' },
+    { text: 'int arr[4]; arr[7] = 1;', answer: 'undefined', why: 'Writing past the end of an array (Lesson 8) is undefined behavior — there is no bounds check to stop it or define the result.' }
+  ];
+  var idx = 0;
+  var answered = false;
+  var prompt = document.querySelector('[data-ub-prompt]');
+  var verdict = document.querySelector('[data-ub-verdict]');
+  var buttons = document.querySelectorAll('[data-ub-guess]');
+
+  function render() {
+    answered = false;
+    verdict.textContent = '';
+    verdict.classList.remove('is-pass', 'is-fail');
+    prompt.textContent = (idx + 1) + '. ' + scenarios[idx].text;
+  }
+
+  buttons.forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      if (answered) return;
+      answered = true;
+      var guess = btn.getAttribute('data-ub-guess');
+      var correct = guess === scenarios[idx].answer;
+      verdict.classList.remove('is-pass', 'is-fail');
+      verdict.classList.add(correct ? 'is-pass' : 'is-fail');
+      verdict.textContent = (correct ? 'Correct — ' : 'Not quite. ') + scenarios[idx].why;
+    });
+  });
+
+  document.querySelector('[data-ub-next]').addEventListener('click', function () {
+    idx = (idx + 1) % scenarios.length;
+    render();
+  });
+
+  render();
+});
+</script>

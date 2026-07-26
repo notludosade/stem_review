@@ -1,0 +1,281 @@
+<meta charset="UTF-8">
+<title>Systems Programming &amp; Architecture: CS Glossary — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<div class="page" data-tier="advanced">
+  <span class="kicker">STEM+ · Systems Programming &amp; Architecture: CS · Reference</span>
+  <h1>Glossary</h1>
+  <p class="subtitle">Definitions in the exact form used across lessons. When a lesson introduces a new term, it gets added here — this file is the single source of truth for wording.</p>
+  <p class="nav-links"><a href="../Unit%208/0024-choosing-a-language-when-low-level-control-is-worth-the-risk.html" class="nav-prev">← Lesson 24: Choosing a Language</a> <a href="../index.html" class="nav-toc">Contents</a></p>
+
+  <h2>Unit 1 — From Source Code to Running Program</h2>
+  <div class="term-grid">
+    <div class="term-card">
+      <p class="term-name">Source code / Machine code</p>
+      <p>Source code is the human-readable text a program is written in; machine code is the raw binary instructions a processor executes directly. Every language's source must eventually become machine code before a processor can run it.</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">Compiling vs. interpreting</p>
+      <p>Compiling translates an entire program into machine code once, ahead of time, producing a standalone executable; interpreting translates and executes source code piece by piece, every single time the program runs.</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">Compiler</p>
+      <p>A program that translates source code into machine code (like gcc). In the compilation pipeline's narrower sense, "the compiler" is specifically the stage that turns preprocessed C source into assembly language.</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">Interpreter</p>
+      <p>A program — itself already compiled into machine code — that reads and executes another program's source code, or a lightweight intermediate form of it, one piece at a time as it runs.</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">Executable</p>
+      <p>A standalone file of machine code, produced by a compiler and linker, that a processor can run directly with no further translation step and no toolchain present.</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">Preprocessor</p>
+      <p>The pipeline stage that performs purely textual substitution on source code before any real compiling happens — expanding #include and #define, and resolving #if/#ifdef blocks.</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">Assembler / Object file</p>
+      <p>The assembler translates human-readable assembly language into an object file: actual binary machine code that may still reference functions or variables (like printf) defined somewhere else entirely.</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">Linker</p>
+      <p>Takes one or more object files, plus any needed libraries, and resolves every outside reference by finding where it's defined and patching in its real address, producing one final executable.</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">Static library / Dynamic library</p>
+      <p>A static library is copied directly into the executable at link time; a dynamic library stays a separate file on disk, loaded and linked in only when the program actually runs.</p>
+    </div>
+  </div>
+
+  <h2>Unit 2 — Memory: Stack and Heap</h2>
+  <div class="term-grid">
+    <div class="term-card">
+      <p class="term-name">Process / Address space</p>
+      <p>A process is a running instance of a program, given its own address space — a range of memory addresses only it can see, laid out into distinct regions by the operating system.</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">Text segment / Data segment</p>
+      <p>The text (code) segment holds a program's compiled instructions and is normally read-only; the data segment holds global and static variables with an initial value baked into the executable.</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">Heap</p>
+      <p>The address-space region holding memory a program requests dynamically while running, growing upward as more is allocated.</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">Stack</p>
+      <p>The address-space region holding local variables and function-call bookkeeping, growing downward as functions call other functions.</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">Stack frame / Return address</p>
+      <p>A stack frame (activation record) is a block pushed onto the stack for each function call, holding its locals, parameters, and return address — where execution resumes in the caller once the call finishes.</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">Stack overflow</p>
+      <p>Happens when the stack grows past the space reserved for it, most commonly from recursion with no base case; the OS detects it and terminates the program immediately.</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">Dynamic memory allocation</p>
+      <p>Requesting a block of memory from the heap while the program is running, of a size decided at run time rather than baked in at compile time — in C, via malloc.</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">Memory leak</p>
+      <p>Happens when a program loses every pointer to a heap block without ever calling free on it — the block stays fully reserved, but nothing in the program can reach it to free it later.</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">Garbage collection</p>
+      <p>A managed language's background runtime system that periodically scans for heap objects nothing can reach anymore and reclaims them automatically — no explicit free() call, and as a result, no double free or use-after-free — at the cost of real CPU time and occasional pauses.</p>
+    </div>
+  </div>
+
+  <h2>Unit 3 — Pointers and Addresses</h2>
+  <div class="term-grid">
+    <div class="term-card">
+      <p class="term-name">Pointer</p>
+      <p>A variable whose value is a memory address, declared with an asterisk: int *p declares p as "a pointer to an int."</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">Address-of operator (&amp;) / Dereference operator (*)</p>
+      <p>The address-of operator takes an ordinary variable and produces its address; the dereference operator, applied to a pointer, reads (or writes) the value stored at the address it holds.</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">Pointer arithmetic</p>
+      <p>Adding or subtracting an integer from a pointer moves the result by that many elements, not bytes — the compiler automatically multiplies by sizeof the pointer's type.</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">Dangling pointer</p>
+      <p>A pointer that still holds an address, but the memory at that address is no longer valid to use — because its stack frame was popped, or its heap memory has already been freed. C never clears the pointer's value, so it looks exactly like a valid one.</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">Use-after-free</p>
+      <p>Dereferencing a dangling pointer whose memory has already been freed — the result may print stale data, print something else entirely, or crash, unpredictably from run to run.</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">Double free</p>
+      <p>Calling free() twice on the same pointer, corrupting the allocator's internal bookkeeping — the result can crash immediately or silently corrupt an unrelated future allocation.</p>
+    </div>
+  </div>
+
+  <h2>Unit 4 — Data Representation</h2>
+  <div class="term-grid">
+    <div class="term-card">
+      <p class="term-name">Unsigned integer</p>
+      <p>Stores only non-negative values, interpreting its bits directly as a plain binary number.</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">Two's complement</p>
+      <p>The representation essentially every modern processor uses for signed integers — the leading bit is weighted negative, and one adder circuit handles both signed and unsigned addition identically.</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">Integer overflow</p>
+      <p>Happens when the true mathematical result of an operation needs more bits than the type has, so the result silently wraps around within the fixed bit width available.</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">Floating-point number (sign / mantissa / exponent)</p>
+      <p>Stored as three parts mirroring scientific notation: a sign bit, a mantissa (or significand — the significant digits), and an exponent (how far to shift the binary point).</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">Memory alignment</p>
+      <p>A hardware requirement, or strong performance preference, that a value of a given size start at an address that's a multiple of its own size.</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">Padding</p>
+      <p>Unused filler bytes the compiler silently inserts between struct fields, purely to keep every field's starting address at the correct alignment multiple.</p>
+    </div>
+  </div>
+
+  <h2>Unit 5 — Processes and the Operating System</h2>
+  <div class="term-grid">
+    <div class="term-card">
+      <p class="term-name">Operating system (OS)</p>
+      <p>The software that manages a computer's hardware resources — CPU, memory, storage, peripherals — and provides a controlled, consistent way for programs to use them.</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">Kernel</p>
+      <p>The operating system's core, running with full, privileged hardware access and making the actual resource-allocation decisions; everything else commonly thought of as "the OS" runs on top of it with the same restricted access as any other program.</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">Program</p>
+      <p>A static executable file sitting on disk, doing nothing until something runs it — as opposed to a process, its running instance (Unit 2).</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">Process states (new / ready / running / waiting / terminated)</p>
+      <p>A process's life cycle: created (new), able to run but waiting for CPU time (ready), actually executing (running), waiting on something slow like disk I/O with the CPU freed for other work (waiting), and finished (terminated).</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">User mode / Kernel mode</p>
+      <p>User mode is the restricted privilege level ordinary program code runs in, unable to directly touch hardware; kernel mode is the OS kernel's full, unrestricted privilege level.</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">System call</p>
+      <p>A controlled, deliberate request that switches the CPU from user mode into kernel mode for a moment, lets trusted kernel code perform a privileged operation on the program's behalf, then switches back.</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">System call categories (file I/O / process control / memory management)</p>
+      <p>File I/O covers open/read/write/close; process control covers fork (create a process) and exit (terminate one); memory management covers requesting more address space from the OS, what malloc ultimately relies on.</p>
+    </div>
+  </div>
+
+  <h2>Unit 6 — Concurrency</h2>
+  <div class="term-grid">
+    <div class="term-card">
+      <p class="term-name">Thread</p>
+      <p>An independent sequence of instructions the CPU can schedule and run, existing inside a process; every process has at least one.</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">Multithreaded</p>
+      <p>Describes a process with more than one thread running inside it, each with its own stack and registers, but sharing the process's heap, data segment, and open files.</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">Race condition</p>
+      <p>A bug where a program's correctness depends on the precise timing or interleaving of operations across multiple threads, so the outcome differs depending on uncontrolled execution order.</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">Mutex</p>
+      <p>A mutual exclusion lock: an object one thread can lock before touching shared data, and must unlock afterward.</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">Lock / unlock / blocks</p>
+      <p>Locking a mutex claims it; unlocking releases it; a thread that tries to lock a mutex another thread already holds blocks — pauses and waits — until it's unlocked.</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">Critical section</p>
+      <p>The block of code between lock and unlock — the shared-data operation that needs to run as one uninterrupted unit.</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">Deadlock</p>
+      <p>Happens when two or more threads are each waiting on a lock the other one holds, and neither can ever proceed — a program can be perfectly race-free and still hang permanently this way.</p>
+    </div>
+  </div>
+
+  <h2>Unit 7 — The CPU and Machine Code</h2>
+  <div class="term-grid">
+    <div class="term-card">
+      <p class="term-name">Register</p>
+      <p>A small storage location built directly into the CPU itself — a processor has only a few dozen, each dramatically faster to access than RAM since there's no memory bus to cross.</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">ALU (arithmetic logic unit)</p>
+      <p>The CPU component that actually performs arithmetic and logic operations on values held in registers, writing the result back into a register.</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">Program counter (PC) / Fetch-decode-execute cycle</p>
+      <p>The program counter is the register holding the next instruction's address; the fetch-decode-execute cycle is the CPU's endlessly repeating job of fetching that instruction, decoding it, and executing it before advancing the PC.</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">Mnemonic / Operands</p>
+      <p>A mnemonic is a short, human-readable name (like mov or add) standing in for one machine instruction; operands are the registers or values that instruction acts on.</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">Calling convention</p>
+      <p>A fixed, agreed-upon rule compilers follow for which registers hold a function's arguments and return value, with no explicit statement needed in the source code.</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">Memory hierarchy</p>
+      <p>The layered set of storage a CPU can reach, trading size for speed at every step: registers → cache → RAM → disk.</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">Cache / Cache line</p>
+      <p>A cache is small, very fast memory that automatically keeps recently and nearby-used data close to the CPU; a cache line (commonly 64 bytes) is the fixed-size chunk memory actually moves in between RAM and cache.</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">Spatial locality / Temporal locality</p>
+      <p>Spatial locality is the tendency to access nearby memory addresses close together in time (like walking an array); temporal locality is the tendency to reuse the exact same address again soon (like a loop counter).</p>
+    </div>
+  </div>
+
+  <h2>Unit 8 — Putting It Together</h2>
+  <div class="term-grid">
+    <div class="term-card">
+      <p class="term-name">Segmentation fault ("segfault")</p>
+      <p>Happens when a process tries to access memory outside its own valid address space; the kernel detects the illegal access and immediately terminates the process.</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">Core dump</p>
+      <p>An optional file the OS can write at the moment of a crash, capturing the process's full memory and register state for later inspection.</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">Breakpoint</p>
+      <p>A marker that pauses a running program at a specific line, handing control to the programmer instead of letting it run to completion or to a crash.</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">Backtrace</p>
+      <p>A list of every currently active stack frame, showing the exact chain of function calls that led to the current point, innermost call first.</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">Undefined behavior (UB)</p>
+      <p>Any operation the C standard places absolutely no requirement on — anything is a conforming result — and which the compiler is entitled to assume never happens, including signed integer overflow, out-of-bounds writes, and dereferencing dangling or null pointers.</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">Implementation-defined behavior</p>
+      <p>Behavior the standard requires each compiler to handle with one specific, documented, consistent answer — like the exact byte size of an int — even though the standard itself doesn't dictate which answer.</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">Systems programming language</p>
+      <p>A language like C, C++, or Rust giving the programmer direct, manual control over memory layout and object lifetime, with no runtime safety net, in exchange for predictable, minimal-overhead performance.</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">Managed language</p>
+      <p>A language like Python, Java, JavaScript, or Go that inserts a runtime automatically enforcing safety — bounds checking, automatic memory reclamation — trading some performance and control for eliminating entire categories of bugs.</p>
+    </div>
+  </div>
+</div>

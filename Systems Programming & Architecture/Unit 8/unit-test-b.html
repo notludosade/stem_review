@@ -1,0 +1,168 @@
+<meta charset="UTF-8">
+<title>Unit 8 Test — Version B — Systems Programming &amp; Architecture: CS — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/tests.js" defer></script>
+<div class="page" data-tier="advanced">
+  <span class="kicker">STEM+ · Systems Programming &amp; Architecture: CS · Unit 8 · Unit Test</span>
+  <h1>Unit 8 Test — Version B</h1>
+  <p class="subtitle">Putting It Together. 10 points covering every lesson in this unit. Score 90% or higher to clear this unit.</p>
+  <p class="nav-links"><a href="../index.html" class="nav-toc">← Course Contents</a> <a href="unit-test-a.html" class="nav-toc">← Version A</a></p>
+
+  <div data-test data-course="Systems Programming &amp; Architecture: CS" data-unit="Unit 8" data-kind="unit_test" data-version="B">
+
+    <div class="quiz" data-test-item data-topic="Segmentation Faults">
+      <p class="quiz-prompt">1. Why does a use-after-free bug (Lesson 9) only sometimes trigger a segmentation fault instead of every single time?</p>
+      <div class="quiz-choices">
+        <button class="quiz-choice" data-correct="true">It only segfaults when the stale address happens to fall in memory the process no longer has mapped at all; otherwise it just reads whatever is there.</button>
+        <button class="quiz-choice" data-correct="false">It always segfaults, with zero exceptions.</button>
+        <button class="quiz-choice" data-correct="false">Segfaults are determined by program length, not memory validity.</button>
+        <button class="quiz-choice" data-correct="false">The kernel decides randomly, with no relation to the actual memory access.</button>
+      </div>
+      <p class="quiz-feedback" hidden></p>
+      <p class="quiz-explain" hidden>Whether the freed address is still mapped at all decides "garbage value" versus "segfault" — not consistency of the bug itself.</p>
+    </div>
+
+    <div class="quiz" data-test-item data-test-fill data-topic="Core Dumps" data-answers="core dump">
+      <p class="quiz-prompt">2. Fill in the blank: capturing a crashed process's full memory and register state to a file for later inspection is called writing a ___.</p>
+      <div class="quiz-fill-row">
+        <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      </div>
+      <p class="quiz-feedback" hidden></p>
+      <p class="quiz-explain" hidden>A core dump is that saved snapshot, taken at the exact moment of the crash.</p>
+    </div>
+
+    <div class="quiz" data-test-item data-topic="Debuggers and Backtraces">
+      <p class="quiz-prompt">3. What does a breakpoint actually do when a debugger reaches it?</p>
+      <div class="quiz-choices">
+        <button class="quiz-choice" data-correct="true">It pauses the running program at that exact line, handing control to the programmer instead of letting execution continue.</button>
+        <button class="quiz-choice" data-correct="false">It permanently deletes that line of code from the program.</button>
+        <button class="quiz-choice" data-correct="false">It automatically fixes whatever bug is nearby.</button>
+        <button class="quiz-choice" data-correct="false">It restarts the program from the very beginning.</button>
+      </div>
+      <p class="quiz-feedback" hidden></p>
+      <p class="quiz-explain" hidden>A breakpoint's entire job is pausing execution so real state can be inspected instead of guessed at.</p>
+    </div>
+
+    <div class="quiz" data-test-item data-test-fill data-topic="Undefined Behavior" data-answers="undefined behavior|ub">
+      <p class="quiz-prompt">4. Fill in the blank: because ___ places no requirement on a program's result, an optimizing compiler is free to assume it never happens at all.</p>
+      <div class="quiz-fill-row">
+        <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      </div>
+      <p class="quiz-feedback" hidden></p>
+      <p class="quiz-explain" hidden>Undefined behavior's total lack of requirements is exactly what licenses compilers to optimize as if it never occurs.</p>
+    </div>
+
+    <div class="quiz" data-test-item data-topic="Implementation-Defined Behavior">
+      <p class="quiz-prompt">5. The exact number of bytes a C <code class="inline-code">int</code> occupies varies between compilers, but any one compiler always answers consistently and documents its choice. What category of behavior is this?</p>
+      <div class="quiz-choices">
+        <button class="quiz-choice" data-correct="true">Implementation-defined behavior.</button>
+        <button class="quiz-choice" data-correct="false">Undefined behavior, since the standard permits any result at all.</button>
+        <button class="quiz-choice" data-correct="false">A syntax error every compiler must reject.</button>
+        <button class="quiz-choice" data-correct="false">Well-defined behavior, identical across every compiler.</button>
+      </div>
+      <p class="quiz-feedback" hidden></p>
+      <p class="quiz-explain" hidden>A consistent, documented, per-compiler answer without a standard-mandated value is exactly what implementation-defined means.</p>
+    </div>
+
+    <div class="quiz" data-test-item data-topic="Signed vs Unsigned Overflow">
+      <p class="quiz-prompt">6. Two loop counters overflow past their maximum value — one is signed, one is unsigned. Answer both parts:</p>
+      <div class="quiz-part" data-part>
+        <p class="quiz-part-label">(a) Which one is guaranteed by the C standard to wrap around to a specific, predictable value?</p>
+        <div class="quiz-choices">
+          <button class="quiz-choice" data-correct="false">The signed counter</button>
+          <button class="quiz-choice" data-correct="true">The unsigned counter</button>
+        </div>
+      </div>
+      <div class="quiz-part" data-part>
+        <p class="quiz-part-label">(b) What category of behavior governs the signed counter's overflow instead?</p>
+        <div class="quiz-choices">
+          <button class="quiz-choice" data-correct="true">Undefined behavior</button>
+          <button class="quiz-choice" data-correct="false">Implementation-defined behavior</button>
+        </div>
+      </div>
+      <p class="quiz-explain" hidden>Unsigned overflow wraps predictably by standard guarantee; signed overflow falls into undefined behavior instead, with no such guarantee.</p>
+    </div>
+
+    <div class="quiz" data-test-item data-topic="UB and Compiler Optimization">
+      <p class="quiz-prompt">7. An optimizing compiler encounters code whose correctness depends on signed integer overflow actually wrapping around. Answer both parts:</p>
+      <div class="quiz-part" data-part>
+        <p class="quiz-part-label">(a) Is the compiler required to preserve wraparound behavior for the programmer's benefit?</p>
+        <div class="quiz-choices">
+          <button class="quiz-choice" data-correct="false">Yes, compilers must always preserve it</button>
+          <button class="quiz-choice" data-correct="true">No — since signed overflow is UB, the compiler may assume it never happens</button>
+        </div>
+      </div>
+      <div class="quiz-part" data-part>
+        <p class="quiz-part-label">(b) What can result from this mismatch between programmer assumption and compiler assumption?</p>
+        <div class="quiz-choices">
+          <button class="quiz-choice" data-correct="true">The optimized program can behave differently than the programmer expected, including silently dropping intended checks</button>
+          <button class="quiz-choice" data-correct="false">Nothing — compilers are physically incapable of changing this kind of code</button>
+        </div>
+      </div>
+      <p class="quiz-explain" hidden>Assuming UB never happens is exactly why an optimizer can produce a program that no longer matches a programmer's wraparound assumption.</p>
+    </div>
+
+    <div class="quiz" data-test-item data-topic="Systems vs Managed Languages">
+      <p class="quiz-prompt">8. Rust and Python sit on opposite ends of the systems-vs-managed spectrum in different ways. Answer both parts:</p>
+      <div class="quiz-part" data-part>
+        <p class="quiz-part-label">(a) Which language category typically requires the programmer to manage memory lifetime manually?</p>
+        <div class="quiz-choices">
+          <button class="quiz-choice" data-correct="true">Systems languages, like C</button>
+          <button class="quiz-choice" data-correct="false">Managed languages, like Python</button>
+        </div>
+      </div>
+      <div class="quiz-part" data-part>
+        <p class="quiz-part-label">(b) Which category trades some performance for automatically eliminating whole classes of memory bugs?</p>
+        <div class="quiz-choices">
+          <button class="quiz-choice" data-correct="false">Systems languages, like C</button>
+          <button class="quiz-choice" data-correct="true">Managed languages, like Python</button>
+        </div>
+      </div>
+      <p class="quiz-explain" hidden>Manual lifetime control versus automatic, runtime-enforced safety is the exact axis separating the two categories.</p>
+    </div>
+
+    <div class="quiz" data-test-item data-topic="Garbage Collection">
+      <p class="quiz-prompt">9. Because a managed language automatically reclaims unreachable heap memory, answer both parts:</p>
+      <div class="quiz-part" data-part>
+        <p class="quiz-part-label">(a) Can that language still produce a double-free bug the way C can?</p>
+        <div class="quiz-choices">
+          <button class="quiz-choice" data-correct="false">Yes, double free is just as common in managed languages</button>
+          <button class="quiz-choice" data-correct="true">No — there's no explicit free() call for the programmer to call twice</button>
+        </div>
+      </div>
+      <div class="quiz-part" data-part>
+        <p class="quiz-part-label">(b) What must the garbage collector spend to provide this guarantee?</p>
+        <div class="quiz-choices">
+          <button class="quiz-choice" data-correct="true">CPU time, periodically, including occasional pauses in the running program</button>
+          <button class="quiz-choice" data-correct="false">Nothing at all — the guarantee is entirely free of any runtime cost</button>
+        </div>
+      </div>
+      <p class="quiz-explain" hidden>Removing the explicit free() call removes double-free by construction, but the collector's own work is a real, ongoing cost.</p>
+    </div>
+
+    <div class="quiz" data-test-item data-topic="Choosing a Language for the Job">
+      <p class="quiz-prompt">10. A company needs a one-off internal script to reformat a CSV file once a week. Answer both parts:</p>
+      <div class="quiz-part" data-part>
+        <p class="quiz-part-label">(a) Which category of language is the better practical fit?</p>
+        <div class="quiz-choices">
+          <button class="quiz-choice" data-correct="false">A systems language</button>
+          <button class="quiz-choice" data-correct="true">A managed language</button>
+        </div>
+      </div>
+      <div class="quiz-part" data-part>
+        <p class="quiz-part-label">(b) Why?</p>
+        <div class="quiz-choices">
+          <button class="quiz-choice" data-correct="true">Nothing about the task is performance-critical, so faster development and a built-in safety net matter more than raw speed</button>
+          <button class="quiz-choice" data-correct="false">Systems languages cannot read or write files under any circumstances</button>
+        </div>
+      </div>
+      <p class="quiz-explain" hidden>Low-stakes, non-performance-critical tasks are exactly where a managed language's tradeoffs pay off instead of costing anything.</p>
+    </div>
+
+    <p class="test-warning" data-test-warning hidden></p>
+    <button class="widget-btn" data-test-submit>Submit Test</button>
+    <div class="test-result" data-test-result hidden></div>
+  </div>
+
+  <footer class="lesson-footer">STEM+ · Systems Programming &amp; Architecture: CS · Unit 8 Test — Version B</footer>
+</div>

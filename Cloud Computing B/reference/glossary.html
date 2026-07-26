@@ -1,0 +1,209 @@
+<meta charset="UTF-8">
+<title>Cloud Computing B / DevOps Glossary — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · Cloud Computing B / DevOps · Reference</span>
+  <h1>Glossary</h1>
+  <p class="subtitle">Definitions in the exact form used across lessons. When a lesson introduces a new term, it gets added here — this file is the single source of truth for wording.</p>
+  <p class="nav-links"><a href="../Unit%207/0020-devops-anti-patterns-and-how-teams-actually-fail-at-this.html" class="nav-prev">← Lesson 20: DevOps Anti-Patterns and How Teams Actually Fail at This</a> <a href="../index.html" class="nav-toc">Contents</a></p>
+
+  <h2>Unit 1 — Why DevOps?</h2>
+  <div class="term-grid">
+    <div class="term-card">
+      <p class="term-name">Development ("Dev") / Operations ("Ops")</p>
+      <p>Dev is the team that writes application code and is judged on shipping change quickly; Ops is the team that keeps that code running reliably in production and is judged on uptime, not feature velocity — historically separate teams with opposite incentives.</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">The wall</p>
+      <p>The informal handoff boundary where responsibility for deploying and running code passes from Dev to a separate Ops team, who then deploys code they didn't write and gets paged if it breaks.</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">DevOps</p>
+      <p>A set of cultural practices and shared responsibility that unites development and operations around one goal — shipping reliable software quickly, together — which the tools this course covers support but don't create by themselves.</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">Blameless postmortem</p>
+      <p>A review of an incident, after the fact, focused entirely on what happened in the system and the process — not on which individual to blame, on the premise that a reasonable decision usually isn't the root cause.</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">Deployment pipeline / CI/CD pipeline</p>
+      <p>The automated sequence of stages a code change passes through between being committed and running in production — typically build, test, package, deploy, and release — running the same way every time without manual repetition.</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">Build artifact</p>
+      <p>The packaged, runnable output of the build stage — a compiled binary, bundled application, or container image — versioned and carried unchanged through the rest of the pipeline instead of rebuilt at each stage.</p>
+    </div>
+  </div>
+
+  <h2>Unit 2 — Continuous Integration</h2>
+  <div class="term-grid">
+    <div class="term-card">
+      <p class="term-name">Continuous Integration (CI)</p>
+      <p>The practice of merging every developer's code changes into a shared main branch frequently — multiple times a day — with each merge automatically built and tested right away.</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">Merge conflict</p>
+      <p>What happens when two changes touch overlapping code in a way that can't be combined automatically, forcing a human to manually reconcile them; CI controls their size, not their existence.</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">CI server</p>
+      <p>The automated system that watches a shared repository and, on every merge, runs a defined build step followed by a test suite — reacting to the merge itself, with no human needing to click anything.</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">Build step / test suite</p>
+      <p>The build step compiles or bundles the code; the test suite is the collection of automated tests that runs afterward to check the code still behaves correctly.</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">Build status: green / red</p>
+      <p>Green means the build compiled and every test passed; red means something failed somewhere in the sequence — a signal to investigate, not a punishment.</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">Build log</p>
+      <p>The recorded output of every stage a CI server ran, in order, including exactly where it stopped and why — best read starting from the first failure, not the last line.</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">Flaky test</p>
+      <p>A test that sometimes passes and sometimes fails against the exact same, unchanged code, usually from timing assumptions or shared state — worse than a wrong test because it erodes trust in red builds over time.</p>
+    </div>
+  </div>
+
+  <h2>Unit 3 — Continuous Delivery &amp; Deployment</h2>
+  <div class="term-grid">
+    <div class="term-card">
+      <p class="term-name">Continuous Delivery (CD) / Continuous Deployment</p>
+      <p>Continuous Delivery packages every change that passes CI into a release ready to deploy at any time, with a human still deciding when; Continuous Deployment removes that manual step and releases automatically.</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">Release gate</p>
+      <p>The manual approval step that separates Continuous Delivery from Continuous Deployment — removing it is the entire difference between the two.</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">Blue-green deployment</p>
+      <p>Running two identical, complete production environments — "blue" (current) and "green" (new) — side by side, then switching all traffic between them instantly, with an equally instant switch back if something's wrong.</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">Canary release / traffic shifting</p>
+      <p>Sending only a small percentage of real traffic to a new version first, monitoring it closely, then gradually increasing that percentage (traffic shifting) until it serves everyone or is rolled back.</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">Rollback / roll-forward</p>
+      <p>A rollback reverts a deployment to the last known-good version; roll-forward ships a new deploy that fixes the problem instead of reverting — sometimes the only option when reverting isn't safe.</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">Feature flag</p>
+      <p>A runtime switch, checked by the running code itself, that turns a specific piece of functionality on or off without a new deployment — usable as a near-instant "kill switch."</p>
+    </div>
+  </div>
+
+  <h2>Unit 4 — Infrastructure as Code</h2>
+  <div class="term-grid">
+    <div class="term-card">
+      <p class="term-name">Infrastructure as Code (IaC)</p>
+      <p>Defining servers, networking, and other infrastructure in version-controlled configuration files that a tool reads to provision the actual resources, instead of an engineer manually clicking through a console.</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">Imperative / declarative</p>
+      <p>An imperative approach lists exact steps to execute in order; a declarative approach states the desired end state and lets a tool figure out what changes are needed to reach it.</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">Idempotent</p>
+      <p>An operation where running it once has the same effect as running it many times — the property declarative IaC tools are built around, making reapplying a configuration file always safe.</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">Configuration drift</p>
+      <p>The gap that opens up between a system's actual, running configuration and what its IaC file says it should be, caused by any manual change made outside the IaC process.</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">Reconciliation</p>
+      <p>The process, run manually or on a schedule, of comparing actual state against declared desired state and correcting any difference found — what actually catches drift.</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">Immutable infrastructure</p>
+      <p>Instead of patching a running server, any change replaces it with a freshly-provisioned one built from the current IaC file, making drift structurally impossible rather than just detectable.</p>
+    </div>
+  </div>
+
+  <h2>Unit 5 — Container Orchestration</h2>
+  <div class="term-grid">
+    <div class="term-card">
+      <p class="term-name">Container orchestration / orchestrator</p>
+      <p>Orchestration is the automated scheduling, networking, scaling, and health management of many containers across many machines; an orchestrator is the system that does it, continuously and without manual placement decisions.</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">Pod</p>
+      <p>The smallest deployable unit an orchestrator schedules — usually one container, occasionally a small group of tightly-coupled containers that must always run together on the same machine.</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">Node / cluster</p>
+      <p>A node is a single physical or virtual machine capable of running one or more pods; a cluster is the whole collection of nodes managed together as a single system.</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">Control plane</p>
+      <p>The orchestrator's own coordination software, making scheduling decisions across every node in a cluster based on total available capacity, not node by node by hand.</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">Replica count</p>
+      <p>The number of identical pod copies an orchestrator is told should be running at all times — the desired state it continuously compares the actual running count against.</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">Self-healing</p>
+      <p>An orchestrator's automatic, unattended recovery of crashed pods back to the desired replica count, with no human needing to notice or intervene.</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">Elasticity</p>
+      <p>The same auto-scaling-group idea from Cloud Computing A applied one layer down — adding or removing pods, based on demand, instead of whole servers.</p>
+    </div>
+  </div>
+
+  <h2>Unit 6 — Observability</h2>
+  <div class="term-grid">
+    <div class="term-card">
+      <p class="term-name">Log</p>
+      <p>A timestamped, discrete record of a single event, written as free-form text or structured fields, answering "what exactly happened" in one specific instance.</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">Metric</p>
+      <p>A numeric measurement sampled at regular intervals and stored as a series over time — cheap to store and fast to graph, good at trends but not detail on any one event.</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">Trace / span</p>
+      <p>A trace follows a single request's entire path across multiple services, stitched into one timeline; a span is the record, within a trace, of how long that request spent inside one particular service.</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">Alert</p>
+      <p>An automated notification triggered when a monitored signal — a metric crossing a threshold, an error spike, a log pattern — indicates something needs a human's attention right now.</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">Alert fatigue</p>
+      <p>The desensitization that sets in when alerts fire too often or for non-actionable conditions, until people start muting or ignoring them, including the one that mattered.</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">Actionable alert</p>
+      <p>An alert with a specific, known response a human can actually take right now — the property that separates a genuinely useful page from one that just adds fatigue.</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">On-call rotation</p>
+      <p>A schedule where responsibility for responding to pages rotates among a defined group of engineers on a set cadence, so no single person is always on the hook.</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">Incident / incident commander</p>
+      <p>An incident is a formally declared event where a system is degraded in a way that affects users, kicking off a coordinated response; the incident commander coordinates that response without necessarily writing the fix themselves.</p>
+    </div>
+  </div>
+
+  <h2>Unit 7 — Putting It Together</h2>
+  <div class="term-grid">
+    <div class="term-card">
+      <p class="term-name">DORA metrics</p>
+      <p>Four measures — deployment frequency, lead time for changes, change failure rate, and time to restore service — that research has repeatedly found separate high-performing DevOps teams from low-performing ones.</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">Anti-pattern</p>
+      <p>A common response to a recurring problem that looks reasonable, or even feels responsible, but is actually counterproductive — a repeated habit, not a one-time mistake.</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">Toil</p>
+      <p>Manual, repetitive operational work that has no lasting value and grows roughly in proportion to a system's size, unless someone automates it away.</p>
+    </div>
+  </div>
+</div>

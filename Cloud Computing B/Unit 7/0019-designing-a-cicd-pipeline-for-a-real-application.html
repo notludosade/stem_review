@@ -1,0 +1,149 @@
+<meta charset="UTF-8">
+<title>Lesson 19: Designing a CI/CD Pipeline for a Real Application — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · Cloud Computing B / DevOps · Unit 7 · Lesson 19</span>
+  <h1>Designing a CI/CD Pipeline for a Real Application</h1>
+  <p class="subtitle">Every unit so far taught one stage of the pipeline Lesson 3 mapped, in isolation. This lesson doesn't introduce anything new — it's about combining all six units into one coherent pipeline design, and noticing that the right combination changes completely depending on what's actually being built.</p>
+  <p class="nav-links"><a href="../Unit%206/0018-on-call-and-incident-response.html" class="nav-prev">← Unit 6, Lesson 18</a> <a href="0020-devops-anti-patterns-and-how-teams-actually-fail-at-this.html" class="nav-next">Lesson 20 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>There's no single "correct" CI/CD pipeline — only a pipeline that fits a specific team's risk tolerance, a specific application's blast radius if something breaks, and a specific organization's regulatory or business constraints. This lesson is the judgment call of combining CI cadence, deployment strategy, infrastructure management, orchestration, and observability into one design, for three genuinely different real applications.</p>
+
+  <h2>A shared measuring stick</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    The <strong>DORA metrics</strong> are four measures — deployment frequency, lead time for changes, change failure rate, and time to restore service — that research has repeatedly found separate high-performing DevOps teams from low-performing ones, regardless of company size or industry. Nearly every practice this course has covered exists to move one of these four in the right direction: CI (Unit 2) and small merges shrink lead time; canary releases and rollback plans (Unit 3) shrink change failure rate; self-healing (Unit 5) and good alerting (Unit 6) shrink time to restore. A pipeline design is really just a set of concrete choices aimed at all four at once.
+  </div>
+
+  <h2>See how the design changes with the application</h2>
+  <p>The same six units of tools and practices produce three different pipelines below, depending only on what's actually being shipped.</p>
+
+  <div class="widget" id="pipeline-design-widget">
+    <p class="widget-label">Interactive: matching a pipeline design to a real application</p>
+    <div class="fm-tabs" id="pipeline-design-tabs">
+      <button class="fm-tab is-active" type="button" data-design="startup">Small SaaS Startup</button>
+      <button class="fm-tab" type="button" data-design="fintech">Regulated Fintech Backend</button>
+      <button class="fm-tab" type="button" data-design="consumer">High-Traffic Consumer App</button>
+    </div>
+    <div class="fm-panel" data-design-panel="startup">
+      <p><strong>Shape:</strong> five engineers, low regulatory burden, needs to move fast to find product-market fit.</p>
+      <ul>
+        <li><strong>CI (Unit 2):</strong> every merge auto-built and tested; a small, fast suite that gives an answer in minutes.</li>
+        <li><strong>Deployment (Unit 3):</strong> Continuous Deployment, no release gate — the team trusts its test suite and ships many small changes a day, using blue-green for simplicity.</li>
+        <li><strong>IaC (Unit 4):</strong> one declarative repo, reconciled automatically on every merge to main.</li>
+        <li><strong>Orchestration (Unit 5):</strong> a small cluster, desired replica count of 2–3, mostly for redundancy rather than raw scale.</li>
+        <li><strong>Observability (Unit 6):</strong> a handful of high-signal alerts (error rate, uptime) pointed at a single-person on-call rotation.</li>
+      </ul>
+    </div>
+    <div class="fm-panel" data-design-panel="fintech" hidden>
+      <p><strong>Shape:</strong> handles real money, subject to audit, a bad deploy has real regulatory and financial consequences.</p>
+      <ul>
+        <li><strong>CI (Unit 2):</strong> the same build-and-test rigor, plus a mandatory security scanning step before anything is considered green.</li>
+        <li><strong>Deployment (Unit 3):</strong> Continuous Delivery with a release gate — compliance requires human sign-off — followed by a canary release, since limiting blast radius on financial data matters.</li>
+        <li><strong>IaC (Unit 4):</strong> every infrastructure change requires two-reviewer approval; reconciliation runs on a strict schedule, and drift triggers an alert instead of silently auto-correcting.</li>
+        <li><strong>Orchestration (Unit 5):</strong> higher replica counts spread across multiple availability zones, with explicit resource limits per pod.</li>
+        <li><strong>Observability (Unit 6):</strong> tracing is mandatory on every request for audit purposes; tiered alerts mean only true customer-impacting issues page the rotation, the rest become tickets.</li>
+      </ul>
+    </div>
+    <div class="fm-panel" data-design-panel="consumer" hidden>
+      <p><strong>Shape:</strong> millions of users, traffic that spikes unpredictably, a bug at 100% rollout affects an enormous number of people instantly.</p>
+      <ul>
+        <li><strong>CI (Unit 2):</strong> a fast, heavily parallelized suite — the fail-fast ordering from Unit 2 matters enormously at this size of codebase.</li>
+        <li><strong>Deployment (Unit 3):</strong> canary releases by default, gradually shifting traffic, since even a small bug affects a large absolute number of users.</li>
+        <li><strong>IaC (Unit 4):</strong> infrastructure defined per-region, since the application runs across many regions at once.</li>
+        <li><strong>Orchestration (Unit 5):</strong> aggressive autoscaling, with replica count driven by real-time request-rate metrics rather than a fixed number.</li>
+        <li><strong>Observability (Unit 6):</strong> genuinely uses all three signals from Lesson 16 — metrics for trend dashboards, logs for incident deep-dives, and traces for cross-service latency debugging.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why the "right" pipeline differs by trust and risk, not just by app type</span>
+    Two companies with nearly identical applications can reasonably land on different pipelines, because the difference isn't really about the code — it's about how much a bad deploy costs, and how much the team currently trusts its own tests and monitoring. That's exactly the same trust decision Unit 3 raised about release gates, and Unit 3's point about canary requiring mature per-slice monitoring: a team can't safely skip a release gate it doesn't yet have the test coverage to justify skipping, and it can't safely lean on a canary strategy without the observability from Unit 6 to actually notice a problem in a thin slice of traffic. A pipeline design is only as good as the trust it's actually built on.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What do the DORA metrics measure?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Four outcomes — deployment frequency, lead time for changes, change failure rate, and time to restore service — shown to separate high- and low-performing DevOps teams.</button>
+      <button class="quiz-choice" data-correct="false">The exact dollar cost of a company's cloud bill each month.</button>
+      <button class="quiz-choice" data-correct="false">How many engineers a company employs in total.</button>
+      <button class="quiz-choice" data-correct="false">The programming language used across an application's codebase.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The DORA metrics are the four measures this course's practices are ultimately aimed at improving.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why does the small SaaS startup scenario favor Continuous Deployment with no release gate, while the regulated fintech scenario keeps a release gate?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">The startup's team trusts its test suite and has low regulatory burden; the fintech team faces compliance requirements a human decision is genuinely needed for.</button>
+      <button class="quiz-choice" data-correct="false">Release gates are technically incompatible with any financial application.</button>
+      <button class="quiz-choice" data-correct="false">Continuous Deployment is illegal for startups with fewer than five engineers.</button>
+      <button class="quiz-choice" data-correct="false">There's no real difference between the two scenarios' deployment needs.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Trust in the pipeline and regulatory constraints, not the technology itself, drive whether a release gate makes sense.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why does the high-traffic consumer app scenario genuinely need all three observability signals from Unit 6, rather than just one?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Trend dashboards, incident deep-dives, and cross-service latency debugging are three different jobs, each best served by metrics, logs, and traces respectively.</button>
+      <button class="quiz-choice" data-correct="false">Traces alone are always sufficient for every observability need at any scale.</button>
+      <button class="quiz-choice" data-correct="false">Large-scale applications are technically incapable of using logs at all.</button>
+      <button class="quiz-choice" data-correct="false">Metrics, logs, and traces record identical information at this scale.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A high-traffic app's varied observability needs are exactly why the three signals are complementary, not redundant.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="dora metrics|dora">
+    <p class="quiz-prompt">4. Fill in the blank: deployment frequency, lead time for changes, change failure rate, and time to restore service together make up the ___ metrics.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The DORA metrics are the shared measuring stick this lesson uses to evaluate pipeline design choices.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="canary|canary release">
+    <p class="quiz-prompt">5. Fill in the blank: because even a small bug can affect a huge absolute number of users, the high-traffic consumer app scenario defaults to a ___ release for deployments.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A canary release limits how many of those many users are exposed to a bad deploy before it's caught.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: DORA's <a href="https://dora.dev/">research site</a> covers the four metrics this lesson introduced and the practices shown to move them, based on years of surveying real engineering teams.</p>
+
+  <p class="ask-teacher">Have a real application in mind you'd like to sketch a pipeline design for using this lesson's approach? Ask your teacher — that's what I'm here for. Next up: the course's last lesson — why teams with every one of these tools in place still sometimes fail at DevOps anyway.</p>
+
+  <footer class="lesson-footer">STEM+ · Cloud Computing B / DevOps · Lesson 19 of the course sequence</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var tabs = document.querySelectorAll('#pipeline-design-tabs [data-design]');
+  var panels = document.querySelectorAll('[data-design-panel]');
+
+  tabs.forEach(function (tab) {
+    tab.addEventListener('click', function () {
+      var target = tab.getAttribute('data-design');
+      tabs.forEach(function (t) { t.classList.remove('is-active'); });
+      tab.classList.add('is-active');
+      panels.forEach(function (p) {
+        p.hidden = p.getAttribute('data-design-panel') !== target;
+      });
+    });
+  });
+});
+</script>

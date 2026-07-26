@@ -1,0 +1,158 @@
+<meta charset="UTF-8">
+<title>Lesson 24: Choosing a Language — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="advanced">
+  <span class="kicker">STEM+ · Systems Programming &amp; Architecture: CS · Unit 8 · Lesson 24</span>
+  <h1>Choosing a Language: When Low-Level Control Is Worth the Risk</h1>
+  <p class="subtitle">Lesson 1 opened this course by splitting languages into compiled and interpreted, and picked C because it sits at the bottom layer with no further translation underneath. Twenty-three lessons later, you know exactly what that bottom layer costs: manual memory management (Unit 2, Unit 3), no bounds checking, and undefined behavior (Lesson 23) instead of a safety net. This closing lesson asks the question the whole course has been building toward — when is that trade actually worth making?</p>
+  <p class="nav-links"><a href="0023-undefined-behavior-and-why-c-trusts-you.html" class="nav-prev">← Lesson 23</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Every bug this course named — a dangling pointer, a struct's wasted padding, a race condition, a segfault, undefined behavior — is a bug that a different kind of language simply cannot produce, by construction. That's not an accident, and it's not free either. This lesson names the actual tradeoff so the choice can be made on purpose, not by habit.</p>
+
+  <h2>Two categories of language, one real tradeoff</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    A <strong>systems programming language</strong> (C, C++, Rust) gives the programmer direct, manual control over memory layout and object lifetime, with no runtime safety net stopping an out-of-bounds access or a use-after-free — in exchange for predictable, minimal-overhead performance, since nothing runs at run time that the programmer didn't explicitly ask for. A <strong>managed language</strong> (Python, Java, JavaScript, Go) inserts a runtime between the program and the hardware that automatically enforces safety — checking array bounds, tracking object lifetimes for you — trading some performance and low-level control for eliminating entire categories of the bugs this course has spent eight units naming.
+  </div>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    <strong>Garbage collection</strong> is a managed language's runtime automatically finding heap-allocated objects nothing in the program can reach anymore, and reclaiming that memory itself — no explicit <code class="inline-code">free()</code> call (Lesson 6), and as a direct consequence, no double free and no use-after-free (Lesson 9), since the language never lets a live reference outlive the memory it points to. The cost isn't zero: a garbage collector has to run, periodically, using CPU time and occasionally pausing the program to do its bookkeeping — a cost a systems language's programmer pays instead in personal discipline, not CPU cycles.
+  </div>
+
+  <h2>Try it: which category fits the job?</h2>
+  <p>Real engineering teams make this call constantly. Given each workload, would you reach for a systems language or a managed one?</p>
+
+  <div class="widget" id="lang-widget">
+    <p class="widget-label">Interactive: systems language or managed language?</p>
+    <p class="quiz-prompt" data-lang-prompt></p>
+    <div class="fm-row" style="flex-wrap:wrap; gap:0.6rem;">
+      <button class="widget-btn" type="button" data-lang-guess="systems">Systems language (like C)</button>
+      <button class="widget-btn" type="button" data-lang-guess="managed">Managed language (like Python)</button>
+    </div>
+    <p class="verdict" data-lang-verdict></p>
+    <div class="fm-row">
+      <button class="widget-btn" type="button" data-lang-next>Next scenario →</button>
+    </div>
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Worked example: real software mixes both, on purpose</span>
+    A web browser's rendering and JavaScript engines are written in C++ (and increasingly Rust) — every millisecond of layout and paint time is user-visible, and the memory-safety discipline of a small, expert team is worth paying for that speed. The pages it renders, though, run in JavaScript, a managed, garbage-collected language — because arbitrary untrusted website code needs a runtime that can't corrupt memory even if it tries, and most of what a web page's script does isn't performance-critical enough to justify the risk. The same project routinely uses both categories at once, matched to which part of the system actually needs which tradeoff.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why this course chose C, and why most software doesn't</span>
+    Almost all production software written today is not written in C — it's written in managed languages, because most programs aren't chasing the last few percent of performance, and eliminating whole bug classes by construction is worth more than raw speed for the overwhelming majority of code anyone will ever write. But every managed language's runtime — its garbage collector, its interpreter or JIT (Lesson 1), its bounds checks — is itself built by someone, in a systems language, applying exactly what this course covered: address spaces (Unit 2), pointers (Unit 3), the OS interface (Unit 5), the CPU and cache (Unit 7). Systems programming knowledge doesn't disappear when you write Python tomorrow — it just moves down a layer, to the smaller number of engineers building the floor everyone else's code stands on. This course existed so that whichever language you reach for next, you understand exactly what it's doing for you, and what it's costing you to do it.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What is the central tradeoff between a systems language and a managed language?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Manual control and minimal runtime overhead, with no safety net, versus automatic safety enforcement that eliminates whole bug classes at some performance cost.</button>
+      <button class="quiz-choice" data-correct="false">Managed languages always run faster than systems languages under every condition.</button>
+      <button class="quiz-choice" data-correct="false">Systems languages cannot produce any bugs at all, by definition.</button>
+      <button class="quiz-choice" data-correct="false">There is no meaningful difference between the two categories.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Control-and-speed versus safety-and-overhead is the exact axis this entire lesson, and much of this course, has been walking.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why might an operating system kernel be written in a systems language rather than a garbage-collected one?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">A kernel needs predictable, minimal-overhead memory control with no unpredictable collector pauses, and it often provides the very services a managed runtime would depend on.</button>
+      <button class="quiz-choice" data-correct="false">Garbage-collected languages are incapable of representing operating system logic at all.</button>
+      <button class="quiz-choice" data-correct="false">Kernels never allocate any memory, so the language choice makes no difference.</button>
+      <button class="quiz-choice" data-correct="false">Systems languages are always shorter to write in than managed ones.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Predictability and being the foundation other runtimes rely on are exactly why kernels favor systems languages.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why does even a Python program ultimately depend on systems programming knowledge somewhere?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">The Python interpreter itself is a compiled program, built in a systems language, applying exactly this course's concepts to manage memory and execute instructions.</button>
+      <button class="quiz-choice" data-correct="false">Python programs are secretly compiled to C source code every time they run.</button>
+      <button class="quiz-choice" data-correct="false">Systems programming knowledge is irrelevant once a language has a garbage collector.</button>
+      <button class="quiz-choice" data-correct="false">Python cannot actually run without a human manually managing its memory.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>This is Lesson 1's point returning at the very end: an interpreter is itself a compiled program, built on exactly this course's foundations.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="garbage collection|garbage collector">
+    <p class="quiz-prompt">4. Fill in the blank: a managed language runtime automatically finding and reclaiming heap memory nothing can reach anymore, with no explicit free() call required, is called ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Garbage collection is what removes manual free() calls, and with them, double-free and use-after-free bugs, from a language entirely.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="systems programming language|systems language">
+    <p class="quiz-prompt">5. Fill in the blank: a language like C or C++, giving the programmer direct manual control over memory with no runtime safety net, in exchange for predictable low-overhead performance, is called a ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Systems languages are exactly the category this entire course has been examining from the inside.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before you move on: the Rust programming language's <a href="https://doc.rust-lang.org/book/ch00-00-introduction.html">official book introduction</a> lays out, from a language designed after C, an explicit attempt to keep systems-level control while removing the exact bug classes Units 2, 3, and 8 spent this course naming.</p>
+
+  <p class="ask-teacher">Curious whether Rust or Go actually deliver on giving you C-level control without C-level risk? Ask your teacher — that's what I'm here for. This closes Systems Programming &amp; Architecture: CS — the course exam, covering all eight units, is ready whenever you are.</p>
+
+  <footer class="lesson-footer">STEM+ · Systems Programming &amp; Architecture: CS · Lesson 24 of the course sequence</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var scenarios = [
+    { text: 'An operating system kernel that must run with zero garbage-collection pauses and full, direct hardware control.', answer: 'systems', why: 'A kernel needs predictable, minimal-overhead memory control — exactly what a systems language provides and a GC pause would violate.' },
+    { text: 'A one-off internal script that reformats a CSV file once a week, run by a single analyst.', answer: 'managed', why: 'Nothing here is performance-critical; a managed language\'s speed of writing and built-in safety net is worth far more than raw execution speed.' },
+    { text: 'A high-frequency trading engine where a single unpredictable millisecond-scale pause is unacceptable.', answer: 'systems', why: 'Predictable, low-overhead timing rules out a garbage collector\'s occasional pauses — this is exactly the case for manual control.' },
+    { text: 'A typical company\'s web application backend, where shipping features quickly matters far more than shaving off microseconds.', answer: 'managed', why: 'Developer velocity and eliminated bug classes usually outweigh a small performance cost for ordinary application backends.' },
+    { text: 'Firmware for a microcontroller with 2KB of RAM and no operating system running underneath it at all.', answer: 'systems', why: 'With no OS and almost no memory to spare, there\'s no room for a managed runtime\'s overhead in the first place.' }
+  ];
+  var idx = 0;
+  var answered = false;
+  var prompt = document.querySelector('[data-lang-prompt]');
+  var verdict = document.querySelector('[data-lang-verdict]');
+  var buttons = document.querySelectorAll('[data-lang-guess]');
+
+  function render() {
+    answered = false;
+    verdict.textContent = '';
+    verdict.classList.remove('is-pass', 'is-fail');
+    prompt.textContent = (idx + 1) + '. ' + scenarios[idx].text;
+  }
+
+  buttons.forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      if (answered) return;
+      answered = true;
+      var guess = btn.getAttribute('data-lang-guess');
+      var correct = guess === scenarios[idx].answer;
+      verdict.classList.remove('is-pass', 'is-fail');
+      verdict.classList.add(correct ? 'is-pass' : 'is-fail');
+      verdict.textContent = (correct ? 'Correct — ' : 'Not quite. ') + scenarios[idx].why;
+    });
+  });
+
+  document.querySelector('[data-lang-next]').addEventListener('click', function () {
+    idx = (idx + 1) % scenarios.length;
+    render();
+  });
+
+  render();
+});
+</script>

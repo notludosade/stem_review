@@ -1,0 +1,175 @@
+<meta charset="UTF-8">
+<title>Lesson 18: On-Call and Incident Response — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · Cloud Computing B / DevOps · Unit 6 · Lesson 18</span>
+  <h1>On-Call and Incident Response</h1>
+  <p class="subtitle">Lesson 17 built a well-tuned tripwire. This lesson is about what's actually supposed to happen the moment it fires — who gets paged, what they're supposed to do first, and how a chaotic, everyone-jumps-in scramble turns into a coordinated response.</p>
+  <p class="nav-links"><a href="0017-alerting-without-drowning-in-noise.html" class="nav-prev">← Lesson 17</a> <a href="../Unit%207/0019-designing-a-cicd-pipeline-for-a-real-application.html" class="nav-next">Unit 7, Lesson 19 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>An actionable alert (Lesson 17) still has to reach an actual person, and that person still has to know what happens next. Without a plan for both of those, a real page at 3 a.m. turns into exactly the kind of chaos this unit has been trying to prevent — several people independently discovering the problem, nobody sure who's actually in charge of fixing it, and no shared record of what was tried.</p>
+
+  <h2>Who gets paged, and who's in charge once they are</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    An <strong>on-call rotation</strong> is a schedule where responsibility for responding to pages rotates among a defined group of engineers on a set cadence — a week at a time, say — so no single person is always on the hook, and the burden of being interrupted is shared roughly evenly across the team over time.
+  </div>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    An <strong>incident</strong> is a formally declared event where a system is degraded or unavailable in a way that affects real users, which kicks off a coordinated response instead of leaving each person who notices to independently investigate on their own. The <strong>incident commander</strong> is the person responsible for coordinating that response — tracking status, deciding when to escalate or pull in more people, and calling it resolved — and isn't necessarily the engineer actually fixing the underlying code.
+  </div>
+
+  <h2>Try it: walk a mock incident from page to postmortem</h2>
+  <p>Click through the stages below in order, and see what's happening — and who owns it — at each one.</p>
+
+  <div class="widget" id="incident-widget">
+    <p class="widget-label">Interactive: an incident, stage by stage</p>
+    <div class="fm-tabs" id="incident-stages">
+      <button class="fm-tab is-active" type="button" data-stage="alert">1. Alert fires</button>
+      <button class="fm-tab" type="button" data-stage="ack">2. On-call acknowledges</button>
+      <button class="fm-tab" type="button" data-stage="declare">3. Incident declared</button>
+      <button class="fm-tab" type="button" data-stage="mitigate">4. Mitigation</button>
+      <button class="fm-tab" type="button" data-stage="resolve">5. Resolved</button>
+      <button class="fm-tab" type="button" data-stage="postmortem">6. Postmortem</button>
+    </div>
+    <p class="verdict" data-incident-desc>The threshold from Lesson 17 crosses its line, and a page goes out automatically to whoever is currently on the on-call rotation.</p>
+    <p class="plot-hint" data-incident-owner">Owner: the alerting system — no human has been interrupted yet.</p>
+    <p class="plot-readout" data-incident-progress>Stages explored: 1 of 6.</p>
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Worked example</span>
+    A checkout error-rate alert pages the on-call engineer at 2:17 a.m. She acknowledges it within two minutes — stopping the page from escalating further up the rotation — and within five minutes decides this is bigger than a quick fix: she formally declares an incident and takes the incident commander role herself. She pulls in a second engineer with checkout-service context, uses Lesson 9's feature flag to disable the broken code path as a fast mitigation, confirms the error rate drops back to normal, and declares it resolved at 2:41 a.m. — twenty-four minutes from page to resolution, with a written timeline the whole way, ready for a postmortem later that week.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why declaring an incident formally is worth the overhead it feels like</span>
+    It's tempting to skip the formal declaration when a problem seems small — just quietly fix it and move on. The cost shows up when a "small" problem turns out not to be: without a declared incident and a named incident commander, a second engineer who notices the same symptom independently starts investigating in parallel, possibly trying a conflicting fix at the same time, with neither person aware the other is even looking. Declaring early costs almost nothing if the problem turns out to be minor; not declaring costs real coordination time if it turns out not to be — and by the time that's obvious, the chaotic version has usually already started. The incident closes, appropriately, with the same blameless postmortem Unit 1 introduced — reviewing what happened and why, not who to blame for it.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What does an on-call rotation accomplish?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">It spreads responsibility for responding to pages across a defined group on a set cadence, so no one person is always on the hook.</button>
+      <button class="quiz-choice" data-correct="false">It guarantees a system will never experience an incident.</button>
+      <button class="quiz-choice" data-correct="false">It permanently assigns one single engineer to handle every future page.</button>
+      <button class="quiz-choice" data-correct="false">It replaces the need for any alerting system entirely.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Rotation shares the burden of being paged evenly across a team over time.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. What is the incident commander's role during an incident?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Coordinating the response — tracking status, deciding when to escalate, and calling it resolved — not necessarily fixing the code themselves.</button>
+      <button class="quiz-choice" data-correct="false">Writing the fix to the underlying bug personally, in every case.</button>
+      <button class="quiz-choice" data-correct="false">Deciding which engineer gets blamed once the incident ends.</button>
+      <button class="quiz-choice" data-correct="false">Permanently taking over the on-call rotation from that point on.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The incident commander coordinates the response; someone else may well be the one actually debugging.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why does formally declaring an incident, even for a problem that seems small, tend to save time overall?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">It prevents multiple people from independently investigating the same problem in parallel, possibly with conflicting fixes and no shared awareness.</button>
+      <button class="quiz-choice" data-correct="false">Declaring an incident always takes longer than simply fixing the problem quietly.</button>
+      <button class="quiz-choice" data-correct="false">Formal declaration is required by law for every production system.</button>
+      <button class="quiz-choice" data-correct="false">It has no effect on how many people end up investigating a problem.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A declared incident with a clear owner avoids the coordination cost of an uncoordinated, parallel scramble.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="on-call rotation|on call rotation|rotation">
+    <p class="quiz-prompt">4. Fill in the blank: a schedule where responsibility for responding to pages rotates among a defined group of engineers is called an ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>An on-call rotation spreads the burden of being paged evenly across a team.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="incident commander">
+    <p class="quiz-prompt">5. Fill in the blank: the person responsible for coordinating an incident response — tracking status and deciding when to escalate — is called the ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The incident commander owns coordination, whether or not they're the one writing the actual fix.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: PagerDuty's <a href="https://response.pagerduty.com/">Incident Response Documentation</a> covers this exact page-to-postmortem flow, from a company whose product is largely built around it.</p>
+
+  <p class="ask-teacher">Curious how a team decides who gets added to the on-call rotation in the first place? Ask your teacher — that's what I'm here for. Next up: Unit 7 combines everything from all six units so far into one real, coherent pipeline design.</p>
+
+  <footer class="lesson-footer">STEM+ · Cloud Computing B / DevOps · Lesson 18 of the course sequence</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var stages = {
+    alert: {
+      desc: 'The threshold from Lesson 17 crosses its line, and a page goes out automatically to whoever is currently on the on-call rotation.',
+      owner: 'Owner: the alerting system — no human has been interrupted yet.'
+    },
+    ack: {
+      desc: 'The on-call engineer acknowledges the page, confirming they\'ve seen it and are looking — this stops it from escalating further up the rotation.',
+      owner: 'Owner: the on-call engineer, individually, still just investigating.'
+    },
+    declare: {
+      desc: 'The problem looks bigger than a quick fix, so the on-call engineer formally declares an incident and someone takes on the incident commander role.',
+      owner: 'Owner: the incident commander, now coordinating — possibly pulling in more people.'
+    },
+    mitigate: {
+      desc: 'The team stops the bleeding using whatever tool fits fastest — a rollback, a feature flag flip, or a roll-forward fix from Unit 3.',
+      owner: 'Owner: whoever is actively fixing it, directed by the incident commander.'
+    },
+    resolve: {
+      desc: 'Metrics confirm the system is back to normal. The incident commander declares it resolved and records a timeline of what happened.',
+      owner: 'Owner: the incident commander, closing out the response.'
+    },
+    postmortem: {
+      desc: 'The team holds a blameless postmortem (Unit 1, Lesson 2) — reviewing the system and process that let this happen, not assigning individual blame.',
+      owner: 'Owner: the whole team, reviewing together.'
+    }
+  };
+
+  var order = ['alert', 'ack', 'declare', 'mitigate', 'resolve', 'postmortem'];
+  var visited = { alert: true };
+
+  var tabs = document.querySelectorAll('#incident-stages [data-stage]');
+  var descEl = document.querySelector('[data-incident-desc]');
+  var ownerEl = document.querySelector('[data-incident-owner]');
+  var progressEl = document.querySelector('[data-incident-progress]');
+
+  function render(stage) {
+    descEl.textContent = stages[stage].desc;
+    ownerEl.textContent = stages[stage].owner;
+    var count = Object.keys(visited).length;
+    progressEl.textContent = 'Stages explored: ' + count + ' of ' + order.length + (count === order.length ? ' — you’ve walked the whole incident.' : '.');
+  }
+
+  tabs.forEach(function (tab) {
+    tab.addEventListener('click', function () {
+      tabs.forEach(function (t) { t.classList.remove('is-active'); });
+      tab.classList.add('is-active');
+      var stage = tab.getAttribute('data-stage');
+      visited[stage] = true;
+      render(stage);
+    });
+  });
+
+  render('alert');
+});
+</script>

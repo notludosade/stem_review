@@ -1,0 +1,169 @@
+<meta charset="UTF-8">
+<title>Unit 6 Test — Version B — Systems Programming &amp; Architecture: CS — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/tests.js" defer></script>
+<div class="page" data-tier="advanced">
+  <span class="kicker">STEM+ · Systems Programming &amp; Architecture: CS · Unit 6 · Unit Test</span>
+  <h1>Unit 6 Test — Version B</h1>
+  <p class="subtitle">Concurrency. 10 points covering every lesson in this unit. Score 90% or higher to clear this unit.</p>
+  <p class="nav-links"><a href="../index.html" class="nav-toc">← Course Contents</a> <a href="unit-test-a.html" class="nav-toc">← Version A</a></p>
+
+  <div data-test data-course="Systems Programming &amp; Architecture: CS" data-unit="Unit 6" data-kind="unit_test" data-version="B">
+
+    <div class="quiz" data-test-item data-topic="Threads vs Processes">
+      <p class="quiz-prompt">1. What does each individual thread still keep private to itself, even inside a multithreaded process?</p>
+      <div class="quiz-choices">
+        <button class="quiz-choice" data-correct="true">Its own stack and its own set of CPU register values.</button>
+        <button class="quiz-choice" data-correct="false">The entire process's heap.</button>
+        <button class="quiz-choice" data-correct="false">Every file the process has open.</button>
+        <button class="quiz-choice" data-correct="false">Nothing — threads share every piece of memory unconditionally.</button>
+      </div>
+      <p class="quiz-feedback" hidden></p>
+      <p class="quiz-explain" hidden>Each thread still needs its own stack to track its own local variables and call history independently.</p>
+    </div>
+
+    <div class="quiz" data-test-item data-topic="Thread Creation Cost">
+      <p class="quiz-prompt">2. A video game's rendering thread and physics thread both need to read and write the same game-world data. Why is this cheap and direct, compared to doing it across two separate processes?</p>
+      <div class="quiz-choices">
+        <button class="quiz-choice" data-correct="true">Both threads already share the same heap, so no copying or message-passing mechanism is needed.</button>
+        <button class="quiz-choice" data-correct="false">Separate processes are actually just as cheap for this, since they also share memory automatically.</button>
+        <button class="quiz-choice" data-correct="false">Threads are not capable of accessing heap-allocated data at all.</button>
+        <button class="quiz-choice" data-correct="false">The operating system copies the data on every single access to keep it in sync.</button>
+      </div>
+      <p class="quiz-feedback" hidden></p>
+      <p class="quiz-explain" hidden>Shared heap access is exactly what makes cooperating threads cheaper and simpler than cooperating processes.</p>
+    </div>
+
+    <div class="quiz" data-test-item data-topic="Race Conditions">
+      <p class="quiz-prompt">3. What is a race condition?</p>
+      <div class="quiz-choices">
+        <button class="quiz-choice" data-correct="true">A bug where a program's correctness depends on the precise, uncontrolled timing or interleaving of operations across threads.</button>
+        <button class="quiz-choice" data-correct="false">Any bug that occurs only in single-threaded programs.</button>
+        <button class="quiz-choice" data-correct="false">A deliberate feature that makes threads run in a fixed, predictable order.</button>
+        <button class="quiz-choice" data-correct="false">A compiler error caught before the program ever runs.</button>
+      </div>
+      <p class="quiz-feedback" hidden></p>
+      <p class="quiz-explain" hidden>Race conditions depend on exactly how threads' steps happen to interleave at run time.</p>
+    </div>
+
+    <div class="quiz" data-test-item data-test-fill data-topic="Lost Update" data-answers="lost update">
+      <p class="quiz-prompt">4. Fill in the blank: the specific outcome where two threads each increment a shared counter, but one increment is silently overwritten by the other's stale write, is called a ___.</p>
+      <div class="quiz-fill-row">
+        <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      </div>
+      <p class="quiz-feedback" hidden></p>
+      <p class="quiz-explain" hidden>A lost update is the classic, concrete symptom of an unprotected shared counter race condition.</p>
+    </div>
+
+    <div class="quiz" data-test-item data-topic="Mutexes">
+      <p class="quiz-prompt">5. What happens if a thread tries to lock a mutex that another thread currently holds?</p>
+      <div class="quiz-choices">
+        <button class="quiz-choice" data-correct="true">It blocks — pauses and waits — until the mutex is unlocked.</button>
+        <button class="quiz-choice" data-correct="false">It proceeds immediately, ignoring the lock entirely.</button>
+        <button class="quiz-choice" data-correct="false">It automatically terminates the whole program.</button>
+        <button class="quiz-choice" data-correct="false">It force-unlocks the mutex on the other thread's behalf.</button>
+      </div>
+      <p class="quiz-feedback" hidden></p>
+      <p class="quiz-explain" hidden>Blocking is exactly how a mutex enforces that only one thread's critical section runs at a time.</p>
+    </div>
+
+    <div class="quiz" data-test-item data-topic="Threads vs Processes">
+      <p class="quiz-prompt">6. Compare creating a new thread to creating a new process. Answer both parts:</p>
+      <div class="quiz-part" data-part>
+        <p class="quiz-part-label">(a) Does creating a new thread require setting up a brand-new, isolated address space?</p>
+        <div class="quiz-choices">
+          <button class="quiz-choice" data-correct="false">Yes — every thread gets its own fully isolated address space</button>
+          <button class="quiz-choice" data-correct="true">No — a thread reuses the existing process's address space</button>
+        </div>
+      </div>
+      <div class="quiz-part" data-part>
+        <p class="quiz-part-label">(b) Does creating a new process require setting up a brand-new, isolated address space?</p>
+        <div class="quiz-choices">
+          <button class="quiz-choice" data-correct="true">Yes — full process isolation is exactly what makes process creation heavier</button>
+          <button class="quiz-choice" data-correct="false">No — processes and threads set up memory identically</button>
+        </div>
+      </div>
+      <p class="quiz-explain" hidden>Skipping full address-space isolation is exactly what makes thread creation lighter weight than process creation.</p>
+    </div>
+
+    <div class="quiz" data-test-item data-topic="Debugging Race Conditions">
+      <p class="quiz-prompt">7. A race condition shows up once in ten thousand production runs, but never during local testing. Answer both parts:</p>
+      <div class="quiz-part" data-part>
+        <p class="quiz-part-label">(a) Does this mean the bug wasn't real during local testing?</p>
+        <div class="quiz-choices">
+          <button class="quiz-choice" data-correct="false">Correct — if it didn't appear, it genuinely wasn't present in the code</button>
+          <button class="quiz-choice" data-correct="true">Incorrect — the bug was always present; the bad interleaving simply didn't occur locally</button>
+        </div>
+      </div>
+      <div class="quiz-part" data-part>
+        <p class="quiz-part-label">(b) Why might heavier production load make the bad interleaving more likely?</p>
+        <div class="quiz-choices">
+          <button class="quiz-choice" data-correct="true">More threads competing for the CPU makes interleavings more varied, increasing the odds of hitting the bad one</button>
+          <button class="quiz-choice" data-correct="false">Production servers run a fundamentally different CPU instruction set</button>
+        </div>
+      </div>
+      <p class="quiz-explain" hidden>Race conditions can hide behind mostly-correct interleavings for a long time before surfacing under heavier, more varied load.</p>
+    </div>
+
+    <div class="quiz" data-test-item data-topic="Critical Sections">
+      <p class="quiz-prompt">8. Answer both parts about protecting shared data:</p>
+      <div class="quiz-part" data-part data-answers="mutex">
+        <p class="quiz-part-label">(a) Fill in the blank: the object that must be locked before entering a critical section, and unlocked afterward, is a ___.</p>
+        <div class="quiz-fill-row">
+          <input type="text" class="quiz-fill-input" aria-label="Your answer">
+        </div>
+      </div>
+      <div class="quiz-part" data-part>
+        <p class="quiz-part-label">(b) Why does wrapping the read-add-write sequence in a mutex fix the lost-update bug?</p>
+        <div class="quiz-choices">
+          <button class="quiz-choice" data-correct="true">It forces the two threads' critical sections to run one at a time instead of interleaving</button>
+          <button class="quiz-choice" data-correct="false">It makes the increment operation run twice as fast</button>
+        </div>
+      </div>
+      <p class="quiz-explain" hidden>A mutex doesn't speed anything up — it guarantees the critical section can't be interrupted by another thread's critical section.</p>
+    </div>
+
+    <div class="quiz" data-test-item data-topic="Deadlock">
+      <p class="quiz-prompt">9. What is a deadlock? Answer both parts:</p>
+      <div class="quiz-part" data-part>
+        <p class="quiz-part-label">(a) Which of these describes it?</p>
+        <div class="quiz-choices">
+          <button class="quiz-choice" data-correct="true">Two or more threads each waiting on a lock the other holds, so neither can ever proceed</button>
+          <button class="quiz-choice" data-correct="false">A mutex that has simply been locked and unlocked too many times</button>
+        </div>
+      </div>
+      <div class="quiz-part" data-part>
+        <p class="quiz-part-label">(b) Does adding more locking to a program automatically make it safer from every concurrency bug?</p>
+        <div class="quiz-choices">
+          <button class="quiz-choice" data-correct="false">Yes — more locks always strictly improve safety with no new risk</button>
+          <button class="quiz-choice" data-correct="true">No — locking introduces a new failure mode, deadlock, that didn't exist before</button>
+        </div>
+      </div>
+      <p class="quiz-explain" hidden>Locks solve race conditions but introduce deadlock as a brand-new possible failure mode of their own.</p>
+    </div>
+
+    <div class="quiz" data-test-item data-topic="Thread Terminology">
+      <p class="quiz-prompt">10. A process starts with exactly one thread. Answer both parts:</p>
+      <div class="quiz-part" data-part>
+        <p class="quiz-part-label">(a) What is that starting thread usually called?</p>
+        <div class="quiz-choices">
+          <button class="quiz-choice" data-correct="true">The main thread</button>
+          <button class="quiz-choice" data-correct="false">The kernel thread</button>
+        </div>
+      </div>
+      <div class="quiz-part" data-part data-answers="multithreaded">
+        <p class="quiz-part-label">(b) Fill in the blank: once more threads are added, the process is described as ___.</p>
+        <div class="quiz-fill-row">
+          <input type="text" class="quiz-fill-input" aria-label="Your answer">
+        </div>
+      </div>
+      <p class="quiz-explain" hidden>Every process starts with one main thread; a multithreaded process has simply added more, all sharing its heap.</p>
+    </div>
+
+    <p class="test-warning" data-test-warning hidden></p>
+    <button class="widget-btn" data-test-submit>Submit Test</button>
+    <div class="test-result" data-test-result hidden></div>
+  </div>
+
+  <footer class="lesson-footer">STEM+ · Systems Programming &amp; Architecture: CS · Unit 6 Test — Version B</footer>
+</div>
