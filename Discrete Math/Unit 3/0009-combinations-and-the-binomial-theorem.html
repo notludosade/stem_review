@@ -1,0 +1,145 @@
+<meta charset="UTF-8">
+<title>Lesson 9: Combinations and the Binomial Theorem — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Discrete Math · Unit 3 · Lesson 9</span>
+  <h1>Combinations and the Binomial Theorem</h1>
+  <p class="subtitle">Lesson 8 closed on a question: what happens to the count once order stops mattering? This lesson answers it, then shows the resulting numbers arranged into a triangle you may have already seen — and proves it isn't a coincidence.</p>
+  <p class="nav-links"><a href="0008-permutations.html" class="nav-prev">← Lesson 8</a> <a href="../Unit%204/0010-sample-spaces-and-events.html" class="nav-next">Lesson 10 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <h2>1. Combinations</h2>
+  <div class="box">
+    <span class="box-label">Definition — Combination, C(n, r)</span>
+    A <strong>combination</strong> of r items chosen from n distinct items, where order does <em>not</em> matter, is counted by C(n, r) = n! / (r!(n − r)!), also written <sup>n</sup>C<sub>r</sub> or (ⁿᵣ) ("n choose r"). It equals P(n,r) divided by r! — the permutation count, with the r! orderings of each chosen group collapsed into a single outcome.
+  </div>
+  <div class="box example">
+    <span class="box-label">Worked example</span>
+    A committee of 3 is chosen from 8 people, with no distinct roles (unlike Lesson 8's podium, where 1st/2nd/3rd were different positions). C(8,3) = 8!/(3!·5!) = (8·7·6)/(3·2·1) = 336/6 = 56 — exactly P(8,3) = 336 divided by 3! = 6, since every group of 3 people can be internally ordered 3! = 6 different ways, all counting as the same committee.
+  </div>
+
+  <h2>2. Symmetry and Pascal's identity</h2>
+  <div class="box">
+    <span class="box-label">Two Identities</span>
+    <strong>Symmetry</strong>: C(n, r) = C(n, n−r) — choosing r items to include is the same count as choosing n−r items to exclude. <strong>Pascal's identity</strong>: C(n, r) = C(n−1, r−1) + C(n−1, r) — to choose r from n items, either a fixed item is included (choose the remaining r−1 from the other n−1) or it isn't (choose all r from the other n−1); the addition principle from Lesson 7 combines these two mutually-exclusive cases.
+  </div>
+
+  <h2>3. Pascal's Triangle</h2>
+  <div class="box">
+    <span class="box-label">Definition — Pascal's Triangle</span>
+    Arranging C(n, 0), C(n, 1), ..., C(n, n) as row n of a triangle (starting with row 0) produces <strong>Pascal's Triangle</strong>: each row starts and ends in 1, is symmetric left to right (Pascal's identity's symmetry fact), and every interior entry is the sum of the two entries diagonally above it (Pascal's identity itself, applied directly).
+  </div>
+
+  <h2>4. The Binomial Theorem</h2>
+  <div class="box">
+    <span class="box-label">Formula — Binomial Theorem</span>
+    (x + y)ⁿ = Σ (k=0 to n) C(n,k) · x<sup>(n−k)</sup> · y<sup>k</sup>. Expanding (x+y)ⁿ by hand for large n means tracking, for each term, how many of the n factors of (x+y) contributed a y instead of an x — and "how many of n slots have y" is exactly a combination count, C(n,k), with no ordering involved.
+  </div>
+  <div class="box example">
+    <span class="box-label">Worked example</span>
+    Row 4 of Pascal's triangle is 1, 4, 6, 4, 1 — exactly C(4,0) through C(4,4). So (x+y)⁴ = x⁴ + 4x³y + 6x²y² + 4xy³ + y⁴, with no multiplying-it-out required once the row is known.
+  </div>
+
+  <h2>5. Try it — build Pascal's triangle live</h2>
+  <p>Step through row by row, then use row 5 to see the coefficients of (x+y)⁵ without expanding a single binomial.</p>
+  <div class="widget">
+    <div class="widget-label">Try It — Pascal's Triangle, Row by Row</div>
+    <div class="step-display" id="pt-display" style="min-height: 5rem; padding: 1rem; border: 1px solid var(--border); border-radius: 8px; font-family: var(--mono, monospace); white-space: pre-line;">Click "Next Row" to begin.</div>
+    <div class="quiz-fill-row" style="margin-top: 0.75rem;">
+      <button class="widget-btn" id="pt-next">Next Row →</button>
+      <button class="widget-btn" id="pt-reset">Reset</button>
+    </div>
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. A pizza shop lets you pick any 3 of 7 available toppings, with no ranking among them. How many topping combinations are possible?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">210</button>
+      <button class="quiz-choice" data-correct="true">35</button>
+      <button class="quiz-choice" data-correct="false">21</button>
+      <button class="quiz-choice" data-correct="false">7</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Order doesn't matter for toppings, so this is a combination: C(7,3) = 7!/(3!·4!) = (7·6·5)/(3·2·1) = 35.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why is C(n, r) always equal to C(n, n−r)?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">It isn't always equal — only for even n.</button>
+      <button class="quiz-choice" data-correct="true">Choosing which r items to include is the same act as choosing which n−r items to leave out.</button>
+      <button class="quiz-choice" data-correct="false">Because order matters in combinations.</button>
+      <button class="quiz-choice" data-correct="false">Because C(n,r) always equals n!.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Every selection of r items to keep simultaneously determines a selection of n−r items to exclude, and vice versa — the two counts describe the same set of outcomes from opposite directions.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Row 3 of Pascal's triangle is 1, 3, 3, 1. What is (x + y)³?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">x³ + 3x²y + 3xy² + y³</button>
+      <button class="quiz-choice" data-correct="false">x³ + 3xy + y³</button>
+      <button class="quiz-choice" data-correct="false">x³ + x²y + xy² + y³</button>
+      <button class="quiz-choice" data-correct="false">3x³ + 3y³</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The Binomial Theorem pairs row 3's coefficients (1,3,3,1) with descending powers of x and ascending powers of y: x³ + 3x²y + 3xy² + y³.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="6">
+    <p class="quiz-prompt">4. Fill in the blank: C(4,2) = ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>C(4,2) = 4!/(2!·2!) = 24/4 = 6.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="pascals identity|pascal's identity">
+    <p class="quiz-prompt">5. Fill in the blank: the identity C(n,r) = C(n−1,r−1) + C(n−1,r), which produces each entry of Pascal's triangle as the sum of the two above it, is called ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Pascal's identity is the addition-principle argument that splits "choose r from n" into "fixed item included" plus "fixed item excluded" cases.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read before the next lesson: <a href="https://openstax.org/books/precalculus-2e/pages/11-6-binomial-theorem">OpenStax Precalculus 2e, §11.6, "The Binomial Theorem"</a> and <a href="https://open.umn.edu/opentextbooks/textbooks/discrete-mathematics-an-open-introduction">Levin, Chapter 1.3–1.4</a> extend combinations to counting problems with repetition allowed, which this lesson's distinct-items version left out.</p>
+
+  <p class="ask-teacher">This closes out Unit 3 — the multiplication principle, permutations, and combinations all build directly on each other, so if any one still feels shaky, it's worth revisiting before the unit test rather than pushing ahead. Next up: Unit 4 turns this same counting toolkit toward probability — counting favorable outcomes over total outcomes.</p>
+
+  <footer class="lesson-footer">STEM+ · Discrete Math · Lesson 9 of the course sequence</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  function buildRow(n) {
+    var row = [1];
+    for (var k = 1; k <= n; k++) row.push(row[k - 1] * (n - k + 1) / k);
+    return row;
+  }
+  var steps = [];
+  for (var n = 0; n <= 5; n++) {
+    steps.push('Row ' + n + ':\n' + buildRow(n).join('   '));
+  }
+  steps.push('Row 5 gives the coefficients for (x+y)⁵:\nx⁵ + 5x⁴y + 10x³y² + 10x²y³ + 5xy⁴ + y⁵');
+
+  var idx = 0;
+  var display = document.getElementById('pt-display');
+  document.getElementById('pt-next').addEventListener('click', function () {
+    if (idx < steps.length - 1) idx++;
+    display.textContent = steps[idx];
+  });
+  document.getElementById('pt-reset').addEventListener('click', function () {
+    idx = 0;
+    display.textContent = steps[0];
+  });
+});
+</script>

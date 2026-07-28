@@ -1,0 +1,149 @@
+<meta charset="UTF-8">
+<title>Unit 2, Lesson 6: Mixing Problems and Logistic Growth — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/interactive.js" defer></script>
+<script src="../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Differential Equations · Unit 2 · Lesson 6</span>
+  <h1>Mixing Problems and Logistic Growth</h1>
+  <p class="subtitle">Two more first-order models close out the unit: a tank whose contents change as fluid flows in and out, and a growth equation that — unlike Lesson 4's — builds a limit into itself.</p>
+  <p class="nav-links"><a href="0005-newtons-law-of-cooling.html" class="nav-prev">← Lesson 5</a> <a href="../Unit%203/0007-homogeneous-equations-constant-coefficients.html" class="nav-next">Unit 3, Lesson 7 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <h2>1. Mixing problems</h2>
+  <div class="box">
+    <span class="box-label">Method — Setting Up a Mixing Problem</span>
+    For a tank holding a dissolved substance, track the amount A(t) with <strong>dA/dt = (rate in) − (rate out)</strong>. Rate in is (incoming concentration)×(inflow rate). Rate out is (current concentration)×(outflow rate) = [A(t)/V(t)]×(outflow rate), where V(t) is the tank's volume at time t — constant if inflow and outflow rates match.
+  </div>
+  <div class="box">
+    <span class="box-label">Worked Example</span>
+    A 100-gallon tank starts with 5 lb of dissolved salt. Brine with 2 lb/gal enters at 3 gal/min; the well-mixed solution leaves at the same rate, so volume stays at 100 gal. Rate in = 3(2) = 6 lb/min. Rate out = 3(A/100) = 0.03A lb/min. This gives <strong>dA/dt + 0.03A = 6</strong> — first-order linear, solved with Unit 1's integrating factor: μ = e<sup>0.03t</sup>, giving A(t) = 200 + Ce<sup>−0.03t</sup>. Applying A(0) = 5: C = −195, so <strong>A(t) = 200 − 195e<sup>−0.03t</sup></strong>.
+  </div>
+
+  <h2>2. The logistic differential equation</h2>
+  <div class="box">
+    <span class="box-label">Definition — Logistic Differential Equation</span>
+    <strong>dP/dt = rP(1 − P/K)</strong>, where r is the growth rate and K is the <strong>carrying capacity</strong> — the maximum sustainable population. When P is small compared to K, (1 − P/K) ≈ 1 and growth looks nearly exponential, matching Lesson 4. As P approaches K, (1 − P/K) approaches 0 and growth slows to a stop — the missing ingredient in the plain exponential model.
+  </div>
+  <div class="box">
+    <span class="box-label">Fact — The Logistic Solution</span>
+    Solving by separation of variables (partial fractions required) gives P(t) = <strong>K·P₀·e<sup>rt</sup> / (K − P₀ + P₀e<sup>rt</sup>)</strong>. As t → ∞, e<sup>rt</sup> dominates and the ratio approaches K — the population levels off at the carrying capacity no matter where it started, as long as P₀ &gt; 0. Growth is fastest at the curve's inflection point, <strong>P = K/2</strong>.
+  </div>
+
+  <h2>3. Watching the S-curve approach its capacity</h2>
+  <p>With r = 0.5 and P₀ = 5 fixed, slide the carrying capacity K and watch the curve level off there — always slowing fastest as it crosses K/2.</p>
+
+  <div class="widget">
+    <div class="widget-label">Try It — The Logistic Curve as K Varies</div>
+    <div class="plot-wrap">
+      <svg viewBox="0 0 460 300" width="460" height="300" role="img" aria-label="An S-shaped logistic growth curve leveling off at a carrying capacity K, which changes as the slider moves">
+        <line class="fig-axis" x1="30" y1="270" x2="430" y2="270"></line>
+        <line class="fig-axis" x1="60" y1="280" x2="60" y2="20"></line>
+        <line id="lg-capacity" stroke="#c0392b" stroke-width="1.5" stroke-dasharray="4 3" x1="60" x2="430"></line>
+        <polyline class="fig-curve" id="lg-curve"></polyline>
+      </svg>
+    </div>
+    <div class="slider-row">
+      <label for="lg-slider">Carrying capacity K</label>
+      <input type="range" id="lg-slider" min="20" max="100" step="5" value="60">
+      <span class="slider-value" id="lg-k-label">K = 60</span>
+    </div>
+    <p class="plot-readout" id="lg-readout">—</p>
+  </div>
+
+  <h2>Check your recall</h2>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. A mixing problem's governing equation always takes the form dA/dt = :</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">(rate in) − (rate out)</button>
+      <button class="quiz-choice" data-correct="false">(rate in) × (rate out)</button>
+      <button class="quiz-choice" data-correct="false">A(t)/V(t)</button>
+      <button class="quiz-choice" data-correct="false">(rate in) + (rate out)</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The amount of dissolved substance changes exactly by what flows in minus what flows out per unit time — a direct accounting equation, not a product or a ratio.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="6">
+    <p class="quiz-prompt">2. Fill in the blank: for the 100-gallon tank example (2 lb/gal brine entering at 3 gal/min, well-mixed outflow at 3 gal/min), the governing equation is dA/dt + 0.03A = ___</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Rate in = 3 gal/min × 2 lb/gal = 6 lb/min, and rate out = 3(A/100) = 0.03A, giving dA/dt = 6 − 0.03A, or dA/dt + 0.03A = 6.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. In dP/dt = rP(1 − P/K), the constant K represents:</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">the carrying capacity</button>
+      <button class="quiz-choice" data-correct="false">the initial population</button>
+      <button class="quiz-choice" data-correct="false">the growth rate</button>
+      <button class="quiz-choice" data-correct="false">the doubling time</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>K is the population level the factor (1 − P/K) drives growth toward zero at — the maximum size the environment can sustain.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="K/2">
+    <p class="quiz-prompt">4. The logistic curve grows fastest — its inflection point — at P = ___</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Maximizing rP(1 − P/K) with respect to P places the peak growth rate exactly halfway to the carrying capacity, at P = K/2.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">5. As t → ∞, the logistic solution P(t) approaches:</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">K</button>
+      <button class="quiz-choice" data-correct="false">0</button>
+      <button class="quiz-choice" data-correct="false">P₀</button>
+      <button class="quiz-choice" data-correct="false">infinity</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The e^(rt) term dominates both numerator and denominator as t grows, and the ratio simplifies to K — unlike the plain exponential model, the population levels off instead of growing without bound.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p><a href="https://tutorial.math.lamar.edu/Classes/DE/Modeling.aspx">Paul's Online Math Notes, "Modeling with First Order Differential Equations"</a> works through mixing-tank problems and population models, including the logistic case, in full.</p>
+
+  <p class="ask-teacher">Mixing problems are just bookkeeping dressed up as calculus — get "rate in minus rate out" right and the rest is Unit 1's integrating factor. The logistic equation's full closed-form solution needs partial fractions after separating; ask for that derivation step by step if curious how it's built. That closes Unit 2 — three lessons turning first-order techniques into real models. Unit 3 moves to second-order equations, where two initial conditions (not one) pin down a solution.</p>
+
+  <footer class="lesson-footer">STEM+ · Differential Equations · Unit 2 · Lesson 3 of 3</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var r = 0.5, P0 = 5;
+  var origin = { originX: 60, originY: 270, scaleX: 40, scaleY: 2.3 };
+  var curveMount = STEMPlus.mountLiveCurve(document.getElementById('lg-curve'), Object.assign({ xMin: 0, xMax: 9, samples: 120 }, origin));
+  var capLine = document.getElementById('lg-capacity');
+
+  var slider = document.getElementById('lg-slider');
+  var kLabel = document.getElementById('lg-k-label');
+  var readout = document.getElementById('lg-readout');
+
+  function logistic(K) {
+    return function (t) {
+      return (K * P0 * Math.exp(r * t)) / (K - P0 + P0 * Math.exp(r * t));
+    };
+  }
+
+  function render() {
+    var K = parseInt(slider.value, 10);
+    kLabel.textContent = 'K = ' + K;
+    curveMount.setFn(logistic(K));
+    var capY = origin.originY - K * origin.scaleY;
+    capLine.setAttribute('y1', capY);
+    capLine.setAttribute('y2', capY);
+    readout.textContent = 'K = ' + K + ': the curve levels off at ' + K + ', growing fastest near P = ' + (K / 2) + '.';
+  }
+
+  slider.addEventListener('input', render);
+  render();
+});
+</script>

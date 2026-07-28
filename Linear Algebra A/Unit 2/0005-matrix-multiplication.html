@@ -1,0 +1,165 @@
+<meta charset="UTF-8">
+<title>Lesson 5: Matrix Multiplication — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Linear Algebra A · Unit 2 · Lesson 5</span>
+  <h1>Matrix Multiplication</h1>
+  <p class="subtitle">Not entry-by-entry this time — rows meet columns, and the order you multiply in actually matters.</p>
+  <p class="nav-links"><a href="0004-matrix-notation-and-basic-operations.html" class="nav-prev">← Lesson 4</a> <a href="0006-the-identity-matrix-and-matrix-inverses.html" class="nav-next">Lesson 6 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Addition and scalar multiplication were both entrywise, borrowed almost unchanged from vectors. Matrix multiplication breaks that pattern completely — and it's the operation the rest of this course leans on the most: solving systems (Unit 3), transforming the plane (Unit 4), even eigenvalues (Unit 6) are all, underneath, statements about multiplying matrices.</p>
+
+  <h2>1. The rule</h2>
+  <div class="box">
+    <span class="box-label">Rule — Multiplying Two Matrices</span>
+    A product AB is defined only when A's number of columns matches B's number of rows (the "inner dimensions" must agree). The result has A's row count and B's column count (the "outer dimensions"). Entry (i, j) of AB is found by pairing row i of A with column j of B, multiplying corresponding entries, and adding — a dot product of that row with that column.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Worked Example</span>
+    A = [[2, 0], [1, 3]], B = [[4, −1], [2, 5]]. Entry (1,1): (2)(4) + (0)(2) = 8. Entry (1,2): (2)(−1) + (0)(5) = −2. Entry (2,1): (1)(4) + (3)(2) = 10. Entry (2,2): (1)(−1) + (3)(5) = 14. So AB = [[8, −2], [10, 14]].
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why AB ≠ BA in general</span>
+    Multiplication isn't symmetric here because row-times-column isn't symmetric: entry (i,j) of AB pairs A's row i with B's column j, while entry (i,j) of BA pairs B's row i with A's column j — completely different numbers, in general. Try both orders below and see it happen.
+  </div>
+
+  <div class="widget">
+    <div class="widget-label">Try It — AB vs. BA</div>
+    <div class="fm-row" style="align-items: flex-start; gap: 1.6rem;">
+      <div>
+        <p class="widget-label" style="margin-bottom: 0.4rem;">A</p>
+        <div style="display: inline-grid; grid-template-columns: repeat(2, 3.4rem); gap: 0.4rem; border: 1px solid var(--border); border-radius: 6px; padding: 0.6rem;">
+          <input type="number" class="fm-input" id="l5-a11" value="2">
+          <input type="number" class="fm-input" id="l5-a12" value="0">
+          <input type="number" class="fm-input" id="l5-a21" value="1">
+          <input type="number" class="fm-input" id="l5-a22" value="3">
+        </div>
+      </div>
+      <div>
+        <p class="widget-label" style="margin-bottom: 0.4rem;">B</p>
+        <div style="display: inline-grid; grid-template-columns: repeat(2, 3.4rem); gap: 0.4rem; border: 1px solid var(--border); border-radius: 6px; padding: 0.6rem;">
+          <input type="number" class="fm-input" id="l5-b11" value="4">
+          <input type="number" class="fm-input" id="l5-b12" value="-1">
+          <input type="number" class="fm-input" id="l5-b21" value="2">
+          <input type="number" class="fm-input" id="l5-b22" value="5">
+        </div>
+      </div>
+    </div>
+    <p class="plot-readout" id="l5-ab-readout" style="margin-top: 1rem;">AB = [[8, −2], [10, 14]]</p>
+    <p class="plot-readout" id="l5-ba-readout">BA = [[7, −3], [9, 15]]</p>
+    <p class="plot-readout" id="l5-verdict"></p>
+  </div>
+
+  <h2>2. Dimensions of the product</h2>
+  <div class="box">
+    <span class="box-label">Worked Example — Non-Square Product</span>
+    If A is 2×3 and B is 3×4, the inner dimensions (3 and 3) agree, so AB is defined and comes out 2×4 — A's rows, B's columns. BA, on the other hand, would need B's 4 columns to match A's 2 rows — they don't, so BA isn't even defined here.
+  </div>
+
+  <h2>Check your recall</h2>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. For a product AB to be defined, A's column count must match:</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">B's row count</button>
+      <button class="quiz-choice" data-correct="false">B's column count</button>
+      <button class="quiz-choice" data-correct="false">A's row count</button>
+      <button class="quiz-choice" data-correct="false">B's total entry count</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Each entry of AB pairs a row of A with a column of B; that pairing only makes sense if those two have the same length — A's columns and B's rows.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. For A = [[2, 0], [1, 3]] and B = [[4, −1], [2, 5]], entry (2,2) of AB is:</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">14</button>
+      <button class="quiz-choice" data-correct="false">10</button>
+      <button class="quiz-choice" data-correct="false">−2</button>
+      <button class="quiz-choice" data-correct="false">8</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Row 2 of A is (1, 3), column 2 of B is (−1, 5): (1)(−1) + (3)(5) = −1 + 15 = 14.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="2x4|2 x 4|2×4">
+    <p class="quiz-prompt">3. Fill in the blank: if A is 2×3 and B is 3×4, AB has dimensions ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The inner dimensions (3 and 3) agree, so the product exists, taking A's row count and B's column count: 2×4.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">4. Is matrix multiplication commutative — is AB always equal to BA?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">No — in general AB ≠ BA, and one product may not even be defined when the other is.</button>
+      <button class="quiz-choice" data-correct="false">Yes — order never matters for matrix multiplication.</button>
+      <button class="quiz-choice" data-correct="false">Yes, but only for matrices with negative entries.</button>
+      <button class="quiz-choice" data-correct="false">No — AB and BA are always undefined together.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Row-times-column pairs different rows and columns depending on the order, so AB and BA generally differ — and can even have different dimensions, or fail to both be defined.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="[[3,0],[-3,6]]|[[3, 0], [-3, 6]]|[[3,0],[−3,6]]|[[3, 0], [−3, 6]]">
+    <p class="quiz-prompt">5. Fill in the blank: for A = [[1, 1], [−1, 1]] and B = [[3, −3], [0, 3]], the product AB = ___ (in the form [[row 1], [row 2]]).</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Row 1 · col 1: (1)(3)+(1)(0)=3. Row 1 · col 2: (1)(−3)+(1)(3)=0. Row 2 · col 1: (−1)(3)+(1)(0)=−3. Row 2 · col 2: (−1)(−3)+(1)(3)=6. AB = [[3, 0], [−3, 6]].</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p><a href="https://www.khanacademy.org/math/linear-algebra/matrix-transformations">Khan Academy's Matrix Transformations unit</a>, in the "Transformations and matrix multiplication" section, works through several more row-by-column products, including non-square cases.</p>
+
+  <p class="ask-teacher">Ask your teacher for a 3×2 times 2×2 example to try by hand if the dimension-checking still feels shaky — getting fast at "does this product exist, and what shape comes out" pays off for the rest of the course. Next up: the one matrix that acts like the number 1, and which matrices get to have an inverse.</p>
+
+  <footer class="lesson-footer">STEM+ · Linear Algebra A · Lesson 5 of the course sequence</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var ids = ['l5-a11', 'l5-a12', 'l5-a21', 'l5-a22', 'l5-b11', 'l5-b12', 'l5-b21', 'l5-b22'];
+  var els = {};
+  ids.forEach(function (id) { els[id] = document.getElementById(id); });
+  var abOut = document.getElementById('l5-ab-readout');
+  var baOut = document.getElementById('l5-ba-readout');
+  var verdict = document.getElementById('l5-verdict');
+
+  function num(id) { var v = parseFloat(els[id].value); return isNaN(v) ? 0 : v; }
+  function fmt(v) { return String(Math.round(v * 1000) / 1000); }
+
+  function mult(a11, a12, a21, a22, b11, b12, b21, b22) {
+    return {
+      m11: a11 * b11 + a12 * b21, m12: a11 * b12 + a12 * b22,
+      m21: a21 * b11 + a22 * b21, m22: a21 * b12 + a22 * b22
+    };
+  }
+
+  function render() {
+    var a11 = num('l5-a11'), a12 = num('l5-a12'), a21 = num('l5-a21'), a22 = num('l5-a22');
+    var b11 = num('l5-b11'), b12 = num('l5-b12'), b21 = num('l5-b21'), b22 = num('l5-b22');
+
+    var ab = mult(a11, a12, a21, a22, b11, b12, b21, b22);
+    var ba = mult(b11, b12, b21, b22, a11, a12, a21, a22);
+
+    abOut.textContent = 'AB = [[' + fmt(ab.m11) + ', ' + fmt(ab.m12) + '], [' + fmt(ab.m21) + ', ' + fmt(ab.m22) + ']]';
+    baOut.textContent = 'BA = [[' + fmt(ba.m11) + ', ' + fmt(ba.m12) + '], [' + fmt(ba.m21) + ', ' + fmt(ba.m22) + ']]';
+
+    var equal = ab.m11 === ba.m11 && ab.m12 === ba.m12 && ab.m21 === ba.m21 && ab.m22 === ba.m22;
+    verdict.textContent = equal ? 'For this particular A and B, AB happens to equal BA — try changing an entry.' : 'AB ≠ BA — order changed the result.';
+    verdict.className = 'plot-readout ' + (equal ? 'is-pass' : 'is-fail');
+  }
+
+  ids.forEach(function (id) { els[id].addEventListener('input', render); });
+  render();
+});
+</script>

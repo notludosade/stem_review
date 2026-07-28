@@ -23,6 +23,8 @@
 //     </div>
 //   A [data-part] is fill-type if it carries data-answers, otherwise multiple-choice —
 //   same rule `data-test-fill`/`data-answers` follow at the item level for single-part questions.
+//   Pass thresholds are per test kind (PASS_THRESHOLDS below), not one flat number —
+//   unit_test 80%, course_exam 85%, pathway_exam 75%, pathway_final_exam 80%.
 //   Course exam gate: <div data-exam-gate data-course="…" data-required-units="Unit 1|Unit 2|…">
 //                        <div data-exam-locked hidden></div>
 //                        <div data-test …>…</div>   (hidden until unlocked)
@@ -38,9 +40,18 @@
 //       <div data-project-locked hidden></div>
 //       <div data-project-content hidden> … the brief + <div data-reflection> below … </div>
 //     </div>
+//   A project can instead gate on a pathway's End-of-Pathway Exam (see below) rather than
+//   listing every course individually — use this on the capstone for any pathway that has
+//   adopted the mid/final pathway-exam structure:
+//     <div data-project-gate data-required-pathway-exam="Mathematics">
+//       <div data-project-locked hidden></div>
+//       <div data-project-content hidden>…</div>
+//     </div>
 //   Project status badge (hub/pathway listings) — read-only, never hides anything, just
 //   reports this browser's progress toward a project so it can be judged "separately":
 //     <span data-project-status data-required-courses="Course A|Course B|…"></span>
+//   Or, for a project gated on a pathway's End-of-Pathway Exam instead:
+//     <span data-project-status data-required-pathway-exam="Mathematics"></span>
 //   Single-course badge (pathway listings, one per course in the route):
 //     <span data-course-status="Course A"></span>
 //   Reflection (project pages) — open-ended answers, saved to this browser's localStorage,
@@ -56,11 +67,77 @@
 //         <span data-reflection-status class="reflection-status"></span>
 //       </div>
 //     </div>
+//
+//   Pathway mid-exam gate (Pathways/*.html): unlocks once every listed course's exam is
+//   passed — same "course exam" standard as the course-exam gate above, but scoped across
+//   the first half of a pathway's courses instead of units within one course. data-pathway
+//   is a stable identifier shared with the data-route-lock below (and, for an end-of-route
+//   final exam, with data-pathway-final-exam-gate). The inner <div data-test> uses
+//   data-pathway instead of data-course, and data-kind="pathway_exam".
+//     <div data-pathway-exam-gate data-pathway="…" data-required-courses="Course A|Course B">
+//       <div data-pathway-exam-locked hidden></div>
+//       <div data-test data-pathway="…" data-kind="pathway_exam" data-version="A|B">…</div>
+//     </div>
+//   Route lock (Pathways/*.html): hides the remaining route steps (and/or capstone link)
+//   until the pathway's mid-exam or final exam is passed. data-unlock-after is
+//   "pathway_exam" or "pathway_final_exam".
+//     <div data-route-lock data-pathway="…" data-unlock-after="pathway_exam">
+//       <div data-route-locked hidden></div>
+//       <div data-route-content hidden> … later <a class="toc-item"> route steps … </div>
+//     </div>
+//   Pathway final exam gate: identical shape to the mid-exam gate, but data-kind on its
+//   inner <div data-test> is "pathway_final_exam", and data-required-courses lists the
+//   second half of the route. Passing it is what a pathway's capstone project should gate
+//   on via data-required-pathway-exam above, instead of listing every course individually.
+//     <div data-pathway-final-exam-gate data-pathway="…" data-required-courses="Course C|Course D">
+//       <div data-pathway-final-exam-locked hidden></div>
+//       <div data-test data-pathway="…" data-kind="pathway_final_exam" data-version="A|B">…</div>
+//     </div>
+//
+//   Developer mode (developer.html): a passcode that unlocks every gate above in this
+//   browser only (course exam gates, pathway exam gates, route locks, project gates) —
+//   for site maintainers testing gated content, not a real access-control feature (this is
+//   a static site with no backend; anyone reading assets/tests.js can find the code).
+//     <div data-devmode>
+//       <input data-devmode-input type="password">
+//       <button data-devmode-submit>Unlock</button>
+//       <p data-devmode-status hidden></p>
+//       <button data-devmode-clear hidden>Turn Off Developer Mode</button>
+//     </div>
 window.STEMPlusTests = (function () {
-  var PASS_THRESHOLD = 0.9;
+  var PASS_THRESHOLDS = {
+    unit_test: 0.80,
+    course_exam: 0.85,
+    pathway_exam: 0.75,
+    pathway_final_exam: 0.80,
+  };
+  var DEFAULT_PASS_THRESHOLD = 0.80;
   var WEAK_TOPIC_THRESHOLD = 0.7;
   var STORAGE_KEY = 'stemplus:results:v1';
   var PROJECTS_STORAGE_KEY = 'stemplus:projects:v1';
+  var DEV_MODE_KEY = 'stemplus:devmode:v1';
+  var DEV_CODE = 'STEMPLUS-DEV-ACCESS';
+
+  function passThresholdFor(kind) {
+    return Object.prototype.hasOwnProperty.call(PASS_THRESHOLDS, kind) ? PASS_THRESHOLDS[kind] : DEFAULT_PASS_THRESHOLD;
+  }
+
+  function isDevMode() {
+    try {
+      return window.localStorage.getItem(DEV_MODE_KEY) === 'true';
+    } catch (err) {
+      return false;
+    }
+  }
+
+  function setDevMode(on) {
+    try {
+      window.localStorage.setItem(DEV_MODE_KEY, on ? 'true' : 'false');
+      return true;
+    } catch (err) {
+      return false;
+    }
+  }
 
   function normalize(s) {
     return s.trim().toLowerCase();
@@ -89,7 +166,7 @@ window.STEMPlusTests = (function () {
   function recordAttempt({ course, unit, kind, version, answers }) {
     const total = answers.length;
     const score = answers.reduce((sum, a) => sum + a.correct, 0);
-    const passed = score / total >= PASS_THRESHOLD;
+    const passed = score / total >= passThresholdFor(kind);
     const results = loadResults();
     results.push({
       course, unit, kind, version: version || null,
@@ -120,11 +197,15 @@ window.STEMPlusTests = (function () {
     return units;
   }
 
-  function summarizeCourseExam(rows) {
+  function summarizeExamOfKind(rows, kind) {
     const attempts = rows
-      .filter((row) => row.kind === 'course_exam')
+      .filter((row) => row.kind === kind)
       .map((row) => ({ score: row.score, total: row.total, passed: row.passed, takenAt: row.takenAt }));
     return { attempts, passed: attempts.some((a) => a.passed) };
+  }
+
+  function summarizeCourseExam(rows) {
+    return summarizeExamOfKind(rows, 'course_exam');
   }
 
   function buildReport(course) {
@@ -150,7 +231,18 @@ window.STEMPlusTests = (function () {
   }
 
   function isCourseExamPassed(course) {
+    if (isDevMode()) return true;
     return summarizeCourseExam(getResultsForCourse(course)).passed;
+  }
+
+  function isPathwayExamPassed(pathway) {
+    if (isDevMode()) return true;
+    return summarizeExamOfKind(getResultsForCourse(pathway), 'pathway_exam').passed;
+  }
+
+  function isPathwayFinalExamPassed(pathway) {
+    if (isDevMode()) return true;
+    return summarizeExamOfKind(getResultsForCourse(pathway), 'pathway_final_exam').passed;
   }
 
   function requiredCoursesStatus(courses) {
@@ -183,9 +275,27 @@ window.STEMPlusTests = (function () {
   }
 
   function mountProjectGate(gate) {
-    const required = (gate.getAttribute('data-required-courses') || '').split('|').filter(Boolean);
+    const pathwayExam = gate.getAttribute('data-required-pathway-exam');
     const locked = gate.querySelector('[data-project-locked]');
     const content = gate.querySelector('[data-project-content]');
+
+    if (pathwayExam) {
+      const passed = isPathwayFinalExamPassed(pathwayExam);
+      if (!passed) {
+        if (locked) {
+          locked.innerHTML = '<p class="box-label">Project locked</p><p>Pass the ' + pathwayExam +
+            ' pathway’s End-of-Pathway Exam before this project unlocks.</p>';
+          locked.hidden = false;
+        }
+        if (content) content.hidden = true;
+        return;
+      }
+      if (locked) locked.hidden = true;
+      if (content) content.hidden = false;
+      return;
+    }
+
+    const required = (gate.getAttribute('data-required-courses') || '').split('|').filter(Boolean);
     const statuses = requiredCoursesStatus(required);
     const missing = statuses.filter((s) => !s.passed);
 
@@ -218,12 +328,21 @@ window.STEMPlusTests = (function () {
   }
 
   function mountProjectStatus(el) {
+    const pathwayExam = el.getAttribute('data-required-pathway-exam');
+    el.classList.add('lock-badge');
+    el.classList.remove('is-locked', 'is-unlocked');
+
+    if (pathwayExam) {
+      const unlocked = isPathwayFinalExamPassed(pathwayExam);
+      el.classList.add(unlocked ? 'is-unlocked' : 'is-locked');
+      el.textContent = unlocked ? 'Unlocked' : 'Locked · End-of-Pathway Exam not yet passed';
+      return;
+    }
+
     const required = (el.getAttribute('data-required-courses') || '').split('|').filter(Boolean);
     const statuses = requiredCoursesStatus(required);
     const passedCount = statuses.filter((s) => s.passed).length;
     const unlocked = passedCount === statuses.length;
-    el.classList.add('lock-badge');
-    el.classList.remove('is-locked', 'is-unlocked');
     el.classList.add(unlocked ? 'is-unlocked' : 'is-locked');
     el.textContent = unlocked ? 'Unlocked' : 'Locked · ' + passedCount + '/' + statuses.length + ' courses passed';
   }
@@ -381,9 +500,10 @@ window.STEMPlusTests = (function () {
     const pct = Math.round((score / total) * 100);
     result.classList.remove('is-pass', 'is-fail');
     result.classList.add(passed ? 'is-pass' : 'is-fail');
+    const thresholdPct = Math.round(passThresholdFor(kind) * 100);
 
     let html = '<p class="test-result-score">' + score + ' / ' + total + ' (' + pct + '%) — ' +
-      (passed ? 'Passed' : 'Not yet — 90% is required to pass') + '</p>';
+      (passed ? 'Passed' : 'Not yet — ' + thresholdPct + '% is required to pass') + '</p>';
 
     if (kind === 'unit_test') {
       if (passed) {
@@ -393,6 +513,14 @@ window.STEMPlusTests = (function () {
         html += '<p class="test-result-note">Review the questions above, then ' +
           (retry ? '<a href="' + retry + '">try the other version of this test</a>' : 'try again') + '.</p>';
       }
+    } else if (kind === 'pathway_exam') {
+      html += '<p class="test-result-note">' + (passed
+        ? 'Pathway exam passed — the rest of this pathway’s route is now unlocked.'
+        : 'Review the questions above, then retake this exam.') + '</p>';
+    } else if (kind === 'pathway_final_exam') {
+      html += '<p class="test-result-note">' + (passed
+        ? 'End-of-Pathway Exam passed — the capstone project is now unlocked.'
+        : 'Review the questions above, then retake this exam.') + '</p>';
     } else {
       html += '<p class="test-result-note">' + (passed
         ? 'Course exam passed — congratulations.'
@@ -430,7 +558,7 @@ window.STEMPlusTests = (function () {
         return { topic: item.getAttribute('data-topic') || container.getAttribute('data-unit') || 'General', correct };
       });
 
-      const course = container.getAttribute('data-course');
+      const course = container.getAttribute('data-course') || container.getAttribute('data-pathway');
       const unit = container.getAttribute('data-unit');
       const kind = container.getAttribute('data-kind');
       const version = container.getAttribute('data-version');
@@ -447,7 +575,7 @@ window.STEMPlusTests = (function () {
     const test = gate.querySelector('[data-test]');
 
     const units = summarizeUnits(getResultsForCourse(course));
-    const missing = required.filter((unit) => !units[unit] || !units[unit].cleared);
+    const missing = isDevMode() ? [] : required.filter((unit) => !units[unit] || !units[unit].cleared);
 
     if (missing.length > 0) {
       if (locked) {
@@ -468,6 +596,136 @@ window.STEMPlusTests = (function () {
     if (test) {
       test.hidden = false;
       mountTest(test);
+    }
+  }
+
+  function mountPathwayExamGate(gate) {
+    const pathway = gate.getAttribute('data-pathway');
+    const required = (gate.getAttribute('data-required-courses') || '').split('|').filter(Boolean);
+    const locked = gate.querySelector('[data-pathway-exam-locked]');
+    const test = gate.querySelector('[data-test]');
+
+    const statuses = requiredCoursesStatus(required);
+    const missing = statuses.filter((s) => !s.passed);
+
+    if (missing.length > 0) {
+      if (locked) {
+        let html = '<p class="box-label">Pathway exam locked</p>';
+        html += '<p>Pass every course exam below before this pathway exam unlocks:</p><ul>';
+        statuses.forEach((s) => {
+          html += '<li>' + (s.passed ? '✓ ' : '— ') + s.course + (s.passed ? ' — passed' : ' — not yet') + '</li>';
+        });
+        html += '</ul>';
+        locked.innerHTML = html;
+        locked.hidden = false;
+      }
+      if (test) test.hidden = true;
+      return;
+    }
+
+    if (locked) locked.hidden = true;
+    if (test) {
+      test.hidden = false;
+      mountTest(test);
+    }
+    void pathway; // identifier is read by mountTest via data-pathway on the inner [data-test]
+  }
+
+  function mountPathwayFinalExamGate(gate) {
+    const pathway = gate.getAttribute('data-pathway');
+    const required = (gate.getAttribute('data-required-courses') || '').split('|').filter(Boolean);
+    const locked = gate.querySelector('[data-pathway-final-exam-locked]');
+    const test = gate.querySelector('[data-test]');
+
+    const statuses = requiredCoursesStatus(required);
+    const missing = statuses.filter((s) => !s.passed);
+
+    if (missing.length > 0) {
+      if (locked) {
+        let html = '<p class="box-label">End-of-Pathway Exam locked</p>';
+        html += '<p>Pass every course exam below before this exam unlocks:</p><ul>';
+        statuses.forEach((s) => {
+          html += '<li>' + (s.passed ? '✓ ' : '— ') + s.course + (s.passed ? ' — passed' : ' — not yet') + '</li>';
+        });
+        html += '</ul>';
+        locked.innerHTML = html;
+        locked.hidden = false;
+      }
+      if (test) test.hidden = true;
+      return;
+    }
+
+    if (locked) locked.hidden = true;
+    if (test) {
+      test.hidden = false;
+      mountTest(test);
+    }
+    void pathway;
+  }
+
+  function mountRouteLock(el) {
+    const pathway = el.getAttribute('data-pathway');
+    const unlockAfter = el.getAttribute('data-unlock-after');
+    const locked = el.querySelector('[data-route-locked]');
+    const content = el.querySelector('[data-route-content]');
+    const passed = unlockAfter === 'pathway_final_exam' ? isPathwayFinalExamPassed(pathway) : isPathwayExamPassed(pathway);
+
+    if (!passed) {
+      if (locked) {
+        if (!locked.innerHTML.trim()) {
+          locked.innerHTML = '<p class="box-label">Locked</p><p>Pass the pathway exam above to continue this route.</p>';
+        }
+        locked.hidden = false;
+      }
+      if (content) content.hidden = true;
+      return;
+    }
+
+    if (locked) locked.hidden = true;
+    if (content) content.hidden = false;
+  }
+
+  function mountDevModePage(el) {
+    const input = el.querySelector('[data-devmode-input]');
+    const submit = el.querySelector('[data-devmode-submit]');
+    const status = el.querySelector('[data-devmode-status]');
+    const clearBtn = el.querySelector('[data-devmode-clear]');
+
+    function refresh() {
+      if (isDevMode()) {
+        if (status) {
+          status.textContent = 'Developer mode is ON in this browser — every gate is unlocked.';
+          status.hidden = false;
+          status.classList.add('is-correct');
+          status.classList.remove('is-incorrect');
+        }
+        if (clearBtn) clearBtn.hidden = false;
+      } else {
+        if (clearBtn) clearBtn.hidden = true;
+      }
+    }
+    refresh();
+
+    if (submit) {
+      submit.addEventListener('click', () => {
+        const val = input ? input.value.trim() : '';
+        if (val === DEV_CODE) {
+          setDevMode(true);
+          refresh();
+        } else if (status) {
+          status.textContent = 'Incorrect code.';
+          status.hidden = false;
+          status.classList.add('is-incorrect');
+          status.classList.remove('is-correct');
+        }
+      });
+    }
+    if (clearBtn) {
+      clearBtn.addEventListener('click', () => {
+        setDevMode(false);
+        if (status) status.hidden = true;
+        refresh();
+      });
     }
   }
 
@@ -514,19 +772,25 @@ window.STEMPlusTests = (function () {
 
   document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('[data-test]').forEach((container) => {
-      if (!container.closest('[data-exam-gate]')) mountTest(container);
+      if (!container.closest('[data-exam-gate], [data-pathway-exam-gate], [data-pathway-final-exam-gate]')) mountTest(container);
     });
     document.querySelectorAll('[data-exam-gate]').forEach(mountCourseExamGate);
+    document.querySelectorAll('[data-pathway-exam-gate]').forEach(mountPathwayExamGate);
+    document.querySelectorAll('[data-pathway-final-exam-gate]').forEach(mountPathwayFinalExamGate);
+    document.querySelectorAll('[data-route-lock]').forEach(mountRouteLock);
     document.querySelectorAll('[data-report]').forEach(mountProgressReport);
     document.querySelectorAll('[data-project-gate]').forEach(mountProjectGate);
     document.querySelectorAll('[data-project-status]').forEach(mountProjectStatus);
     document.querySelectorAll('[data-course-status]').forEach(mountCourseStatus);
     document.querySelectorAll('[data-reflection]').forEach(mountReflection);
+    document.querySelectorAll('[data-devmode]').forEach(mountDevModePage);
   });
 
   return {
     mountTest, mountCourseExamGate, mountProgressReport,
     mountProjectGate, mountProjectStatus, mountCourseStatus, mountReflection,
-    isCourseExamPassed, isProjectComplete,
+    mountPathwayExamGate, mountPathwayFinalExamGate, mountRouteLock, mountDevModePage,
+    isCourseExamPassed, isProjectComplete, isPathwayExamPassed, isPathwayFinalExamPassed,
+    isDevMode, setDevMode,
   };
 })();

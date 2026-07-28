@@ -1,0 +1,159 @@
+<meta charset="UTF-8">
+<title>Unit 3, Lesson 7: Directional Derivatives — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/interactive.js" defer></script>
+<script src="../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Multivariable Calculus · Unit 3 · Lesson 7</span>
+  <h1>Directional Derivatives</h1>
+  <p class="subtitle">Partial derivatives only ever looked straight along the x-axis or the y-axis. A directional derivative asks the same "how fast is f changing" question in literally any direction at all.</p>
+  <p class="nav-links"><a href="../Unit%202/0006-chain-rule-multivariable.html" class="nav-prev">← Lesson 6</a> <a href="0008-tangent-planes-and-linear-approximation.html" class="nav-next">Lesson 8 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <h2>1. Choosing your own direction</h2>
+  <div class="box">
+    <span class="box-label">Definition — Directional Derivative</span>
+    For a unit vector u = ⟨a, b⟩ (|u| = 1), the <strong>directional derivative</strong> of f at (x, y) in the direction of u is <strong>D<sub>u</sub>f(x, y) = ∇f(x, y) · u</strong>. This is exactly the dz/dt from Lesson 6's Chain Rule, specialized to a straight-line path in direction u — and f<sub>x</sub> and f<sub>y</sub> themselves are just the special cases u = ⟨1,0⟩ and u = ⟨0,1⟩.
+  </div>
+  <div class="box">
+    <span class="box-label">Method — Finding the Steepest Direction</span>
+    Because D<sub>u</sub>f = ∇f · u = |∇f||u|cos θ = |∇f|cos θ (since |u| = 1), D<sub>u</sub>f is <strong>largest when u points the same way as ∇f</strong> (θ = 0, cos θ = 1), giving a maximum rate of increase of exactly <strong>|∇f|</strong>. It is smallest — most negative — when u points opposite to ∇f, and exactly 0 when u is perpendicular to ∇f, i.e. tangent to the level curve.
+  </div>
+  <div class="box">
+    <span class="box-label">Worked Example</span>
+    f(x, y) = x² + y² at (1, 2): ∇f(1,2) = ⟨2, 4⟩. In the direction u = ⟨3/5, 4/5⟩ (a unit vector, since (3/5)² + (4/5)² = 1): D<sub>u</sub>f = (2)(3/5) + (4)(4/5) = 6/5 + 16/5 = <strong>22/5 = 4.4</strong>. The maximum possible rate of increase at (1,2), in any direction, is |∇f(1,2)| = √(4+16) = √20 = 2√5 ≈ <strong>4.47</strong> — achieved only in the direction of ∇f itself, ⟨2,4⟩/√20.
+  </div>
+  <div class="box why">
+    <span class="box-label">Why This Matters</span>
+    A hiker standing on a hillside doesn't only care about the steepness due east or due north — they care about the steepness in whichever direction they're actually walking. D<sub>u</sub>f answers exactly that, and its maximum, |∇f|, is the reason the gradient is called the direction of steepest ascent in the first place, not just an arbitrary vector built from two partials.
+  </div>
+
+  <h2>2. Turning the direction, watching D<sub>u</sub>f swing</h2>
+  <p>Slide θ to rotate u around the fixed point (3, 2). D<sub>u</sub>f peaks exactly when u lines up with ∇f (red), and bottoms out when it points the opposite way.</p>
+
+  <div class="widget">
+    <div class="widget-label">Try It — Directional Derivative at (3, 2)</div>
+    <div class="plot-wrap">
+      <svg id="dd-svg" viewBox="0 0 460 300" width="460" height="300" role="img" aria-label="A point with its gradient vector and a rotatable unit direction vector, with the directional derivative shown below">
+        <defs>
+          <marker id="dd-arrow-red" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#c0392b"></path></marker>
+          <marker id="dd-arrow-blue" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#2c5f8a"></path></marker>
+        </defs>
+        <line class="fig-axis" x1="20" y1="150" x2="440" y2="150"></line>
+        <line class="fig-axis" x1="230" y1="280" x2="230" y2="20"></line>
+        <g id="dd-rings" fill="none" stroke="#8a8a8a" stroke-width="1" opacity="0.55"></g>
+        <circle id="dd-point" r="6" fill="#333"></circle>
+        <line id="dd-grad" stroke="#c0392b" stroke-width="2.5" marker-end="url(#dd-arrow-red)"></line>
+        <line id="dd-u" stroke="#2c5f8a" stroke-width="2.5" marker-end="url(#dd-arrow-blue)"></line>
+      </svg>
+    </div>
+    <div class="slider-row">
+      <label for="dd-theta">θ</label>
+      <input type="range" id="dd-theta" min="0" max="6.283" step="0.02" value="0.5">
+      <span class="slider-value" id="dd-theta-label">θ = 0.50 rad</span>
+    </div>
+    <p class="plot-readout" id="dd-readout">—</p>
+  </div>
+
+  <h2>Check your recall</h2>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. For a unit vector u, the directional derivative D<sub>u</sub>f equals:</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">∇f · u</button>
+      <button class="quiz-choice" data-correct="false">∇f × u</button>
+      <button class="quiz-choice" data-correct="false">|∇f| + |u|</button>
+      <button class="quiz-choice" data-correct="false">∇f + u</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The directional derivative is a dot product of the gradient with the (unit) direction vector — a scalar rate of change, not a vector.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="22/5|4.4">
+    <p class="quiz-prompt">2. For f(x,y) = x² + y² at (1,2), the directional derivative in the direction u = ⟨3/5, 4/5⟩ is ___</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>∇f(1,2) = ⟨2,4⟩, so D_u f = 2(3/5) + 4(4/5) = 6/5 + 16/5 = 22/5 = 4.4.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. The direction of maximum increase of f at a point is:</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">along ∇f itself</button>
+      <button class="quiz-choice" data-correct="false">along the x-axis, always</button>
+      <button class="quiz-choice" data-correct="false">perpendicular to ∇f</button>
+      <button class="quiz-choice" data-correct="false">along the level curve</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>D_u f = |∇f|cos θ is maximized when θ = 0 — u pointing the same direction as ∇f.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">4. The maximum possible value of D<sub>u</sub>f at a point, over every possible unit direction u, is:</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">|∇f|</button>
+      <button class="quiz-choice" data-correct="false">∇f · ∇f</button>
+      <button class="quiz-choice" data-correct="false">f<sub>x</sub> + f<sub>y</sub></button>
+      <button class="quiz-choice" data-correct="false">1, since u is a unit vector</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>D_u f = |∇f|cos θ tops out at |∇f| when cos θ = 1 — the gradient's own magnitude, not a fixed constant like 1.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p><a href="https://openstax.org/books/calculus-volume-3/pages/4-6-directional-derivatives-and-the-gradient">OpenStax Calculus Volume 3, §4.6 "Directional Derivatives and the Gradient"</a> derives D<sub>u</sub>f from the Chain Rule and proves the maximum-rate property.</p>
+
+  <p class="ask-teacher">D<sub>u</sub>f only has a well-defined meaning when u is a unit vector. Ask your teacher what would go wrong — numerically, not just "it's against the rules" — if you plugged a non-unit vector into ∇f · u and called the result a directional derivative. Lesson 8 uses the gradient again, this time to build the actual tangent plane touching a surface at a point.</p>
+
+  <footer class="lesson-footer">STEM+ · Multivariable Calculus · Unit 3 · Lesson 7 of 24</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var originX = 230, originY = 150, scale = 30;
+  var ringsGroup = document.getElementById('dd-rings');
+  var pointEl = document.getElementById('dd-point');
+  var gradEl = document.getElementById('dd-grad');
+  var uEl = document.getElementById('dd-u');
+  var readout = document.getElementById('dd-readout');
+  var slider = document.getElementById('dd-theta');
+  var thetaLabel = document.getElementById('dd-theta-label');
+
+  var px = 3, py = 2;
+  [1, 4, 9, 16].forEach(function (k) {
+    var r = Math.sqrt(k) * scale;
+    var ring = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    ring.setAttribute('cx', originX); ring.setAttribute('cy', originY); ring.setAttribute('r', r);
+    ringsGroup.appendChild(ring);
+  });
+
+  var sx = originX + px * scale, sy = originY - py * scale;
+  pointEl.setAttribute('cx', sx); pointEl.setAttribute('cy', sy);
+
+  var gx = 2 * px, gy = 2 * py;
+  var gmag = Math.sqrt(gx * gx + gy * gy);
+  gradEl.setAttribute('x1', sx); gradEl.setAttribute('y1', sy);
+  gradEl.setAttribute('x2', sx + (gx / gmag) * 60);
+  gradEl.setAttribute('y2', sy - (gy / gmag) * 60);
+
+  function render() {
+    var theta = parseFloat(slider.value);
+    thetaLabel.textContent = 'θ = ' + theta.toFixed(2) + ' rad';
+    var ux = Math.cos(theta), uy = Math.sin(theta);
+    uEl.setAttribute('x1', sx); uEl.setAttribute('y1', sy);
+    uEl.setAttribute('x2', sx + ux * 55);
+    uEl.setAttribute('y2', sy - uy * 55);
+
+    var dU = gx * ux + gy * uy;
+    var note = Math.abs(dU - gmag) < 0.02 ? ' — maximum rate of increase!' :
+      Math.abs(dU + gmag) < 0.02 ? ' — steepest decrease.' :
+      Math.abs(dU) < 0.03 ? ' — along the level curve, no change.' : '';
+    readout.textContent = 'At (3, 2), ∇f = ⟨6, 4⟩, u = ⟨' + ux.toFixed(2) + ', ' + uy.toFixed(2) + '⟩. D_u f = ∇f · u = ' + dU.toFixed(2) + note;
+  }
+
+  slider.addEventListener('input', render);
+  render();
+});
+</script>

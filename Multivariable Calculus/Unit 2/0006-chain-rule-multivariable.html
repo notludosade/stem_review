@@ -1,0 +1,172 @@
+<meta charset="UTF-8">
+<title>Unit 2, Lesson 6: The Chain Rule for Multivariable Functions — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/interactive.js" defer></script>
+<script src="../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Multivariable Calculus · Unit 2 · Lesson 6</span>
+  <h1>The Chain Rule for Multivariable Functions</h1>
+  <p class="subtitle">A particle moving through the plane sees f(x,y) change along its path. The gradient from Lesson 5 turns out to be exactly the tool that predicts how fast — as a single dot product.</p>
+  <p class="nav-links"><a href="0005-partial-derivatives-and-gradient.html" class="nav-prev">← Lesson 5</a> <a href="../Unit%203/0007-directional-derivatives.html" class="nav-next">Lesson 7 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <h2>1. Differentiating f along a moving path</h2>
+  <div class="box">
+    <span class="box-label">Definition — Chain Rule Along a Path</span>
+    If z = f(x, y) and x = x(t), y = y(t) are both differentiable, then <strong>dz/dt = (∂f/∂x)(dx/dt) + (∂f/∂y)(dy/dt)</strong>. Recognizing the right-hand side as a dot product: <strong>dz/dt = ∇f(x(t), y(t)) · r'(t)</strong>, where r(t) = ⟨x(t), y(t)⟩ is the position and r'(t) the tangent (velocity) vector from AP Calculus BC's Unit 9. The gradient meets the tangent vector, and their dot product is the rate of change of f felt by a particle walking that exact path.
+  </div>
+  <div class="box">
+    <span class="box-label">Method — The General Chain Rule (Tree Diagram)</span>
+    When x and y each depend on <em>two</em> new variables, say x = x(s,t) and y = y(s,t), each partial of z picks up one term per path from z down to that variable: <strong>∂z/∂s = (∂f/∂x)(∂x/∂s) + (∂f/∂y)(∂y/∂s)</strong>, and ∂z/∂t is built the same way, swapping every ∂s for ∂t. Sketching z branching to x and y, and each of those branching again, makes it easy to see — and count — every term the rule needs.
+  </div>
+  <div class="box">
+    <span class="box-label">Worked Example</span>
+    f(x, y) = x²y, with x(t) = cos t, y(t) = sin t. f<sub>x</sub> = 2xy, f<sub>y</sub> = x², dx/dt = −sin t, dy/dt = cos t. So dz/dt = 2xy(−sin t) + x²(cos t). At t = 0: x = 1, y = 0, giving dz/dt = 2(1)(0)(0) + (1)²(1) = <strong>1</strong>. Checking directly: z(t) = cos²t sin t, so z'(t) = −2sin²t cos t + cos³t, and z'(0) = 0 + 1 = 1 — matches.
+  </div>
+  <div class="box why">
+    <span class="box-label">Why This Matters</span>
+    This is the multivariable Chain Rule doing exactly what the single-variable one always did — differentiating a composition — but now the "inside function" is a whole path through the plane. Lesson 7 specializes dz/dt to the case where the path is a straight line through a point in a chosen direction, turning it into the directional derivative.
+  </div>
+
+  <h2>2. The gradient meets the tangent vector</h2>
+  <p>Slide t. The blue arrow is the path's tangent vector r'(t); the red arrow is ∇f at that same point. Their dot product is dz/dt — read it two ways at once below.</p>
+
+  <div class="widget">
+    <div class="widget-label">Try It — dz/dt as ∇f · r'(t)</div>
+    <div class="plot-wrap">
+      <svg id="cr-svg" viewBox="0 0 460 300" width="460" height="300" role="img" aria-label="An elliptical path plotted over level curves of f, with the tangent vector and gradient vector drawn at the chosen point">
+        <defs>
+          <marker id="cr-arrow-blue" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#2c5f8a"></path></marker>
+          <marker id="cr-arrow-red" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#c0392b"></path></marker>
+        </defs>
+        <line class="fig-axis" x1="20" y1="150" x2="440" y2="150"></line>
+        <line class="fig-axis" x1="230" y1="280" x2="230" y2="20"></line>
+        <g id="cr-rings" fill="none" stroke="#8a8a8a" stroke-width="1" opacity="0.55"></g>
+        <polyline id="cr-path" fill="none" stroke="#1f7a63" stroke-width="1.5" opacity="0.6"></polyline>
+        <line id="cr-tangent" stroke="#2c5f8a" stroke-width="2.5" marker-end="url(#cr-arrow-blue)"></line>
+        <line id="cr-grad" stroke="#c0392b" stroke-width="2.5" marker-end="url(#cr-arrow-red)"></line>
+        <circle id="cr-point" r="6" fill="#1f7a63"></circle>
+      </svg>
+    </div>
+    <div class="slider-row">
+      <label for="cr-t">t</label>
+      <input type="range" id="cr-t" min="0" max="6.283" step="0.02" value="0">
+      <span class="slider-value" id="cr-t-label">t = 0.00</span>
+    </div>
+    <p class="plot-readout" id="cr-readout">—</p>
+  </div>
+
+  <h2>Check your recall</h2>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. For z = f(x,y) with x = x(t), y = y(t), the Chain Rule gives dz/dt as:</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">(∂f/∂x)(dx/dt) + (∂f/∂y)(dy/dt)</button>
+      <button class="quiz-choice" data-correct="false">(∂f/∂x)(∂f/∂y)</button>
+      <button class="quiz-choice" data-correct="false">(dx/dt)(dy/dt)</button>
+      <button class="quiz-choice" data-correct="false">∂f/∂x + dx/dt</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Each variable's contribution is its partial derivative times its own rate of change with respect to t, and the two contributions add.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="1">
+    <p class="quiz-prompt">2. For f(x,y) = x²y, x(t) = cos t, y(t) = sin t, dz/dt at t = 0 equals ___</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>dz/dt = 2xy(−sin t) + x²(cos t); at t=0, x=1, y=0, giving 2(1)(0)(0) + 1²(1) = 1.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. dz/dt can be rewritten as which dot product?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">∇f(x(t), y(t)) · r'(t)</button>
+      <button class="quiz-choice" data-correct="false">r(t) · r'(t)</button>
+      <button class="quiz-choice" data-correct="false">∇f · r(t)</button>
+      <button class="quiz-choice" data-correct="false">r'(t) · r''(t)</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>∇f = ⟨f_x, f_y⟩ and r'(t) = ⟨dx/dt, dy/dt⟩; their dot product f_x·dx/dt + f_y·dy/dt is exactly the Chain Rule sum.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">4. If z = f(x,y) with x = x(s,t) and y = y(s,t), the general Chain Rule gives ∂z/∂s as:</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">(∂f/∂x)(∂x/∂s) + (∂f/∂y)(∂y/∂s)</button>
+      <button class="quiz-choice" data-correct="false">(∂f/∂x)(∂x/∂t) + (∂f/∂y)(∂y/∂t)</button>
+      <button class="quiz-choice" data-correct="false">(∂f/∂x) + (∂f/∂y)</button>
+      <button class="quiz-choice" data-correct="false">(∂x/∂s)(∂y/∂s)</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Every path in the tree diagram from z down to s must use ∂/∂s, not ∂/∂t — matching each intermediate variable's derivative with respect to the target variable s.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p><a href="https://openstax.org/books/calculus-volume-3/pages/4-5-the-chain-rule-for-multivariable-functions">OpenStax Calculus Volume 3, §4.5 "The Chain Rule for Multivariable Functions"</a> covers both the single-parameter and general tree-diagram versions with worked examples.</p>
+
+  <p class="ask-teacher">dz/dt changes sign every time the ellipse crosses a point where the tangent vector and gradient are perpendicular. Ask your teacher to connect that moment to what's special about f along the path right there — it's the same idea Lesson 9 uses to hunt for a surface's extrema. Lesson 7 turns dz/dt into a tool you can point in any direction you choose, not just along a specific path.</p>
+
+  <footer class="lesson-footer">STEM+ · Multivariable Calculus · Unit 2 · Lesson 6 of 24</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var originX = 230, originY = 150, scale = 55;
+  var ringsGroup = document.getElementById('cr-rings');
+  var tangentEl = document.getElementById('cr-tangent');
+  var gradEl = document.getElementById('cr-grad');
+  var pointEl = document.getElementById('cr-point');
+  var readout = document.getElementById('cr-readout');
+  var slider = document.getElementById('cr-t');
+  var tLabel = document.getElementById('cr-t-label');
+
+  [0.25, 1, 2.25, 4].forEach(function (k) {
+    var rEl = document.createElementNS('http://www.w3.org/2000/svg', 'ellipse');
+    var r = Math.sqrt(k);
+    rEl.setAttribute('cx', originX); rEl.setAttribute('cy', originY);
+    rEl.setAttribute('rx', r * scale); rEl.setAttribute('ry', r * scale);
+    ringsGroup.appendChild(rEl);
+  });
+
+  function xFn(t) { return 2 * Math.cos(t); }
+  function yFn(t) { return Math.sin(t); }
+  function dxFn(t) { return -2 * Math.sin(t); }
+  function dyFn(t) { return Math.cos(t); }
+
+  var curveMount = STEMPlus.mountParametricCurve({
+    xFn: xFn, yFn: yFn, tMin: 0, tMax: 2 * Math.PI, samples: 120,
+    originX: originX, originY: originY, scaleX: scale, scaleY: scale,
+    curveEl: document.getElementById('cr-path')
+  });
+
+  function render() {
+    var t = parseFloat(slider.value);
+    tLabel.textContent = 't = ' + t.toFixed(2);
+    var x = xFn(t), y = yFn(t);
+    var p = curveMount.pointAt(t);
+    pointEl.setAttribute('cx', p.x); pointEl.setAttribute('cy', p.y);
+
+    var dx = dxFn(t), dy = dyFn(t);
+    var tanScale = 0.5;
+    tangentEl.setAttribute('x1', p.x); tangentEl.setAttribute('y1', p.y);
+    tangentEl.setAttribute('x2', p.x + dx * tanScale * scale);
+    tangentEl.setAttribute('y2', p.y - dy * tanScale * scale);
+
+    var gx = 2 * x, gy = 2 * y;
+    var gmag = Math.sqrt(gx * gx + gy * gy);
+    var gradScale = 0.35 * scale / Math.max(gmag, 0.01);
+    gradEl.setAttribute('x1', p.x); gradEl.setAttribute('y1', p.y);
+    gradEl.setAttribute('x2', p.x + gx * gradScale);
+    gradEl.setAttribute('y2', p.y - gy * gradScale);
+
+    var dzdt = gx * dx + gy * dy;
+    readout.textContent = 'Point (' + x.toFixed(2) + ', ' + y.toFixed(2) + '), r\'(t) = ⟨' + dx.toFixed(2) + ', ' + dy.toFixed(2) +
+      '⟩, ∇f = ⟨' + gx.toFixed(2) + ', ' + gy.toFixed(2) + '⟩. dz/dt = ∇f · r\'(t) = ' + dzdt.toFixed(2) + '.';
+  }
+
+  slider.addEventListener('input', render);
+  render();
+});
+</script>

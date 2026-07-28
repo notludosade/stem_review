@@ -1,0 +1,191 @@
+<meta charset="UTF-8">
+<title>Lesson 2: Linear Combinations and Span — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Linear Algebra A · Unit 1 · Lesson 2</span>
+  <h1>Linear Combinations and Span</h1>
+  <p class="subtitle">Scale a handful of vectors, add them up, and ask: which points can you actually reach?</p>
+  <p class="nav-links"><a href="0001-vectors-and-vector-operations.html" class="nav-prev">← Lesson 1</a> <a href="0003-vector-spaces-and-subspaces.html" class="nav-next">Lesson 3 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Lesson 1 gave you two operations: add vectors, scale vectors. This lesson asks what happens when you use both, freely and repeatedly, starting from a fixed handful of vectors. The answer to "which points can I reach?" turns out to be one of the most useful questions in the entire subject.</p>
+
+  <h2>1. Linear combinations</h2>
+  <div class="box">
+    <span class="box-label">Definition — Linear Combination</span>
+    A <strong>linear combination</strong> of vectors v₁, v₂, …, vₖ is any vector of the form c₁v₁ + c₂v₂ + ⋯ + cₖvₖ, where c₁, …, cₖ are scalars (real numbers). Every one of Lesson 1's operations is already a special case: v + w is a linear combination with both coefficients equal to 1, and cv is a linear combination of a single vector.
+  </div>
+
+  <h2>2. Span: every combination, all at once</h2>
+  <div class="box">
+    <span class="box-label">Definition — Span</span>
+    The <strong>span</strong> of a set of vectors {v₁, …, vₖ}, written span{v₁, …, vₖ}, is the set of <em>all</em> linear combinations of those vectors — every point reachable by choosing some c₁, …, cₖ. Span isn't one vector; it's an entire set, usually infinite.
+  </div>
+
+  <p>Drag the sliders below to sweep c₁ and c₂ across every combination of two fixed vectors, and watch which points light up as reachable.</p>
+
+  <div class="widget">
+    <div class="widget-label">Try It — Sweep a Linear Combination</div>
+    <div class="plot-wrap">
+      <svg viewBox="0 0 460 460" width="460" height="460" role="img" aria-label="A point at c1 times v1 plus c2 times v2, updating live as sliders change c1 and c2">
+        <defs>
+          <marker id="l2-arrow-v1" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="var(--muted)"></path></marker>
+          <marker id="l2-arrow-v2" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="var(--muted)"></path></marker>
+          <marker id="l2-arrow-p" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="var(--accent)"></path></marker>
+        </defs>
+        <line class="fig-axis" x1="10" y1="230" x2="450" y2="230"></line>
+        <line class="fig-axis" x1="230" y1="10" x2="230" y2="450"></line>
+        <line id="l2-v1line" x1="230" y1="230" x2="280" y2="205" stroke="var(--muted)" stroke-width="2" marker-end="url(#l2-arrow-v1)"></line>
+        <text class="fig-label" id="l2-v1label" x="284" y="203">v1 = (2, 1)</text>
+        <line id="l2-v2line" x1="230" y1="230" x2="205" y2="180" stroke="var(--muted)" stroke-width="2" marker-end="url(#l2-arrow-v2)"></line>
+        <text class="fig-label" id="l2-v2label" x="150" y="172">v2 = (−1, 2)</text>
+        <line id="l2-pline" x1="230" y1="230" x2="280" y2="205" stroke="var(--accent)" stroke-width="3" marker-end="url(#l2-arrow-p)"></line>
+        <circle class="fig-point" id="l2-point" r="6" cx="280" cy="205" fill="var(--accent)"></circle>
+      </svg>
+    </div>
+    <div class="fm-row">
+      <label for="l2-c1">c1: <span id="l2-c1val">1.0</span></label>
+      <input type="range" id="l2-c1" min="-2" max="2" step="0.5" value="1">
+    </div>
+    <div class="fm-row" style="margin-top: 0.4rem;">
+      <label for="l2-c2">c2: <span id="l2-c2val">0.0</span></label>
+      <input type="range" id="l2-c2" min="-2" max="2" step="0.5" value="0">
+    </div>
+    <p class="plot-readout" id="l2-readout">c1·v1 + c2·v2 = (2.0, 1.0)</p>
+    <button class="widget-btn" id="l2-toggle">Make v2 a multiple of v1</button>
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why span collapses to a line</span>
+    With v1 = (2, 1) and v2 = (−1, 2) — two vectors pointing in genuinely different directions — sweeping c1 and c2 reaches <em>every</em> point in the plane: span{v1, v2} = ℝ². Click the button above to make v2 a scalar multiple of v1 instead. Now every combination c1v1 + c2v2 is really just (c1 + 2c2)v1 — one direction, scaled — so the span collapses down to a single line through the origin. A second vector only adds new reachable territory if it points somewhere the first one couldn't already scale into.
+  </div>
+
+  <div class="box">
+    <span class="box-label">Edge case worth stating precisely</span>
+    The <strong>zero vector</strong> is always in the span of any set of vectors — set every coefficient to 0. This includes the <em>empty</em> set: span(∅) = {0} by definition (an "empty sum" of coefficients is 0). Span is never actually empty, even when you start with nothing to combine.
+  </div>
+
+  <h2>Check your recall</h2>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. Which expression is a linear combination of v₁ and v₂?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">3v₁ − 2v₂</button>
+      <button class="quiz-choice" data-correct="false">v₁ · v₂ (their product)</button>
+      <button class="quiz-choice" data-correct="false">v₁ / v₂ (their quotient)</button>
+      <button class="quiz-choice" data-correct="false">‖v₁‖ + ‖v₂‖ (a sum of magnitudes)</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A linear combination is strictly scale-then-add: c₁v₁ + c₂v₂. 3v₁ − 2v₂ is exactly that form with c₁ = 3, c₂ = −2.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. For v1 = (1, 0) and v2 = (0, 1), what is span{v1, v2}?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">All of ℝ² — every point in the plane.</button>
+      <button class="quiz-choice" data-correct="false">Just the two points (1, 0) and (0, 1).</button>
+      <button class="quiz-choice" data-correct="false">A single line through the origin.</button>
+      <button class="quiz-choice" data-correct="false">Only the first quadrant.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>c1(1,0) + c2(0,1) = (c1, c2), and c1, c2 can be any real numbers — that reaches every point in ℝ².</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="(6,-2)|(6, -2)|(6,−2)|(6, −2)">
+    <p class="quiz-prompt">3. Fill in the blank: for v = (3, −1), the linear combination 2v = ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>2v scales every component by 2: (2·3, 2·−1) = (6, −2).</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">4. If v2 = 3v1 (and v1 is nonzero), what is span{v1, v2}?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">A single line through the origin, in the direction of v1.</button>
+      <button class="quiz-choice" data-correct="false">All of ℝ².</button>
+      <button class="quiz-choice" data-correct="false">Just the zero vector.</button>
+      <button class="quiz-choice" data-correct="false">A plane in ℝ³.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>c1v1 + c2v2 = c1v1 + c2(3v1) = (c1 + 3c2)v1 — every combination is just some scalar times v1, so nothing outside v1's line is ever reached.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">5. What is the span of the empty set of vectors?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">{0} — just the zero vector.</button>
+      <button class="quiz-choice" data-correct="false">The empty set — span(∅) is undefined.</button>
+      <button class="quiz-choice" data-correct="false">All of ℝⁿ.</button>
+      <button class="quiz-choice" data-correct="false">A single line through the origin.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>With no vectors to combine, the only linear combination available is the empty sum, which is defined to be 0 — so span(∅) = {0}, never empty itself.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p><a href="https://www.khanacademy.org/math/linear-algebra/vectors-and-spaces">Khan Academy's Vectors and Spaces unit</a>, in the "Linear combinations and span" section, has several more drag-and-see examples building the same intuition for span in ℝ³.</p>
+
+  <p class="ask-teacher">If "why does a second parallel vector add nothing" still feels hand-wavy, ask your teacher to work through it algebraically for a specific pair — it's a good warm-up for Unit 4's linear independence. Next up: which subsets of ℝⁿ are "closed" enough to be called vector spaces in their own right.</p>
+
+  <footer class="lesson-footer">STEM+ · Linear Algebra A · Lesson 2 of the course sequence</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var originX = 230, originY = 230, scale = 25;
+  var v1 = { x: 2, y: 1 };
+  var v2Independent = { x: -1, y: 2 };
+  var v2Parallel = { x: 4, y: 2 };
+  var v2 = v2Independent;
+  var parallelMode = false;
+
+  var c1Input = document.getElementById('l2-c1');
+  var c2Input = document.getElementById('l2-c2');
+  var c1val = document.getElementById('l2-c1val');
+  var c2val = document.getElementById('l2-c2val');
+  var pline = document.getElementById('l2-pline');
+  var point = document.getElementById('l2-point');
+  var v2line = document.getElementById('l2-v2line');
+  var v2label = document.getElementById('l2-v2label');
+  var readout = document.getElementById('l2-readout');
+  var toggleBtn = document.getElementById('l2-toggle');
+
+  function toSvgX(mx) { return originX + mx * scale; }
+  function toSvgY(my) { return originY - my * scale; }
+
+  function render() {
+    var c1 = parseFloat(c1Input.value);
+    var c2 = parseFloat(c2Input.value);
+    c1val.textContent = c1.toFixed(1);
+    c2val.textContent = c2.toFixed(1);
+
+    var px = c1 * v1.x + c2 * v2.x;
+    var py = c1 * v1.y + c2 * v2.y;
+    var sx = toSvgX(px), sy = toSvgY(py);
+    pline.setAttribute('x2', sx); pline.setAttribute('y2', sy);
+    point.setAttribute('cx', sx); point.setAttribute('cy', sy);
+
+    v2line.setAttribute('x2', toSvgX(v2.x)); v2line.setAttribute('y2', toSvgY(v2.y));
+    v2label.setAttribute('x', toSvgX(v2.x) + (v2.x >= 0 ? 6 : -70));
+    v2label.setAttribute('y', toSvgY(v2.y) - 4);
+    v2label.textContent = 'v2 = (' + v2.x + ', ' + v2.y + ')' + (parallelMode ? ' = 2·v1' : '');
+
+    readout.textContent = 'c1·v1 + c2·v2 = (' + px.toFixed(1) + ', ' + py.toFixed(1) + ')' +
+      (parallelMode ? ' — always on the same line, no matter c1 or c2.' : '');
+  }
+
+  c1Input.addEventListener('input', render);
+  c2Input.addEventListener('input', render);
+  toggleBtn.addEventListener('click', function () {
+    parallelMode = !parallelMode;
+    v2 = parallelMode ? v2Parallel : v2Independent;
+    toggleBtn.textContent = parallelMode ? 'Make v2 independent again' : 'Make v2 a multiple of v1';
+    render();
+  });
+
+  render();
+});
+</script>

@@ -1,0 +1,158 @@
+<meta charset="UTF-8">
+<title>Unit 2, Lesson 5: Partial Derivatives and the Gradient — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/interactive.js" defer></script>
+<script src="../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Multivariable Calculus · Unit 2 · Lesson 5</span>
+  <h1>Partial Derivatives and the Gradient</h1>
+  <p class="subtitle">A surface has infinitely many directions to differentiate in at once. Start with the two simplest — straight along x, straight along y — then bundle both into a single vector.</p>
+  <p class="nav-links"><a href="0004-functions-of-several-variables.html" class="nav-prev">← Lesson 4</a> <a href="0006-chain-rule-multivariable.html" class="nav-next">Lesson 6 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <h2>1. Differentiating one variable at a time</h2>
+  <div class="box">
+    <span class="box-label">Definition — Partial Derivative</span>
+    The <strong>partial derivative</strong> of f(x, y) with respect to x is <strong>∂f/∂x = lim<sub>h→0</sub> [f(x+h, y) − f(x, y)] / h</strong> — the ordinary derivative definition, with y frozen as a constant. ∂f/∂y is defined the same way, freezing x instead. In practice: to compute ∂f/∂x, differentiate normally while treating every y as a constant; to compute ∂f/∂y, treat every x as a constant.
+  </div>
+  <div class="box">
+    <span class="box-label">Method — The Gradient Vector</span>
+    The <strong>gradient</strong> ∇f = ⟨∂f/∂x, ∂f/∂y⟩ (or ⟨f<sub>x</sub>, f<sub>y</sub>, f<sub>z</sub>⟩ in three variables) packages both partial derivatives into one vector. At any point, ∇f points in the direction of <strong>steepest ascent</strong> of the surface and is always <strong>perpendicular to the level curve</strong> through that point. Second partial derivatives — f<sub>xx</sub>, f<sub>yy</sub>, and the <strong>mixed partials</strong> f<sub>xy</sub>, f<sub>yx</sub> — come from differentiating a first partial again. <strong>Clairaut's theorem</strong> guarantees f<sub>xy</sub> = f<sub>yx</sub> whenever both mixed partials exist and are continuous near the point — a condition true of essentially every function this course uses, but not a free guarantee for every conceivable function.
+  </div>
+  <div class="box">
+    <span class="box-label">Worked Example</span>
+    f(x, y) = x²y + y³. Treating y as constant: f<sub>x</sub> = 2xy. Treating x as constant: f<sub>y</sub> = x² + 3y². At (1, 2): f<sub>x</sub>(1,2) = 2(1)(2) = <strong>4</strong>, f<sub>y</sub>(1,2) = 1² + 3(2²) = 1 + 12 = <strong>13</strong>, so ∇f(1,2) = ⟨4, 13⟩. Checking mixed partials: f<sub>xy</sub> = ∂/∂y(2xy) = 2x, and f<sub>yx</sub> = ∂/∂x(x² + 3y²) = 2x — equal, as Clairaut's theorem predicts for this smooth polynomial.
+  </div>
+  <div class="box why">
+    <span class="box-label">Why This Matters</span>
+    A single-variable slope only had two directions to point: up or down the x-axis. On a surface, "which way is steepest" is a genuine question with a specific answer — and the gradient is that answer, in vector form. Every later tool in this unit and the next (directional derivatives, tangent planes, the Second Derivative Test, Lagrange multipliers) is built directly on top of ∇f and its second-derivative cousins.
+  </div>
+
+  <h2>2. The gradient, perpendicular to every level curve</h2>
+  <p>Drag the point. The red arrow is ∇f at that location — notice it always points straight across the level curve, toward larger k, never along it.</p>
+
+  <div class="widget">
+    <div class="widget-label">Try It — The Gradient of f(x,y) = x² + y²</div>
+    <div class="plot-wrap">
+      <svg id="grad-svg" viewBox="0 0 460 300" width="460" height="300" role="img" aria-label="A contour map with a draggable point and its gradient vector drawn as a red arrow perpendicular to the level curve">
+        <defs>
+          <marker id="grad-arrowhead" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#c0392b"></path></marker>
+        </defs>
+        <line class="fig-axis" x1="20" y1="150" x2="440" y2="150"></line>
+        <line class="fig-axis" x1="230" y1="280" x2="230" y2="20"></line>
+        <g id="grad-rings" fill="none" stroke="#8a8a8a" stroke-width="1" opacity="0.55"></g>
+        <line id="grad-arrow" stroke="#c0392b" stroke-width="2.5" marker-end="url(#grad-arrowhead)"></line>
+        <circle id="grad-handle" r="7" fill="#2c5f8a" style="cursor:grab"></circle>
+      </svg>
+    </div>
+    <p class="plot-readout" id="grad-readout">—</p>
+  </div>
+
+  <h2>Check your recall</h2>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. To compute ∂f/∂x for f(x, y), you:</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">differentiate with respect to x, treating y as a constant</button>
+      <button class="quiz-choice" data-correct="false">differentiate with respect to y, treating x as a constant</button>
+      <button class="quiz-choice" data-correct="false">differentiate with respect to both x and y at once</button>
+      <button class="quiz-choice" data-correct="false">set x = 0 and differentiate what remains</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A partial derivative isolates one variable's effect by freezing every other variable as a constant during ordinary differentiation.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="4">
+    <p class="quiz-prompt">2. For f(x, y) = x²y + y³, f<sub>x</sub>(1, 2) = ___</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>f<sub>x</sub> = 2xy (treating y as constant), so f<sub>x</sub>(1,2) = 2(1)(2) = 4.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. At any point, the gradient vector ∇f is:</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">perpendicular to the level curve through that point, pointing toward increasing f</button>
+      <button class="quiz-choice" data-correct="false">tangent to the level curve through that point</button>
+      <button class="quiz-choice" data-correct="false">always pointing toward the origin</button>
+      <button class="quiz-choice" data-correct="false">always a unit vector</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The gradient points in the direction f increases fastest, which is always perpendicular to the "no change" direction a level curve represents — not tangent to it, and not necessarily length 1.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">4. Clairaut's theorem guarantees f<sub>xy</sub> = f<sub>yx</sub> at a point provided:</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">both mixed partial derivatives exist and are continuous near that point</button>
+      <button class="quiz-choice" data-correct="false">f is defined at that point</button>
+      <button class="quiz-choice" data-correct="false">f is a polynomial</button>
+      <button class="quiz-choice" data-correct="false">it always holds, with no conditions needed</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Clairaut's theorem is conditional on continuity of the mixed partials near the point — a mild condition met by nearly every function in this course, but not automatic for every function in general.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p><a href="https://openstax.org/books/calculus-volume-3/pages/4-3-partial-derivatives">OpenStax Calculus Volume 3, §4.3 "Partial Derivatives"</a> covers first and higher-order partial derivatives, including the precise statement of Clairaut's theorem.</p>
+
+  <p class="ask-teacher">The gradient of f(x,y) = x² + y² always points directly away from the origin. Ask your teacher why that specific fact matches the shape of this particular surface — and whether it would still be true for a differently shaped bowl, like f(x,y) = x² + 4y². Lesson 6 asks what happens to a multivariable function's rate of change when its inputs are themselves moving.</p>
+
+  <footer class="lesson-footer">STEM+ · Multivariable Calculus · Unit 2 · Lesson 5 of 24</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var svg = document.getElementById('grad-svg');
+  var originX = 230, originY = 150, scale = 22;
+  var ringsGroup = document.getElementById('grad-rings');
+  var arrow = document.getElementById('grad-arrow');
+  var handle = document.getElementById('grad-handle');
+  var readout = document.getElementById('grad-readout');
+  var dragging = false;
+
+  [1, 4, 9, 16, 25].forEach(function (k) {
+    var r = Math.sqrt(k) * scale;
+    var ring = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    ring.setAttribute('cx', originX); ring.setAttribute('cy', originY); ring.setAttribute('r', r);
+    ringsGroup.appendChild(ring);
+  });
+
+  function toSvgPoint(evt) {
+    var pt = svg.createSVGPoint();
+    pt.x = evt.clientX; pt.y = evt.clientY;
+    return pt.matrixTransform(svg.getScreenCTM().inverse());
+  }
+
+  function render(mx, my) {
+    mx = STEMPlus.clamp(mx, -9, 9);
+    my = STEMPlus.clamp(my, -6, 6);
+    if (Math.abs(mx) < 0.15 && Math.abs(my) < 0.15) { mx = 0.15; my = 0.15; }
+    var sx = originX + mx * scale, sy = originY - my * scale;
+    handle.setAttribute('cx', sx); handle.setAttribute('cy', sy);
+
+    var gx = 2 * mx, gy = 2 * my;
+    var gmag = Math.sqrt(gx * gx + gy * gy);
+    var unitScale = 0.6;
+    arrow.setAttribute('x1', sx); arrow.setAttribute('y1', sy);
+    arrow.setAttribute('x2', sx + gx * unitScale * scale / Math.max(gmag, 0.01) * 0.9);
+    arrow.setAttribute('y2', sy - gy * unitScale * scale / Math.max(gmag, 0.01) * 0.9);
+
+    var k = mx * mx + my * my;
+    readout.textContent = 'Point (' + mx.toFixed(2) + ', ' + my.toFixed(2) + ') on level curve k = ' + k.toFixed(2) +
+      '. ∇f = ⟨' + gx.toFixed(2) + ', ' + gy.toFixed(2) + '⟩, |∇f| = ' + gmag.toFixed(2) + '.';
+  }
+
+  handle.addEventListener('pointerdown', function (evt) { dragging = true; handle.setPointerCapture(evt.pointerId); });
+  svg.addEventListener('pointermove', function (evt) {
+    if (!dragging) return;
+    var p = toSvgPoint(evt);
+    render((p.x - originX) / scale, (originY - p.y) / scale);
+  });
+  handle.addEventListener('pointerup', function () { dragging = false; });
+
+  render(3, 2);
+});
+</script>

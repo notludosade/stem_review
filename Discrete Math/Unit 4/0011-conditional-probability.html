@@ -1,0 +1,161 @@
+<meta charset="UTF-8">
+<title>Lesson 11: Conditional Probability — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Discrete Math · Unit 4 · Lesson 11</span>
+  <h1>Conditional Probability</h1>
+  <p class="subtitle">Lesson 10 computed probability against the whole sample space. This lesson asks a sharper question: given that you already know some event B happened, how does that change the odds of A? The answer is the single most misapplied formula in introductory probability, so this lesson leans hard on one worked example until the mechanics are automatic.</p>
+  <p class="nav-links"><a href="0010-sample-spaces-and-events.html" class="nav-prev">← Lesson 10</a> <a href="0012-expected-value.html" class="nav-next">Lesson 12 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <h2>1. Conditional probability</h2>
+  <div class="box">
+    <span class="box-label">Definition — Conditional Probability</span>
+    The <strong>conditional probability</strong> of A given B, written P(A | B), is P(A | B) = P(A ∩ B) / P(B), defined whenever P(B) &gt; 0. Intuitively: once you know B happened, the sample space effectively shrinks to just B, and you ask what fraction of that shrunken space is also in A.
+  </div>
+
+  <h2>2. Worked example — a diagnostic test</h2>
+  <div class="box example">
+    <span class="box-label">Worked example — testing 1,000 people for a rare disease</span>
+    Out of 1,000 people: 50 have the disease, 950 don't. The test correctly flags 45 of the 50 sick people (true positives) and incorrectly flags 95 of the 950 healthy people (false positives).
+    <table>
+      <tr><th></th><th>Test +</th><th>Test −</th><th>Total</th></tr>
+      <tr><td>Disease</td><td>45</td><td>5</td><td>50</td></tr>
+      <tr><td>No Disease</td><td>95</td><td>855</td><td>950</td></tr>
+      <tr><td>Total</td><td>140</td><td>860</td><td>1,000</td></tr>
+    </table>
+    P(Disease | Test +) = P(Disease ∩ Test+) / P(Test+) = (45/1000) / (140/1000) = 45/140 ≈ 0.321. A positive test only means a 32% chance of actually having the disease — far lower than most people's intuition, precisely because the disease is rare enough that false positives from the large healthy population outnumber true positives.
+  </div>
+
+  <h2>3. Independence</h2>
+  <div class="box">
+    <span class="box-label">Definition — Independent Events</span>
+    A and B are <strong>independent</strong> if knowing B tells you nothing about A: P(A | B) = P(A). Equivalently (multiplying both sides by P(B)), P(A ∩ B) = P(A) · P(B) — this is exactly Lesson 7's multiplication principle, restated for probabilities of independent events instead of counts of independent choices.
+  </div>
+  <div class="box why">
+    <span class="box-label">Why the diagnostic-test example is the one worth memorizing</span>
+    The base-rate mistake in that example — assuming a positive test mostly means "has the disease" — is the single most common conditional-probability error in practice, in medicine, spam filtering, and criminal justice alike. The fix is always the same: write down P(A ∩ B) and P(B) as raw counts (or fractions of the total population) before dividing, rather than trying to intuit P(A|B) directly. The contingency table is that fix, made visual.
+  </div>
+
+  <div class="box">
+    <span class="box-label">Formula — Bayes' Theorem</span>
+    Rearranging the conditional probability definition both ways (P(A∩B) = P(A|B)P(B) = P(B|A)P(A)) gives <strong>Bayes' Theorem</strong>: P(A | B) = P(B | A) · P(A) / P(B). It's the same computation as the contingency table above, just solved algebraically instead of by counting — useful when you're given P(B|A) directly (like a test's true-positive rate) but want P(A|B) (the chance of disease given a positive test).
+  </div>
+
+  <h2>4. Try it — the diagnostic test, interactively</h2>
+  <p>Click a quantity to compute it from the table above, with the relevant counts highlighted.</p>
+  <div class="widget">
+    <div class="widget-label">Try It — Conditional Probability from a Contingency Table</div>
+    <table id="cp-table">
+      <tr><th></th><th>Test +</th><th>Test −</th><th>Total</th></tr>
+      <tr><td>Disease</td><td id="cp-tp">45</td><td id="cp-fn">5</td><td>50</td></tr>
+      <tr><td>No Disease</td><td id="cp-fp">95</td><td id="cp-tn">855</td><td>950</td></tr>
+      <tr><td>Total</td><td id="cp-postotal">140</td><td>860</td><td>1,000</td></tr>
+    </table>
+    <div class="quiz-fill-row" style="margin-top: 0.9rem;">
+      <button class="widget-btn" id="cp-a-given-b">P(Disease | Test+)</button>
+      <button class="widget-btn" id="cp-b-given-a">P(Test+ | Disease)</button>
+      <button class="widget-btn" id="cp-prior">P(Disease)</button>
+    </div>
+    <p id="cp-result" style="margin-top: 0.7rem; font-weight: 600;">Click a quantity above.</p>
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. P(A | B) is defined as:</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">P(A) · P(B)</button>
+      <button class="quiz-choice" data-correct="true">P(A ∩ B) / P(B)</button>
+      <button class="quiz-choice" data-correct="false">P(A ∪ B) / P(B)</button>
+      <button class="quiz-choice" data-correct="false">P(A) / P(B)</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Conditional probability restricts attention to the overlap of A and B, as a fraction of B's own probability — P(A ∩ B) / P(B).</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. In the diagnostic-test example, why is P(Disease | Test+) so much lower than most people expect?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because the test has no true positives at all.</button>
+      <button class="quiz-choice" data-correct="true">Because the disease is rare, so the large healthy population still produces more false positives than the small sick population produces true positives.</button>
+      <button class="quiz-choice" data-correct="false">Because P(B) is always larger than P(A ∩ B).</button>
+      <button class="quiz-choice" data-correct="false">Because conditional probability formulas don't apply to medical tests.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>With 950 healthy people and only a 10% false-positive rate, 95 false positives still outnumber the 45 true positives from the much smaller group of 50 sick people — the base-rate effect.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. A and B are independent exactly when:</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">A ∩ B = ∅.</button>
+      <button class="quiz-choice" data-correct="true">P(A ∩ B) = P(A) · P(B).</button>
+      <button class="quiz-choice" data-correct="false">P(A) = P(B).</button>
+      <button class="quiz-choice" data-correct="false">P(A | B) = 1.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Independence means knowing B doesn't change A's probability, which is algebraically equivalent to P(A ∩ B) = P(A)P(B) — not the same as being mutually exclusive (A ∩ B = ∅), a common mix-up.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="45/140|0.321|9/28">
+    <p class="quiz-prompt">4. Fill in the blank: from the table (45 true positives, 140 total positives), P(Disease | Test+) = ___ (as a fraction or decimal).</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>P(Disease | Test+) = 45/140 ≈ 0.321 — true positives divided by all positives.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="bayes|bayes theorem|bayes' theorem">
+    <p class="quiz-prompt">5. Fill in the blank: the formula P(A|B) = P(B|A)·P(A)/P(B) is called ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Bayes' Theorem rearranges the conditional probability definition to solve for P(A|B) when P(B|A) is what's directly known.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read before the next lesson: <a href="https://open.umn.edu/opentextbooks/textbooks/discrete-mathematics-an-open-introduction">Levin, "Discrete Mathematics: An Open Introduction," Chapter 1.5</a> continues into Bayes' Theorem with additional worked examples, including the classic "Monty Hall" problem.</p>
+
+  <p class="ask-teacher">If the diagnostic-test result still feels wrong, build the contingency table for a disease of your own choosing (pick a prevalence and a test accuracy) and recompute — ask your teacher to check your table. Next up: turning a random outcome into a single number you can average.</p>
+
+  <footer class="lesson-footer">STEM+ · Discrete Math · Lesson 11 of the course sequence</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var resultEl = document.getElementById('cp-result');
+  var cells = {
+    tp: document.getElementById('cp-tp'),
+    fn: document.getElementById('cp-fn'),
+    fp: document.getElementById('cp-fp'),
+    tn: document.getElementById('cp-tn'),
+    postotal: document.getElementById('cp-postotal'),
+  };
+
+  function clearHighlights() {
+    Object.keys(cells).forEach(function (k) { cells[k].style.background = ''; });
+  }
+
+  document.getElementById('cp-a-given-b').addEventListener('click', function () {
+    clearHighlights();
+    cells.tp.style.background = 'var(--accent-soft)';
+    cells.postotal.style.background = 'var(--code-bg)';
+    resultEl.textContent = 'P(Disease | Test+) = 45 / 140 ≈ 0.321';
+  });
+  document.getElementById('cp-b-given-a').addEventListener('click', function () {
+    clearHighlights();
+    cells.tp.style.background = 'var(--accent-soft)';
+    resultEl.textContent = 'P(Test+ | Disease) = 45 / 50 = 0.900';
+  });
+  document.getElementById('cp-prior').addEventListener('click', function () {
+    clearHighlights();
+    resultEl.textContent = 'P(Disease) = 50 / 1000 = 0.050 (the base rate, before any test result is known)';
+  });
+});
+</script>

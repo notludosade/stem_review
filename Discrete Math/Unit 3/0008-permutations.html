@@ -1,0 +1,157 @@
+<meta charset="UTF-8">
+<title>Lesson 8: Permutations — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Discrete Math · Unit 3 · Lesson 8</span>
+  <h1>Permutations</h1>
+  <p class="subtitle">Lesson 7's multiplication principle counted independent choices. This lesson applies it to a specific, extremely common shape of problem: arranging things in order, where each choice slightly shrinks the options left for the next one.</p>
+  <p class="nav-links"><a href="0007-the-counting-principles.html" class="nav-prev">← Lesson 7</a> <a href="0009-combinations-and-the-binomial-theorem.html" class="nav-next">Lesson 9 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <h2>1. Factorial notation</h2>
+  <div class="box">
+    <span class="box-label">Definition — Factorial (n!)</span>
+    For a positive integer n, n! = n · (n−1) · (n−2) · ... · 2 · 1 — the product of every positive integer up to n. By convention, <strong>0! = 1</strong> (an empty product — there is exactly one way to arrange zero things: do nothing).
+  </div>
+
+  <h2>2. Arranging all n items</h2>
+  <div class="box">
+    <span class="box-label">Rule — Arranging n Distinct Items</span>
+    The number of ways to arrange all n distinct items in a sequence is n!. By the multiplication principle: n choices for the first position, n−1 remaining for the second (since one is used), n−2 for the third, and so on down to 1 choice for the last position.
+  </div>
+  <div class="box example">
+    <span class="box-label">Worked example</span>
+    How many ways can 5 distinct books be arranged on a shelf? 5! = 5·4·3·2·1 = 120.
+  </div>
+
+  <h2>3. Arranging r of n items</h2>
+  <div class="box">
+    <span class="box-label">Definition — Permutation, P(n, r)</span>
+    A <strong>permutation</strong> of r items chosen from n distinct items, where order matters, is counted by P(n, r) = n! / (n − r)! = n · (n−1) · ... · (n−r+1) — the first r factors of n!, stopping after r terms instead of running all the way down to 1.
+  </div>
+  <div class="box example">
+    <span class="box-label">Worked example</span>
+    8 runners race; only 1st, 2nd, and 3rd place are recorded (order matters, and not everyone gets a spot). P(8,3) = 8!/(8−3)! = 8!/5! = 8 · 7 · 6 = 336. Notice this is just the multiplication principle directly: 8 choices for 1st, 7 remaining for 2nd, 6 remaining for 3rd — the n!/(n−r)! formula is a shortcut for exactly that shrinking-choices product, and P(n,n) = n!/0! = n! recovers the "arrange everything" case from before.
+  </div>
+  <div class="box why">
+    <span class="box-label">Why order matters here, and why that's about to change</span>
+    Every example this lesson used cares which item lands in which position — 1st place is a different outcome from 3rd place, even with the same three runners. Lesson 9 asks the opposite question: what if you only care <em>which</em> r items were chosen, not the order they came in? That single change in what counts as "the same outcome" is the entire difference between a permutation and a combination, and it shows up as dividing out the r! orderings that a combination doesn't distinguish.
+  </div>
+
+  <h2>4. Try it — build a podium</h2>
+  <p>5 racers: A, B, C, D, E. Click racers in order to fill 1st, 2nd, and 3rd place, and watch the shrinking choice count match P(5,3).</p>
+  <div class="widget">
+    <div class="widget-label">Try It — Permutation Builder, P(5, 3)</div>
+    <p id="perm-status" style="font-family: var(--mono, monospace);">Choices remaining for next slot: 5</p>
+    <div class="quiz-fill-row" id="perm-racers"></div>
+    <p id="perm-podium" style="margin-top: 0.9rem; font-weight: 600;">1st: ___ &nbsp; 2nd: ___ &nbsp; 3rd: ___</p>
+    <div class="quiz-fill-row">
+      <button class="widget-btn" id="perm-reset">Reset</button>
+    </div>
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What is 0! by convention, and why?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">0, since there's nothing to multiply.</button>
+      <button class="quiz-choice" data-correct="true">1 — an empty product, since there's exactly one way to arrange zero things.</button>
+      <button class="quiz-choice" data-correct="false">Undefined — factorial isn't defined at 0.</button>
+      <button class="quiz-choice" data-correct="false">−1, to keep the pattern n! = n · (n−1)! consistent.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>0! = 1 by convention, treating it as an empty product — there is exactly one way to arrange nothing (do nothing), which also keeps formulas like P(n,n) = n!/0! = n! working correctly.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. How many ways can 6 distinct trophies be arranged in a row on a shelf?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">36</button>
+      <button class="quiz-choice" data-correct="true">720</button>
+      <button class="quiz-choice" data-correct="false">6</button>
+      <button class="quiz-choice" data-correct="false">120</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Arranging all n distinct items uses n!: 6! = 6·5·4·3·2·1 = 720.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. 10 sprinters run a race; gold, silver, and bronze medals go to 1st, 2nd, and 3rd place. How many different medal outcomes are possible?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">1000</button>
+      <button class="quiz-choice" data-correct="false">120</button>
+      <button class="quiz-choice" data-correct="true">720</button>
+      <button class="quiz-choice" data-correct="false">10</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>P(10,3) = 10!/(10−3)! = 10 · 9 · 8 = 720 — order matters, since gold, silver, and bronze are distinct positions.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="24">
+    <p class="quiz-prompt">4. Fill in the blank: P(4,4) = 4!/0! = ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>4! = 24 and 0! = 1, so P(4,4) = 24/1 = 24 — arranging all 4 of 4 items is just 4!.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="order">
+    <p class="quiz-prompt">5. Fill in the blank: a permutation counts arrangements where ___ matters, unlike a combination.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Order is exactly the distinguishing feature: a permutation treats "A then B" as different from "B then A," which is what Lesson 9's combinations will stop caring about.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read before the next lesson: <a href="https://open.umn.edu/opentextbooks/textbooks/discrete-mathematics-an-open-introduction">Levin, "Discrete Mathematics: An Open Introduction," Chapter 1.3, "Binomial Coefficients"</a> previews permutations with repeated elements (like arranging the letters of "MISSISSIPPI"), which this lesson's distinct-items-only version sets aside.</p>
+
+  <p class="ask-teacher">If P(n,r) still feels like a formula to memorize rather than "the multiplication principle, r times," try re-deriving it from the shrinking-choices argument for a couple of your own (n, r) pairs — ask your teacher to check your derivation. Next up: what changes in the count once order stops mattering.</p>
+
+  <footer class="lesson-footer">STEM+ · Discrete Math · Lesson 8 of the course sequence</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var racers = ['A', 'B', 'C', 'D', 'E'];
+  var placed = [];
+  var racersEl = document.getElementById('perm-racers');
+  var statusEl = document.getElementById('perm-status');
+  var podiumEl = document.getElementById('perm-podium');
+  var labels = ['1st', '2nd', '3rd'];
+
+  function render() {
+    racersEl.innerHTML = '';
+    racers.forEach(function (r) {
+      var btn = document.createElement('button');
+      btn.className = 'widget-btn';
+      btn.textContent = r;
+      if (placed.indexOf(r) !== -1 || placed.length >= 3) btn.disabled = true;
+      btn.addEventListener('click', function () {
+        placed.push(r);
+        render();
+      });
+      racersEl.appendChild(btn);
+    });
+    var remaining = 5 - placed.length;
+    statusEl.textContent = placed.length >= 3
+      ? 'All 3 slots filled — that\'s 5 × 4 × 3 = 60 = P(5,3) total possible podiums.'
+      : 'Choices remaining for next slot: ' + remaining;
+    var slots = [0, 1, 2].map(function (i) { return labels[i] + ': ' + (placed[i] || '___'); });
+    podiumEl.textContent = slots.join('   ');
+  }
+
+  document.getElementById('perm-reset').addEventListener('click', function () {
+    placed = [];
+    render();
+  });
+
+  render();
+});
+</script>

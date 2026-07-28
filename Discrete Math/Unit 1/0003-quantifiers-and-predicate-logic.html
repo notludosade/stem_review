@@ -1,0 +1,174 @@
+<meta charset="UTF-8">
+<title>Lesson 3: Quantifiers and Predicate Logic — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Discrete Math · Unit 1 · Lesson 3</span>
+  <h1>Quantifiers and Predicate Logic</h1>
+  <p class="subtitle">Lesson 1 set "x + 3 = 7" aside as not-yet-a-statement, because its truth depends on x. This lesson finishes the job: quantifiers turn a predicate into a genuine statement by saying how many x it has to hold for — and one edge case, the empty domain, is where a lot of people's intuition first goes wrong.</p>
+  <p class="nav-links"><a href="0002-logical-connectives.html" class="nav-prev">← Lesson 2</a> <a href="../Unit%202/0004-set-notation-and-operations.html" class="nav-next">Lesson 4 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <h2>1. Predicates</h2>
+  <div class="box">
+    <span class="box-label">Definition — Predicate</span>
+    A <strong>predicate</strong> is a sentence containing one or more variables that becomes a statement once every variable is either replaced with a specific value or bound by a quantifier. P(x) = "x is even" is not a statement on its own — P(4) is the true statement "4 is even," P(7) is the false statement "7 is even," and neither replacement is forced until you supply one.
+  </div>
+
+  <h2>2. The universal and existential quantifiers</h2>
+  <div class="box">
+    <span class="box-label">Definition — Universal Quantifier (∀)</span>
+    ∀x ∈ D, P(x) ("for all x in D, P(x)") is true exactly when P(x) is true for <em>every single</em> element x of the domain D. One counterexample — one x in D where P(x) is false — makes the whole universal statement false.
+  </div>
+  <div class="box">
+    <span class="box-label">Definition — Existential Quantifier (∃)</span>
+    ∃x ∈ D, P(x) ("there exists an x in D such that P(x)") is true exactly when P(x) is true for <em>at least one</em> element x of the domain D. It takes only one example to make an existential statement true, and it takes checking (or ruling out) every element to make it false.
+  </div>
+  <div class="box example">
+    <span class="box-label">Worked example</span>
+    Let D = {1, 2, 3, 4, 5} and P(x) = "x is even." ∀x ∈ D, P(x) is false — x = 1 is a counterexample. ∃x ∈ D, P(x) is true — x = 2 (or x = 4) witnesses it. Changing the domain changes the answer: over D = {2, 4}, the same ∀ statement becomes true, since every element left in the domain happens to be even.
+  </div>
+
+  <h2>3. Vacuous truth</h2>
+  <div class="box why">
+    <span class="box-label">Vacuous truth — the empty-domain case</span>
+    What is ∀x ∈ ∅, P(x) — a universal claim over the <strong>empty set</strong>, which has no elements at all? It is <strong>true</strong>, for every predicate P, no exceptions. This is called a <strong>vacuous truth</strong>. It follows directly from Lesson 2's implication table: ∀x ∈ D, P(x) unpacks to "for every x, if x ∈ D then P(x)" — and when D is empty, the hypothesis "x ∈ D" is false for every possible x, so the implication is true every single time, the same "promise never tested" reasoning from Lesson 2. The mirror case, ∃x ∈ ∅, P(x), is false for every P — there is nothing in the empty domain to witness it, so an existential claim over ∅ can never be satisfied. Watch for this the other way around too: it's a common mistake to assume an empty-domain claim must be false just because "nothing is in there to check" — the correct reading is the opposite for ∀.
+  </div>
+
+  <h2>4. Negating quantified statements</h2>
+  <div class="box">
+    <span class="box-label">Rule — Negating a Quantifier</span>
+    ¬(∀x ∈ D, P(x)) is logically equivalent to ∃x ∈ D, ¬P(x). ¬(∃x ∈ D, P(x)) is logically equivalent to ∀x ∈ D, ¬P(x). In words: to deny "all of them do," it suffices to produce one that doesn't — the negation of ∀ is ∃ of the negation, and vice versa. Every ∀ that flips to ∃ (and back) when negated is the quantifier version of De Morgan's laws, which Lesson 4 restates for sets.
+  </div>
+  <div class="box example">
+    <span class="box-label">Worked example</span>
+    Claim: "All primes are odd." Formally, ∀x ∈ Primes, x is odd. This is false — its negation, ∃x ∈ Primes, x is not odd, is true, witnessed by x = 2, the one even prime. Notice the negation only needed one counterexample, not a full re-proof.
+  </div>
+
+  <h2>5. Try it — evaluate a quantified statement</h2>
+  <p>Click through each element of the domain to test P(x) = "x is even," then see whether ∀x P(x) and ∃x P(x) hold. Try shrinking the domain to empty and see what happens to both.</p>
+  <div class="widget">
+    <div class="widget-label">Try It — Quantifier Evaluator</div>
+    <p id="q-domain" style="font-family: var(--mono, monospace);">Domain D = {1, 2, 3, 4, 5}. Predicate P(x) = "x is even."</p>
+    <div class="quiz-fill-row" id="q-elements"></div>
+    <p id="q-result" style="margin-top: 0.9rem; font-weight: 600;"></p>
+    <div class="quiz-fill-row" style="margin-top: 0.6rem;">
+      <button class="widget-btn" id="q-empty">Shrink domain to ∅</button>
+      <button class="widget-btn" id="q-reset">Reset domain</button>
+    </div>
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What makes ∀x ∈ D, P(x) false?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">P(x) being false for every x in D.</button>
+      <button class="quiz-choice" data-correct="true">Finding just one x in D where P(x) is false.</button>
+      <button class="quiz-choice" data-correct="false">D being an infinite set.</button>
+      <button class="quiz-choice" data-correct="false">P(x) being a predicate rather than a statement.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A universal statement claims P(x) holds for every element; a single counterexample is enough to break that claim, regardless of how many other elements do satisfy P.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. What is the truth value of ∀x ∈ ∅, P(x), for any predicate P?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">False, since there's nothing in ∅ to check.</button>
+      <button class="quiz-choice" data-correct="true">True — vacuously, since the empty domain has no element to serve as a counterexample.</button>
+      <button class="quiz-choice" data-correct="false">Undefined, since quantifiers require a nonempty domain.</button>
+      <button class="quiz-choice" data-correct="false">It depends entirely on what P(x) says.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A universal statement over an empty domain is vacuously true for every predicate P — there's no element that could ever falsify it, exactly the "promise never tested" logic behind implication with a false hypothesis.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. What is the correct negation of ∀x ∈ D, P(x)?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">∀x ∈ D, ¬P(x)</button>
+      <button class="quiz-choice" data-correct="true">∃x ∈ D, ¬P(x)</button>
+      <button class="quiz-choice" data-correct="false">∃x ∈ D, P(x)</button>
+      <button class="quiz-choice" data-correct="false">¬∃x ∈ D, P(x)</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Negating a universal claim only requires exhibiting one element where the predicate fails, which is exactly what ∃x ∈ D, ¬P(x) asserts.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="false">
+    <p class="quiz-prompt">4. Fill in the blank: ∃x ∈ ∅, P(x) is always ___, for any predicate P, since the empty domain has no element that could witness it.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>An existential claim needs at least one witnessing element; with no elements at all in the domain, it can never be satisfied, so it is always false over the empty set.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="2">
+    <p class="quiz-prompt">5. Fill in the blank: the statement "all primes are odd" is false, and the single counterexample that proves it is x = ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>2 is prime and even, so it satisfies ¬P(x) for P(x) = "x is odd" — exactly one counterexample is enough to falsify the universal claim.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read before the next lesson: <a href="https://open.umn.edu/opentextbooks/textbooks/discrete-mathematics-an-open-introduction">Levin, "Discrete Mathematics: An Open Introduction," Chapter 3.2, "Quantifiers"</a> covers nested quantifiers (∀x ∃y ...) this lesson didn't have room for, which come back when Unit 2 defines functions rigorously.</p>
+
+  <p class="ask-teacher">Vacuous truth is the single most commonly mis-answered idea in this unit — if "true because there's nothing to check" still feels backwards, ask your teacher for more empty-domain examples before Unit 1's test. Next up: Unit 2 builds sets, formally, out of exactly the membership language this lesson's domains D already leaned on.</p>
+
+  <footer class="lesson-footer">STEM+ · Discrete Math · Lesson 3 of the course sequence</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var fullDomain = [1, 2, 3, 4, 5];
+  var domain = fullDomain.slice();
+  var elementsEl = document.getElementById('q-elements');
+  var resultEl = document.getElementById('q-result');
+  var domainEl = document.getElementById('q-domain');
+  var checked = {};
+
+  function isEven(x) { return x % 2 === 0; }
+
+  function render() {
+    elementsEl.innerHTML = '';
+    domain.forEach(function (x) {
+      var btn = document.createElement('button');
+      btn.className = 'widget-btn';
+      btn.textContent = x + (checked[x] ? (isEven(x) ? ' ✓' : ' ✗') : '');
+      btn.addEventListener('click', function () {
+        checked[x] = true;
+        render();
+      });
+      elementsEl.appendChild(btn);
+    });
+    domainEl.textContent = 'Domain D = {' + domain.join(', ') + '}. Predicate P(x) = "x is even."';
+
+    if (domain.length === 0) {
+      resultEl.textContent = '∀x ∈ D, P(x) = TRUE (vacuously — no elements to falsify it). ∃x ∈ D, P(x) = FALSE (no elements to witness it).';
+      return;
+    }
+    var allEven = domain.every(isEven);
+    var someEven = domain.some(isEven);
+    resultEl.textContent = '∀x ∈ D, P(x) = ' + (allEven ? 'TRUE' : 'FALSE') + '.  ∃x ∈ D, P(x) = ' + (someEven ? 'TRUE' : 'FALSE') + '.';
+  }
+
+  document.getElementById('q-empty').addEventListener('click', function () {
+    domain = [];
+    checked = {};
+    render();
+  });
+  document.getElementById('q-reset').addEventListener('click', function () {
+    domain = fullDomain.slice();
+    checked = {};
+    render();
+  });
+
+  render();
+});
+</script>

@@ -1,0 +1,187 @@
+<meta charset="UTF-8">
+<title>Lesson 1: Vectors and Vector Operations — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Linear Algebra A · Unit 1 · Lesson 1</span>
+  <h1>Vectors and Vector Operations</h1>
+  <p class="subtitle">A quantity with both size and direction — and the two operations, addition and scalar multiplication, that everything else in this course is built from.</p>
+  <p class="nav-links"><a href="0002-linear-combinations-and-span.html" class="nav-next">Lesson 2 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Precalculus treated a system of equations as a search for the point where two lines cross. Linear algebra rebuilds that idea from the ground up, starting with a single object: the <strong>vector</strong>. Everything in this course — matrices, systems, eigenvectors — is a statement about vectors and the two operations defined on them in this lesson.</p>
+
+  <h2>1. What a vector is</h2>
+  <div class="box">
+    <span class="box-label">Definition — Vector</span>
+    A <strong>vector</strong> in ℝⁿ is an ordered list of n real numbers, written v = (v₁, v₂, …, vₙ). Each vᵢ is a <strong>component</strong>. Geometrically, a vector in ℝ² or ℝ³ is drawn as an arrow from the origin to the point with those coordinates — the arrow has both a length (magnitude) and a direction, which is the whole reason it's not just "a point."
+  </div>
+  <p>Two vectors are <strong>equal</strong> exactly when every one of their components matches. (3, 5) and (5, 3) are different vectors, even though they use the same two numbers — order is part of the identity of a vector, not just decoration.</p>
+
+  <h2>2. Adding vectors and scaling them</h2>
+  <div class="box">
+    <span class="box-label">Rule — Vector Addition</span>
+    Vectors add <strong>component-wise</strong>, and only if they live in the same ℝⁿ: (u₁, u₂) + (w₁, w₂) = (u₁ + w₁, u₂ + w₂).
+  </div>
+  <div class="box">
+    <span class="box-label">Rule — Scalar Multiplication</span>
+    Multiplying a vector by a real number c (a <strong>scalar</strong>) scales every component: c(v₁, v₂) = (cv₁, cv₂). c &gt; 1 stretches the arrow, 0 &lt; c &lt; 1 shrinks it, and c &lt; 0 reverses its direction entirely.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why addition looks like "tip-to-tail"</span>
+    Draw u starting at the origin, then draw w starting from u's tip instead of the origin. The arrow from the origin to w's new tip lands exactly on u + w, every time. That's not a coincidence to memorize — it falls straight out of adding coordinates: moving u₁ right and u₂ up, then w₁ right and w₂ up, moves you the same total distance as one component-wise sum.
+  </div>
+
+  <p>Drag u below and watch both the arrow and the tip-to-tail construction update together. w is fixed at (4, 1).</p>
+
+  <div class="widget">
+    <div class="widget-label">Try It — Vector Addition, Tip to Tail</div>
+    <div class="plot-wrap">
+      <svg viewBox="0 0 460 320" width="460" height="320" role="img" aria-label="A draggable vector u added tip-to-tail to a fixed vector w, with the sum vector drawn from the origin">
+        <defs>
+          <marker id="l1-arrow-w" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="var(--muted)"></path></marker>
+          <marker id="l1-arrow-u" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="var(--accent)"></path></marker>
+          <marker id="l1-arrow-sum" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="var(--correct)"></path></marker>
+        </defs>
+        <line class="fig-axis" x1="10" y1="260" x2="450" y2="260"></line>
+        <line class="fig-axis" x1="100" y1="10" x2="100" y2="310"></line>
+        <line x1="100" y1="260" x2="220" y2="230" stroke="var(--muted)" stroke-width="2.5" marker-end="url(#l1-arrow-w)"></line>
+        <text class="fig-label" x="222" y="222">w = (4, 1)</text>
+        <line id="l1-ghost" x1="220" y1="230" x2="280" y2="140" stroke="var(--muted)" stroke-width="1.5" stroke-dasharray="4 3"></line>
+        <line id="l1-sumline" x1="100" y1="260" x2="280" y2="140" stroke="var(--correct)" stroke-width="3" marker-end="url(#l1-arrow-sum)"></line>
+        <line id="l1-uline" x1="100" y1="260" x2="160" y2="170" stroke="var(--accent)" stroke-width="3" marker-end="url(#l1-arrow-u)"></line>
+        <text class="fig-label" id="l1-ulabel" x="165" y="163">u</text>
+        <circle class="fig-point" id="l1-point" r="7" cx="160" cy="170" fill="var(--accent)"></circle>
+        <rect class="drag-surface" id="l1-surface" x="10" y="10" width="440" height="300"></rect>
+      </svg>
+    </div>
+    <p class="plot-readout" id="l1-readout">u = (2.0, 3.0). u + w = (6.0, 4.0).</p>
+  </div>
+
+  <h2>3. Magnitude and the zero vector</h2>
+  <div class="box">
+    <span class="box-label">Definition — Magnitude (Norm)</span>
+    The <strong>magnitude</strong> (or <strong>norm</strong>) of v = (v₁, …, vₙ), written ‖v‖, is its length as an arrow: ‖v‖ = √(v₁² + v₂² + ⋯ + vₙ²) — the Pythagorean theorem, extended to n coordinates.
+  </div>
+  <div class="box">
+    <span class="box-label">Definition — Zero Vector</span>
+    The <strong>zero vector</strong>, written <strong>0</strong> = (0, 0, …, 0), is the unique vector with ‖0‖ = 0. It's the additive identity: v + 0 = v for every vector v, and it's the one vector with no direction at all — a fact that matters a great deal once Unit 4 asks which sets of vectors are "independent."
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What distinguishes a vector from a single number?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">A vector carries both a magnitude and a direction; a number alone carries neither.</button>
+      <button class="quiz-choice" data-correct="false">A vector is always positive; a number can be negative.</button>
+      <button class="quiz-choice" data-correct="false">A vector can only exist in three dimensions.</button>
+      <button class="quiz-choice" data-correct="false">A vector has no numerical value at all.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>An ordered list of components gives a vector direction (which way it points) on top of magnitude (how long it is) — a single real number has magnitude but no direction to speak of.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. For u = (3, −1) and w = (−2, 4), what is u + w?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">(1, 3)</button>
+      <button class="quiz-choice" data-correct="false">(5, −5)</button>
+      <button class="quiz-choice" data-correct="false">(1, −3)</button>
+      <button class="quiz-choice" data-correct="false">(−6, −4)</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Add component-wise: (3 + (−2), −1 + 4) = (1, 3).</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="(-6,15)|(-6, 15)|(−6,15)|(−6, 15)">
+    <p class="quiz-prompt">3. Fill in the blank: for v = (2, −5), the scalar multiple −3v = ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Scale every component by −3: (−3·2, −3·−5) = (−6, 15).</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">4. What is the magnitude of v = (3, 4)?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">5</button>
+      <button class="quiz-choice" data-correct="false">7</button>
+      <button class="quiz-choice" data-correct="false">12</button>
+      <button class="quiz-choice" data-correct="false">25</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>‖v‖ = √(3² + 4²) = √25 = 5.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="zero">
+    <p class="quiz-prompt">5. Fill in the blank: the vector (0, 0, …, 0), the unique additive identity, is called the ___ vector.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Adding it changes nothing (v + 0 = v), the same role 0 plays among ordinary numbers.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read before the next lesson: Khan Academy's <a href="https://www.khanacademy.org/math/linear-algebra/vectors-and-spaces">Vectors and Spaces</a> unit opens with the same real-vs-arrow picture of a vector, then walks through addition and scalar multiplication with several worked, drawn examples.</p>
+
+  <p class="ask-teacher">If the tip-to-tail picture isn't clicking yet, ask your teacher for a few more vectors to add by hand and check against the widget above. Next up: combining vectors with scalars to build every point a pair of vectors can reach — linear combinations and span.</p>
+
+  <footer class="lesson-footer">STEM+ · Linear Algebra A · Lesson 1 of the course sequence</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var svg = document.getElementById('l1-surface').ownerSVGElement;
+  var originX = 100, originY = 260, scale = 30;
+  var aMin = -2, aMax = 8, bMin = -1, bMax = 7;
+  var wx = 4, wy = 1;
+
+  var point = document.getElementById('l1-point');
+  var uline = document.getElementById('l1-uline');
+  var ulabel = document.getElementById('l1-ulabel');
+  var ghost = document.getElementById('l1-ghost');
+  var sumline = document.getElementById('l1-sumline');
+  var readout = document.getElementById('l1-readout');
+  var surface = document.getElementById('l1-surface');
+
+  function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
+
+  function toMath(evt) {
+    var pt = svg.createSVGPoint();
+    pt.x = evt.clientX; pt.y = evt.clientY;
+    var loc = pt.matrixTransform(svg.getScreenCTM().inverse());
+    return { a: (loc.x - originX) / scale, b: (originY - loc.y) / scale };
+  }
+
+  function update(a, b) {
+    a = clamp(a, aMin, aMax);
+    b = clamp(b, bMin, bMax);
+    var sx = originX + a * scale, sy = originY - b * scale;
+    point.setAttribute('cx', sx); point.setAttribute('cy', sy);
+    uline.setAttribute('x2', sx); uline.setAttribute('y2', sy);
+    ulabel.setAttribute('x', sx + 6); ulabel.setAttribute('y', sy - 6);
+
+    var sumA = a + wx, sumB = b + wy;
+    var sumX = originX + sumA * scale, sumY = originY - sumB * scale;
+    sumline.setAttribute('x2', sumX); sumline.setAttribute('y2', sumY);
+    ghost.setAttribute('x1', sx); ghost.setAttribute('y1', sy);
+    ghost.setAttribute('x2', sumX); ghost.setAttribute('y2', sumY);
+
+    readout.textContent = 'u = (' + a.toFixed(1) + ', ' + b.toFixed(1) + '). u + w = (' + sumA.toFixed(1) + ', ' + sumB.toFixed(1) + ').';
+  }
+
+  var dragging = false;
+  surface.addEventListener('pointerdown', function (e) { dragging = true; surface.setPointerCapture(e.pointerId); var m = toMath(e); update(m.a, m.b); });
+  surface.addEventListener('pointermove', function (e) { if (!dragging) return; var m = toMath(e); update(m.a, m.b); });
+  surface.addEventListener('pointerup', function () { dragging = false; });
+  surface.addEventListener('pointercancel', function () { dragging = false; });
+
+  update(2, 3);
+});
+</script>
