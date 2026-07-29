@@ -1,0 +1,147 @@
+<meta charset="UTF-8">
+<title>Lesson 12: Strong Induction — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Mathematical Proofs · Unit 4 · Lesson 12</span>
+  <h1>Strong Induction</h1>
+  <p class="subtitle">Some inductive steps need more than just the case immediately before them — they need every earlier case, on call, all at once. Same overall shape as Lesson 10, one enlarged assumption.</p>
+  <p class="nav-links"><a href="0011-induction-proofs-involving-sums-and-inequalities.html" class="nav-prev">← Lesson 11</a> <a href="../Unit%205/0013-proof-by-cases.html" class="nav-next">Lesson 13 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Lessons 10 and 11 used the inductive hypothesis "P(k) is true" to prove P(k+1) — the single case immediately before the one being proved. Some claims can't be attacked that way, because P(k+1) genuinely depends on some earlier case P(j) that has no fixed relationship to k at all. Strong induction hands you every earlier case as an assumption, not just the last one.</p>
+
+  <div class="box">
+    <span class="box-label">Definition — The Principle of Strong Induction</span>
+    Let P(n) be a statement depending on a natural number n. Suppose: (1) <strong>Base case:</strong> P(n₀) is true for some starting value n₀, and (2) <strong>Inductive step:</strong> for every k ≥ n₀, <em>if P(n₀), P(n₀+1), …, P(k) are all true</em>, then P(k+1) is true. Then P(n) is true for every integer n ≥ n₀.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">The precise difference from weak (ordinary) induction — get this exactly right</span>
+    The two techniques differ in exactly one place: what the inductive hypothesis is allowed to assume. <strong>Weak induction's</strong> inductive step assumes only P(k) — the single previous case — to prove P(k+1). <strong>Strong induction's</strong> inductive step assumes P(n₀) through P(k) — <em>every</em> case so far, not just the last one — to prove P(k+1). They are not different in what they ultimately prove (either can prove anything the other can, and strong induction can always be rewritten as an equivalent weak-induction argument on a combined statement), but they differ sharply in which claims are natural and easy to prove with each: some inductive steps only ever need the immediately preceding case, and some genuinely need an arbitrary earlier one.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Theorem — Every Integer ≥ 2 Is a Product of Primes</span>
+    Every integer n ≥ 2 can be written as a product of one or more prime numbers.
+  </div>
+  <div class="box">
+    <span class="box-label">Proof</span>
+    <strong>Base case (n=2):</strong> 2 is itself prime, so it's a "product" of the single prime 2.<br>
+    <strong>Inductive step:</strong> let k ≥ 2, and assume every integer from 2 through k is a product of primes (the strong inductive hypothesis). Consider k+1. Either k+1 is prime — in which case it's trivially a product of one prime, itself — or k+1 is composite, meaning k+1 = a · b for some integers a, b with 2 ≤ a, b ≤ k. Since both a and b lie in the range 2 through k, the inductive hypothesis applies to <em>both</em>: a is a product of primes, and b is a product of primes. Then k+1 = a · b is a product of primes (the primes from a's factorization together with the primes from b's factorization). Either way, k+1 is a product of primes. By strong induction, every integer n ≥ 2 is a product of primes. ∎
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why weak induction genuinely cannot run this argument</span>
+    Weak induction would only hand you "k is a product of primes" to work with. But if k+1 = 24, its factorization might be 24 = 4 × 6 — and neither 4 nor 6 is k = 23. Knowing 23 factors into primes says nothing directly useful about 4 or 6. What the proof actually needs is "some earlier number, whichever one a or b happens to be," which could be almost anywhere in the range 2 through k depending on how k+1 factors — exactly what strong induction, and only strong induction, hands you for free.
+  </div>
+
+  <div class="widget" id="strong-widget">
+    <div class="widget-label">Try It — Why 12 Needs More Than Just P(11)</div>
+    <p class="fm-steps">Suppose you've already proved P(2) through P(11). Click "Reveal next" to see why proving P(12) needs strong induction.</p>
+    <button class="widget-btn" data-strong-next>Reveal next</button>
+    <button class="widget-btn" data-strong-reset hidden>Reset</button>
+    <ol>
+      <li class="fm-steps" data-strong-step hidden><strong>12 is composite.</strong> 12 = 3 × 4.</li>
+      <li class="fm-steps" data-strong-step hidden><strong>Weak induction only offers P(11).</strong> But 11 is prime and has nothing to do with factoring 12 — P(11) alone is useless here.</li>
+      <li class="fm-steps" data-strong-step hidden><strong>Strong induction offers P(2) through P(11), all at once.</strong> In particular, it offers P(3) and P(4) — exactly the two factors 12 actually needs.</li>
+      <li class="fm-steps" data-strong-step hidden><strong>Apply P(3) and P(4).</strong> P(3): 3 is already prime. P(4): 4 = 2 × 2, a product of primes.</li>
+      <li class="fm-steps" data-strong-step hidden><strong>Combine.</strong> 12 = 3 × 4 = 3 × 2 × 2 — a product of primes. ∎ The specific earlier cases needed (3 and 4) were only knowable after seeing how 12 happened to factor — strong induction is what makes both available regardless.</li>
+    </ol>
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What exactly does the inductive hypothesis assume in strong induction, that weak induction does not?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Nothing — strong and weak induction have identical inductive hypotheses.</button>
+      <button class="quiz-choice" data-correct="true">That every case from the base case through k is true, not only P(k) itself.</button>
+      <button class="quiz-choice" data-correct="false">That P(k+1) is already true before it's proved.</button>
+      <button class="quiz-choice" data-correct="false">That the claim holds for all n at once, skipping the inductive step entirely.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Strong induction's inductive hypothesis is the full range P(n₀), …, P(k) — weak induction's is just the single case P(k).</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why does weak induction fail to directly prove "every integer ≥ 2 is a product of primes"?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because the claim is actually false for composite numbers.</button>
+      <button class="quiz-choice" data-correct="true">Because if k+1 is composite, its factors a and b are not necessarily equal to k — weak induction's hypothesis about k alone doesn't cover them.</button>
+      <button class="quiz-choice" data-correct="false">Because weak induction cannot have a base case other than n = 1.</button>
+      <button class="quiz-choice" data-correct="false">Because prime numbers cannot be reasoned about using induction at all.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>k+1's factors could be any pair of smaller numbers, not specifically k — exactly the gap strong induction's full range of assumptions closes.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="strong induction|strong">
+    <p class="quiz-prompt">3. Fill in the blank: the technique whose inductive step assumes every case from the base case through k, not just P(k) alone, is called ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Strong induction — the technique this entire lesson defines, needed whenever P(k+1) can depend on an arbitrary earlier case.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">4. What is the base case of the "every integer ≥ 2 is a product of primes" proof, and why does it need no further factoring?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">n = 2, since 2 is itself prime and thus trivially a "product" of one prime.</button>
+      <button class="quiz-choice" data-correct="false">n = 1, since 1 is prime.</button>
+      <button class="quiz-choice" data-correct="false">n = 0, since 0 has no prime factors to find.</button>
+      <button class="quiz-choice" data-correct="false">There is no base case needed for strong induction.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>2 is the smallest integer the claim covers, and since it's already prime, it needs no factoring to serve as a valid base case.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="5">
+    <p class="quiz-prompt">5. Fill in the blank: using strong induction, 15 = 3 × ___, and since both 3 and 5 are prime, 15 is a product of primes.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>15 = 3 × 5, and applying the strong inductive hypothesis to both 3 and 5 (each already prime) completes the factorization.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: Hammack's <em>Book of Proof</em>, Chapter 10's section on strong induction proves this exact "product of primes" theorem and discusses why it's the textbook example for when weak induction falls short.</p>
+
+  <p class="ask-teacher">Stuck on why 4 and 6 (rather than 23) are what matter for factoring 24, or want to see strong induction applied to a Fibonacci-style claim? Ask your teacher — that's what I'm here for. This closes Unit 4. Next up: Unit 5, where the last handful of proof strategies — and the judgment to pick between all of them — round out the course.</p>
+
+  <footer class="lesson-footer">STEM+ · Mathematical Proofs · Lesson 12 of the course sequence</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var widget = document.getElementById('strong-widget');
+  var steps = widget.querySelectorAll('[data-strong-step]');
+  var nextBtn = widget.querySelector('[data-strong-next]');
+  var resetBtn = widget.querySelector('[data-strong-reset]');
+  var shown = 0;
+
+  function reveal() {
+    if (shown >= steps.length) return;
+    steps[shown].hidden = false;
+    shown++;
+    if (shown >= steps.length) {
+      nextBtn.hidden = true;
+      resetBtn.hidden = false;
+    }
+  }
+
+  function reset() {
+    steps.forEach(function (s) { s.hidden = true; });
+    shown = 0;
+    nextBtn.hidden = false;
+    resetBtn.hidden = true;
+  }
+
+  nextBtn.addEventListener('click', reveal);
+  resetBtn.addEventListener('click', reset);
+});
+</script>

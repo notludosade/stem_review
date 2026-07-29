@@ -1,0 +1,119 @@
+<meta charset="UTF-8">
+<title>Unit 3, Lesson 9: Nonhomogeneous Equations and the Method of Undetermined Coefficients — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/interactive.js" defer></script>
+<script src="../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Differential Equations · Unit 3 · Lesson 9</span>
+  <h1>Nonhomogeneous Equations and the Method of Undetermined Coefficients</h1>
+  <p class="subtitle">Lessons 7–8 handled a right side of zero. A real forcing term needs one more piece added to the solution — found by guessing its shape from the forcing term itself.</p>
+  <p class="nav-links"><a href="0008-the-characteristic-equation.html" class="nav-prev">← Lesson 8</a> <a href="../Unit%204/0010-simple-harmonic-motion.html" class="nav-next">Unit 4, Lesson 10 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <h2>1. Splitting the solution in two</h2>
+  <div class="box">
+    <span class="box-label">Definition — Nonhomogeneous Equation</span>
+    A <strong>nonhomogeneous</strong> second-order linear equation has the form <strong>ay″ + by′ + cy = g(x)</strong>, with g(x) ≠ 0 — a forcing term with no y in it.
+  </div>
+  <div class="box">
+    <span class="box-label">Fact — General Solution Structure</span>
+    The general solution is <strong>y = y<sub>h</sub> + y<sub>p</sub></strong>: y<sub>h</sub> is the <strong>complementary solution</strong> — the general solution of the matching homogeneous equation ay″ + by′ + cy = 0 from Lessons 7–8, carrying both arbitrary constants — and y<sub>p</sub> is any single <strong>particular solution</strong> of the full nonhomogeneous equation. Only y<sub>h</sub> supplies C₁ and C₂; y<sub>p</sub> is one fixed function with no free constants at all.
+  </div>
+  <div class="box">
+    <span class="box-label">Method — Undetermined Coefficients</span>
+    Guess the form of y<sub>p</sub> from g(x)'s type, with unknown coefficients: a degree-n polynomial g(x) → guess a degree-n polynomial; g(x) = ae<sup>kx</sup> → guess Ae<sup>kx</sup>; g(x) = a·cos(kx) or a·sin(kx) → guess A·cos(kx) + B·sin(kx) (always both, even if g has only one). Substitute the guess into the full equation and solve for the unknown coefficients. <strong>Resonance case:</strong> if the guessed form already solves the homogeneous equation, multiply it by x (or x² for a repeated root) before solving.
+  </div>
+  <div class="box">
+    <span class="box-label">Worked Example</span>
+    Solve y″ − 3y′ + 2y = e<sup>4x</sup>. Characteristic equation r² − 3r + 2 = (r−1)(r−2) = 0 gives y<sub>h</sub> = C₁e<sup>x</sup> + C₂e<sup>2x</sup>. Since r = 4 is not a root, guess y<sub>p</sub> = Ae<sup>4x</sup>: y<sub>p</sub>′ = 4Ae<sup>4x</sup>, y<sub>p</sub>″ = 16Ae<sup>4x</sup>. Substituting: 16Ae<sup>4x</sup> − 12Ae<sup>4x</sup> + 2Ae<sup>4x</sup> = e<sup>4x</sup> → 6A = 1 → A = 1/6. General solution: <strong>y = C₁e<sup>x</sup> + C₂e<sup>2x</sup> + (1/6)e<sup>4x</sup></strong>.
+  </div>
+  <div class="box">
+    <span class="box-label">Worked Example — Resonance</span>
+    Solve y″ − 3y′ + 2y = e<sup>x</sup> — same left side as above, but now the forcing term matches root r = 1 already in y<sub>h</sub>. The naive guess Ae<sup>x</sup> would make the left side collapse to 0 (since e<sup>x</sup> solves the homogeneous equation), never matching e<sup>x</sup>. Guess instead <strong>y<sub>p</sub> = Axe<sup>x</sup></strong>. Substituting and simplifying gives −Ae<sup>x</sup> = e<sup>x</sup>, so A = −1: y<sub>p</sub> = −xe<sup>x</sup>.
+  </div>
+
+  <h2>2. Matching the guess to the forcing term</h2>
+  <p>Pick a type of forcing term below to see the correct trial form for y<sub>p</sub> — including what changes in the resonance case.</p>
+
+  <div class="widget" id="uc-widget">
+    <div class="widget-label">Try It — Choosing a Trial Solution</div>
+    <div class="quiz-fill-row">
+      <button class="quiz-fill-check is-active" data-uc-tab="poly">Polynomial</button>
+      <button class="quiz-fill-check" data-uc-tab="exp">Exponential</button>
+      <button class="quiz-fill-check" data-uc-tab="res">Exponential (Resonance)</button>
+      <button class="quiz-fill-check" data-uc-tab="trig">Sine / Cosine</button>
+    </div>
+    <div data-uc-panel="poly" class="plot-readout">g(x) = 3x² + 1, and 0 is not a root of the characteristic equation → trial y_p = Ax² + Bx + C (match the degree of g exactly, include every lower power).</div>
+    <div data-uc-panel="exp" hidden class="plot-readout">g(x) = 5e^(4x), and r = 4 is not a root of the characteristic equation → trial y_p = Ae^(4x) (one unknown coefficient, same exponent as g).</div>
+    <div data-uc-panel="res" hidden class="plot-readout">g(x) = 5e^(x), but r = 1 already solves y″ − 3y′ + 2y = 0 → the plain guess Ae^(x) collapses to 0 and can't match. Multiply by x: trial y_p = Axe^(x). (If r = 1 were a <em>repeated</em> root of the characteristic equation, multiply by x² instead.)</div>
+    <div data-uc-panel="trig" hidden class="plot-readout">g(x) = 4cos(3x) → trial y_p = A·cos(3x) + B·sin(3x). Both terms are required even though g has no sine — differentiating cos(3x) twice always reintroduces a sine term.</div>
+  </div>
+
+  <h2>Check your recall</h2>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. The general solution of ay″ + by′ + cy = g(x) is built as:</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">y = y_h + y_p</button>
+      <button class="quiz-choice" data-correct="false">y = y_h · y_p</button>
+      <button class="quiz-choice" data-correct="false">y = y_p only, with two constants inside it</button>
+      <button class="quiz-choice" data-correct="false">y = y_h only</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The complementary solution y_h (carrying both arbitrary constants) and one particular solution y_p (with no free constants) add together to form the complete general solution.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. For y″ + y′ − 6y = 6x (and 0 is not a root of the characteristic equation), the correct trial form for y_p is:</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Ax + B</button>
+      <button class="quiz-choice" data-correct="false">Ax</button>
+      <button class="quiz-choice" data-correct="false">Ax² + Bx + C</button>
+      <button class="quiz-choice" data-correct="false">Ae^(6x)</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>g(x) = 6x is a degree-1 polynomial, so the trial form should be a general degree-1 polynomial, Ax + B — including the constant term B even though g(x) doesn't have one.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="x">
+    <p class="quiz-prompt">3. Fill in the blank: if the naive trial form for y_p already solves the homogeneous equation, multiply the guess by ___ (or by its square, for a repeated root) before solving.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Multiplying the resonating guess by x keeps it independent of y_h's matching term, the same fix Lesson 8 used for a repeated root's second solution.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="1/6|0.1667|0.167">
+    <p class="quiz-prompt">4. Fill in the blank: for y″ − 3y′ + 2y = e^(4x), solving y_p = Ae^(4x) gives A = ___</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Substituting y_p = Ae^(4x) gives 16Ae^(4x) − 12Ae^(4x) + 2Ae^(4x) = 6Ae^(4x), set equal to e^(4x): 6A = 1, so A = 1/6.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="sin">
+    <p class="quiz-prompt">5. Fill in the blank: the correct trial form for g(x) = cos(3x) is y_p = A·cos(3x) + B·___(3x)</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Differentiating cos(3x) always produces a sine term, so both cos(3x) and sin(3x) must appear in the trial form, regardless of which one g(x) itself contains.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p><a href="https://tutorial.math.lamar.edu/Classes/DE/UndeterminedCoefficients.aspx">Paul's Online Math Notes, "Undetermined Coefficients"</a> works through a full table of forcing-term types and several resonance examples.</p>
+
+  <p class="ask-teacher">Checking whether the naive guess overlaps with y_h is the one step most often skipped — always find y_h first, before choosing the trial form for y_p. Ask for an example combining a polynomial and an exponential forcing term (g(x) = x·e<sup>2x</sup>) if a compound case would help. That closes Unit 3's toolkit for second-order equations; Unit 4 turns to what these solutions actually describe physically — oscillating springs, damping, and resonance.</p>
+
+  <footer class="lesson-footer">STEM+ · Differential Equations · Unit 3 · Lesson 3 of 3</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  STEMPlus.mountTabs(document.getElementById('uc-widget'), 'data-uc-tab', 'data-uc-panel');
+});
+</script>

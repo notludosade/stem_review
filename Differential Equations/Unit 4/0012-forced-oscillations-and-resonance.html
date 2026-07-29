@@ -1,0 +1,157 @@
+<meta charset="UTF-8">
+<title>Unit 4, Lesson 12: Forced Oscillations and Resonance — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/interactive.js" defer></script>
+<script src="../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Differential Equations · Unit 4 · Lesson 12</span>
+  <h1>Forced Oscillations and Resonance</h1>
+  <p class="subtitle">Lesson 11 let a spring settle on its own. Push it rhythmically instead, and Unit 3's undetermined coefficients returns — with a driving frequency that can pump in energy faster than damping removes it.</p>
+  <p class="nav-links"><a href="0011-damped-oscillations.html" class="nav-prev">← Lesson 11</a> <a href="../Unit%205/0013-the-laplace-transform.html" class="nav-next">Unit 5, Lesson 13 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <h2>1. Driving the system</h2>
+  <div class="box">
+    <span class="box-label">Definition — Forced Oscillation</span>
+    Adding a periodic external force F₀cos(ωt) to Lesson 11's model gives <strong>mx″ + cx′ + kx = F₀cos(ωt)</strong> — nonhomogeneous, with the driving frequency ω generally different from the system's own natural frequency ω₀ = √(k/m).
+  </div>
+  <div class="box">
+    <span class="box-label">Fact — Undamped Resonance</span>
+    With no damping (c = 0), x″ + ω₀²x = f₀cos(ωt): when ω ≠ ω₀, undetermined coefficients (Unit 3, Lesson 9) gives x<sub>p</sub>(t) = [f₀/(ω₀² − ω²)]cos(ωt) — bounded, steady oscillation. But when <strong>ω = ω₀</strong>, the trial form resonates exactly as in Lesson 9's resonance case, forcing a factor of t into the guess: x<sub>p</sub>(t) = [f₀/(2ω₀)]·t·sin(ω₀t). The amplitude now <strong>grows without bound</strong> as t → ∞ — pushing a swing at exactly its own natural rhythm, forever.
+  </div>
+  <div class="box">
+    <span class="box-label">Fact — Damped Forced Response</span>
+    With damping present, the steady-state response has amplitude <strong>M(ω) = f₀ / √[(ω₀² − ω²)² + (2βω)²]</strong>. Unlike the undamped case, M(ω) stays finite even when ω = ω₀ — but it still peaks sharply near ω₀ for small β, and that peak flattens as β grows. This finite-but-large peak is <strong>practical resonance</strong>.
+  </div>
+  <div class="box">
+    <span class="box-label">Worked Example</span>
+    For x″ + 9x = 10cos(2t) (so ω₀ = 3, f₀ = 10, ω = 2 ≠ ω₀): x<sub>p</sub>(t) = [10/(9 − 4)]cos(2t) = <strong>2cos(2t)</strong>. Driving at ω = 3 instead would hit resonance, and the amplitude would grow linearly in t rather than settling at a fixed value.
+  </div>
+
+  <h2>2. Watching the resonance peak</h2>
+  <p>With ω₀ = 2 and f₀ = 1 fixed, slide the damping β and the driving frequency ω, and watch how close to ω₀ the response amplitude peaks — and how tall that peak gets as damping shrinks.</p>
+
+  <div class="widget">
+    <div class="widget-label">Try It — Amplitude Response M(ω)</div>
+    <div class="plot-wrap">
+      <svg viewBox="0 0 460 300" width="460" height="300" role="img" aria-label="An amplitude response curve peaking near the natural frequency, with a marker showing the current driving frequency">
+        <line class="fig-axis" x1="30" y1="280" x2="440" y2="280"></line>
+        <line class="fig-axis" x1="40" y1="290" x2="40" y2="20"></line>
+        <polyline class="fig-curve" id="res-curve"></polyline>
+        <circle id="res-marker" r="6" fill="#c0392b"></circle>
+      </svg>
+    </div>
+    <div class="slider-row">
+      <label for="res-beta">Damping β</label>
+      <input type="range" id="res-beta" min="5" max="100" step="5" value="30">
+      <span class="slider-value" id="res-beta-label">β = 0.30</span>
+    </div>
+    <div class="slider-row">
+      <label for="res-omega">Driving frequency ω</label>
+      <input type="range" id="res-omega" min="0" max="400" step="5" value="200">
+      <span class="slider-value" id="res-omega-label">ω = 2.00</span>
+    </div>
+    <p class="plot-readout" id="res-readout">—</p>
+  </div>
+
+  <h2>Check your recall</h2>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. A forced spring-mass system is governed by:</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">mx″ + cx′ + kx = F₀cos(ωt)</button>
+      <button class="quiz-choice" data-correct="false">mx″ + cx′ + kx = 0</button>
+      <button class="quiz-choice" data-correct="false">mx″ + cx′ = kF₀cos(ωt)</button>
+      <button class="quiz-choice" data-correct="false">mx″ + kx = c</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Forcing adds a nonzero, time-varying right-hand side to the damped equation — a periodic external push rather than a homogeneous, self-contained system.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="ω0|omega0|the natural frequency|natural frequency">
+    <p class="quiz-prompt">2. Fill in the blank: pure resonance in the undamped case occurs when the driving frequency ω equals ___</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>When ω = ω₀, the forcing term cos(ωt) matches the homogeneous solution exactly, triggering the same resonance rule from Unit 3 — multiply the trial form by t.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Compared to the undamped case, adding damping to a forced oscillator at resonance (ω = ω₀):</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">keeps the amplitude finite instead of growing without bound</button>
+      <button class="quiz-choice" data-correct="false">makes the amplitude grow even faster</button>
+      <button class="quiz-choice" data-correct="false">has no effect on the amplitude</button>
+      <button class="quiz-choice" data-correct="false">eliminates the oscillation entirely</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>M(ω) = f₀/√[(ω₀²−ω²)² + (2βω)²] stays finite at ω = ω₀ as long as β &gt; 0, unlike the undamped case's unbounded linear growth.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="2">
+    <p class="quiz-prompt">4. Fill in the blank: for x″ + 9x = 10cos(2t), the steady-state response is x_p(t) = ___·cos(2t)</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>x_p(t) = [f₀/(ω₀²−ω²)]cos(ωt) = [10/(9−4)]cos(2t) = 2cos(2t).</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">5. Holding ω₀ and f₀ fixed, as the damping β increases, the peak of the amplitude response curve M(ω) generally:</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">decreases</button>
+      <button class="quiz-choice" data-correct="false">increases</button>
+      <button class="quiz-choice" data-correct="false">stays exactly the same</button>
+      <button class="quiz-choice" data-correct="false">moves further from ω₀</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>More damping removes energy faster, flattening the resonance peak — the sharp, tall spike of light damping becomes a low, broad bump as β grows.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p><a href="https://tutorial.math.lamar.edu/Classes/DE/Vibrations.aspx">Paul's Online Math Notes, "Mechanical Vibrations"</a> works through forced and resonant vibrations, including the undamped resonance case, in full.</p>
+
+  <p class="ask-teacher">Resonance is why marching soldiers break step crossing a bridge, and why shattering a wine glass with sound means matching its natural frequency exactly — both are this lesson's ω = ω₀ case in disguise. Ask for the Tacoma Narrows Bridge story if a dramatic real-world example would help it stick. That closes Unit 4's physical applications; Unit 5 introduces a completely different solution method — the Laplace transform — that will make forced and discontinuous forcing problems like these much easier to handle.</p>
+
+  <footer class="lesson-footer">STEM+ · Differential Equations · Unit 4 · Lesson 3 of 3</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var f0 = 1, omega0 = 2;
+  function amplitude(beta, omega) {
+    var a = omega0 * omega0 - omega * omega;
+    var b = 2 * beta * omega;
+    return f0 / Math.sqrt(a * a + b * b);
+  }
+
+  var origin = { originX: 40, originY: 280, scaleX: 100, scaleY: 50 };
+  var curveMount = STEMPlus.mountLiveCurve(document.getElementById('res-curve'), Object.assign({ xMin: 0, xMax: 4, samples: 160 }, origin));
+  var marker = document.getElementById('res-marker');
+
+  var betaSlider = document.getElementById('res-beta');
+  var omegaSlider = document.getElementById('res-omega');
+  var betaLabel = document.getElementById('res-beta-label');
+  var omegaLabel = document.getElementById('res-omega-label');
+  var readout = document.getElementById('res-readout');
+
+  function render() {
+    var beta = parseInt(betaSlider.value, 10) / 100;
+    var omega = parseInt(omegaSlider.value, 10) / 100;
+    betaLabel.textContent = 'β = ' + beta.toFixed(2);
+    omegaLabel.textContent = 'ω = ' + omega.toFixed(2);
+    curveMount.setFn(function (w) { return amplitude(beta, w); });
+    var M = amplitude(beta, omega);
+    marker.setAttribute('cx', origin.originX + omega * origin.scaleX);
+    marker.setAttribute('cy', origin.originY - M * origin.scaleY);
+    readout.textContent = 'M(' + omega.toFixed(2) + ') ≈ ' + M.toFixed(3) + (Math.abs(omega - omega0) < 0.1 ? ' — near resonance (ω ≈ ω₀ = 2).' : '.');
+  }
+
+  betaSlider.addEventListener('input', render);
+  omegaSlider.addEventListener('input', render);
+  render();
+});
+</script>

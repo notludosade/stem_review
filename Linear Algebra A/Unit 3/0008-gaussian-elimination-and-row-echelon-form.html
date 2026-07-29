@@ -1,0 +1,132 @@
+<meta charset="UTF-8">
+<title>Lesson 8: Gaussian Elimination and Row Echelon Form — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Linear Algebra A · Unit 3 · Lesson 8</span>
+  <h1>Gaussian Elimination and Row Echelon Form</h1>
+  <p class="subtitle">A systematic, row-by-row way to solve any system — invertible coefficient matrix or not.</p>
+  <p class="nav-links"><a href="0007-systems-as-matrix-equations.html" class="nav-prev">← Lesson 7</a> <a href="0009-rank-and-the-structure-of-solution-sets.html" class="nav-next">Lesson 9 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>x = A⁻¹b was fast, but it stalled the moment A was singular. <strong>Gaussian elimination</strong> is the more general tool — it works on every system, tells you exactly how many solutions exist, and is really just "elimination," the technique from Precalculus, repackaged as row operations on a matrix.</p>
+
+  <h2>1. The augmented matrix</h2>
+  <div class="box">
+    <span class="box-label">Definition — Augmented Matrix</span>
+    The <strong>augmented matrix</strong> [A | b] appends the constants column b onto the coefficient matrix A, separated by a vertical bar. It holds the entire system — every coefficient and every constant — without ever writing a variable name.
+  </div>
+
+  <h2>2. Row operations and row echelon form</h2>
+  <div class="box">
+    <span class="box-label">Definition — Elementary Row Operations</span>
+    Three moves are allowed, and each one preserves the solution set exactly: (1) swap two rows, (2) multiply a row by a <em>nonzero</em> constant, and (3) add a multiple of one row to another. Multiplying a row by 0 is <em>not</em> allowed — that would destroy information, not just rearrange it.
+  </div>
+  <div class="box">
+    <span class="box-label">Definition — Row Echelon Form (REF)</span>
+    A matrix is in <strong>row echelon form</strong> when: every row of all zeros sits at the bottom, and each row's leading nonzero entry (its <strong>pivot</strong>) sits strictly to the right of the pivot in the row above it. Reaching this form is the goal of forward elimination.
+  </div>
+  <div class="box why">
+    <span class="box-label">Why this works even when A is singular</span>
+    Unlike x = A⁻¹b, elimination never assumes an inverse exists. It just keeps simplifying rows. If A turns out to be singular, that shows up naturally as a row of zeros appearing on the left side — Lesson 9 turns that observation into a full classification of how many solutions the system has.
+  </div>
+
+  <p>Step through eliminating the system x + y + z = 6, 2x + y − z = 1, 3x − y + z = 4, one row operation at a time.</p>
+
+  <div class="widget">
+    <div class="widget-label">Try It — Gaussian Elimination, Step by Step</div>
+    <div class="step-display" id="l8-display" style="min-height: 6rem; padding: 1rem; border: 1px solid var(--border); border-radius: 8px; font-family: monospace; white-space: pre-line;">Click "Next Step" to begin.</div>
+    <div class="quiz-fill-row" style="margin-top: 0.75rem;">
+      <button class="quiz-fill-check" id="l8-next">Next Step →</button>
+      <button class="quiz-fill-check" id="l8-reset">Reset</button>
+    </div>
+  </div>
+
+  <h2>Check your recall</h2>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. Which of these is NOT a valid elementary row operation?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Multiply a row by 0.</button>
+      <button class="quiz-choice" data-correct="false">Swap two rows.</button>
+      <button class="quiz-choice" data-correct="false">Multiply a row by −3.</button>
+      <button class="quiz-choice" data-correct="false">Add 2 times row 1 to row 3.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Scaling by 0 would erase a row's information entirely rather than just rearrange it — the allowed scalar must be nonzero.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Which matrix is in row echelon form?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">[[1, 2, 3], [0, 1, 4], [0, 0, 5]]</button>
+      <button class="quiz-choice" data-correct="false">[[0, 0, 5], [0, 1, 4], [1, 2, 3]]</button>
+      <button class="quiz-choice" data-correct="false">[[1, 2, 3], [0, 0, 4], [0, 1, 5]]</button>
+      <button class="quiz-choice" data-correct="false">[[1, 2, 3], [1, 1, 4], [0, 0, 5]]</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Each row's pivot (leading nonzero entry) sits strictly right of the one above it: column 1, then column 2, then column 3. The other options either have a zero row on top, a later pivot to the left of an earlier one, or two rows both leading in column 1.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="3">
+    <p class="quiz-prompt">3. Fill in the blank: after reaching [[1,1,1|6],[0,−1,−3|−11],[0,0,10|30]], back-substitution gives 10z = 30, so z = ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>10z = 30 gives z = 3 directly — the whole point of reaching row echelon form is that the last row solves for one variable immediately.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">4. What does the augmented matrix [A | b] represent?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">An entire system of equations, coefficients and constants together.</button>
+      <button class="quiz-choice" data-correct="false">Only the coefficient matrix, with b discarded.</button>
+      <button class="quiz-choice" data-correct="false">The product Ab.</button>
+      <button class="quiz-choice" data-correct="false">The inverse of A.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Appending b as an extra column keeps every coefficient and every constant in one grid, ready for row operations, with no variable names needed.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="no solution|inconsistent">
+    <p class="quiz-prompt">5. Fill in the blank: if elimination produces a row [0, 0, 0 | 5] (all zeros on the left, nonzero on the right), the system has ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>That row claims 0 = 5, a contradiction no values of the variables can satisfy — the system is inconsistent and has no solution at all.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p><a href="https://www.khanacademy.org/math/linear-algebra/vectors-and-spaces">Khan Academy's Vectors and Spaces unit</a>, in "Matrices for solving systems by elimination," works the same row-operation process on several more systems, including ones with no solution.</p>
+
+  <p class="ask-teacher">Ask your teacher for a 3×3 system that turns out to be singular, to see the zero-row case happen firsthand. Next up: turning "how many pivots did elimination find" into a precise count — rank — and using it to classify every possible solution set.</p>
+
+  <footer class="lesson-footer">STEM+ · Linear Algebra A · Lesson 8 of the course sequence</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var steps = [
+    'Augmented matrix:\n[ 1   1   1 | 6 ]\n[ 2   1  -1 | 1 ]\n[ 3  -1   1 | 4 ]\n\nGoal: pivots of 1, strictly staggered right, going down.',
+    'R2 = R2 - 2*R1:\n(2-2, 1-2, -1-2 | 1-12) = (0, -1, -3 | -11)\n\n[ 1   1   1 |  6 ]\n[ 0  -1  -3 | -11 ]\n[ 3  -1   1 |  4 ]',
+    'R3 = R3 - 3*R1:\n(3-3, -1-3, 1-3 | 4-18) = (0, -4, -2 | -14)\n\n[ 1   1   1 |  6 ]\n[ 0  -1  -3 | -11 ]\n[ 0  -4  -2 | -14 ]',
+    'R3 = R3 - 4*R2:\n(0-0, -4-4(-1), -2-4(-3) | -14-4(-11)) = (0, 0, 10 | 30)\n\n[ 1   1   1 |  6 ]\n[ 0  -1  -3 | -11 ]\n[ 0   0  10 |  30 ]\n\nRow echelon form reached.',
+    'Back-substitute row 3: 10z = 30 -> z = 3.',
+    'Back-substitute row 2: -y - 3z = -11 -> -y - 9 = -11 -> y = 2.',
+    'Back-substitute row 1: x + y + z = 6 -> x + 2 + 3 = 6 -> x = 1.\n\nSolution: (x, y, z) = (1, 2, 3) - done!'
+  ];
+  var idx = 0;
+  var display = document.getElementById('l8-display');
+  document.getElementById('l8-next').addEventListener('click', function () {
+    if (idx < steps.length - 1) idx++;
+    display.textContent = steps[idx];
+  });
+  document.getElementById('l8-reset').addEventListener('click', function () {
+    idx = 0;
+    display.textContent = steps[0];
+  });
+});
+</script>

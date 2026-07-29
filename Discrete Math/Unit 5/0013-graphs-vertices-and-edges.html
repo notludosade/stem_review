@@ -1,0 +1,191 @@
+<meta charset="UTF-8">
+<title>Lesson 13: Graphs, Vertices, and Edges — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Discrete Math · Unit 5 · Lesson 13</span>
+  <h1>Graphs, Vertices, and Edges</h1>
+  <p class="subtitle">Unit 5 leaves numbers behind and starts drawing pictures. A graph is one of the simplest structures in all of mathematics — points, and connections between some pairs of them — and one of the most widely reused, from road maps to social networks to the dependency chain between the lessons in this course.</p>
+  <p class="nav-links"><a href="../Unit%204/0012-expected-value.html" class="nav-prev">← Lesson 12</a> <a href="0014-paths-cycles-and-connectivity.html" class="nav-next">Lesson 14 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <h2>1. Graphs, vertices, and edges</h2>
+  <div class="box">
+    <span class="box-label">Definition — Graph</span>
+    A <strong>graph</strong> G = (V, E) consists of a set V of <strong>vertices</strong> (or nodes) and a set E of <strong>edges</strong>, where each edge is an unordered pair of vertices, {u, v}. This lesson works with <strong>simple graphs</strong>: no edge from a vertex to itself (no loops), and no two vertices connected by more than one edge. E is literally a set — Unit 2's set operations and notation apply to it without modification, since an edge set is just a set of 2-element subsets of V.
+  </div>
+  <div class="box example">
+    <span class="box-label">Worked example</span>
+    V = {A, B, C, D}, E = {{A,B}, {B,C}, {C,D}, {D,A}} describes a 4-cycle: A connects to B and D, B connects to A and C, and so on around a square.
+  </div>
+
+  <h2>2. Degree and the Handshake Theorem</h2>
+  <div class="box">
+    <span class="box-label">Definition — Degree</span>
+    The <strong>degree</strong> of a vertex v, written deg(v), is the number of edges incident to it (the number of other vertices it's directly connected to).
+  </div>
+  <div class="box">
+    <span class="box-label">Theorem — The Handshake Theorem</span>
+    Σ (v ∈ V) deg(v) = 2|E| — the sum of every vertex's degree equals exactly twice the number of edges. Each edge {u,v} contributes exactly 1 to deg(u) and 1 to deg(v), so it's counted twice in the sum, once from each endpoint. A direct consequence: the sum of all degrees in any graph is always even, and the number of vertices with odd degree is always even.
+  </div>
+  <div class="box why">
+    <span class="box-label">Why this looks familiar</span>
+    Counting each edge from both endpoints is exactly the same "counted from two directions, must agree" logic as Unit 3's symmetry identity C(n,r) = C(n,n−r), and the Handshake Theorem's proof is a one-line application of the addition principle from Lesson 7: summing degrees vertex by vertex is the same total as summing 2 for every edge, just grouped differently.
+  </div>
+
+  <h2>3. Directed graphs, briefly</h2>
+  <div class="box">
+    <span class="box-label">Directed vs. Undirected</span>
+    Everything above describes an <strong>undirected</strong> graph — {u,v} connects u to v and v to u equally. A <strong>directed graph</strong> (digraph) instead uses ordered pairs (u,v), meaning an edge that only goes from u to v — think one-way streets or "follows" on a social network. This course's Unit 5 focuses on undirected graphs; directed graphs reuse every definition here with "unordered pair" swapped for "ordered pair."
+  </div>
+
+  <h2>4. Try it — build a graph</h2>
+  <p>Click two vertices in a row to toggle an edge between them. Watch each vertex's degree, and check that the sum of degrees always comes out to twice the edge count.</p>
+  <div class="widget">
+    <div class="widget-label">Try It — Graph Builder</div>
+    <svg id="graph-svg" viewBox="0 0 260 220" style="width: 100%; max-width: 300px; display: block; margin: 0 auto;"></svg>
+    <p id="graph-status" style="margin-top: 0.7rem; font-family: var(--mono, monospace);">Edges: 0. Degrees — A:0 B:0 C:0 D:0 E:0. Handshake check: 0 = 2×0 ✓</p>
+    <div class="quiz-fill-row" style="margin-top: 0.6rem;">
+      <button class="widget-btn" id="graph-reset">Reset</button>
+    </div>
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. In a simple graph, which of these is disallowed?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">A vertex with degree 0.</button>
+      <button class="quiz-choice" data-correct="true">Two edges both connecting the same pair of vertices.</button>
+      <button class="quiz-choice" data-correct="false">A vertex connected to every other vertex.</button>
+      <button class="quiz-choice" data-correct="false">An edge set that is empty.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Simple graphs disallow loops and multiple edges between the same pair of vertices — a vertex with degree 0, a fully-connected vertex, and an empty edge set are all perfectly valid.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. A graph has 5 edges. What must the sum of all vertex degrees equal?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">5</button>
+      <button class="quiz-choice" data-correct="true">10</button>
+      <button class="quiz-choice" data-correct="false">25</button>
+      <button class="quiz-choice" data-correct="false">It depends on the number of vertices.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>By the Handshake Theorem, the sum of degrees is always exactly 2|E| = 2(5) = 10, regardless of how many vertices the graph has.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Can a simple graph have exactly one vertex of odd degree, with every other vertex having even degree?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Yes, as long as the graph has at least 3 vertices.</button>
+      <button class="quiz-choice" data-correct="true">No — the number of odd-degree vertices in any graph is always even.</button>
+      <button class="quiz-choice" data-correct="false">Yes, but only in directed graphs.</button>
+      <button class="quiz-choice" data-correct="false">It's impossible to know without seeing the specific graph.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Since the total degree sum is always even (2|E|), and an odd number of odd terms would make the sum odd, the count of odd-degree vertices must always be even — a direct consequence of the Handshake Theorem.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="edge">
+    <p class="quiz-prompt">4. Fill in the blank: an ___ is an unordered pair of vertices, {u, v}, in an undirected simple graph.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>An edge connects two vertices without regard to order — {u,v} and {v,u} name the same edge.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="degree">
+    <p class="quiz-prompt">5. Fill in the blank: the number of edges incident to a vertex v is called its ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>deg(v) counts how many edges touch v — how many other vertices v is directly connected to.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read before the next lesson: <a href="https://open.umn.edu/opentextbooks/textbooks/discrete-mathematics-an-open-introduction">Levin, "Discrete Mathematics: An Open Introduction," Chapter 4.1, "Definitions"</a> covers additional graph terminology (multigraphs, weighted graphs) this lesson intentionally set aside.</p>
+
+  <p class="ask-teacher">Build a graph in the widget above where every vertex has the same degree ("regular" graphs are a common exam topic) — ask your teacher if you get stuck finding one on 5 vertices. Next up: what it means to travel through a graph, and whether you can always get from any vertex to any other.</p>
+
+  <footer class="lesson-footer">STEM+ · Discrete Math · Lesson 13 of the course sequence</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var labels = ['A', 'B', 'C', 'D', 'E'];
+  var positions = [[130, 20], [230, 90], [190, 200], [70, 200], [30, 90]];
+  var edges = {}; // key "i-j" (i<j) -> true
+  var selected = null;
+  var svg = document.getElementById('graph-svg');
+  var statusEl = document.getElementById('graph-status');
+  var ns = 'http://www.w3.org/2000/svg';
+
+  function el(tag, attrs) {
+    var e = document.createElementNS(ns, tag);
+    for (var k in attrs) e.setAttribute(k, attrs[k]);
+    return e;
+  }
+  function key(i, j) { return i < j ? i + '-' + j : j + '-' + i; }
+
+  function degree(i) {
+    var d = 0;
+    Object.keys(edges).forEach(function (k) {
+      var parts = k.split('-').map(Number);
+      if (parts[0] === i || parts[1] === i) d++;
+    });
+    return d;
+  }
+
+  function render() {
+    svg.innerHTML = '';
+    Object.keys(edges).forEach(function (k) {
+      var parts = k.split('-').map(Number);
+      var p1 = positions[parts[0]], p2 = positions[parts[1]];
+      svg.appendChild(el('line', { x1: p1[0], y1: p1[1], x2: p2[0], y2: p2[1], stroke: 'var(--accent)', 'stroke-width': 2 }));
+    });
+    labels.forEach(function (label, i) {
+      var pos = positions[i];
+      var isSelected = selected === i;
+      var circle = el('circle', {
+        cx: pos[0], cy: pos[1], r: 16,
+        fill: isSelected ? 'var(--accent)' : 'var(--code-bg)',
+        stroke: 'var(--accent)', 'stroke-width': 2, style: 'cursor: pointer;',
+      });
+      circle.addEventListener('click', function () {
+        if (selected === null) {
+          selected = i;
+        } else if (selected === i) {
+          selected = null;
+        } else {
+          var k = key(selected, i);
+          if (edges[k]) delete edges[k]; else edges[k] = true;
+          selected = null;
+        }
+        render();
+      });
+      svg.appendChild(circle);
+      var text = el('text', { x: pos[0], y: pos[1] + 5, 'text-anchor': 'middle', fill: isSelected ? 'var(--bg)' : 'var(--text)', 'font-size': 14, style: 'pointer-events: none;' });
+      text.textContent = label;
+      svg.appendChild(text);
+    });
+    var edgeCount = Object.keys(edges).length;
+    var degStr = labels.map(function (l, i) { return l + ':' + degree(i); }).join(' ');
+    var degSum = labels.reduce(function (sum, l, i) { return sum + degree(i); }, 0);
+    statusEl.textContent = 'Edges: ' + edgeCount + '. Degrees — ' + degStr + '. Handshake check: ' + degSum + ' = 2×' + edgeCount + ' ' + (degSum === 2 * edgeCount ? '✓' : '✗');
+  }
+
+  document.getElementById('graph-reset').addEventListener('click', function () {
+    edges = {};
+    selected = null;
+    render();
+  });
+
+  render();
+});
+</script>

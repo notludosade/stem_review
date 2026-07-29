@@ -1,0 +1,126 @@
+<meta charset="UTF-8">
+<title>Lesson 13: Computing Determinants — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Linear Algebra A · Unit 5 · Lesson 13</span>
+  <h1>Computing Determinants</h1>
+  <p class="subtitle">One number, computed from a square matrix, that already secretly appeared twice — as an area-scaling factor and as an invertibility test.</p>
+  <p class="nav-links"><a href="../Unit%204/0012-linear-transformations.html" class="nav-prev">← Lesson 12</a> <a href="0014-properties-of-determinants.html" class="nav-next">Lesson 14 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Lesson 6's ad − bc and Lesson 12's area-scaling factor were the same quantity in disguise: the <strong>determinant</strong>. This lesson gives it a formal definition and, crucially, extends it past 2×2 to any square matrix.</p>
+
+  <h2>1. The 2×2 determinant</h2>
+  <div class="box">
+    <span class="box-label">Definition — 2×2 Determinant</span>
+    For A = [[a, b], [c, d]], det(A) = |A| = ad − bc.
+  </div>
+
+  <h2>2. The 3×3 determinant, by cofactor expansion</h2>
+  <div class="box">
+    <span class="box-label">Definition — Cofactor Expansion (along row 1)</span>
+    For a 3×3 matrix A, det(A) = a₁₁M₁₁ − a₁₂M₁₂ + a₁₃M₁₃, where Mᵢⱼ (the <strong>minor</strong>) is the determinant of the 2×2 matrix left after deleting row i and column j from A. The alternating signs (+, −, +) come from each term's position, not from the sign of the entry itself.
+  </div>
+  <div class="box why">
+    <span class="box-label">Why expand along a row at all</span>
+    Cofactor expansion breaks an n×n determinant down into n smaller (n−1)×(n−1) determinants, each one computable by the same rule one size down. It's recursive: a 3×3 reduces to three 2×2's, a 4×4 would reduce to four 3×3's, and so on.
+  </div>
+
+  <p>Step through expanding det(A) for A = [[2, 1, 0], [1, 3, 2], [0, 1, 4]] along its first row.</p>
+
+  <div class="widget">
+    <div class="widget-label">Try It — Cofactor Expansion, Step by Step</div>
+    <div class="step-display" id="l13-display" style="min-height: 6rem; padding: 1rem; border: 1px solid var(--border); border-radius: 8px; font-family: monospace; white-space: pre-line;">Click "Next Step" to begin.</div>
+    <div class="quiz-fill-row" style="margin-top: 0.75rem;">
+      <button class="quiz-fill-check" id="l13-next">Next Step →</button>
+      <button class="quiz-fill-check" id="l13-reset">Reset</button>
+    </div>
+  </div>
+
+  <h2>Check your recall</h2>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. For A = [[4, 3], [2, 5]], what is det(A)?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">14</button>
+      <button class="quiz-choice" data-correct="false">26</button>
+      <button class="quiz-choice" data-correct="false">6</button>
+      <button class="quiz-choice" data-correct="false">−14</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>ad − bc = (4)(5) − (3)(2) = 20 − 6 = 14.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. In cofactor expansion along the first row of a 3×3 matrix, what sign pattern applies to the three terms?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">+, −, +</button>
+      <button class="quiz-choice" data-correct="false">+, +, +</button>
+      <button class="quiz-choice" data-correct="false">−, +, −</button>
+      <button class="quiz-choice" data-correct="false">+, −, −</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The signs alternate starting from +, based purely on position: (+, −, +) for columns 1, 2, 3 of row 1.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="-2|−2">
+    <p class="quiz-prompt">3. Fill in the blank: for [[1, 3], [2, 4]], the determinant is ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>(1)(4) − (3)(2) = 4 − 6 = −2.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">4. For A = [[2, 1, 0], [1, 3, 2], [0, 1, 4]], what is the minor M₁₁ (delete row 1, column 1)?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">10</button>
+      <button class="quiz-choice" data-correct="false">14</button>
+      <button class="quiz-choice" data-correct="false">4</button>
+      <button class="quiz-choice" data-correct="false">2</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Deleting row 1 and column 1 leaves [[3, 2], [1, 4]], with determinant (3)(4) − (2)(1) = 12 − 2 = 10.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="-2|−2">
+    <p class="quiz-prompt">5. Fill in the blank: for B = [[1, 0, 2], [0, 1, 0], [3, 0, 4]], det(B) = ___ (expand along row 1: 1·M₁₁ − 0·M₁₂ + 2·M₁₃).</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>M₁₁ = det[[1,0],[0,4]] = 4. M₁₃ = det[[0,1],[3,0]] = 0 − 3 = −3. det(B) = 1(4) − 0(M₁₂) + 2(−3) = 4 − 6 = −2.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p><a href="https://www.khanacademy.org/math/linear-algebra/matrix-transformations">Khan Academy's Matrix Transformations unit</a>, in "Determinants," walks through cofactor expansion on several more 3×3 examples, including ones expanded along a different row or column.</p>
+
+  <p class="ask-teacher">Ask your teacher to show expansion along a different row or column (any row or column works, and always gives the same answer) if you want to see why the choice doesn't matter. Next up: the algebraic shortcuts that make computing larger determinants far less tedious.</p>
+
+  <footer class="lesson-footer">STEM+ · Linear Algebra A · Lesson 13 of the course sequence</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var steps = [
+    'A = [ 2  1  0 ]\n    [ 1  3  2 ]\n    [ 0  1  4 ]\n\nExpand along row 1: det(A) = 2*M11 - 1*M12 + 0*M13',
+    'M11: delete row 1, col 1 -> [[3,2],[1,4]]\ndet = 3*4 - 2*1 = 10\n\nTerm 1: +2 * 10 = 20',
+    'M12: delete row 1, col 2 -> [[1,2],[0,4]]\ndet = 1*4 - 2*0 = 4\n\nTerm 2: -1 * 4 = -4',
+    'M13: delete row 1, col 3 -> [[1,3],[0,1]]\ndet = 1*1 - 3*0 = 1\n\nTerm 3: +0 * 1 = 0',
+    'det(A) = 20 + (-4) + 0 = 16\n\ndone!'
+  ];
+  var idx = 0;
+  var display = document.getElementById('l13-display');
+  document.getElementById('l13-next').addEventListener('click', function () {
+    if (idx < steps.length - 1) idx++;
+    display.textContent = steps[idx];
+  });
+  document.getElementById('l13-reset').addEventListener('click', function () {
+    idx = 0;
+    display.textContent = steps[0];
+  });
+});
+</script>

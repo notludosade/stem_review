@@ -1,0 +1,145 @@
+<meta charset="UTF-8">
+<title>Lesson 21: Solving Recurrence Relations — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Discrete Math · Unit 7 · Lesson 21 · Capstone</span>
+  <h1>Solving Recurrence Relations</h1>
+  <p class="subtitle">The course capstone. A recurrence relation is Lesson 19's recursive definition applied to a whole family of counting problems; solving one for a closed form is the payoff; and proving that closed form correct, for every n, is Lesson 20's induction doing exactly the job it was built for. Every earlier unit shows up here at once.</p>
+  <p class="nav-links"><a href="0020-mathematical-induction.html" class="nav-prev">← Lesson 20</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <h2>1. Linear recurrence relations</h2>
+  <div class="box">
+    <span class="box-label">Definition — Linear Homogeneous Recurrence (Constant Coefficients)</span>
+    A sequence satisfies a <strong>linear homogeneous recurrence relation with constant coefficients</strong> if aₙ = c₁aₙ₋₁ + c₂aₙ₋₂ + ... + cₖaₙ₋ₖ for fixed constants c₁,...,cₖ. This lesson focuses on the order-2 case: aₙ = c₁aₙ₋₁ + c₂aₙ₋₂, which needs two initial conditions (a₀ and a₁) to pin down a unique sequence — the Fibonacci recurrence from Lesson 19 is exactly this shape, with c₁ = c₂ = 1.
+  </div>
+  <div class="box why">
+    <span class="box-label">Where recurrences like this actually come from</span>
+    They're not just abstract exercises — Unit 3's counting problems generate them directly. The number of ways to tile a 2×n board with 1×2 dominoes, Tₙ, satisfies Tₙ = Tₙ₋₁ + Tₙ₋₂: the last column is either a single vertical domino (leaving a 2×(n−1) board, Tₙ₋₁ ways) or two horizontal dominoes stacked (leaving a 2×(n−2) board, Tₙ₋₂ ways) — the addition principle from Lesson 7, applied to these two mutually-exclusive cases. Tₙ turns out to literally be the Fibonacci sequence.
+  </div>
+
+  <h2>2. The characteristic equation method</h2>
+  <div class="box">
+    <span class="box-label">Method — Characteristic Equation</span>
+    For aₙ = c₁aₙ₋₁ + c₂aₙ₋₂, form the <strong>characteristic equation</strong> x² = c₁x + c₂ (substitute aₙ → xⁿ, aₙ₋₁ → xⁿ⁻¹, aₙ₋₂ → xⁿ⁻², then divide out xⁿ⁻²). If it has two distinct roots r₁, r₂, the general solution is aₙ = A·r₁ⁿ + B·r₂ⁿ, where A and B are constants determined by the two initial conditions.
+  </div>
+  <div class="box example">
+    <span class="box-label">Worked example</span>
+    Solve aₙ = 5aₙ₋₁ − 6aₙ₋₂, with a₀ = 1, a₁ = 4. Characteristic equation: x² = 5x − 6, i.e. x² − 5x + 6 = 0, which factors as (x−2)(x−3) = 0 — roots r₁=2, r₂=3. General solution: aₙ = A(2ⁿ) + B(3ⁿ). Apply initial conditions: a₀ = A + B = 1; a₁ = 2A + 3B = 4. Solving this system: A = −1, B = 2. Closed form: <strong>aₙ = −2ⁿ + 2·3ⁿ</strong>. Check: a₀ = −1+2 = 1 ✓. a₁ = −2+6 = 4 ✓. a₂ = −4+18 = 14, and directly from the recurrence, a₂ = 5(4)−6(1) = 14 ✓.
+  </div>
+
+  <h2>3. Why induction is what makes the closed form trustworthy</h2>
+  <div class="box why">
+    <span class="box-label">The characteristic equation finds a candidate — induction proves it</span>
+    Checking a closed form against the first few terms (as above) is good evidence, but it's not a proof for every n. The actual proof is a strong induction (Lesson 20) on n: base cases confirm the closed form matches a₀ and a₁ directly; the inductive step assumes the closed form is correct for both n−1 and n−2 (this is exactly why it needs to be <em>strong</em> induction, reaching back two steps instead of one) and substitutes those two assumed-correct closed-form values into the recurrence aₙ = c₁aₙ₋₁ + c₂aₙ₋₂ to show the closed form is also correct at n. This is the whole course in miniature: a counting problem (Unit 3) generates a recurrence (Unit 7's own Lesson 19), algebra proposes a closed-form answer, and induction (Lesson 20) is what turns "looks right for the first few terms" into "provably right for every term."
+  </div>
+
+  <h2>4. Try it — recursive vs. closed form, side by side</h2>
+  <p>For aₙ = 5aₙ₋₁ − 6aₙ₋₂ (a₀=1, a₁=4), step through terms computed two ways — directly from the recurrence, and from the closed form aₙ = −2ⁿ + 2·3ⁿ — and watch them agree at every step.</p>
+  <div class="widget">
+    <div class="widget-label">Try It — Recurrence vs. Closed Form</div>
+    <div class="step-display" id="rec-display" style="min-height: 4rem; padding: 1rem; border: 1px solid var(--border); border-radius: 8px; font-family: var(--mono, monospace); white-space: pre-line;">Click "Next Term" to begin.</div>
+    <div class="quiz-fill-row" style="margin-top: 0.75rem;">
+      <button class="widget-btn" id="rec-next">Next Term →</button>
+      <button class="widget-btn" id="rec-reset">Reset</button>
+    </div>
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What is the characteristic equation of aₙ = 7aₙ₋₁ − 10aₙ₋₂?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">x² = 10x − 7</button>
+      <button class="quiz-choice" data-correct="true">x² = 7x − 10</button>
+      <button class="quiz-choice" data-correct="false">x² + 7x + 10 = 0</button>
+      <button class="quiz-choice" data-correct="false">x = 7x − 10x</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Substituting aₙ → xⁿ directly into the recurrence and dividing out xⁿ⁻² gives x² = 7x − 10.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. x² − 7x + 10 = 0 factors as (x−2)(x−5) = 0. What is the general solution's form?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">aₙ = A(2n) + B(5n)</button>
+      <button class="quiz-choice" data-correct="true">aₙ = A(2ⁿ) + B(5ⁿ)</button>
+      <button class="quiz-choice" data-correct="false">aₙ = 2ⁿ + 5ⁿ, with no constants needed.</button>
+      <button class="quiz-choice" data-correct="false">aₙ = A + B(2ⁿ)(5ⁿ)</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Distinct roots r₁=2, r₂=5 give general solution aₙ = A·r₁ⁿ + B·r₂ⁿ = A(2ⁿ) + B(5ⁿ), with A and B to be fixed by initial conditions.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why does proving a closed form correct for a 2nd-order recurrence require strong induction, not ordinary induction?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">It doesn't — ordinary induction always suffices.</button>
+      <button class="quiz-choice" data-correct="true">The inductive step needs the closed form assumed correct at both n−1 and n−2, not just the single immediately preceding case.</button>
+      <button class="quiz-choice" data-correct="false">Because the characteristic equation has degree 2.</button>
+      <button class="quiz-choice" data-correct="false">Because recurrences can't be proven by induction at all.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Since aₙ depends on both aₙ₋₁ and aₙ₋₂, the inductive step must assume the closed form holds at both of those points — exactly the "assume it for every smaller case you need" flexibility strong induction provides.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="2">
+    <p class="quiz-prompt">4. Fill in the blank: for aₙ = 5aₙ₋₁ − 6aₙ₋₂ with a₀=1, a₁=4, the closed form aₙ = −2ⁿ + 2·3ⁿ gives a₂ = ___ × 7? — actually compute directly: a₂ = −2² + 2·3² = ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>a₂ = −4 + 2(9) = −4 + 18 = 14, matching the recurrence directly: 5(4) − 6(1) = 14.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="tiling|domino tiling|the domino tiling problem">
+    <p class="quiz-prompt">5. Fill in the blank: the number of ways to tile a 2×n board with 1×2 dominoes satisfies the Fibonacci recurrence, arising from the ___ problem discussed in this lesson.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Splitting on whether the last column uses one vertical domino or two horizontal ones (the addition principle) produces Tₙ = Tₙ₋₁ + Tₙ₋₂ — the domino tiling problem.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read: <a href="https://open.umn.edu/opentextbooks/textbooks/discrete-mathematics-an-open-introduction">Levin, "Discrete Mathematics: An Open Introduction," Chapter 2.7–2.8, "Solving Recurrence Relations"</a> covers the repeated-root case (when the characteristic equation has a double root) that this lesson's distinct-roots example set aside.</p>
+
+  <p class="ask-teacher">This closes the course. Every unit fed into this lesson: logic for writing the induction proof precisely, sets and functions for the vocabulary underneath all of it, combinatorics for where recurrences come from, probability's counting-based foundations, graphs for the tree-edge-count fact Lesson 15 flagged as needing induction, and number theory's own recursive structure in ℕ. Ask your teacher for a review session across any unit before the course exam — that's what I'm here for.</p>
+
+  <footer class="lesson-footer">STEM+ · Discrete Math · Lesson 21 of 21 — course complete</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var display = document.getElementById('rec-display');
+  var terms = [1, 4]; // a0, a1 via recurrence
+  var n = 1;
+
+  function closedForm(k) { return -Math.pow(2, k) + 2 * Math.pow(3, k); }
+
+  var lines = ['a(0): recurrence = 1, closed form = ' + closedForm(0), 'a(1): recurrence = 4, closed form = ' + closedForm(1)];
+
+  function render() { display.textContent = lines.join('\n'); }
+
+  document.getElementById('rec-next').addEventListener('click', function () {
+    n++;
+    var viaRecurrence = 5 * terms[n - 1] - 6 * terms[n - 2];
+    terms.push(viaRecurrence);
+    var viaClosed = closedForm(n);
+    lines.push('a(' + n + '): recurrence = 5(' + terms[n-1] + ')−6(' + terms[n-2] + ') = ' + viaRecurrence + ', closed form = ' + viaClosed + (viaRecurrence === viaClosed ? '  ✓ match' : '  ✗ mismatch'));
+    render();
+  });
+
+  document.getElementById('rec-reset').addEventListener('click', function () {
+    terms = [1, 4];
+    n = 1;
+    lines = ['a(0): recurrence = 1, closed form = ' + closedForm(0), 'a(1): recurrence = 4, closed form = ' + closedForm(1)];
+    render();
+  });
+
+  render();
+});
+</script>

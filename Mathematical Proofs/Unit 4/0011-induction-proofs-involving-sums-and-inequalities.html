@@ -1,0 +1,151 @@
+<meta charset="UTF-8">
+<title>Lesson 11: Induction Proofs Involving Sums and Inequalities — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Mathematical Proofs · Unit 4 · Lesson 11</span>
+  <h1>Induction Proofs Involving Sums and Inequalities</h1>
+  <p class="subtitle">The same base case / inductive step skeleton from Lesson 10, run on a longer sum formula and then on an inequality — where the base case doesn't even have to be n = 1.</p>
+  <p class="nav-links"><a href="0010-the-principle-of-mathematical-induction.html" class="nav-prev">← Lesson 10</a> <a href="0012-strong-induction.html" class="nav-next">Lesson 12 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Lesson 10's sum formula was the simplest possible induction target. This lesson runs the same two-step skeleton on a sum with more moving parts, and then on an inequality — where the base case is free to start wherever the claim actually first becomes true, not necessarily at n = 1.</p>
+
+  <div class="box example">
+    <span class="box-label">Theorem — Sum of Squares</span>
+    For every natural number n ≥ 1, 1² + 2² + ⋯ + n² = n(n+1)(2n+1)/6.
+  </div>
+  <div class="box">
+    <span class="box-label">Proof</span>
+    <strong>Base case (n=1):</strong> left side = 1; right side = 1(2)(3)/6 = 1. Equal.<br>
+    <strong>Inductive step:</strong> assume 1² + 2² + ⋯ + k² = k(k+1)(2k+1)/6 for some k ≥ 1 (inductive hypothesis). Then 1² + ⋯ + k² + (k+1)² = k(k+1)(2k+1)/6 + (k+1)². Factor out (k+1): = (k+1)[k(2k+1)/6 + (k+1)] = (k+1)[k(2k+1) + 6(k+1)]/6 = (k+1)(2k² + 7k + 6)/6 = (k+1)(k+2)(2k+3)/6. This matches n(n+1)(2n+1)/6 with n = k+1. So P(k) → P(k+1). By induction, the formula holds for all n ≥ 1. ∎
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why "factor out (k+1) first" is the entire strategy</span>
+    Every induction proof of a sum formula has the identical shape: the inductive hypothesis replaces the first k terms with a closed formula, one new term gets added, and then algebra has to reshape the result into P(k+1)'s target formula. Factoring out (k+1) immediately — rather than expanding everything and hoping it simplifies — is what turns a messy cubic into the recognizable (k+1)(k+2)(2k+3)/6 shape. Knowing the target shape in advance is what tells you which factoring move to make.
+  </div>
+
+  <h2>Induction on an inequality — and a base case that isn't 1</h2>
+  <div class="box example">
+    <span class="box-label">Theorem</span>
+    For every integer n ≥ 4, n! &gt; 2ⁿ.
+  </div>
+  <div class="box why">
+    <span class="box-label">Why the base case is n = 4, not n = 1</span>
+    Check small cases directly: 1! = 1 vs 2¹ = 2 (claim false); 2! = 2 vs 2² = 4 (false); 3! = 6 vs 2³ = 8 (false); 4! = 24 vs 2⁴ = 16 (true, finally). The claim is simply false for n = 1, 2, 3 — induction can only ever prove what's actually true, and starting the base case at n = 4 is not a stylistic choice, it's the first point where P(n) holds at all. Induction proves P(n) for all n at or above whatever base case you can actually establish.
+  </div>
+  <div class="box">
+    <span class="box-label">Proof</span>
+    <strong>Base case (n=4):</strong> 4! = 24 and 2⁴ = 16, and 24 &gt; 16. True.<br>
+    <strong>Inductive step:</strong> assume k! &gt; 2ᵏ for some k ≥ 4 (inductive hypothesis). Then (k+1)! = (k+1) · k! &gt; (k+1) · 2ᵏ, using the inductive hypothesis. Since k ≥ 4, k+1 ≥ 5 &gt; 2, so (k+1) · 2ᵏ &gt; 2 · 2ᵏ = 2ᵏ⁺¹. Chaining the two inequalities: (k+1)! &gt; 2ᵏ⁺¹. So P(k) → P(k+1). By induction, n! &gt; 2ⁿ for every integer n ≥ 4. ∎
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why the direction of every inequality had to be tracked carefully</span>
+    An inequality-induction proof lives or dies on multiplying or adding the right quantity on the right side without ever silently flipping a direction. The step (k+1)·2ᵏ &gt; 2·2ᵏ relies specifically on k+1 &gt; 2, which is exactly where the hypothesis k ≥ 4 gets used — try this same proof with a claimed base case of k ≥ 0 and this step breaks immediately, since k+1 isn't guaranteed to exceed 2 for small k.
+  </div>
+
+  <div class="widget" id="factorial-widget">
+    <div class="widget-label">Try It — Where Does n! &gt; 2ⁿ Actually Start?</div>
+    <div class="slider-row">
+      <label for="fact-n">n =</label>
+      <input type="range" id="fact-n" min="1" max="8" value="1" step="1">
+      <span class="slider-value" data-fact-n>1</span>
+    </div>
+    <p class="fm-steps" data-fact-readout></p>
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. For the sum of squares formula, what does the base case n = 1 check?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">That 1² + 2² = 2(3)(5)/6.</button>
+      <button class="quiz-choice" data-correct="true">That 1² equals 1(2)(3)/6, i.e., 1 = 1.</button>
+      <button class="quiz-choice" data-correct="false">That the formula holds for every n up to 1.</button>
+      <button class="quiz-choice" data-correct="false">Nothing — the base case is optional when the inductive step is strong enough.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Plugging n = 1 into both sides of the claimed formula and confirming they match (both equal 1) is exactly the base case.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why can't the theorem "n! &gt; 2ⁿ" be proved by induction starting at n = 1?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because induction can never start anywhere other than n = 1.</button>
+      <button class="quiz-choice" data-correct="true">Because the claim is actually false at n = 1 (1! = 1 is not greater than 2¹ = 2) — induction can't prove a false base case.</button>
+      <button class="quiz-choice" data-correct="false">Because factorials are undefined for n = 1.</button>
+      <button class="quiz-choice" data-correct="false">Because the inductive step fails for every k when starting at 1.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The claim is simply false for n = 1, 2, and 3 — the base case has to be a value where the statement is actually true, which here first happens at n = 4.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="5">
+    <p class="quiz-prompt">3. Fill in the blank: in the inductive step of the n! &gt; 2ⁿ proof, the key inequality uses k + 1 ≥ ___, which follows from k ≥ 4.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>k ≥ 4 gives k + 1 ≥ 5, which is what guarantees (k+1)·2ᵏ &gt; 2·2ᵏ in the next step.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">4. In the sum-of-squares inductive step, after substituting the inductive hypothesis, what is the very next algebraic move made?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Dividing both sides by (k+1).</button>
+      <button class="quiz-choice" data-correct="true">Factoring (k+1) out of both terms, since that factor is known to appear in the target formula for P(k+1).</button>
+      <button class="quiz-choice" data-correct="false">Assuming the formula for n = k+2 as well.</button>
+      <button class="quiz-choice" data-correct="false">Replacing k with k+1 everywhere without justification.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Factoring out (k+1) immediately, rather than expanding blindly, is what makes the algebra land on the recognizable (k+1)(k+2)(2k+3)/6 form.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="4">
+    <p class="quiz-prompt">5. Fill in the blank: the inequality n! &gt; 2ⁿ is proved by induction starting at the base case n = ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>n = 4 is the first value where n! actually exceeds 2ⁿ, so that's where the base case has to be set.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: Hammack's <em>Book of Proof</em>, Chapter 10, includes both a sum-formula and an inequality induction example, with a discussion of choosing a base case other than 1.</p>
+
+  <p class="ask-teacher">Stuck on the algebra in the sum-of-squares inductive step, or want to try proving 2ⁿ &gt; n² for n ≥ 5 the same way? Ask your teacher — that's what I'm here for. Next up: a stronger version of induction, for claims that need more than just the immediately preceding case.</p>
+
+  <footer class="lesson-footer">STEM+ · Mathematical Proofs · Lesson 11 of the course sequence</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var slider = document.getElementById('fact-n');
+  var nOut = document.querySelector('[data-fact-n]');
+  var readout = document.querySelector('[data-fact-readout]');
+
+  function factorial(n) {
+    var r = 1;
+    for (var i = 2; i <= n; i++) r *= i;
+    return r;
+  }
+
+  function render() {
+    var n = parseInt(slider.value, 10);
+    nOut.textContent = String(n);
+    var f = factorial(n);
+    var p = Math.pow(2, n);
+    var holds = f > p;
+    readout.innerHTML = n + '! = ' + f + ', 2<sup>' + n + '</sup> = ' + p + ' → ' + f + (holds ? ' &gt; ' : ' ≤ ') + p +
+      (holds ? ' ✓ (claim holds)' : ' ✗ (claim fails — this is exactly why the base case starts at n = 4, not n = 1)');
+    readout.className = 'fm-steps verdict ' + (holds ? 'is-pass' : 'is-fail');
+  }
+
+  slider.addEventListener('input', render);
+  render();
+});
+</script>

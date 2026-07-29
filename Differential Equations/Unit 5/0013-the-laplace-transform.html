@@ -1,0 +1,176 @@
+<meta charset="UTF-8">
+<title>Unit 5, Lesson 13: The Laplace Transform and Its Basic Properties — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/interactive.js" defer></script>
+<script src="../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Differential Equations · Unit 5 · Lesson 13</span>
+  <h1>The Laplace Transform and Its Basic Properties</h1>
+  <p class="subtitle">Units 3–4 solved equations by guessing a form and matching coefficients. This unit trades the differential equation for an algebra problem entirely — by transforming the whole thing into a new variable, s.</p>
+  <p class="nav-links"><a href="../Unit%204/0012-forced-oscillations-and-resonance.html" class="nav-prev">← Unit 4, Lesson 12</a> <a href="0014-solving-ivps-with-laplace-transforms.html" class="nav-next">Lesson 14 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <h2>1. Turning a function of t into a function of s</h2>
+  <div class="box">
+    <span class="box-label">Definition — Laplace Transform</span>
+    For a function f(t) defined on t ≥ 0, the <strong>Laplace transform</strong> is <strong>L{f(t)}(s) = F(s) = ∫₀<sup>∞</sup> e<sup>−st</sup>f(t) dt</strong> — an improper integral that turns a function of t into a new function of s, for every s large enough that the integral converges.
+  </div>
+  <div class="box">
+    <span class="box-label">Fact — Linearity</span>
+    <strong>L{af(t) + bg(t)} = a·L{f(t)} + b·L{g(t)}</strong> for constants a, b — the transform of a sum is the sum of the transforms, which is what makes it possible to build up complicated transforms from a short table of basic ones.
+  </div>
+  <div class="box">
+    <span class="box-label">Fact — A Basic Transform Table</span>
+    L{1} = 1/s. L{t} = 1/s². L{t<sup>n</sup>} = n!/s<sup>n+1</sup>. L{e<sup>at</sup>} = 1/(s−a). L{cos(bt)} = s/(s²+b²). L{sin(bt)} = b/(s²+b²). Every entry comes from directly evaluating ∫₀<sup>∞</sup>e<sup>−st</sup>f(t)dt — Lesson 14 needs one more entry (for derivatives) to actually solve equations.
+  </div>
+  <div class="box">
+    <span class="box-label">Worked Example</span>
+    Find L{3 + 5t}. By linearity: L{3 + 5t} = 3·L{1} + 5·L{t} = 3(1/s) + 5(1/s²) = <strong>3/s + 5/s²</strong>. No integral needs to be evaluated by hand — the table and linearity do all the work.
+  </div>
+
+  <h2>2. Exploring the transform table</h2>
+  <p>Pick a function type to see its graph alongside its Laplace transform — and for the parameterized types, slide the constant to watch F(s) update.</p>
+
+  <div class="widget" id="lt-widget">
+    <div class="widget-label">Try It — The Transform Table</div>
+    <div class="quiz-fill-row">
+      <button class="quiz-fill-check is-active" data-lt-tab="one">f(t) = 1</button>
+      <button class="quiz-fill-check" data-lt-tab="t">f(t) = t</button>
+      <button class="quiz-fill-check" data-lt-tab="exp">f(t) = e^(at)</button>
+      <button class="quiz-fill-check" data-lt-tab="cos">f(t) = cos(bt)</button>
+      <button class="quiz-fill-check" data-lt-tab="sin">f(t) = sin(bt)</button>
+    </div>
+
+    <div data-lt-panel="one">
+      <div class="plot-wrap"><svg viewBox="0 0 460 160" width="460" height="160"><line class="fig-axis" x1="30" y1="140" x2="440" y2="140"></line><line class="fig-axis" x1="30" y1="150" x2="30" y2="10"></line><polyline class="fig-curve" id="lt-one-curve"></polyline></svg></div>
+      <p class="plot-readout">F(s) = L{1} = 1/s</p>
+    </div>
+    <div data-lt-panel="t" hidden>
+      <div class="plot-wrap"><svg viewBox="0 0 460 160" width="460" height="160"><line class="fig-axis" x1="30" y1="140" x2="440" y2="140"></line><line class="fig-axis" x1="30" y1="150" x2="30" y2="10"></line><polyline class="fig-curve" id="lt-t-curve"></polyline></svg></div>
+      <p class="plot-readout">F(s) = L{t} = 1/s²</p>
+    </div>
+    <div data-lt-panel="exp" hidden>
+      <div class="plot-wrap"><svg viewBox="0 0 460 160" width="460" height="160"><line class="fig-axis" x1="30" y1="140" x2="440" y2="140"></line><line class="fig-axis" x1="30" y1="150" x2="30" y2="10"></line><polyline class="fig-curve" id="lt-exp-curve"></polyline></svg></div>
+      <div class="slider-row"><label for="lt-a">a</label><input type="range" id="lt-a" min="-20" max="20" step="1" value="5"><span class="slider-value" id="lt-a-label">a = 0.5</span></div>
+      <p class="plot-readout" id="lt-exp-readout">F(s) = L{e^(0.5t)} = 1/(s − 0.5)</p>
+    </div>
+    <div data-lt-panel="cos" hidden>
+      <div class="plot-wrap"><svg viewBox="0 0 460 160" width="460" height="160"><line class="fig-axis" x1="30" y1="80" x2="440" y2="80"></line><line class="fig-axis" x1="30" y1="150" x2="30" y2="10"></line><polyline class="fig-curve" id="lt-cos-curve"></polyline></svg></div>
+      <div class="slider-row"><label for="lt-b1">b</label><input type="range" id="lt-b1" min="1" max="6" step="1" value="2"><span class="slider-value" id="lt-b1-label">b = 2</span></div>
+      <p class="plot-readout" id="lt-cos-readout">F(s) = L{cos(2t)} = s/(s² + 4)</p>
+    </div>
+    <div data-lt-panel="sin" hidden>
+      <div class="plot-wrap"><svg viewBox="0 0 460 160" width="460" height="160"><line class="fig-axis" x1="30" y1="80" x2="440" y2="80"></line><line class="fig-axis" x1="30" y1="150" x2="30" y2="10"></line><polyline class="fig-curve" id="lt-sin-curve"></polyline></svg></div>
+      <div class="slider-row"><label for="lt-b2">b</label><input type="range" id="lt-b2" min="1" max="6" step="1" value="2"><span class="slider-value" id="lt-b2-label">b = 2</span></div>
+      <p class="plot-readout" id="lt-sin-readout">F(s) = L{sin(2t)} = 2/(s² + 4)</p>
+    </div>
+  </div>
+
+  <h2>Check your recall</h2>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. The Laplace transform of f(t) is defined as:</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">F(s) = ∫₀^∞ e^(−st)f(t) dt</button>
+      <button class="quiz-choice" data-correct="false">F(s) = ∫₀^∞ e^(st)f(t) dt</button>
+      <button class="quiz-choice" data-correct="false">F(s) = ∫₀^∞ f(t)/s dt</button>
+      <button class="quiz-choice" data-correct="false">F(s) = f(s) for all s</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The defining integral uses e^(−st), a decaying factor for s large enough to make the improper integral converge.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="1/s">
+    <p class="quiz-prompt">2. Fill in the blank: L{1} = ___</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>∫₀^∞ e^(−st)(1) dt = [−e^(−st)/s]₀^∞ = 0 − (−1/s) = 1/s.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. L{e^(at)} equals:</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">1/(s − a)</button>
+      <button class="quiz-choice" data-correct="false">1/(s + a)</button>
+      <button class="quiz-choice" data-correct="false">a/s</button>
+      <button class="quiz-choice" data-correct="false">1/s − a</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>∫₀^∞ e^(−st)e^(at) dt = ∫₀^∞ e^(−(s−a)t) dt = 1/(s−a), convergent for s &gt; a.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="7/s">
+    <p class="quiz-prompt">4. Fill in the blank: by linearity, L{4t + 7} = 4/s² + ___</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>L{4t + 7} = 4·L{t} + 7·L{1} = 4/s² + 7/s.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">5. L{cos(bt)} equals:</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">s/(s² + b²)</button>
+      <button class="quiz-choice" data-correct="false">b/(s² + b²)</button>
+      <button class="quiz-choice" data-correct="false">s/(s² − b²)</button>
+      <button class="quiz-choice" data-correct="false">1/(s + b)</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>L{cos(bt)} = s/(s²+b²), while L{sin(bt)} = b/(s²+b²) — easy to mix up, since they share the same denominator.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p><a href="https://tutorial.math.lamar.edu/Classes/DE/LaplaceTransforms.aspx">Paul's Online Math Notes, "Laplace Transforms"</a> derives the full basic table from the defining integral and includes a printable table for reference.</p>
+
+  <p class="ask-teacher">Nobody re-derives ∫₀^∞e^(−st)f(t)dt by hand every time — the table plus linearity covers almost every function this course throws at it. Ask for the derivation of L{t} (it needs integration by parts) if seeing one worked by hand would help. Lesson 14 adds the transform of a derivative, the one entry that turns this whole table into a tool for actually solving differential equations.</p>
+
+  <footer class="lesson-footer">STEM+ · Differential Equations · Unit 5 · Lesson 1 of 3</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  STEMPlus.mountTabs(document.getElementById('lt-widget'), 'data-lt-tab', 'data-lt-panel');
+
+  var flatOrigin = { originX: 30, originY: 140, scaleX: 100, scaleY: 90 };
+  STEMPlus.mountLiveCurve(document.getElementById('lt-one-curve'), Object.assign({ xMin: 0, xMax: 4, samples: 50 }, flatOrigin)).setFn(function () { return 1; });
+  STEMPlus.mountLiveCurve(document.getElementById('lt-t-curve'), Object.assign({ xMin: 0, xMax: 4, samples: 50 }, flatOrigin)).setFn(function (t) { return t; });
+
+  var expCurve = STEMPlus.mountLiveCurve(document.getElementById('lt-exp-curve'), Object.assign({ xMin: 0, xMax: 4, samples: 80 }, flatOrigin));
+  var aSlider = document.getElementById('lt-a'), aLabel = document.getElementById('lt-a-label'), expReadout = document.getElementById('lt-exp-readout');
+  function renderExp() {
+    var a = parseInt(aSlider.value, 10) / 10;
+    aLabel.textContent = 'a = ' + a.toFixed(1);
+    expCurve.setFn(function (t) { return Math.exp(a * t); });
+    expReadout.textContent = 'F(s) = L{e^(' + a.toFixed(1) + 't)} = 1/(s − ' + a.toFixed(1) + ')';
+  }
+  aSlider.addEventListener('input', renderExp);
+  renderExp();
+
+  var trigOrigin = { originX: 30, originY: 80, scaleX: 100, scaleY: 60 };
+  var cosCurve = STEMPlus.mountLiveCurve(document.getElementById('lt-cos-curve'), Object.assign({ xMin: 0, xMax: 4, samples: 100 }, trigOrigin));
+  var b1Slider = document.getElementById('lt-b1'), b1Label = document.getElementById('lt-b1-label'), cosReadout = document.getElementById('lt-cos-readout');
+  function renderCos() {
+    var b = parseInt(b1Slider.value, 10);
+    b1Label.textContent = 'b = ' + b;
+    cosCurve.setFn(function (t) { return Math.cos(b * t); });
+    cosReadout.textContent = 'F(s) = L{cos(' + b + 't)} = s/(s² + ' + (b * b) + ')';
+  }
+  b1Slider.addEventListener('input', renderCos);
+  renderCos();
+
+  var sinCurve = STEMPlus.mountLiveCurve(document.getElementById('lt-sin-curve'), Object.assign({ xMin: 0, xMax: 4, samples: 100 }, trigOrigin));
+  var b2Slider = document.getElementById('lt-b2'), b2Label = document.getElementById('lt-b2-label'), sinReadout = document.getElementById('lt-sin-readout');
+  function renderSin() {
+    var b = parseInt(b2Slider.value, 10);
+    b2Label.textContent = 'b = ' + b;
+    sinCurve.setFn(function (t) { return Math.sin(b * t); });
+    sinReadout.textContent = 'F(s) = L{sin(' + b + 't)} = ' + b + '/(s² + ' + (b * b) + ')';
+  }
+  b2Slider.addEventListener('input', renderSin);
+  renderSin();
+});
+</script>

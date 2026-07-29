@@ -1,0 +1,156 @@
+<meta charset="UTF-8">
+<title>Lesson 12: Expected Value — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Discrete Math · Unit 4 · Lesson 12</span>
+  <h1>Expected Value</h1>
+  <p class="subtitle">Unit 4 closes by turning a random outcome into a single number: not what will happen on any one trial, but what the long-run average settles toward if you repeated the experiment forever. It's the concept behind "the house always wins" and every insurance premium ever set.</p>
+  <p class="nav-links"><a href="0011-conditional-probability.html" class="nav-prev">← Lesson 11</a> <a href="../Unit%205/0013-graphs-vertices-and-edges.html" class="nav-next">Lesson 13 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <h2>1. Random variables</h2>
+  <div class="box">
+    <span class="box-label">Definition — Random Variable</span>
+    A <strong>random variable</strong> X is a function from the sample space S to the real numbers: X: S → ℝ. It assigns a number to every outcome — "number of heads in 3 coin flips," "sum of two dice," "dollars won" — turning an abstract outcome into something you can average and compare.
+  </div>
+
+  <h2>2. Expected value</h2>
+  <div class="box">
+    <span class="box-label">Definition — Expected Value</span>
+    The <strong>expected value</strong> of a discrete random variable X is E[X] = Σ x · P(X = x), summed over every value x that X can take. It is a probability-weighted average — each possible value contributes in proportion to how likely it is.
+  </div>
+  <div class="box example">
+    <span class="box-label">Worked example — a fair game</span>
+    Roll a fair die: if it lands on 6, you win $5; otherwise, you lose $1. Let X = your winnings. X = 5 with probability 1/6, and X = −1 with probability 5/6. E[X] = 5·(1/6) + (−1)·(5/6) = 5/6 − 5/6 = 0. On any single roll you either win $5 or lose $1 — you never actually see "$0" happen — but averaged over many, many rolls, your winnings per roll converge toward exactly $0. This is what makes it a mathematically <em>fair</em> game: E[X] = 0 means neither side has an edge in the long run.
+  </div>
+  <div class="box why">
+    <span class="box-label">Why "expected" doesn't mean "most likely" or "guaranteed"</span>
+    E[X] = 0 in the example above is not one of X's two possible values (5 and −1) at all — it's the long-run average, not a prediction about any single trial. This is the single most common misreading of expected value: E[X] = 3.5 for a fair die roll doesn't mean you should expect to roll a 3.5 (impossible) — it means if you rolled the die a huge number of times and averaged the results, that average would converge to 3.5. Casinos and insurers rely on exactly this gap between "any one outcome" and "the long-run average" to run profitable businesses on games and policies where nearly every individual event is unpredictable.
+  </div>
+
+  <div class="box">
+    <span class="box-label">Linearity of Expectation</span>
+    For any random variables X and Y (independent or not), E[X + Y] = E[X] + E[Y]. This holds unconditionally, which makes it one of the most useful shortcuts in probability — it lets you compute the expected value of a complicated sum by breaking it into simpler pieces and adding their expectations, without ever needing to know how the pieces interact.
+  </div>
+
+  <h2>3. Try it — play the fair game</h2>
+  <p>Play the $5-on-a-6, otherwise-lose-$1 game repeatedly, and watch your average winnings per play drift toward E[X] = 0.</p>
+  <div class="widget">
+    <div class="widget-label">Try It — Expected Value Simulator</div>
+    <p id="ev-display" style="font-family: var(--mono, monospace); font-size: 1.05rem; min-height: 1.6rem;">No plays yet.</p>
+    <p id="ev-stats" style="font-family: var(--mono, monospace);">Plays: 0 &nbsp; Total winnings: $0 &nbsp; Average per play: —</p>
+    <div class="quiz-fill-row" style="margin-top: 0.75rem;">
+      <button class="widget-btn" id="ev-play">Play Once</button>
+      <button class="widget-btn" id="ev-play20">Play 20 Times</button>
+      <button class="widget-btn" id="ev-reset">Reset</button>
+    </div>
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. A random variable is best described as:</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">An event that occurs randomly.</button>
+      <button class="quiz-choice" data-correct="true">A function assigning a real number to each outcome in the sample space.</button>
+      <button class="quiz-choice" data-correct="false">A probability that changes unpredictably.</button>
+      <button class="quiz-choice" data-correct="false">Any variable whose value is unknown.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A random variable is formally a function X: S → ℝ — it converts each outcome of the sample space into a number, which is what makes averaging ("expected value") possible.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. A game costs $2 to play. You win $10 with probability 0.1, and win nothing otherwise. What is the expected net profit per play?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">$10</button>
+      <button class="quiz-choice" data-correct="false">$8</button>
+      <button class="quiz-choice" data-correct="true">−$1</button>
+      <button class="quiz-choice" data-correct="false">$0</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Expected winnings = 10(0.1) + 0(0.9) = 1. Net profit subtracts the $2 cost: 1 − 2 = −$1, so the game loses money for the player on average.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. E[X] = 3.5 for rolling one fair six-sided die. What does this actually mean?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">The die is most likely to roll a 3 or a 4.</button>
+      <button class="quiz-choice" data-correct="false">Every roll will be close to 3.5.</button>
+      <button class="quiz-choice" data-correct="true">The long-run average of many rolls converges to 3.5, even though 3.5 is never an outcome of any single roll.</button>
+      <button class="quiz-choice" data-correct="false">The die is unfair, since 3.5 isn't a valid face.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Expected value is a long-run average, not a prediction about any individual trial or the "most likely" outcome — no single roll can ever equal 3.5.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="0">
+    <p class="quiz-prompt">4. Fill in the blank: for the $5-on-a-6, otherwise-lose-$1 game, E[X] = 5(1/6) + (−1)(5/6) = ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>5/6 − 5/6 = 0 — a mathematically fair game, with no long-run edge to either side.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="linearity of expectation|linearity">
+    <p class="quiz-prompt">5. Fill in the blank: the rule E[X + Y] = E[X] + E[Y], which holds even when X and Y aren't independent, is called ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Linearity of expectation holds unconditionally, regardless of dependence between X and Y, which is what makes it such a powerful computational shortcut.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read before the next lesson: <a href="https://open.umn.edu/opentextbooks/textbooks/discrete-mathematics-an-open-introduction">Levin, "Discrete Mathematics: An Open Introduction," Chapter 1.6, "Expected Value"</a> extends this into variance, a second number that measures how spread out X's outcomes are around E[X].</p>
+
+  <p class="ask-teacher">This closes Unit 4 — sample spaces, conditional probability, and expected value all lean on Unit 3's counting tools underneath. Ask your teacher for a linearity-of-expectation example (like expected number of fixed points in a random shuffle) if you want to see why it's considered one of probability's most useful tricks. Next up: Unit 5 leaves numbers behind for a while and starts drawing pictures — graphs, vertices, and edges.</p>
+
+  <footer class="lesson-footer">STEM+ · Discrete Math · Lesson 12 of the course sequence</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var plays = 0, total = 0;
+  var displayEl = document.getElementById('ev-display');
+  var statsEl = document.getElementById('ev-stats');
+
+  function playOnce() {
+    var r = Math.floor(Math.random() * 6) + 1;
+    var winnings = r === 6 ? 5 : -1;
+    plays++;
+    total += winnings;
+    return { roll: r, winnings: winnings };
+  }
+
+  function updateStats() {
+    var avg = plays > 0 ? (total / plays).toFixed(3) : '—';
+    statsEl.textContent = 'Plays: ' + plays + '   Total winnings: $' + total + '   Average per play: ' + avg + ' (theoretical: 0.000)';
+  }
+
+  document.getElementById('ev-play').addEventListener('click', function () {
+    var result = playOnce();
+    displayEl.textContent = 'Rolled: ' + result.roll + ' → ' + (result.winnings > 0 ? '+$' + result.winnings : '−$' + Math.abs(result.winnings));
+    updateStats();
+  });
+
+  document.getElementById('ev-play20').addEventListener('click', function () {
+    var results = [];
+    for (var i = 0; i < 20; i++) results.push(playOnce().roll);
+    displayEl.textContent = 'Last 20 rolls: ' + results.join(', ');
+    updateStats();
+  });
+
+  document.getElementById('ev-reset').addEventListener('click', function () {
+    plays = 0; total = 0;
+    displayEl.textContent = 'No plays yet.';
+    updateStats();
+  });
+
+  updateStats();
+});
+</script>

@@ -1,0 +1,156 @@
+<meta charset="UTF-8">
+<title>Unit 5, Lesson 13: Polar Coordinates in Double Integrals — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/interactive.js" defer></script>
+<script src="../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Multivariable Calculus · Unit 5 · Lesson 13</span>
+  <h1>Polar Coordinates in Double Integrals</h1>
+  <p class="subtitle">A circular region forced into x and y coordinates fights you the whole way. Switch to r and θ, and the bounds — and often the integral itself — become dramatically simpler.</p>
+  <p class="nav-links"><a href="../Unit%204/0012-triple-integrals.html" class="nav-prev">← Lesson 12</a> <a href="0014-cylindrical-and-spherical-coordinates.html" class="nav-next">Lesson 14 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <h2>1. The area element picks up an extra factor of r</h2>
+  <div class="box">
+    <span class="box-label">Definition — Polar Area Element</span>
+    Converting x = r cos θ, y = r sin θ, the flat area element transforms as <strong>dA = dx dy = r dr dθ</strong> — not just dr dθ. A thin "polar rectangle" spanning Δr in radius and Δθ in angle at radius r has arc length r·Δθ (not Δθ alone), so its area is approximately (Δr)(r·Δθ) = r Δr Δθ. That extra factor of r is not optional — dropping it is the single most common polar-integral mistake.
+  </div>
+  <div class="box">
+    <span class="box-label">Method — Converting a Double Integral to Polar</span>
+    <strong>∬<sub>R</sub> f(x,y) dA = ∬<sub>R</sub> f(r cos θ, r sin θ) · r dr dθ</strong>, with R's bounds rewritten in terms of r and θ. This pays off whenever R is a disk, annulus, or wedge, or when the integrand itself involves x² + y² = r² — both situations where Cartesian bounds or algebra get painful fast.
+  </div>
+  <div class="box">
+    <span class="box-label">Worked Example</span>
+    ∬<sub>D</sub> e<sup>−(x²+y²)</sup> dA over the disk x² + y² ≤ 4 (radius 2) — an integral with no elementary Cartesian antiderivative at all. In polar: ∫<sub>0</sub><sup>2π</sup> ∫<sub>0</sub><sup>2</sup> e<sup>−r²</sup>·r dr dθ. Substituting u = r², du = 2r dr: ∫<sub>0</sub><sup>2</sup> e<sup>−r²</sup> r dr = (1/2)(1 − e<sup>−4</sup>). Then the outer integral just multiplies by 2π: <strong>π(1 − e<sup>−4</sup>) ≈ 3.084</strong>.
+  </div>
+  <div class="box why">
+    <span class="box-label">Why This Matters</span>
+    This exact substitution is the standard trick behind evaluating ∫e<sup>−x²</sup>dx (the Gaussian integral), which underlies the normal distribution in statistics. It's also the direct preview of Lesson 15's general rule: swapping coordinate systems always costs an extra scaling factor in the area (or volume) element, and the Jacobian is what computes it in general.
+  </div>
+
+  <h2>2. Why the polar area element needs that extra r</h2>
+  <p>Move the sliders to place a small polar "rectangle" of fixed Δr and Δθ. Watch how its actual area — and the r·Δr·Δθ formula predicting it — both grow as r increases, even though Δr and Δθ never change.</p>
+
+  <div class="widget">
+    <div class="widget-label">Try It — The Polar Area Element r dr dθ</div>
+    <div class="plot-wrap">
+      <svg id="pol-svg" viewBox="0 0 460 300" width="460" height="300" role="img" aria-label="A polar grid with a highlighted small wedge patch whose area is r delta r delta theta">
+        <g id="pol-rings" fill="none" stroke="#ccc" stroke-width="1"></g>
+        <g id="pol-spokes" stroke="#ccc" stroke-width="1"></g>
+        <path id="pol-patch" fill="#c0392b" opacity="0.55" stroke="#c0392b"></path>
+      </svg>
+    </div>
+    <div class="slider-row"><label for="pol-r">r</label><input type="range" id="pol-r" min="0.5" max="4" step="0.1" value="1.5"><span class="slider-value" id="pol-r-label">1.5</span></div>
+    <div class="slider-row"><label for="pol-theta">θ</label><input type="range" id="pol-theta" min="0" max="6.283" step="0.05" value="0.8"><span class="slider-value" id="pol-theta-label">0.80 rad</span></div>
+    <p class="plot-readout" id="pol-readout">—</p>
+  </div>
+
+  <h2>Check your recall</h2>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. Converting a double integral to polar coordinates, dA becomes:</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">r dr dθ</button>
+      <button class="quiz-choice" data-correct="false">dr dθ</button>
+      <button class="quiz-choice" data-correct="false">r² dr dθ</button>
+      <button class="quiz-choice" data-correct="false">dr dθ / r</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The extra factor of r accounts for arc length at radius r growing with r, even for the same Δθ.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="9pi|9π">
+    <p class="quiz-prompt">2. ∬<sub>D</sub> 1 dA over the disk of radius 3, computed in polar as ∫₀^(2π)∫₀³ r dr dθ, equals ___ (use "pi" for π)</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>∫₀³ r dr = 9/2, then ∫₀^(2π) 9/2 dθ = (9/2)(2π) = 9π — matching the familiar area formula πr² = π(3²) = 9π.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Polar coordinates are especially advantageous for a double integral when:</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">the region is a disk, annulus, or wedge, or the integrand involves x² + y²</button>
+      <button class="quiz-choice" data-correct="false">the region is a rectangle aligned with the axes</button>
+      <button class="quiz-choice" data-correct="false">f(x,y) is a linear function</button>
+      <button class="quiz-choice" data-correct="false">it never matters — Cartesian is always simpler</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Circular regions and expressions like x²+y² = r² are exactly where polar bounds and algebra become simple instead of painful.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">4. ∫₀² e<sup>−r²</sup> r dr equals:</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">(1/2)(1 − e<sup>−4</sup>)</button>
+      <button class="quiz-choice" data-correct="false">(1/2)(1 − e<sup>−2</sup>)</button>
+      <button class="quiz-choice" data-correct="false">1 − e<sup>−4</sup></button>
+      <button class="quiz-choice" data-correct="false">2(1 − e<sup>−4</sup>)</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>u = r², du = 2r dr turns this into (1/2)∫₀⁴ e⁻ᵘ du = (1/2)[−e⁻ᵘ]₀⁴ = (1/2)(1 − e⁻⁴), since r=2 gives u=4.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p><a href="https://openstax.org/books/calculus-volume-3/pages/5-3-double-integrals-in-polar-coordinates">OpenStax Calculus Volume 3, §5.3 "Double Integrals in Polar Coordinates"</a> derives the r dr dθ area element and works through several circular regions.</p>
+
+  <p class="ask-teacher">The extra factor of r means a polar "rectangle" far from the pole covers far more area than one close to it, for the same Δr and Δθ. Ask your teacher what would go wrong with a region's total-area calculation if that r were accidentally left out of the integral. Lesson 14 extends this exact idea to space, with two different 3D coordinate systems built for different kinds of symmetry.</p>
+
+  <footer class="lesson-footer">STEM+ · Multivariable Calculus · Unit 5 · Lesson 13 of 24</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var originX = 230, originY = 150, scale = 55;
+  var ringsGroup = document.getElementById('pol-rings');
+  var spokesGroup = document.getElementById('pol-spokes');
+  var patchEl = document.getElementById('pol-patch');
+  var readout = document.getElementById('pol-readout');
+  var rSlider = document.getElementById('pol-r'), thetaSlider = document.getElementById('pol-theta');
+  var rLabel = document.getElementById('pol-r-label'), thetaLabel = document.getElementById('pol-theta-label');
+  var dr = 0.4, dtheta = 0.35;
+
+  [1, 2, 3, 4].forEach(function (rr) {
+    var ring = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    ring.setAttribute('cx', originX); ring.setAttribute('cy', originY); ring.setAttribute('r', rr * scale);
+    ringsGroup.appendChild(ring);
+  });
+  for (var i = 0; i < 12; i++) {
+    var ang = (i / 12) * 2 * Math.PI;
+    var spoke = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    spoke.setAttribute('x1', originX); spoke.setAttribute('y1', originY);
+    spoke.setAttribute('x2', originX + 4.3 * scale * Math.cos(ang));
+    spoke.setAttribute('y2', originY - 4.3 * scale * Math.sin(ang));
+    spokesGroup.appendChild(spoke);
+  }
+
+  function pt(r, theta) { return { x: originX + r * scale * Math.cos(theta), y: originY - r * scale * Math.sin(theta) }; }
+
+  function render() {
+    var r0 = parseFloat(rSlider.value), theta0 = parseFloat(thetaSlider.value);
+    rLabel.textContent = r0.toFixed(1);
+    thetaLabel.textContent = theta0.toFixed(2) + ' rad';
+
+    var rIn = r0 - dr / 2, rOut = r0 + dr / 2;
+    var tStart = theta0 - dtheta / 2, tEnd = theta0 + dtheta / 2;
+    var p1 = pt(rIn, tStart), p2 = pt(rOut, tStart), p3 = pt(rOut, tEnd), p4 = pt(rIn, tEnd);
+    var largeArc = 0;
+    var d = 'M ' + p1.x + ' ' + p1.y +
+      ' L ' + p2.x + ' ' + p2.y +
+      ' A ' + (rOut * scale) + ' ' + (rOut * scale) + ' 0 ' + largeArc + ' 0 ' + p3.x + ' ' + p3.y +
+      ' L ' + p4.x + ' ' + p4.y +
+      ' A ' + (rIn * scale) + ' ' + (rIn * scale) + ' 0 ' + largeArc + ' 1 ' + p1.x + ' ' + p1.y + ' Z';
+    patchEl.setAttribute('d', d);
+
+    var approxArea = r0 * dr * dtheta;
+    var exactArea = 0.5 * dtheta * (rOut * rOut - rIn * rIn);
+    readout.textContent = 'At r = ' + r0.toFixed(2) + ': patch spans Δr = ' + dr.toFixed(2) + ', Δθ = ' + dtheta.toFixed(2) +
+      ' rad. Approx. area r·Δr·Δθ = ' + approxArea.toFixed(3) + ' (exact wedge area = ' + exactArea.toFixed(3) + ').';
+  }
+
+  rSlider.addEventListener('input', render);
+  thetaSlider.addEventListener('input', render);
+  render();
+});
+</script>

@@ -1,0 +1,126 @@
+<meta charset="UTF-8">
+<title>Unit 6, Lesson 16: Writing a System in Matrix Form — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/interactive.js" defer></script>
+<script src="../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Differential Equations · Unit 6 · Lesson 16</span>
+  <h1>Writing a System in Matrix Form</h1>
+  <p class="subtitle">Every equation so far has tracked one unknown function. Real systems often couple several together — and packaging them as a single matrix equation is what lets linear algebra take over from here.</p>
+  <p class="nav-links"><a href="../Unit%205/0015-inverse-transform-and-partial-fractions.html" class="nav-prev">← Unit 5, Lesson 15</a> <a href="0017-solving-systems-via-eigenvalues.html" class="nav-next">Lesson 17 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <h2>1. Packaging two equations into one</h2>
+  <div class="box">
+    <span class="box-label">Definition — System of First-Order Linear Equations</span>
+    A pair of coupled equations <strong>x′ = ax + by, y′ = cx + dy</strong> can be written as a single matrix equation <strong>X′ = AX</strong>, where X = [x, y]<sup>T</sup> and A = [[a, b], [c, d]]. Each entry of A is exactly the coefficient sitting in front of the matching variable in the original pair.
+  </div>
+  <div class="box">
+    <span class="box-label">Fact — Any Higher-Order Equation Is a System in Disguise</span>
+    Unit 3's y″ + by′ + cy = 0 converts to a first-order system by introducing x₁ = y and x₂ = y′: then x₁′ = x₂ (by definition), and x₂′ = y″ = −cy − by′ = −cx₁ − bx₂. Every nth-order linear equation becomes a system of n first-order equations this same way — which is exactly why the matrix methods in Lessons 17–18 end up solving Unit 3's equations too, from a completely different angle.
+  </div>
+  <div class="box">
+    <span class="box-label">Worked Example — Converting a Second-Order Equation</span>
+    Convert y″ − 5y′ + 6y = 0. Let x₁ = y, x₂ = y′. Then x₁′ = x₂, and x₂′ = y″ = 5y′ − 6y = 5x₂ − 6x₁. In matrix form: <strong>X′ = [[0, 1], [−6, 5]]X</strong>.
+  </div>
+  <div class="box">
+    <span class="box-label">Worked Example — A System Given Directly</span>
+    x′ = 3x − 2y, y′ = 4x − y converts directly, reading coefficients straight into the matrix: <strong>A = [[3, −2], [4, −1]]</strong>.
+  </div>
+
+  <h2>2. Building the matrix live</h2>
+  <p>Adjust the coefficients of x′ = ax + by, y′ = cx + dy and watch the matrix form update.</p>
+
+  <div class="widget">
+    <div class="widget-label">Try It — From Equations to Matrix Form</div>
+    <div class="slider-row"><label for="mf-a">a</label><input type="range" id="mf-a" min="-5" max="5" step="1" value="3"><span class="slider-value" id="mf-a-label">a = 3</span></div>
+    <div class="slider-row"><label for="mf-b">b</label><input type="range" id="mf-b" min="-5" max="5" step="1" value="-2"><span class="slider-value" id="mf-b-label">b = −2</span></div>
+    <div class="slider-row"><label for="mf-c">c</label><input type="range" id="mf-c" min="-5" max="5" step="1" value="4"><span class="slider-value" id="mf-c-label">c = 4</span></div>
+    <div class="slider-row"><label for="mf-d">d</label><input type="range" id="mf-d" min="-5" max="5" step="1" value="-1"><span class="slider-value" id="mf-d-label">d = −1</span></div>
+    <div class="step-display" id="mf-display" style="min-height: 4.5rem; padding: 1rem; border: 1px solid var(--rule); border-radius: 8px; font-family: var(--mono, monospace); white-space: pre-line;">—</div>
+  </div>
+
+  <h2>Check your recall</h2>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. The system x′ = ax + by, y′ = cx + dy has matrix form X′ = AX with A equal to:</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">[[a, b], [c, d]]</button>
+      <button class="quiz-choice" data-correct="false">[[a, c], [b, d]]</button>
+      <button class="quiz-choice" data-correct="false">[[a, b], [d, c]]</button>
+      <button class="quiz-choice" data-correct="false">[[b, a], [d, c]]</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Row 1 holds x′'s coefficients (a, b) in order, and row 2 holds y′'s coefficients (c, d) in order — matching the equations top to bottom.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="-6">
+    <p class="quiz-prompt">2. Fill in the blank: converting y″ − 5y′ + 6y = 0 with x₁ = y, x₂ = y′ gives x₂′ = 5x₂ + ___x₁</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>x₂′ = y″ = 5y′ − 6y = 5x₂ − 6x₁, so the coefficient of x₁ is −6.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. For x′ = 3x − 2y, y′ = 4x − y, the matrix A is:</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">[[3, −2], [4, −1]]</button>
+      <button class="quiz-choice" data-correct="false">[[3, 4], [−2, −1]]</button>
+      <button class="quiz-choice" data-correct="false">[[−2, 3], [−1, 4]]</button>
+      <button class="quiz-choice" data-correct="false">[[4, −1], [3, −2]]</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Reading each equation's coefficients into its own row, in order, gives [[3, −2], [4, −1]].</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="4">
+    <p class="quiz-prompt">4. Fill in the blank: in A = [[3, −2], [4, −1]], the entry in row 2, column 1 is ___</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Row 2 is [4, −1], so its first entry (column 1) is 4 — the coefficient of x in the y′ equation.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">5. Rewriting a second-order equation as a first-order system is useful because:</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">it lets the same linear-algebra tools (Lessons 17–18) apply uniformly to any order</button>
+      <button class="quiz-choice" data-correct="false">it changes the equation's actual solution</button>
+      <button class="quiz-choice" data-correct="false">it removes the need for initial conditions</button>
+      <button class="quiz-choice" data-correct="false">it only works for nonlinear equations</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The conversion doesn't change what the equation says — it just repackages it so that eigenvalue methods, built for systems of any size, can solve it too.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p><a href="https://tutorial.math.lamar.edu/Classes/DE/SystemsDE.aspx">Paul's Online Math Notes, "Systems of Differential Equations"</a> covers converting both single higher-order equations and directly-given systems into matrix form.</p>
+
+  <p class="ask-teacher">Reading coefficients straight into rows is mechanical once the equations are lined up correctly — the only real judgment call is keeping x′ and y′'s equations in matching order. Ask for a three-variable system, or a third-order equation converted to a 3×3 system, if the pattern needs to stretch further. Lesson 17 puts this matrix to work — its eigenvalues turn out to solve the whole system at once.</p>
+
+  <footer class="lesson-footer">STEM+ · Differential Equations · Unit 6 · Lesson 1 of 3</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var sliders = ['a', 'b', 'c', 'd'].map(function (k) { return document.getElementById('mf-' + k); });
+  var labels = ['a', 'b', 'c', 'd'].map(function (k) { return document.getElementById('mf-' + k + '-label'); });
+  var display = document.getElementById('mf-display');
+
+  function render() {
+    var vals = sliders.map(function (s) { return parseInt(s.value, 10); });
+    labels.forEach(function (l, i) { l.textContent = ['a', 'b', 'c', 'd'][i] + ' = ' + vals[i]; });
+    var a = vals[0], b = vals[1], c = vals[2], d = vals[3];
+    display.textContent =
+      'x′ = ' + a + 'x + (' + b + ')y\ny′ = ' + c + 'x + (' + d + ')y\n\n' +
+      'Matrix form:\nX′ = AX,  A = [[' + a + ', ' + b + '], [' + c + ', ' + d + ']]';
+  }
+
+  sliders.forEach(function (s) { s.addEventListener('input', render); });
+  render();
+});
+</script>

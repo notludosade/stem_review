@@ -1,0 +1,179 @@
+<meta charset="UTF-8">
+<title>Unit 6, Lesson 17: Line Integrals of Scalar and Vector Fields — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/interactive.js" defer></script>
+<script src="../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Multivariable Calculus · Unit 6 · Lesson 17</span>
+  <h1>Line Integrals of Scalar and Vector Fields</h1>
+  <p class="subtitle">A definite integral summed a function along a straight interval of the x-axis. A line integral sums a field along any curved path at all — and for a vector field, it measures work.</p>
+  <p class="nav-links"><a href="0016-vector-fields.html" class="nav-prev">← Lesson 16</a> <a href="0018-conservative-fields-and-the-fundamental-theorem-for-line-integrals.html" class="nav-next">Lesson 18 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <h2>1. Integrating along a curve instead of an axis</h2>
+  <div class="box">
+    <span class="box-label">Definition — Line Integral of a Scalar Field</span>
+    For a curve C parametrized by r(t), t ∈ [a,b], and a scalar field f, the <strong>line integral ∫<sub>C</sub> f ds = ∫<sub>a</sub><sup>b</sup> f(r(t)) |r'(t)| dt</strong> — f sampled along the path, weighted by arc length. Reversing the direction C is traversed doesn't change ∫<sub>C</sub> f ds, since |r'(t)| ≥ 0 regardless of direction.
+  </div>
+  <div class="box">
+    <span class="box-label">Definition — Line Integral of a Vector Field</span>
+    For an <em>oriented</em> curve C (a direction of travel is specified) and a vector field F, the <strong>line integral ∫<sub>C</sub> F · dr = ∫<sub>a</sub><sup>b</sup> F(r(t)) · r'(t) dt</strong> — the dot product accumulates only the part of F acting along the direction of travel at each instant. This is exactly W = F·d generalized to a curved path and a non-constant force: ∫<sub>C</sub> F · dr represents the <strong>work</strong> done by F moving an object along C. Unlike the scalar case, <strong>reversing C's orientation flips the sign</strong>: ∫<sub>−C</sub> F · dr = −∫<sub>C</sub> F · dr.
+  </div>
+  <div class="box">
+    <span class="box-label">Worked Example</span>
+    F(x,y) = ⟨y, x⟩ along C: r(t) = ⟨t, t²⟩, t from 0 to 1. r'(t) = ⟨1, 2t⟩, and F(r(t)) = ⟨t², t⟩. So F(r(t)) · r'(t) = t²(1) + t(2t) = 3t². Then ∫<sub>C</sub> F · dr = ∫<sub>0</sub><sup>1</sup> 3t² dt = <strong>1</strong>. Traversing the same curve backward (from (1,1) to (0,0)) would give <strong>−1</strong> — the identical path, opposite sign.
+  </div>
+  <div class="box why">
+    <span class="box-label">Why This Matters</span>
+    Every physical notion of "work done moving through a force field" — a satellite's orbit through gravity, a charge moving through an electric field — is exactly this line integral. Lesson 18 identifies a special class of vector field where this work only depends on the start and end points, never the path taken in between — and Lesson 20's Green's Theorem turns a line integral around a closed curve into a double integral over the region it encloses.
+  </div>
+
+  <h2>2. Accumulating work along a path</h2>
+  <p>Slide t. The blue arrow is the tangent r'(t); the green arrow is the field F(r(t)). The readout accumulates ∫ F·dr from 0 up to the current t, converging to 1 at t = 1.</p>
+
+  <div class="widget">
+    <div class="widget-label">Try It — ∫<sub>C</sub> F · dr, Accumulating</div>
+    <div class="plot-wrap">
+      <svg id="li-svg" viewBox="0 0 460 300" width="460" height="300" role="img" aria-label="A curve from the origin to (1,1) with the tangent vector and field vector drawn at the chosen t, and the accumulated line integral shown below">
+        <defs>
+          <marker id="li-arrow-blue" markerWidth="7" markerHeight="7" refX="5" refY="3.5" orient="auto"><path d="M0,0 L7,3.5 L0,7 Z" fill="#2c5f8a"></path></marker>
+          <marker id="li-arrow-green" markerWidth="7" markerHeight="7" refX="5" refY="3.5" orient="auto"><path d="M0,0 L7,3.5 L0,7 Z" fill="#1f7a63"></path></marker>
+        </defs>
+        <line class="fig-axis" x1="60" y1="260" x2="420" y2="260"></line>
+        <line class="fig-axis" x1="60" y1="260" x2="60" y2="20"></line>
+        <polyline id="li-path" fill="none" stroke="#999" stroke-width="1.5"></polyline>
+        <polyline id="li-traveled" fill="none" stroke="#c0392b" stroke-width="3"></polyline>
+        <line id="li-tangent" stroke="#2c5f8a" stroke-width="2.2" marker-end="url(#li-arrow-blue)"></line>
+        <line id="li-field" stroke="#1f7a63" stroke-width="2.2" marker-end="url(#li-arrow-green)"></line>
+        <circle id="li-point" r="5" fill="#c0392b"></circle>
+      </svg>
+    </div>
+    <div class="slider-row">
+      <label for="li-t">t</label>
+      <input type="range" id="li-t" min="0" max="1" step="0.01" value="0.5">
+      <span class="slider-value" id="li-t-label">t = 0.50</span>
+    </div>
+    <p class="plot-readout" id="li-readout">—</p>
+  </div>
+
+  <h2>Check your recall</h2>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. The line integral of a vector field F along oriented curve C, parametrized by r(t), t ∈ [a,b], is:</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">∫<sub>a</sub><sup>b</sup> F(r(t)) · r'(t) dt</button>
+      <button class="quiz-choice" data-correct="false">∫<sub>a</sub><sup>b</sup> F(r(t)) |r'(t)| dt</button>
+      <button class="quiz-choice" data-correct="false">∫<sub>a</sub><sup>b</sup> F(r(t)) dt</button>
+      <button class="quiz-choice" data-correct="false">F(r(b)) − F(r(a))</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The vector field's line integral dots F with the tangent vector r'(t) — the scalar-field version instead uses |r'(t)| for arc length weighting.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="1">
+    <p class="quiz-prompt">2. For F(x,y) = ⟨y, x⟩ along r(t) = ⟨t, t²⟩, t from 0 to 1, ∫<sub>C</sub> F · dr = ___</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>F(r(t))·r'(t) = 3t², so ∫₀¹ 3t² dt = [t³]₀¹ = 1.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. If −C denotes the same curve as C but traversed in the opposite direction, then:</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">∫<sub>−C</sub> F · dr = −∫<sub>C</sub> F · dr</button>
+      <button class="quiz-choice" data-correct="false">∫<sub>−C</sub> F · dr = ∫<sub>C</sub> F · dr</button>
+      <button class="quiz-choice" data-correct="false">∫<sub>−C</sub> F · dr is always 0</button>
+      <button class="quiz-choice" data-correct="false">∫<sub>−C</sub> F · dr is undefined</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Reversing the direction of travel flips the sign of r'(t), which flips the sign of the dot product F · r'(t) at every instant — and so flips the whole integral.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">4. The scalar line integral ∫<sub>C</sub> f ds uses which factor to weight f along the curve?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">|r'(t)|, the speed along the curve</button>
+      <button class="quiz-choice" data-correct="false">r'(t), the tangent vector itself</button>
+      <button class="quiz-choice" data-correct="false">r(t), the position vector</button>
+      <button class="quiz-choice" data-correct="false">no weighting factor at all</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>ds = |r'(t)| dt converts "integrate with respect to t" into "integrate with respect to actual arc length traveled" — a scalar weight, not a vector dot product.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p><a href="https://openstax.org/books/calculus-volume-3/pages/6-2-line-integrals">OpenStax Calculus Volume 3, §6.2 "Line Integrals"</a> covers both scalar and vector line integrals, orientation, and the work interpretation.</p>
+
+  <p class="ask-teacher">This lesson's worked example only checked one specific path from (0,0) to (1,1). Ask your teacher whether a straight line between the same two endpoints would give the same value of ∫<sub>C</sub> F · dr for this particular F — and if you try it, notice how surprising (or unsurprising) the answer is. Lesson 18 explains exactly which fields guarantee that path never matters at all.</p>
+
+  <footer class="lesson-footer">STEM+ · Multivariable Calculus · Unit 6 · Lesson 17 of 24</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var originX = 60, originY = 260, scale = 220;
+  function xFn(t) { return t; }
+  function yFn(t) { return t * t; }
+  function dxFn() { return 1; }
+  function dyFn(t) { return 2 * t; }
+  function Fx(x, y) { return y; }
+  function Fy(x, y) { return x; }
+
+  var pathEl = document.getElementById('li-path'), traveledEl = document.getElementById('li-traveled');
+  var tangentEl = document.getElementById('li-tangent'), fieldEl = document.getElementById('li-field');
+  var pointEl = document.getElementById('li-point');
+  var readout = document.getElementById('li-readout');
+  var slider = document.getElementById('li-t'), tLabel = document.getElementById('li-t-label');
+
+  function toSvg(x, y) { return { x: originX + x * scale, y: originY - y * scale }; }
+
+  var full = [];
+  for (var i = 0; i <= 60; i++) {
+    var t = i / 60;
+    var p = toSvg(xFn(t), yFn(t));
+    full.push(p.x + ',' + p.y);
+  }
+  pathEl.setAttribute('points', full.join(' '));
+
+  function render() {
+    var t0 = parseFloat(slider.value);
+    tLabel.textContent = 't = ' + t0.toFixed(2);
+
+    var traveled = [];
+    var n = Math.max(1, Math.round(t0 * 200));
+    var sum = 0, prevT = 0;
+    for (var i = 0; i <= n; i++) {
+      var t = (i / n) * t0;
+      var p = toSvg(xFn(t), yFn(t));
+      traveled.push(p.x + ',' + p.y);
+      if (i > 0) {
+        var dt = t - prevT;
+        var mid = (t + prevT) / 2;
+        var dotVal = Fx(xFn(mid), yFn(mid)) * dxFn(mid) + Fy(xFn(mid), yFn(mid)) * dyFn(mid);
+        sum += dotVal * dt;
+      }
+      prevT = t;
+    }
+    traveledEl.setAttribute('points', traveled.join(' '));
+
+    var pos = toSvg(xFn(t0), yFn(t0));
+    pointEl.setAttribute('cx', pos.x); pointEl.setAttribute('cy', pos.y);
+
+    var dx = dxFn(t0), dy = dyFn(t0);
+    tangentEl.setAttribute('x1', pos.x); tangentEl.setAttribute('y1', pos.y);
+    tangentEl.setAttribute('x2', pos.x + dx * 45); tangentEl.setAttribute('y2', pos.y - dy * 45);
+
+    var fx = Fx(xFn(t0), yFn(t0)), fy = Fy(xFn(t0), yFn(t0));
+    fieldEl.setAttribute('x1', pos.x); fieldEl.setAttribute('y1', pos.y);
+    fieldEl.setAttribute('x2', pos.x + fx * 45); fieldEl.setAttribute('y2', pos.y - fy * 45);
+
+    readout.textContent = 'r(' + t0.toFixed(2) + ') = (' + xFn(t0).toFixed(2) + ', ' + yFn(t0).toFixed(2) + '), r\'(t) = ⟨' + dx.toFixed(2) + ', ' + dy.toFixed(2) +
+      '⟩, F = ⟨' + fx.toFixed(2) + ', ' + fy.toFixed(2) + '⟩. Accumulated ∫ F·dr from 0 to ' + t0.toFixed(2) + ' ≈ ' + sum.toFixed(3) + '.';
+  }
+
+  slider.addEventListener('input', render);
+  render();
+});
+</script>

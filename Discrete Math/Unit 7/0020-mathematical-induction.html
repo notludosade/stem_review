@@ -1,0 +1,151 @@
+<meta charset="UTF-8">
+<title>Lesson 20: Mathematical Induction — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Discrete Math · Unit 7 · Lesson 20</span>
+  <h1>Mathematical Induction</h1>
+  <p class="subtitle">Lesson 19 showed that a recursive definition reaches every case from a base case plus a rule. This lesson turns that exact shape into a proof technique — one capable of proving a claim about infinitely many integers at once, from checking only two things.</p>
+  <p class="nav-links"><a href="0019-recursive-definitions.html" class="nav-prev">← Lesson 19</a> <a href="0021-solving-recurrence-relations.html" class="nav-next">Lesson 21 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <h2>1. The principle of mathematical induction</h2>
+  <div class="box">
+    <span class="box-label">Definition — Mathematical Induction</span>
+    To prove a statement P(n) holds for every integer n ≥ n₀: (1) <strong>Base case</strong> — prove P(n₀) directly. (2) <strong>Inductive step</strong> — assume P(k) holds for some arbitrary k ≥ n₀ (the <strong>inductive hypothesis</strong>), and use that assumption to prove P(k+1). Together, these two pieces prove P(n) for every n ≥ n₀ — the base case starts the chain, and the inductive step shows each case forces the next.
+  </div>
+  <div class="box why">
+    <span class="box-label">Why these two steps are enough to cover infinitely many cases</span>
+    This is exactly Lesson 19's recursive-definition shape, run in the proof direction instead of the definition direction. The base case proves P(n₀). The inductive step, applied to k = n₀, proves P(n₀+1). Applied again to k = n₀+1, it proves P(n₀+2). And so on — every single case gets proven, one domino knocking over the next, even though you only ever wrote down two arguments (not infinitely many).
+  </div>
+
+  <h2>2. A full worked proof</h2>
+  <div class="box example">
+    <span class="box-label">Worked example — the sum of the first n positive integers</span>
+    <strong>Claim</strong>: for all n ≥ 1, 1 + 2 + ... + n = n(n+1)/2.<br><br>
+    <strong>Base case</strong> (n=1): the left side is just 1. The right side is 1(2)/2 = 1. They match.<br><br>
+    <strong>Inductive step</strong>: assume 1 + 2 + ... + k = k(k+1)/2 for some k ≥ 1 (inductive hypothesis). Show it holds for k+1: 1 + 2 + ... + k + (k+1) = [1 + 2 + ... + k] + (k+1) = k(k+1)/2 + (k+1) [using the inductive hypothesis to replace the bracketed sum] = (k+1)(k/2 + 1) = (k+1)(k+2)/2 — which is exactly the claimed formula with n = k+1. ∎<br><br>
+    Since both steps hold, the claim is true for every n ≥ 1.
+  </div>
+
+  <h2>3. Strong induction</h2>
+  <div class="box">
+    <span class="box-label">Variant — Strong Induction</span>
+    <strong>Strong induction</strong> changes only the inductive hypothesis: instead of assuming just P(k), assume P(m) holds for <em>every</em> m with n₀ ≤ m ≤ k, then prove P(k+1). This is useful whenever the k+1 case needs to reach back further than just the immediately preceding case — Lesson 15's claim that every tree on n vertices has n−1 edges is exactly this shape, since removing one vertex from a larger tree doesn't always leave a tree of size exactly one smaller in an easily-isolated way without strong induction's full range of smaller cases available.
+  </div>
+
+  <h2>4. Try it — knock over the induction chain</h2>
+  <p>This chain only falls completely if you start at domino 1 (the base case) and let the inductive step carry it forward. Try knocking a domino in the middle by itself first.</p>
+  <div class="widget">
+    <div class="widget-label">Try It — Induction as a Domino Chain</div>
+    <div class="quiz-fill-row" id="domino-row"></div>
+    <p id="domino-status" style="margin-top: 0.7rem; font-weight: 600;">Click domino 1 to start the chain, or try a middle domino first.</p>
+    <div class="quiz-fill-row" style="margin-top: 0.6rem;">
+      <button class="widget-btn" id="domino-reset">Reset</button>
+    </div>
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What does the inductive step actually prove?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">P(n₀), the base case, directly.</button>
+      <button class="quiz-choice" data-correct="true">That IF P(k) holds, THEN P(k+1) also holds — a conditional, not P(k+1) on its own.</button>
+      <button class="quiz-choice" data-correct="false">That P(k) is true for every k, all at once.</button>
+      <button class="quiz-choice" data-correct="false">That P(n) is false for some n.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The inductive step is an implication: assuming P(k) (the inductive hypothesis) lets you derive P(k+1). It never asserts P(k) is true on its own — that's the base case and the chain of implications together that establish it.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. In the sum-of-integers proof, what role does the inductive hypothesis play?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">It's proven from scratch inside the inductive step.</button>
+      <button class="quiz-choice" data-correct="true">It's assumed true for k, then used to substitute k(k+1)/2 in place of the bracketed sum.</button>
+      <button class="quiz-choice" data-correct="false">It replaces the need for a base case entirely.</button>
+      <button class="quiz-choice" data-correct="false">It only applies when n is even.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The whole point of assuming P(k) is to use it as a known fact partway through deriving P(k+1) — here, substituting the assumed formula for 1+2+...+k directly into the sum for k+1.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. When is strong induction preferred over ordinary induction?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Whenever the base case is hard to check.</button>
+      <button class="quiz-choice" data-correct="true">When proving P(k+1) needs more than just P(k) — it needs some or all of P(n₀) through P(k).</button>
+      <button class="quiz-choice" data-correct="false">Strong induction and ordinary induction always prove different things.</button>
+      <button class="quiz-choice" data-correct="false">Only when n₀ = 0.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Strong induction only changes what you're allowed to assume — the full range of smaller cases, not just the immediately preceding one — which matters exactly when the k+1 case needs to reach back further than one step.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="base case">
+    <p class="quiz-prompt">4. Fill in the blank: skipping the ___ of an induction proof means the chain of implications has nothing to start from, even if every implication itself is correct.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Without the base case established, the inductive step's chain of "P(k) implies P(k+1)" implications is vacuous — none of them ever get triggered, exactly like the widget's middle-domino demonstration.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="k+1|k + 1">
+    <p class="quiz-prompt">5. Fill in the blank: in the inductive step, after assuming P(k), the goal is to prove P(___).</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The inductive step always targets the very next case, k+1, using P(k) as an assumed tool to get there.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read before the next lesson: <a href="https://open.umn.edu/opentextbooks/textbooks/discrete-mathematics-an-open-introduction">Levin, "Discrete Mathematics: An Open Introduction," Chapter 2.5–2.6, "Mathematical Induction" and "Strong Induction"</a> works through several more full proofs, including an inequality proof where the algebra is trickier than the sum-of-integers example above.</p>
+
+  <p class="ask-teacher">Try proving 1 + 3 + 5 + ... + (2n−1) = n² by induction on your own before the next lesson — ask your teacher to check your base case and inductive step. Next up: induction's most direct application in this course — proving a closed-form solution to a recurrence relation is correct.</p>
+
+  <footer class="lesson-footer">STEM+ · Discrete Math · Lesson 20 of the course sequence</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var N = 8;
+  var down = new Array(N).fill(false);
+  var rowEl = document.getElementById('domino-row');
+  var statusEl = document.getElementById('domino-status');
+
+  function render() {
+    rowEl.innerHTML = '';
+    for (var i = 0; i < N; i++) {
+      (function (i) {
+        var btn = document.createElement('button');
+        btn.className = 'widget-btn';
+        btn.textContent = (i + 1) + (down[i] ? ' ↓' : ' |');
+        btn.addEventListener('click', function () {
+          if (i === 0) {
+            for (var j = 0; j < N; j++) down[j] = true;
+            statusEl.textContent = 'Base case (domino 1) knocked — the inductive step (each falling domino knocks the next) carries the fall through all ' + N + ' dominoes.';
+          } else if (!down[i]) {
+            down[i] = true;
+            statusEl.textContent = 'Domino ' + (i + 1) + ' fell alone — without the base case and every earlier link in the chain, the rest stays standing.';
+          }
+          render();
+        });
+        rowEl.appendChild(btn);
+      })(i);
+    }
+  }
+
+  document.getElementById('domino-reset').addEventListener('click', function () {
+    down = new Array(N).fill(false);
+    statusEl.textContent = 'Click domino 1 to start the chain, or try a middle domino first.';
+    render();
+  });
+
+  render();
+});
+</script>

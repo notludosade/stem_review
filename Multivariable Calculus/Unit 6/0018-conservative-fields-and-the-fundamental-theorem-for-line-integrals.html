@@ -1,0 +1,155 @@
+<meta charset="UTF-8">
+<title>Unit 6, Lesson 18: Conservative Fields and the Fundamental Theorem for Line Integrals — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/interactive.js" defer></script>
+<script src="../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Multivariable Calculus · Unit 6 · Lesson 18</span>
+  <h1>Conservative Fields and the Fundamental Theorem for Line Integrals</h1>
+  <p class="subtitle">For one special class of vector field, a line integral stops caring about the path at all — only where you started and where you ended up.</p>
+  <p class="nav-links"><a href="0017-line-integrals-of-scalar-and-vector-fields.html" class="nav-prev">← Lesson 17</a> <a href="../Unit%207/0019-parametrized-surfaces-and-surface-integrals.html" class="nav-next">Lesson 19 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <h2>1. When a field is somebody's gradient</h2>
+  <div class="box">
+    <span class="box-label">Definition — Conservative Vector Field</span>
+    A vector field F is <strong>conservative</strong> if F = ∇f for some scalar function f, called a <strong>potential function</strong>. The <strong>Fundamental Theorem for Line Integrals</strong> states: if F = ∇f and C is any curve from point A to point B, <strong>∫<sub>C</sub> F · dr = f(B) − f(A)</strong> — the exact same "evaluate an antiderivative at the endpoints" structure as single-variable FTC Part 2, now with a potential function playing the antiderivative's role.
+  </div>
+  <div class="box">
+    <span class="box-label">Method — Testing for Conservativeness</span>
+    For F = ⟨P, Q⟩ on an <strong>open, simply connected</strong> domain (no holes), F is conservative if and only if <strong>∂P/∂y = ∂Q/∂x</strong> everywhere on that domain — this is Clairaut's theorem applied to a potential function's mixed partials. The simply-connected requirement is not a technicality to skip: on a domain with a hole, a field can satisfy ∂P/∂y = ∂Q/∂x everywhere and still fail to be conservative.
+  </div>
+  <div class="box">
+    <span class="box-label">Worked Example</span>
+    F(x,y) = ⟨y, x⟩ (Lesson 17's field): ∂P/∂y = ∂(y)/∂y = 1, and ∂Q/∂x = ∂(x)/∂x = 1 — equal, and the domain is all of ℝ² (simply connected), so F is conservative. Finding f: integrating P with respect to x gives f = xy + g(y); differentiating with respect to y and matching to Q = x gives g′(y) = 0, so f(x,y) = xy. By the Fundamental Theorem, ∫<sub>C</sub> F · dr from (0,0) to (1,1) = f(1,1) − f(0,0) = 1 − 0 = <strong>1</strong> — matching Lesson 17's answer, computed there the hard way along one specific parabola.
+  </div>
+  <div class="box why">
+    <span class="box-label">Why This Matters</span>
+    Gravity and electrostatic force are conservative fields — which is precisely why "conservation of energy" works: the work done moving between two points never depends on the route taken. Lesson 20's Green's Theorem later shows that a conservative field's line integral around any closed loop is always exactly 0 — no work at all is needed to return to where you started.
+  </div>
+
+  <h2>2. Same field, two different paths</h2>
+  <p>Both paths run from (0,0) to (1,1). Toggle the field — for the conservative field, both line integrals agree no matter the path; for the non-conservative field, they don't.</p>
+
+  <div class="widget">
+    <div class="widget-label">Try It — Path Independence, Tested on Two Paths</div>
+    <div class="slider-row">
+      <button class="widget-btn" id="cf-btn-cons" type="button">F = ⟨y, x⟩ (conservative)</button>
+      <button class="widget-btn" id="cf-btn-noncons" type="button">F = ⟨-y, x⟩ (not conservative)</button>
+    </div>
+    <div class="plot-wrap">
+      <svg id="cf-svg" viewBox="0 0 460 260" width="460" height="260" role="img" aria-label="Two paths from the origin to (1,1), a straight line and a parabola, with the line integral of the chosen field computed along each">
+        <line class="fig-axis" x1="60" y1="220" x2="420" y2="220"></line>
+        <line class="fig-axis" x1="60" y1="220" x2="60" y2="20"></line>
+        <polyline id="cf-line-path" fill="none" stroke="#2c5f8a" stroke-width="2.5"></polyline>
+        <polyline id="cf-curve-path" fill="none" stroke="#1f7a63" stroke-width="2.5"></polyline>
+        <circle cx="60" cy="220" r="5" fill="#333"></circle>
+      </svg>
+    </div>
+    <p class="plot-readout" id="cf-readout">—</p>
+  </div>
+
+  <h2>Check your recall</h2>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. If F = ∇f, the Fundamental Theorem for Line Integrals says ∫<sub>C</sub> F · dr from A to B equals:</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">f(B) − f(A)</button>
+      <button class="quiz-choice" data-correct="false">f(A) − f(B)</button>
+      <button class="quiz-choice" data-correct="false">f(A) + f(B)</button>
+      <button class="quiz-choice" data-correct="false">∇f(B) − ∇f(A)</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Exactly like F(b) − F(a) for single-variable FTC Part 2, evaluated at the endpoint of travel minus the start.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="1">
+    <p class="quiz-prompt">2. For F(x,y) = ⟨y,x⟩ = ∇f with f(x,y) = xy, ∫<sub>C</sub> F · dr from (0,0) to (1,1), for any path C, equals ___</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>f(1,1) − f(0,0) = (1)(1) − (0)(0) = 1, regardless of which path connects the two points.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. For F = ⟨P, Q⟩ on an open, simply connected domain, F is conservative if and only if:</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">∂P/∂y = ∂Q/∂x everywhere on the domain</button>
+      <button class="quiz-choice" data-correct="false">∂P/∂x = ∂Q/∂y everywhere on the domain</button>
+      <button class="quiz-choice" data-correct="false">P and Q are both positive everywhere</button>
+      <button class="quiz-choice" data-correct="false">the domain is a rectangle</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>This mixed-partials test is exactly Clairaut's theorem applied to a hypothetical potential function f, checking f_xy = f_yx.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">4. The test ∂P/∂y = ∂Q/∂x is only sufficient to guarantee F is conservative when:</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">the domain is simply connected (has no holes)</button>
+      <button class="quiz-choice" data-correct="false">it always guarantees conservativeness, with no further condition</button>
+      <button class="quiz-choice" data-correct="false">F is a rotational field</button>
+      <button class="quiz-choice" data-correct="false">P and Q are both linear functions</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>On a domain with a hole (like the plane minus the origin), a field can pass the ∂P/∂y = ∂Q/∂x test everywhere and still fail to be conservative — simple connectedness is a genuine extra requirement.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p><a href="https://openstax.org/books/calculus-volume-3/pages/6-3-conservative-vector-fields">OpenStax Calculus Volume 3, §6.3 "Conservative Vector Fields"</a> proves the Fundamental Theorem for Line Integrals and covers the simply-connected caveat with the classic counterexample.</p>
+
+  <p class="ask-teacher">The rotational field ⟨-y,x⟩ from Lesson 16 fails the ∂P/∂y = ∂Q/∂x test (-1 ≠ 1), so it isn't conservative — consistent with the widget above showing two different path values for it. Ask your teacher to check the test on F = ⟨-y/(x²+y²), x/(x²+y²)⟩, defined everywhere except the origin — it passes the test everywhere on its domain, yet is famously not conservative. The missing ingredient is exactly the hole at the origin. Unit 7 needs conservative fields again once it defines what it means for a field to have zero circulation around a loop.</p>
+
+  <footer class="lesson-footer">STEM+ · Multivariable Calculus · Unit 6 · Lesson 18 of 24</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var originX = 60, originY = 220, scale = 200;
+  var linePathEl = document.getElementById('cf-line-path'), curvePathEl = document.getElementById('cf-curve-path');
+  var readout = document.getElementById('cf-readout');
+
+  function toSvg(x, y) { return { x: originX + x * scale, y: originY - y * scale }; }
+
+  var linePts = [], curvePts = [];
+  for (var i = 0; i <= 40; i++) {
+    var t = i / 40;
+    var pl = toSvg(t, t);
+    var pc = toSvg(t, t * t);
+    linePts.push(pl.x + ',' + pl.y);
+    curvePts.push(pc.x + ',' + pc.y);
+  }
+  linePathEl.setAttribute('points', linePts.join(' '));
+  curvePathEl.setAttribute('points', curvePts.join(' '));
+
+  var fields = {
+    cons: { Fx: function (x, y) { return y; }, Fy: function (x, y) { return x; }, label: 'F = ⟨y, x⟩ (conservative)' },
+    noncons: { Fx: function (x, y) { return -y; }, Fy: function (x, y) { return x; }, label: 'F = ⟨-y, x⟩ (not conservative)' }
+  };
+
+  function lineIntegral(xFn, yFn, dxFn, dyFn, Fx, Fy) {
+    var n = 400, sum = 0;
+    for (var i = 0; i < n; i++) {
+      var t = (i + 0.5) / n;
+      var x = xFn(t), y = yFn(t);
+      sum += (Fx(x, y) * dxFn(t) + Fy(x, y) * dyFn(t)) / n;
+    }
+    return sum;
+  }
+
+  function render(name) {
+    var f = fields[name];
+    var lineVal = lineIntegral(function (t) { return t; }, function (t) { return t; }, function () { return 1; }, function () { return 1; }, f.Fx, f.Fy);
+    var curveVal = lineIntegral(function (t) { return t; }, function (t) { return t * t; }, function () { return 1; }, function (t) { return 2 * t; }, f.Fx, f.Fy);
+    var match = Math.abs(lineVal - curveVal) < 0.01;
+    readout.textContent = f.label + '. Straight line (blue): ∫F·dr ≈ ' + lineVal.toFixed(3) + '. Parabola (green): ∫F·dr ≈ ' + curveVal.toFixed(3) +
+      '. ' + (match ? 'They match — path-independent!' : 'They differ — this field is not conservative.');
+  }
+
+  document.getElementById('cf-btn-cons').addEventListener('click', function () { render('cons'); });
+  document.getElementById('cf-btn-noncons').addEventListener('click', function () { render('noncons'); });
+
+  render('cons');
+});
+</script>

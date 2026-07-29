@@ -1,0 +1,190 @@
+<meta charset="UTF-8">
+<title>Unit 3, Lesson 8: The Characteristic Equation — Real, Repeated, and Complex Roots — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/interactive.js" defer></script>
+<script src="../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Differential Equations · Unit 3 · Lesson 8</span>
+  <h1>The Characteristic Equation — Real, Repeated, and Complex Roots</h1>
+  <p class="subtitle">Lesson 7 solved the easy case. A quadratic's discriminant can also hit exactly zero, or go negative — and each case needs its own solution template, not a guess.</p>
+  <p class="nav-links"><a href="0007-homogeneous-equations-constant-coefficients.html" class="nav-prev">← Lesson 7</a> <a href="0009-undetermined-coefficients.html" class="nav-next">Lesson 9 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <h2>1. Three cases, from one discriminant</h2>
+  <div class="box">
+    <span class="box-label">Fact — Case 1: Real, Distinct Roots (b² − 4ac &gt; 0)</span>
+    Two different real roots r₁ ≠ r₂ give two independent solutions. The general solution is <strong>y = C₁e<sup>r₁x</sup> + C₂e<sup>r₂x</sup></strong>.
+  </div>
+  <div class="box">
+    <span class="box-label">Fact — Case 2: Repeated Root (b² − 4ac = 0)</span>
+    A single root r = −b/(2a) only supplies one solution, e<sup>rx</sup> — not enough for a second-order equation. A second, independent solution is <strong>xe<sup>rx</sup></strong> (found by reduction of order). The general solution is <strong>y = (C₁ + C₂x)e<sup>rx</sup></strong> — note the second term carries an extra factor of x, not just a second constant.
+  </div>
+  <div class="box">
+    <span class="box-label">Fact — Case 3: Complex Conjugate Roots (b² − 4ac &lt; 0)</span>
+    The roots come as a conjugate pair r = α ± βi. Using Euler's formula, the real-valued general solution is <strong>y = e<sup>αx</sup>(C₁cos(βx) + C₂sin(βx))</strong> — an exponential envelope (from the real part α) multiplying an oscillation (from the imaginary part β), never a bare exponential in βi.
+  </div>
+  <div class="box">
+    <span class="box-label">Worked Example — All Three Cases</span>
+    y″ − 5y′ + 6y = 0: r = 2, 3 (real, distinct) → y = C₁e<sup>2x</sup> + C₂e<sup>3x</sup>. y″ − 6y′ + 9y = 0: r = 3, 3 (repeated) → y = (C₁ + C₂x)e<sup>3x</sup>. y″ + 4y = 0: r = ±2i, so α = 0, β = 2 (complex) → y = C₁cos(2x) + C₂sin(2x).
+  </div>
+
+  <h2>2. Watching the solution shape change with the roots</h2>
+  <p>Each root type has its own solution template — pick a tab and slide the roots to see how the curve's shape follows directly from them.</p>
+
+  <div class="widget" id="root-widget">
+    <div class="widget-label">Try It — How Root Type Shapes the Solution</div>
+    <div class="quiz-fill-row">
+      <button class="quiz-fill-check is-active" data-root-tab="real">Real Distinct</button>
+      <button class="quiz-fill-check" data-root-tab="repeated">Repeated</button>
+      <button class="quiz-fill-check" data-root-tab="complex">Complex</button>
+    </div>
+
+    <div data-root-panel="real">
+      <p class="plot-readout">y = e^(r₁x) + e^(r₂x)</p>
+      <div class="plot-wrap">
+        <svg viewBox="0 0 460 300" width="460" height="300" role="img" aria-label="Solution curve for two real distinct roots">
+          <line class="fig-axis" x1="20" y1="270" x2="440" y2="270"></line>
+          <line class="fig-axis" x1="230" y1="290" x2="230" y2="20"></line>
+          <polyline class="fig-curve" id="root-real-curve"></polyline>
+        </svg>
+      </div>
+      <div class="slider-row"><label for="root-r1">r₁</label><input type="range" id="root-r1" min="-10" max="10" step="1" value="5"><span class="slider-value" id="root-r1-label">r₁ = 0.5</span></div>
+      <div class="slider-row"><label for="root-r2">r₂</label><input type="range" id="root-r2" min="-10" max="10" step="1" value="-3"><span class="slider-value" id="root-r2-label">r₂ = −0.3</span></div>
+    </div>
+
+    <div data-root-panel="repeated" hidden>
+      <p class="plot-readout">y = (1 + x)e^(rx)</p>
+      <div class="plot-wrap">
+        <svg viewBox="0 0 460 300" width="460" height="300" role="img" aria-label="Solution curve for a repeated root">
+          <line class="fig-axis" x1="20" y1="270" x2="440" y2="270"></line>
+          <line class="fig-axis" x1="230" y1="290" x2="230" y2="20"></line>
+          <polyline class="fig-curve" id="root-rep-curve"></polyline>
+        </svg>
+      </div>
+      <div class="slider-row"><label for="root-r">r</label><input type="range" id="root-r" min="-10" max="10" step="1" value="-3"><span class="slider-value" id="root-r-label">r = −0.3</span></div>
+    </div>
+
+    <div data-root-panel="complex" hidden>
+      <p class="plot-readout">y = e^(αx)cos(βx)</p>
+      <div class="plot-wrap">
+        <svg viewBox="0 0 460 300" width="460" height="300" role="img" aria-label="Solution curve for a complex conjugate root pair">
+          <line class="fig-axis" x1="20" y1="270" x2="440" y2="270"></line>
+          <line class="fig-axis" x1="230" y1="290" x2="230" y2="20"></line>
+          <polyline class="fig-curve" id="root-cx-curve"></polyline>
+        </svg>
+      </div>
+      <div class="slider-row"><label for="root-alpha">α</label><input type="range" id="root-alpha" min="-10" max="10" step="1" value="-3"><span class="slider-value" id="root-alpha-label">α = −0.3</span></div>
+      <div class="slider-row"><label for="root-beta">β</label><input type="range" id="root-beta" min="1" max="6" step="1" value="2"><span class="slider-value" id="root-beta-label">β = 2</span></div>
+    </div>
+  </div>
+
+  <h2>Check your recall</h2>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. If the characteristic equation has two distinct real roots r₁ and r₂, the general solution is:</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">y = C₁e^(r₁x) + C₂e^(r₂x)</button>
+      <button class="quiz-choice" data-correct="false">y = C₁e^((r₁+r₂)x)</button>
+      <button class="quiz-choice" data-correct="false">y = e^(r₁x) · e^(r₂x)</button>
+      <button class="quiz-choice" data-correct="false">y = C₁e^(r₁x)</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Two distinct roots give two independent solutions, e^(r₁x) and e^(r₂x), combined with their own constants — dropping either term would lose a degree of freedom the second-order equation needs.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="x">
+    <p class="quiz-prompt">2. Fill in the blank: for a repeated root r, the general solution is y = (C₁ + C₂___)e^(rx)</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The second independent solution is xe^(rx), not a second copy of e^(rx) — that extra factor of x is what keeps the two solutions independent.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. If the characteristic equation has complex conjugate roots α ± βi, the real-valued general solution is:</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">y = e^(αx)(C₁cos(βx) + C₂sin(βx))</button>
+      <button class="quiz-choice" data-correct="false">y = C₁cos(βx) + C₂sin(βx)</button>
+      <button class="quiz-choice" data-correct="false">y = C₁e^(αx) + C₂e^(βx)</button>
+      <button class="quiz-choice" data-correct="false">y = e^(βx)(C₁cos(αx) + C₂sin(αx))</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The real part α of the root always builds the exponential envelope e^(αx); the imaginary part β always builds the oscillation cos(βx) and sin(βx) — mixing the two up (as the last option does) swaps envelope and frequency.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="2">
+    <p class="quiz-prompt">4. Fill in the blank: for y″ + 4y = 0, the roots are r = ±2i, so the general solution is y = C₁cos(___x) + C₂sin(___x)</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Here α = 0 (no exponential envelope, since e^(0x) = 1) and β = 2, giving pure oscillation y = C₁cos(2x) + C₂sin(2x).</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">5. y″ − 6y′ + 9y = 0 has characteristic equation r² − 6r + 9 = (r − 3)² = 0 — a repeated root r = 3. The general solution is:</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">y = (C₁ + C₂x)e^(3x)</button>
+      <button class="quiz-choice" data-correct="false">y = C₁e^(3x) + C₂e^(3x)</button>
+      <button class="quiz-choice" data-correct="false">y = C₁e^(3x) + C₂xe^(6x)</button>
+      <button class="quiz-choice" data-correct="false">y = C₂xe^(3x)</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>C₁e^(3x) + C₂e^(3x) collapses to a single constant times e^(3x) — not two independent solutions. The correct second solution is xe^(3x) (same root, extra factor of x), giving y = (C₁ + C₂x)e^(3x).</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p><a href="https://tutorial.math.lamar.edu/Classes/DE/RealRoots.aspx">Paul's Online Math Notes, "Real, Distinct Roots"</a> and its linked "Complex Roots" and "Repeated Roots" pages cover all three cases with further derivations and examples.</p>
+
+  <p class="ask-teacher">The discriminant does all the classifying — compute b² − 4ac first, and the rest is template-matching. Ask for the reduction-of-order derivation behind xe^(rx), or a refresher on Euler's formula e^(iθ) = cos θ + i sin θ, if either case's origin still feels like a rule dropped from nowhere. Lesson 9 handles the case this lesson set aside — a nonzero right-hand side, where the equation is no longer homogeneous.</p>
+
+  <footer class="lesson-footer">STEM+ · Differential Equations · Unit 3 · Lesson 2 of 3</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  STEMPlus.mountTabs(document.getElementById('root-widget'), 'data-root-tab', 'data-root-panel');
+
+  var originReal = { originX: 230, originY: 270, scaleX: 60, scaleY: 10 };
+  var realMount = STEMPlus.mountLiveCurve(document.getElementById('root-real-curve'), Object.assign({ xMin: -3, xMax: 3, samples: 120 }, originReal));
+  var r1Slider = document.getElementById('root-r1'), r2Slider = document.getElementById('root-r2');
+  var r1Label = document.getElementById('root-r1-label'), r2Label = document.getElementById('root-r2-label');
+  function renderReal() {
+    var r1 = parseInt(r1Slider.value, 10) / 10, r2 = parseInt(r2Slider.value, 10) / 10;
+    r1Label.textContent = 'r₁ = ' + r1.toFixed(1);
+    r2Label.textContent = 'r₂ = ' + r2.toFixed(1);
+    realMount.setFn(function (x) { return Math.exp(r1 * x) + Math.exp(r2 * x); });
+  }
+  r1Slider.addEventListener('input', renderReal);
+  r2Slider.addEventListener('input', renderReal);
+  renderReal();
+
+  var originRep = { originX: 230, originY: 270, scaleX: 60, scaleY: 10 };
+  var repMount = STEMPlus.mountLiveCurve(document.getElementById('root-rep-curve'), Object.assign({ xMin: -3, xMax: 3, samples: 120 }, originRep));
+  var rSlider = document.getElementById('root-r');
+  var rLabel = document.getElementById('root-r-label');
+  function renderRep() {
+    var r = parseInt(rSlider.value, 10) / 10;
+    rLabel.textContent = 'r = ' + r.toFixed(1);
+    repMount.setFn(function (x) { return (1 + x) * Math.exp(r * x); });
+  }
+  rSlider.addEventListener('input', renderRep);
+  renderRep();
+
+  var originCx = { originX: 230, originY: 150, scaleX: 60, scaleY: 100 };
+  var cxMount = STEMPlus.mountLiveCurve(document.getElementById('root-cx-curve'), Object.assign({ xMin: -3, xMax: 3, samples: 200 }, originCx));
+  var aSlider = document.getElementById('root-alpha'), bSlider = document.getElementById('root-beta');
+  var aLabel = document.getElementById('root-alpha-label'), bLabel = document.getElementById('root-beta-label');
+  function renderCx() {
+    var a = parseInt(aSlider.value, 10) / 10, b = parseInt(bSlider.value, 10);
+    aLabel.textContent = 'α = ' + a.toFixed(1);
+    bLabel.textContent = 'β = ' + b;
+    cxMount.setFn(function (x) { return Math.exp(a * x) * Math.cos(b * x); });
+  }
+  aSlider.addEventListener('input', renderCx);
+  bSlider.addEventListener('input', renderCx);
+  renderCx();
+});
+</script>

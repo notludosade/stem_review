@@ -1,0 +1,211 @@
+<meta charset="UTF-8">
+<title>Lesson 14: Paths, Cycles, and Connectivity — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Discrete Math · Unit 5 · Lesson 14</span>
+  <h1>Paths, Cycles, and Connectivity</h1>
+  <p class="subtitle">Lesson 13 defined a graph as a static picture. This lesson asks about movement through it — what counts as a valid route, when a route loops back on itself, and whether every vertex can even be reached from every other one at all.</p>
+  <p class="nav-links"><a href="0013-graphs-vertices-and-edges.html" class="nav-prev">← Lesson 13</a> <a href="0015-trees-and-graph-coloring.html" class="nav-next">Lesson 15 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <h2>1. Walks, paths, and cycles</h2>
+  <div class="box">
+    <span class="box-label">Definitions — Walk, Path, Cycle</span>
+    A <strong>walk</strong> is any sequence of vertices v₀, v₁, ..., vₖ where consecutive vertices are joined by an edge — repeats are allowed. A <strong>path</strong> is a walk that never repeats a vertex. A <strong>cycle</strong> is a path of length ≥ 3 with one exception: it's allowed to return to its starting vertex at the very end (vₖ = v₀), with no other repeats anywhere in between.
+  </div>
+  <div class="box example">
+    <span class="box-label">Worked example</span>
+    In the 4-cycle from Lesson 13 (V={A,B,C,D}, edges forming a square A–B–C–D–A): A, B, C is a path (no repeats). A, B, C, D, A is a cycle (only the start/end vertex repeats, and it closes the loop). A, B, A, B is a walk but not a path (B and A both repeat in the middle).
+  </div>
+
+  <h2>2. Connectivity</h2>
+  <div class="box">
+    <span class="box-label">Definition — Connected Graph and Connected Component</span>
+    A graph is <strong>connected</strong> if there is a path between every pair of vertices. If it isn't, it breaks into <strong>connected components</strong> — maximal groups of vertices that are mutually reachable, with no edges at all between different components. Every vertex belongs to exactly one connected component (including a graph with no edges at all, where every vertex is its own component of size 1).
+  </div>
+  <div class="box why">
+    <span class="box-label">Why "exactly one component" should sound familiar</span>
+    "Every vertex belongs to exactly one component" is the same partition structure Unit 2's set operations kept assuming implicitly — connected components split V into disjoint, non-overlapping pieces that cover every vertex, exactly like how A and Aᶜ partition a universal set U into two disjoint pieces that cover everything. Connectivity is really a question about how many pieces a graph's vertex set naturally splits into.
+  </div>
+
+  <h2>3. Try it — trace a path and find components</h2>
+  <p>This graph has two separate pieces: a triangle {A,B,C} and a chain {D,E,F}, with no edges between them. Click vertices in sequence to trace a walk (only along existing edges), or click "Find Components" to see the pieces highlighted.</p>
+  <div class="widget">
+    <div class="widget-label">Try It — Path Tracer &amp; Component Finder</div>
+    <svg id="pc-svg" viewBox="0 0 320 160" style="width: 100%; max-width: 360px; display: block; margin: 0 auto;"></svg>
+    <p id="pc-status" style="margin-top: 0.7rem; font-family: var(--mono, monospace); white-space: pre-line;">Click vertices to trace a walk.</p>
+    <div class="quiz-fill-row" style="margin-top: 0.6rem;">
+      <button class="widget-btn" id="pc-components">Find Components</button>
+      <button class="widget-btn" id="pc-reset">Reset</button>
+    </div>
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What distinguishes a path from a general walk?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">A path must start and end at the same vertex.</button>
+      <button class="quiz-choice" data-correct="true">A path never repeats a vertex; a walk can.</button>
+      <button class="quiz-choice" data-correct="false">A path must visit every vertex in the graph.</button>
+      <button class="quiz-choice" data-correct="false">There is no difference — the terms are interchangeable.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A walk only requires consecutive vertices to be joined by an edge; a path adds the extra requirement that no vertex is visited twice.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Which of these correctly describes a cycle?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Any walk that repeats at least one vertex.</button>
+      <button class="quiz-choice" data-correct="true">A path of length ≥ 3 that returns to its starting vertex, with no other repeats.</button>
+      <button class="quiz-choice" data-correct="false">A graph with no edges.</button>
+      <button class="quiz-choice" data-correct="false">A path that visits every vertex exactly once, without returning to the start.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A cycle is a path that closes the loop back to its own starting vertex, with that single exception being the only repeat allowed.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. A graph has 7 vertices and splits into 3 connected components. Which statement must be true?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Every component has the same number of vertices.</button>
+      <button class="quiz-choice" data-correct="true">Every one of the 7 vertices belongs to exactly one of the 3 components.</button>
+      <button class="quiz-choice" data-correct="false">There must be at least one edge between two different components.</button>
+      <button class="quiz-choice" data-correct="false">The graph must actually be connected.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Connected components always partition the vertex set — every vertex is in exactly one component, with components of possibly different sizes and, by definition, no edges crossing between them.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="connected">
+    <p class="quiz-prompt">4. Fill in the blank: a graph with only 1 connected component (containing every vertex) is called ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A connected graph has a path between every pair of vertices, which is exactly the same as saying it has only one connected component.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="1">
+    <p class="quiz-prompt">5. Fill in the blank: a graph on 5 vertices with zero edges has ___ vertex(es) per connected component, and 5 components total.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>With no edges at all, no two vertices are mutually reachable, so every vertex is its own isolated component of size 1.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read before the next lesson: <a href="https://open.umn.edu/opentextbooks/textbooks/discrete-mathematics-an-open-introduction">Levin, "Discrete Mathematics: An Open Introduction," Chapter 4.2, "Trails, Paths, and Circuits"</a> covers Euler circuits (which reuse the Handshake Theorem's odd/even degree fact directly) beyond what this lesson needed.</p>
+
+  <p class="ask-teacher">Try adding one edge in the widget above between the two components and re-running "Find Components" — ask your teacher to confirm your prediction of what changes before you try it. Next up: a special kind of connected graph with no cycles at all, and the classic problem of coloring a map so no two neighbors share a color.</p>
+
+  <footer class="lesson-footer">STEM+ · Discrete Math · Lesson 14 of the course sequence</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var labels = ['A', 'B', 'C', 'D', 'E', 'F'];
+  var positions = [[60, 30], [110, 120], [10, 120], [230, 30], [300, 75], [230, 120]];
+  var edgeList = [[0, 1], [1, 2], [2, 0], [3, 4], [4, 5]]; // triangle ABC, chain D-E-F
+  var walk = [];
+  var svg = document.getElementById('pc-svg');
+  var statusEl = document.getElementById('pc-status');
+  var ns = 'http://www.w3.org/2000/svg';
+  var componentColors = ['#c76b4a', '#3d7a5c', '#4a5fc7', '#a04ac7'];
+  var vertexComponent = null;
+
+  function el(tag, attrs) {
+    var e = document.createElementNS(ns, tag);
+    for (var k in attrs) e.setAttribute(k, attrs[k]);
+    return e;
+  }
+  function hasEdge(i, j) {
+    return edgeList.some(function (e) { return (e[0] === i && e[1] === j) || (e[0] === j && e[1] === i); });
+  }
+  function findComponents() {
+    var comp = new Array(labels.length).fill(-1);
+    var compId = 0;
+    for (var start = 0; start < labels.length; start++) {
+      if (comp[start] !== -1) continue;
+      var queue = [start];
+      comp[start] = compId;
+      while (queue.length) {
+        var v = queue.shift();
+        edgeList.forEach(function (e) {
+          var other = e[0] === v ? e[1] : (e[1] === v ? e[0] : null);
+          if (other !== null && comp[other] === -1) { comp[other] = compId; queue.push(other); }
+        });
+      }
+      compId++;
+    }
+    return { comp: comp, count: compId };
+  }
+
+  function render() {
+    svg.innerHTML = '';
+    edgeList.forEach(function (e) {
+      var p1 = positions[e[0]], p2 = positions[e[1]];
+      svg.appendChild(el('line', { x1: p1[0], y1: p1[1], x2: p2[0], y2: p2[1], stroke: 'var(--border)', 'stroke-width': 2 }));
+    });
+    // highlight walked edges
+    for (var i = 0; i < walk.length - 1; i++) {
+      if (hasEdge(walk[i], walk[i + 1])) {
+        var p1 = positions[walk[i]], p2 = positions[walk[i + 1]];
+        svg.appendChild(el('line', { x1: p1[0], y1: p1[1], x2: p2[0], y2: p2[1], stroke: 'var(--accent)', 'stroke-width': 3 }));
+      }
+    }
+    labels.forEach(function (label, i) {
+      var pos = positions[i];
+      var fill = 'var(--code-bg)';
+      if (vertexComponent) fill = componentColors[vertexComponent.comp[i] % componentColors.length];
+      else if (walk.indexOf(i) !== -1) fill = 'var(--accent-soft)';
+      var circle = el('circle', { cx: pos[0], cy: pos[1], r: 16, fill: fill, stroke: 'var(--accent)', 'stroke-width': 2, style: 'cursor: pointer;' });
+      circle.addEventListener('click', function () {
+        walk.push(i);
+        vertexComponent = null;
+        render();
+      });
+      svg.appendChild(circle);
+      var text = el('text', { x: pos[0], y: pos[1] + 5, 'text-anchor': 'middle', fill: 'var(--text)', 'font-size': 14, style: 'pointer-events: none;' });
+      text.textContent = label;
+      svg.appendChild(text);
+    });
+
+    if (vertexComponent) {
+      statusEl.textContent = 'Found ' + vertexComponent.count + ' connected components: {A,B,C} and {D,E,F}.';
+      return;
+    }
+    if (walk.length === 0) {
+      statusEl.textContent = 'Click vertices to trace a walk.';
+      return;
+    }
+    var seq = walk.map(function (i) { return labels[i]; }).join(', ');
+    var validEdges = true;
+    for (var j = 0; j < walk.length - 1; j++) if (!hasEdge(walk[j], walk[j + 1])) validEdges = false;
+    var noRepeats = new Set(walk).size === walk.length;
+    var isCycle = walk.length >= 4 && walk[0] === walk[walk.length - 1] && new Set(walk.slice(0, -1)).size === walk.length - 1;
+    var kind = !validEdges ? 'NOT a walk — consecutive vertices aren\'t connected by an edge.'
+      : isCycle ? 'a CYCLE (returns to start, no other repeats).'
+      : noRepeats ? 'a PATH (no repeated vertices).'
+      : 'a WALK, but not a path (a vertex repeats).';
+    statusEl.textContent = 'Sequence: ' + seq + '\nThis is ' + kind;
+  }
+
+  document.getElementById('pc-components').addEventListener('click', function () {
+    vertexComponent = findComponents();
+    render();
+  });
+  document.getElementById('pc-reset').addEventListener('click', function () {
+    walk = [];
+    vertexComponent = null;
+    render();
+  });
+
+  render();
+});
+</script>

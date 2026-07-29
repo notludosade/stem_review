@@ -1,0 +1,175 @@
+<meta charset="UTF-8">
+<title>Lesson 18: Modular Arithmetic — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Discrete Math · Unit 6 · Lesson 18</span>
+  <h1>Modular Arithmetic</h1>
+  <p class="subtitle">This closing lesson of Unit 6 turns the Division Algorithm's remainder into arithmetic that wraps around — exactly like a clock, where 9 plus 5 hours lands back on 2, not 14. It's the same wraparound logic behind cryptography, hash tables, and every calendar calculation.</p>
+  <p class="nav-links"><a href="0017-prime-numbers-and-the-fundamental-theorem-of-arithmetic.html" class="nav-prev">← Lesson 17</a> <a href="../Unit%207/0019-recursive-definitions.html" class="nav-next">Lesson 19 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <h2>1. Congruence modulo n</h2>
+  <div class="box">
+    <span class="box-label">Definition — Congruence Modulo n</span>
+    For a fixed positive integer n (the <strong>modulus</strong>), integers a and b are <strong>congruent modulo n</strong>, written a ≡ b (mod n), if n | (a − b) — equivalently, a and b leave the same remainder when divided by n via Lesson 16's Division Algorithm.
+  </div>
+  <div class="box example">
+    <span class="box-label">Worked example</span>
+    17 ≡ 5 (mod 12), since 12 | (17 − 5 = 12). Both 17 and 5 leave remainder 5 when divided by 12 (17 = 12·1 + 5; 5 = 12·0 + 5). This is exactly clock arithmetic: 17:00 and 5:00 point to the same spot on a 12-hour clock face.
+  </div>
+
+  <div class="box">
+    <span class="box-label">Definition — a mod n</span>
+    a mod n denotes the unique remainder r from the Division Algorithm applied to a and n — the single representative of a's congruence class in the range 0 ≤ r &lt; n. So 17 mod 12 = 5, and (−1) mod 12 = 11 (since −1 = 12(−1) + 11).
+  </div>
+
+  <h2>2. Arithmetic respects congruence</h2>
+  <div class="box">
+    <span class="box-label">Property — Modular Addition and Multiplication</span>
+    If a ≡ b (mod n) and c ≡ d (mod n), then a + c ≡ b + d (mod n), and a · c ≡ b · d (mod n). In practice, this means you can reduce mod n at any point in a calculation — before, during, or after — without changing the final answer mod n, which is what makes modular arithmetic tractable for huge numbers.
+  </div>
+  <div class="box example">
+    <span class="box-label">Worked example</span>
+    What is 9 + 5 on a 12-hour clock? 9 + 5 = 14, and 14 mod 12 = 2 — so the clock reads 2. Or reduce first: 9 ≡ 9, 5 ≡ 5 (mod 12), so 9 + 5 ≡ 2 (mod 12) directly, without ever computing 14.
+  </div>
+  <div class="box why">
+    <span class="box-label">Why this matters beyond clocks</span>
+    Cryptographic systems like RSA perform modular exponentiation on numbers hundreds of digits long — computing the full result first and reducing afterward would be computationally infeasible, but reducing mod n at every intermediate step keeps every number in the calculation small throughout. Hash tables use "key mod (table size)" to assign entries to a fixed number of slots. Both rely on exactly this fact: you never need the "real" value, only its residue mod n.
+  </div>
+
+  <h2>3. Try it — a modular arithmetic clock</h2>
+  <p>Set the modulus (clock size) and click a number to add. Watch the hand wrap around when it passes the top.</p>
+  <div class="widget">
+    <div class="widget-label">Try It — Modular Arithmetic Clock</div>
+    <div class="quiz-fill-row">
+      <label style="align-self: center;">Modulus n: </label>
+      <input type="number" id="mod-n" class="quiz-fill-input" value="12" min="2" max="24" style="max-width: 5rem; flex: none;">
+      <button class="widget-btn" id="mod-rebuild">Rebuild Clock</button>
+    </div>
+    <svg id="mod-svg" viewBox="0 0 200 200" style="width: 100%; max-width: 260px; display: block; margin: 0.8rem auto;"></svg>
+    <p id="mod-display" style="text-align: center; font-family: var(--mono, monospace); font-size: 1.1rem;">Current value: 0</p>
+    <div class="quiz-fill-row" style="margin-top: 0.6rem;">
+      <input type="number" id="mod-add" class="quiz-fill-input" value="5" style="max-width: 6rem; flex: none;">
+      <button class="widget-btn" id="mod-add-btn">Add</button>
+      <button class="widget-btn" id="mod-reset">Reset to 0</button>
+    </div>
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. Is 23 ≡ 8 (mod 5) true?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Yes — both 23 and 8 leave remainder 3 when divided by 5.</button>
+      <button class="quiz-choice" data-correct="false">No — 23 and 8 aren't equal.</button>
+      <button class="quiz-choice" data-correct="false">No — 5 doesn't divide either 23 or 8.</button>
+      <button class="quiz-choice" data-correct="false">Cannot be determined without a calculator.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>23 − 8 = 15, and 5 | 15, so 23 ≡ 8 (mod 5) — congruence doesn't require equality, only equal remainders (both are 3).</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. What is (−1) mod 12?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">−1</button>
+      <button class="quiz-choice" data-correct="true">11</button>
+      <button class="quiz-choice" data-correct="false">1</button>
+      <button class="quiz-choice" data-correct="false">0</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>−1 = 12(−1) + 11, and the remainder must satisfy 0 ≤ r &lt; 12, so (−1) mod 12 = 11.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why can modular arithmetic reduce values mod n at any point during a calculation, without affecting the final answer mod n?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">It can't — you must always compute the exact value first.</button>
+      <button class="quiz-choice" data-correct="true">Because congruence is preserved under both addition and multiplication.</button>
+      <button class="quiz-choice" data-correct="false">Because modular arithmetic only works for addition, not multiplication.</button>
+      <button class="quiz-choice" data-correct="false">Because every modulus is prime.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Since a≡b and c≡d (mod n) guarantees a+c≡b+d and a·c≡b·d (mod n), swapping any number for a congruent one at any step never changes the final result's residue mod n.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="2">
+    <p class="quiz-prompt">4. Fill in the blank: on a 12-hour clock, 9 + 5 wraps around to ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>9 + 5 = 14, and 14 mod 12 = 2.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="modulus">
+    <p class="quiz-prompt">5. Fill in the blank: in a ≡ b (mod n), the fixed number n is called the ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>n is the modulus — the number that determines how the wraparound works and defines each congruence class.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read before the next lesson: <a href="https://open.umn.edu/opentextbooks/textbooks/discrete-mathematics-an-open-introduction">Levin, "Discrete Mathematics: An Open Introduction," Chapter 8.4, "Modular Arithmetic"</a> extends this into modular inverses, needed for modular division — deliberately outside this lesson's scope.</p>
+
+  <p class="ask-teacher">This closes Unit 6 — divisibility, primes, and modular arithmetic are the toolkit that underlies both cryptography and the recursive number-theoretic proofs coming up next. Ask your teacher for an RSA-flavored example if you want to see modular exponentiation applied for real. Next up: Unit 7 turns from proving facts about specific structures to proving facts about infinitely many cases at once — starting with how to define a sequence in terms of itself.</p>
+
+  <footer class="lesson-footer">STEM+ · Discrete Math · Lesson 18 of the course sequence</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var n = 12;
+  var value = 0;
+  var svg = document.getElementById('mod-svg');
+  var displayEl = document.getElementById('mod-display');
+  var ns = 'http://www.w3.org/2000/svg';
+  var cx = 100, cy = 100, r = 80;
+
+  function el(tag, attrs) {
+    var e = document.createElementNS(ns, tag);
+    for (var k in attrs) e.setAttribute(k, attrs[k]);
+    return e;
+  }
+  function tickPos(i) {
+    var angle = (Math.PI * 2 * i) / n - Math.PI / 2;
+    return [cx + r * Math.cos(angle), cy + r * Math.sin(angle)];
+  }
+
+  function render() {
+    svg.innerHTML = '';
+    svg.appendChild(el('circle', { cx: cx, cy: cy, r: r, fill: 'none', stroke: 'var(--border)', 'stroke-width': 2 }));
+    for (var i = 0; i < n; i++) {
+      var pos = tickPos(i);
+      var text = el('text', { x: pos[0], y: pos[1] + 5, 'text-anchor': 'middle', fill: 'var(--text)', 'font-size': n > 16 ? 9 : 12 });
+      text.textContent = i;
+      svg.appendChild(text);
+    }
+    var handPos = tickPos(value % n);
+    svg.appendChild(el('line', { x1: cx, y1: cy, x2: handPos[0] * 0.75 + cx * 0.25, y2: handPos[1] * 0.75 + cy * 0.25, stroke: 'var(--accent)', 'stroke-width': 3 }));
+    svg.appendChild(el('circle', { cx: cx, cy: cy, r: 4, fill: 'var(--accent)' }));
+    displayEl.textContent = 'Current value: ' + (value % n) + ' (mod ' + n + ')';
+  }
+
+  document.getElementById('mod-rebuild').addEventListener('click', function () {
+    var newN = parseInt(document.getElementById('mod-n').value, 10);
+    if (newN >= 2 && newN <= 24) { n = newN; value = 0; render(); }
+  });
+  document.getElementById('mod-add-btn').addEventListener('click', function () {
+    var k = parseInt(document.getElementById('mod-add').value, 10) || 0;
+    value = ((value + k) % n + n) % n;
+    render();
+  });
+  document.getElementById('mod-reset').addEventListener('click', function () {
+    value = 0;
+    render();
+  });
+
+  render();
+});
+</script>

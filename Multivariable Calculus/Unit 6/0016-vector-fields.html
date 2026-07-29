@@ -1,0 +1,169 @@
+<meta charset="UTF-8">
+<title>Unit 6, Lesson 16: Vector Fields — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/interactive.js" defer></script>
+<script src="../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Multivariable Calculus · Unit 6 · Lesson 16</span>
+  <h1>Vector Fields</h1>
+  <p class="subtitle">Every function so far has assigned a number, or at most a fixed vector at one point, to an input. A vector field assigns a whole arrow to every single point in the plane at once.</p>
+  <p class="nav-links"><a href="../Unit%205/0015-the-jacobian-and-general-substitution.html" class="nav-prev">← Lesson 15</a> <a href="0017-line-integrals-of-scalar-and-vector-fields.html" class="nav-next">Lesson 17 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <h2>1. An arrow at every point</h2>
+  <div class="box">
+    <span class="box-label">Definition — Vector Field</span>
+    A <strong>vector field</strong> in the plane, F(x,y) = ⟨P(x,y), Q(x,y)⟩, assigns a vector — not a number — to every point (x,y) in its domain. In space, F(x,y,z) = ⟨P,Q,R⟩ does the same with a third component. Drawn on paper, a vector field looks like a whole grid of arrows, one rooted at each sample point, each with its own length and direction.
+  </div>
+  <div class="box">
+    <span class="box-label">Method — Recognizing Common Field Shapes</span>
+    A <strong>radial field</strong> like F = ⟨x,y⟩ points directly away from (or toward) the origin everywhere — the velocity field of something expanding outward from a source. A <strong>rotational field</strong> like F = ⟨−y,x⟩ circles around the origin, always perpendicular to the position vector — like a fluid spinning in place. A <strong>gradient field</strong> F = ∇f, built from some scalar function f, always points toward increasing f — a shape Lesson 18 studies closely.
+  </div>
+  <div class="box">
+    <span class="box-label">Worked Example</span>
+    F(x,y) = ⟨−y, x⟩ at (1,0): F(1,0) = <strong>⟨0, 1⟩</strong> — straight up, perpendicular to the position vector ⟨1,0⟩, confirming rotational behavior. Compare G(x,y) = ⟨x, y⟩ at (1,0): G(1,0) = ⟨1, 0⟩ — pointing directly away from the origin, along the same line as the position vector itself, confirming radial behavior.
+  </div>
+  <div class="box why">
+    <span class="box-label">Why This Matters</span>
+    Wind velocity across a map, the flow of a river, the force of gravity or an electric field around a charge — these are the physical quantities vector fields exist to model. Every remaining lesson in this unit and the next two builds on exactly this object: line integrals measure work done moving through a field, and Green's, Stokes', and the Divergence Theorem all describe how a field behaves across a whole region at once.
+  </div>
+
+  <h2>2. Three field shapes, side by side</h2>
+  <p>Choose a field, then hover anywhere on the grid — the exact vector F(x,y) at that point is read out below.</p>
+
+  <div class="widget">
+    <div class="widget-label">Try It — Vector Field Arrow Grid</div>
+    <div class="slider-row">
+      <button class="widget-btn" id="vf-btn-radial" type="button">Radial: ⟨x, y⟩</button>
+      <button class="widget-btn" id="vf-btn-rotational" type="button">Rotational: ⟨-y, x⟩</button>
+      <button class="widget-btn" id="vf-btn-saddle" type="button">Saddle: ⟨x, -y⟩</button>
+    </div>
+    <div class="plot-wrap">
+      <svg id="vf-svg" viewBox="0 0 460 300" width="460" height="300" role="img" aria-label="A grid of arrows showing a vector field, with the exact vector at the hovered point read out below">
+        <defs>
+          <marker id="vf-arrowhead" markerWidth="6" markerHeight="6" refX="4.5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#2c5f8a"></path></marker>
+        </defs>
+        <line class="fig-axis" x1="20" y1="150" x2="440" y2="150"></line>
+        <line class="fig-axis" x1="230" y1="280" x2="230" y2="20"></line>
+        <g id="vf-arrows" stroke="#2c5f8a" stroke-width="1.8"></g>
+        <circle id="vf-cursor" r="4" fill="#c0392b" opacity="0"></circle>
+      </svg>
+    </div>
+    <p class="plot-readout" id="vf-readout">Hover the grid to sample F(x,y). Currently showing the radial field.</p>
+  </div>
+
+  <h2>Check your recall</h2>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. A vector field F(x,y) = ⟨P(x,y), Q(x,y)⟩ assigns to each point (x,y):</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">a vector</button>
+      <button class="quiz-choice" data-correct="false">a single real number</button>
+      <button class="quiz-choice" data-correct="false">a curve</button>
+      <button class="quiz-choice" data-correct="false">another point in the domain only</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Unlike f(x,y), whose output is a bare number, a vector field's output at every point is itself a vector — magnitude and direction both.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="<0,1>|(0,1)">
+    <p class="quiz-prompt">2. For F(x,y) = ⟨-y, x⟩, F(1, 0) = ___ (format: &lt;a,b&gt;)</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>F(1,0) = ⟨-(0), 1⟩ = ⟨0, 1⟩.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. F(x,y) = ⟨x, y⟩ is an example of a:</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">radial field, pointing away from the origin</button>
+      <button class="quiz-choice" data-correct="false">rotational field, circling the origin</button>
+      <button class="quiz-choice" data-correct="false">constant field</button>
+      <button class="quiz-choice" data-correct="false">field that is zero everywhere</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>At every point, F points in the same direction as the position vector itself — directly away from the origin.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">4. F(x,y) = ⟨-y, x⟩ is an example of a:</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">rotational field</button>
+      <button class="quiz-choice" data-correct="false">radial field</button>
+      <button class="quiz-choice" data-correct="false">gradient field of f(x,y) = x² + y²</button>
+      <button class="quiz-choice" data-correct="false">field that is undefined at every point</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>F(x,y) = ⟨-y,x⟩ is always perpendicular to the position vector ⟨x,y⟩, circling the origin rather than pointing toward or away from it.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p><a href="https://openstax.org/books/calculus-volume-3/pages/6-1-vector-fields">OpenStax Calculus Volume 3, §6.1 "Vector Fields"</a> introduces vector fields in the plane and in space, plus gradient fields specifically.</p>
+
+  <p class="ask-teacher">The rotational field ⟨-y,x⟩ never points toward or away from the origin at any point — its dot product with the position vector ⟨x,y⟩ is always exactly 0. Ask your teacher to verify that algebraically, and connect it to what "perpendicular" meant back in Unit 1. Lesson 17 finally puts these fields to work, measuring how much a field pushes with or against a moving object along a specific path.</p>
+
+  <footer class="lesson-footer">STEM+ · Multivariable Calculus · Unit 6 · Lesson 16 of 24</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var svg = document.getElementById('vf-svg');
+  var arrowsGroup = document.getElementById('vf-arrows');
+  var cursorDot = document.getElementById('vf-cursor');
+  var readout = document.getElementById('vf-readout');
+  var originX = 230, originY = 150, scale = 30;
+
+  var fields = {
+    radial: { fn: function (x, y) { return { x: x, y: y }; }, label: 'the radial field' },
+    rotational: { fn: function (x, y) { return { x: -y, y: x }; }, label: 'the rotational field' },
+    saddle: { fn: function (x, y) { return { x: x, y: -y }; }, label: 'the saddle field' }
+  };
+  var current = 'radial';
+
+  function drawGrid() {
+    arrowsGroup.innerHTML = '';
+    var fn = fields[current].fn;
+    for (var i = -6; i <= 6; i++) {
+      for (var j = -4; j <= 4; j++) {
+        var mx = i * 1.1, my = j * 1.1;
+        var v = fn(mx, my);
+        var mag = Math.sqrt(v.x * v.x + v.y * v.y) || 1;
+        var len = Math.min(0.9, 0.25 + mag * 0.12) * scale;
+        var ux = v.x / mag, uy = v.y / mag;
+        var sx = originX + mx * scale, sy = originY - my * scale;
+        var line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        line.setAttribute('x1', sx); line.setAttribute('y1', sy);
+        line.setAttribute('x2', sx + ux * len); line.setAttribute('y2', sy - uy * len);
+        line.setAttribute('marker-end', 'url(#vf-arrowhead)');
+        arrowsGroup.appendChild(line);
+      }
+    }
+  }
+
+  function setField(name) {
+    current = name;
+    drawGrid();
+    readout.textContent = 'Hover the grid to sample F(x,y). Currently showing ' + fields[name].label + '.';
+  }
+
+  document.getElementById('vf-btn-radial').addEventListener('click', function () { setField('radial'); });
+  document.getElementById('vf-btn-rotational').addEventListener('click', function () { setField('rotational'); });
+  document.getElementById('vf-btn-saddle').addEventListener('click', function () { setField('saddle'); });
+
+  svg.addEventListener('pointermove', function (evt) {
+    var pt = svg.createSVGPoint();
+    pt.x = evt.clientX; pt.y = evt.clientY;
+    var loc = pt.matrixTransform(svg.getScreenCTM().inverse());
+    var mx = (loc.x - originX) / scale, my = (originY - loc.y) / scale;
+    if (mx < -7 || mx > 7 || my < -4.5 || my > 4.5) { cursorDot.setAttribute('opacity', 0); return; }
+    cursorDot.setAttribute('opacity', 1);
+    cursorDot.setAttribute('cx', loc.x); cursorDot.setAttribute('cy', loc.y);
+    var v = fields[current].fn(mx, my);
+    readout.textContent = 'F(' + mx.toFixed(2) + ', ' + my.toFixed(2) + ') = ⟨' + v.x.toFixed(2) + ', ' + v.y.toFixed(2) + '⟩.';
+  });
+
+  drawGrid();
+});
+</script>

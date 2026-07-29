@@ -1,0 +1,175 @@
+<meta charset="UTF-8">
+<title>Lesson 15: Trees and Graph Coloring — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Discrete Math · Unit 5 · Lesson 15</span>
+  <h1>Trees and Graph Coloring</h1>
+  <p class="subtitle">This closing lesson of Unit 5 covers two ideas that look unrelated at first — the most cycle-free graphs possible, and the classic problem of coloring a map so no two neighbors match — and both turn out to matter far beyond graph theory itself.</p>
+  <p class="nav-links"><a href="0014-paths-cycles-and-connectivity.html" class="nav-prev">← Lesson 14</a> <a href="../Unit%206/0016-divisibility-and-the-division-algorithm.html" class="nav-next">Lesson 16 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <h2>1. Trees</h2>
+  <div class="box">
+    <span class="box-label">Definition — Tree</span>
+    A <strong>tree</strong> is a connected graph with no cycles. A vertex of degree 1 in a tree is called a <strong>leaf</strong>.
+  </div>
+  <div class="box">
+    <span class="box-label">Theorem — Edge Count</span>
+    A tree on n vertices has <em>exactly</em> n − 1 edges — never more, never fewer. Removing any single edge disconnects a tree (it has no cycle to route around the missing edge), and adding any single edge to a tree creates exactly one cycle (connecting two vertices that already had a unique path between them).
+  </div>
+  <div class="box example">
+    <span class="box-label">Worked example</span>
+    A tree on 6 vertices has exactly 5 edges. This isn't a coincidence to verify case by case — it's provable by induction (Unit 7's central proof technique): a single vertex (n=1) has 0 = n−1 edges trivially, and every larger tree can be built by attaching one new leaf at a time, each attachment adding exactly 1 vertex and exactly 1 edge, preserving n − 1 at every step.
+  </div>
+  <div class="box why">
+    <span class="box-label">Why trees matter beyond this lesson</span>
+    A tree is the minimal connected structure — the fewest possible edges that still keep every vertex reachable from every other. That "no wasted edges, no redundant path" property is exactly why file systems, decision trees, and the call structure of a recursive function (Unit 7) are all modeled as trees: it's the natural shape for anything built by repeatedly branching from a single starting point with no way back to where you've already been.
+  </div>
+
+  <h2>2. Graph coloring</h2>
+  <div class="box">
+    <span class="box-label">Definition — Proper Coloring and Chromatic Number</span>
+    A <strong>proper coloring</strong> of a graph assigns a color to every vertex so that no two adjacent vertices (connected by an edge) share a color. The <strong>chromatic number</strong> χ(G) is the minimum number of colors any proper coloring of G needs.
+  </div>
+  <div class="box example">
+    <span class="box-label">Worked examples</span>
+    A tree (or any graph with no cycles) always has χ(G) = 2 (or 1, if it has no edges at all) — alternate two colors outward from any starting vertex, and since there's no cycle to force a clash, it always works. An <strong>odd</strong> cycle (like a 5-cycle) needs χ(G) = 3: alternating 2 colors around an odd number of vertices always forces the last vertex to match one of its neighbors, no matter where you start. A <strong>complete graph</strong> Kₙ (every vertex connected to every other) needs χ(G) = n, since every pair of vertices is adjacent and therefore needs a distinct color.
+  </div>
+
+  <h2>3. Try it — color a 5-cycle</h2>
+  <p>Click a vertex to cycle through colors. This graph is an odd cycle (5 vertices in a ring) — try to properly color it with only 2 colors, then see why you need a 3rd.</p>
+  <div class="widget">
+    <div class="widget-label">Try It — Graph Coloring</div>
+    <svg id="color-svg" viewBox="0 0 220 220" style="width: 100%; max-width: 280px; display: block; margin: 0 auto;"></svg>
+    <p id="color-status" style="margin-top: 0.7rem; font-family: var(--mono, monospace);">Colors used: 0. Click a vertex to begin.</p>
+    <div class="quiz-fill-row" style="margin-top: 0.6rem;">
+      <button class="widget-btn" id="color-reset">Reset</button>
+    </div>
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. A tree has 9 vertices. How many edges does it have?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">9</button>
+      <button class="quiz-choice" data-correct="true">8</button>
+      <button class="quiz-choice" data-correct="false">10</button>
+      <button class="quiz-choice" data-correct="false">It depends on the tree's shape.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Every tree on n vertices has exactly n − 1 edges, regardless of its specific shape — here, 9 − 1 = 8.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why does an odd cycle (like a 5-cycle) need 3 colors instead of 2?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because odd cycles have more edges than even cycles.</button>
+      <button class="quiz-choice" data-correct="true">Alternating 2 colors around an odd number of vertices always forces the last vertex to match a neighbor.</button>
+      <button class="quiz-choice" data-correct="false">Odd cycles are disconnected, so each component needs its own color.</button>
+      <button class="quiz-choice" data-correct="false">They don't — 2 colors always suffice for any cycle.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>With an odd number of vertices in a ring, a strict 2-color alternation can't close the loop without a clash at the seam — a 3rd color is required to break the parity problem.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. What is the chromatic number of K₅, the complete graph on 5 vertices (every pair connected)?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">2</button>
+      <button class="quiz-choice" data-correct="false">3</button>
+      <button class="quiz-choice" data-correct="true">5</button>
+      <button class="quiz-choice" data-correct="false">10</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>In a complete graph, every vertex is adjacent to every other vertex, so all 5 must receive distinct colors — χ(K₅) = 5.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="leaf">
+    <p class="quiz-prompt">4. Fill in the blank: a vertex of degree 1 in a tree is called a ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A leaf is a tree vertex connected to exactly one other vertex — an endpoint of the tree.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="chromatic number">
+    <p class="quiz-prompt">5. Fill in the blank: the minimum number of colors needed for a proper coloring of a graph G is called its ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>χ(G), the chromatic number, is defined as the smallest number of colors any proper coloring of G can achieve.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read before the next lesson: <a href="https://open.umn.edu/opentextbooks/textbooks/discrete-mathematics-an-open-introduction">Levin, "Discrete Mathematics: An Open Introduction," Chapter 4.3–4.8</a> covers spanning trees and the Four Color Theorem (every planar map needs at most 4 colors) beyond what this lesson needed.</p>
+
+  <p class="ask-teacher">This closes Unit 5 — graphs, paths, connectivity, trees, and coloring all build on the same vertex-and-edge foundation from Lesson 13. Ask your teacher for a graph where 2 colors almost work but don't, if the odd-cycle argument above still feels abstract. Next up: Unit 6 leaves graphs behind for the integers themselves — division, primes, and modular arithmetic.</p>
+
+  <footer class="lesson-footer">STEM+ · Discrete Math · Lesson 15 of the course sequence</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var labels = ['A', 'B', 'C', 'D', 'E'];
+  var n = labels.length;
+  var positions = labels.map(function (_, i) {
+    var angle = (Math.PI * 2 * i) / n - Math.PI / 2;
+    return [110 + 90 * Math.cos(angle), 110 + 90 * Math.sin(angle)];
+  });
+  var edgeList = labels.map(function (_, i) { return [i, (i + 1) % n]; });
+  var palette = [null, '#c76b4a', '#3d7a5c', '#4a5fc7', '#a04ac7'];
+  var colorNames = ['none', 'red', 'green', 'blue', 'purple'];
+  var vColor = new Array(n).fill(0);
+  var svg = document.getElementById('color-svg');
+  var statusEl = document.getElementById('color-status');
+  var ns = 'http://www.w3.org/2000/svg';
+
+  function el(tag, attrs) {
+    var e = document.createElementNS(ns, tag);
+    for (var k in attrs) e.setAttribute(k, attrs[k]);
+    return e;
+  }
+
+  function render() {
+    svg.innerHTML = '';
+    var conflict = false;
+    edgeList.forEach(function (e) {
+      var clash = vColor[e[0]] !== 0 && vColor[e[0]] === vColor[e[1]];
+      if (clash) conflict = true;
+      var p1 = positions[e[0]], p2 = positions[e[1]];
+      svg.appendChild(el('line', { x1: p1[0], y1: p1[1], x2: p2[0], y2: p2[1], stroke: clash ? 'var(--incorrect)' : 'var(--border)', 'stroke-width': clash ? 3 : 2 }));
+    });
+    labels.forEach(function (label, i) {
+      var pos = positions[i];
+      var fill = palette[vColor[i]] || 'var(--code-bg)';
+      var circle = el('circle', { cx: pos[0], cy: pos[1], r: 16, fill: fill, stroke: 'var(--accent)', 'stroke-width': 2, style: 'cursor: pointer;' });
+      circle.addEventListener('click', function () {
+        vColor[i] = (vColor[i] + 1) % palette.length;
+        render();
+      });
+      svg.appendChild(circle);
+      var text = el('text', { x: pos[0], y: pos[1] + 5, 'text-anchor': 'middle', fill: vColor[i] === 0 ? 'var(--text)' : '#fff', 'font-size': 14, style: 'pointer-events: none;' });
+      text.textContent = label;
+      svg.appendChild(text);
+    });
+    var usedColors = new Set(vColor.filter(function (c) { return c !== 0; })).size;
+    var allColored = vColor.every(function (c) { return c !== 0; });
+    var status = 'Colors used: ' + usedColors + '.';
+    if (allColored) status += conflict ? ' NOT a valid coloring — adjacent vertices share a color (see red edges).' : ' Valid proper coloring!';
+    statusEl.textContent = status;
+  }
+
+  document.getElementById('color-reset').addEventListener('click', function () {
+    vColor = new Array(n).fill(0);
+    render();
+  });
+
+  render();
+});
+</script>

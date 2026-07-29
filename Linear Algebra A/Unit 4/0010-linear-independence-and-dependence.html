@@ -1,0 +1,145 @@
+<meta charset="UTF-8">
+<title>Lesson 10: Linear Independence and Dependence — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Linear Algebra A · Unit 4 · Lesson 10</span>
+  <h1>Linear Independence and Dependence</h1>
+  <p class="subtitle">Does every vector in a set pull its own weight, or is at least one of them redundant — already reachable from the others?</p>
+  <p class="nav-links"><a href="../Unit%203/0009-rank-and-the-structure-of-solution-sets.html" class="nav-prev">← Lesson 9</a> <a href="0011-basis-and-dimension.html" class="nav-next">Lesson 11 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Unit 1 asked which points a set of vectors could reach (span). This unit asks a sharper question: is every vector in that set actually necessary, or could you throw one away and reach exactly the same span? The precise tool for answering it is <strong>linear independence</strong>.</p>
+
+  <h2>1. The precise definition</h2>
+  <div class="box">
+    <span class="box-label">Definition — Linear Independence</span>
+    Vectors v₁, …, vₖ are <strong>linearly independent</strong> if the only solution to c₁v₁ + c₂v₂ + ⋯ + cₖvₖ = 0 is the <strong>trivial solution</strong> c₁ = c₂ = ⋯ = cₖ = 0. If some <em>nontrivial</em> solution exists (not all cᵢ zero), the set is <strong>linearly dependent</strong>.
+  </div>
+  <div class="box why">
+    <span class="box-label">Why this is the right question</span>
+    A nontrivial solution to c₁v₁ + ⋯ + cₖvₖ = 0 means at least one vector can be solved for in terms of the others — it's redundant, contributing nothing new to the span. Independence is exactly the absence of that redundancy.
+  </div>
+
+  <h2>2. Two precise edge cases</h2>
+  <div class="box">
+    <span class="box-label">Fact — A Single Nonzero Vector</span>
+    Any single nonzero vector v is automatically linearly independent. The equation cv = 0 with v ≠ 0 forces c = 0 — no other solution is possible, so only the trivial one exists.
+  </div>
+  <div class="box">
+    <span class="box-label">Fact — The Zero Vector Alone</span>
+    The set {0} (just the zero vector, by itself) is automatically linearly dependent. c·0 = 0 holds for <em>every</em> scalar c — c = 1 is a perfectly good nontrivial solution, so the trivial solution is never the only one.
+  </div>
+
+  <h2>3. Testing two vectors in ℝ²</h2>
+  <div class="box">
+    <span class="box-label">Test — Two Vectors in ℝ²</span>
+    For v1 = (a, b) and v2 = (c, d), the set {v1, v2} is linearly independent exactly when ad − bc ≠ 0 — the same quantity from Lesson 6's inverse formula. Geometrically: independent means the two vectors point in genuinely different directions; dependent means one is a scalar multiple of the other (parallel, or one of them is 0).
+  </div>
+
+  <p>Type two vectors and watch the independence test update live.</p>
+
+  <div class="widget">
+    <div class="widget-label">Try It — Independence Test for Two Vectors</div>
+    <div class="fm-row" style="align-items: flex-start; gap: 1.6rem;">
+      <div>
+        <p class="widget-label" style="margin-bottom: 0.4rem;">v1 = (a, b)</p>
+        <input type="number" class="fm-input" id="l10-a" value="2" style="width: 3.4rem;">
+        <input type="number" class="fm-input" id="l10-b" value="1" style="width: 3.4rem;">
+      </div>
+      <div>
+        <p class="widget-label" style="margin-bottom: 0.4rem;">v2 = (c, d)</p>
+        <input type="number" class="fm-input" id="l10-c" value="-1" style="width: 3.4rem;">
+        <input type="number" class="fm-input" id="l10-d" value="3" style="width: 3.4rem;">
+      </div>
+    </div>
+    <p class="plot-readout" id="l10-readout" style="margin-top: 1rem;">ad − bc = 7 → linearly independent.</p>
+  </div>
+
+  <h2>Check your recall</h2>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. A set of vectors is linearly independent when:</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">the only way to combine them to get 0 is with every coefficient equal to 0.</button>
+      <button class="quiz-choice" data-correct="false">every vector in the set has a different magnitude.</button>
+      <button class="quiz-choice" data-correct="false">their span is all of ℝⁿ.</button>
+      <button class="quiz-choice" data-correct="false">none of them is the zero vector.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Independence is defined entirely through the trivial-solution condition on c₁v₁ + ⋯ + cₖvₖ = 0 — magnitude, spanning all of ℝⁿ, and simply avoiding 0 are all separate (and not equivalent) properties.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Is a single nonzero vector v always linearly independent?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Yes — cv = 0 forces c = 0 whenever v ≠ 0.</button>
+      <button class="quiz-choice" data-correct="false">No — it depends on which vector it is.</button>
+      <button class="quiz-choice" data-correct="false">No, only if it's a unit vector.</button>
+      <button class="quiz-choice" data-correct="false">Only if it's one of the standard basis vectors.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Since v ≠ 0, cv = 0 has no room for a nonzero c to work — c = 0 is forced, which is exactly the trivial-solution-only condition for independence.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="dependent">
+    <p class="quiz-prompt">3. Fill in the blank: the set {0}, containing only the zero vector, is always linearly ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>c·0 = 0 for every scalar c, so a nontrivial solution (like c = 1) always exists — {0} can never be independent.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">4. Are v1 = (2, 1) and v2 = (4, 2) linearly independent?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Yes — they're different vectors.</button>
+      <button class="quiz-choice" data-correct="true">No — v2 = 2v1, so ad − bc = (2)(2) − (1)(4) = 0.</button>
+      <button class="quiz-choice" data-correct="false">Yes, because neither is the zero vector.</button>
+      <button class="quiz-choice" data-correct="false">Cannot be determined.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>v2 is exactly twice v1 — a nontrivial combination like 2v1 − v2 = 0 exists, so the pair is dependent, matching ad − bc = 0.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="0">
+    <p class="quiz-prompt">5. Fill in the blank: for two vectors v1 = (a, b), v2 = (c, d) in ℝ², the set is independent exactly when ad − bc ≠ ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>ad − bc = 0 is exactly the condition for the two vectors to be parallel (or one to be zero) — the dependent case.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p><a href="https://www.khanacademy.org/math/linear-algebra/vectors-and-spaces">Khan Academy's Vectors and Spaces unit</a>, in "Linear dependence and independence," works through the trivial-solution test on several more sets, including three vectors in ℝ³.</p>
+
+  <p class="ask-teacher">Ask your teacher for a set of three vectors in ℝ³ to test if you want practice beyond the two-vector case — the same trivial-solution definition applies, just with a bigger system to solve. Next up: picking the smallest independent set that still spans everything — a basis.</p>
+
+  <footer class="lesson-footer">STEM+ · Linear Algebra A · Lesson 10 of the course sequence</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var ids = ['l10-a', 'l10-b', 'l10-c', 'l10-d'];
+  var els = {};
+  ids.forEach(function (id) { els[id] = document.getElementById(id); });
+  var readout = document.getElementById('l10-readout');
+
+  function num(id) { var v = parseFloat(els[id].value); return isNaN(v) ? 0 : v; }
+  function fmt(v) { return String(Math.round(v * 1000) / 1000); }
+
+  function render() {
+    var a = num('l10-a'), b = num('l10-b'), c = num('l10-c'), d = num('l10-d');
+    var det = a * d - b * c;
+    var independent = det !== 0;
+    readout.textContent = 'ad − bc = ' + fmt(det) + ' → linearly ' + (independent ? 'independent.' : 'dependent.');
+    readout.className = 'plot-readout ' + (independent ? 'is-pass' : 'is-fail');
+  }
+
+  ids.forEach(function (id) { els[id].addEventListener('input', render); });
+  render();
+});
+</script>

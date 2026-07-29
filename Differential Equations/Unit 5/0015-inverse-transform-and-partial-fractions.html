@@ -1,0 +1,153 @@
+<meta charset="UTF-8">
+<title>Unit 5, Lesson 15: The Inverse Transform and Partial Fractions — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/interactive.js" defer></script>
+<script src="../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Differential Equations · Unit 5 · Lesson 15</span>
+  <h1>The Inverse Transform and Partial Fractions</h1>
+  <p class="subtitle">Lesson 14's examples matched the table by luck. Most Y(s) need to be broken into pieces first — the same partial-fractions skill from Unit 6 of AP Calculus BC, now solving differential equations instead of integrals.</p>
+  <p class="nav-links"><a href="0014-solving-ivps-with-laplace-transforms.html" class="nav-prev">← Lesson 14</a> <a href="../Unit%206/0016-systems-in-matrix-form.html" class="nav-next">Unit 6, Lesson 16 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <h2>1. Undoing the transform</h2>
+  <div class="box">
+    <span class="box-label">Definition — Inverse Laplace Transform</span>
+    <strong>L<sup>−1</sup>{F(s)} = f(t)</strong> means f is the function whose Laplace transform is F — undoing Lesson 13's table lookup in the other direction. Like the transform itself, L<sup>−1</sup> is linear: L<sup>−1</sup>{aF(s) + bG(s)} = a·L<sup>−1</sup>{F(s)} + b·L<sup>−1</sup>{G(s)}.
+  </div>
+  <div class="box">
+    <span class="box-label">Fact — First Shifting Theorem</span>
+    <strong>L{e<sup>at</sup>f(t)} = F(s − a)</strong>, so in reverse, <strong>L<sup>−1</sup>{F(s − a)} = e<sup>at</sup>f(t)</strong>. This handles any denominator built by completing the square, like (s−a)² + b² — it's the shifted version of L{sin(bt)} or L{cos(bt)}, multiplied by e<sup>at</sup>.
+  </div>
+  <div class="box">
+    <span class="box-label">Method — Partial Fractions Before Inverting</span>
+    When Y(s) is a rational function that doesn't match the table directly, decompose it into simpler pieces first — distinct linear factors A/(s−a) + B/(s−b), exactly as in ordinary partial-fractions integration — then invert each piece separately using the table and linearity.
+  </div>
+  <div class="box">
+    <span class="box-label">Worked Example — Distinct Linear Factors</span>
+    Invert Y(s) = 1/[(s−1)(s+2)]. Write 1/[(s−1)(s+2)] = A/(s−1) + B/(s+2), so 1 = A(s+2) + B(s−1). At s = 1: 1 = 3A → A = 1/3. At s = −2: 1 = −3B → B = −1/3. So Y(s) = (1/3)/(s−1) − (1/3)/(s+2), and <strong>y(t) = (1/3)e<sup>t</sup> − (1/3)e<sup>−2t</sup></strong>.
+  </div>
+  <div class="box">
+    <span class="box-label">Worked Example — Completing the Square</span>
+    Invert Y(s) = 1/(s² + 2s + 5). Completing the square: s² + 2s + 5 = (s+1)² + 4. Since L{sin(2t)} = 2/(s²+4), the First Shifting Theorem gives L{e<sup>−t</sup>sin(2t)} = 2/[(s+1)²+4]. Matching Y(s) = 1/[(s+1)²+4] = (1/2)·2/[(s+1)²+4] gives <strong>y(t) = (1/2)e<sup>−t</sup>sin(2t)</strong>.
+  </div>
+
+  <h2>2. Watching a decomposition change with its poles</h2>
+  <p>For Y(s) = 1/[(s−a)(s−b)], slide the two poles a and b and watch the partial-fraction coefficients — and the resulting f(t) — update.</p>
+
+  <div class="widget">
+    <div class="widget-label">Try It — Partial Fractions for Y(s) = 1/[(s−a)(s−b)]</div>
+    <div class="plot-wrap">
+      <svg viewBox="0 0 460 300" width="460" height="300" role="img" aria-label="The inverse Laplace transform of a two-pole rational function, reshaping as the poles change">
+        <line class="fig-axis" x1="30" y1="150" x2="440" y2="150"></line>
+        <line class="fig-axis" x1="230" y1="290" x2="230" y2="10"></line>
+        <polyline class="fig-curve" id="pf-curve"></polyline>
+      </svg>
+    </div>
+    <div class="slider-row">
+      <label for="pf-a">Pole a</label>
+      <input type="range" id="pf-a" min="-30" max="30" step="5" value="10">
+      <span class="slider-value" id="pf-a-label">a = 1.0</span>
+    </div>
+    <div class="slider-row">
+      <label for="pf-b">Pole b</label>
+      <input type="range" id="pf-b" min="-30" max="30" step="5" value="-20">
+      <span class="slider-value" id="pf-b-label">b = −2.0</span>
+    </div>
+    <p class="plot-readout" id="pf-readout">—</p>
+  </div>
+
+  <h2>Check your recall</h2>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. L<sup>−1</sup>{F(s)} = f(t) means:</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">f is the function whose Laplace transform is F</button>
+      <button class="quiz-choice" data-correct="false">f(t) = 1/F(s)</button>
+      <button class="quiz-choice" data-correct="false">f(t) = F(t)</button>
+      <button class="quiz-choice" data-correct="false">f is the derivative of F</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The inverse transform undoes the forward transform exactly: if L{f(t)} = F(s), then L^(−1){F(s)} = f(t).</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. The correct partial-fraction setup for 1/[(s−1)(s+2)] is:</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">A/(s−1) + B/(s+2)</button>
+      <button class="quiz-choice" data-correct="false">A/(s−1) · B/(s+2)</button>
+      <button class="quiz-choice" data-correct="false">A/[(s−1)(s+2)]</button>
+      <button class="quiz-choice" data-correct="false">(As + B)/[(s−1)(s+2)]</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Two distinct linear factors split into two separate fractions, added together, each with its own unknown constant numerator.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="1/4|0.25">
+    <p class="quiz-prompt">3. Fill in the blank: for 1/[(s−3)(s+1)] = A/(s−3) + B/(s+1), solving gives A = ___</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>1 = A(s+1) + B(s−3). At s = 3: 1 = 4A, so A = 1/4.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">4. The First Shifting Theorem states:</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">L{e^(at)f(t)} = F(s − a)</button>
+      <button class="quiz-choice" data-correct="false">L{e^(at)f(t)} = F(s) − a</button>
+      <button class="quiz-choice" data-correct="false">L{f(t − a)} = F(s − a)</button>
+      <button class="quiz-choice" data-correct="false">L{e^(at)f(t)} = e^(at)F(s)</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Multiplying f(t) by e^(at) shifts the transform's variable by a, replacing every s with (s − a) — the exact tool needed for a completed-square denominator.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="1/2|0.5">
+    <p class="quiz-prompt">5. Fill in the blank: inverting Y(s) = 1/(s² + 2s + 5) = 1/[(s+1)² + 4] gives y(t) = ___·e^(−t)sin(2t)</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>L{sin(2t)} = 2/(s²+4), so by the shift theorem L{e^(−t)sin(2t)} = 2/[(s+1)²+4]. Matching the coefficient 1 (not 2) in Y(s) requires scaling by 1/2.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p><a href="https://tutorial.math.lamar.edu/Classes/DE/InverseTransforms.aspx">Paul's Online Math Notes, "Inverse Laplace Transforms"</a> works through repeated and irreducible-quadratic factor cases beyond the two shown here.</p>
+
+  <p class="ask-teacher">Every Laplace solve ends the same way: get Y(s) into a sum of pieces the table already knows, then invert term by term. Ask for a repeated-linear-factor example, like 1/[(s−2)²(s+1)], if that case (echoing Unit 3's repeated-root fix of an extra factor) would help round things out. That closes Unit 5's toolkit; Unit 6 moves from single equations to systems of them — several unknown functions, tied together, solved all at once.</p>
+
+  <footer class="lesson-footer">STEM+ · Differential Equations · Unit 5 · Lesson 3 of 3</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var origin = { originX: 230, originY: 150, scaleX: 70, scaleY: 40 };
+  var curveMount = STEMPlus.mountLiveCurve(document.getElementById('pf-curve'), Object.assign({ xMin: -2, xMax: 2, samples: 160 }, origin));
+
+  var aSlider = document.getElementById('pf-a'), bSlider = document.getElementById('pf-b');
+  var aLabel = document.getElementById('pf-a-label'), bLabel = document.getElementById('pf-b-label');
+  var readout = document.getElementById('pf-readout');
+
+  function render() {
+    var a = parseInt(aSlider.value, 10) / 10;
+    var b = parseInt(bSlider.value, 10) / 10;
+    aLabel.textContent = 'a = ' + a.toFixed(1);
+    bLabel.textContent = 'b = ' + b.toFixed(1);
+    if (Math.abs(a - b) < 0.05) {
+      readout.textContent = 'a ≈ b: a repeated pole — needs the (s−a)² partial-fraction form, not covered by this simple case.';
+      curveMount.setFn(function () { return NaN; });
+      return;
+    }
+    var A = 1 / (a - b), B = -A;
+    curveMount.setFn(function (t) { return A * Math.exp(a * t) + B * Math.exp(b * t); });
+    readout.textContent = 'A = 1/(a−b) = ' + A.toFixed(3) + ', B = ' + B.toFixed(3) + '. f(t) = ' + A.toFixed(3) + 'e^(' + a.toFixed(1) + 't) + (' + B.toFixed(3) + ')e^(' + b.toFixed(1) + 't).';
+  }
+
+  aSlider.addEventListener('input', render);
+  bSlider.addEventListener('input', render);
+  render();
+});
+</script>

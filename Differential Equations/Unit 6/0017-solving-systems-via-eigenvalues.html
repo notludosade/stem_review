@@ -1,0 +1,138 @@
+<meta charset="UTF-8">
+<title>Unit 6, Lesson 17: Solving Systems via Eigenvalues — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/interactive.js" defer></script>
+<script src="../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Differential Equations · Unit 6 · Lesson 17</span>
+  <h1>Solving Systems via Eigenvalues</h1>
+  <p class="subtitle">Unit 3 guessed y = e^(rx) and found a characteristic equation in r. The matrix version guesses X = ve^(λt) — and finds the exact same kind of characteristic equation, now in λ.</p>
+  <p class="nav-links"><a href="0016-systems-in-matrix-form.html" class="nav-prev">← Lesson 16</a> <a href="0018-phase-portraits-and-stability.html" class="nav-next">Lesson 18 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <h2>1. The matrix version of the exponential guess</h2>
+  <div class="box">
+    <span class="box-label">Method — The Eigenvalue Guess</span>
+    For X′ = AX, try <strong>X = ve<sup>λt</sup></strong>, where v is a constant vector. Substituting: λve<sup>λt</sup> = Ave<sup>λt</sup>, so <strong>Av = λv</strong> — v must be an <strong>eigenvector</strong> of A with <strong>eigenvalue</strong> λ. A nontrivial solution exists only when <strong>det(A − λI) = 0</strong>, the matrix's characteristic equation — the direct matrix analogue of Unit 3's ar² + br + c = 0.
+  </div>
+  <div class="box">
+    <span class="box-label">Fact — General Solution, Real Distinct Eigenvalues</span>
+    For a 2×2 system with distinct real eigenvalues λ₁ ≠ λ₂ and matching eigenvectors v₁, v₂, the general solution is <strong>X(t) = C₁v₁e<sup>λ₁t</sup> + C₂v₂e<sup>λ₂t</sup></strong> — structurally identical to Unit 3's y = C₁e<sup>r₁x</sup> + C₂e<sup>r₂x</sup>, with a vector attached to each exponential.
+  </div>
+  <div class="box">
+    <span class="box-label">Fact — The 2×2 Characteristic Equation, in Trace and Determinant</span>
+    For A = [[a, b], [c, d]], det(A − λI) expands to <strong>λ² − Tλ + D = 0</strong>, where T = a + d (the <strong>trace</strong>) and D = ad − bc (the <strong>determinant</strong>). Exactly like Unit 3's discriminant, T² − 4D &gt; 0, = 0, or &lt; 0 sorts the eigenvalues into real distinct, repeated, or complex conjugate pairs — the classification Lesson 18 turns into a picture.
+  </div>
+  <div class="box">
+    <span class="box-label">Worked Example</span>
+    Solve X′ = AX for A = [[1, 1], [4, 1]]. Characteristic equation: (1−λ)² − 4 = 0 → λ = 1 ± 2 → <strong>λ₁ = 3, λ₂ = −1</strong>. For λ₁ = 3: (A − 3I)v = 0 gives −2v₁ + v₂ = 0, so v₁ = (1, 2). For λ₂ = −1: (A + I)v = 0 gives 2v₁ + v₂ = 0, so v₂ = (1, −2). General solution: <strong>X(t) = C₁(1, 2)e<sup>3t</sup> + C₂(1, −2)e<sup>−t</sup></strong>.
+  </div>
+
+  <h2>2. Exploring the matrix's eigenvalues</h2>
+  <p>Slide the entries of A = [[a, b], [c, d]] and watch the trace, determinant, and eigenvalue type update.</p>
+
+  <div class="widget">
+    <div class="widget-label">Try It — Eigenvalues of A = [[a, b], [c, d]]</div>
+    <div class="slider-row"><label for="ev-a">a</label><input type="range" id="ev-a" min="-5" max="5" step="1" value="1"><span class="slider-value" id="ev-a-label">a = 1</span></div>
+    <div class="slider-row"><label for="ev-b">b</label><input type="range" id="ev-b" min="-5" max="5" step="1" value="1"><span class="slider-value" id="ev-b-label">b = 1</span></div>
+    <div class="slider-row"><label for="ev-c">c</label><input type="range" id="ev-c" min="-5" max="5" step="1" value="4"><span class="slider-value" id="ev-c-label">c = 4</span></div>
+    <div class="slider-row"><label for="ev-d">d</label><input type="range" id="ev-d" min="-5" max="5" step="1" value="1"><span class="slider-value" id="ev-d-label">d = 1</span></div>
+    <p class="plot-readout" id="ev-readout">—</p>
+  </div>
+
+  <h2>Check your recall</h2>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. Substituting X = ve^(λt) into X′ = AX leads to the condition:</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Av = λv</button>
+      <button class="quiz-choice" data-correct="false">Av = λ</button>
+      <button class="quiz-choice" data-correct="false">A = λv</button>
+      <button class="quiz-choice" data-correct="false">v = λAv</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>λve^(λt) = Ave^(λt) simplifies (dividing out e^(λt), never zero) to Av = λv — the defining equation of an eigenvalue/eigenvector pair.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="0">
+    <p class="quiz-prompt">2. Fill in the blank: a nontrivial eigenvector v exists only when det(A − λI) = ___</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>(A − λI)v = 0 has a nonzero solution v only when A − λI is singular, i.e. det(A − λI) = 0 — the matrix characteristic equation.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. For A = [[1, 1], [4, 1]], the eigenvalues are:</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">3 and −1</button>
+      <button class="quiz-choice" data-correct="false">1 and 4</button>
+      <button class="quiz-choice" data-correct="false">2 and −2</button>
+      <button class="quiz-choice" data-correct="false">5 and −3</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>(1−λ)² − (1)(4) = 0 → (1−λ)² = 4 → 1−λ = ±2 → λ = 3 or λ = −1.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="-1">
+    <p class="quiz-prompt">4. Fill in the blank: for A = [[1, 1], [4, 1]], the general solution X(t) = C₁(1,2)e^(3t) + C₂(1,−2)e^(___t)</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The second eigenvalue found in the worked example was λ₂ = −1, matching eigenvector (1, −2).</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">5. For a 2×2 matrix, the characteristic equation in terms of trace T and determinant D is:</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">λ² − Tλ + D = 0</button>
+      <button class="quiz-choice" data-correct="false">λ² + Tλ − D = 0</button>
+      <button class="quiz-choice" data-correct="false">λ² − Dλ + T = 0</button>
+      <button class="quiz-choice" data-correct="false">Tλ² − λ + D = 0</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Expanding det(A − λI) for a 2×2 matrix always produces λ² − Tλ + D = 0 — the trace and determinant are all that's needed, without writing out a, b, c, d individually.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p><a href="https://tutorial.math.lamar.edu/Classes/DE/RealEigenvalues.aspx">Paul's Online Math Notes, "Review: Eigenvalues and Eigenvectors"</a> and its linked "Real Eigenvalues" page walk through the full solving process with further examples.</p>
+
+  <p class="ask-teacher">Everything about this method is Unit 3's characteristic-equation idea, one dimension up — a vector-valued exponential guess instead of a scalar one. Ask for a refresher on finding eigenvectors by hand (row-reducing A − λI) if that step still feels shaky. Lesson 18 takes the eigenvalue classification from this lesson's widget and turns it into a picture: a phase portrait showing exactly how the system behaves over time.</p>
+
+  <footer class="lesson-footer">STEM+ · Differential Equations · Unit 6 · Lesson 2 of 3</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var sliders = ['a', 'b', 'c', 'd'].map(function (k) { return document.getElementById('ev-' + k); });
+  var labels = ['a', 'b', 'c', 'd'].map(function (k) { return document.getElementById('ev-' + k + '-label'); });
+  var readout = document.getElementById('ev-readout');
+
+  function fmt(v) { return String(Math.round(v * 1000) / 1000); }
+
+  function render() {
+    var vals = sliders.map(function (s) { return parseInt(s.value, 10); });
+    labels.forEach(function (l, i) { l.textContent = ['a', 'b', 'c', 'd'][i] + ' = ' + vals[i]; });
+    var a = vals[0], b = vals[1], c = vals[2], d = vals[3];
+    var T = a + d, D = a * d - b * c;
+    var disc = T * T - 4 * D;
+    var msg = 'Trace T = ' + T + ', Determinant D = ' + D + '. ';
+    if (disc > 0) {
+      var l1 = (T + Math.sqrt(disc)) / 2, l2 = (T - Math.sqrt(disc)) / 2;
+      msg += 'Real distinct eigenvalues: λ = ' + fmt(l1) + ', ' + fmt(l2) + '.';
+    } else if (disc === 0) {
+      msg += 'Repeated eigenvalue: λ = ' + fmt(T / 2) + '.';
+    } else {
+      var re = T / 2, im = Math.sqrt(-disc) / 2;
+      msg += 'Complex conjugate eigenvalues: λ = ' + fmt(re) + ' ± ' + fmt(im) + 'i.';
+    }
+    readout.textContent = msg;
+  }
+
+  sliders.forEach(function (s) { s.addEventListener('input', render); });
+  render();
+});
+</script>

@@ -1,0 +1,174 @@
+<meta charset="UTF-8">
+<title>Lesson 9: Rank and the Structure of Solution Sets — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Linear Algebra A · Unit 3 · Lesson 9</span>
+  <h1>Rank and the Structure of Solution Sets</h1>
+  <p class="subtitle">One number, read straight off row echelon form, that predicts exactly how many solutions a system has — before you even finish solving it.</p>
+  <p class="nav-links"><a href="0008-gaussian-elimination-and-row-echelon-form.html" class="nav-prev">← Lesson 8</a> <a href="../Unit%204/0010-linear-independence-and-dependence.html" class="nav-next">Lesson 10 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Lesson 8 ended with "run elimination and see what happens." This lesson names the thing you're actually watching for — <strong>rank</strong> — and turns it into a complete, three-way classification of every possible solution set a system can have.</p>
+
+  <h2>1. Rank</h2>
+  <div class="box">
+    <span class="box-label">Definition — Rank</span>
+    The <strong>rank</strong> of a matrix is the number of pivot positions (equivalently, the number of nonzero rows) in its row echelon form. Extra equations that don't add new information — duplicates, or combinations of other rows — reduce to a zero row during elimination and don't raise the rank.
+  </div>
+  <div class="box why">
+    <span class="box-label">Why rank, not just "number of equations"</span>
+    Writing down five equations doesn't guarantee five pieces of independent information — one might just be 2 times another. Rank measures the information that survives elimination, which is what actually determines whether a system pins down a unique answer.
+  </div>
+
+  <h2>2. Classifying the solution set</h2>
+  <div class="box">
+    <span class="box-label">Theorem — Rank and Solutions</span>
+    For a system with n variables, let r = rank(A) and r′ = rank([A | b]) (the augmented matrix). Exactly one of three cases holds: <strong>r′ &gt; r</strong> — no solution (some row reduces to 0 = nonzero). <strong>r′ = r = n</strong> — exactly one solution. <strong>r′ = r &lt; n</strong> — infinitely many solutions, with n − r free variables.
+  </div>
+
+  <p>Type a 3-equation, 3-unknown augmented matrix below and watch its rank — and its solution classification — update live.</p>
+
+  <div class="widget">
+    <div class="widget-label">Try It — Rank and Solution Type</div>
+    <p style="font-size: 0.85rem; color: var(--muted);">Rows are [a, b, c | d] for ax + by + cz = d.</p>
+    <div style="display: inline-grid; grid-template-columns: repeat(4, 3.4rem); gap: 0.4rem; border: 1px solid var(--border); border-radius: 6px; padding: 0.6rem;">
+      <input type="number" class="fm-input" id="l9-r0c0" value="1"><input type="number" class="fm-input" id="l9-r0c1" value="1"><input type="number" class="fm-input" id="l9-r0c2" value="1"><input type="number" class="fm-input" id="l9-r0c3" value="6">
+      <input type="number" class="fm-input" id="l9-r1c0" value="2"><input type="number" class="fm-input" id="l9-r1c1" value="2"><input type="number" class="fm-input" id="l9-r1c2" value="2"><input type="number" class="fm-input" id="l9-r1c3" value="12">
+      <input type="number" class="fm-input" id="l9-r2c0" value="1"><input type="number" class="fm-input" id="l9-r2c1" value="-1"><input type="number" class="fm-input" id="l9-r2c2" value="0"><input type="number" class="fm-input" id="l9-r2c3" value="1">
+    </div>
+    <p class="plot-readout" id="l9-rank-readout" style="margin-top: 1rem;">rank(A) = 2, rank([A|b]) = 2</p>
+    <p class="plot-readout" id="l9-verdict-readout">Infinitely many solutions (1 free variable).</p>
+  </div>
+
+  <h2>Check your recall</h2>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What does the rank of a matrix measure?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">The number of pivot positions (nonzero rows) in row echelon form.</button>
+      <button class="quiz-choice" data-correct="false">The total number of rows, regardless of content.</button>
+      <button class="quiz-choice" data-correct="false">The largest entry in the matrix.</button>
+      <button class="quiz-choice" data-correct="false">The number of variables in the system.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Rank counts genuinely independent rows after elimination — redundant rows collapse to zero and don't count.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. A 3×3 matrix reduces to row echelon form [[1,2,3],[0,1,4],[0,0,0]]. What is its rank?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">2</button>
+      <button class="quiz-choice" data-correct="false">3</button>
+      <button class="quiz-choice" data-correct="false">1</button>
+      <button class="quiz-choice" data-correct="false">0</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Two rows have pivots (nonzero leading entries); the bottom row is entirely zero and contributes nothing — rank 2.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="unique|exactly one|one solution">
+    <p class="quiz-prompt">3. Fill in the blank: if rank(A) = rank([A|b]) = n (the number of variables), the system has a ___ solution.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Full rank matching the number of variables means every variable is pinned down by its own pivot — exactly one solution.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">4. If rank(A) &lt; rank([A|b]), what does that tell you about the system?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">It has no solution.</button>
+      <button class="quiz-choice" data-correct="false">It has exactly one solution.</button>
+      <button class="quiz-choice" data-correct="false">It has infinitely many solutions.</button>
+      <button class="quiz-choice" data-correct="false">A must be the zero matrix.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Adding column b raised the rank, which only happens when some row becomes 0 = (nonzero) — a contradiction, so no solution exists.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="2">
+    <p class="quiz-prompt">5. Fill in the blank: for a system in n = 4 variables with rank(A) = rank([A|b]) = 2, there are ___ free variables.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Free variables = n − r = 4 − 2 = 2 — two variables can be chosen freely, with the other two determined in terms of them.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p><a href="https://www.khanacademy.org/math/linear-algebra/vectors-and-spaces">Khan Academy's Vectors and Spaces unit</a> covers rank alongside null space and column space, connecting this lesson directly to Unit 4's basis and dimension.</p>
+
+  <p class="ask-teacher">Ask your teacher to build a 3-equation system for each of the three cases (unique, infinite, none) if you want to see rank predict the outcome before any back-substitution happens. Next up: leaving systems behind for a moment to ask a closely related question about vectors themselves — when is a set of them "independent"?</p>
+
+  <footer class="lesson-footer">STEM+ · Linear Algebra A · Lesson 9 of the course sequence</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var ids = [];
+  for (var r = 0; r < 3; r++) { for (var c = 0; c < 4; c++) { ids.push('l9-r' + r + 'c' + c); } }
+  var els = {};
+  ids.forEach(function (id) { els[id] = document.getElementById(id); });
+  var rankOut = document.getElementById('l9-rank-readout');
+  var verdictOut = document.getElementById('l9-verdict-readout');
+
+  function num(id) { var v = parseFloat(els[id].value); return isNaN(v) ? 0 : v; }
+
+  function readRows() {
+    var rows = [];
+    for (var r = 0; r < 3; r++) {
+      var row = [];
+      for (var c = 0; c < 4; c++) { row.push(num('l9-r' + r + 'c' + c)); }
+      rows.push(row);
+    }
+    return rows;
+  }
+
+  function computeRank(rows) {
+    var m = rows.map(function (row) { return row.slice(); });
+    var numRows = m.length, numCols = m[0].length;
+    var eps = 1e-9;
+    var rank = 0;
+    for (var col = 0; col < numCols && rank < numRows; col++) {
+      var pivotRow = -1, maxVal = eps;
+      for (var rr = rank; rr < numRows; rr++) {
+        if (Math.abs(m[rr][col]) > maxVal) { maxVal = Math.abs(m[rr][col]); pivotRow = rr; }
+      }
+      if (pivotRow === -1) continue;
+      var tmp = m[rank]; m[rank] = m[pivotRow]; m[pivotRow] = tmp;
+      for (var r2 = rank + 1; r2 < numRows; r2++) {
+        var factor = m[r2][col] / m[rank][col];
+        for (var c2 = col; c2 < numCols; c2++) { m[r2][c2] -= factor * m[rank][c2]; }
+      }
+      rank++;
+    }
+    return rank;
+  }
+
+  function render() {
+    var augmented = readRows();
+    var coeffOnly = augmented.map(function (row) { return row.slice(0, 3); });
+    var rA = computeRank(coeffOnly);
+    var rAb = computeRank(augmented);
+    rankOut.textContent = 'rank(A) = ' + rA + ', rank([A|b]) = ' + rAb;
+
+    var n = 3;
+    if (rAb > rA) {
+      verdictOut.textContent = 'No solution — some row reduces to 0 = (nonzero).';
+      verdictOut.className = 'plot-readout is-fail';
+    } else if (rA === n) {
+      verdictOut.textContent = 'Exactly one solution.';
+      verdictOut.className = 'plot-readout is-pass';
+    } else {
+      verdictOut.textContent = 'Infinitely many solutions (' + (n - rA) + ' free variable' + (n - rA === 1 ? '' : 's') + ').';
+      verdictOut.className = 'plot-readout is-pass';
+    }
+  }
+
+  ids.forEach(function (id) { els[id].addEventListener('input', render); });
+  render();
+});
+</script>

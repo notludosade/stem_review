@@ -1,0 +1,153 @@
+<meta charset="UTF-8">
+<title>Lesson 15: The Determinant and Invertibility — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Linear Algebra A · Unit 5 · Lesson 15</span>
+  <h1>The Determinant and Invertibility</h1>
+  <p class="subtitle">Every thread from Units 2 through 5 — inverses, independence, rank, area — ties together at exactly one number.</p>
+  <p class="nav-links"><a href="0014-properties-of-determinants.html" class="nav-prev">← Lesson 14</a> <a href="../Unit%206/0016-eigenvalues-and-the-characteristic-polynomial.html" class="nav-next">Lesson 16 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Lesson 6 introduced ad − bc as the thing you divide by to build an inverse. Lesson 12 showed the same quantity measuring area-scaling. This lesson makes the connection precise, for square matrices of any size — and collects several other equivalent conditions along with it.</p>
+
+  <h2>1. The theorem</h2>
+  <div class="box">
+    <span class="box-label">Theorem — Determinant and Invertibility</span>
+    A square matrix A is invertible <strong>if and only if</strong> det(A) ≠ 0. Equivalently, for a square A, all of the following are either simultaneously true or simultaneously false: A is invertible · det(A) ≠ 0 · the columns of A are linearly independent · Ax = b has a unique solution for every b · rank(A) equals the size of A.
+  </div>
+  <div class="box why">
+    <span class="box-label">Why det(A) = 0 breaks invertibility</span>
+    Lesson 12 showed a linear transformation's area-scaling factor is |det(A)|. When det(A) = 0, the transformation squashes the entire plane down onto a line (or a point) — genuinely different input vectors get flattened onto the same output. An inverse would need to know which input produced a given output, and once information like that is destroyed, there's no way to recover it. This is precisely why the 2×2 inverse formula divides by ad − bc: dividing by 0 is the algebra's way of refusing to invert something that can't be inverted.
+  </div>
+
+  <p>Type a 2×2 matrix and watch the transformed square collapse to a line exactly when det(A) = 0.</p>
+
+  <div class="widget">
+    <div class="widget-label">Try It — Watching Invertibility Fail</div>
+    <div style="display: inline-grid; grid-template-columns: repeat(2, 3.4rem); gap: 0.4rem; border: 1px solid var(--border); border-radius: 6px; padding: 0.6rem;">
+      <input type="number" class="fm-input" id="l15-a" value="2">
+      <input type="number" class="fm-input" id="l15-b" value="1">
+      <input type="number" class="fm-input" id="l15-c" value="4">
+      <input type="number" class="fm-input" id="l15-d" value="2">
+    </div>
+    <div class="plot-wrap" style="margin-top: 0.8rem;">
+      <svg viewBox="0 0 400 400" width="400" height="400" role="img" aria-label="A grid showing the unit square before (dashed) and after (solid) a matrix transformation, collapsing to a line when the determinant is zero">
+        <defs>
+          <marker id="l15-arrow-orig" markerWidth="7" markerHeight="7" refX="5" refY="3.5" orient="auto"><path d="M0,0 L7,3.5 L0,7 z" fill="var(--muted)"></path></marker>
+          <marker id="l15-arrow-t" markerWidth="7" markerHeight="7" refX="5" refY="3.5" orient="auto"><path d="M0,0 L7,3.5 L0,7 z" fill="var(--accent)"></path></marker>
+        </defs>
+        <line class="fig-axis" x1="10" y1="200" x2="390" y2="200"></line>
+        <line class="fig-axis" x1="200" y1="10" x2="200" y2="390"></line>
+        <polygon points="200,200 225,200 225,175 200,175" fill="none" stroke="var(--muted)" stroke-width="1.5" stroke-dasharray="4 3"></polygon>
+        <polygon id="l15-tsquare" points="200,200 250,100 275,50 225,150" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="2"></polygon>
+        <line id="l15-ti" x1="200" y1="200" x2="250" y2="100" stroke="var(--accent)" stroke-width="2.5" marker-end="url(#l15-arrow-t)"></line>
+        <line id="l15-tj" x1="200" y1="200" x2="225" y2="150" stroke="var(--accent)" stroke-width="2.5" marker-end="url(#l15-arrow-t)"></line>
+      </svg>
+    </div>
+    <p class="plot-readout" id="l15-readout">det(A) = 0 → singular. The transformed square has collapsed onto a line — A has no inverse.</p>
+  </div>
+
+  <h2>Check your recall</h2>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. A square matrix A is invertible exactly when:</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">det(A) ≠ 0.</button>
+      <button class="quiz-choice" data-correct="false">det(A) = 0.</button>
+      <button class="quiz-choice" data-correct="false">A has only positive entries.</button>
+      <button class="quiz-choice" data-correct="false">A is a diagonal matrix.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A nonzero determinant is the exact if-and-only-if condition for invertibility of a square matrix.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Is A = [[3, 6], [1, 2]] invertible?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">No — det(A) = (3)(2) − (6)(1) = 0.</button>
+      <button class="quiz-choice" data-correct="false">Yes — det(A) = 12.</button>
+      <button class="quiz-choice" data-correct="false">Yes, every 2×2 matrix is invertible.</button>
+      <button class="quiz-choice" data-correct="false">Cannot be determined.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Row 2 is exactly half of row 1, so det(A) = 6 − 6 = 0 — A is singular, not invertible.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="dependent">
+    <p class="quiz-prompt">3. Fill in the blank: if det(A) = 0 for a square matrix A, the columns of A are linearly ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>det(A) = 0 is one of several equivalent ways of saying A's columns aren't independent — one column is a combination of the others.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">4. Geometrically, what happens to the plane under a transformation whose matrix has determinant 0?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">It gets squashed onto a lower-dimensional set — a line or a point.</button>
+      <button class="quiz-choice" data-correct="false">It gets stretched uniformly in every direction.</button>
+      <button class="quiz-choice" data-correct="false">Nothing changes — every point stays fixed.</button>
+      <button class="quiz-choice" data-correct="false">It gets rotated by 90°.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>An area-scaling factor of |det(A)| = 0 means every region's area becomes 0 — the whole plane flattens onto something with less than two dimensions.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="no|not invertible">
+    <p class="quiz-prompt">5. Fill in the blank (yes/no): if det(A) = 0 for a 5×5 matrix A, is A invertible?</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The theorem holds for square matrices of any size, not just 2×2 or 3×3 — det(A) = 0 always rules out an inverse.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p><a href="https://www.khanacademy.org/math/linear-algebra/matrix-transformations">Khan Academy's Matrix Transformations unit</a>, in "Finding inverses and determinants" and "More determinant depth," proves this if-and-only-if relationship directly from the cofactor formula for the inverse.</p>
+
+  <p class="ask-teacher">Ask your teacher for a 3×3 matrix to test invertibility on using the full theorem (any one of the equivalent conditions is enough to check) as review before Unit 6. Next up: eigenvalues — the special directions a matrix stretches instead of rotates.</p>
+
+  <footer class="lesson-footer">STEM+ · Linear Algebra A · Lesson 15 of the course sequence</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var originX = 200, originY = 200, scale = 25;
+  var ids = ['l15-a', 'l15-b', 'l15-c', 'l15-d'];
+  var els = {};
+  ids.forEach(function (id) { els[id] = document.getElementById(id); });
+  var tsquare = document.getElementById('l15-tsquare');
+  var tiLine = document.getElementById('l15-ti');
+  var tjLine = document.getElementById('l15-tj');
+  var readout = document.getElementById('l15-readout');
+
+  function num(id) { var v = parseFloat(els[id].value); return isNaN(v) ? 0 : v; }
+  function fmt(v) { return String(Math.round(v * 1000) / 1000); }
+  function toSvgX(x) { return originX + x * scale; }
+  function toSvgY(y) { return originY - y * scale; }
+
+  function render() {
+    var a = num('l15-a'), b = num('l15-b'), c = num('l15-c'), d = num('l15-d');
+    var corners = [[0, 0], [a, c], [a + b, c + d], [b, d]];
+    var pts = corners.map(function (p) { return toSvgX(p[0]) + ',' + toSvgY(p[1]); }).join(' ');
+    tsquare.setAttribute('points', pts);
+    tiLine.setAttribute('x2', toSvgX(a)); tiLine.setAttribute('y2', toSvgY(c));
+    tjLine.setAttribute('x2', toSvgX(b)); tjLine.setAttribute('y2', toSvgY(d));
+
+    var det = a * d - b * c;
+    if (det === 0) {
+      readout.textContent = 'det(A) = 0 → singular. The transformed square has collapsed onto a line — A has no inverse.';
+      readout.className = 'plot-readout is-fail';
+    } else {
+      readout.textContent = 'det(A) = ' + fmt(det) + ' → invertible. The transformed square keeps its area (' + fmt(Math.abs(det)) + '× original) and stays two-dimensional.';
+      readout.className = 'plot-readout is-pass';
+    }
+  }
+
+  ids.forEach(function (id) { els[id].addEventListener('input', render); });
+  render();
+});
+</script>

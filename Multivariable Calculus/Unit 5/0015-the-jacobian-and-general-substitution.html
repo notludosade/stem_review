@@ -1,0 +1,181 @@
+<meta charset="UTF-8">
+<title>Unit 5, Lesson 15: The Jacobian and General Substitution — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/interactive.js" defer></script>
+<script src="../../assets/quiz.js" defer></script>
+<div class="page">
+  <span class="kicker">STEM+ · Multivariable Calculus · Unit 5 · Lesson 15</span>
+  <h1>The Jacobian and General Substitution</h1>
+  <p class="subtitle">Polar's extra r and spherical's extra ρ² sin φ weren't two unrelated tricks — they're both the same single formula, evaluated for two particular coordinate changes.</p>
+  <p class="nav-links"><a href="0014-cylindrical-and-spherical-coordinates.html" class="nav-prev">← Lesson 14</a> <a href="../Unit%206/0016-vector-fields.html" class="nav-next">Lesson 16 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <h2>1. One formula behind every coordinate change</h2>
+  <div class="box">
+    <span class="box-label">Definition — The Jacobian</span>
+    For a transformation x = x(u,v), y = y(u,v), the <strong>Jacobian</strong> is <strong>J = ∂(x,y)/∂(u,v) = (∂x/∂u)(∂y/∂v) − (∂x/∂v)(∂y/∂u)</strong> — the determinant of the matrix of first partial derivatives. |J| measures how much a tiny patch of area near (u,v) is stretched or shrunk once mapped into (x,y)-space.
+  </div>
+  <div class="box">
+    <span class="box-label">Method — General Substitution</span>
+    For a region R in (x,y) that's the image of a region S in (u,v) under a one-to-one transformation T: <strong>∬<sub>R</sub> f(x,y) dx dy = ∬<sub>S</sub> f(x(u,v), y(u,v)) · |J| du dv</strong>. This is the direct two-variable generalization of single-variable u-substitution's du = g′(x)dx — the Jacobian is what g′(x) becomes once there are two variables to track.
+  </div>
+  <div class="box">
+    <span class="box-label">Worked Example — Recovering Polar Coordinates</span>
+    For x = r cos θ, y = r sin θ: ∂x/∂r = cos θ, ∂x/∂θ = −r sin θ, ∂y/∂r = sin θ, ∂y/∂θ = r cos θ. So <strong>J = (cos θ)(r cos θ) − (−r sin θ)(sin θ) = r cos²θ + r sin²θ = r</strong>. |J| = r exactly recovers Lesson 13's dA = r dr dθ — polar coordinates were a special case of this formula all along.
+  </div>
+  <div class="box why">
+    <span class="box-label">Why This Matters</span>
+    Any awkward region can potentially be straightened into a simple rectangle by choosing the right (u,v), at the one-time cost of computing a Jacobian — the same trade every coordinate change in this unit has been making. Spherical coordinates' ρ² sin φ factor from Lesson 14 is this exact same determinant, just built from three variables instead of two.
+  </div>
+
+  <h2>2. Watching a grid stretch under a transformation</h2>
+  <p>Drag the point in the (u,v)-grid on the left. Its image under T(u,v) = (u² − v², 2uv) appears on the right, along with the local Jacobian — the factor by which area is being stretched right at that point.</p>
+
+  <div class="widget">
+    <div class="widget-label">Try It — The Jacobian as a Local Area Scale Factor</div>
+    <div class="plot-wrap">
+      <svg id="jac-svg" viewBox="0 0 460 300" width="460" height="300" role="img" aria-label="A uv grid on the left and its image under a transformation on the right, with a draggable point and the local Jacobian value">
+        <text x="105" y="14" font-size="12" text-anchor="middle" fill="#666">(u, v)-space</text>
+        <text x="350" y="14" font-size="12" text-anchor="middle" fill="#666">(x, y)-space</text>
+        <line x1="230" y1="20" x2="230" y2="270" stroke="#ddd" stroke-width="1"></line>
+        <g id="jac-left-grid" fill="none" stroke="#2c5f8a" stroke-width="1" opacity="0.5"></g>
+        <g id="jac-right-grid" fill="none" stroke="#1f7a63" stroke-width="1" opacity="0.5"></g>
+        <circle id="jac-left-point" r="6" fill="#c0392b" style="cursor:grab"></circle>
+        <circle id="jac-right-point" r="6" fill="#c0392b"></circle>
+      </svg>
+    </div>
+    <p class="plot-readout" id="jac-readout">—</p>
+  </div>
+
+  <h2>Check your recall</h2>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. The Jacobian J = ∂(x,y)/∂(u,v) is computed as:</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">(∂x/∂u)(∂y/∂v) − (∂x/∂v)(∂y/∂u)</button>
+      <button class="quiz-choice" data-correct="false">(∂x/∂u) + (∂y/∂v)</button>
+      <button class="quiz-choice" data-correct="false">(∂x/∂u)(∂y/∂v) + (∂x/∂v)(∂y/∂u)</button>
+      <button class="quiz-choice" data-correct="false">(∂x/∂u)(∂x/∂v)</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The Jacobian is a 2×2 determinant of partial derivatives — the same cross-multiply-and-subtract pattern as any 2×2 determinant.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="2">
+    <p class="quiz-prompt">2. For T(u,v) = (u+v, u−v), |J| = ___ (this Jacobian happens to be the same everywhere)</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>∂x/∂u=1, ∂x/∂v=1, ∂y/∂u=1, ∂y/∂v=-1, so J = (1)(-1) - (1)(1) = -2, and |J| = 2.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. The general substitution formula for a double integral is:</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">∬<sub>R</sub> f(x,y) dx dy = ∬<sub>S</sub> f(x(u,v),y(u,v)) |J| du dv</button>
+      <button class="quiz-choice" data-correct="false">∬<sub>R</sub> f(x,y) dx dy = ∬<sub>S</sub> f(x(u,v),y(u,v)) du dv</button>
+      <button class="quiz-choice" data-correct="false">∬<sub>R</sub> f(x,y) dx dy = J · ∬<sub>S</sub> f(u,v) du dv</button>
+      <button class="quiz-choice" data-correct="false">∬<sub>R</sub> f(x,y) dx dy = ∬<sub>S</sub> f(x(u,v),y(u,v)) / J du dv</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The Jacobian's absolute value multiplies the transformed integrand — dropping the absolute value, or dropping J entirely, both give the wrong scaling.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">4. For x = r cos θ, y = r sin θ, the Jacobian ∂(x,y)/∂(r,θ) equals:</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">r</button>
+      <button class="quiz-choice" data-correct="false">1</button>
+      <button class="quiz-choice" data-correct="false">r²</button>
+      <button class="quiz-choice" data-correct="false">θ</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Working out the 2×2 determinant of partials gives r cos²θ + r sin²θ = r — exactly polar's dA = r dr dθ factor.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p><a href="https://openstax.org/books/calculus-volume-3/pages/5-7-change-of-variables-in-multiple-integrals">OpenStax Calculus Volume 3, §5.7 "Change of Variables in Multiple Integrals"</a> defines the Jacobian in full generality and derives both polar and spherical coordinates as special cases.</p>
+
+  <p class="ask-teacher">At (u,v) = (0,0), the transformation T(u,v) = (u² − v², 2uv) has Jacobian |J| = 4(0² + 0²) = 0. Ask your teacher what a Jacobian of exactly 0 means about the transformation right at that point — and why the general substitution formula requires T to be one-to-one almost everywhere, not just somewhere. Unit 5 is complete. Unit 6 leaves scalar-valued functions behind and builds functions that assign an entire vector to every point in space.</p>
+
+  <footer class="lesson-footer">STEM+ · Multivariable Calculus · Unit 5 · Lesson 15 of 24</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var svg = document.getElementById('jac-svg');
+  var leftGrid = document.getElementById('jac-left-grid');
+  var rightGrid = document.getElementById('jac-right-grid');
+  var leftPoint = document.getElementById('jac-left-point');
+  var rightPoint = document.getElementById('jac-right-point');
+  var readout = document.getElementById('jac-readout');
+
+  var Lox = 20, Loy = 260, Ls = 150;
+  var Rox = 350, Roy = 260, Rs = 58;
+
+  function Tmap(u, v) { return { x: u * u - v * v, y: 2 * u * v }; }
+  function toLeft(u, v) { return { x: Lox + u * Ls, y: Loy - v * Ls }; }
+  function toRight(x, y) { return { x: Rox + x * Rs, y: Roy - y * Rs }; }
+
+  function drawGrid(container, mapFn, isRight) {
+    container.innerHTML = '';
+    var levels = [0, 0.3, 0.6, 0.9, 1.2];
+    levels.forEach(function (u0) {
+      var pts = [];
+      for (var i = 0; i <= 20; i++) {
+        var v = (i / 20) * 1.2;
+        var p = isRight ? toRight(Tmap(u0, v).x, Tmap(u0, v).y) : toLeft(u0, v);
+        pts.push(p.x + ',' + p.y);
+      }
+      var pl = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
+      pl.setAttribute('points', pts.join(' '));
+      container.appendChild(pl);
+    });
+    levels.forEach(function (v0) {
+      var pts = [];
+      for (var i = 0; i <= 20; i++) {
+        var u = (i / 20) * 1.2;
+        var p = isRight ? toRight(Tmap(u, v0).x, Tmap(u, v0).y) : toLeft(u, v0);
+        pts.push(p.x + ',' + p.y);
+      }
+      var pl = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
+      pl.setAttribute('points', pts.join(' '));
+      container.appendChild(pl);
+    });
+  }
+  drawGrid(leftGrid, null, false);
+  drawGrid(rightGrid, Tmap, true);
+
+  var dragging = false;
+  function toSvgPoint(evt) {
+    var pt = svg.createSVGPoint();
+    pt.x = evt.clientX; pt.y = evt.clientY;
+    return pt.matrixTransform(svg.getScreenCTM().inverse());
+  }
+
+  function render(u, v) {
+    u = STEMPlus.clamp(u, 0, 1.2);
+    v = STEMPlus.clamp(v, 0, 1.2);
+    var pL = toLeft(u, v);
+    leftPoint.setAttribute('cx', pL.x); leftPoint.setAttribute('cy', pL.y);
+    var img = Tmap(u, v);
+    var pR = toRight(img.x, img.y);
+    rightPoint.setAttribute('cx', pR.x); rightPoint.setAttribute('cy', pR.y);
+
+    var J = 4 * (u * u + v * v);
+    readout.textContent = '(u,v) = (' + u.toFixed(2) + ', ' + v.toFixed(2) + ') → (x,y) = (' + img.x.toFixed(2) + ', ' + img.y.toFixed(2) +
+      '). |J| = 4(u²+v²) = ' + J.toFixed(2) + ' — a small patch here is scaled by about ' + J.toFixed(2) + '×.';
+  }
+
+  leftPoint.addEventListener('pointerdown', function (evt) { dragging = true; leftPoint.setPointerCapture(evt.pointerId); });
+  svg.addEventListener('pointermove', function (evt) {
+    if (!dragging) return;
+    var p = toSvgPoint(evt);
+    render((p.x - Lox) / Ls, (Loy - p.y) / Ls);
+  });
+  leftPoint.addEventListener('pointerup', function () { dragging = false; });
+
+  render(0.9, 0.5);
+});
+</script>
