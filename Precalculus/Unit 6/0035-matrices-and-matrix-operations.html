@@ -1,12 +1,12 @@
 <meta charset="UTF-8">
-<title>Lesson 35: Matrices and Matrix Operations — STEM+</title>
+<title>Lesson 35: Matrices, Vectors, and Their Operations — STEM+</title>
 <link rel="stylesheet" href="../../assets/style.css">
 <script src="../../assets/interactive.js" defer></script>
 <script src="../../assets/quiz.js" defer></script>
 <div class="page" data-tier="intro">
   <span class="kicker">STEM+ · Precalculus · Unit 6 · Lesson 35</span>
-  <h1>Matrices and Matrix Operations</h1>
-  <p class="subtitle">A rectangular grid of numbers, stripped of variable names — and a small set of rules for combining two of them into a third.</p>
+  <h1>Matrices, Vectors, and Their Operations</h1>
+  <p class="subtitle">A rectangular grid of numbers, stripped of variable names — a small set of rules for combining two of them into a third — and the special one-row or one-column case that shows up everywhere: the vector.</p>
   <p class="nav-links"><a href="0034-nonlinear-systems-and-partial-fractions.html" class="nav-prev">← Lesson 34</a> <a href="0036-gaussian-elimination-and-inverses.html" class="nav-next">Lesson 36 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
 
   <p>A <strong>matrix</strong> is a rectangular array of numbers, enclosed in brackets, usually named with a capital letter. A <strong>row</strong> runs horizontally, a <strong>column</strong> runs vertically, and each number is an <strong>entry</strong>. A matrix with m rows and n columns has <strong>dimensions</strong> m × n. Strip the x's and y's out of a system of linear equations and only the coefficients remain — arranged in rows and columns, that's a matrix, and it's exactly the representation the next few lessons build on.</p>
@@ -42,6 +42,55 @@
       <button class="quiz-fill-check" id="mat-next">Next Entry →</button>
       <button class="quiz-fill-check" id="mat-reset">Reset</button>
     </div>
+  </div>
+
+  <h2>4. Vectors: the one-row (or one-column) special case</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    A <strong>vector</strong> is an ordered list of numbers — equivalently, a 1×n matrix (a <em>row vector</em>) or an n×1 matrix (a <em>column vector</em>). Written in component form, a 2D vector looks like v = ⟨3, −2⟩ or as a column [[3], [−2]]. Geometrically, a vector represents a <strong>magnitude</strong> (length) and a <strong>direction</strong> — drawn as an arrow from one point to another, most often from the origin. Two arrows with the same length and direction represent the <em>same</em> vector, no matter where they're drawn; only the components matter, not the starting point.
+  </div>
+  <div class="box why">
+    <span class="box-label">Why "just a matrix with one row" undersells what a vector does</span>
+    Treating a vector as a skinny matrix is technically accurate and useful — it means every addition, subtraction, and scalar-multiplication rule from Section 1 applies to vectors with zero new rules to learn. But a vector also carries geometric meaning a general matrix doesn't: a displacement, a velocity, a force. That dual identity — "a matrix by the rules, an arrow by the meaning" — is exactly why vectors get their own name instead of just being called "a matrix."
+  </div>
+
+  <h2>5. Vector operations</h2>
+  <div class="box">
+    <span class="box-label">Rule — Vector Addition and Scalar Multiplication</span>
+    Vector addition is component-wise, same as matrix addition: ⟨3, −2⟩ + ⟨1, 4⟩ = ⟨4, 2⟩. Geometrically, this is "tip-to-tail": draw the second vector starting where the first one ends, and the sum is the arrow from the very start to the very end. Scalar multiplication scales every component: 2⟨3, −2⟩ = ⟨6, −4⟩ — geometrically, a vector twice as long, pointing the same direction (or the opposite direction, for a negative scalar).
+  </div>
+  <div class="box">
+    <span class="box-label">Rule — Magnitude</span>
+    The <strong>magnitude</strong> (length) of v = ⟨x, y⟩ is ‖v‖ = √(x² + y²) — literally the Pythagorean theorem, treating the vector as the hypotenuse of a right triangle formed by its components. A <strong>unit vector</strong> has magnitude exactly 1; dividing any nonzero vector by its own magnitude produces a unit vector pointing the same direction.
+  </div>
+  <div class="box">
+    <span class="box-label">Worked Example</span>
+    For v = ⟨3, −4⟩: ‖v‖ = √(3² + (−4)²) = √(9 + 16) = √25 = 5. The unit vector in v's direction is v/5 = ⟨3/5, −4/5⟩ — check: ‖⟨3/5, −4/5⟩‖ = √(9/25 + 16/25) = √(25/25) = 1.
+  </div>
+
+  <h2>6. The dot product: where vectors and matrix multiplication meet again</h2>
+  <div class="box">
+    <span class="box-label">Rule — Dot Product</span>
+    For v = ⟨v₁, v₂⟩ and w = ⟨w₁, w₂⟩, the <strong>dot product</strong> is v · w = v₁w₁ + v₂w₂ — a single number, not a vector. Notice this is exactly the "multiply corresponding entries and add" step from Section 2's matrix multiplication rule, applied to a row vector times a column vector. The dot product of two vectors pointing in similar directions is positive; pointing in opposite directions, negative; and exactly zero when the vectors are perpendicular.
+  </div>
+
+  <h2>7. Try it: vector addition and magnitude</h2>
+  <p>Set two vectors' components below and see the tip-to-tail sum drawn on the grid, along with each vector's magnitude.</p>
+
+  <div class="widget" id="vec-widget">
+    <div class="widget-label">Try It — Add Two Vectors</div>
+    <div class="fm-row" style="gap: 0.75rem; flex-wrap: wrap; align-items: center;">
+      <label>v = ⟨<input type="number" id="vec-v1" value="3" style="width:3.5rem;">, <input type="number" id="vec-v2" value="1" style="width:3.5rem;">⟩</label>
+      <label>w = ⟨<input type="number" id="vec-w1" value="1" style="width:3.5rem;">, <input type="number" id="vec-w2" value="3" style="width:3.5rem;">⟩</label>
+      <button class="widget-btn" type="button" id="vec-compute">Add Vectors</button>
+    </div>
+    <svg id="vec-svg" width="280" height="280" viewBox="-10 -10 20 20" style="margin-top: 0.75rem; border: 1px solid var(--rule); border-radius: 8px; background: var(--bg-soft, transparent);">
+      <line x1="-10" y1="0" x2="10" y2="0" stroke="var(--rule)" stroke-width="0.08"></line>
+      <line x1="0" y1="-10" x2="0" y2="10" stroke="var(--rule)" stroke-width="0.08"></line>
+      <g id="vec-arrows"></g>
+    </svg>
+    <p class="plot-readout" id="vec-readout">‖v‖ = —, ‖w‖ = —, v + w = —, v · w = —</p>
+    <p class="plot-hint">The dashed arrow is w drawn tip-to-tail from the end of v — its endpoint is v + w.</p>
   </div>
 
   <h2>Check your recall</h2>
@@ -80,10 +129,44 @@
     <p class="quiz-explain" hidden>Row 2 of A is (1,3), column 2 of B is (−1,5): (1)(−1) + (3)(5) = −1 + 15 = 14.</p>
   </div>
 
-  <h2>Go to the source</h2>
-  <p><a href="https://openstax.org/books/precalculus-2e/pages/9-5-matrices-and-matrix-operations">OpenStax Precalculus 2e, §9.5 "Matrices and Matrix Operations"</a> opens with a two-team sports-equipment example and works through several fully-computed sums, differences, and products, including cases where an operation is undefined.</p>
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">4. A vector is best described as:</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">A 1×n or n×1 matrix — an ordered list of numbers with a magnitude and direction</button>
+      <button class="quiz-choice" data-correct="false">Any matrix with equal rows and columns</button>
+      <button class="quiz-choice" data-correct="false">A matrix that can't be multiplied by anything</button>
+      <button class="quiz-choice" data-correct="false">A single number with no direction</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A vector is a row or column matrix — every matrix operation still applies — but it's also interpreted geometrically as an arrow with length and direction.</p>
+  </div>
 
-  <p class="ask-teacher">The "inner dimensions must match, outer dimensions survive" rule for multiplication trips a lot of people up at first — ask for a few more dimension-checking examples (does AB exist? does BA?) if that still feels shaky. Lesson 36 puts matrices to work solving the same systems from Lessons 32–33, but far more efficiently.</p>
+  <div class="quiz" data-quiz-fill data-answers="5">
+    <p class="quiz-prompt">5. Fill in the blank: for v = ⟨3, −4⟩, ‖v‖ = ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>‖v‖ = √(3² + (−4)²) = √25 = 5.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">6. If v · w = 0 for two nonzero vectors, what does that tell you?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">v and w are perpendicular</button>
+      <button class="quiz-choice" data-correct="false">v and w point in the same direction</button>
+      <button class="quiz-choice" data-correct="false">One of the vectors must be the zero vector</button>
+      <button class="quiz-choice" data-correct="false">v and w have equal magnitude</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A dot product of zero between two nonzero vectors is exactly the condition for perpendicularity — it's often used as the definition.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p><a href="https://openstax.org/books/precalculus-2e/pages/9-5-matrices-and-matrix-operations">OpenStax Precalculus 2e, §9.5 "Matrices and Matrix Operations"</a> opens with a two-team sports-equipment example and works through several fully-computed sums, differences, and products, including cases where an operation is undefined. For vectors specifically, <a href="https://openstax.org/books/precalculus-2e/pages/8-8-vectors">§8.8 "Vectors"</a> covers component form, magnitude, and the geometric tip-to-tail picture in more depth.</p>
+
+  <p class="ask-teacher">The "inner dimensions must match, outer dimensions survive" rule for multiplication trips a lot of people up at first — ask for a few more dimension-checking examples (does AB exist? does BA?) if that still feels shaky. Vectors will come back constantly from here on — forces and velocities in physics, and an entire course's worth of depth (spans, bases, eigenvectors) in STEM+'s Linear Algebra A once you're past Precalculus. Lesson 36 puts matrices to work solving the same systems from Lessons 32–33, but far more efficiently.</p>
 
   <footer class="lesson-footer">STEM+ · Precalculus · Lesson 35 of the course sequence</footer>
 </div>
@@ -107,5 +190,40 @@ document.addEventListener('DOMContentLoaded', function () {
     idx = 0;
     display.textContent = steps[0];
   });
+
+  var svgNS = 'http://www.w3.org/2000/svg';
+  var arrowsGroup = document.getElementById('vec-arrows');
+  var readout = document.getElementById('vec-readout');
+
+  function arrow(x1, y1, x2, y2, color, dashed) {
+    var line = document.createElementNS(svgNS, 'line');
+    line.setAttribute('x1', x1); line.setAttribute('y1', -y1);
+    line.setAttribute('x2', x2); line.setAttribute('y2', -y2);
+    line.setAttribute('stroke', color);
+    line.setAttribute('stroke-width', '0.2');
+    if (dashed) line.setAttribute('stroke-dasharray', '0.5,0.4');
+    return line;
+  }
+
+  function compute() {
+    var v1 = parseFloat(document.getElementById('vec-v1').value) || 0;
+    var v2 = parseFloat(document.getElementById('vec-v2').value) || 0;
+    var w1 = parseFloat(document.getElementById('vec-w1').value) || 0;
+    var w2 = parseFloat(document.getElementById('vec-w2').value) || 0;
+
+    while (arrowsGroup.firstChild) arrowsGroup.removeChild(arrowsGroup.firstChild);
+    arrowsGroup.appendChild(arrow(0, 0, v1, v2, '#2c5f8a', false));
+    arrowsGroup.appendChild(arrow(v1, v2, v1 + w1, v2 + w2, '#8a2b3d', true));
+    arrowsGroup.appendChild(arrow(0, 0, v1 + w1, v2 + w2, '#1f7a63', false));
+
+    var magV = Math.sqrt(v1 * v1 + v2 * v2).toFixed(2);
+    var magW = Math.sqrt(w1 * w1 + w2 * w2).toFixed(2);
+    var sum = '⟨' + (v1 + w1) + ', ' + (v2 + w2) + '⟩';
+    var dot = (v1 * w1 + v2 * w2).toFixed(2);
+    readout.textContent = '‖v‖ = ' + magV + ', ‖w‖ = ' + magW + ', v + w = ' + sum + ', v · w = ' + dot;
+  }
+
+  document.getElementById('vec-compute').addEventListener('click', compute);
+  compute();
 });
 </script>
