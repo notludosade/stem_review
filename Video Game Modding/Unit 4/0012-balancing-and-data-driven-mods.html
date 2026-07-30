@@ -1,0 +1,144 @@
+<meta charset="UTF-8">
+<title>Lesson 12: Balancing and Data-Driven Mods — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · Video Game Modding · Unit 4 · Lesson 12</span>
+  <h1>Balancing and Data-Driven Mods (Stats, Drop Tables, Config-Only Changes)</h1>
+  <p class="subtitle">Unit 2, Lesson 6 introduced the config-file edit as the safest possible entry point to modding. This lesson scales that same idea up to entire systems — without adding a single new asset or line of script.</p>
+  <p class="nav-links"><a href="0011-audio-replacement-and-localization-mods.html" class="nav-prev">← Lesson 11</a> <a href="../Unit%205/0013-reading-compiled-behavior-without-source.html" class="nav-next">Unit 5, Lesson 13 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>A <strong>data-driven mod</strong> changes nothing but the numbers and structures already exposed in a game's config files — no new textures, no new models, no new scripts. This is the category <strong>game balance</strong> mods live in almost entirely: adjusting weapon damage, enemy health, resource costs, or spawn rates until the game feels fair and fun again, purely by editing values the developer already made adjustable. Because it touches no copyrighted assets and requires no programming, it's simultaneously the lowest-legal-risk and lowest-technical-barrier category in this entire course — and, because a single well-chosen number can reshape how an entire game plays, one of the highest-impact.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    A <strong>drop table</strong> is the data structure defining what items an enemy, chest, or event can produce, and at what odds — a classic target for data-driven mods that want to change the game's economy or difficulty without touching any code.
+  </div>
+
+  <h2>Why balance changes need testing, not just intuition</h2>
+  <p>A weapon's raw damage number in isolation says very little — what actually matters to a player is <strong>DPS</strong> (damage per second), which factors in attack speed too: a weapon dealing 10 damage at 2 attacks per second outputs the same DPS as one dealing 20 damage at 1 attack per second, even though the two numbers look completely different in the config file. Good balance modding means computing and comparing the numbers that actually matter to gameplay, not just eyeballing individual fields in isolation — a mistake even experienced modders make when a config file has many interacting values.</p>
+
+  <div class="box why">
+    <span class="box-label">Why it matters here</span>
+    This lesson closes Unit 4 by returning to where Unit 2 started: a plain-text value. Every technique in between — asset formats, scripting, textures, audio — expands what a mod can touch, but data-driven changes remain the simplest, safest, and often most effective category of all.
+  </div>
+
+  <h2>Try it — balance a weapon and check its DPS</h2>
+  <p>Adjust damage and attack speed for two weapons and compare their computed DPS — exactly the calculation a real balance pass has to do before shipping a change.</p>
+
+  <div class="widget">
+    <p class="widget-label">Try It — Weapon Balance Calculator</p>
+    <div class="fm-row">
+      <label>Sword — damage</label>
+      <input type="number" class="fm-input" id="sword-dmg" value="10" min="0">
+      <label>attacks/sec</label>
+      <input type="number" class="fm-input" id="sword-spd" value="2" min="0.1" step="0.1">
+      <span class="fm-arrow">=</span>
+      <span class="fm-output" id="sword-dps">20.0 DPS</span>
+    </div>
+    <div class="fm-row" style="margin-top:0.6rem;">
+      <label>Axe — damage</label>
+      <input type="number" class="fm-input" id="axe-dmg" value="20" min="0">
+      <label>attacks/sec</label>
+      <input type="number" class="fm-input" id="axe-spd" value="1" min="0.1" step="0.1">
+      <span class="fm-arrow">=</span>
+      <span class="fm-output" id="axe-dps">20.0 DPS</span>
+    </div>
+    <p class="verdict" id="balance-verdict" style="margin-top:0.9rem;"></p>
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. Why is a data-driven mod generally the lowest-legal-risk category covered in this course?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">It touches no copyrighted assets and requires no programming — only values already exposed by the developer.</button>
+      <button class="quiz-choice" data-correct="false">It is impossible for any developer to detect.</button>
+      <button class="quiz-choice" data-correct="false">It always requires an official modding SDK.</button>
+      <button class="quiz-choice" data-correct="false">It automatically comes with a redistribution license.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Changing only exposed values, with no new assets or code, is the same low-risk profile Lesson 6 first introduced.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why can two weapons with very different damage numbers still be perfectly balanced against each other?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">DPS accounts for attack speed too, so a lower damage number at a faster attack speed can match a higher damage number at a slower speed.</button>
+      <button class="quiz-choice" data-correct="false">Damage numbers in a config file are always cosmetic and never affect gameplay.</button>
+      <button class="quiz-choice" data-correct="false">Weapons can never be meaningfully compared to each other.</button>
+      <button class="quiz-choice" data-correct="false">Attack speed has no effect on total damage output.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>DPS (damage per second) is the number that actually determines gameplay impact — raw damage alone can be misleading.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. What is a drop table?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">The data structure defining what an enemy, chest, or event can produce, and at what odds.</button>
+      <button class="quiz-choice" data-correct="false">A 3D model's list of vertices.</button>
+      <button class="quiz-choice" data-correct="false">The archive format used to unpack game data.</button>
+      <button class="quiz-choice" data-correct="false">A type of audio bank reference.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Drop tables are a classic data-driven modding target for reshaping a game's economy or difficulty.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="dps|damage per second">
+    <p class="quiz-prompt">4. Fill in the blank: the metric combining a weapon's damage and attack speed into one number that reflects actual gameplay impact is ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>DPS is what a careful balance pass actually compares, rather than raw damage numbers in isolation.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="data-driven mod|data-driven">
+    <p class="quiz-prompt">5. Fill in the blank: a mod that changes only values already exposed in config files, with no new assets or scripts, is called a ___ mod.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Data-driven mods are the largest-scale version of the config edit Lesson 6 first introduced.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: Wikipedia's overview of <a href="https://en.wikipedia.org/wiki/Game_balance">game balance</a> covers the design theory behind exactly the kind of tuning this lesson's widget demonstrated.</p>
+
+  <p class="ask-teacher">Stuck on anything above, or want to work through a trickier balance scenario? Ask your teacher — that's what I'm here for. Unit 4 is complete. Next up: Unit 5 covers what modders do when a game exposes none of this — no config, no scripting API, nothing but the compiled game itself.</p>
+
+  <footer class="lesson-footer">STEM+ · Video Game Modding · Lesson 12</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var ids = ['sword-dmg', 'sword-spd', 'axe-dmg', 'axe-spd'];
+  function recompute() {
+    var sd = parseFloat(document.getElementById('sword-dmg').value) || 0;
+    var ss = parseFloat(document.getElementById('sword-spd').value) || 0;
+    var ad = parseFloat(document.getElementById('axe-dmg').value) || 0;
+    var as = parseFloat(document.getElementById('axe-spd').value) || 0;
+    var swordDps = sd * ss;
+    var axeDps = ad * as;
+    document.getElementById('sword-dps').textContent = swordDps.toFixed(1) + ' DPS';
+    document.getElementById('axe-dps').textContent = axeDps.toFixed(1) + ' DPS';
+    var verdict = document.getElementById('balance-verdict');
+    var diff = Math.abs(swordDps - axeDps);
+    if (diff <= 1) {
+      verdict.className = 'verdict is-pass';
+      verdict.textContent = 'Balanced — both weapons deal roughly equal DPS despite different stats.';
+    } else {
+      verdict.className = 'verdict is-fail';
+      verdict.textContent = 'Unbalanced — DPS differs by ' + diff.toFixed(1) + '. Adjust damage or speed to even them out.';
+    }
+  }
+  ids.forEach(function (id) {
+    document.getElementById(id).addEventListener('input', recompute);
+  });
+  recompute();
+});
+</script>

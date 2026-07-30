@@ -1,0 +1,174 @@
+<meta charset="UTF-8">
+<title>Lesson 12: Cameras, Culling, and Draw Calls — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="advanced">
+  <span class="kicker">STEM+ · Game Engine Architecture · Unit 4 · Lesson 12</span>
+  <h1>Cameras, Culling, and Draw Calls</h1>
+  <p class="subtitle">A large open-world scene might contain tens of thousands of objects. The player's screen shows a few hundred at most, at any given moment. This lesson is about the step that decides which is which, before Lesson 10's pipeline ever gets involved.</p>
+  <p class="nav-links"><a href="0011-scene-graphs-and-transform-hierarchies.html" class="nav-prev">← Lesson 11</a> <a href="../Unit%205/0013-collision-detection-basics.html" class="nav-next">Unit 5, Lesson 13 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Sending every object in a scene through the full render pipeline every frame, whether the camera can actually see it or not, would waste enormous amounts of GPU time on work whose result is invisible. Culling is the fix.</p>
+
+  <h2>The frustum, and throwing away what's outside it</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    A <strong>camera</strong> defines the viewpoint a scene renders from — position, direction, and field of view. The <strong>view frustum</strong> is the pyramid-shaped (truncated at a near and far plane) region of space the camera can actually see. <strong>Frustum culling</strong> discards any object entirely outside that region before rendering, so the pipeline never spends work on it. Each remaining, visible object typically costs one <strong>draw call</strong> — an instruction telling the GPU "render this object now" — and since each draw call carries its own fixed overhead, fewer, larger draw calls generally outperform many tiny ones, even at an identical total triangle count.
+  </div>
+
+  <h2>Try it: move objects in and out of the frustum</h2>
+  <p>Drag objects around the top-down scene. Anything outside the shaded frustum gets culled and never reaches a draw call.</p>
+
+  <div class="widget" id="culling-widget">
+    <p class="widget-label">Interactive: frustum culling from a top-down view</p>
+    <svg viewBox="0 0 400 260" width="400" height="260" role="img" aria-label="Top-down view of a camera frustum with draggable objects" id="cull-svg" style="background:var(--code-bg); border-radius:8px; touch-action:none;">
+      <polygon points="200,20 100,240 300,240" fill="var(--accent-soft)" opacity="0.5"></polygon>
+      <polygon id="cam-tri" points="190,10 210,10 200,25" fill="var(--text)"></polygon>
+      <circle class="cull-obj" data-obj-id="0" cx="200" cy="120" r="14" fill="var(--correct)"></circle>
+      <circle class="cull-obj" data-obj-id="1" cx="330" cy="90" r="14" fill="var(--correct)"></circle>
+      <circle class="cull-obj" data-obj-id="2" cx="70" cy="180" r="14" fill="var(--correct)"></circle>
+      <circle class="cull-obj" data-obj-id="3" cx="220" cy="200" r="14" fill="var(--correct)"></circle>
+    </svg>
+    <p class="verdict" data-cull-verdict>Drag the circles. Objects outside the shaded frustum turn gray and get culled.</p>
+    <p class="plot-readout" data-cull-readout></p>
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Worked example</span>
+    An open-world game might have 50,000 objects in its scene graph total, but the camera standing in a canyon can geometrically see at most a few thousand of them — everything behind the canyon walls, or simply outside the field of view, is culled before the GPU ever touches it. If the engine skipped culling and issued a draw call for all 50,000 objects every frame regardless of visibility, most of that GPU work would be entirely wasted on triangles that end up nowhere on screen.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why draw call count matters even at a fixed triangle count</span>
+    It's tempting to think only total triangle count determines render cost, but issuing a draw call itself has fixed overhead — the CPU has to prepare and submit state to the GPU for each one, and that overhead doesn't shrink just because the object is small. A scene with 1,000 tiny separate draw calls can be slower than an equivalent scene with 10 large ones, even with the same total triangles — which is why engines often batch multiple small objects into fewer, larger draw calls wherever the scene allows it.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What does frustum culling actually do?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Discards any object entirely outside the camera's visible region before rendering, so the pipeline never processes it.</button>
+      <button class="quiz-choice" data-correct="false">Deletes objects permanently from the scene graph.</button>
+      <button class="quiz-choice" data-correct="false">Increases the number of triangles in every visible object.</button>
+      <button class="quiz-choice" data-correct="false">Moves the camera automatically toward nearby objects.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Culling removes invisible objects from the render workload, not from the scene itself.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why can 1,000 tiny separate draw calls be slower than 10 large ones with the same total triangle count?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Each draw call has its own fixed CPU-to-GPU overhead, regardless of how few triangles it contains.</button>
+      <button class="quiz-choice" data-correct="false">Triangle count has no real effect on rendering performance at all.</button>
+      <button class="quiz-choice" data-correct="false">Small objects always require more total triangles than large ones.</button>
+      <button class="quiz-choice" data-correct="false">The GPU physically cannot process more than 10 draw calls per frame.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Per-draw-call overhead is fixed, so fewer, larger calls tend to outperform many small ones.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. What is the view frustum?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">The pyramid-shaped region of space, bounded by near and far planes, that the camera can actually see.</button>
+      <button class="quiz-choice" data-correct="false">The exact position and rotation of a single object.</button>
+      <button class="quiz-choice" data-correct="false">A texture applied to the camera itself.</button>
+      <button class="quiz-choice" data-correct="false">The full set of every object that exists anywhere in the scene.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The frustum is specifically the camera's visible region in space.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="draw call">
+    <p class="quiz-prompt">4. Fill in the blank: an instruction telling the GPU to render one object, typically issued once per visible object, is called a ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A draw call is the per-object instruction submitted to the GPU.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="frustum culling|culling">
+    <p class="quiz-prompt">5. Fill in the blank: discarding objects outside the camera's visible region before they reach the render pipeline is called ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Frustum culling is the process this lesson defines at the top.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next unit: the <a href="https://learnopengl.com/Advanced-OpenGL/Face-culling">LearnOpenGL chapter on culling</a> covers frustum and face culling with real, runnable code examples.</p>
+
+  <p class="ask-teacher">Curious how an engine efficiently tests thousands of objects against the frustum without checking each one by brute force? Ask your teacher — that's what I'm here for. Next up: Unit 5 leaves rendering behind and tackles the second major visual subsystem — physics, starting with how an engine detects when two objects touch at all.</p>
+
+  <footer class="lesson-footer">STEM+ · Game Engine Architecture · Lesson 12 of the course sequence</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var svg = document.getElementById('cull-svg');
+  var verdict = document.querySelector('[data-cull-verdict]');
+  var readout = document.querySelector('[data-cull-readout]');
+  var dragging = null;
+
+  // frustum triangle: apex (200,20), base corners (100,240) and (300,240)
+  function inFrustum(cx, cy) {
+    var apex = { x: 200, y: 20 }, bl = { x: 100, y: 240 }, br = { x: 300, y: 240 };
+    function sign(p1, p2, p3) {
+      return (p1.x - p3.x) * (p2.y - p3.y) - (p2.x - p3.x) * (p1.y - p3.y);
+    }
+    var p = { x: cx, y: cy };
+    var d1 = sign(p, apex, bl);
+    var d2 = sign(p, bl, br);
+    var d3 = sign(p, br, apex);
+    var hasNeg = (d1 < 0) || (d2 < 0) || (d3 < 0);
+    var hasPos = (d1 > 0) || (d2 > 0) || (d3 > 0);
+    return !(hasNeg && hasPos);
+  }
+
+  function toSvgPoint(evt) {
+    var pt = svg.createSVGPoint();
+    pt.x = evt.clientX;
+    pt.y = evt.clientY;
+    return pt.matrixTransform(svg.getScreenCTM().inverse());
+  }
+
+  function updateStatus() {
+    var objs = svg.querySelectorAll('.cull-obj');
+    var visible = 0;
+    objs.forEach(function (o) {
+      var cx = parseFloat(o.getAttribute('cx'));
+      var cy = parseFloat(o.getAttribute('cy'));
+      var v = inFrustum(cx, cy);
+      o.setAttribute('fill', v ? 'var(--correct)' : 'var(--muted)');
+      if (v) visible++;
+    });
+    verdict.textContent = visible + ' of ' + objs.length + ' object(s) inside the frustum — those get a draw call.';
+    readout.textContent = (objs.length - visible) + ' object(s) culled entirely — zero GPU work spent on them this frame.';
+  }
+
+  svg.addEventListener('pointerdown', function (e) {
+    if (e.target.classList.contains('cull-obj')) {
+      dragging = e.target;
+      svg.setPointerCapture(e.pointerId);
+    }
+  });
+  svg.addEventListener('pointermove', function (e) {
+    if (!dragging) return;
+    var p = toSvgPoint(e);
+    dragging.setAttribute('cx', Math.max(10, Math.min(390, p.x)));
+    dragging.setAttribute('cy', Math.max(10, Math.min(250, p.y)));
+    updateStatus();
+  });
+  svg.addEventListener('pointerup', function () { dragging = null; });
+  svg.addEventListener('pointercancel', function () { dragging = null; });
+
+  updateStatus();
+});
+</script>

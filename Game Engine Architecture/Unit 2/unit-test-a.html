@@ -1,0 +1,166 @@
+<meta charset="UTF-8">
+<title>Unit 2 Test — Version A — Game Engine Architecture — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/tests.js" defer></script>
+<div class="page" data-tier="advanced">
+  <span class="kicker">STEM+ · Game Engine Architecture · Unit 2 · Unit Test</span>
+  <h1>Unit 2 Test — Version A</h1>
+  <p class="subtitle">The Game Loop &amp; Timing. 10 points covering every lesson in this unit. Score 80% or higher to clear this unit.</p>
+  <p class="nav-links"><a href="../index.html" class="nav-toc">← Course Contents</a> <a href="unit-test-b.html" class="nav-toc">Version B →</a></p>
+
+  <div data-test data-course="Game Engine Architecture" data-unit="Unit 2" data-kind="unit_test" data-version="A">
+
+    <div class="quiz" data-test-item data-topic="The Core Game Loop">
+      <p class="quiz-prompt">1. What are the three phases of a basic game loop, in order?</p>
+      <div class="quiz-choices">
+        <button class="quiz-choice" data-correct="true">Process input, update, render.</button>
+        <button class="quiz-choice" data-correct="false">Render, process input, update.</button>
+        <button class="quiz-choice" data-correct="false">Update, render, process input.</button>
+        <button class="quiz-choice" data-correct="false">Render only — the other two aren't separate phases.</button>
+      </div>
+      <p class="quiz-feedback" hidden></p>
+      <p class="quiz-explain" hidden>Input is read first, the world advances next, and the result is drawn last.</p>
+    </div>
+
+    <div class="quiz" data-test-item data-test-fill data-topic="Frame Rate &amp; Delta Time" data-answers="delta time|dt">
+      <p class="quiz-prompt">2. Fill in the blank: the amount of real time, in seconds, that elapsed since the last frame is called ___.</p>
+      <div class="quiz-fill-row">
+        <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      </div>
+      <p class="quiz-feedback" hidden></p>
+      <p class="quiz-explain" hidden>Delta time is the elapsed-seconds value multiplied into per-second rates.</p>
+    </div>
+
+    <div class="quiz" data-test-item data-topic="Fixed vs. Variable Timestep">
+      <p class="quiz-prompt">3. Why is a fixed timestep generally preferred for physics simulation?</p>
+      <div class="quiz-choices">
+        <button class="quiz-choice" data-correct="true">Physics math assumes small, roughly-equal steps, and one huge variable step can produce unstable results.</button>
+        <button class="quiz-choice" data-correct="false">Fixed timestep always produces a higher rendered frame rate.</button>
+        <button class="quiz-choice" data-correct="false">Physics engines cannot technically run under variable timestep at all.</button>
+        <button class="quiz-choice" data-correct="false">There is no real difference between the two for physics.</button>
+      </div>
+      <p class="quiz-feedback" hidden></p>
+      <p class="quiz-explain" hidden>Consistent step size is what keeps physics numerically stable and reproducible.</p>
+    </div>
+
+    <div class="quiz" data-test-item data-test-fill data-topic="The Core Game Loop" data-answers="render">
+      <p class="quiz-prompt">4. Fill in the blank: the phase that must always run last, so the screen shows this frame's changes rather than a stale state, is ___.</p>
+      <div class="quiz-fill-row">
+        <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      </div>
+      <p class="quiz-feedback" hidden></p>
+      <p class="quiz-explain" hidden>Render must reflect the freshest state, which only exists after update runs.</p>
+    </div>
+
+    <div class="quiz" data-test-item data-topic="Frame Rate &amp; Delta Time">
+      <p class="quiz-prompt">5. A character moves with <code class="inline-code">position += 5;</code> and no delta time multiplier. What happens if frame rate doubles?</p>
+      <div class="quiz-choices">
+        <button class="quiz-choice" data-correct="true">The character moves twice as fast in real time, since twice as many frames now run each second.</button>
+        <button class="quiz-choice" data-correct="false">The character's real-world speed stays exactly the same.</button>
+        <button class="quiz-choice" data-correct="false">The game refuses to run at the new frame rate.</button>
+        <button class="quiz-choice" data-correct="false">The character stops moving entirely.</button>
+      </div>
+      <p class="quiz-feedback" hidden></p>
+      <p class="quiz-explain" hidden>Without delta time, speed is tied directly to how many frames occur per second.</p>
+    </div>
+
+    <div class="quiz" data-test-item data-topic="The Core Game Loop">
+      <p class="quiz-prompt">6. Answer both parts about why a game needs a continuously running loop:</p>
+      <div class="quiz-part" data-part>
+        <p class="quiz-part-label">(a) Unlike a word processor that just waits for input, a game world must...</p>
+        <div class="quiz-choices">
+          <button class="quiz-choice" data-correct="true">Keep advancing on its own — gravity, AI, animation — even if the player does nothing</button>
+          <button class="quiz-choice" data-correct="false">Pause completely whenever the player stops typing</button>
+        </div>
+      </div>
+      <div class="quiz-part" data-part data-answers="input">
+        <p class="quiz-part-label">(b) Fill in the blank: the first phase of the loop, responsible for reading what the player did since the last frame, is process ___.</p>
+        <div class="quiz-fill-row">
+          <input type="text" class="quiz-fill-input" aria-label="Your answer">
+        </div>
+      </div>
+      <p class="quiz-explain" hidden>A game must actively drive its own world forward every frame, starting with reading input.</p>
+    </div>
+
+    <div class="quiz" data-test-item data-topic="Fixed vs. Variable Timestep">
+      <p class="quiz-prompt">7. A single frame takes an unusually long 250ms (a "hitch"). Answer both parts:</p>
+      <div class="quiz-part" data-part>
+        <p class="quiz-part-label">(a) Under variable timestep, a fast-moving object could...</p>
+        <div class="quiz-choices">
+          <button class="quiz-choice" data-correct="true">Tunnel straight through a thin wall it should have collided with</button>
+          <button class="quiz-choice" data-correct="false">Instantly stop moving for the rest of the game</button>
+        </div>
+      </div>
+      <div class="quiz-part" data-part>
+        <p class="quiz-part-label">(b) Under fixed timestep, that same 250ms would instead be simulated as...</p>
+        <div class="quiz-choices">
+          <button class="quiz-choice" data-correct="true">Several small, consistent steps in a row</button>
+          <button class="quiz-choice" data-correct="false">One single step exactly as large as under variable timestep</button>
+        </div>
+      </div>
+      <p class="quiz-explain" hidden>Fixed timestep breaks a large gap in real time into several small, physically consistent steps.</p>
+    </div>
+
+    <div class="quiz" data-test-item data-topic="Frame Rate &amp; Delta Time">
+      <p class="quiz-prompt">8. Answer both parts about why the missing-delta-time bug is easy to miss:</p>
+      <div class="quiz-part" data-part>
+        <p class="quiz-part-label">(a) On a developer's own machine at a fairly steady frame rate, code without delta time...</p>
+        <div class="quiz-choices">
+          <button class="quiz-choice" data-correct="true">Still runs and looks plausible, hiding the bug</button>
+          <button class="quiz-choice" data-correct="false">Fails to compile immediately</button>
+        </div>
+      </div>
+      <div class="quiz-part" data-part>
+        <p class="quiz-part-label">(b) The bug becomes obvious specifically when...</p>
+        <div class="quiz-choices">
+          <button class="quiz-choice" data-correct="true">The game runs on different hardware or under a different frame-rate condition</button>
+          <button class="quiz-choice" data-correct="false">The game is compiled with a different compiler flag</button>
+        </div>
+      </div>
+      <p class="quiz-explain" hidden>The bug is silent on one consistent machine and only surfaces under different conditions.</p>
+    </div>
+
+    <div class="quiz" data-test-item data-topic="The Core Game Loop">
+      <p class="quiz-prompt">9. Answer both parts about a character holding "move right" every frame:</p>
+      <div class="quiz-part" data-part>
+        <p class="quiz-part-label">(a) Each frame, update() moves the character...</p>
+        <div class="quiz-choices">
+          <button class="quiz-choice" data-correct="true">A small amount further, based on the current input state</button>
+          <button class="quiz-choice" data-correct="false">All the way to the edge of the screen instantly</button>
+        </div>
+      </div>
+      <div class="quiz-part" data-part>
+        <p class="quiz-part-label">(b) Sixty small position changes across sixty frames in one second is what makes holding a direction look like...</p>
+        <div class="quiz-choices">
+          <button class="quiz-choice" data-correct="true">Smooth, continuous motion</button>
+          <button class="quiz-choice" data-correct="false">A single instantaneous jump</button>
+        </div>
+      </div>
+      <p class="quiz-explain" hidden>Many small per-frame updates are what produce the illusion of smooth motion.</p>
+    </div>
+
+    <div class="quiz" data-test-item data-topic="Fixed vs. Variable Timestep">
+      <p class="quiz-prompt">10. Answer both parts defining the two timestep strategies:</p>
+      <div class="quiz-part" data-part data-answers="variable">
+        <p class="quiz-part-label">(a) Fill in the blank: passing update() the real, measured duration of the previous frame is a ___ timestep.</p>
+        <div class="quiz-fill-row">
+          <input type="text" class="quiz-fill-input" aria-label="Your answer">
+        </div>
+      </div>
+      <div class="quiz-part" data-part>
+        <p class="quiz-part-label">(b) A fixed timestep, by contrast, is defined by...</p>
+        <div class="quiz-choices">
+          <button class="quiz-choice" data-correct="true">Always advancing the simulation by the same constant amount</button>
+          <button class="quiz-choice" data-correct="false">Advancing by a different random amount every frame</button>
+        </div>
+      </div>
+      <p class="quiz-explain" hidden>Variable timestep uses the real elapsed duration; fixed timestep uses a constant step regardless of it.</p>
+    </div>
+
+    <p class="test-warning" data-test-warning hidden></p>
+    <button class="widget-btn" data-test-submit>Submit Test</button>
+    <div class="test-result" data-test-result hidden></div>
+  </div>
+
+  <footer class="lesson-footer">STEM+ · Game Engine Architecture · Unit 2 Test — Version A</footer>
+</div>

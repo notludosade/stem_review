@@ -1,0 +1,149 @@
+<meta charset="UTF-8">
+<title>Lesson 17: Testing and Compatibility with Other Mods — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · Video Game Modding · Unit 6 · Lesson 17</span>
+  <h1>Testing and Compatibility with Other Mods</h1>
+  <p class="subtitle">A mod that works flawlessly by itself can still break the moment a real player installs it alongside twenty other mods. This lesson is about testing for that reality, not just the clean, isolated case.</p>
+  <p class="nav-links"><a href="0016-packaging-a-mod-for-distribution.html" class="nav-prev">← Lesson 16</a> <a href="0018-publishing-to-a-modding-community-responsibly.html" class="nav-next">Lesson 18 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Testing a mod alone, with nothing else installed, only proves the mod works in a scenario almost no real player will actually have. A <strong>mod conflict</strong> happens when two independently-written mods both try to change the same underlying thing — the same config value, the same event hook, the same model — and one silently overwrites or breaks the other, exactly the load-order problem from Unit 3, Lesson 9, now showing up as an actual bug report instead of a hypothetical.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    A <strong>mod conflict</strong> occurs when two independently-made mods both modify the same underlying game element, producing a result — a crash, a silently overwritten change, an obviously broken visual — that neither mod alone would cause.
+  </div>
+
+  <h2>Testing against reality, not just isolation</h2>
+  <p>Realistic testing means installing a mod alongside a handful of the most popular mods for the same game — the ones a real player is statistically most likely to already have installed — and checking specifically for the kinds of conflicts Unit 4 and Unit 3 already described: two mods editing the same config value, two mods replacing the same texture with different UV assumptions, two mods hooking the same event in a way that produces an unintended interaction. This is a lighter, informal version of what professional software calls <strong>regression testing</strong> — checking that a change hasn't broken something that used to work — applied here to combinations of mods rather than a single codebase's history.</p>
+
+  <h2>Compatibility patches and changelogs, revisited</h2>
+  <p>When testing does turn up a real conflict with another specific, popular mod, Lesson 10 already introduced the fix: a small compatibility patch built specifically to reconcile the two. Documenting this — and every other change — in a <strong>changelog</strong>, a running record of what changed in each released version, is what lets both users and other modders understand what's actually different between version 1.2 and 1.3 without having to compare every file by hand.</p>
+
+  <div class="box why">
+    <span class="box-label">Why it matters here</span>
+    A mod's manifest (Lesson 16) declares its dependencies honestly only if its author actually tested against the mods it's likely to run alongside. Skipping this step doesn't just risk one broken install — it produces a manifest that quietly lies about what the mod actually needs to run safely.
+  </div>
+
+  <h2>Try it — toggle mods and watch for conflicts</h2>
+  <p>Turn other popular mods on and off alongside yours, and watch the compatibility matrix update.</p>
+
+  <div class="widget">
+    <p class="widget-label">Try It — Compatibility Matrix</p>
+    <div id="compat-list" style="display:flex; flex-direction:column; gap:0.5rem;"></div>
+    <p class="verdict" id="compat-verdict" style="margin-top:0.9rem;"></p>
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. Why is testing a mod completely alone, with nothing else installed, an incomplete test?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Almost no real player will actually run the mod in total isolation, so it misses the conflicts that show up alongside other mods.</button>
+      <button class="quiz-choice" data-correct="false">Testing alone is always sufficient and nothing more is needed.</button>
+      <button class="quiz-choice" data-correct="false">Isolated testing is illegal under most EULAs.</button>
+      <button class="quiz-choice" data-correct="false">Mods can never be tested in isolation at all.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Realistic testing means checking against the mods a real player is actually likely to have installed alongside it.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. What is a mod conflict?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Two independently-made mods both modifying the same underlying game element in a way that breaks something.</button>
+      <button class="quiz-choice" data-correct="false">A single mod that fails to install correctly by itself.</button>
+      <button class="quiz-choice" data-correct="false">A disagreement between two modders about design philosophy.</button>
+      <button class="quiz-choice" data-correct="false">A bug that only ever appears in the base, unmodded game.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A conflict specifically requires two mods both touching the same underlying thing — it's not a single-mod bug.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. What purpose does a changelog serve?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">It's a running record of what changed in each released version, so users and other modders don't have to compare files by hand.</button>
+      <button class="quiz-choice" data-correct="false">It automatically resolves mod conflicts.</button>
+      <button class="quiz-choice" data-correct="false">It replaces the need for a mod manifest.</button>
+      <button class="quiz-choice" data-correct="false">It is only relevant to a mod's very first release.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A changelog documents what actually changed between versions, complementing (not replacing) the manifest's metadata.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="mod conflict|conflict">
+    <p class="quiz-prompt">4. Fill in the blank: when two independently-made mods both modify the same underlying game element and something breaks, this is called a mod ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Realistic testing against popular mods is how conflicts like this get caught before a wide release.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="changelog">
+    <p class="quiz-prompt">5. Fill in the blank: a running record documenting what changed in each released version of a mod is called a ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A changelog pairs naturally with semantic versioning (Lesson 16) — each version bump gets an entry explaining why.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: Wikipedia's overview of <a href="https://en.wikipedia.org/wiki/Regression_testing">regression testing</a> covers the formal software-engineering version of the same "did this change break something that used to work" idea this lesson applied informally to mod combinations.</p>
+
+  <p class="ask-teacher">Stuck on anything above, or want to think through a specific compatibility scenario? Ask your teacher — that's what I'm here for. Next up: the capstone — actually publishing a mod, and doing it responsibly.</p>
+
+  <footer class="lesson-footer">STEM+ · Video Game Modding · Lesson 17</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var container = document.getElementById('compat-list');
+  var verdict = document.getElementById('compat-verdict');
+  var mods = [
+    { name: 'RebalanceMod', conflictsWith: null, on: true, fixed: false },
+    { name: 'BetterWeaponsMod (edits the same weapon config as yours)', conflictsWith: 'you', on: false, fixed: false },
+    { name: 'UICleanupMod', conflictsWith: null, on: false, fixed: false }
+  ];
+  function render() {
+    container.innerHTML = '';
+    var hasConflict = false;
+    mods.forEach(function (m, i) {
+      var row = document.createElement('label');
+      row.style.cssText = 'display:flex; align-items:center; gap:0.6rem; padding:0.4rem 0.6rem; border:1px solid var(--border); border-radius:5px;';
+      var cb = document.createElement('input');
+      cb.type = 'checkbox';
+      cb.checked = m.on;
+      cb.addEventListener('change', function () { m.on = cb.checked; render(); });
+      row.appendChild(cb);
+      var span = document.createElement('span');
+      span.style.flex = '1';
+      span.textContent = m.name;
+      row.appendChild(span);
+      if (m.on && m.conflictsWith === 'you') {
+        hasConflict = true;
+        var badge = document.createElement('span');
+        badge.className = 'verdict is-fail';
+        badge.style.fontSize = '0.8rem';
+        badge.textContent = 'conflict';
+        row.appendChild(badge);
+      }
+      container.appendChild(row);
+    });
+    if (hasConflict) {
+      verdict.className = 'verdict is-fail';
+      verdict.textContent = 'Conflict detected with BetterWeaponsMod — both edit the same weapon config. Build a compatibility patch (Lesson 10) before publishing.';
+    } else {
+      verdict.className = 'verdict is-pass';
+      verdict.textContent = 'No conflicts detected with the currently enabled mods.';
+    }
+  }
+  render();
+});
+</script>

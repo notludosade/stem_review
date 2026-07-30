@@ -1,0 +1,135 @@
+<meta charset="UTF-8">
+<title>Lesson 8: Hooking into Game Events and Logic — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · Video Game Modding · Unit 3 · Lesson 8</span>
+  <h1>Hooking into Game Events and Logic</h1>
+  <p class="subtitle">Lesson 7's toy script reacted to an item pickup — but how does a mod's code actually get called the moment that happens, without ever touching the base game's original logic?</p>
+  <p class="nav-links"><a href="0007-embedded-scripting-languages-in-games.html" class="nav-prev">← Lesson 7</a> <a href="0009-popular-modding-frameworks-and-what-they-provide.html" class="nav-next">Lesson 9 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>The answer is the <strong>event hook</strong>: the game engine itself announces, at specific moments, that something has happened — a player spawned, a player took damage, an item was picked up — by "firing" a named event. Any script that has registered interest in that event, called a <strong>callback</strong>, gets called automatically the instant the event fires, and runs whatever logic it wants in response. The original game code that fires the event never needs to know a mod exists at all; it just always announces "this happened," and mods choose whether to listen.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    An <strong>event hook</strong> is a named point in a game's logic where it announces that something happened, allowing any registered script to run code in response — without modifying the game's original logic at all.
+  </div>
+
+  <h2>Event-driven programming, and why order matters</h2>
+  <p>This pattern — code that runs in response to something happening, rather than being called directly in a fixed sequence — is called <strong>event-driven programming</strong>, and it isn't unique to games; it's the same idea behind a button's on-click handler in any user interface. What is specific to modding is that multiple, entirely unrelated mods can all register a callback for the exact same event — three different mods might all care about <code class="inline-code">onPlayerDamage</code>. When that happens, <strong>hook priority</strong> decides which callback runs first, since the order can matter: a mod that reduces incoming damage before a second mod calculates a critical-hit bonus produces a different result than the same two mods running in the reverse order.</p>
+
+  <div class="box why">
+    <span class="box-label">Why it matters here</span>
+    Lesson 9's modding frameworks exist largely to manage exactly this problem at scale — dozens of mods, all hooking the same handful of events, need a system deciding what order they run in and catching conflicts before they cause silent, hard-to-diagnose bugs.
+  </div>
+
+  <h2>Try it — trigger events and watch hooks fire</h2>
+  <p>Click an event button below to fire it. The log shows every registered mod hook for that event firing in priority order — highest priority first.</p>
+
+  <div class="widget">
+    <p class="widget-label">Try It — Event Hook Trigger Log</p>
+    <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
+      <button class="widget-btn" data-event="spawn" type="button">Fire: Player Spawn</button>
+      <button class="widget-btn" data-event="damage" type="button">Fire: Player Damage</button>
+      <button class="widget-btn" data-event="pickup" type="button">Fire: Item Pickup</button>
+    </div>
+    <div id="hook-log" style="margin-top:0.9rem; font-family:'SF Mono',Menlo,Consolas,monospace; font-size:0.85rem; line-height:1.6; min-height:2rem;"><span style="color:var(--muted);">Fire an event to see which hooks respond, in priority order.</span></div>
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What is an event hook, in plain terms?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">A named point where the game announces something happened, letting a registered script run code in response.</button>
+      <button class="quiz-choice" data-correct="false">A permanent edit to the game's original compiled logic.</button>
+      <button class="quiz-choice" data-correct="false">A type of config file value.</button>
+      <button class="quiz-choice" data-correct="false">A texture format used for player models.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>An event hook lets a mod respond to something happening without altering the game's own original logic.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why does the original game code that fires an event not need to know any mod exists?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">It just always announces that something happened; it's up to registered scripts to decide whether to listen.</button>
+      <button class="quiz-choice" data-correct="false">Mods are required to directly edit the game's original source code.</button>
+      <button class="quiz-choice" data-correct="false">Events can only fire when no mods are installed.</button>
+      <button class="quiz-choice" data-correct="false">The game checks a list of installed mods before running any of its own logic.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The event-firing code and the mod's callback are decoupled — the game just announces, and interested scripts opt in.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why does hook priority matter when multiple mods register a callback for the same event?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">The order callbacks run in can change the final result, such as a damage-reduction mod running before or after a critical-hit mod.</button>
+      <button class="quiz-choice" data-correct="false">Only one mod is ever allowed to register for a given event.</button>
+      <button class="quiz-choice" data-correct="false">Hook priority only affects a mod's file size.</button>
+      <button class="quiz-choice" data-correct="false">Priority order never actually changes gameplay outcomes.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Since multiple mods' callbacks can all modify the same value in sequence, the order they run in can produce genuinely different outcomes.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="callback">
+    <p class="quiz-prompt">4. Fill in the blank: a function registered to automatically run when a specific event fires is called a ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A callback is the code that actually runs once the event it's registered for fires.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="event-driven programming|event-driven">
+    <p class="quiz-prompt">5. Fill in the blank: the general programming pattern where code runs in response to something happening, rather than in a fixed sequence, is called ___ ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Event-driven programming isn't unique to modding — it's the same underlying pattern as a button click handler in any user interface.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: Garry's Mod's <a href="https://wiki.facepunch.com/gmod/Hooks">hook library documentation</a> is a real, publicly readable example of exactly this pattern — named events a script can register a callback against.</p>
+
+  <p class="ask-teacher">Stuck on anything above, or want to trace through a real hook-priority conflict? Ask your teacher — that's what I'm here for. Next up: the frameworks that manage dozens of hooks and mods at once, so conflicts like this get caught before they ship.</p>
+
+  <footer class="lesson-footer">STEM+ · Video Game Modding · Lesson 8</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var log = document.getElementById('hook-log');
+  var events = {
+    spawn: { name: 'onPlayerSpawn', hooks: [
+      { mod: 'StarterKitMod', priority: 10, action: 'gives player starting equipment' },
+      { mod: 'SpawnProtectionMod', priority: 5, action: 'grants 3 seconds of invulnerability' }
+    ]},
+    damage: { name: 'onPlayerDamage', hooks: [
+      { mod: 'ArmorMod', priority: 20, action: 'reduces incoming damage by armor value' },
+      { mod: 'CriticalHitMod', priority: 8, action: 'rolls a chance to apply bonus damage' },
+      { mod: 'DamageLogMod', priority: 1, action: 'writes the final damage amount to a log' }
+    ]},
+    pickup: { name: 'onItemPickup', hooks: [
+      { mod: 'InventorySortMod', priority: 15, action: 'auto-sorts the item into the correct inventory slot' },
+      { mod: 'PickupSoundMod', priority: 3, action: 'plays a custom pickup sound effect' }
+    ]}
+  };
+  document.querySelectorAll('[data-event]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var ev = events[btn.getAttribute('data-event')];
+      var html = '<div><strong>' + ev.name + '</strong> fired.</div>';
+      ev.hooks.slice().sort(function (a, b) { return b.priority - a.priority; }).forEach(function (h) {
+        html += '<div style="margin:0.25rem 0; padding:0.3rem 0.6rem; background:var(--bg); border-left:2px solid var(--accent);">priority ' + h.priority + ' — <strong>' + h.mod + '</strong>: ' + h.action + '</div>';
+      });
+      log.innerHTML = html;
+    });
+  });
+});
+</script>

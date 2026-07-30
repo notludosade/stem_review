@@ -1,0 +1,194 @@
+<meta charset="UTF-8">
+<title>Lesson 1: Electric Field from a Point Charge, Reviewed with Calculus — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="advanced">
+  <span class="kicker">STEM+ · AP Physics C: Electricity and Magnetism · Unit 1 · Lesson 1</span>
+  <h1>Electric Field from a Point Charge, Reviewed with Calculus</h1>
+  <p class="subtitle">An algebra-based course hands you E = kQ/r² as a fact to plug numbers into. This course rebuilds electricity and magnetism from calculus instead — starting by treating the field as a vector function of position, not a formula.</p>
+  <p class="nav-links"><a href="0002-electric-flux.html" class="nav-next">Lesson 2 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <div class="box">
+    <span class="box-label">Definition — Electric Field as a Vector Function</span>
+    A point charge Q at the origin creates a vector field <strong>E(r) = (kQ/r²) r̂</strong> at every point in space, where r is the distance from the charge and r̂ is the unit vector pointing from the charge to the field point. E(r) is a function you can evaluate anywhere — not a single number computed for one specific pair of charges. <strong>Sign convention used throughout this course:</strong> a positive Q produces E pointing along +r̂ (away from the charge); a negative Q produces E pointing along −r̂ (toward the charge).
+  </div>
+
+  <div class="box">
+    <span class="box-label">Method — Superposition, and Why It Becomes an Integral</span>
+    For several point charges, the net field at any point is the vector sum of each charge's individual field: <strong>E_net = ΣEᵢ</strong> (superposition). For a continuous distribution of charge — a rod, ring, disk, or sphere — there's no longer a finite list of charges to sum. Instead you slice the object into infinitesimal charge elements dq, each contributing a field <strong>dE = k dq/r² r̂</strong>, and superposition becomes an integral: <strong>E = ∫dE</strong>. Lesson 5 carries this out in full; this lesson's job is just to make E(r) feel like a function first.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why This Is the Right Starting Point</span>
+    Every remaining idea in Units 1–2 is a consequence of treating E as a vector field: flux (Lesson 2) measures how much of this field pierces a surface, Gauss's law (Lesson 3) relates that flux to enclosed charge, and potential (Unit 2) turns out to be an integral of E along a path. None of that language makes sense if E is just "a number you compute per problem" — it has to be a function of position from the start.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Worked Example — Superposition on an Axis</span>
+    A charge q₁ = +3 μC sits at x = 0, and q₂ = −5 μC sits at x = 0.4 m. Find the field at x = 0.2 m (the midpoint).<br>
+    E₁ (from q₁, positive ⟹ points away from q₁, i.e. +x): kq₁/r² = (8.99×10⁹)(3×10⁻⁶)/(0.2)² ≈ 6.74×10⁵ N/C, direction +x.<br>
+    E₂ (from q₂, negative ⟹ points toward q₂, which is also +x from this point): kq₂/r² = (8.99×10⁹)(5×10⁻⁶)/(0.2)² ≈ 1.12×10⁶ N/C, direction +x.<br>
+    Both fields point the same way here, so they add directly: E_net ≈ 6.74×10⁵ + 1.12×10⁶ ≈ <strong>1.80×10⁶ N/C in the +x direction</strong>. (If the point weren't on the line joining the charges, you'd need to add the two vectors component by component instead.)
+  </div>
+
+  <h2>Try it — point-charge field explorer</h2>
+  <p>Set the source charge's sign and size, then hover anywhere on the grid to sample E(r) at that point — magnitude and direction both come straight from E = kQ/r².</p>
+
+  <div class="widget">
+    <div class="widget-label">Try It — Field of a Point Charge</div>
+    <div class="slider-row">
+      <button class="widget-btn" id="pc-btn-pos" type="button">Positive charge</button>
+      <button class="widget-btn" id="pc-btn-neg" type="button">Negative charge</button>
+    </div>
+    <div class="slider-row">
+      <label for="pc-q">|Q| (μC)</label>
+      <input type="range" id="pc-q" min="1" max="10" step="1" value="4">
+      <span class="slider-value" id="pc-q-val">4 μC</span>
+    </div>
+    <div class="plot-wrap">
+      <svg id="pc-svg" viewBox="0 0 460 300" width="460" height="300" role="img" aria-label="A grid showing the electric field of a point charge at the center; hovering samples the field vector at that point">
+        <defs>
+          <marker id="pc-arrowhead" markerWidth="6" markerHeight="6" refX="4.5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#2c5f8a"></path></marker>
+        </defs>
+        <line class="fig-axis" x1="20" y1="150" x2="440" y2="150"></line>
+        <line class="fig-axis" x1="230" y1="280" x2="230" y2="20"></line>
+        <circle id="pc-charge" cx="230" cy="150" r="7" fill="#c0392b"></circle>
+        <g id="pc-arrows" stroke="#2c5f8a" stroke-width="1.8"></g>
+        <circle id="pc-cursor" r="4" fill="#c0392b" opacity="0"></circle>
+      </svg>
+    </div>
+    <p class="plot-readout" id="pc-readout">Hover the grid (each square ≈ 0.1 m) to sample E(r). Currently a +4 μC charge.</p>
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. Using this course's sign convention, the electric field produced by a negative point charge at some field point points:</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Away from the charge, along +r̂</button>
+      <button class="quiz-choice" data-correct="true">Toward the charge, along −r̂</button>
+      <button class="quiz-choice" data-correct="false">Perpendicular to r̂</button>
+      <button class="quiz-choice" data-correct="false">In a random direction depending on the observer</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Negative charges produce fields pointing along −r̂ — toward the source — the opposite of a positive charge's outward field.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. For a continuous object like a charged rod, why is E = kQ/r² not directly usable, forcing an integral instead?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Different pieces of the rod's charge sit at different distances and directions from the field point, so each contributes a different dE that must be summed</button>
+      <button class="quiz-choice" data-correct="false">Continuous charge doesn't actually create an electric field</button>
+      <button class="quiz-choice" data-correct="false">Coulomb's law only applies to charges larger than 1 C</button>
+      <button class="quiz-choice" data-correct="false">Integrals are only needed when the total charge is negative</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Every infinitesimal charge element dq is at its own distance r and direction r̂ from the field point, so superposition over infinitely many elements becomes an integral, E = ∫k dq/r² r̂.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="899000|8.99e5|8.99×10^5|899,000">
+    <p class="quiz-prompt">3. Fill in the blank: a point charge of 1 μC creates a field, at a distance of 0.1 m, of magnitude ___ N/C. (Use k = 8.99×10⁹ N·m²/C².)</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>E = kQ/r² = (8.99×10⁹)(1×10⁻⁶)/(0.1)² = 8990/0.01 = 899,000 N/C = 8.99×10⁵ N/C.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">4. The superposition principle states that the net electric field from several point charges is:</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">The vector sum of each charge's individual field</button>
+      <button class="quiz-choice" data-correct="false">The average of each charge's individual field</button>
+      <button class="quiz-choice" data-correct="false">Equal to whichever single charge is largest</button>
+      <button class="quiz-choice" data-correct="false">Always zero unless the charges are equal</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Superposition says fields add like vectors: E_net = E₁ + E₂ + E₃ + …, magnitude and direction both accounted for.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: OpenStax <em>University Physics Volume 2</em>, <a href="https://openstax.org/books/university-physics-volume-2/pages/5-4-electric-field">Section 5.4, "Electric Field"</a>, restates the point-charge field as a vector function and works through superposition for several charges.</p>
+
+  <p class="ask-teacher">Ask your teacher to justify, physically, why E(r) has to fall off as 1/r² rather than 1/r or 1/r³ — it's the same geometric argument you'll meet again in Lesson 3 as Gauss's law. Next up: measuring how much of this field pierces a surface.</p>
+
+  <footer class="lesson-footer">STEM+ · AP Physics C: Electricity and Magnetism · Unit 1 · Lesson 1 of 24</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var svg = document.getElementById('pc-svg');
+  var arrowsGroup = document.getElementById('pc-arrows');
+  var cursorDot = document.getElementById('pc-cursor');
+  var chargeDot = document.getElementById('pc-charge');
+  var readout = document.getElementById('pc-readout');
+  var qSlider = document.getElementById('pc-q');
+  var qVal = document.getElementById('pc-q-val');
+  var originX = 230, originY = 150, scale = 30, metersPerUnit = 0.1;
+  var k = 8.99e9;
+  var sign = 1;
+
+  function fmtE(v) {
+    if (!isFinite(v) || v === 0) return '0 N/C';
+    var exp = Math.floor(Math.log10(Math.abs(v)));
+    var mant = v / Math.pow(10, exp);
+    return mant.toFixed(2) + '×10' + toSup(exp) + ' N/C';
+  }
+  var SUP = {'0':'⁰','1':'¹','2':'²','3':'³','4':'⁴','5':'⁵','6':'⁶','7':'⁷','8':'⁸','9':'⁹','-':'⁻'};
+  function toSup(n) { return String(n).split('').map(function (c) { return SUP[c] || c; }).join(''); }
+
+  function drawGrid() {
+    arrowsGroup.innerHTML = '';
+    for (var i = -6; i <= 6; i++) {
+      for (var j = -4; j <= 4; j++) {
+        if (i === 0 && j === 0) continue;
+        var mx = i * 1.1, my = j * 1.1;
+        var r = Math.sqrt(mx * mx + my * my);
+        var ux = sign * mx / r, uy = sign * my / r;
+        var len = Math.min(0.9, 0.35 + 1.1 / r) * scale;
+        var sx = originX + mx * scale, sy = originY - my * scale;
+        var line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        line.setAttribute('x1', sx); line.setAttribute('y1', sy);
+        line.setAttribute('x2', sx + ux * len); line.setAttribute('y2', sy - uy * len);
+        line.setAttribute('marker-end', 'url(#pc-arrowhead)');
+        arrowsGroup.appendChild(line);
+      }
+    }
+  }
+
+  function setSign(s) {
+    sign = s;
+    chargeDot.setAttribute('fill', s > 0 ? '#c0392b' : '#2c5f8a');
+    drawGrid();
+    readout.textContent = 'Hover the grid (each square ≈ 0.1 m) to sample E(r). Currently a ' + (s > 0 ? '+' : '−') + qSlider.value + ' μC charge.';
+  }
+
+  qSlider.addEventListener('input', function () {
+    qVal.textContent = qSlider.value + ' μC';
+    readout.textContent = 'Hover the grid (each square ≈ 0.1 m) to sample E(r). Currently a ' + (sign > 0 ? '+' : '−') + qSlider.value + ' μC charge.';
+  });
+
+  document.getElementById('pc-btn-pos').addEventListener('click', function () { setSign(1); });
+  document.getElementById('pc-btn-neg').addEventListener('click', function () { setSign(-1); });
+
+  svg.addEventListener('pointermove', function (evt) {
+    var pt = svg.createSVGPoint();
+    pt.x = evt.clientX; pt.y = evt.clientY;
+    var loc = pt.matrixTransform(svg.getScreenCTM().inverse());
+    var mx = (loc.x - originX) / scale, my = (originY - loc.y) / scale;
+    if (mx < -7 || mx > 7 || my < -4.5 || my > 4.5) { cursorDot.setAttribute('opacity', 0); return; }
+    var r = Math.sqrt(mx * mx + my * my);
+    if (r < 0.15) { cursorDot.setAttribute('opacity', 0); return; }
+    cursorDot.setAttribute('opacity', 1);
+    cursorDot.setAttribute('cx', loc.x); cursorDot.setAttribute('cy', loc.y);
+    var rMeters = r * metersPerUnit;
+    var Q = Number(qSlider.value) * 1e-6;
+    var E = sign * k * Q / (rMeters * rMeters);
+    readout.textContent = 'At r = ' + rMeters.toFixed(2) + ' m: |E| = ' + fmtE(Math.abs(E)) + ', pointing ' + (E > 0 ? 'away from' : 'toward') + ' the charge.';
+  });
+
+  setSign(1);
+});
+</script>

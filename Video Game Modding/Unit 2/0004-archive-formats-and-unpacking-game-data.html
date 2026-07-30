@@ -1,0 +1,134 @@
+<meta charset="UTF-8">
+<title>Lesson 4: Archive Formats and Unpacking Game Data — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · Video Game Modding · Unit 2 · Lesson 4</span>
+  <h1>Archive Formats and Unpacking Game Data</h1>
+  <p class="subtitle">Almost no game ships its textures, models, and sounds as loose files on disk. They're bundled into one or a few large archive files first — and unpacking that archive is nearly always a modder's first real step.</p>
+  <p class="nav-links"><a href="../Unit%201/0003-how-game-developers-support-or-block-modding.html" class="nav-prev">← Unit 1, Lesson 3</a> <a href="0005-common-asset-formats.html" class="nav-next">Lesson 5 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Open a typical game's install folder and, instead of thousands of individual texture and sound files, you'll usually find a handful of large files with unfamiliar extensions — <code class="inline-code">.pak</code>, <code class="inline-code">.vpk</code>, <code class="inline-code">.wad</code>, <code class="inline-code">.bsa</code>, and dozens of other studio-specific variants. These are <strong>archive formats</strong>: containers that bundle many individual asset files into one, the same basic idea as a <code class="inline-code">.zip</code> file, just with a custom internal structure the studio designed itself.</p>
+
+  <h2>Why archives exist at all</h2>
+  <p>Two real engineering reasons, neither of which is really about stopping modders. First, <strong>performance</strong>: reading one large file sequentially off a disk is dramatically faster than opening thousands of small files individually, especially on spinning hard drives and optical media, and even on solid-state storage the overhead of opening many small files adds up. Second, <strong>light obfuscation</strong>: bundling assets into a custom binary format means a curious player can't just double-click a texture file and open it in an image viewer — casual tampering requires at least knowing the archive's structure. This is worth being precise about: an unfamiliar archive format is an inconvenience, not real security. It's not encryption, and reverse-engineered format specs for most popular game engines already exist publicly, maintained by modding communities (Unit 5 covers the harder case, when a format is genuinely encrypted).</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    An <strong>archive format</strong> is a studio-specific container file that bundles many individual game assets into one file for faster loading and light tamper-resistance — not encryption.
+  </div>
+
+  <h2>Unpacking tools</h2>
+  <p>Because most archive formats aren't officially documented, community-built <strong>extractor</strong> (or "unpacker") tools exist for the popular ones — figured out by modders inspecting the archive's binary structure by hand, then sharing what they found. Running an extractor against an archive produces exactly what you'd expect from unzipping a normal archive: a folder tree of individual files, sorted by the game's own internal organization — a <code class="inline-code">textures/</code> folder, a <code class="inline-code">models/</code> folder, a <code class="inline-code">sounds/</code> folder, sometimes a <code class="inline-code">config/</code> folder holding the plain-text files Lesson 6 covers.</p>
+
+  <div class="box why">
+    <span class="box-label">Why it matters here</span>
+    Everything in Units 3 and 4 — scripting, asset replacement — assumes you can already see what's inside the game in the first place. Unpacking is the step before all of it: it turns one opaque archive file into a browsable, readable file tree.
+  </div>
+
+  <h2>Try it — unpack a mock archive</h2>
+  <p>Click "Unpack" to run a mock extractor against a fake archive file and watch the folder tree populate the way a real one would.</p>
+
+  <div class="widget">
+    <p class="widget-label">Try It — Unpack This Archive</p>
+    <button class="widget-btn" id="unpack-btn" type="button">Unpack game_data.pak</button>
+    <div id="unpack-tree" style="margin-top:0.9rem; font-family:'SF Mono',Menlo,Consolas,monospace; font-size:0.88rem; line-height:1.6; min-height:2rem;"><span style="color:var(--muted);">Archive not yet unpacked.</span></div>
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What is the main reason game studios bundle assets into one large archive file instead of shipping them as loose files?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Reading one large file sequentially is faster than opening thousands of small files individually.</button>
+      <button class="quiz-choice" data-correct="false">Archive files are legally required by every platform.</button>
+      <button class="quiz-choice" data-correct="false">Loose files cannot be compressed at all.</button>
+      <button class="quiz-choice" data-correct="false">Archives make a game impossible to mod under any circumstances.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Performance is the primary engineering reason — sequential reads of one large file beat opening many small ones.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why is an unfamiliar archive format described as "light obfuscation" rather than real security?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">It's not encryption, and reverse-engineered format specs for popular engines are already publicly documented by modding communities.</button>
+      <button class="quiz-choice" data-correct="false">It is mathematically impossible to ever unpack.</button>
+      <button class="quiz-choice" data-correct="false">It requires breaking real encryption to read at all.</button>
+      <button class="quiz-choice" data-correct="false">Archive formats are always identical across every game studio.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>An unfamiliar structure is an inconvenience that community reverse-engineering has already solved for most popular formats — it isn't cryptographic protection.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. What does an extractor tool actually produce when run against a game's archive file?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">A browsable folder tree of the individual asset files, organized the way the game itself organized them internally.</button>
+      <button class="quiz-choice" data-correct="false">A single new, larger archive file.</button>
+      <button class="quiz-choice" data-correct="false">A modified copy of the original game executable.</button>
+      <button class="quiz-choice" data-correct="false">A brand new scripting API for the game.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Unpacking turns one opaque archive into a readable file tree — textures, models, sounds, and config files, sorted the way the archive originally stored them.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="extractor|unpacker">
+    <p class="quiz-prompt">4. Fill in the blank: a community-built tool that reads a game's proprietary archive format and pulls out its individual files is called an ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Extractors exist for most popular archive formats because modders have already reverse-engineered the structure and shared it.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="archive format|archive">
+    <p class="quiz-prompt">5. Fill in the blank: a studio-specific container file that bundles many individual game assets into one file is called an ___ ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Extensions like .pak, .vpk, .wad, and .bsa are all examples of studio-specific archive formats.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: the community-maintained <a href="https://wiki.xentax.com/">XeNTaX game file format wiki</a> catalogs reverse-engineered archive and asset formats across hundreds of games — exactly the kind of documentation this lesson described modders building and sharing.</p>
+
+  <p class="ask-teacher">Stuck on anything above, or want to know which archive format a specific game uses? Ask your teacher — that's what I'm here for. Next up: once an archive is unpacked, what the individual asset files inside it actually are.</p>
+
+  <footer class="lesson-footer">STEM+ · Video Game Modding · Lesson 4</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var btn = document.getElementById('unpack-btn');
+  var tree = document.getElementById('unpack-tree');
+  var lines = [
+    'game_data.pak (unpacking…)',
+    '├─ textures/',
+    '│&nbsp;&nbsp;├─ player_diffuse.dds',
+    '│&nbsp;&nbsp;└─ terrain_grass.dds',
+    '├─ models/',
+    '│&nbsp;&nbsp;└─ player_rig.fbx',
+    '├─ sounds/',
+    '│&nbsp;&nbsp;└─ footstep_grass.ogg',
+    '└─ config/',
+    '&nbsp;&nbsp;&nbsp;&nbsp;└─ weapon_stats.ini'
+  ];
+  btn.addEventListener('click', function () {
+    btn.disabled = true;
+    tree.innerHTML = '';
+    var i = 0;
+    var timer = setInterval(function () {
+      if (i >= lines.length) { clearInterval(timer); btn.disabled = false; return; }
+      var div = document.createElement('div');
+      div.innerHTML = lines[i];
+      tree.appendChild(div);
+      i++;
+    }, 220);
+  });
+});
+</script>

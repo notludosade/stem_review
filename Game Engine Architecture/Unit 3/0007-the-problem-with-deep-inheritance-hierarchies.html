@@ -1,0 +1,147 @@
+<meta charset="UTF-8">
+<title>Lesson 7: The Problem with Deep Inheritance Hierarchies — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="advanced">
+  <span class="kicker">STEM+ · Game Engine Architecture · Unit 3 · Lesson 7</span>
+  <h1>The Problem with Deep Inheritance Hierarchies</h1>
+  <p class="subtitle">Software Engineering's Unit 4 covered design patterns and the idea of "favor composition over inheritance." Game object modeling is the single clearest, most-cited case where inheritance actively fights back against a growing codebase.</p>
+  <p class="nav-links"><a href="../Unit%202/0006-frame-rate-delta-time-and-why-physics-breaks-without-it.html" class="nav-prev">← Unit 2, Lesson 6</a> <a href="0008-entities-components-and-systems.html" class="nav-next">Lesson 8 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>A natural first instinct: every game object is a class. A <code class="inline-code">GameObject</code> base class, then <code class="inline-code">Character</code> extends it, then <code class="inline-code">Enemy</code> extends <code class="inline-code">Character</code>, then <code class="inline-code">FlyingEnemy</code> extends <code class="inline-code">Enemy</code>. It works, right up until a designer asks for a flying enemy that's also a boss that also swims sometimes.</p>
+
+  <h2>The diamond problem, in a game's own terms</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    A <strong>deep inheritance hierarchy</strong> models game object types as classes that extend other classes, layer after layer, to reuse behavior. It breaks down at <strong>multiple inheritance</strong> — needing a single object type to combine behaviors from two branches of the tree that don't share a common, sensible ancestor (a flying enemy and a swimming enemy that also needs to fly), which most languages either forbid outright or make dangerously ambiguous through the <strong>diamond problem</strong>: if two parent classes both define a method, which one does the child actually inherit?
+  </div>
+
+  <h2>Try it: grow a hierarchy and watch it strain</h2>
+  <p>Add new game object types one at a time. Watch how quickly the tree needs a type that doesn't fit cleanly anywhere.</p>
+
+  <div class="widget" id="hierarchy-widget">
+    <p class="widget-label">Interactive: growing a class hierarchy</p>
+    <div id="hierarchy-display"></div>
+    <p class="fm-row">
+      <button class="widget-btn" type="button" data-hier-add="flying">Add: Flying Enemy</button>
+      <button class="widget-btn" type="button" data-hier-add="swimming">Add: Swimming Enemy</button>
+      <button class="widget-btn" type="button" data-hier-add="boss">Add: Flying Swimming Boss</button>
+      <button class="widget-btn" type="button" data-hier-reset>Reset</button>
+    </p>
+    <p class="verdict" data-hier-verdict></p>
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Worked example</span>
+    <code class="inline-code">Enemy</code> splits cleanly into <code class="inline-code">FlyingEnemy</code> and <code class="inline-code">SwimmingEnemy</code> — so far, so good. Then design asks for a boss that flies <em>and</em> swims. It can't extend both <code class="inline-code">FlyingEnemy</code> and <code class="inline-code">SwimmingEnemy</code> cleanly in most languages, so a team is stuck picking one of several bad options: duplicate the flying or swimming code into a new one-off class, restructure the whole hierarchy around this one new requirement, or bolt on a special case that breaks the "is-a" assumption the tree was built on. None of these get easier as the hierarchy grows deeper.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why this specific problem hits games so hard</span>
+    Every domain has some inheritance trees, but games are unusually bad for it: game designers constantly ask for new combinations of existing behaviors — a fast enemy that's also invisible, a slow enemy that's also explosive — because novel combinations are often exactly what makes a game interesting. A hierarchy designed around "is-a" relationships assumes those relationships are mostly stable and tree-shaped. Game design assumes the opposite: behaviors need to mix and match freely, which is precisely what a rigid tree structure resists.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What specifically breaks a deep inheritance hierarchy of game object types?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Needing one object type to combine behaviors from two branches of the tree that don't share a sensible common ancestor.</button>
+      <button class="quiz-choice" data-correct="false">The hierarchy running out of available class names.</button>
+      <button class="quiz-choice" data-correct="false">The game engine refusing to compile more than three classes.</button>
+      <button class="quiz-choice" data-correct="false">Inheritance hierarchies never actually cause any real problems.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Cross-branch combinations are exactly what a tree-shaped hierarchy can't represent cleanly.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. What is the "diamond problem"?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Ambiguity about which parent's method a child inherits, when two parent classes both define that same method.</button>
+      <button class="quiz-choice" data-correct="false">A graphical rendering artifact shaped like a diamond.</button>
+      <button class="quiz-choice" data-correct="false">A performance issue unrelated to class structure.</button>
+      <button class="quiz-choice" data-correct="false">A naming convention for boss enemies specifically.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The diamond problem is specifically about ambiguous method inheritance from two parents.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why does this problem hit game development especially hard, compared to other software domains?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Game design constantly asks for novel combinations of existing behaviors, which a rigid tree structure resists by nature.</button>
+      <button class="quiz-choice" data-correct="false">Games never actually need more than one class of object.</button>
+      <button class="quiz-choice" data-correct="false">Game object types never share any behavior with each other.</button>
+      <button class="quiz-choice" data-correct="false">This problem is unique to games and never occurs in other software.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Games specifically demand mix-and-match behavior combinations, which is what breaks a tree assumption.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="diamond problem">
+    <p class="quiz-prompt">4. Fill in the blank: the ambiguity over which parent's method a child class inherits, when two parents define the same method, is called the ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>This is the named problem this lesson introduces.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="multiple inheritance">
+    <p class="quiz-prompt">5. Fill in the blank: needing a class to inherit from two unrelated parent classes at once is called ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Multiple inheritance is exactly what a flying-and-swimming boss would require.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: Robert Nystrom's <a href="https://gameprogrammingpatterns.com/component.html">"Component" chapter</a> in <em>Game Programming Patterns</em> walks through exactly this problem before introducing the fix.</p>
+
+  <p class="ask-teacher">Curious how "favor composition over inheritance" from Software Engineering applies here specifically? Ask your teacher — that's what I'm here for. Next up: the alternative nearly every modern engine adopted instead — entities, components, and systems.</p>
+
+  <footer class="lesson-footer">STEM+ · Game Engine Architecture · Lesson 7 of the course sequence</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var display = document.getElementById('hierarchy-display');
+  var verdict = document.querySelector('[data-hier-verdict]');
+  var added = { flying: false, swimming: false, boss: false };
+
+  function render() {
+    var html = '<div class="box" style="margin:0.3rem 0; padding:0.5rem 0.8rem;"><strong>GameObject</strong></div>';
+    html += '<div class="box" style="margin:0.3rem 0 0.3rem 1.5rem; padding:0.5rem 0.8rem;">└ <strong>Character</strong></div>';
+    html += '<div class="box" style="margin:0.3rem 0 0.3rem 3rem; padding:0.5rem 0.8rem;">└ <strong>Enemy</strong></div>';
+    if (added.flying) html += '<div class="box" style="margin:0.3rem 0 0.3rem 4.5rem; padding:0.5rem 0.8rem;">└ <strong>FlyingEnemy</strong></div>';
+    if (added.swimming) html += '<div class="box" style="margin:0.3rem 0 0.3rem 4.5rem; padding:0.5rem 0.8rem;">└ <strong>SwimmingEnemy</strong></div>';
+    if (added.boss) html += '<div class="box why" style="margin:0.3rem 0 0.3rem 4.5rem; padding:0.5rem 0.8rem;">└ <strong>FlyingSwimmingBoss</strong> — doesn\'t fit under either branch. Duplicate code? Restructure everything? Special-case hack?</div>';
+    display.innerHTML = html;
+    if (added.boss) {
+      verdict.textContent = 'The hierarchy has no clean place for a type spanning two branches — this is the diamond problem in practice.';
+      verdict.className = 'verdict is-fail';
+    } else {
+      verdict.textContent = 'Tree looks fine so far. Try adding the boss that needs both flying and swimming.';
+      verdict.className = 'verdict';
+    }
+  }
+
+  document.querySelectorAll('[data-hier-add]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      added[btn.getAttribute('data-hier-add')] = true;
+      render();
+    });
+  });
+  document.querySelector('[data-hier-reset]').addEventListener('click', function () {
+    added = { flying: false, swimming: false, boss: false };
+    render();
+  });
+
+  render();
+});
+</script>

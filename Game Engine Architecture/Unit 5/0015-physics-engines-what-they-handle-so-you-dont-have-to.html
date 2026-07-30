@@ -1,0 +1,148 @@
+<meta charset="UTF-8">
+<title>Lesson 15: Physics Engines: What They Handle So You Don't Have To — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="advanced">
+  <span class="kicker">STEM+ · Game Engine Architecture · Unit 5 · Lesson 15</span>
+  <h1>Physics Engines: What They Handle So You Don't Have To</h1>
+  <p class="subtitle">Lessons 13 and 14 built collision detection and integration from scratch, on purpose, to see how they actually work. In a real engine, you'd almost never write either by hand again — this lesson is about the dedicated subsystem that takes over from here.</p>
+  <p class="nav-links"><a href="0014-rigid-body-physics-and-integration.html" class="nav-prev">← Lesson 14</a> <a href="../Unit%206/0016-asset-formats-and-the-import-pipeline.html" class="nav-next">Unit 6, Lesson 16 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Broad phase, narrow phase, integration, and one more thing neither lesson touched yet: what happens the instant after two rigid bodies are found to be overlapping? Something has to decide how hard they push apart, in which direction, and how that affects both objects' velocities — correctly, for boxes, ramps, stacks, and joints, all at once. That's what a dedicated physics engine is for.</p>
+
+  <h2>The subsystem, not the algorithm</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    A <strong>physics engine</strong> is the subsystem (Unit 1's term) responsible for the entire simulation loop: broad and narrow phase collision detection, <strong>collision response</strong> (resolving overlap and updating velocities so objects push apart realistically instead of passing through each other), integration, and often <strong>constraints</strong> — rules like "these two bodies must stay connected at this joint" that have to hold true even while everything else is moving. Most engines embed or integrate with a battle-tested, general-purpose physics engine (Box2D for 2D, Bullet or PhysX for 3D) rather than writing this subsystem from scratch.
+  </div>
+
+  <h2>Try it: who handles what</h2>
+  <p>Classify each task as something a physics engine handles internally, or something game code still has to decide on top of it.</p>
+
+  <div class="widget" id="physwho-widget">
+    <p class="widget-label">Interactive: physics engine or game code?</p>
+    <div id="physwho-list"></div>
+    <p class="verdict" data-physwho-verdict>0 of 6 classified correctly.</p>
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Worked example</span>
+    A crate stacked on a ramp needs friction to stay put instead of sliding, and a chain-link bridge needs each plank to stay connected to its neighbors while still swinging under a player's weight. Both are exactly the kind of numerically finicky, easy-to-get-subtly-wrong problems (friction coefficients, joint constraint solving under many simultaneous contacts) that a mature physics engine has already spent years tuning — which is precisely why "which object took how much damage from that collision" is left to game code, while "did the crate slide off cleanly" is not.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why almost nobody writes a full physics engine for a single game</span>
+    Lesson 14's two-line integrator looks simple, but a general physics engine handling stacks of boxes, ramps, joints, and dozens of simultaneous contacts without visibly jittering or exploding is genuinely difficult numerical software — the kind of problem where subtle bugs surface only in specific, hard-to-predict configurations. This mirrors Lesson 1's argument about engines generally: physics is a shared, extremely hard problem nearly every game needs solved the same way, which is exactly the profile of problem worth outsourcing to a dedicated, heavily-tested library instead of re-deriving.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What does "collision response" specifically refer to?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Resolving overlap between two colliding bodies and updating their velocities so they push apart realistically.</button>
+      <button class="quiz-choice" data-correct="false">The initial broad-phase check that rules out most non-colliding pairs.</button>
+      <button class="quiz-choice" data-correct="false">Loading a physics engine library into memory at startup.</button>
+      <button class="quiz-choice" data-correct="false">Rendering two overlapping objects with a different color.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Collision response is specifically the resolve-and-update-velocities step after overlap is detected.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. What is a physics "constraint"?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">A rule, like a joint connecting two bodies, that must keep holding true even as everything else in the simulation moves.</button>
+      <button class="quiz-choice" data-correct="false">The maximum number of rigid bodies a scene is allowed to contain.</button>
+      <button class="quiz-choice" data-correct="false">A limit on how many frames per second the game can render.</button>
+      <button class="quiz-choice" data-correct="false">A rule that only ever applies to a single isolated rigid body.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Constraints maintain relationships (like joints) between bodies across the whole simulation.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why do most teams use an existing physics engine (Box2D, Bullet, PhysX) instead of writing their own?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Handling stacks, ramps, joints, and many simultaneous contacts correctly is genuinely difficult numerical software, already solved and heavily tested elsewhere.</button>
+      <button class="quiz-choice" data-correct="false">Writing a custom physics engine is against most game engines' license terms.</button>
+      <button class="quiz-choice" data-correct="false">Existing physics engines are always free, while custom ones always cost money.</button>
+      <button class="quiz-choice" data-correct="false">It is technically impossible for a small team to implement any physics code.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Difficulty and existing, battle-tested solutions are why teams reuse rather than reinvent.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="collision response">
+    <p class="quiz-prompt">4. Fill in the blank: resolving overlap and updating velocities so two colliding bodies push apart realistically is called ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Collision response is the specific term for this resolve-and-update step.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="constraint|constraints">
+    <p class="quiz-prompt">5. Fill in the blank: a rule like "these two bodies must stay connected at this joint," which must keep holding as the simulation runs, is called a ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Constraints are exactly this kind of persistent relationship between bodies.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next unit: Box2D's own <a href="https://box2d.org/documentation/">documentation overview</a> tours a real, widely-used 2D physics engine's feature set — collision, response, joints, and more.</p>
+
+  <p class="ask-teacher">Curious what actually goes wrong when a physics engine's numerical solver gets it slightly wrong — the jittering-box problem? Ask your teacher — that's what I'm here for. Next up: Unit 6 turns from simulating the world to a different kind of engine problem entirely — getting art, models, and sound from a disk file into the engine in the first place.</p>
+
+  <footer class="lesson-footer">STEM+ · Game Engine Architecture · Lesson 15 of the course sequence</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var items = [
+    { name: 'Detecting that a box has overlapped a ramp', answer: 'engine' },
+    { name: '"Falling off the map instantly kills the player"', answer: 'game' },
+    { name: 'Resolving how hard two overlapping crates push apart', answer: 'engine' },
+    { name: '"Picking up a speed boost item doubles velocity for 5 seconds"', answer: 'game' },
+    { name: 'Keeping a rope\'s joints connected while it swings', answer: 'engine' },
+    { name: '"Enemies take double damage while airborne"', answer: 'game' }
+  ];
+  var classified = items.map(function () { return null; });
+  var list = document.getElementById('physwho-list');
+  var verdict = document.querySelector('[data-physwho-verdict]');
+
+  function render() {
+    list.innerHTML = '';
+    items.forEach(function (it, i) {
+      var row = document.createElement('div');
+      row.style.margin = '0.35rem 0';
+      row.style.padding = '0.5rem 0.8rem';
+      var status = '';
+      if (classified[i] === 'engine') { row.className = 'box why'; status = ' — marked Physics Engine' + (it.answer === 'engine' ? ' ✓' : ' ✗'); }
+      else if (classified[i] === 'game') { row.className = 'box example'; status = ' — marked Game Code' + (it.answer === 'game' ? ' ✓' : ' ✗'); }
+      else { row.className = 'box'; }
+      row.innerHTML = '<strong>' + it.name + '</strong>' + status +
+        '<br><span style="display:inline-flex;gap:0.5rem;margin-top:0.4rem;">' +
+        '<button class="widget-btn" type="button" data-choose="engine" data-idx="' + i + '">Physics Engine</button>' +
+        '<button class="widget-btn" type="button" data-choose="game" data-idx="' + i + '">Game Code</button></span>';
+      list.appendChild(row);
+    });
+    list.querySelectorAll('[data-choose]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        classified[parseInt(btn.getAttribute('data-idx'), 10)] = btn.getAttribute('data-choose');
+        render();
+      });
+    });
+    var correct = items.filter(function (it, i) { return classified[i] === it.answer; }).length;
+    verdict.textContent = correct + ' of ' + items.length + ' classified correctly.';
+    verdict.className = 'verdict' + (correct === items.length ? ' is-pass' : '');
+  }
+
+  render();
+});
+</script>

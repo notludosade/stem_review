@@ -1,0 +1,169 @@
+<meta charset="UTF-8">
+<title>Lesson 17: Memory Management for Game Assets — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="advanced">
+  <span class="kicker">STEM+ · Game Engine Architecture · Unit 6 · Lesson 17</span>
+  <h1>Memory Management for Game Assets</h1>
+  <p class="subtitle">Systems Programming's Unit 2 covered the heap and what happens when memory isn't managed carefully. A game console or phone has a hard, fixed memory budget — and a AAA game's assets, loaded all at once, would blow past it many times over.</p>
+  <p class="nav-links"><a href="0016-asset-formats-and-the-import-pipeline.html" class="nav-prev">← Lesson 16</a> <a href="0018-streaming-and-level-of-detail.html" class="nav-next">Lesson 18 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>A single open-world game might ship with hundreds of gigabytes of textures, models, and audio on disk. No gaming device has hundreds of gigabytes of fast memory available to a single game — most have a few gigabytes, shared with the operating system and everything else running. Every asset an engine loads is a bet against a hard, unforgiving ceiling.</p>
+
+  <h2>A budget, not a suggestion</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    A <strong>memory budget</strong> is the fixed amount of fast memory (RAM, or dedicated video memory on the GPU) a game is allowed to use for its assets at any one time, set by the target hardware, not chosen by the developer. An asset manager tracks every currently-loaded asset against that budget, and when a newly-needed asset would push memory past the limit, something already loaded has to be <strong>evicted</strong> — unloaded from memory — usually the asset judged least likely to be needed again soon.
+  </div>
+
+  <h2>Try it: fill a memory budget and watch eviction happen</h2>
+  <p>Load assets of different sizes into a small simulated budget. Once it's full, loading anything new forces something else out.</p>
+
+  <div class="widget" id="membudget-widget">
+    <p class="widget-label">Interactive: a 100 MB memory budget</p>
+    <div class="fm-row">
+      <button class="widget-btn" type="button" data-mem-add="20">Load small texture (20 MB)</button>
+      <button class="widget-btn" type="button" data-mem-add="45">Load character model (45 MB)</button>
+      <button class="widget-btn" type="button" data-mem-add="60">Load level environment (60 MB)</button>
+      <button class="widget-btn" type="button" data-mem-reset>Reset</button>
+    </div>
+    <div id="mem-bar" style="height:24px; background:var(--code-bg); border-radius:4px; overflow:hidden; margin:0.8rem 0; display:flex;"></div>
+    <p class="verdict" data-mem-verdict>Budget: 0 / 100 MB used.</p>
+    <p class="plot-readout" data-mem-log></p>
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Worked example</span>
+    A player walks from a forest zone into a cave. The forest's high-resolution foliage textures aren't visible or needed anymore, but they're still sitting in memory, taking up space the cave's rock and torch textures now need. The asset manager evicts the forest textures — the least-recently-needed assets — freeing exactly enough budget to load what the cave now requires, all without the player ever consciously noticing memory changed hands at all.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why this connects directly to Systems Programming's heap lesson, at a much larger scale</span>
+    A memory leak (loading an asset and never properly releasing its reference) is exactly as dangerous here as in any C program — except a leaked 200 MB texture doesn't just waste space quietly, it can push a whole console over budget and crash the game outright within minutes, not run slowly for days like a leaking server might. Asset memory management is the same reference-counting and lifetime-tracking problem from that unit, just with a much smaller, much harder ceiling and much less room for error.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What determines a game's memory budget?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">The target hardware's available fast memory — it's a fixed limit, not chosen by the developer.</button>
+      <button class="quiz-choice" data-correct="false">However much memory the developer personally decides to allow.</button>
+      <button class="quiz-choice" data-correct="false">The total size of every asset the game ships with on disk.</button>
+      <button class="quiz-choice" data-correct="false">It has no real limit — modern devices have effectively unlimited memory.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The budget is set externally by the hardware the game runs on.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. What does "evicting" an asset mean?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Unloading it from memory, usually because it's judged unlikely to be needed again soon.</button>
+      <button class="quiz-choice" data-correct="false">Permanently deleting it from the game's disk files.</button>
+      <button class="quiz-choice" data-correct="false">Converting it into a different runtime format.</button>
+      <button class="quiz-choice" data-correct="false">Loading it into memory for the very first time.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Eviction is unloading from memory, not deleting the underlying file.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why is a leaked asset arguably more dangerous on a game console than a similar leak in a long-running server?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">A console's memory ceiling is small and hard, so a leaked asset can crash the game within minutes rather than degrading slowly.</button>
+      <button class="quiz-choice" data-correct="false">Consoles are technically incapable of ever leaking memory.</button>
+      <button class="quiz-choice" data-correct="false">Game consoles have no memory limit at all, unlike servers.</button>
+      <button class="quiz-choice" data-correct="false">A leaked asset always fixes itself automatically within seconds.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A small, fixed budget means a leak's consequences arrive much faster and harder than on a server.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="memory budget|budget">
+    <p class="quiz-prompt">4. Fill in the blank: the fixed amount of fast memory a game may use for assets at any one time is its ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The memory budget is the hard ceiling asset loading has to respect.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="evicted|eviction">
+    <p class="quiz-prompt">5. Fill in the blank: when a needed asset would push memory past budget, an existing asset is ___ to make room.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Eviction frees space by unloading an asset judged least likely to be needed soon.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: the <a href="https://learn.microsoft.com/en-us/gaming/gdk/_content/gc/system/overviews/memory-and-storage/xbox-memory-overview">Xbox memory management overview</a> from Microsoft's console developer docs describes exactly this fixed-budget constraint from a real platform's perspective.</p>
+
+  <p class="ask-teacher">Curious how an asset manager decides which loaded asset is "least likely to be needed soon"? Ask your teacher — that's what I'm here for. Next up: the technique that lets a game world feel far larger than any fixed memory budget could ever hold at once — streaming and level of detail.</p>
+
+  <footer class="lesson-footer">STEM+ · Game Engine Architecture · Lesson 17 of the course sequence</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var BUDGET = 100;
+  var loaded = []; // {name, size}
+  var nextTag = 0;
+  var bar = document.getElementById('mem-bar');
+  var verdict = document.querySelector('[data-mem-verdict]');
+  var log = document.querySelector('[data-mem-log]');
+  var colors = ['var(--accent)', 'var(--correct)', 'var(--incorrect)', 'var(--muted)'];
+
+  function totalUsed() {
+    return loaded.reduce(function (sum, a) { return sum + a.size; }, 0);
+  }
+
+  function render() {
+    bar.innerHTML = '';
+    loaded.forEach(function (a, i) {
+      var seg = document.createElement('div');
+      seg.style.width = (a.size / BUDGET * 100) + '%';
+      seg.style.background = colors[i % colors.length];
+      seg.title = a.name + ' (' + a.size + ' MB)';
+      bar.appendChild(seg);
+    });
+    verdict.textContent = 'Budget: ' + totalUsed() + ' / ' + BUDGET + ' MB used (' + loaded.length + ' asset(s) loaded).';
+    verdict.className = 'verdict' + (totalUsed() > BUDGET ? ' is-fail' : '');
+  }
+
+  function addAsset(size, name) {
+    var evicted = [];
+    while (totalUsed() + size > BUDGET && loaded.length > 0) {
+      var gone = loaded.shift(); // evict oldest (least-recently-loaded) first
+      evicted.push(gone.name);
+    }
+    loaded.push({ name: name, size: size });
+    render();
+    log.textContent = evicted.length
+      ? 'Loaded ' + name + ' (' + size + ' MB). Evicted to make room: ' + evicted.join(', ') + '.'
+      : 'Loaded ' + name + ' (' + size + ' MB). No eviction needed — budget had room.';
+  }
+
+  document.querySelectorAll('[data-mem-add]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var size = parseInt(btn.getAttribute('data-mem-add'), 10);
+      nextTag++;
+      addAsset(size, 'Asset #' + nextTag + ' (' + size + ' MB)');
+    });
+  });
+
+  document.querySelector('[data-mem-reset]').addEventListener('click', function () {
+    loaded = [];
+    nextTag = 0;
+    render();
+    log.textContent = '';
+  });
+
+  render();
+});
+</script>

@@ -1,0 +1,121 @@
+<meta charset="UTF-8">
+<title>Lesson 7: Embedded Scripting Languages in Games — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · Video Game Modding · Unit 3 · Lesson 7</span>
+  <h1>Embedded Scripting Languages in Games (Lua and Similar)</h1>
+  <p class="subtitle">Config files (Unit 2) can only change numbers that already exist. To add real new behavior without recompiling the game, a modder needs a scripting language the game itself already knows how to run.</p>
+  <p class="nav-links"><a href="../Unit%202/0006-finding-and-reading-a-games-configuration-files.html" class="nav-prev">← Unit 2, Lesson 6</a> <a href="0008-hooking-into-game-events-and-logic.html" class="nav-next">Lesson 8 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>A great many games ship with an <strong>embedded scripting language</strong> built directly into the engine — a small programming language interpreter the game runs internally, exposed so that some (or all) of the game's own logic is written in it, not just its compiled core. <strong>Lua</strong> is by far the most common choice across the industry — it's small, fast, and designed from the start to be embedded inside a larger host application. World of Warcraft's entire user-interface system runs on Lua. Garry's Mod and Roblox build nearly their whole player-facing experience around it. Other games use Python, JavaScript, or a fully custom, game-specific scripting language instead, but the underlying idea is identical across all of them.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    An <strong>embedded scripting language</strong> is a lightweight programming language interpreter built into a game engine, letting some of the game's logic — and, when exposed to players, a mod's logic — run as script rather than as compiled engine code.
+  </div>
+
+  <h2>Why studios expose this to players at all</h2>
+  <p>Scripting sits in a genuinely different category from the earlier units' techniques. Unpacking (Unit 2) reveals what already exists; config edits change values that already exist. A script can add logic that never existed in the base game at all — a new ability, a new game mode, an entirely new system — all without touching a single line of the compiled engine. Studios that expose a scripting <strong>API</strong> (application programming interface — the specific set of functions and data a script is allowed to call) are making a deliberate choice to let modders build real new functionality, safely contained within limits the studio still controls.</p>
+
+  <h2>Sandboxing</h2>
+  <p>That containment matters because a script isn't given free rein over the player's computer. Games run mod scripts inside a <strong>sandbox</strong> — a restricted execution environment that only exposes the specific functions the API deliberately provides (spawn an item, deal damage, display a message) and blocks everything else (reading arbitrary files, making network requests, touching other running programs). A well-designed sandbox is what makes it safe for a studio to let untrusted, community-written scripts run inside its game at all.</p>
+
+  <div class="box why">
+    <span class="box-label">Why it matters here</span>
+    Lesson 8's event hooks and Lesson 9's modding frameworks are both built entirely on top of what this lesson introduces: a scripting language the game already runs, and an API surface the studio has chosen to expose through it.
+  </div>
+
+  <h2>Try it — run a toy script</h2>
+  <p>Below is a tiny Lua-like script a mod might use to react to the player picking up an item. Click "Run Script" to see what it produces in a mock output log.</p>
+
+  <div class="widget">
+    <p class="widget-label">Try It — Mock Script Runner</p>
+    <pre class="code-block" style="margin-bottom:0.9rem;"><code>function onItemPickup(item)
+  print("Picked up: " .. item.name)
+  if item.name == "Health Potion" then
+    player.heal(25)
+  end
+end</code></pre>
+    <button class="widget-btn" id="run-script-btn" type="button">Run Script — Pick Up "Health Potion"</button>
+    <div id="script-log" style="margin-top:0.8rem; font-family:'SF Mono',Menlo,Consolas,monospace; font-size:0.85rem; min-height:1.5rem;"></div>
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What can a scripted mod do that a config-file edit (Unit 2) fundamentally cannot?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Add entirely new logic and behavior, not just change the value of something that already exists.</button>
+      <button class="quiz-choice" data-correct="false">Change a texture's color.</button>
+      <button class="quiz-choice" data-correct="false">Edit a plain-text file.</button>
+      <button class="quiz-choice" data-correct="false">Nothing — the two techniques are functionally identical.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Config edits change existing values; scripts can introduce genuinely new logic the base game never had.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why is Lua specifically so common as a game's embedded scripting language?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">It's small, fast, and was designed from the start to be embedded inside a larger host application.</button>
+      <button class="quiz-choice" data-correct="false">It is the only language capable of running inside any software.</button>
+      <button class="quiz-choice" data-correct="false">It is required by every game console manufacturer.</button>
+      <button class="quiz-choice" data-correct="false">It cannot be sandboxed, so studios prefer it for that reason.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Lua's design goal — being a small, fast, easily embeddable interpreter — is exactly why it's the industry's most common choice, from World of Warcraft to Roblox.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. What is the purpose of running a mod script inside a sandbox?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">To restrict the script to only the specific functions the API deliberately exposes, blocking everything else.</button>
+      <button class="quiz-choice" data-correct="false">To make the script run faster than compiled code.</button>
+      <button class="quiz-choice" data-correct="false">To give the script full, unrestricted access to the player's computer.</button>
+      <button class="quiz-choice" data-correct="false">To automatically translate the script into a different programming language.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A sandbox is what makes it safe to run untrusted, community-written scripts — it only allows what the API explicitly exposes.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="sandbox|sandboxing">
+    <p class="quiz-prompt">4. Fill in the blank: a restricted execution environment that only exposes a deliberately limited set of functions to a running script is called a ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A sandbox is what allows a studio to safely run community-written code inside its own game.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="api|application programming interface">
+    <p class="quiz-prompt">5. Fill in the blank: the specific set of functions and data a script is allowed to call within a game is called its ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The API is the deliberate boundary a studio draws around what a mod script is permitted to do.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: the official <a href="https://www.lua.org/about.html">Lua language site</a> explains exactly why the language was designed to be embedded — small, fast, and portable — the same design goals that made it the industry's default modding language.</p>
+
+  <p class="ask-teacher">Stuck on anything above, or want to see a real game's scripting API documentation? Ask your teacher — that's what I'm here for. Next up: how a script actually gets called when something happens in-game, without ever touching the original code.</p>
+
+  <footer class="lesson-footer">STEM+ · Video Game Modding · Lesson 7</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var btn = document.getElementById('run-script-btn');
+  var log = document.getElementById('script-log');
+  btn.addEventListener('click', function () {
+    log.innerHTML = '<div>&gt; onItemPickup(item) called with item.name = "Health Potion"</div>' +
+      '<div style="color:var(--muted);">Picked up: Health Potion</div>' +
+      '<div style="color:var(--correct);">player.heal(25) called — player healed 25 HP.</div>';
+  });
+});
+</script>

@@ -1,0 +1,145 @@
+<meta charset="UTF-8">
+<title>Lesson 18: Streaming and Level of Detail — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="advanced">
+  <span class="kicker">STEM+ · Game Engine Architecture · Unit 6 · Lesson 18</span>
+  <h1>Streaming and Level of Detail</h1>
+  <p class="subtitle">Lesson 17 established a hard memory ceiling. This lesson is about the two techniques that let a game world feel enormous — hundreds of square kilometers, thousands of objects — without ever actually needing all of it in memory at once.</p>
+  <p class="nav-links"><a href="0017-memory-management-for-game-assets.html" class="nav-prev">← Lesson 17</a> <a href="../Unit%207/0019-the-scripting-layer.html" class="nav-next">Unit 7, Lesson 19 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>A player only ever sees a small slice of an open world at once — nearby, and roughly what's on the horizon. Everything far outside that doesn't need full detail loaded in memory, or sometimes any detail at all yet. Two related ideas exploit exactly that.</p>
+
+  <h2>Load what's near, simplify what's far</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    <strong>Streaming</strong> loads and unloads assets in the background, based on the player's position, so only the area actually near the player (plus a margin) is ever fully resident in memory — Lesson 17's eviction, driven automatically by distance instead of a fixed rule. <strong>Level of detail (LOD)</strong> keeps multiple versions of the same model, at decreasing triangle counts, and swaps in a simpler version as an object gets farther from the camera — since a distant object covers only a few screen pixels anyway, its extra detail would be invisible, wasted rendering work (tying back to Unit 4's draw-call cost).
+  </div>
+
+  <h2>Try it: move away and watch LOD swap in real time</h2>
+  <p>Drag the distance slider and watch which level of detail the engine would actually use, and how many triangles it costs.</p>
+
+  <div class="widget" id="lod-widget">
+    <p class="widget-label">Interactive: level of detail vs. camera distance</p>
+    <div class="slider-row">
+      <label for="lod-dist">Distance from camera</label>
+      <input type="range" id="lod-dist" min="0" max="100" value="0" step="1">
+      <span class="slider-value" data-lod-dist-val>0 m</span>
+    </div>
+    <svg viewBox="0 0 300 150" width="300" height="150" role="img" aria-label="A model shown at varying levels of detail" style="background:var(--code-bg); border-radius:8px;">
+      <polygon id="lod-shape" points="150,20 100,130 200,130" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="2"></polygon>
+    </svg>
+    <p class="verdict" data-lod-verdict>LOD0 (full detail) — 12,000 triangles.</p>
+    <p class="plot-hint">Past a set distance, streaming would also unload this object's high-res textures entirely.</p>
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Worked example</span>
+    A mountain village has 40 detailed houses. Standing in the village square, the nearest houses render at LOD0 — full detail, thousands of triangles each, close enough that a player could see individual roof shingles. A house at the far edge of the village renders at LOD2 — a few hundred triangles, indistinguishable at that distance from the full version. A house past the village entirely might not be loaded at all yet, waiting for streaming to bring it in only once the player gets close enough to actually reach it.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why these two techniques are usually paired, not used alone</span>
+    LOD alone still requires every object's data to already be sitting in memory, just rendered cheaply — it saves rendering cost, not memory budget. Streaming alone still renders whatever's loaded at full detail, wasting GPU time on triangles too small to see. Together, streaming keeps memory usage bounded regardless of how large the world is, while LOD keeps rendering cost bounded regardless of how much detail nearby objects actually have — solving Lesson 17's memory problem and Unit 4's draw-call problem with one paired strategy instead of two separate, unrelated fixes.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What does streaming decide, based on the player's position?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Which assets get loaded into or unloaded from memory in the background.</button>
+      <button class="quiz-choice" data-correct="false">Which triangles get colored during the fragment stage.</button>
+      <button class="quiz-choice" data-correct="false">How fast the player character is allowed to move.</button>
+      <button class="quiz-choice" data-correct="false">Which entity components a system's query matches.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Streaming manages memory residency based on proximity to the player.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why does a distant object benefit from a lower level of detail?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">It covers only a few screen pixels, so its extra triangle detail would be invisible, wasted rendering work.</button>
+      <button class="quiz-choice" data-correct="false">Distant objects are always technically impossible to render at full detail.</button>
+      <button class="quiz-choice" data-correct="false">Lower detail models always look objectively better than high-detail ones.</button>
+      <button class="quiz-choice" data-correct="false">It has no effect on rendering cost either way.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>LOD trades invisible extra detail for real rendering-cost savings.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why are streaming and LOD usually paired, rather than relying on just one of them?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Streaming bounds memory usage but not rendering cost, while LOD bounds rendering cost but not memory usage — together they cover both.</button>
+      <button class="quiz-choice" data-correct="false">The two techniques are actually incompatible and can never be used in the same engine.</button>
+      <button class="quiz-choice" data-correct="false">LOD alone fully solves both the memory and rendering problems by itself.</button>
+      <button class="quiz-choice" data-correct="false">Streaming alone fully solves both the memory and rendering problems by itself.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Each technique solves a different half of the problem, which is why they're typically combined.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="streaming">
+    <p class="quiz-prompt">4. Fill in the blank: loading and unloading assets in the background based on player position is called ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Streaming is the distance-driven loading/unloading technique defined at the top of the lesson.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="level of detail|lod">
+    <p class="quiz-prompt">5. Fill in the blank: keeping multiple versions of a model at decreasing triangle counts, swapped in by distance, is called ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Level of detail (LOD) is the distance-based model-swapping technique.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next unit: the <a href="https://docs.unrealengine.com/5.0/en-US/level-of-detail-lod-in-unreal-engine/">Unreal Engine docs on level of detail</a> cover LOD generation and streaming in a real, production open-world engine.</p>
+
+  <p class="ask-teacher">Curious what happens if a player moves faster than streaming can load new terrain in — the classic "pop-in" problem? Ask your teacher — that's what I'm here for. Next up: Unit 7 closes the course by adding a layer for game-specific logic on top of everything built so far, starting with why engines embed a whole separate scripting language.</p>
+
+  <footer class="lesson-footer">STEM+ · Game Engine Architecture · Lesson 18 of the course sequence</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var distInput = document.getElementById('lod-dist');
+  var distVal = document.querySelector('[data-lod-dist-val]');
+  var verdict = document.querySelector('[data-lod-verdict]');
+  var shape = document.getElementById('lod-shape');
+
+  function render() {
+    var dist = parseInt(distInput.value, 10);
+    distVal.textContent = dist + ' m';
+    var scale, tris, label, points;
+    if (dist < 30) {
+      tris = 12000; label = 'LOD0 (full detail)';
+      points = '150,20 100,130 200,130';
+    } else if (dist < 60) {
+      tris = 2000; label = 'LOD1 (medium detail)';
+      points = '150,45 115,120 185,120';
+    } else if (dist < 90) {
+      tris = 300; label = 'LOD2 (low detail)';
+      points = '150,65 130,110 170,110';
+    } else {
+      tris = 0; label = 'Unloaded — streaming has evicted this object entirely';
+      points = '150,75 145,95 155,95';
+    }
+    shape.setAttribute('points', points);
+    shape.setAttribute('opacity', dist >= 90 ? '0.25' : '1');
+    verdict.textContent = label + ' — ' + tris.toLocaleString() + ' triangles' + (dist >= 90 ? ' (streaming: not resident in memory).' : '.');
+  }
+
+  distInput.addEventListener('input', render);
+  render();
+});
+</script>

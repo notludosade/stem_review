@@ -1,0 +1,141 @@
+<meta charset="UTF-8">
+<title>Lesson 20: Scene Management and State Machines — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="advanced">
+  <span class="kicker">STEM+ · Game Engine Architecture · Unit 7 · Lesson 20</span>
+  <h1>Scene Management and State Machines</h1>
+  <p class="subtitle">Every lesson so far assumed one continuous game world. Real games have a main menu, a pause screen, a level, a game-over screen — very different modes, and the engine has to know exactly which one it's in at all times.</p>
+  <p class="nav-links"><a href="0019-the-scripting-layer.html" class="nav-prev">← Lesson 19</a> <a href="0021-designing-a-small-engines-architecture.html" class="nav-next">Lesson 21 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Pressing "Start" should load a level and not somehow also render the main menu underneath it, still listening for menu clicks. Pressing "Pause" should stop the world from updating without unloading it — the player should come back to exactly where they left off. Both of these are the same underlying problem: the game is always in exactly one well-defined mode, and something has to enforce that.</p>
+
+  <h2>Exactly one state at a time, with defined transitions</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    A <strong>scene</strong> is a distinct, loadable collection of game state — a menu, a level, a loading screen — usually with its own scene graph (Unit 4). A <strong>state machine</strong> is a system that's always in exactly one of a fixed set of named states, moving between them only along explicitly defined <strong>transitions</strong> (Menu → Playing is valid; Playing → Menu directly, skipping Pause, might not be). Engines commonly use a state machine to manage which scene is active, ensuring the game is never rendering or updating two incompatible modes at once.
+  </div>
+
+  <h2>Try it: drive a game's state machine</h2>
+  <p>Click a transition button to move between states. Only the buttons for valid transitions from the current state are enabled.</p>
+
+  <div class="widget" id="statemachine-widget">
+    <p class="widget-label">Interactive: a simple game state machine</p>
+    <div id="sm-states"></div>
+    <p class="fm-row" id="sm-transitions"></p>
+    <p class="plot-readout" data-sm-log>Current state: Menu.</p>
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Worked example</span>
+    From <strong>Playing</strong>, pressing pause transitions to <strong>Paused</strong> — the level's scene stays fully loaded in memory, its update() calls simply stop running (Unit 2's game loop, selectively frozen), while render() keeps drawing its last frame underneath a pause overlay. From <strong>Paused</strong>, only two transitions are valid: back to <strong>Playing</strong> (resume exactly where the player left off) or to <strong>Menu</strong> (quit to menu, unloading the level entirely). Jumping straight from <strong>Paused</strong> to <strong>GameOver</strong> was never a transition anyone defined — the state machine simply won't allow it.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why an explicit state machine beats a tangle of boolean flags</span>
+    An early, informal version of this might be a handful of booleans — <code class="inline-code">isPaused</code>, <code class="inline-code">isInMenu</code>, <code class="inline-code">isGameOver</code> — checked all over the codebase. Nothing stops <code class="inline-code">isPaused</code> and <code class="inline-code">isGameOver</code> from both accidentally being true at once, a combination that was never supposed to exist and that no single piece of code is responsible for preventing. An explicit state machine makes "exactly one state, only valid transitions" a property of the system's structure itself, not a rule every future contributor has to remember and re-enforce by hand.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What guarantee does a state machine provide that a handful of independent boolean flags doesn't?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">That the system is always in exactly one well-defined state, reachable only through explicitly allowed transitions.</button>
+      <button class="quiz-choice" data-correct="false">That the game will never encounter a bug of any kind.</button>
+      <button class="quiz-choice" data-correct="false">That rendering will always run faster than with boolean flags.</button>
+      <button class="quiz-choice" data-correct="false">That every scene will use exactly the same amount of memory.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Structural enforcement of "exactly one state" is the core guarantee a state machine provides.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. What happens to a level's scene when the game transitions from Playing to Paused?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">It stays loaded in memory; update() calls stop, but the last frame keeps rendering underneath a pause overlay.</button>
+      <button class="quiz-choice" data-correct="false">It's immediately unloaded from memory entirely.</button>
+      <button class="quiz-choice" data-correct="false">Rendering stops completely, leaving a blank black screen.</button>
+      <button class="quiz-choice" data-correct="false">The scene graph is permanently deleted and cannot be resumed.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Pausing selectively stops update() while keeping the scene resident and still rendering.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why can independent boolean flags like isPaused and isGameOver lead to bugs a state machine avoids?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Nothing prevents two flags from both being true at once, a combination that was never supposed to exist.</button>
+      <button class="quiz-choice" data-correct="false">Boolean flags are technically incapable of ever being set to true.</button>
+      <button class="quiz-choice" data-correct="false">State machines and boolean flags behave identically in every case.</button>
+      <button class="quiz-choice" data-correct="false">Boolean flags always run slower than a state machine.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Unconstrained flags allow invalid combinations that a state machine's structure rules out entirely.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="state machine">
+    <p class="quiz-prompt">4. Fill in the blank: a system always in exactly one of a fixed set of named states, moving between them only via defined transitions, is a ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>This is the term defined at the top of the lesson.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="scene">
+    <p class="quiz-prompt">5. Fill in the blank: a distinct, loadable collection of game state — a menu, a level, a loading screen — is called a ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A scene is the distinct, loadable unit of game state a state machine manages between.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: Robert Nystrom's <a href="https://gameprogrammingpatterns.com/state.html">"State" chapter</a> in <em>Game Programming Patterns</em> covers exactly this pattern with real game examples.</p>
+
+  <p class="ask-teacher">Curious how nested state machines handle something like a pause menu that itself has sub-states (settings, confirm-quit)? Ask your teacher — that's what I'm here for. Next up: the course capstone — designing a small engine's architecture by pulling every subsystem from every unit into one coherent whole.</p>
+
+  <footer class="lesson-footer">STEM+ · Game Engine Architecture · Lesson 20 of the course sequence</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var states = ['Menu', 'Playing', 'Paused', 'GameOver'];
+  var transitions = {
+    Menu: [{ to: 'Playing', label: 'Start Game' }],
+    Playing: [{ to: 'Paused', label: 'Pause' }, { to: 'GameOver', label: 'Player Dies' }],
+    Paused: [{ to: 'Playing', label: 'Resume' }, { to: 'Menu', label: 'Quit to Menu' }],
+    GameOver: [{ to: 'Menu', label: 'Return to Menu' }]
+  };
+  var current = 'Menu';
+  var statesEl = document.getElementById('sm-states');
+  var transEl = document.getElementById('sm-transitions');
+  var log = document.querySelector('[data-sm-log]');
+
+  function render() {
+    statesEl.innerHTML = states.map(function (s) {
+      return '<span class="box' + (s === current ? ' why' : '') + '" style="display:inline-block; margin:0.2rem; padding:0.4rem 0.9rem;">' + s + '</span>';
+    }).join('');
+    transEl.innerHTML = '';
+    transitions[current].forEach(function (t) {
+      var btn = document.createElement('button');
+      btn.className = 'widget-btn';
+      btn.type = 'button';
+      btn.textContent = t.label + ' → ' + t.to;
+      btn.addEventListener('click', function () {
+        log.textContent = 'Transitioned: ' + current + ' → ' + t.to + ' (via "' + t.label + '").';
+        current = t.to;
+        render();
+      });
+      transEl.appendChild(btn);
+    });
+  }
+
+  render();
+});
+</script>

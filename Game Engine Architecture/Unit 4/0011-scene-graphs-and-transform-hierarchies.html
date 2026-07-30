@@ -1,0 +1,172 @@
+<meta charset="UTF-8">
+<title>Lesson 11: Scene Graphs and Transform Hierarchies — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="advanced">
+  <span class="kicker">STEM+ · Game Engine Architecture · Unit 4 · Lesson 11</span>
+  <h1>Scene Graphs and Transform Hierarchies</h1>
+  <p class="subtitle">Lesson 10's vertex stage needs to know each triangle's exact position in the world. For anything with moving parts — a hand attached to an arm attached to a character walking through a level — "exact position" is a small chain of math, not a single number.</p>
+  <p class="nav-links"><a href="0010-the-render-pipeline-at-a-high-level.html" class="nav-prev">← Lesson 10</a> <a href="0012-cameras-culling-and-draw-calls.html" class="nav-next">Lesson 12 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Rotate a character's shoulder, and the whole arm — upper arm, elbow, forearm, hand — needs to swing with it, without each part needing its own separately-computed rotation. That's exactly the problem a parent-child transform hierarchy solves.</p>
+
+  <h2>Local space, parents, and world space</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    A <strong>transform</strong> is an object's position, rotation, and scale. A <strong>scene graph</strong> arranges every object in a scene as a tree, where each node's transform is stored <strong>relative to its parent</strong> ("2 units forward from wherever the hand is," not "at world coordinate 47, 12, 3"). An object's actual <strong>world-space transform</strong> — where it truly is in the scene — is computed by combining its own local transform with every parent's transform, all the way up to the root. Move or rotate a parent, and every descendant's world position updates automatically, without their local transforms changing at all.
+  </div>
+
+  <h2>Try it: rotate a joint, watch the chain follow</h2>
+  <p>Drag the sliders for the shoulder and elbow joints of a simple two-segment arm, and watch how a rotation at one joint carries every child below it along automatically.</p>
+
+  <div class="widget" id="scenegraph-widget">
+    <p class="widget-label">Interactive: a two-joint arm as a transform hierarchy</p>
+    <svg viewBox="0 0 400 220" width="400" height="220" role="img" aria-label="A simple two-segment arm controlled by shoulder and elbow rotation" style="background:var(--code-bg); border-radius:8px;">
+      <circle cx="80" cy="110" r="6" fill="var(--text)"></circle>
+      <line id="sg-upper" x1="80" y1="110" x2="180" y2="110" stroke="var(--accent)" stroke-width="8" stroke-linecap="round"></line>
+      <circle id="sg-elbow-dot" cx="180" cy="110" r="6" fill="var(--text)"></circle>
+      <line id="sg-lower" x1="180" y1="110" x2="260" y2="110" stroke="var(--muted)" stroke-width="8" stroke-linecap="round"></line>
+      <circle id="sg-hand-dot" cx="260" cy="110" r="6" fill="var(--text)"></circle>
+    </svg>
+    <div class="slider-row">
+      <label for="sg-shoulder">Shoulder rotation</label>
+      <input type="range" id="sg-shoulder" min="-90" max="90" value="0" step="1">
+      <span class="slider-value" data-sg-shoulder-val>0°</span>
+    </div>
+    <div class="slider-row">
+      <label for="sg-elbow">Elbow rotation (local, relative to shoulder)</label>
+      <input type="range" id="sg-elbow" min="-90" max="90" value="0" step="1">
+      <span class="slider-value" data-sg-elbow-val>0°</span>
+    </div>
+    <p class="plot-readout" data-sg-readout>Hand's world position = shoulder rotation + elbow's own local rotation, combined.</p>
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Worked example</span>
+    The elbow's local transform never changes as you rotate the shoulder slider alone — it's still "bent 0° relative to the upper arm," exactly as before. What changes is the elbow's <em>world</em> position, because computing world space means walking up to its parent (the shoulder) first. This is exactly why animating a whole character skeleton doesn't mean recomputing every bone by hand every frame — moving the hip node once correctly carries the spine, arms, and head along with it, each contributing only their own small local rotation on top.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why this hierarchy exists instead of storing every object's world position directly</span>
+    Storing only world-space transforms would mean moving a character's whole arm requires manually recalculating the position of the hand, every finger bone, and anything the character happens to be holding — every single frame that arm moves. A parent-child hierarchy lets each part of a complex object store the one small, local relationship that actually stays constant (the hand is always roughly where the wrist puts it), while a single change high in the tree propagates correctly to everything below it for free.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What does a scene graph node's transform typically get stored relative to?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Its parent node, not the world's absolute origin.</button>
+      <button class="quiz-choice" data-correct="false">The camera's current position only.</button>
+      <button class="quiz-choice" data-correct="false">The screen's pixel coordinates.</button>
+      <button class="quiz-choice" data-correct="false">Nothing — scene graph nodes store no transform at all.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Local, parent-relative storage is the defining property of a scene graph node.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. What happens to a node's local transform when its parent rotates?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Nothing — the local transform stays exactly the same; only the computed world-space transform changes.</button>
+      <button class="quiz-choice" data-correct="false">The local transform is automatically overwritten to match the parent's new rotation.</button>
+      <button class="quiz-choice" data-correct="false">The node is automatically detached from the scene graph.</button>
+      <button class="quiz-choice" data-correct="false">The child's world position stays fixed regardless of the parent.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Local transforms are unaffected by parent changes — only the derived world transform shifts.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why is a parent-child hierarchy preferred over storing every object's world position directly?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">A single change high in the tree automatically propagates correctly to everything below it, without manually recalculating each descendant.</button>
+      <button class="quiz-choice" data-correct="false">World-space-only storage is technically impossible to implement.</button>
+      <button class="quiz-choice" data-correct="false">Hierarchies always use less memory than storing world positions.</button>
+      <button class="quiz-choice" data-correct="false">There is no real advantage either way.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Automatic propagation of a single high-level change is the core payoff of the hierarchy.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="scene graph">
+    <p class="quiz-prompt">4. Fill in the blank: a tree structure arranging every object in a scene, with each node's transform stored relative to its parent, is called a ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>This is the term defined at the top of the lesson.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="world space|world-space">
+    <p class="quiz-prompt">5. Fill in the blank: an object's true position in the scene, computed by combining its local transform with every parent's transform up to the root, is its ___ transform.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>World space is the fully-combined, absolute position after walking up the hierarchy.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: the <a href="https://docs.godotengine.org/en/stable/tutorials/2d/2d_transforms.html">Godot docs on 2D transforms</a> cover exactly this local-vs-global transform distinction in a real, runnable engine.</p>
+
+  <p class="ask-teacher">Curious how this same idea extends to a full 3D character skeleton with dozens of bones? Ask your teacher — that's what I'm here for. Next up: once every object's world transform is known, the camera decides what's actually worth drawing at all.</p>
+
+  <footer class="lesson-footer">STEM+ · Game Engine Architecture · Lesson 11 of the course sequence</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var shoulderInput = document.getElementById('sg-shoulder');
+  var elbowInput = document.getElementById('sg-elbow');
+  var shoulderVal = document.querySelector('[data-sg-shoulder-val]');
+  var elbowVal = document.querySelector('[data-sg-elbow-val]');
+  var readout = document.querySelector('[data-sg-readout]');
+  var upper = document.getElementById('sg-upper');
+  var lower = document.getElementById('sg-lower');
+  var elbowDot = document.getElementById('sg-elbow-dot');
+  var handDot = document.getElementById('sg-hand-dot');
+
+  var shoulderPivot = { x: 80, y: 110 };
+  var upperLen = 100;
+  var lowerLen = 80;
+
+  function render() {
+    var shoulderDeg = parseFloat(shoulderInput.value);
+    var elbowLocalDeg = parseFloat(elbowInput.value);
+    shoulderVal.textContent = shoulderDeg + '°';
+    elbowVal.textContent = elbowLocalDeg + '°';
+
+    var shoulderRad = shoulderDeg * Math.PI / 180;
+    var elbowX = shoulderPivot.x + upperLen * Math.cos(shoulderRad);
+    var elbowY = shoulderPivot.y + upperLen * Math.sin(shoulderRad);
+    upper.setAttribute('x1', shoulderPivot.x);
+    upper.setAttribute('y1', shoulderPivot.y);
+    upper.setAttribute('x2', elbowX);
+    upper.setAttribute('y2', elbowY);
+    elbowDot.setAttribute('cx', elbowX);
+    elbowDot.setAttribute('cy', elbowY);
+
+    // elbow world rotation = shoulder rotation + elbow's own local rotation
+    var elbowWorldDeg = shoulderDeg + elbowLocalDeg;
+    var elbowWorldRad = elbowWorldDeg * Math.PI / 180;
+    var handX = elbowX + lowerLen * Math.cos(elbowWorldRad);
+    var handY = elbowY + lowerLen * Math.sin(elbowWorldRad);
+    lower.setAttribute('x1', elbowX);
+    lower.setAttribute('y1', elbowY);
+    lower.setAttribute('x2', handX);
+    lower.setAttribute('y2', handY);
+    handDot.setAttribute('cx', handX);
+    handDot.setAttribute('cy', handY);
+
+    readout.textContent = 'Elbow local rotation stays ' + elbowLocalDeg + '° the whole time — but hand\'s world rotation is ' + shoulderDeg + '° (shoulder) + ' + elbowLocalDeg + '° (elbow local) = ' + elbowWorldDeg + '°.';
+  }
+
+  shoulderInput.addEventListener('input', render);
+  elbowInput.addEventListener('input', render);
+  render();
+});
+</script>

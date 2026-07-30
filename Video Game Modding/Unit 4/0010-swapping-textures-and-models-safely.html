@@ -1,0 +1,123 @@
+<meta charset="UTF-8">
+<title>Lesson 10: Swapping Textures and Models Safely — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · Video Game Modding · Unit 4 · Lesson 10</span>
+  <h1>Swapping Textures and Models Safely</h1>
+  <p class="subtitle">The most common mod on earth is a replaced texture or model. It's also the easiest one to get subtly wrong — the game rarely crashes outright, it just looks broken in a way that's hard to diagnose.</p>
+  <p class="nav-links"><a href="../Unit%203/0009-popular-modding-frameworks-and-what-they-provide.html" class="nav-prev">← Unit 3, Lesson 9</a> <a href="0011-audio-replacement-and-localization-mods.html" class="nav-next">Lesson 11 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Once Unit 2 has unpacked a game's archive and identified a texture or model file, replacing it sounds simple: make a new version, put it back in the same place, done. In practice, the game engine still expects the replacement to match several things about the original exactly, and a mismatch on any one of them produces a visibly broken result rather than a clean error message.</p>
+
+  <h2>What has to match</h2>
+  <p><strong>Format and resolution.</strong> If the original texture is a compressed DDS file at a specific pixel resolution, the engine's loading code often expects that same format and, sometimes, that same resolution — a wildly different size can load stretched, tiled incorrectly, or simply fail silently. <strong>UV mapping.</strong> A 3D model's surface is "unwrapped" onto a flat 2D layout so a texture can be painted onto it — this is <strong>UV mapping</strong>. A replacement texture has to line up with the original model's existing UV layout, or the new image will appear stretched, mirrored, or placed on the wrong part of the model, even though the file itself loads without any error. <strong>File naming and location.</strong> Most engines find assets by an exact file name and folder path baked into other files that reference them — get either wrong and the engine simply won't find the replacement at all, silently falling back to the original or to a placeholder.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    <strong>UV mapping</strong> is the correspondence between points on a 3D model's surface and points on a flat 2D texture image — the "unwrapped" layout a texture has to match for a swap to look correct rather than stretched or misplaced.
+  </div>
+
+  <h2>Compatibility patches</h2>
+  <p>When two separately-made mods both replace assets on the same model — a new texture from one mod, a new mesh with a different UV layout from another — the result is often visibly wrong even though each mod works perfectly fine on its own. A <strong>compatibility patch</strong> is a small, third mod built specifically to reconcile two other mods' conflicting changes, rather than expecting either original mod's author to do it. This is one of the most common categories of mod on any large platform's mod list.</p>
+
+  <div class="box why">
+    <span class="box-label">Why it matters here</span>
+    "It loaded without an error" is not the same as "it's correct." Unit 6's compatibility-testing lesson picks this exact problem back up at the scale of an entire mod list, not just one asset — but the root cause, format and layout mismatches, is identical either way.
+  </div>
+
+  <h2>Try it — before/after texture swap</h2>
+  <p>Drag the slider to wipe between the original and replacement texture on the same object, the way an in-game comparison tool would.</p>
+
+  <div class="widget">
+    <p class="widget-label">Try It — Texture Swap Slider</p>
+    <div style="position:relative; width:100%; max-width:22rem; height:10rem; margin:0 auto; border-radius:8px; overflow:hidden; border:1px solid var(--border);">
+      <div id="tex-after" style="position:absolute; inset:0; background:repeating-linear-gradient(45deg, #5a3a8a, #5a3a8a 12px, #8a5fc4 12px, #8a5fc4 24px);"></div>
+      <div id="tex-before" style="position:absolute; inset:0; width:50%; background:repeating-linear-gradient(45deg, #8a4f2b, #8a4f2b 12px, #d99a5f 12px, #d99a5f 24px); border-right:2px solid #fff;"></div>
+    </div>
+    <div class="slider-row" style="max-width:22rem; margin:0.9rem auto 0;">
+      <label for="tex-slider">Original ↔ Replacement</label>
+      <input type="range" id="tex-slider" min="0" max="100" value="50">
+      <span class="slider-value" id="tex-slider-value">50%</span>
+    </div>
+    <p class="plot-hint" style="text-align:center;">Left of the line: original texture. Right of the line: replacement texture — same model, new UV-matched image.</p>
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. Why might a replacement texture load without any error message, yet still look stretched or misplaced on the model?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">It doesn't match the model's existing UV mapping, even though the file itself is a valid image.</button>
+      <button class="quiz-choice" data-correct="false">The game always crashes in this exact situation.</button>
+      <button class="quiz-choice" data-correct="false">Texture files can never be replaced without editing the model too.</button>
+      <button class="quiz-choice" data-correct="false">UV mapping only applies to audio files, not textures.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A valid image file can still be visually wrong on the model if it doesn't correspond correctly to the model's UV layout.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. What is UV mapping?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">The correspondence between points on a 3D model's surface and points on its flat 2D texture image.</button>
+      <button class="quiz-choice" data-correct="false">The file format a texture is compressed in.</button>
+      <button class="quiz-choice" data-correct="false">The archive format a model is stored inside.</button>
+      <button class="quiz-choice" data-correct="false">A type of audio bank reference.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>UV mapping is the "unwrapped" layout linking a 3D surface to a 2D texture — matching it is what makes a texture swap look correct.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. What problem does a compatibility patch mod typically solve?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Two separately-made mods conflict when both change assets on the same model, and a third mod reconciles the difference.</button>
+      <button class="quiz-choice" data-correct="false">It converts a game's archive format into a different one.</button>
+      <button class="quiz-choice" data-correct="false">It automatically writes a mod's documentation.</button>
+      <button class="quiz-choice" data-correct="false">It replaces the need for a scripting API entirely.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A compatibility patch is built specifically to reconcile two other mods' conflicting changes, since each individually works fine on its own.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="uv mapping|uv map">
+    <p class="quiz-prompt">4. Fill in the blank: the layout that unwraps a 3D model's surface onto a flat 2D image so a texture lines up correctly is called ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>UV mapping is why a replacement texture can load fine yet still look wrong on the model.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="compatibility patch">
+    <p class="quiz-prompt">5. Fill in the blank: a small mod built specifically to reconcile two other mods' conflicting asset changes is called a ___ ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Compatibility patches are one of the most common mod categories precisely because independently-made mods frequently touch the same assets.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: the Nexus Mods wiki's <a href="https://wiki.nexusmods.com/index.php/Category:Modding_guides">modding guides</a> collect real, community-written texture and model replacement walkthroughs across many games — the exact format-matching and UV concerns from this lesson, applied in practice.</p>
+
+  <p class="ask-teacher">Stuck on anything above, or want to see a real UV-mapping mismatch bug? Ask your teacher — that's what I'm here for. Next up: the same asset-replacement idea applied to sound instead of sight.</p>
+
+  <footer class="lesson-footer">STEM+ · Video Game Modding · Lesson 10</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var slider = document.getElementById('tex-slider');
+  var value = document.getElementById('tex-slider-value');
+  var before = document.getElementById('tex-before');
+  slider.addEventListener('input', function () {
+    before.style.width = slider.value + '%';
+    value.textContent = slider.value + '%';
+  });
+});
+</script>

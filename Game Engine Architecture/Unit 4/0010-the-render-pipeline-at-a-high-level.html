@@ -1,0 +1,177 @@
+<meta charset="UTF-8">
+<title>Lesson 10: The Render Pipeline at a High Level — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="advanced">
+  <span class="kicker">STEM+ · Game Engine Architecture · Unit 4 · Lesson 10</span>
+  <h1>The Render Pipeline at a High Level</h1>
+  <p class="subtitle">Unit 3's render() call was a black box: "draw the current state." This unit opens it up. First stop: the fixed sequence of stages every triangle passes through on its way from 3D data to a lit pixel on your screen.</p>
+  <p class="nav-links"><a href="../Unit%203/0009-building-a-minimal-ecs.html" class="nav-prev">← Unit 3, Lesson 9</a> <a href="0011-scene-graphs-and-transform-hierarchies.html" class="nav-next">Lesson 11 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Every 3D shape a GPU knows how to draw is ultimately made of triangles — a sphere, a character, a mountain, all triangles, just a lot of them. The render pipeline is the fixed sequence of steps that turns a list of triangle corners in 3D space into colored pixels in a 2D image.</p>
+
+  <h2>From vertices to pixels, in order</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    The <strong>render pipeline</strong> (or <strong>graphics pipeline</strong>) is the sequence of stages a GPU runs, in order, for every triangle it draws: <strong>vertex processing</strong> (transform each triangle corner from 3D model space into its final 2D screen position), <strong>rasterization</strong> (figure out exactly which screen pixels fall inside that triangle), <strong>fragment/pixel processing</strong> (compute the actual color of each of those pixels — lighting, texture lookups, and so on), and finally writing the result into the <strong>framebuffer</strong>, the block of memory that becomes the image shown on screen.
+  </div>
+
+  <h2>Try it: step a triangle through the pipeline</h2>
+  <p>Advance one stage at a time and watch a single triangle change from raw 3D coordinates to colored pixels.</p>
+
+  <div class="widget" id="pipeline-widget">
+    <p class="widget-label">Interactive: one triangle through the render pipeline</p>
+    <svg viewBox="0 0 400 200" width="400" height="200" role="img" aria-label="A triangle progressing through pipeline stages" id="pipe-svg" style="background:var(--code-bg); border-radius:8px;">
+      <polygon id="pipe-tri" points="100,150 200,50 300,150" fill="none" stroke="var(--text)" stroke-width="2"></polygon>
+      <g id="pipe-pixels"></g>
+    </svg>
+    <p class="fm-row">
+      <button class="widget-btn" type="button" data-pipe-next>Next stage →</button>
+      <button class="widget-btn" type="button" data-pipe-reset>Reset</button>
+    </p>
+    <p class="verdict" data-pipe-verdict>Stage: Vertex data in model space (not yet processed).</p>
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Worked example</span>
+    A character's shoulder is one vertex among thousands making up their mesh. Vertex processing moves that one point from "3 units up, 1 unit right, relative to the character's own origin" all the way to "this exact pixel column and row on your monitor," accounting for the character's position in the world, the camera's position and angle, and the screen's resolution — all in one stage, for every vertex, every single frame.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why this pipeline is fixed, not something an engine invents</span>
+    Modern GPUs are built as specialized hardware around exactly this sequence — vertex stage, rasterization, fragment stage — because that division is what let chip designers build massively parallel hardware that processes millions of vertices and pixels independently and simultaneously. A game engine doesn't reinvent this pipeline; it writes small custom programs (shaders, which Unit 4 touches again in Lesson 12) that plug into the vertex and fragment stages, while rasterization itself stays fixed, dedicated hardware the engine never has to implement.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What is rasterization's specific job in the render pipeline?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Determining exactly which screen pixels fall inside a given triangle.</button>
+      <button class="quiz-choice" data-correct="false">Moving a vertex from 3D model space to its final screen position.</button>
+      <button class="quiz-choice" data-correct="false">Loading a texture file from disk into memory.</button>
+      <button class="quiz-choice" data-correct="false">Reading player input for the current frame.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Rasterization specifically finds which pixels a triangle covers.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. What does the fragment/pixel processing stage compute?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">The actual color of each pixel covered by a triangle, including lighting and texture lookups.</button>
+      <button class="quiz-choice" data-correct="false">The 3D position of each triangle's corner vertices.</button>
+      <button class="quiz-choice" data-correct="false">Which triangles are inside the camera's view at all.</button>
+      <button class="quiz-choice" data-correct="false">The player's current input state.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Fragment processing produces final pixel color, after rasterization has found which pixels matter.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why is the render pipeline's overall stage sequence fixed, rather than something each engine designs from scratch?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">GPUs are specialized hardware built around exactly this sequence, enabling massively parallel processing of vertices and pixels.</button>
+      <button class="quiz-choice" data-correct="false">There is no technical reason — it's purely an industry-wide convention with no benefit.</button>
+      <button class="quiz-choice" data-correct="false">Every engine actually does implement its own completely different pipeline.</button>
+      <button class="quiz-choice" data-correct="false">Software rendering makes hardware-level stages irrelevant.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>This fixed structure maps directly onto how GPU hardware is physically built to parallelize work.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="framebuffer">
+    <p class="quiz-prompt">4. Fill in the blank: the block of memory holding the final pixel colors that actually get displayed on screen is called the ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The framebuffer is where the pipeline's final output ends up.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="rasterization">
+    <p class="quiz-prompt">5. Fill in the blank: the stage that figures out which screen pixels a triangle covers is called ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Rasterization sits between vertex processing and fragment processing.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: <a href="https://www.khronos.org/opengl/wiki/Rendering_Pipeline_Overview">Khronos's OpenGL wiki overview of the rendering pipeline</a> documents this exact sequence at the level real graphics APIs expose it.</p>
+
+  <p class="ask-teacher">Curious what a shader program actually looks like inside the vertex or fragment stage? Ask your teacher — that's what I'm here for. Next up: before anything reaches this pipeline, an engine needs to know where every object is in the world — scene graphs and transform hierarchies.</p>
+
+  <footer class="lesson-footer">STEM+ · Game Engine Architecture · Lesson 10 of the course sequence</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var stages = ['model', 'vertex', 'raster', 'fragment'];
+  var labels = {
+    model: 'Vertex data in model space (not yet processed).',
+    vertex: 'Vertex processing — each corner transformed to final screen position.',
+    raster: 'Rasterization — pixels inside the triangle identified.',
+    fragment: 'Fragment processing — each pixel colored and written to the framebuffer.'
+  };
+  var idx = 0;
+  var tri = document.getElementById('pipe-tri');
+  var pixels = document.getElementById('pipe-pixels');
+  var verdict = document.querySelector('[data-pipe-verdict]');
+
+  function render() {
+    var stage = stages[idx];
+    verdict.textContent = 'Stage: ' + labels[stage];
+    pixels.innerHTML = '';
+    if (stage === 'model') {
+      tri.setAttribute('points', '100,150 200,50 300,150');
+      tri.setAttribute('stroke-dasharray', '4 3');
+      tri.setAttribute('fill', 'none');
+    } else if (stage === 'vertex') {
+      tri.setAttribute('points', '100,150 200,50 300,150');
+      tri.setAttribute('stroke-dasharray', '');
+      tri.setAttribute('fill', 'none');
+    } else if (stage === 'raster') {
+      tri.setAttribute('fill', 'none');
+      var html = '';
+      // grid of sample squares approximating pixels covered inside the triangle
+      for (var yy = 65; yy < 150; yy += 14) {
+        var t = (150 - yy) / 100; // 0 at base, 1 at apex
+        var xMin = 100 + t * 100;
+        var xMax = 300 - t * 100;
+        for (var xx = xMin; xx < xMax; xx += 14) {
+          html += '<rect x="' + (xx - 4) + '" y="' + (yy - 4) + '" width="8" height="8" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="0.5"></rect>';
+        }
+      }
+      pixels.innerHTML = html;
+    } else if (stage === 'fragment') {
+      tri.setAttribute('fill', 'var(--accent-soft)');
+      var html2 = '';
+      for (var yy2 = 65; yy2 < 150; yy2 += 14) {
+        var t2 = (150 - yy2) / 100;
+        var xMin2 = 100 + t2 * 100;
+        var xMax2 = 300 - t2 * 100;
+        for (var xx2 = xMin2; xx2 < xMax2; xx2 += 14) {
+          html2 += '<rect x="' + (xx2 - 4) + '" y="' + (yy2 - 4) + '" width="8" height="8" fill="var(--accent)"></rect>';
+        }
+      }
+      pixels.innerHTML = html2;
+    }
+  }
+
+  document.querySelector('[data-pipe-next]').addEventListener('click', function () {
+    idx = Math.min(idx + 1, stages.length - 1);
+    render();
+  });
+  document.querySelector('[data-pipe-reset]').addEventListener('click', function () {
+    idx = 0;
+    render();
+  });
+
+  render();
+});
+</script>

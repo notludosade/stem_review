@@ -1,0 +1,142 @@
+<meta charset="UTF-8">
+<title>Lesson 9: Popular Modding Frameworks and What They Provide — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · Video Game Modding · Unit 3 · Lesson 9</span>
+  <h1>Popular Modding Frameworks and What They Provide</h1>
+  <p class="subtitle">A raw scripting API and a handful of event hooks work fine for one mod. Once dozens of independently-written mods need to coexist, something has to manage load order, shared code, and conflicts — that's what a modding framework is for.</p>
+  <p class="nav-links"><a href="0008-hooking-into-game-events-and-logic.html" class="nav-prev">← Lesson 8</a> <a href="../Unit%204/0010-swapping-textures-and-models-safely.html" class="nav-next">Unit 4, Lesson 10 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>A <strong>modding framework</strong> is a layer built on top of a game's own scripting API, providing infrastructure that individual mods would otherwise each have to reinvent: a standard way to load mods, a shared library of helper functions, and rules for how multiple mods interact. Well-known examples include SKSE for Skyrim (which extends what the base scripting engine can do), Minecraft's Forge and Fabric (which let independently-written Java mods coexist), and BepInEx (a general-purpose framework used across many Unity games). None of these replace the underlying scripting language or API from Unit 3's earlier lessons — they sit on top of it.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    A <strong>modding framework</strong> is community- or studio-built infrastructure that sits on top of a game's scripting API, handling mod loading, shared functionality, and conflict management so individual mods don't each have to solve those problems themselves.
+  </div>
+
+  <h2>What a framework actually provides</h2>
+  <p>Concretely, a framework typically supplies: a <strong>mod loader</strong> — the program that finds installed mods, reads their metadata, and loads them into the running game in the right order; a shared API layer richer than what the base game exposes on its own, so mods don't duplicate common functionality; and a system for declaring a <strong>dependency</strong> — one mod explicitly requiring another mod (or a specific framework version) to already be present before it can run. That dependency system is what lets one mod safely build on top of another's work instead of every mod needing to be fully self-contained.</p>
+
+  <h2>Load order</h2>
+  <p>The <strong>load order</strong> — the sequence mods are loaded in — directly determines which mod's changes "win" when two mods try to change the same thing, extending Lesson 8's hook-priority idea to entire mods rather than just individual event callbacks. A framework's mod loader typically lets a player set this order explicitly, and increasingly can detect known conflicts and dependency problems automatically before the game even starts, rather than leaving a player to discover a broken game after the fact.</p>
+
+  <div class="box why">
+    <span class="box-label">Why it matters here</span>
+    Unit 6's lessons on packaging and compatibility testing are really about preparing a mod to behave well inside someone else's load order — a framework can catch a missing dependency or a known conflict, but only if the mod itself declares its requirements honestly in the first place.
+  </div>
+
+  <h2>Try it — reorder a load order and watch for conflicts</h2>
+  <p>Use the buttons to move mods up or down in load order. A conflict warning appears whenever two mods that are known to clash aren't in a safe relative order.</p>
+
+  <div class="widget">
+    <p class="widget-label">Try It — Load Order Manager</p>
+    <div id="load-order-list" style="display:flex; flex-direction:column; gap:0.4rem;"></div>
+    <p class="verdict" id="load-order-verdict" style="margin-top:0.9rem;"></p>
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What does a modding framework add on top of a game's own scripting API?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Infrastructure like mod loading, shared functionality, and conflict management that individual mods would otherwise each reinvent.</button>
+      <button class="quiz-choice" data-correct="false">A completely new scripting language that replaces the game's own.</button>
+      <button class="quiz-choice" data-correct="false">Nothing — a framework is identical to the base scripting API.</button>
+      <button class="quiz-choice" data-correct="false">Direct editing access to the game's compiled source code.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A framework sits on top of the existing API, adding shared infrastructure rather than replacing the underlying scripting system.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. What does a mod's declared dependency actually do?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">States that another mod or framework version must already be present before this mod can run.</button>
+      <button class="quiz-choice" data-correct="false">Automatically deletes any conflicting mod.</button>
+      <button class="quiz-choice" data-correct="false">Prevents the mod from ever being uninstalled.</button>
+      <button class="quiz-choice" data-correct="false">Changes the game's archive format.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A dependency is a declared requirement — it lets one mod safely build on another's work instead of duplicating it.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. How does load order relate to Lesson 8's idea of hook priority?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">It extends the same "who runs first, and who wins a conflict" idea from individual hooks up to entire mods.</button>
+      <button class="quiz-choice" data-correct="false">The two concepts are completely unrelated.</button>
+      <button class="quiz-choice" data-correct="false">Load order only affects a mod's file size on disk.</button>
+      <button class="quiz-choice" data-correct="false">Hook priority replaces the need for any load order at all.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Load order is hook priority scaled up from individual callbacks to whole mods competing to change the same thing.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="mod loader">
+    <p class="quiz-prompt">4. Fill in the blank: the part of a framework that finds installed mods, reads their metadata, and loads them into the game in the right order is the ___ ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The mod loader is the concrete piece of the framework responsible for actually bringing mods into the running game.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="load order">
+    <p class="quiz-prompt">5. Fill in the blank: the sequence in which installed mods are loaded, which determines whose changes take priority when two mods conflict, is called the ___ ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Load order is set (often manually) through the framework's mod loader, and Unit 6 revisits it from the compatibility-testing side.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: the <a href="https://minecraftforge.net/">Minecraft Forge project site</a> is a real, long-running example of a modding framework — mod loading, a shared API, and dependency handling for an entire ecosystem of independently-written mods.</p>
+
+  <p class="ask-teacher">Stuck on anything above, or want to compare two real modding frameworks side by side? Ask your teacher — that's what I'm here for. Unit 3 is complete. Next up: Unit 4 puts scripting aside and focuses on the most common mod category of all — asset replacement.</p>
+
+  <footer class="lesson-footer">STEM+ · Video Game Modding · Lesson 9</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var listEl = document.getElementById('load-order-list');
+  var verdictEl = document.getElementById('load-order-verdict');
+  var mods = [
+    { name: 'BaseTexturePack', id: 'tex' },
+    { name: 'RebalanceMod (edits same items as BaseTexturePack)', id: 'rebalance' },
+    { name: 'UICleanupMod', id: 'ui' }
+  ];
+  // Known-safe rule: 'rebalance' must load AFTER 'tex' (i.e. appear later in the array) to avoid a conflict.
+  function render() {
+    listEl.innerHTML = '';
+    mods.forEach(function (m, i) {
+      var row = document.createElement('div');
+      row.style.cssText = 'display:flex; align-items:center; gap:0.6rem; padding:0.5rem 0.8rem; border:1px solid var(--border); border-radius:5px; background:var(--bg);';
+      row.innerHTML = '<span style="font-family:\'SF Mono\',Menlo,Consolas,monospace; color:var(--muted); min-width:1.5rem;">' + (i + 1) + '.</span><span style="flex:1;">' + m.name + '</span>';
+      var up = document.createElement('button');
+      up.className = 'widget-btn'; up.type = 'button'; up.textContent = '↑'; up.disabled = i === 0;
+      up.addEventListener('click', function () { mods.splice(i - 1, 0, mods.splice(i, 1)[0]); render(); });
+      var down = document.createElement('button');
+      down.className = 'widget-btn'; down.type = 'button'; down.textContent = '↓'; down.disabled = i === mods.length - 1;
+      down.addEventListener('click', function () { mods.splice(i + 1, 0, mods.splice(i, 1)[0]); render(); });
+      row.appendChild(up); row.appendChild(down);
+      listEl.appendChild(row);
+    });
+    var texIdx = mods.findIndex(function (m) { return m.id === 'tex'; });
+    var rebalanceIdx = mods.findIndex(function (m) { return m.id === 'rebalance'; });
+    if (rebalanceIdx > texIdx) {
+      verdictEl.className = 'verdict is-pass';
+      verdictEl.textContent = 'No conflicts — RebalanceMod correctly loads after BaseTexturePack.';
+    } else {
+      verdictEl.className = 'verdict is-fail';
+      verdictEl.textContent = 'Conflict — RebalanceMod loads before BaseTexturePack and may get overwritten. Move it below.';
+    }
+  }
+  render();
+});
+</script>

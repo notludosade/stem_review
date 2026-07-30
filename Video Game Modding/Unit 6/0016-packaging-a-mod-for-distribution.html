@@ -1,0 +1,156 @@
+<meta charset="UTF-8">
+<title>Lesson 16: Packaging a Mod for Distribution — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · Video Game Modding · Unit 6 · Lesson 16</span>
+  <h1>Packaging a Mod for Distribution</h1>
+  <p class="subtitle">A working mod on your own machine and a mod someone else can actually install are two different things. This lesson is about the gap between them.</p>
+  <p class="nav-links"><a href="../Unit%205/0015-where-reverse-engineering-crosses-a-legal-line.html" class="nav-prev">← Unit 5, Lesson 15</a> <a href="0017-testing-and-compatibility-with-other-mods.html" class="nav-next">Lesson 17 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Every earlier unit assumed you already had access to an unpacked, modified copy of a game to test against. Sharing that work with someone else means packaging only the changed files — never the original game's own files — into a clean, self-contained bundle, typically a single <code class="inline-code">.zip</code> archive, matching the same folder structure the game expects so a user can drop it in and have it work.</p>
+
+  <h2>The manifest</h2>
+  <p>Most modding frameworks (Unit 3) expect a <strong>mod manifest</strong> — a small metadata file, often named something like <code class="inline-code">mod.json</code> or <code class="inline-code">manifest.txt</code>, declaring the mod's name, author, version number, and any dependencies (Lesson 9) it requires. This is what lets a mod loader find, identify, and correctly order the mod without a human having to read a readme first — the same load-order and dependency machinery from Unit 3 depends on this metadata actually being present and accurate.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    A <strong>mod manifest</strong> is a metadata file — name, author, version, dependencies — that a mod loader reads to identify and correctly manage a mod, distinct from the mod's actual asset or script files.
+  </div>
+
+  <h2>Version numbers that mean something</h2>
+  <p><strong>Semantic versioning</strong> (semver) is a widely-used convention for version numbers in the form <code class="inline-code">MAJOR.MINOR.PATCH</code> — incrementing PATCH for a small bug fix, MINOR for a new feature that doesn't break existing users, and MAJOR for a change that does break compatibility with what came before. A mod that follows this convention gives other modders' dependency declarations (Lesson 9) something reliable to check against: "requires version 2.x or higher" means something concrete only if version numbers are actually incremented meaningfully.</p>
+
+  <h2>The readme</h2>
+  <p>A <strong>readme</strong> — a plain-text file included with the package, meant to be the very first thing a user opens — should cover installation steps, requirements (which game version, which framework, which dependencies), and known issues. This isn't optional polish; it's the difference between a mod someone can actually use and a folder of files nobody can figure out how to install.</p>
+
+  <div class="box why">
+    <span class="box-label">Why it matters here</span>
+    Lesson 17's compatibility testing and Lesson 18's responsible publishing both assume the package itself is already clean, versioned, and documented. Skipping this step doesn't just create a bad user experience — it makes every later step in Unit 6 harder to do well.
+  </div>
+
+  <h2>Try it — build a mod package</h2>
+  <p>Check the files that belong in a clean package. Watch the manifest preview and package size update as you choose.</p>
+
+  <div class="widget">
+    <p class="widget-label">Try It — Mod Package Builder</p>
+    <div id="pkg-files" style="display:flex; flex-direction:column; gap:0.4rem; font-family:'SF Mono',Menlo,Consolas,monospace; font-size:0.88rem;"></div>
+    <p class="verdict" id="pkg-verdict" style="margin-top:0.9rem;"></p>
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What should a mod's distributed package generally never include?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">The original game's own unmodified files.</button>
+      <button class="quiz-choice" data-correct="false">A readme file.</button>
+      <button class="quiz-choice" data-correct="false">A mod manifest.</button>
+      <button class="quiz-choice" data-correct="false">The mod's own changed asset files.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Only changed files belong in a package — bundling the original game's own files risks exactly the redistribution problem Lesson 2 covered.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. What does a mod manifest actually let a mod loader do?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Identify the mod's name, version, and dependencies automatically, without a human reading a readme first.</button>
+      <button class="quiz-choice" data-correct="false">Automatically fix any bugs in the mod's code.</button>
+      <button class="quiz-choice" data-correct="false">Compress the mod's files into a smaller archive.</button>
+      <button class="quiz-choice" data-correct="false">Translate the mod into a different scripting language.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The manifest is metadata the loader reads programmatically, enabling the dependency and load-order machinery from Unit 3.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Under semantic versioning, what does incrementing the MAJOR version number signal?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">A change that breaks compatibility with what came before.</button>
+      <button class="quiz-choice" data-correct="false">A small bug fix with no other changes.</button>
+      <button class="quiz-choice" data-correct="false">A purely cosmetic change to the readme file.</button>
+      <button class="quiz-choice" data-correct="false">Nothing — MAJOR version numbers are arbitrary.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Semver's three numbers each carry specific meaning — MAJOR specifically signals a breaking change.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="mod manifest|manifest">
+    <p class="quiz-prompt">4. Fill in the blank: a metadata file declaring a mod's name, author, version, and dependencies is called a mod ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The manifest is what lets a mod loader manage the mod programmatically, separate from its actual content files.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="semantic versioning|semver">
+    <p class="quiz-prompt">5. Fill in the blank: the MAJOR.MINOR.PATCH version-numbering convention, where each part carries a specific meaning, is called ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Semantic versioning gives dependency declarations something concrete and reliable to check against.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: the official <a href="https://semver.org/">Semantic Versioning specification</a> lays out the full MAJOR.MINOR.PATCH rules in detail — worth skimming once, since so much of the modding ecosystem assumes it.</p>
+
+  <p class="ask-teacher">Stuck on anything above, or want help writing a manifest for a real mod idea? Ask your teacher — that's what I'm here for. Next up: what happens once your cleanly packaged mod meets everyone else's mods.</p>
+
+  <footer class="lesson-footer">STEM+ · Video Game Modding · Lesson 16</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var container = document.getElementById('pkg-files');
+  var verdict = document.getElementById('pkg-verdict');
+  var files = [
+    { name: 'mod.json (manifest)', kb: 1, required: true, risky: false },
+    { name: 'README.txt', kb: 3, required: true, risky: false },
+    { name: 'textures/sword_diffuse.dds (my new texture)', kb: 512, required: false, risky: false },
+    { name: 'scripts/weapon_behavior.lua (my new script)', kb: 8, required: false, risky: false },
+    { name: 'original_game.exe (the base game itself)', kb: 45000, required: false, risky: true }
+  ];
+  var checked = {};
+  function render() {
+    container.innerHTML = '';
+    var totalKb = 0;
+    var hasManifest = false, hasRisky = false;
+    files.forEach(function (f, i) {
+      var row = document.createElement('label');
+      row.style.cssText = 'display:flex; align-items:center; gap:0.6rem; padding:0.3rem 0.5rem; cursor:pointer;';
+      var cb = document.createElement('input');
+      cb.type = 'checkbox';
+      cb.checked = checked[i] !== undefined ? checked[i] : f.required;
+      checked[i] = cb.checked;
+      cb.addEventListener('change', function () { checked[i] = cb.checked; render(); });
+      row.appendChild(cb);
+      var span = document.createElement('span');
+      span.textContent = f.name + ' — ' + f.kb + ' KB';
+      row.appendChild(span);
+      container.appendChild(row);
+      if (checked[i]) {
+        totalKb += f.kb;
+        if (f.name.indexOf('manifest') > -1) hasManifest = true;
+        if (f.risky) hasRisky = true;
+      }
+    });
+    if (hasRisky) {
+      verdict.className = 'verdict is-fail';
+      verdict.textContent = 'Package size: ' + totalKb + ' KB. Do not include the original game\'s own executable — only changed files belong in a mod package.';
+    } else if (!hasManifest) {
+      verdict.className = 'verdict is-fail';
+      verdict.textContent = 'Package size: ' + totalKb + ' KB. Missing a manifest — the mod loader won\'t be able to identify this mod.';
+    } else {
+      verdict.className = 'verdict is-pass';
+      verdict.textContent = 'Package size: ' + totalKb + ' KB. Clean package — only changed files plus manifest and readme.';
+    }
+  }
+  render();
+});
+</script>

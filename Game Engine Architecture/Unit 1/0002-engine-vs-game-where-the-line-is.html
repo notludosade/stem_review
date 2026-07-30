@@ -1,0 +1,152 @@
+<meta charset="UTF-8">
+<title>Lesson 2: Engine vs. Game: Where the Line Is — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="advanced">
+  <span class="kicker">STEM+ · Game Engine Architecture · Unit 1 · Lesson 2</span>
+  <h1>Engine vs. Game: Where the Line Is</h1>
+  <p class="subtitle">Lesson 1 established that an engine is "the reusable part." In practice that line isn't always obvious — and drawing it in the wrong place is one of the most common architecture mistakes a team makes early in a project.</p>
+  <p class="nav-links"><a href="0001-what-a-game-engine-actually-provides.html" class="nav-prev">← Lesson 1</a> <a href="0003-major-subsystems-at-a-glance.html" class="nav-next">Lesson 3 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>"Draw a triangle" is obviously engine. "The boss has 500 hit points" is obviously game. Most real decisions live between those two extremes: is "health" itself an engine concept, or something the game defines? Is "damage" a built-in idea, or just a number some game code decided to subtract?</p>
+
+  <h2>The line: does it know what a "game" even is?</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    A piece of code belongs to the <strong>engine</strong> if it has no knowledge of any particular game's rules — it manipulates generic concepts like meshes, transforms, and numeric values. It belongs to the <strong>game</strong> if it encodes a rule specific to that game — what damage means, what happens when the player dies, what a "win" is. An engine that starts hard-coding rule words like "health" or "ammo" into its core has quietly started becoming a specific game.
+  </div>
+
+  <p>This is why serious engines expose <em>generic</em> building blocks — an entity can hold arbitrary named numeric or data fields — rather than a built-in "health" field. The engine doesn't know or care that one of those fields happens to represent hit points; that meaning lives entirely in the game's code, sitting on top.</p>
+
+  <h2>Try it: sort systems into Engine or Game</h2>
+  <p>Click each item to classify it. Some are less obvious than they first look.</p>
+
+  <div class="widget" id="sort-widget">
+    <p class="widget-label">Interactive: engine or game?</p>
+    <div id="sort-list"></div>
+    <p class="verdict" data-sort-verdict>0 of 8 classified correctly.</p>
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Worked example</span>
+    Unreal Engine's core has no idea what "mana" is. A game built on Unreal defines a "mana" value as game-specific data attached to a character, written by that game's own gameplay code, and drawn on screen using the engine's completely generic UI and rendering tools. If Unreal's core team hard-coded "mana" as a built-in concept, every unrelated game built on the engine — a racing game, a farming sim — would be carrying dead weight for a concept that only makes sense in one genre.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why blurring this line causes real damage later</span>
+    A team that writes game-specific logic directly into what should be reusable, generic engine code doesn't feel the cost immediately — it's faster to hard-code "if enemy touches player, subtract 10 health" straight into the collision system than to build a generic event system first. The cost shows up later: that collision code can no longer be reused for the next game, or even the next feature in the same game, without being rewritten. Keeping the line clean is what makes an engine actually reusable, instead of reusable in name only.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What's the core test for whether code belongs in the engine or the game?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Whether it has any knowledge of a specific game's rules, versus manipulating only generic concepts.</button>
+      <button class="quiz-choice" data-correct="false">Whether it was written before or after the gameplay code.</button>
+      <button class="quiz-choice" data-correct="false">Whether it runs on the CPU or the GPU.</button>
+      <button class="quiz-choice" data-correct="false">Whether it's stored in the same file as other code.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Knowledge of specific game rules is exactly what separates the two.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why do serious engines avoid a built-in "health" field, favoring generic named data fields instead?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">The engine has no reason to know what "health" means — that meaning is a game-specific rule layered on top of generic storage.</button>
+      <button class="quiz-choice" data-correct="false">Generic fields run measurably faster on every hardware platform.</button>
+      <button class="quiz-choice" data-correct="false">A built-in "health" field is technically impossible to implement.</button>
+      <button class="quiz-choice" data-correct="false">Every game happens to define health identically, so it's redundant.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Genericness, not performance, is why the engine stays ignorant of "health" as a concept.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. What's the real cost of hard-coding game-specific logic directly into engine-level systems?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">That code stops being reusable for the next feature or game, even though it was faster to write in the moment.</button>
+      <button class="quiz-choice" data-correct="false">The game will fail to compile at all.</button>
+      <button class="quiz-choice" data-correct="false">There is no real cost — it's always the better choice.</button>
+      <button class="quiz-choice" data-correct="false">It makes the engine run measurably slower at runtime.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The cost is architectural — lost reusability — not a compile error or raw performance hit.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="generic">
+    <p class="quiz-prompt">4. Fill in the blank: an engine exposes ___ building blocks (arbitrary named data fields) rather than concepts specific to one game's rules.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Genericness is what keeps the engine reusable across unrelated games.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="mana">
+    <p class="quiz-prompt">5. Fill in the blank: in the worked example, a resource value like ___ is defined entirely by a specific game's code, not by the engine, even though the engine renders and stores it.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Mana is the worked example's concrete case of a game-specific concept sitting on generic engine storage.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: Unreal Engine's own docs on <a href="https://dev.epicgames.com/documentation/en-us/unreal-engine/gameplay-framework-in-unreal-engine">the Gameplay Framework</a> show a real, production engine's take on separating generic engine classes from game-specific ones.</p>
+
+  <p class="ask-teacher">Curious about a real case where a studio blurred this line and had to pay for it later? Ask your teacher — that's what I'm here for. Next up: a tour of the major subsystems every engine needs, at a glance, before this course goes deep on each one.</p>
+
+  <footer class="lesson-footer">STEM+ · Game Engine Architecture · Lesson 2 of the course sequence</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var items = [
+    { name: 'A function that renders any mesh given a transform matrix', answer: 'engine' },
+    { name: '"The boss enters phase 2 below 50% health"', answer: 'game' },
+    { name: 'A generic named-field data container attached to an entity', answer: 'engine' },
+    { name: '"Picking up a key unlocks the matching door"', answer: 'game' },
+    { name: 'A function that detects whether two boxes overlap in space', answer: 'engine' },
+    { name: '"Falling into lava kills the player instantly"', answer: 'game' },
+    { name: 'A system that loads a texture file from disk into memory', answer: 'engine' },
+    { name: '"Collecting 3 stars unlocks the next level"', answer: 'game' }
+  ];
+  var classified = items.map(function () { return null; });
+  var list = document.getElementById('sort-list');
+  var verdict = document.querySelector('[data-sort-verdict]');
+
+  function render() {
+    list.innerHTML = '';
+    items.forEach(function (it, i) {
+      var row = document.createElement('div');
+      row.className = 'box';
+      row.style.margin = '0.35rem 0';
+      row.style.padding = '0.5rem 0.8rem';
+      var status = '';
+      if (classified[i] === 'engine') { row.className = 'box why'; status = ' — marked Engine' + (it.answer === 'engine' ? ' ✓' : ' ✗ (this is Game — reread the definition)'); }
+      if (classified[i] === 'game') { row.className = 'box example'; status = ' — marked Game' + (it.answer === 'game' ? ' ✓' : ' ✗ (this is Engine — reread the definition)'); }
+      row.innerHTML = '<strong>' + it.name + '</strong>' + status +
+        '<br><span style="display:inline-flex;gap:0.5rem;margin-top:0.4rem;">' +
+        '<button class="widget-btn" type="button" data-choose="engine" data-idx="' + i + '">Engine</button>' +
+        '<button class="widget-btn" type="button" data-choose="game" data-idx="' + i + '">Game</button></span>';
+      list.appendChild(row);
+    });
+    list.querySelectorAll('[data-choose]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        classified[parseInt(btn.getAttribute('data-idx'), 10)] = btn.getAttribute('data-choose');
+        render();
+      });
+    });
+    var correct = items.filter(function (it, i) { return classified[i] === it.answer; }).length;
+    verdict.textContent = correct + ' of ' + items.length + ' classified correctly.';
+    verdict.className = 'verdict' + (correct === items.length ? ' is-pass' : '');
+  }
+
+  render();
+});
+</script>

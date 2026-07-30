@@ -1,0 +1,161 @@
+<meta charset="UTF-8">
+<title>Unit 6 Test — Version B — Game Engine Architecture — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/tests.js" defer></script>
+<div class="page" data-tier="advanced">
+  <span class="kicker">STEM+ · Game Engine Architecture · Unit 6 · Unit Test</span>
+  <h1>Unit 6 Test — Version B</h1>
+  <p class="subtitle">Asset Pipelines &amp; Resource Management. 10 points covering every lesson in this unit. Score 80% or higher to clear this unit.</p>
+  <p class="nav-links"><a href="../index.html" class="nav-toc">← Course Contents</a> <a href="unit-test-a.html" class="nav-toc">← Version A</a></p>
+
+  <div data-test data-course="Game Engine Architecture" data-unit="Unit 6" data-kind="unit_test" data-version="B">
+
+    <div class="quiz" data-test-item data-topic="Asset Formats &amp; Import">
+      <p class="quiz-prompt">1. When does the import pipeline typically convert a source asset into its runtime form?</p>
+      <div class="quiz-choices">
+        <button class="quiz-choice" data-correct="true">Ahead of time, during development — not every time the game loads that asset.</button>
+        <button class="quiz-choice" data-correct="false">Every single time the game boots up.</button>
+        <button class="quiz-choice" data-correct="false">Only the very first time a customer plays the game.</button>
+        <button class="quiz-choice" data-correct="false">Never — source and runtime assets are always identical.</button>
+      </div>
+      <p class="quiz-feedback" hidden></p>
+      <p class="quiz-explain" hidden>Conversion happens once ahead of time so runtime loading itself stays cheap.</p>
+    </div>
+
+    <div class="quiz" data-test-item data-test-fill data-topic="Memory Management" data-answers="memory budget|budget">
+      <p class="quiz-prompt">2. Fill in the blank: the fixed amount of fast memory a game may use for assets at any one time is its ___.</p>
+      <div class="quiz-fill-row">
+        <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      </div>
+      <p class="quiz-feedback" hidden></p>
+      <p class="quiz-explain" hidden>The memory budget is the hard ceiling asset loading has to respect.</p>
+    </div>
+
+    <div class="quiz" data-test-item data-topic="Streaming &amp; LOD">
+      <p class="quiz-prompt">3. What does streaming decide, based on the player's position?</p>
+      <div class="quiz-choices">
+        <button class="quiz-choice" data-correct="true">Which assets get loaded into or unloaded from memory in the background.</button>
+        <button class="quiz-choice" data-correct="false">Which triangles get colored during the fragment stage.</button>
+        <button class="quiz-choice" data-correct="false">How fast the player character can move.</button>
+        <button class="quiz-choice" data-correct="false">Which entity components a system's query matches.</button>
+      </div>
+      <p class="quiz-feedback" hidden></p>
+      <p class="quiz-explain" hidden>Streaming manages memory residency based on proximity to the player.</p>
+    </div>
+
+    <div class="quiz" data-test-item data-test-fill data-topic="Asset Formats &amp; Import" data-answers="runtime asset">
+      <p class="quiz-prompt">4. Fill in the blank: the fast-loading, engine-native format produced by the import pipeline is called a ___.</p>
+      <div class="quiz-fill-row">
+        <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      </div>
+      <p class="quiz-feedback" hidden></p>
+      <p class="quiz-explain" hidden>Runtime assets are the import pipeline's output format, optimized for the engine.</p>
+    </div>
+
+    <div class="quiz" data-test-item data-topic="Memory Management">
+      <p class="quiz-prompt">5. What does "evicting" an asset mean?</p>
+      <div class="quiz-choices">
+        <button class="quiz-choice" data-correct="true">Unloading it from memory, usually because it's judged unlikely to be needed again soon.</button>
+        <button class="quiz-choice" data-correct="false">Permanently deleting it from the game's disk files.</button>
+        <button class="quiz-choice" data-correct="false">Converting it into a different runtime format.</button>
+        <button class="quiz-choice" data-correct="false">Loading it into memory for the first time.</button>
+      </div>
+      <p class="quiz-feedback" hidden></p>
+      <p class="quiz-explain" hidden>Eviction removes an asset from memory, not from disk.</p>
+    </div>
+
+    <div class="quiz" data-test-item data-topic="Asset Formats &amp; Import">
+      <p class="quiz-prompt">6. A .blend file stores an artist's entire editable scene, layers included. Answer both parts:</p>
+      <div class="quiz-part" data-part>
+        <p class="quiz-part-label">(a) The engine only actually needs, at runtime...</p>
+        <div class="quiz-choices">
+          <button class="quiz-choice" data-correct="true">The final baked-down mesh and materials</button>
+          <button class="quiz-choice" data-correct="false">Every layer and the entire edit history</button>
+        </div>
+      </div>
+      <div class="quiz-part" data-part>
+        <p class="quiz-part-label">(b) This gap between editing needs and runtime needs is exactly why...</p>
+        <div class="quiz-choices">
+          <button class="quiz-choice" data-correct="true">An import pipeline exists to convert between the two</button>
+          <button class="quiz-choice" data-correct="false">Engines refuse to support 3D models at all</button>
+        </div>
+      </div>
+      <p class="quiz-explain" hidden>The import pipeline bridges the gap between editor-friendly and runtime-friendly formats.</p>
+    </div>
+
+    <div class="quiz" data-test-item data-topic="Memory Management">
+      <p class="quiz-prompt">7. Answer both parts connecting asset memory management to Systems Programming's heap lesson:</p>
+      <div class="quiz-part" data-part>
+        <p class="quiz-part-label">(a) A leaked asset reference is dangerous for the same underlying reason as...</p>
+        <div class="quiz-choices">
+          <button class="quiz-choice" data-correct="true">A heap memory leak in a C program</button>
+          <button class="quiz-choice" data-correct="false">A rendering pipeline running out of draw calls</button>
+        </div>
+      </div>
+      <div class="quiz-part" data-part>
+        <p class="quiz-part-label">(b) The key difference is that a leaked game asset on a console tends to...</p>
+        <div class="quiz-choices">
+          <button class="quiz-choice" data-correct="true">Crash the game quickly, given how small and hard the memory ceiling is</button>
+          <button class="quiz-choice" data-correct="false">Have no real consequence, since consoles auto-correct leaks</button>
+        </div>
+      </div>
+      <p class="quiz-explain" hidden>Same lifetime-tracking problem as heap leaks, but with a much smaller, harder ceiling.</p>
+    </div>
+
+    <div class="quiz" data-test-item data-topic="Streaming &amp; LOD">
+      <p class="quiz-prompt">8. Answer both parts about a mountain village example:</p>
+      <div class="quiz-part" data-part>
+        <p class="quiz-part-label">(a) A house at the far edge of the village, still visible but distant, renders at...</p>
+        <div class="quiz-choices">
+          <button class="quiz-choice" data-correct="true">A lower LOD — a few hundred triangles, indistinguishable at that distance</button>
+          <button class="quiz-choice" data-correct="false">Exactly the same triangle count as a nearby house</button>
+        </div>
+      </div>
+      <div class="quiz-part" data-part>
+        <p class="quiz-part-label">(b) A house well past the village entirely might be...</p>
+        <div class="quiz-choices">
+          <button class="quiz-choice" data-correct="true">Not loaded into memory at all yet</button>
+          <button class="quiz-choice" data-correct="false">Loaded at full LOD0 detail regardless of distance</button>
+        </div>
+      </div>
+      <p class="quiz-explain" hidden>LOD scales rendering detail with distance; streaming controls whether the asset is loaded at all.</p>
+    </div>
+
+    <div class="quiz" data-test-item data-topic="Asset Formats &amp; Import">
+      <p class="quiz-prompt">9. Why does the engine convert a texture ahead of time, rather than at game launch?</p>
+      <div class="quiz-choices">
+        <button class="quiz-choice" data-correct="true">Conversion is relatively slow work, and baking it in once avoids paying that cost on every boot.</button>
+        <button class="quiz-choice" data-correct="false">GPUs cannot technically read any converted texture format.</button>
+        <button class="quiz-choice" data-correct="false">Runtime conversion produces a visually identical result either way.</button>
+        <button class="quiz-choice" data-correct="false">Source and runtime assets are always the same file size.</button>
+      </div>
+      <p class="quiz-feedback" hidden></p>
+      <p class="quiz-explain" hidden>Baking conversion in ahead of time keeps actual game launches fast.</p>
+    </div>
+
+    <div class="quiz" data-test-item data-topic="Streaming &amp; LOD">
+      <p class="quiz-prompt">10. Answer both parts about why streaming and LOD are usually paired:</p>
+      <div class="quiz-part" data-part>
+        <p class="quiz-part-label">(a) Using only LOD, without streaming, would still leave...</p>
+        <div class="quiz-choices">
+          <button class="quiz-choice" data-correct="true">Every object's data resident in memory, just rendered more cheaply</button>
+          <button class="quiz-choice" data-correct="false">No memory usage at all, since LOD removes assets from memory</button>
+        </div>
+      </div>
+      <div class="quiz-part" data-part>
+        <p class="quiz-part-label">(b) Using only streaming, without LOD, would still render...</p>
+        <div class="quiz-choices">
+          <button class="quiz-choice" data-correct="true">Whatever's loaded at full detail, wasting GPU time on tiny, distant triangles</button>
+          <button class="quiz-choice" data-correct="false">Nothing at all, since streaming disables rendering entirely</button>
+        </div>
+      </div>
+      <p class="quiz-explain" hidden>Each technique alone leaves the other problem unsolved, which is why they're paired.</p>
+    </div>
+
+    <p class="test-warning" data-test-warning hidden></p>
+    <button class="widget-btn" data-test-submit>Submit Test</button>
+    <div class="test-result" data-test-result hidden></div>
+  </div>
+
+  <footer class="lesson-footer">STEM+ · Game Engine Architecture · Unit 6 Test — Version B</footer>
+</div>

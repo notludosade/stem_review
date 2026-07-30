@@ -1,0 +1,135 @@
+<meta charset="UTF-8">
+<title>Lesson 13: Reading Compiled Behavior Without Source — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · Video Game Modding · Unit 5 · Lesson 13</span>
+  <h1>Reading Compiled Behavior Without Source (the Basic Idea)</h1>
+  <p class="subtitle">Every technique so far has assumed the game exposed something to work with — an archive, a config file, a scripting API. What happens when it exposes none of that? This lesson is conceptual: the idea behind reverse-engineering, not a technical exploitation tutorial.</p>
+  <p class="nav-links"><a href="../Unit%204/0012-balancing-and-data-driven-mods.html" class="nav-prev">← Unit 4, Lesson 12</a> <a href="0014-debugging-someone-elses-game.html" class="nav-next">Lesson 14 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>A game's compiled executable is, from the outside, a <strong>black box</strong>: you can run it and observe what it does, but you can't directly read the original source code that produced it. When a game has no config files worth editing and no scripting API at all, modders who still want to change its behavior have to study that black box indirectly — watching how it behaves, and inferring what must be happening inside from the outside. This is a real, established field with real tools, and it's worth understanding at a conceptual level even though this course won't turn anyone into a reverse engineer in three lessons.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    <strong>Black-box observation</strong> is studying a program's behavior from the outside — inputs in, outputs out — without reading its original source code, inferring what must be happening internally from patterns in that behavior.
+  </div>
+
+  <h2>Two broad approaches, by name</h2>
+  <p>A <strong>memory scanner</strong> (the general category tools like Cheat Engine belong to) watches a running program's memory while you interact with the game, looking for values that change in a way that correlates with something you did — take damage, and search for a number that dropped by exactly that amount. It's pure correlation-hunting: no understanding of the game's code required, just careful, repeated observation. A <strong>decompiler</strong> or <strong>disassembler</strong> (tools like Ghidra and IDA are the well-known names in this space) instead works on the compiled executable file itself, translating machine code back into a more human-readable approximation of the original logic — disassemblers produce low-level assembly instructions, decompilers attempt a higher-level reconstruction closer to original source. Both require real, specialized skill to use effectively; this lesson names them so the vocabulary is recognizable, not so you walk away able to use them.</p>
+
+  <h2>Correlation, not certainty</h2>
+  <p>Neither approach ever produces the original source code back. A memory scanner shows correlation — this address changed when that happened — not proof of exactly why. A decompiler's reconstructed logic is an approximation, often missing the original variable names, comments, and structure a human programmer would have used. Reverse-engineering compiled behavior is fundamentally a process of building a working hypothesis and testing it against further observation, closer to detective work than to reading a book.</p>
+
+  <div class="box why">
+    <span class="box-label">Why it matters here</span>
+    This is the last resort on the spectrum from Lesson 1 — the technique modders reach for specifically when nothing else in this course's earlier units is available. Lesson 15 comes back to exactly where this stops being a technical question and becomes a legal one.
+  </div>
+
+  <h2>Try it — correlate an observation</h2>
+  <p>Click an in-game action below and watch which value in a mock memory list changes — the same correlation-spotting a memory scanner is built around.</p>
+
+  <div class="widget">
+    <p class="widget-label">Try It — Mock Memory Inspector</p>
+    <div style="display:flex; gap:0.5rem; flex-wrap:wrap; margin-bottom:0.9rem;">
+      <button class="widget-btn" data-action="damage" type="button">Take 10 Damage</button>
+      <button class="widget-btn" data-action="pickup" type="button">Pick Up Coin</button>
+      <button class="widget-btn" data-action="reset" type="button">Reset</button>
+    </div>
+    <div id="mem-list" style="font-family:'SF Mono',Menlo,Consolas,monospace; font-size:0.85rem; line-height:1.7;"></div>
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What does "black-box observation" mean in the context of a compiled game?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Studying the program's behavior from the outside, without access to its original source code.</button>
+      <button class="quiz-choice" data-correct="false">Reading a game's config files directly.</button>
+      <button class="quiz-choice" data-correct="false">Using an official scripting API provided by the developer.</button>
+      <button class="quiz-choice" data-correct="false">Unpacking a game's archive files.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A black box is understood only through its observable inputs and outputs, since the original source isn't available.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. What does a memory scanner fundamentally rely on to identify a relevant value?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Correlation — a memory value changing in a way that lines up with something the user did in-game.</button>
+      <button class="quiz-choice" data-correct="false">Direct access to the game's original source code.</button>
+      <button class="quiz-choice" data-correct="false">A scripting API the developer explicitly provided.</button>
+      <button class="quiz-choice" data-correct="false">The game's config file contents.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A memory scanner is a correlation-hunting tool — it flags values that change when something observable happens, without understanding why.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why is a decompiler's output described as only an approximation of the original source code?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">It reconstructs logic from compiled machine code, typically missing the original variable names, comments, and structure.</button>
+      <button class="quiz-choice" data-correct="false">Decompilers always produce completely random, unrelated code.</button>
+      <button class="quiz-choice" data-correct="false">Decompilers only work on config files, never on executables.</button>
+      <button class="quiz-choice" data-correct="false">A decompiler and a memory scanner are the exact same tool.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Compiling discards information like original names and comments, so a decompiler can only reconstruct an approximation, not the exact original source.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="memory scanner">
+    <p class="quiz-prompt">4. Fill in the blank: a tool that watches a running program's memory for values that change in correlation with an observed action is called a ___ ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Cheat Engine is the best-known example of a general-purpose memory scanner.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="decompiler">
+    <p class="quiz-prompt">5. Fill in the blank: a tool that attempts to reconstruct a higher-level approximation of a program's original source code from its compiled form is called a ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Ghidra and IDA are two well-known named decompiler/disassembler tools in this space.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: the <a href="https://ghidra-sre.org/">Ghidra project site</a> gives a real, high-level overview of what a decompiler actually is and does, without requiring any prior reverse-engineering background to skim.</p>
+
+  <p class="ask-teacher">Stuck on anything above, or want to understand a specific named tool at a conceptual level? Ask your teacher — that's what I'm here for. Next up: what modding without source code actually looks like day to day, before any of the deeper tools above ever get used.</p>
+
+  <footer class="lesson-footer">STEM+ · Video Game Modding · Lesson 13</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var list = document.getElementById('mem-list');
+  var values = { health: 100, coins: 0, timer: 0 };
+  var highlighted = null;
+  function render() {
+    list.innerHTML = '';
+    Object.keys(values).forEach(function (key) {
+      var row = document.createElement('div');
+      var isHighlighted = key === highlighted;
+      row.style.cssText = 'padding:0.3rem 0.6rem; border-radius:4px;' + (isHighlighted ? ' background:var(--correct-soft); color:var(--correct); font-weight:600;' : '');
+      row.textContent = '0x00' + (Object.keys(values).indexOf(key) + 1) + 'A4  ' + key + ' = ' + values[key] + (isHighlighted ? '  ← changed!' : '');
+      list.appendChild(row);
+    });
+  }
+  document.querySelectorAll('[data-action]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var action = btn.getAttribute('data-action');
+      if (action === 'damage') { values.health -= 10; highlighted = 'health'; }
+      else if (action === 'pickup') { values.coins += 1; highlighted = 'coins'; }
+      else { values = { health: 100, coins: 0, timer: 0 }; highlighted = null; }
+      render();
+    });
+  });
+  render();
+});
+</script>

@@ -1,0 +1,150 @@
+<meta charset="UTF-8">
+<title>Lesson 14: Rigid Body Physics and Integration — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="advanced">
+  <span class="kicker">STEM+ · Game Engine Architecture · Unit 5 · Lesson 14</span>
+  <h1>Rigid Body Physics and Integration</h1>
+  <p class="subtitle">Lesson 13 answered "are these two things touching?" This lesson answers the question underneath everything else in physics: given a force like gravity, how does an object's position actually change, frame by frame?</p>
+  <p class="nav-links"><a href="0013-collision-detection-basics.html" class="nav-prev">← Lesson 13</a> <a href="0015-physics-engines-what-they-handle-so-you-dont-have-to.html" class="nav-next">Lesson 15 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Real-world motion follows continuous calculus — velocity is the derivative of position, acceleration is the derivative of velocity. A computer can't work with continuous calculus directly; it can only take small discrete steps. Integration, in this context, is exactly how physics engines approximate that continuous motion using discrete timesteps.</p>
+
+  <h2>A rigid body's state, updated one step at a time</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    A <strong>rigid body</strong> is an object physics treats as a solid, non-deformable shape with mass, position, and velocity, that forces (gravity, a push, a collision response) can act on. <strong>Numerical integration</strong> is the process of updating a rigid body's velocity and position over each small timestep by accumulating the effect of forces. The simplest version, <strong>Euler integration</strong>, does this in two lines per step: first update velocity using the current acceleration, then update position using the updated velocity — each step's result feeding directly into the next.
+  </div>
+
+  <pre class="code-block"><code><span class="code-comment">// semi-implicit Euler integration, run once per fixed timestep (Unit 2)</span>
+velocity += acceleration * dt;   <span class="code-comment">// gravity pulls velocity down over time</span>
+position += velocity * dt;       <span class="code-comment">// position moves according to the *new* velocity</span></code></pre>
+
+  <h2>Try it: drop a ball, watch integration happen live</h2>
+  <p>Step through gravity integration one fixed timestep at a time, and watch velocity accumulate before position catches up.</p>
+
+  <div class="widget" id="integrate-widget">
+    <p class="widget-label">Interactive: Euler integration under gravity</p>
+    <svg viewBox="0 0 200 220" width="200" height="220" role="img" aria-label="A ball falling under gravity via step-by-step integration" style="background:var(--code-bg); border-radius:8px;">
+      <line x1="0" y1="210" x2="200" y2="210" stroke="var(--border)" stroke-width="2"></line>
+      <circle id="int-ball" cx="100" cy="20" r="12" fill="var(--accent)"></circle>
+    </svg>
+    <p class="fm-row">
+      <button class="widget-btn" type="button" data-int-step>Step one timestep (dt = 0.1s)</button>
+      <button class="widget-btn" type="button" data-int-reset>Reset</button>
+    </p>
+    <p class="plot-readout" data-int-readout>Step 0 — velocity: 0.0 m/s, position: 0.0 m fallen.</p>
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Worked example</span>
+    Gravity's acceleration is roughly -9.8 m/s² (downward). At <code class="inline-code">dt = 0.1s</code>, step one: velocity becomes 0 + (-9.8)(0.1) = -0.98 m/s, then position moves by -0.98 × 0.1 = -0.098 m. Step two: velocity becomes -0.98 + (-9.8)(0.1) = -1.96 m/s, then position moves a further -1.96 × 0.1 = -0.196 m. Each step's position change grows, because velocity itself is still accumulating — exactly the accelerating fall a dropped object should show, built entirely from two additions repeated every fixed step.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why the timestep size directly affects accuracy — tying straight back to Unit 2</span>
+    Euler integration is an approximation: it assumes acceleration and velocity stay constant across one single timestep, which is only ever approximately true. A larger timestep accumulates more error per step (which is exactly why Lesson 5's fixed timestep matters for physics specifically) — too large, and a fast-enough object can integrate straight through a thin wall in one step, the same tunneling problem Lesson 5 named for a different reason. Smaller, more frequent, fixed steps are what keep that error small enough to be invisible in practice.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. In semi-implicit Euler integration, what gets updated first each step?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Velocity, using the current acceleration — position is then updated using that new velocity.</button>
+      <button class="quiz-choice" data-correct="false">Position, using the old velocity from the previous step only.</button>
+      <button class="quiz-choice" data-correct="false">Acceleration, recalculated from the object's current position.</button>
+      <button class="quiz-choice" data-correct="false">Nothing is updated in any particular order.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Velocity updates first, and position update then uses that fresh velocity value.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. What is a rigid body, in physics simulation terms?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">An object treated as a solid, non-deformable shape with mass, position, and velocity, that forces can act on.</button>
+      <button class="quiz-choice" data-correct="false">Any object that never moves for the entire game.</button>
+      <button class="quiz-choice" data-correct="false">A shape that changes its own mesh every frame.</button>
+      <button class="quiz-choice" data-correct="false">Exclusively a 2D concept with no 3D equivalent.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Rigid bodies are non-deformable solids that forces act on, as defined at the top of the lesson.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why does a larger integration timestep introduce more error?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Euler integration assumes acceleration and velocity stay roughly constant across one step, and that assumption gets less accurate the longer the step is.</button>
+      <button class="quiz-choice" data-correct="false">Larger timesteps are technically impossible for any physics engine to process.</button>
+      <button class="quiz-choice" data-correct="false">Timestep size has no effect whatsoever on simulation accuracy.</button>
+      <button class="quiz-choice" data-correct="false">A larger timestep always produces a slower-falling object, never a faster one.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The constant-during-one-step assumption is exactly what breaks down more at larger step sizes.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="integration|numerical integration">
+    <p class="quiz-prompt">4. Fill in the blank: updating a rigid body's velocity and position over each small timestep by accumulating forces is called numerical ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Integration is the process of accumulating force effects over discrete timesteps.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="rigid body">
+    <p class="quiz-prompt">5. Fill in the blank: an object treated as a solid, non-deformable shape that forces can act on is a ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>This is the term defined at the top of the lesson.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: <a href="https://gafferongames.com/post/integration_basics/">"Integration Basics"</a> by Glenn Fiedler is the widely-cited, freely available explanation of exactly this Euler-integration approach used in real games.</p>
+
+  <p class="ask-teacher">Curious what happens after two rigid bodies actually collide — how the engine decides which way each one bounces? Ask your teacher — that's what I'm here for. Next up: everything a full physics engine handles that this lesson didn't touch, and why almost no team writes one from scratch.</p>
+
+  <footer class="lesson-footer">STEM+ · Game Engine Architecture · Lesson 14 of the course sequence</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var ball = document.getElementById('int-ball');
+  var readout = document.querySelector('[data-int-readout]');
+  var GRAVITY = -9.8;
+  var dt = 0.1;
+  var velocity = 0;
+  var position = 0; // meters fallen (positive = down)
+  var step = 0;
+  var pxPerMeter = 15;
+  var startY = 20;
+
+  function render() {
+    var y = startY + position * pxPerMeter;
+    ball.setAttribute('cy', Math.min(198, y));
+    readout.textContent = 'Step ' + step + ' — velocity: ' + velocity.toFixed(2) + ' m/s, position: ' + position.toFixed(3) + ' m fallen.';
+  }
+
+  document.querySelector('[data-int-step]').addEventListener('click', function () {
+    velocity += GRAVITY * dt; // note: GRAVITY negative = downward accel; we store position as "fallen" so flip sign
+    position += (-velocity) * dt;
+    step++;
+    render();
+  });
+
+  document.querySelector('[data-int-reset]').addEventListener('click', function () {
+    velocity = 0;
+    position = 0;
+    step = 0;
+    render();
+  });
+
+  render();
+});
+</script>

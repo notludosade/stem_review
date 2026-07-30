@@ -1,0 +1,166 @@
+<meta charset="UTF-8">
+<title>Unit 5 Test — Version A — Game Engine Architecture — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/tests.js" defer></script>
+<div class="page" data-tier="advanced">
+  <span class="kicker">STEM+ · Game Engine Architecture · Unit 5 · Unit Test</span>
+  <h1>Unit 5 Test — Version A</h1>
+  <p class="subtitle">Physics Integration. 10 points covering every lesson in this unit. Score 80% or higher to clear this unit.</p>
+  <p class="nav-links"><a href="../index.html" class="nav-toc">← Course Contents</a> <a href="unit-test-b.html" class="nav-toc">Version B →</a></p>
+
+  <div data-test data-course="Game Engine Architecture" data-unit="Unit 5" data-kind="unit_test" data-version="A">
+
+    <div class="quiz" data-test-item data-topic="Collision Detection">
+      <p class="quiz-prompt">1. What does "axis-aligned" mean about an AABB?</p>
+      <div class="quiz-choices">
+        <button class="quiz-choice" data-correct="true">Its edges are always parallel to the world's x/y axes, never rotated to match the object.</button>
+        <button class="quiz-choice" data-correct="false">It rotates to exactly match the object's own orientation.</button>
+        <button class="quiz-choice" data-correct="false">It only exists in 3D, never in 2D.</button>
+        <button class="quiz-choice" data-correct="false">It is always a perfect square.</button>
+      </div>
+      <p class="quiz-feedback" hidden></p>
+      <p class="quiz-explain" hidden>Never rotating is exactly what keeps an AABB overlap test cheap.</p>
+    </div>
+
+    <div class="quiz" data-test-item data-test-fill data-topic="Rigid Body Physics" data-answers="integration|numerical integration">
+      <p class="quiz-prompt">2. Fill in the blank: updating a rigid body's velocity and position each small timestep by accumulating forces is called numerical ___.</p>
+      <div class="quiz-fill-row">
+        <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      </div>
+      <p class="quiz-feedback" hidden></p>
+      <p class="quiz-explain" hidden>Integration accumulates force effects across discrete timesteps.</p>
+    </div>
+
+    <div class="quiz" data-test-item data-topic="Physics Engines">
+      <p class="quiz-prompt">3. Why do most teams use an existing physics engine instead of writing their own from scratch?</p>
+      <div class="quiz-choices">
+        <button class="quiz-choice" data-correct="true">Handling stacks, ramps, joints, and many simultaneous contacts correctly is genuinely difficult, already-solved software.</button>
+        <button class="quiz-choice" data-correct="false">Writing custom physics code violates most engines' license terms.</button>
+        <button class="quiz-choice" data-correct="false">Existing physics engines are always free of charge.</button>
+        <button class="quiz-choice" data-correct="false">It is technically impossible for any small team to write physics code.</button>
+      </div>
+      <p class="quiz-feedback" hidden></p>
+      <p class="quiz-explain" hidden>Difficulty and maturity of existing solutions drive teams to reuse rather than reinvent.</p>
+    </div>
+
+    <div class="quiz" data-test-item data-test-fill data-topic="Collision Detection" data-answers="narrow phase">
+      <p class="quiz-prompt">4. Fill in the blank: the stage that runs the expensive, exact collision test only on pairs broad phase couldn't rule out is ___.</p>
+      <div class="quiz-fill-row">
+        <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      </div>
+      <p class="quiz-feedback" hidden></p>
+      <p class="quiz-explain" hidden>Narrow phase runs the precise, expensive check only on surviving candidate pairs.</p>
+    </div>
+
+    <div class="quiz" data-test-item data-topic="Rigid Body Physics">
+      <p class="quiz-prompt">5. In semi-implicit Euler integration, what gets updated first each step?</p>
+      <div class="quiz-choices">
+        <button class="quiz-choice" data-correct="true">Velocity, using current acceleration — position then updates using that new velocity.</button>
+        <button class="quiz-choice" data-correct="false">Position, using only the previous step's velocity.</button>
+        <button class="quiz-choice" data-correct="false">Acceleration, recalculated from the current position.</button>
+        <button class="quiz-choice" data-correct="false">Nothing — both update simultaneously with no dependency.</button>
+      </div>
+      <p class="quiz-feedback" hidden></p>
+      <p class="quiz-explain" hidden>Velocity updates first, feeding directly into the position update that follows.</p>
+    </div>
+
+    <div class="quiz" data-test-item data-topic="Collision Detection">
+      <p class="quiz-prompt">6. A scene has 500 objects. Answer both parts:</p>
+      <div class="quiz-part" data-part>
+        <p class="quiz-part-label">(a) Checking every pair with exact mesh collision would require roughly...</p>
+        <div class="quiz-choices">
+          <button class="quiz-choice" data-correct="true">125,000 expensive tests, far too slow for real-time use</button>
+          <button class="quiz-choice" data-correct="false">500 tests total, one per object</button>
+        </div>
+      </div>
+      <div class="quiz-part" data-part data-answers="broad phase">
+        <p class="quiz-part-label">(b) Fill in the blank: cheap AABB checks that quickly rule out most pairs before any exact test runs is called ___.</p>
+        <div class="quiz-fill-row">
+          <input type="text" class="quiz-fill-input" aria-label="Your answer">
+        </div>
+      </div>
+      <p class="quiz-explain" hidden>Broad phase narrows the workload dramatically before any expensive check runs.</p>
+    </div>
+
+    <div class="quiz" data-test-item data-topic="Rigid Body Physics">
+      <p class="quiz-prompt">7. A physics simulation uses a much larger timestep than usual. Answer both parts:</p>
+      <div class="quiz-part" data-part>
+        <p class="quiz-part-label">(a) This makes the constant-acceleration assumption within one step...</p>
+        <div class="quiz-choices">
+          <button class="quiz-choice" data-correct="true">Less accurate, introducing more integration error</button>
+          <button class="quiz-choice" data-correct="false">More accurate than a small timestep would be</button>
+        </div>
+      </div>
+      <div class="quiz-part" data-part>
+        <p class="quiz-part-label">(b) At an extreme enough size, a fast-moving object could...</p>
+        <div class="quiz-choices">
+          <button class="quiz-choice" data-correct="true">Integrate straight through a thin wall in one step</button>
+          <button class="quiz-choice" data-correct="false">Stop moving entirely for the rest of the simulation</button>
+        </div>
+      </div>
+      <p class="quiz-explain" hidden>Larger timesteps increase per-step error and can reproduce the same tunneling problem from Unit 2.</p>
+    </div>
+
+    <div class="quiz" data-test-item data-topic="Physics Engines">
+      <p class="quiz-prompt">8. A crate on a ramp needs friction, and a rope needs its joints to stay connected while swinging. Answer both parts:</p>
+      <div class="quiz-part" data-part>
+        <p class="quiz-part-label">(a) Both problems are examples of...</p>
+        <div class="quiz-choices">
+          <button class="quiz-choice" data-correct="true">Numerically finicky problems a mature physics engine has already spent years tuning</button>
+          <button class="quiz-choice" data-correct="false">Simple problems every team should solve independently from scratch</button>
+        </div>
+      </div>
+      <div class="quiz-part" data-part>
+        <p class="quiz-part-label">(b) By contrast, "how much damage a collision deals" is typically decided by...</p>
+        <div class="quiz-choices">
+          <button class="quiz-choice" data-correct="true">Game code, not the physics engine itself</button>
+          <button class="quiz-choice" data-correct="false">The physics engine's collision response step directly</button>
+        </div>
+      </div>
+      <p class="quiz-explain" hidden>Physics engines own the numerically hard simulation; game-specific meaning stays in game code.</p>
+    </div>
+
+    <div class="quiz" data-test-item data-topic="Collision Detection">
+      <p class="quiz-prompt">9. Two circular objects have overlapping AABBs, but the circles themselves don't actually touch. Answer both parts:</p>
+      <div class="quiz-part" data-part>
+        <p class="quiz-part-label">(a) This happens because an AABB is...</p>
+        <div class="quiz-choices">
+          <button class="quiz-choice" data-correct="true">A rectangular overestimate of the object's true shape</button>
+          <button class="quiz-choice" data-correct="false">Always identical to the object's exact shape</button>
+        </div>
+      </div>
+      <div class="quiz-part" data-part>
+        <p class="quiz-part-label">(b) This is exactly why...</p>
+        <div class="quiz-choices">
+          <button class="quiz-choice" data-correct="true">Narrow phase still has to confirm the collision with an exact test</button>
+          <button class="quiz-choice" data-correct="false">Broad phase alone is always sufficient to confirm a real collision</button>
+        </div>
+      </div>
+      <p class="quiz-explain" hidden>AABB overlap is a necessary but not sufficient condition for a true collision.</p>
+    </div>
+
+    <div class="quiz" data-test-item data-topic="Physics Engines">
+      <p class="quiz-prompt">10. Answer both parts about a physics engine as a subsystem:</p>
+      <div class="quiz-part" data-part data-answers="collision response">
+        <p class="quiz-part-label">(a) Fill in the blank: resolving overlap and updating velocities so bodies push apart realistically is called ___.</p>
+        <div class="quiz-fill-row">
+          <input type="text" class="quiz-fill-input" aria-label="Your answer">
+        </div>
+      </div>
+      <div class="quiz-part" data-part>
+        <p class="quiz-part-label">(b) A rule like "these two bodies must stay connected at this joint" is called a...</p>
+        <div class="quiz-choices">
+          <button class="quiz-choice" data-correct="true">Constraint</button>
+          <button class="quiz-choice" data-correct="false">Draw call</button>
+        </div>
+      </div>
+      <p class="quiz-explain" hidden>Collision response resolves contacts; constraints maintain persistent relationships between bodies.</p>
+    </div>
+
+    <p class="test-warning" data-test-warning hidden></p>
+    <button class="widget-btn" data-test-submit>Submit Test</button>
+    <div class="test-result" data-test-result hidden></div>
+  </div>
+
+  <footer class="lesson-footer">STEM+ · Game Engine Architecture · Unit 5 Test — Version A</footer>
+</div>

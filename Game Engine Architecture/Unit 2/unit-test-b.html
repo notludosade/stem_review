@@ -1,0 +1,167 @@
+<meta charset="UTF-8">
+<title>Unit 2 Test — Version B — Game Engine Architecture — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/tests.js" defer></script>
+<div class="page" data-tier="advanced">
+  <span class="kicker">STEM+ · Game Engine Architecture · Unit 2 · Unit Test</span>
+  <h1>Unit 2 Test — Version B</h1>
+  <p class="subtitle">The Game Loop &amp; Timing. 10 points covering every lesson in this unit. Score 80% or higher to clear this unit.</p>
+  <p class="nav-links"><a href="../index.html" class="nav-toc">← Course Contents</a> <a href="unit-test-a.html" class="nav-toc">← Version A</a></p>
+
+  <div data-test data-course="Game Engine Architecture" data-unit="Unit 2" data-kind="unit_test" data-version="B">
+
+    <div class="quiz" data-test-item data-topic="The Core Game Loop">
+      <p class="quiz-prompt">1. Why must render always run after update in the game loop, never before?</p>
+      <div class="quiz-choices">
+        <button class="quiz-choice" data-correct="true">So the screen shows the world's state after this frame's changes, not a stale state from before them.</button>
+        <button class="quiz-choice" data-correct="false">Rendering before updating makes the loop run measurably faster.</button>
+        <button class="quiz-choice" data-correct="false">The order of the two phases genuinely doesn't matter.</button>
+        <button class="quiz-choice" data-correct="false">Update depends on render having already produced a frame.</button>
+      </div>
+      <p class="quiz-feedback" hidden></p>
+      <p class="quiz-explain" hidden>Rendering must reflect the freshest state, which only exists once update has run.</p>
+    </div>
+
+    <div class="quiz" data-test-item data-test-fill data-topic="Frame Rate &amp; Delta Time" data-answers="frame rate|fps">
+      <p class="quiz-prompt">2. Fill in the blank: how many times per second the game loop completes is called ___.</p>
+      <div class="quiz-fill-row">
+        <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      </div>
+      <p class="quiz-feedback" hidden></p>
+      <p class="quiz-explain" hidden>Frame rate, in FPS, is loop completions per second.</p>
+    </div>
+
+    <div class="quiz" data-test-item data-topic="Fixed vs. Variable Timestep">
+      <p class="quiz-prompt">3. What is the main tradeoff a fixed timestep accepts in exchange for stable, reproducible physics?</p>
+      <div class="quiz-choices">
+        <button class="quiz-choice" data-correct="true">It may need to run update() more than once (or zero times) in a single rendered frame to keep pace with real time.</button>
+        <button class="quiz-choice" data-correct="false">It can never be combined with rendering at all.</button>
+        <button class="quiz-choice" data-correct="false">It requires the frame rate to always be exactly constant on every machine.</button>
+        <button class="quiz-choice" data-correct="false">It has no tradeoff whatsoever compared to variable timestep.</button>
+      </div>
+      <p class="quiz-feedback" hidden></p>
+      <p class="quiz-explain" hidden>Decoupling simulation steps from render timing means update() may run a different number of times per rendered frame.</p>
+    </div>
+
+    <div class="quiz" data-test-item data-test-fill data-topic="The Core Game Loop" data-answers="game loop">
+      <p class="quiz-prompt">4. Fill in the blank: the top-level loop that repeatedly processes input, updates the world, and renders it for the life of a game is the ___.</p>
+      <div class="quiz-fill-row">
+        <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      </div>
+      <p class="quiz-feedback" hidden></p>
+      <p class="quiz-explain" hidden>This is the term defined at the top of Lesson 4.</p>
+    </div>
+
+    <div class="quiz" data-test-item data-topic="Frame Rate &amp; Delta Time">
+      <p class="quiz-prompt">5. What does correctly multiplying a movement value by delta time actually accomplish?</p>
+      <div class="quiz-choices">
+        <button class="quiz-choice" data-correct="true">It keeps the rate of change consistent per second of real time, regardless of how many frames occur in that second.</button>
+        <button class="quiz-choice" data-correct="false">It forces the game to run at exactly 60 FPS on every machine.</button>
+        <button class="quiz-choice" data-correct="false">It has no measurable effect on how an object actually moves.</button>
+        <button class="quiz-choice" data-correct="false">It only matters for audio, never for movement.</button>
+      </div>
+      <p class="quiz-feedback" hidden></p>
+      <p class="quiz-explain" hidden>Delta time converts a per-frame change into a true per-second rate, independent of frame rate.</p>
+    </div>
+
+    <div class="quiz" data-test-item data-topic="The Core Game Loop">
+      <p class="quiz-prompt">6. Answer both parts about why a game can't just wait for player input like a word processor does:</p>
+      <div class="quiz-part" data-part>
+        <p class="quiz-part-label">(a) A game world must keep advancing even when...</p>
+        <div class="quiz-choices">
+          <button class="quiz-choice" data-correct="true">The player does nothing at all</button>
+          <button class="quiz-choice" data-correct="false">The frame rate exceeds 60 FPS</button>
+        </div>
+      </div>
+      <div class="quiz-part" data-part data-answers="render">
+        <p class="quiz-part-label">(b) Fill in the blank: the third and final phase of the loop, which draws the current world state, is ___.</p>
+        <div class="quiz-fill-row">
+          <input type="text" class="quiz-fill-input" aria-label="Your answer">
+        </div>
+      </div>
+      <p class="quiz-explain" hidden>The loop must keep the world moving on its own, ending each cycle with render.</p>
+    </div>
+
+    <div class="quiz" data-test-item data-topic="Fixed vs. Variable Timestep">
+      <p class="quiz-prompt">7. A ball moves at a steady 100 pixels/second and a 250ms hitch occurs. Answer both parts:</p>
+      <div class="quiz-part" data-part>
+        <p class="quiz-part-label">(a) Under variable timestep, the ball would jump...</p>
+        <div class="quiz-choices">
+          <button class="quiz-choice" data-correct="true">25 pixels in a single, visible leap</button>
+          <button class="quiz-choice" data-correct="false">Zero pixels — the hitch has no effect</button>
+        </div>
+      </div>
+      <div class="quiz-part" data-part>
+        <p class="quiz-part-label">(b) Under fixed timestep, that same distance would instead be covered as...</p>
+        <div class="quiz-choices">
+          <button class="quiz-choice" data-correct="true">Fifteen small, physically consistent steps</button>
+          <button class="quiz-choice" data-correct="false">A single, even larger leap than under variable timestep</button>
+        </div>
+      </div>
+      <p class="quiz-explain" hidden>Fixed timestep breaks a real-time gap into many small steps instead of one giant leap.</p>
+    </div>
+
+    <div class="quiz" data-test-item data-topic="Frame Rate &amp; Delta Time">
+      <p class="quiz-prompt">8. A character moves with <code class="inline-code">position += 5 * delta_time;</code> at both 30 FPS and 120 FPS. Answer both parts:</p>
+      <div class="quiz-part" data-part>
+        <p class="quiz-part-label">(a) After exactly one real second at either frame rate, the character has moved...</p>
+        <div class="quiz-choices">
+          <button class="quiz-choice" data-correct="true">The same total distance (5 units) in both cases</button>
+          <button class="quiz-choice" data-correct="false">Four times farther at 120 FPS than at 30 FPS</button>
+        </div>
+      </div>
+      <div class="quiz-part" data-part>
+        <p class="quiz-part-label">(b) The difference between the two frame rates instead shows up as...</p>
+        <div class="quiz-choices">
+          <button class="quiz-choice" data-correct="true">More, smaller individual steps at the higher frame rate</button>
+          <button class="quiz-choice" data-correct="false">The game refusing to run at one of the two frame rates</button>
+        </div>
+      </div>
+      <p class="quiz-explain" hidden>Correct delta-time use keeps total distance per second constant regardless of frame rate.</p>
+    </div>
+
+    <div class="quiz" data-test-item data-topic="The Core Game Loop">
+      <p class="quiz-prompt">9. Answer both parts about the game loop's basic shape:</p>
+      <div class="quiz-part" data-part>
+        <p class="quiz-part-label">(a) The phase that reads what the player did since the last frame is called...</p>
+        <div class="quiz-choices">
+          <button class="quiz-choice" data-correct="true">Process input</button>
+          <button class="quiz-choice" data-correct="false">Render</button>
+        </div>
+      </div>
+      <div class="quiz-part" data-part>
+        <p class="quiz-part-label">(b) The loop keeps repeating these phases...</p>
+        <div class="quiz-choices">
+          <button class="quiz-choice" data-correct="true">Continuously, for the entire life of the game, until the player quits</button>
+          <button class="quiz-choice" data-correct="false">Exactly once, at the very start of the program</button>
+        </div>
+      </div>
+      <p class="quiz-explain" hidden>The loop runs continuously, starting each cycle by reading input.</p>
+    </div>
+
+    <div class="quiz" data-test-item data-topic="Fixed vs. Variable Timestep">
+      <p class="quiz-prompt">10. Answer both parts about why fixed timestep suits physics specifically:</p>
+      <div class="quiz-part" data-part>
+        <p class="quiz-part-label">(a) Physics math (springs, collisions, gravity) generally assumes...</p>
+        <div class="quiz-choices">
+          <button class="quiz-choice" data-correct="true">Small, roughly-equal time steps</button>
+          <button class="quiz-choice" data-correct="false">One single giant step covering the whole simulation</button>
+        </div>
+      </div>
+      <div class="quiz-part" data-part>
+        <p class="quiz-part-label">(b) A key benefit of fixed timestep is that simulation results become...</p>
+        <div class="quiz-choices">
+          <button class="quiz-choice" data-correct="true">Reproducible and independent of the machine's frame rate</button>
+          <button class="quiz-choice" data-correct="false">Dependent on exactly which GPU is installed</button>
+        </div>
+      </div>
+      <p class="quiz-explain" hidden>Consistent step size keeps physics stable and reproducible regardless of hardware speed.</p>
+    </div>
+
+    <p class="test-warning" data-test-warning hidden></p>
+    <button class="widget-btn" data-test-submit>Submit Test</button>
+    <div class="test-result" data-test-result hidden></div>
+  </div>
+
+  <footer class="lesson-footer">STEM+ · Game Engine Architecture · Unit 2 Test — Version B</footer>
+</div>

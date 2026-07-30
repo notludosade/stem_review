@@ -1,0 +1,163 @@
+<meta charset="UTF-8">
+<title>Lesson 6: Frame Rate, Delta Time, and Why Physics Breaks Without It — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="advanced">
+  <span class="kicker">STEM+ · Game Engine Architecture · Unit 2 · Lesson 6</span>
+  <h1>Frame Rate, Delta Time, and Why Physics Breaks Without It</h1>
+  <p class="subtitle">Lesson 5 assumed update() gets some notion of elapsed time. This lesson makes that concrete — and shows the single most common bug new engine programmers write, in one line of code.</p>
+  <p class="nav-links"><a href="0005-fixed-vs-variable-timestep.html" class="nav-prev">← Lesson 5</a> <a href="../Unit%203/0007-the-problem-with-deep-inheritance-hierarchies.html" class="nav-next">Unit 3, Lesson 7 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Imagine a character that should walk at 5 meters per second. The tempting first line of code is <code class="inline-code">position += 5;</code> inside <code class="inline-code">update()</code>. It looks correct, and it even runs — but it silently ties the character's actual speed to how fast the game happens to be rendering, which is exactly the bug this lesson exists to name and fix.</p>
+
+  <h2>Delta time: the missing multiplier</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    <strong>Frame rate</strong> (frames per second, FPS) is how many times per second the loop completes. <strong>Delta time</strong> (often written <code class="inline-code">dt</code>) is the amount of real time, in seconds, that elapsed since the last frame — roughly <code class="inline-code">1 / FPS</code> when frame rate is steady. Any quantity that should change at a rate per second — movement, rotation, a timer counting down — must be multiplied by delta time inside update(), so that the actual amount it changes each frame scales with how much real time that frame represents.
+  </div>
+
+  <pre class="code-block"><code><span class="code-comment">// WRONG: moves 5 units every *frame*, not every *second*</span>
+position += 5;
+
+<span class="code-comment">// RIGHT: moves 5 units every *second*, regardless of frame rate</span>
+position += 5 * delta_time;</code></pre>
+
+  <h2>Try it: the same code at two different frame rates</h2>
+  <p>Run the same movement code at 30 FPS and 120 FPS, with and without multiplying by delta time. Watch how far the object actually travels in one real second.</p>
+
+  <div class="widget" id="dt-widget">
+    <div class="fm-tabs" id="dt-tabs">
+      <button class="fm-tab is-active" type="button" data-dt-mode="wrong">Without delta time</button>
+      <button class="fm-tab" type="button" data-dt-mode="right">With delta time</button>
+    </div>
+    <div class="slider-row">
+      <label for="dt-fps">Frame rate</label>
+      <input type="range" id="dt-fps" min="15" max="144" value="60" step="1">
+      <span class="slider-value" data-dt-fps-val>60 FPS</span>
+    </div>
+    <p class="fm-row">
+      <button class="widget-btn" type="button" data-dt-run>Simulate 1 real second</button>
+      <button class="widget-btn" type="button" data-dt-reset>Reset</button>
+    </p>
+    <p class="verdict" data-dt-verdict>Distance traveled: 0 units.</p>
+    <p class="plot-hint">Target speed is 5 units/second. Change the frame rate and re-run to see what each mode actually delivers.</p>
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Worked example</span>
+    Without delta time, <code class="inline-code">position += 5</code> adds exactly 5 units <em>every frame</em>. At 30 FPS that's 150 units per second; at 120 FPS it's 600 units per second — the same character moves four times faster purely because a player's GPU is faster, which is obviously wrong. With delta time, <code class="inline-code">position += 5 * dt</code> adds 5/30 ≈ 0.167 units per frame at 30 FPS, or 5/120 ≈ 0.042 units per frame at 120 FPS — thirty and one-twenty tiny steps respectively, but both add up to exactly 5 units after one real second, on any hardware.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why this bug is so easy to miss</span>
+    Code that forgets delta time still runs, still moves something, and looks completely fine to the one person testing it on their own machine at a fairly consistent frame rate. The bug only becomes obvious on a different machine, under a different load, or during a frame-rate dip — exactly the conditions a developer's test environment often doesn't reproduce. This is why "multiply movement by delta time" isn't a style preference; it's the difference between a simulation that's correct by construction and one that happens to look right on one machine, one time.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What does multiplying a movement value by delta time actually accomplish?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">It makes the rate of change consistent per second of real time, regardless of how many frames occur in that second.</button>
+      <button class="quiz-choice" data-correct="false">It makes the game render at a higher frame rate.</button>
+      <button class="quiz-choice" data-correct="false">It has no real effect on movement speed.</button>
+      <button class="quiz-choice" data-correct="false">It only affects audio playback speed.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Delta time converts a per-frame change into a true per-second rate.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. What happens to <code class="inline-code">position += 5;</code> (no delta time) if frame rate doubles from 30 to 60 FPS?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">The object moves twice as fast in real time, since twice as many frames now run every second.</button>
+      <button class="quiz-choice" data-correct="false">The object's real-world speed stays exactly the same.</button>
+      <button class="quiz-choice" data-correct="false">The game will refuse to run at the new frame rate.</button>
+      <button class="quiz-choice" data-correct="false">The object moves at half its previous speed.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Without delta time, more frames per second directly means more per-frame additions per second — faster movement.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why can this bug survive testing on a developer's own machine without ever being noticed?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">On one machine at a fairly steady frame rate, the code still runs and still moves something, so it looks correct — the bug only surfaces under different hardware or frame-rate conditions.</button>
+      <button class="quiz-choice" data-correct="false">The code fails to compile, so it's caught immediately every time.</button>
+      <button class="quiz-choice" data-correct="false">It's actually impossible to write this bug in any language.</button>
+      <button class="quiz-choice" data-correct="false">Delta time is required by every compiler and cannot be omitted.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The bug is silent — it produces plausible-looking motion, just at the wrong rate under different conditions.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="delta time|dt">
+    <p class="quiz-prompt">4. Fill in the blank: the amount of real time, in seconds, that elapsed since the last frame is called ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Delta time is exactly the elapsed-seconds value defined at the top of this lesson.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="frame rate|fps">
+    <p class="quiz-prompt">5. Fill in the blank: how many times per second the game loop completes is called ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Frame rate, measured in FPS, is loop completions per second.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next unit: MDN's <a href="https://developer.mozilla.org/en-US/docs/Games/Anatomy">"Anatomy of a video game"</a> walks through exactly this loop-and-timing structure in a runnable browser context.</p>
+
+  <p class="ask-teacher">Curious how this connects back to the fixed-timestep strategy from Lesson 5? Ask your teacher — that's what I'm here for. Next up: Unit 3 leaves timing behind and tackles a different foundational problem — how an engine should actually represent the thousands of different objects that live inside a game world.</p>
+
+  <footer class="lesson-footer">STEM+ · Game Engine Architecture · Lesson 6 of the course sequence</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var mode = 'wrong';
+  var fpsInput = document.getElementById('dt-fps');
+  var fpsVal = document.querySelector('[data-dt-fps-val]');
+  var verdict = document.querySelector('[data-dt-verdict]');
+  var tabs = document.querySelectorAll('#dt-tabs [data-dt-mode]');
+  var SPEED = 5;
+
+  fpsInput.addEventListener('input', function () {
+    fpsVal.textContent = fpsInput.value + ' FPS';
+  });
+
+  tabs.forEach(function (tab) {
+    tab.addEventListener('click', function () {
+      tabs.forEach(function (t) { t.classList.remove('is-active'); });
+      tab.classList.add('is-active');
+      mode = tab.getAttribute('data-dt-mode');
+    });
+  });
+
+  document.querySelector('[data-dt-run]').addEventListener('click', function () {
+    var fps = parseInt(fpsInput.value, 10);
+    var dt = 1 / fps;
+    var distance;
+    if (mode === 'wrong') {
+      distance = SPEED * fps; // SPEED added every frame, fps frames in one second
+      verdict.textContent = 'Distance traveled in 1 real second: ' + distance.toFixed(1) + ' units (should be 5). Wrong — speed scales with frame rate.';
+    } else {
+      distance = SPEED * dt * fps; // always ~SPEED
+      verdict.textContent = 'Distance traveled in 1 real second: ' + distance.toFixed(2) + ' units (target: 5). Correct — independent of frame rate.';
+    }
+    verdict.className = 'verdict ' + (mode === 'right' ? 'is-pass' : 'is-fail');
+  });
+
+  document.querySelector('[data-dt-reset]').addEventListener('click', function () {
+    verdict.textContent = 'Distance traveled: 0 units.';
+    verdict.className = 'verdict';
+  });
+});
+</script>

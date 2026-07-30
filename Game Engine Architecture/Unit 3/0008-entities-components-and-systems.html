@@ -1,0 +1,145 @@
+<meta charset="UTF-8">
+<title>Lesson 8: Entities, Components, and Systems — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="advanced">
+  <span class="kicker">STEM+ · Game Engine Architecture · Unit 3 · Lesson 8</span>
+  <h1>Entities, Components, and Systems</h1>
+  <p class="subtitle">Lesson 7's flying-swimming boss had no clean home in an inheritance tree. This lesson introduces the model nearly every modern engine uses instead — one that makes "flies and swims" a non-event.</p>
+  <p class="nav-links"><a href="0007-the-problem-with-deep-inheritance-hierarchies.html" class="nav-prev">← Lesson 7</a> <a href="0009-building-a-minimal-ecs.html" class="nav-next">Lesson 9 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Instead of asking "what class of thing is this object?", an ECS asks a different question entirely: "what data does this object currently have attached to it?" A flying, swimming boss isn't a special class squeezed into a tree — it's just an object with a Flying component and a Swimming component both attached, exactly like any other combination.</p>
+
+  <h2>Three words, three very different jobs</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    An <strong>Entity</strong> is nothing more than an identifier — often literally just an integer ID — with no behavior and no data of its own. A <strong>Component</strong> is a plain bundle of data (a <code class="inline-code">Position</code> component holds x/y coordinates; a <code class="inline-code">Health</code> component holds a current and max value) with no logic attached. A <strong>System</strong> is where all the logic lives: a function that runs every frame, finds every entity that has a specific combination of components, and operates on their data. An entity's "type" is entirely defined by which components happen to be attached to it right now — nothing more.
+  </div>
+
+  <h2>Try it: compose an entity from components</h2>
+  <p>Toggle components on and off for one entity, and watch which systems would actually process it this frame.</p>
+
+  <div class="widget" id="ecs-widget">
+    <p class="widget-label">Interactive: build an entity by composition, not inheritance</p>
+    <div class="fm-row" style="flex-wrap:wrap;">
+      <label><input type="checkbox" data-comp="Position" checked> Position</label>
+      <label><input type="checkbox" data-comp="Velocity"> Velocity</label>
+      <label><input type="checkbox" data-comp="Sprite"> Sprite</label>
+      <label><input type="checkbox" data-comp="Health"> Health</label>
+      <label><input type="checkbox" data-comp="Flying"> Flying</label>
+      <label><input type="checkbox" data-comp="Swimming"> Swimming</label>
+    </div>
+    <p class="verdict" data-ecs-verdict>This entity has 1 component.</p>
+    <div id="ecs-systems"></div>
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Worked example</span>
+    An entity with <code class="inline-code">Position</code> and <code class="inline-code">Sprite</code> gets drawn by the Render System but ignored by the Movement System (no <code class="inline-code">Velocity</code>) — a perfectly normal static prop. Add <code class="inline-code">Velocity</code> and the exact same entity, unchanged otherwise, is now also picked up by the Movement System next frame. Nothing was reclassified, no class hierarchy was touched — a system's job is entirely defined by which components it looks for, not by what "kind" of object it's looking at.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why this fixes Lesson 7's diamond problem outright</span>
+    The flying-swimming boss from Lesson 7 simply has a <code class="inline-code">Flying</code> component and a <code class="inline-code">Swimming</code> component attached to the same entity — there is no tree to strain, because there is no tree. Adding a new behavior to an existing object type is just attaching one more component; it never requires restructuring anything else, and it never asks "which parent's version wins" because components don't have parents at all. This is composition, not inheritance, applied at the scale an entire game world needs.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. In an ECS, what actually defines an entity's "type"?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Whichever combination of components happen to be attached to it right now.</button>
+      <button class="quiz-choice" data-correct="false">Its position in a fixed class inheritance tree.</button>
+      <button class="quiz-choice" data-correct="false">The order it was created in, relative to other entities.</button>
+      <button class="quiz-choice" data-correct="false">A hard-coded type name assigned once at compile time.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>An entity's effective "type" is just whatever components are currently attached.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Where does game logic actually live in an ECS?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">In systems — functions that find entities with a given component combination and operate on their data.</button>
+      <button class="quiz-choice" data-correct="false">Inside each component's own data fields.</button>
+      <button class="quiz-choice" data-correct="false">Inside the entity ID itself.</button>
+      <button class="quiz-choice" data-correct="false">Nowhere — an ECS has no logic at all, only data.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Systems are specifically where all behavior/logic lives in this pattern.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why does giving an existing entity a new behavior (say, making it fly) not require restructuring anything else?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">It's just attaching one more component — components have no parent/child relationships to strain.</button>
+      <button class="quiz-choice" data-correct="false">Because ECS engines don't actually support adding new behaviors at all.</button>
+      <button class="quiz-choice" data-correct="false">Because every entity must be manually reclassified into a new type first.</button>
+      <button class="quiz-choice" data-correct="false">Because it requires rewriting every system in the engine.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Components are flat, independent data bundles with no hierarchy to strain when combined.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="component">
+    <p class="quiz-prompt">4. Fill in the blank: a plain bundle of data with no attached logic, like Position or Health, is called a ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A component is data-only, with logic living elsewhere, in systems.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="entity">
+    <p class="quiz-prompt">5. Fill in the blank: an identifier with no behavior and no data of its own, which components get attached to, is called an ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>An entity is just an ID — the components attached to it carry the actual data.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: the <a href="https://github.com/SanderMertens/ecs-faq">Entity Component System FAQ</a> is a widely-referenced community collection of exactly what ECS is and isn't.</p>
+
+  <p class="ask-teacher">Curious how a real engine actually stores millions of components efficiently in memory? Ask your teacher — that's what I'm here for. Next up: building a tiny ECS by hand to see exactly how entities, components, and systems fit together in actual code.</p>
+
+  <footer class="lesson-footer">STEM+ · Game Engine Architecture · Lesson 8 of the course sequence</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var checks = document.querySelectorAll('[data-comp]');
+  var verdict = document.querySelector('[data-ecs-verdict]');
+  var systemsEl = document.getElementById('ecs-systems');
+
+  var systems = [
+    { name: 'Movement System', needs: ['Position', 'Velocity'] },
+    { name: 'Render System', needs: ['Position', 'Sprite'] },
+    { name: 'Health/Damage System', needs: ['Health'] },
+    { name: 'Flight System', needs: ['Flying', 'Velocity'] },
+    { name: 'Swim System', needs: ['Swimming', 'Velocity'] }
+  ];
+
+  function render() {
+    var active = [];
+    checks.forEach(function (c) { if (c.checked) active.push(c.getAttribute('data-comp')); });
+    verdict.textContent = 'This entity has ' + active.length + ' component(s): ' + (active.length ? active.join(', ') : 'none') + '.';
+
+    var html = '';
+    systems.forEach(function (sys) {
+      var matches = sys.needs.every(function (n) { return active.indexOf(n) !== -1; });
+      html += '<div class="box' + (matches ? ' why' : '') + '" style="margin:0.3rem 0; padding:0.4rem 0.7rem;">' +
+        '<strong>' + sys.name + '</strong> (needs ' + sys.needs.join(' + ') + ') — ' +
+        (matches ? 'processes this entity.' : 'skips this entity.') + '</div>';
+    });
+    systemsEl.innerHTML = html;
+  }
+
+  checks.forEach(function (c) { c.addEventListener('change', render); });
+  render();
+});
+</script>

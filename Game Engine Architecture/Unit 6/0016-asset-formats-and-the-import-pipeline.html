@@ -1,0 +1,168 @@
+<meta charset="UTF-8">
+<title>Lesson 16: Asset Formats and the Import Pipeline — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="advanced">
+  <span class="kicker">STEM+ · Game Engine Architecture · Unit 6 · Lesson 16</span>
+  <h1>Asset Formats and the Import Pipeline</h1>
+  <p class="subtitle">Every texture, 3D model, and sound in a game started life as a file an artist exported from their own tool — Photoshop, Blender, a DAW. None of those files are in a format the engine can use directly at runtime. Something in between has to bridge that gap.</p>
+  <p class="nav-links"><a href="../Unit%205/0015-physics-engines-what-they-handle-so-you-dont-have-to.html" class="nav-prev">← Unit 5, Lesson 15</a> <a href="0017-memory-management-for-game-assets.html" class="nav-next">Lesson 17 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>A <code class="inline-code">.png</code> is great for editing in an image tool and terrible for a GPU to read directly at full speed — it's compressed in a way built for file size, not fast random access to any pixel. A <code class="inline-code">.blend</code> file stores an artist's entire editable scene, layers and all, when the engine only needs the final baked-down mesh and materials. Every asset needs translating before it's actually useful at runtime.</p>
+
+  <h2>Two formats for two different jobs</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    A <strong>source asset</strong> is the file an artist actually edits — a <code class="inline-code">.png</code>, <code class="inline-code">.blend</code>, <code class="inline-code">.wav</code> — optimized for editing convenience and tool compatibility. The <strong>import pipeline</strong> is the automated process that converts a source asset into a <strong>runtime asset</strong>: a format optimized for fast loading and direct use by the engine's own subsystems (a GPU-ready compressed texture format, a pre-baked mesh with precomputed data, an audio format decoded for low-latency playback). This conversion typically happens once, ahead of time — not every time the game loads that asset.
+  </div>
+
+  <h2>Try it: send an asset through the import pipeline</h2>
+  <p>Pick a source asset and step it through import, watching what actually changes at each stage.</p>
+
+  <div class="widget" id="import-widget">
+    <p class="widget-label">Interactive: source asset → import → runtime asset</p>
+    <div class="fm-tabs" id="import-tabs">
+      <button class="fm-tab is-active" type="button" data-import-asset="texture">Texture (.png)</button>
+      <button class="fm-tab" type="button" data-import-asset="model">3D Model (.blend)</button>
+      <button class="fm-tab" type="button" data-import-asset="audio">Audio (.wav)</button>
+    </div>
+    <p class="fm-row">
+      <button class="widget-btn" type="button" data-import-next>Advance one stage →</button>
+      <button class="widget-btn" type="button" data-import-reset>Reset</button>
+    </p>
+    <div id="import-display"></div>
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Worked example</span>
+    An artist exports a 4096×4096 <code class="inline-code">.png</code> character texture — great for editing, but the wrong shape for a GPU to sample efficiently at runtime. The import pipeline compresses it into a GPU-native format (roughly a quarter the file size, decodable directly by the graphics hardware), generates smaller pre-shrunk copies called <strong>mipmaps</strong> for when the character is far away on screen, and writes the result to disk as a runtime asset the engine loads directly — no conversion work left to do the moment the game actually launches.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why this conversion happens ahead of time, not at game launch</span>
+    Converting a large model or texture is relatively slow work — the kind of one-time cost nobody wants paying every single time the game boots. Baking it into a fast-loading runtime format once, during development, means the actual game only ever does the cheap part: reading an already-optimized file straight into memory. This is the same "do the expensive part once, reuse the result" idea Software Engineering's build pipeline unit covered for compiled code, applied here to art and audio instead of source files.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What is a "source asset"?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">The file an artist actually edits, optimized for editing convenience rather than runtime performance.</button>
+      <button class="quiz-choice" data-correct="false">The final, GPU-ready format the engine loads while the game is running.</button>
+      <button class="quiz-choice" data-correct="false">A file that never needs any conversion before use.</button>
+      <button class="quiz-choice" data-correct="false">A file format that only exists for audio, never for textures or models.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Source assets are editor-facing files, distinct from the runtime format the engine actually uses.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. When does the import pipeline typically convert a source asset into its runtime form?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Ahead of time, during development — not every time the game loads that asset.</button>
+      <button class="quiz-choice" data-correct="false">Every single time the game boots up.</button>
+      <button class="quiz-choice" data-correct="false">Only once, the very first time the game is ever played by a customer.</button>
+      <button class="quiz-choice" data-correct="false">Never — source and runtime assets are always identical files.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Conversion happens once ahead of time, so runtime loading stays cheap.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why does the engine convert a texture ahead of time, rather than at the moment the game launches?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Conversion is relatively slow work, and baking it in once avoids paying that cost on every single boot.</button>
+      <button class="quiz-choice" data-correct="false">GPUs are technically incapable of reading any converted texture format.</button>
+      <button class="quiz-choice" data-correct="false">Runtime conversion would make the texture look visually identical either way, so it doesn't matter.</button>
+      <button class="quiz-choice" data-correct="false">Source assets and runtime assets are always exactly the same size.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Doing the expensive conversion once ahead of time keeps actual game launches fast.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="import pipeline">
+    <p class="quiz-prompt">4. Fill in the blank: the automated process that converts a source asset into a runtime-ready format is the ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>This is the term defined at the top of the lesson.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="mipmap|mipmaps">
+    <p class="quiz-prompt">5. Fill in the blank: smaller, pre-shrunk copies of a texture generated for when an object is far away on screen are called ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Mipmaps are the pre-shrunk texture copies generated during import.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: the <a href="https://docs.unity3d.com/Manual/AssetWorkflow.html">Unity manual's overview of the asset workflow</a> documents a real, production import pipeline end to end.</p>
+
+  <p class="ask-teacher">Curious what happens when a source asset changes after the runtime version was already baked? Ask your teacher — that's what I'm here for. Next up: once assets are in their fast runtime format, something still has to decide when they're loaded into memory, and when they're thrown back out.</p>
+
+  <footer class="lesson-footer">STEM+ · Game Engine Architecture · Lesson 16 of the course sequence</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var asset = 'texture';
+  var idx = 0;
+  var display = document.getElementById('import-display');
+  var tabs = document.querySelectorAll('#import-tabs [data-import-asset]');
+
+  var stages = {
+    texture: [
+      'Source: character.png — 4096×4096, editor-friendly compression, not GPU-native.',
+      'Import: engine compresses to a GPU-native format and generates mipmaps.',
+      'Runtime: character.gpuformat — loads directly into GPU memory, no conversion needed at boot.'
+    ],
+    model: [
+      'Source: character.blend — full editable scene: layers, unused objects, edit history.',
+      'Import: engine bakes down to just the final mesh, materials, and skeleton.',
+      'Runtime: character.mesh — a compact, engine-native mesh ready to hand straight to the render pipeline (Unit 4).'
+    ],
+    audio: [
+      'Source: footstep.wav — uncompressed, large, editor-friendly.',
+      'Import: engine compresses and decodes into a low-latency playback format.',
+      'Runtime: footstep.audiofmt — small file size, ready for instant playback with no decode delay.'
+    ]
+  };
+
+  function render() {
+    var s = stages[asset];
+    var html = '';
+    s.forEach(function (line, i) {
+      html += '<div class="box' + (i === idx ? ' why' : '') + '" style="margin:0.3rem 0; padding:0.5rem 0.8rem;">' + line + '</div>';
+    });
+    display.innerHTML = html;
+  }
+
+  tabs.forEach(function (tab) {
+    tab.addEventListener('click', function () {
+      tabs.forEach(function (t) { t.classList.remove('is-active'); });
+      tab.classList.add('is-active');
+      asset = tab.getAttribute('data-import-asset');
+      idx = 0;
+      render();
+    });
+  });
+
+  document.querySelector('[data-import-next]').addEventListener('click', function () {
+    idx = Math.min(idx + 1, stages[asset].length - 1);
+    render();
+  });
+  document.querySelector('[data-import-reset]').addEventListener('click', function () {
+    idx = 0;
+    render();
+  });
+
+  render();
+});
+</script>

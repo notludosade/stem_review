@@ -1,0 +1,154 @@
+<meta charset="UTF-8">
+<title>Lesson 19: The Scripting Layer — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="advanced">
+  <span class="kicker">STEM+ · Game Engine Architecture · Unit 7 · Lesson 19</span>
+  <h1>The Scripting Layer</h1>
+  <p class="subtitle">Unit 1, Lesson 3 named scripting as one of the five core subsystems and put it off until last. Here's why it's saved for last: it's the layer that ties every other subsystem in this course together into an actual game.</p>
+  <p class="nav-links"><a href="../Unit%206/0018-streaming-and-level-of-detail.html" class="nav-prev">← Unit 6, Lesson 18</a> <a href="0020-scene-management-and-state-machines.html" class="nav-next">Lesson 20 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>The engine's core — rendering, physics, ECS — is typically written in a fast, compiled language like C++ or Rust, and recompiling it takes real time, sometimes minutes. A designer tweaking exactly how high a jump should be, or exactly when a boss enters its second phase, cannot productively wait through a full recompile for every single tweak.</p>
+
+  <h2>A second, slower, faster-to-change language</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    A <strong>scripting layer</strong> is a separate, usually interpreted language (Lua, C#, Python, or a custom in-house language) embedded inside an engine, used to write game-specific logic — Unit 1's exact definition of "game," not "engine" code. Scripts typically run slower than the compiled engine core, but they support <strong>hot-reloading</strong>: editing a script's logic and seeing the change take effect immediately, in a running game, with no recompile and no restart.
+  </div>
+
+  <h2>Try it: compare iteration speed, core vs. scripting</h2>
+  <p>Change the same gameplay value two different ways — through the compiled engine core, and through the scripting layer — and compare how long each takes to actually see the change.</p>
+
+  <div class="widget" id="script-widget">
+    <p class="widget-label">Interactive: changing "jump height" two different ways</p>
+    <div class="fm-tabs" id="script-tabs">
+      <button class="fm-tab is-active" type="button" data-script-mode="core">Compiled engine core (C++)</button>
+      <button class="fm-tab" type="button" data-script-mode="script">Scripting layer (Lua)</button>
+    </div>
+    <p class="fm-row">
+      <button class="widget-btn" type="button" data-script-change>Change jump height value</button>
+      <button class="widget-btn" type="button" data-script-reset>Reset</button>
+    </p>
+    <p class="verdict" data-script-verdict>Make a change to see how long it takes to show up in the running game.</p>
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Worked example</span>
+    A designer wants to try five different jump heights in one afternoon to see which one feels right. Through the compiled core, that's five edit-recompile-relaunch cycles — even at two minutes each, that's ten minutes of waiting, plus losing whatever game state existed before each restart. Through a scripting layer with hot-reload, it's five one-line edits to a script file, each taking effect in the already-running game within a second, mid-playtest, without ever losing position or state.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why engines don't just write everything in the scripting language instead</span>
+    Scripting languages trade raw performance for iteration speed — an interpreted language doing millions of physics or rendering operations every frame would be far too slow for the core simulation loop. The split exists because those two goals genuinely conflict: the engine core needs to be as fast as possible and changes rarely once stable, while gameplay logic needs to be tuned constantly and can tolerate being slower, since it's a tiny fraction of a frame's total work. Using the right language for each job is the entire reason the split exists at all.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What does "hot-reloading" a script actually mean?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Editing a script's logic and seeing the change take effect immediately in a running game, with no recompile or restart.</button>
+      <button class="quiz-choice" data-correct="false">Restarting the entire game from scratch after every code change.</button>
+      <button class="quiz-choice" data-correct="false">Automatically deleting old, unused scripts from disk.</button>
+      <button class="quiz-choice" data-correct="false">Compiling the engine's core rendering code faster than usual.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Hot-reloading applies a script change live, without recompiling or restarting.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why do engines typically write core systems like rendering and physics in a compiled language, but gameplay logic in a scripting language?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">The core needs maximum performance and changes rarely; gameplay logic needs fast iteration and can tolerate being slower.</button>
+      <button class="quiz-choice" data-correct="false">Scripting languages are technically incapable of expressing gameplay logic at all.</button>
+      <button class="quiz-choice" data-correct="false">Compiled languages cannot be used for any part of a game engine.</button>
+      <button class="quiz-choice" data-correct="false">There is no real performance difference between compiled and scripted code.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The split matches each language's strength to what that layer actually needs.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why does an engine's scripting layer connect directly back to Unit 1's engine-vs-game distinction?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Scripting is specifically where game-specific logic — the part that isn't generic and reusable — is meant to live.</button>
+      <button class="quiz-choice" data-correct="false">Scripting languages are only used to write engine-level rendering code.</button>
+      <button class="quiz-choice" data-correct="false">There is no real connection between the two ideas.</button>
+      <button class="quiz-choice" data-correct="false">Every engine subsystem, including physics, is normally written entirely in script.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Scripting is the natural home for the game-specific logic Unit 1 distinguished from generic engine code.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="scripting layer|scripting">
+    <p class="quiz-prompt">4. Fill in the blank: a separate, usually interpreted language embedded in an engine to write game-specific logic is the ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>This is the term defined at the top of the lesson.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="hot-reloading|hot reload|hot-reload">
+    <p class="quiz-prompt">5. Fill in the blank: seeing a script edit take effect immediately in a running game, with no recompile, is called ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Hot-reloading is the fast-iteration benefit scripting layers provide.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: the <a href="https://www.lua.org/about.html">official "About Lua"</a> page describes exactly why Lua became the most widely embedded scripting language in commercial game engines.</p>
+
+  <p class="ask-teacher">Curious how a scripting layer actually calls back into engine-core systems like physics or rendering? Ask your teacher — that's what I'm here for. Next up: managing an entire game as it moves between menus, levels, and pause screens — scene management and state machines.</p>
+
+  <footer class="lesson-footer">STEM+ · Game Engine Architecture · Lesson 19 of the course sequence</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var mode = 'core';
+  var verdict = document.querySelector('[data-script-verdict]');
+  var tabs = document.querySelectorAll('#script-tabs [data-script-mode]');
+  var busy = false;
+
+  tabs.forEach(function (tab) {
+    tab.addEventListener('click', function () {
+      tabs.forEach(function (t) { t.classList.remove('is-active'); });
+      tab.classList.add('is-active');
+      mode = tab.getAttribute('data-script-mode');
+    });
+  });
+
+  document.querySelector('[data-script-change]').addEventListener('click', function () {
+    if (busy) return;
+    busy = true;
+    if (mode === 'core') {
+      verdict.textContent = 'Editing C++ source... recompiling engine core...';
+      verdict.className = 'verdict';
+      setTimeout(function () {
+        verdict.textContent = 'Recompiled and relaunched after ~2 minutes (simulated as 2s here). Playtest state was lost on restart.';
+        verdict.className = 'verdict is-fail';
+        busy = false;
+      }, 2000);
+    } else {
+      verdict.textContent = 'Editing jump_height in gameplay.lua...';
+      setTimeout(function () {
+        verdict.textContent = 'Hot-reloaded in the running game — change visible in under a second, playtest state untouched.';
+        verdict.className = 'verdict is-pass';
+        busy = false;
+      }, 300);
+    }
+  });
+
+  document.querySelector('[data-script-reset]').addEventListener('click', function () {
+    verdict.textContent = 'Make a change to see how long it takes to show up in the running game.';
+    verdict.className = 'verdict';
+    busy = false;
+  });
+});
+</script>

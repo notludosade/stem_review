@@ -1,0 +1,135 @@
+<meta charset="UTF-8">
+<title>Lesson 3: Major Subsystems at a Glance — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="advanced">
+  <span class="kicker">STEM+ · Game Engine Architecture · Unit 1 · Lesson 3</span>
+  <h1>Major Subsystems at a Glance</h1>
+  <p class="subtitle">Rendering, physics, audio, input, and scripting — five subsystems that show up in nearly every engine, in some form. This lesson is a map of the territory before the rest of the course zooms into each region.</p>
+  <p class="nav-links"><a href="0002-engine-vs-game-where-the-line-is.html" class="nav-prev">← Lesson 2</a> <a href="../Unit%202/0004-the-core-game-loop.html" class="nav-next">Unit 2, Lesson 4 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>None of these subsystems work in isolation — the render subsystem needs to know where physics put every object, and the scripting layer needs to reach into almost all of them. But each one is still a distinct piece of engineering, usually owned by different code (and, at a real studio, different specialists) inside the engine.</p>
+
+  <h2>The five you'll see everywhere</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    A <strong>subsystem</strong> is a self-contained part of an engine responsible for one category of work, with its own internal data and update logic, that other parts of the engine and game code interact with through a defined interface rather than by reaching into its internals directly.
+  </div>
+
+  <h2>Click through: what each subsystem actually owns</h2>
+  <p>Click a subsystem to expand what it's responsible for, and which later unit of this course covers it in depth.</p>
+
+  <div class="widget" id="subsys-widget">
+    <p class="widget-label">Interactive: the five core subsystems</p>
+    <div id="subsys-list"></div>
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Worked example</span>
+    A single moment in a game — the player fires a weapon — touches nearly every subsystem in order: <strong>input</strong> detects the button press, <strong>scripting</strong> (or game code) decides that means "spawn a bullet," <strong>physics</strong> moves that bullet forward each frame and checks what it hits, <strong>rendering</strong> draws the bullet and any muzzle flash, and <strong>audio</strong> plays the gunshot sound. No single subsystem "is" the gunshot — it's the coordinated result of five separate systems, each doing one narrow job.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why engines separate these instead of one big update function</span>
+    It would be technically possible to write one giant function that does physics math, then drawing, then sound, all mixed together. Real engines don't, because separating subsystems lets each one be developed, tested, optimized, and even replaced independently — a studio can swap in a different physics engine without touching rendering code, precisely because the two were never tangled together in the first place. This is the same coupling-and-cohesion principle Software Engineering covered, applied to one of the most performance-sensitive kinds of software that exists.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What defines a "subsystem" inside a game engine?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">A self-contained part responsible for one category of work, exposing a defined interface rather than internals other code reaches into directly.</button>
+      <button class="quiz-choice" data-correct="false">Any single function inside the engine's source code.</button>
+      <button class="quiz-choice" data-correct="false">A part of the engine that only one specific game can use.</button>
+      <button class="quiz-choice" data-correct="false">Code that runs exclusively on the graphics card.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Self-contained responsibility with a defined interface is the key property.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. In the "firing a weapon" example, which subsystem is responsible for detecting the button press in the first place?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Input</button>
+      <button class="quiz-choice" data-correct="false">Audio</button>
+      <button class="quiz-choice" data-correct="false">Rendering</button>
+      <button class="quiz-choice" data-correct="false">Physics</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Input is the subsystem responsible for reading the raw button press first.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why do engines keep subsystems like rendering and physics separate instead of merging them into one function?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Separation lets each subsystem be developed, tested, optimized, or even swapped out independently of the others.</button>
+      <button class="quiz-choice" data-correct="false">Merging them is technically impossible on modern hardware.</button>
+      <button class="quiz-choice" data-correct="false">Separate subsystems are always slower than one combined function.</button>
+      <button class="quiz-choice" data-correct="false">There is no real benefit — it's purely a stylistic preference.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Independence in development, testing, and replacement is the concrete payoff.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="physics">
+    <p class="quiz-prompt">4. Fill in the blank: the subsystem responsible for moving the bullet forward each frame and checking what it hits is ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Physics owns movement and collision checks in the worked example.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="subsystem">
+    <p class="quiz-prompt">5. Fill in the blank: a self-contained part of an engine responsible for one category of work, exposed through a defined interface, is called a ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>This is the exact definition given at the top of the lesson.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: Godot's <a href="https://docs.godotengine.org/en/stable/getting_started/introduction/key_concepts_overview.html">key concepts overview</a> tours a real, open-source engine's actual subsystem breakdown.</p>
+
+  <p class="ask-teacher">Curious which subsystem you'd find most interesting to build first? Ask your teacher — that's what I'm here for. Next up: Unit 2 opens with the one piece of code that ties every subsystem together and keeps them all running — the game loop.</p>
+
+  <footer class="lesson-footer">STEM+ · Game Engine Architecture · Lesson 3 of the course sequence</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var subsystems = [
+    { name: 'Rendering', unit: 'Unit 4', desc: 'Turns scene data — meshes, materials, cameras, lights — into pixels on screen, dozens of times a second.' },
+    { name: 'Physics', unit: 'Unit 5', desc: 'Simulates movement, gravity, and collisions so objects interact with each other believably instead of passing through one another.' },
+    { name: 'Audio', unit: 'not a dedicated unit — referenced throughout', desc: 'Loads and mixes sound effects and music, often positioned in 3D space so a sound gets quieter as its source moves away.' },
+    { name: 'Input', unit: 'Unit 2 (as part of the game loop)', desc: 'Reads raw signals from keyboard, mouse, controller, or touch, and turns them into events the rest of the engine can react to.' },
+    { name: 'Scripting', unit: 'Unit 7', desc: 'Gives game-specific logic a place to live — often a separate, faster-to-iterate language layered on top of the engine’s core.' }
+  ];
+  var expanded = subsystems.map(function () { return false; });
+  var list = document.getElementById('subsys-list');
+
+  function render() {
+    list.innerHTML = '';
+    subsystems.forEach(function (s, i) {
+      var row = document.createElement('div');
+      row.className = 'box';
+      row.style.margin = '0.35rem 0';
+      row.style.padding = '0.5rem 0.8rem';
+      row.style.cursor = 'pointer';
+      row.innerHTML = '<strong>' + s.name + '</strong>' + (expanded[i] ? '<br>' + s.desc + '<br><span style="color:var(--muted); font-size:0.85rem;">Covered in: ' + s.unit + '</span>' : ' <span style="color:var(--muted);">(click to expand)</span>');
+      row.addEventListener('click', function () {
+        expanded[i] = !expanded[i];
+        render();
+      });
+      list.appendChild(row);
+    });
+  }
+
+  render();
+});
+</script>

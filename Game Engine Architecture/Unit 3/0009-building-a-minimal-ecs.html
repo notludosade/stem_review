@@ -1,0 +1,183 @@
+<meta charset="UTF-8">
+<title>Lesson 9: Building a Minimal ECS — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="advanced">
+  <span class="kicker">STEM+ · Game Engine Architecture · Unit 3 · Lesson 9</span>
+  <h1>Building a Minimal ECS</h1>
+  <p class="subtitle">Lesson 8 explained entities, components, and systems conceptually. This lesson makes it concrete: a tiny ECS in pseudocode, and a live simulation of one tick of its update loop.</p>
+  <p class="nav-links"><a href="0008-entities-components-and-systems.html" class="nav-prev">← Lesson 8</a> <a href="../Unit%204/0010-the-render-pipeline-at-a-high-level.html" class="nav-next">Unit 4, Lesson 10 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Strip an ECS down to its essentials and it's really just three things: a way to create entity IDs, a way to attach component data to an ID, and a loop that runs each system over the entities that match what it needs.</p>
+
+  <h2>The whole thing, minimized</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    A minimal ECS needs: (1) an <strong>entity registry</strong> that hands out fresh IDs and tracks which are alive, (2) one <strong>component store</strong> per component type — commonly a map from entity ID to that component's data — and (3) a <strong>system update loop</strong>, run once per game-loop tick (Unit 2), where each system <strong>queries</strong> for every entity ID present in all of its required component stores at once, then updates that data in place.
+  </div>
+
+  <pre class="code-block"><code><span class="code-comment">// pseudocode: a movement system's entire body</span>
+function MovementSystem(world, dt) {
+    <span class="code-comment">// query: entities present in BOTH the Position and Velocity stores</span>
+    for (id in world.query(Position, Velocity)) {
+        world.Position[id].x += world.Velocity[id].dx * dt;
+        world.Position[id].y += world.Velocity[id].dy * dt;
+    }
+}</code></pre>
+
+  <p>Notice <code class="inline-code">dt</code> in that loop — Unit 2's delta time shows up again here, exactly as it does in every other per-frame update.</p>
+
+  <h2>Try it: run a tick of a tiny ECS</h2>
+  <p>Add entities with different component combinations, then step the update loop and watch exactly which systems touch which entities.</p>
+
+  <div class="widget" id="minecs-widget">
+    <p class="widget-label">Interactive: a minimal ECS, one tick at a time</p>
+    <p class="fm-row">
+      <button class="widget-btn" type="button" data-mecs-add="mover">Add moving entity (Position + Velocity)</button>
+      <button class="widget-btn" type="button" data-mecs-add="static">Add static prop (Position only)</button>
+      <button class="widget-btn" type="button" data-mecs-add="hurt">Add damaged entity (Health only)</button>
+    </p>
+    <p class="fm-row">
+      <button class="widget-btn" type="button" data-mecs-tick>Run one update tick</button>
+      <button class="widget-btn" type="button" data-mecs-reset>Reset</button>
+    </p>
+    <div id="mecs-table"></div>
+    <p class="plot-readout" data-mecs-log></p>
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Worked example</span>
+    Entity #1 has <code class="inline-code">Position{x:0}</code> and <code class="inline-code">Velocity{dx:5}</code>. The registry knows #1 exists; the Position store knows its x; the Velocity store knows its dx — three completely separate pieces of storage, tied together only by sharing the same ID, #1. When Movement System's query runs, it asks each store "do you have data for #1?" — both say yes, so #1 gets updated. An entity with only <code class="inline-code">Health</code> would fail that same query instantly, because the Position store has nothing filed under its ID at all.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why storing components this way (not as objects on the entity) matters</span>
+    It would be simpler to just attach a list of component objects directly onto each entity object. Real ECS implementations usually don't, because storing all <code class="inline-code">Position</code> data contiguously in one array — rather than scattered across many separate entity objects — lets a system iterate through it with far better memory access patterns, which matters enormously at thousands of entities and sixty updates a second. This performance-driven layout choice is exactly why ECS became the standard in performance-critical engines rather than staying a purely academic idea.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What ties an entity's separate pieces of component data together?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">All of that data is filed under the same shared entity ID, in each relevant component store.</button>
+      <button class="quiz-choice" data-correct="false">The components are stored as a linked list attached to the entity object.</button>
+      <button class="quiz-choice" data-correct="false">Nothing — component data has no relationship to any particular entity.</button>
+      <button class="quiz-choice" data-correct="false">Entities and components share the same memory address always.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The shared entity ID, used as a key into each component store, is what ties the data together.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. What does a system's "query" actually do?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Finds every entity ID present in all of that system's required component stores at once.</button>
+      <button class="quiz-choice" data-correct="false">Creates a brand-new entity ID for every game object.</button>
+      <button class="quiz-choice" data-correct="false">Deletes every component of a given type.</button>
+      <button class="quiz-choice" data-correct="false">Renders the current frame directly to the screen.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A query filters entities down to those matching a required set of components.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why do real ECS implementations usually store each component type contiguously in its own array, rather than as a list of objects on each entity?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Contiguous storage gives systems far better memory access patterns when iterating over thousands of entities every frame.</button>
+      <button class="quiz-choice" data-correct="false">It's the only way any language can technically represent components at all.</button>
+      <button class="quiz-choice" data-correct="false">It has no real performance effect — it's purely a stylistic choice.</button>
+      <button class="quiz-choice" data-correct="false">It makes adding new component types impossible after launch.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Contiguous, per-type storage is a performance-driven choice for large-scale, per-frame iteration.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="query">
+    <p class="quiz-prompt">4. Fill in the blank: the operation a system performs to find every entity that has all of its required components is called a ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A query is exactly this component-matching lookup a system performs.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="component store">
+    <p class="quiz-prompt">5. Fill in the blank: a map from entity ID to that component type's data, one per component type, is called a ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Each component type gets its own store, keyed by entity ID.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next unit: <a href="https://github.com/SanderMertens/flecs">flecs</a>, a real, open-source C ECS library, has an approachable README covering these exact concepts in production code.</p>
+
+  <p class="ask-teacher">Curious how systems decide what order to run in when several of them touch the same components? Ask your teacher — that's what I'm here for. Next up: Unit 4 leaves object modeling behind and opens up rendering — how any of this ends up as pixels on a screen at all.</p>
+
+  <footer class="lesson-footer">STEM+ · Game Engine Architecture · Lesson 9 of the course sequence</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var nextId = 1;
+  var entities = []; // {id, comps: {Position:{x}, Velocity:{dx}, Health:{hp}}}
+  var table = document.getElementById('mecs-table');
+  var log = document.querySelector('[data-mecs-log]');
+
+  function render() {
+    if (entities.length === 0) {
+      table.innerHTML = '<p class="plot-hint">No entities yet. Add some above.</p>';
+      return;
+    }
+    var html = '';
+    entities.forEach(function (e) {
+      var comps = Object.keys(e.comps).map(function (k) {
+        if (k === 'Position') return 'Position{x:' + e.comps.Position.x.toFixed(1) + '}';
+        if (k === 'Velocity') return 'Velocity{dx:' + e.comps.Velocity.dx + '}';
+        if (k === 'Health') return 'Health{hp:' + e.comps.Health.hp + '}';
+        return k;
+      }).join(', ');
+      html += '<div class="box" style="margin:0.3rem 0; padding:0.4rem 0.7rem;"><strong>Entity #' + e.id + '</strong> — ' + comps + '</div>';
+    });
+    table.innerHTML = html;
+  }
+
+  document.querySelectorAll('[data-mecs-add]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var kind = btn.getAttribute('data-mecs-add');
+      var e = { id: nextId++, comps: {} };
+      if (kind === 'mover') { e.comps.Position = { x: 0 }; e.comps.Velocity = { dx: 5 }; }
+      if (kind === 'static') { e.comps.Position = { x: 0 }; }
+      if (kind === 'hurt') { e.comps.Health = { hp: 50 }; }
+      entities.push(e);
+      render();
+    });
+  });
+
+  document.querySelector('[data-mecs-tick]').addEventListener('click', function () {
+    var moved = 0;
+    entities.forEach(function (e) {
+      if (e.comps.Position && e.comps.Velocity) {
+        e.comps.Position.x += e.comps.Velocity.dx * 1; // dt = 1 tick for readability
+        moved++;
+      }
+    });
+    render();
+    log.textContent = 'Movement System query matched ' + moved + ' of ' + entities.length + ' entities (needs Position + Velocity) — their x increased by 5.';
+  });
+
+  document.querySelector('[data-mecs-reset]').addEventListener('click', function () {
+    entities = [];
+    nextId = 1;
+    render();
+    log.textContent = '';
+  });
+
+  render();
+});
+</script>

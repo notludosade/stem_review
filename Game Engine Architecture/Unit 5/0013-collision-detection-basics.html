@@ -1,0 +1,170 @@
+<meta charset="UTF-8">
+<title>Lesson 13: Collision Detection Basics — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="advanced">
+  <span class="kicker">STEM+ · Game Engine Architecture · Unit 5 · Lesson 13</span>
+  <h1>Collision Detection Basics: AABB, Broad Phase, Narrow Phase</h1>
+  <p class="subtitle">Rendering (Unit 4) draws objects that pass through each other with no complaint at all. Making a wall stop a character, or a bullet register a hit, needs an entirely separate system — physics, and it starts with the simple question: are these two things touching?</p>
+  <p class="nav-links"><a href="../Unit%204/0012-cameras-culling-and-draw-calls.html" class="nav-prev">← Unit 4, Lesson 12</a> <a href="0014-rigid-body-physics-and-integration.html" class="nav-next">Lesson 14 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Checking whether two exact, detailed 3D meshes overlap — triangle by triangle — is expensive, and checking every object against every other object that way, every frame, is far too slow for a game with more than a handful of objects. Engines solve this with a cheap approximation first, and only reach for expensive exact checks when the approximation says it's worth it.</p>
+
+  <h2>Boxes first, exact shapes only if the boxes overlap</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    An <strong>AABB</strong> (Axis-Aligned Bounding Box) is the smallest rectangle (or box, in 3D) that fully contains an object, with its edges always aligned to the world's x/y axes — never rotated. Testing whether two AABBs overlap is extremely cheap: just four comparisons of min/max coordinates. <strong>Broad phase</strong> collision detection uses cheap AABB checks (or similar tricks like a spatial grid) to quickly throw out the vast majority of object pairs that obviously can't be touching. <strong>Narrow phase</strong> then runs the expensive, exact collision test only on the small handful of pairs broad phase couldn't rule out.
+  </div>
+
+  <h2>Try it: drag boxes and watch AABB overlap detected live</h2>
+  <p>Drag either box. The overlap check runs continuously — watch the readout below for the actual min/max comparison.</p>
+
+  <div class="widget" id="aabb-widget">
+    <p class="widget-label">Interactive: two draggable AABBs</p>
+    <svg viewBox="0 0 400 220" width="400" height="220" role="img" aria-label="Two draggable rectangles testing AABB overlap" id="aabb-svg" style="background:var(--code-bg); border-radius:8px; touch-action:none;">
+      <rect id="aabb-a" x="60" y="70" width="100" height="70" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="2" style="cursor:grab;"></rect>
+      <rect id="aabb-b" x="230" y="90" width="90" height="60" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="2" style="cursor:grab;"></rect>
+    </svg>
+    <p class="verdict" data-aabb-verdict>Drag a box to test overlap.</p>
+    <p class="plot-readout" data-aabb-readout></p>
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Worked example</span>
+    A scene has 500 objects. Checking every pair exactly would mean roughly 125,000 expensive mesh-vs-mesh tests every frame — far too slow. Broad phase's cheap AABB checks (or a spatial grid that only compares objects in nearby cells) might narrow that down to 40 pairs whose bounding boxes actually overlap. Narrow phase then runs the expensive exact check on just those 40 — a workload that's now entirely manageable, sixty times a second.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why an AABB overlap check is cheap enough to run on every pair</span>
+    Because an AABB is never rotated, checking overlap reduces to comparing ranges on two independent axes: boxes A and B overlap only if A's x-range overlaps B's x-range <em>and</em> A's y-range overlaps B's y-range. That's four simple number comparisons — no square roots, no trigonometry, nothing that scales with how detailed the underlying mesh actually is. It's also, deliberately, an overestimate: an AABB overlap doesn't guarantee the real shapes touch (two round objects can have overlapping boxes while the circles themselves don't touch), which is exactly why narrow phase still has to confirm it.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What does "axis-aligned" mean about an AABB?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Its edges are always parallel to the world's x/y axes, never rotated to match the object's own orientation.</button>
+      <button class="quiz-choice" data-correct="false">It rotates to exactly match the underlying object's orientation.</button>
+      <button class="quiz-choice" data-correct="false">It only exists in 3D, never in 2D.</button>
+      <button class="quiz-choice" data-correct="false">It is always a perfect square, never a rectangle.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Axis-aligned specifically means the box never rotates, which is what keeps the overlap test cheap.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. What is broad phase's job in collision detection?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Cheaply throw out the vast majority of object pairs that obviously can't be touching, before any expensive check runs.</button>
+      <button class="quiz-choice" data-correct="false">Run the final, exact collision test on every single pair of objects.</button>
+      <button class="quiz-choice" data-correct="false">Render the scene to the screen.</button>
+      <button class="quiz-choice" data-correct="false">Decide which objects are inside the camera frustum.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Broad phase is a cheap filter, not the final, exact test.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why can two objects' AABBs overlap while the actual shapes underneath don't touch at all?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">An AABB is a rectangular overestimate of an object's true shape, so it can overlap in cases the real shape wouldn't.</button>
+      <button class="quiz-choice" data-correct="false">AABBs are always perfectly identical to the object's exact shape.</button>
+      <button class="quiz-choice" data-correct="false">This situation is actually impossible in a correctly built engine.</button>
+      <button class="quiz-choice" data-correct="false">AABB overlap is checked only after the objects have already collided.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>An AABB deliberately overestimates the object's footprint, so it can produce false positives narrow phase must confirm.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="aabb|axis-aligned bounding box">
+    <p class="quiz-prompt">4. Fill in the blank: the smallest, non-rotated rectangle that fully contains an object is its ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>AABB is the exact term for this bounding shape.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="narrow phase">
+    <p class="quiz-prompt">5. Fill in the blank: the stage that runs the expensive, exact collision test only on pairs broad phase couldn't rule out is called ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Narrow phase is the precise, expensive follow-up check.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: <a href="https://developer.mozilla.org/en-US/docs/Games/Techniques/2D_collision_detection">MDN's guide to 2D collision detection</a> covers AABB and other basic shape tests with runnable examples.</p>
+
+  <p class="ask-teacher">Curious what a spatial grid or a quadtree does differently from plain AABB checks at broad phase? Ask your teacher — that's what I'm here for. Next up: once a collision is detected, what actually happens next — rigid body physics and how an engine integrates motion over time.</p>
+
+  <footer class="lesson-footer">STEM+ · Game Engine Architecture · Lesson 13 of the course sequence</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var svg = document.getElementById('aabb-svg');
+  var a = document.getElementById('aabb-a');
+  var b = document.getElementById('aabb-b');
+  var verdict = document.querySelector('[data-aabb-verdict]');
+  var readout = document.querySelector('[data-aabb-readout]');
+  var dragging = null, offset = { x: 0, y: 0 };
+
+  function toSvgPoint(evt) {
+    var pt = svg.createSVGPoint();
+    pt.x = evt.clientX;
+    pt.y = evt.clientY;
+    return pt.matrixTransform(svg.getScreenCTM().inverse());
+  }
+
+  function box(el) {
+    return {
+      x1: parseFloat(el.getAttribute('x')),
+      y1: parseFloat(el.getAttribute('y')),
+      x2: parseFloat(el.getAttribute('x')) + parseFloat(el.getAttribute('width')),
+      y2: parseFloat(el.getAttribute('y')) + parseFloat(el.getAttribute('height'))
+    };
+  }
+
+  function check() {
+    var A = box(a), B = box(b);
+    var overlapX = A.x1 < B.x2 && A.x2 > B.x1;
+    var overlapY = A.y1 < B.y2 && A.y2 > B.y1;
+    var overlaps = overlapX && overlapY;
+    [a, b].forEach(function (el) { el.setAttribute('stroke', overlaps ? 'var(--incorrect)' : 'var(--accent)'); });
+    [a, b].forEach(function (el) { el.setAttribute('fill', overlaps ? 'var(--incorrect-soft)' : 'var(--accent-soft)'); });
+    verdict.textContent = overlaps ? 'AABBs OVERLAP — narrow phase would now run an exact check.' : 'AABBs do not overlap — ruled out at broad phase, no further check needed.';
+    verdict.className = 'verdict ' + (overlaps ? 'is-fail' : 'is-pass');
+    readout.textContent = 'A x-range [' + A.x1.toFixed(0) + ', ' + A.x2.toFixed(0) + '], B x-range [' + B.x1.toFixed(0) + ', ' + B.x2.toFixed(0) + '] — x overlap: ' + overlapX + '. A y-range [' + A.y1.toFixed(0) + ', ' + A.y2.toFixed(0) + '], B y-range [' + B.y1.toFixed(0) + ', ' + B.y2.toFixed(0) + '] — y overlap: ' + overlapY + '.';
+  }
+
+  function startDrag(el) {
+    return function (e) {
+      dragging = el;
+      var p = toSvgPoint(e);
+      offset.x = p.x - parseFloat(el.getAttribute('x'));
+      offset.y = p.y - parseFloat(el.getAttribute('y'));
+      svg.setPointerCapture(e.pointerId);
+    };
+  }
+
+  a.addEventListener('pointerdown', startDrag(a));
+  b.addEventListener('pointerdown', startDrag(b));
+  svg.addEventListener('pointermove', function (e) {
+    if (!dragging) return;
+    var p = toSvgPoint(e);
+    dragging.setAttribute('x', Math.max(0, Math.min(400 - parseFloat(dragging.getAttribute('width')), p.x - offset.x)));
+    dragging.setAttribute('y', Math.max(0, Math.min(220 - parseFloat(dragging.getAttribute('height')), p.y - offset.y)));
+    check();
+  });
+  svg.addEventListener('pointerup', function () { dragging = null; });
+  svg.addEventListener('pointercancel', function () { dragging = null; });
+
+  check();
+});
+</script>

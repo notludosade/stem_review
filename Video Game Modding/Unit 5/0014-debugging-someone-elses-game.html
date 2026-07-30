@@ -1,0 +1,141 @@
+<meta charset="UTF-8">
+<title>Lesson 14: Debugging Someone Else's Game — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · Video Game Modding · Unit 5 · Lesson 14</span>
+  <h1>Debugging Someone Else's Game (Logging, Trial and Error, Community Knowledge)</h1>
+  <p class="subtitle">Most modders never touch a decompiler. This lesson is about the far more common, far less exotic way modding problems actually get solved day to day.</p>
+  <p class="nav-links"><a href="0013-reading-compiled-behavior-without-source.html" class="nav-prev">← Lesson 13</a> <a href="0015-where-reverse-engineering-crosses-a-legal-line.html" class="nav-next">Lesson 15 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Lesson 13's decompilers and memory scanners are real tools, but the everyday reality of modding a game with limited documentation looks much more ordinary: reading whatever the game itself already tells you, changing one small thing at a time, and leaning on what other people have already figured out. This is where the vast majority of practical modding problems actually get solved — not through deep binary analysis, but through patience and shared knowledge.</p>
+
+  <h2>Log files and crash dumps</h2>
+  <p>Many games, even ones with no official modding support, still write a <strong>log file</strong> during play — a plain-text record of what the game's internal systems did, often including warnings or errors when something goes wrong. When a game crashes outright, it may also produce a <strong>crash dump</strong>, a snapshot of the program's state at the moment of failure. Neither requires any special reverse-engineering tool to read — just finding where the game writes them (often a folder the log or crash message itself points to) and looking for a line that mentions the mod, the file, or the error that seems relevant.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    <strong>Trial-and-error debugging</strong> is diagnosing a problem by making one small, deliberate change at a time and observing the result — the most accessible debugging method available when no source code or detailed documentation exists at all.
+  </div>
+
+  <h2>Community knowledge as documentation</h2>
+  <p>A <strong>community wiki</strong> — a collaboratively edited reference maintained by a game's modding community rather than its developer — often ends up more complete and more practically useful than any official documentation, precisely because it's written by people who hit the same undocumented problems a new modder is about to hit. Forums, Discord servers, and wikis built around a specific game's modding scene routinely already contain the answer to "why does my mod cause this exact crash," saved from someone else's earlier trial and error. Checking whether a problem has already been solved by someone else is, realistically, the single highest-value debugging step available before diving into reverse-engineering at all.</p>
+
+  <div class="box why">
+    <span class="box-label">Why it matters here</span>
+    Reverse-engineering tools from Lesson 13 exist for the cases genuinely nothing else solves. In practice, most modding problems are solved with a log file, a careful one-change-at-a-time test, and a search through a community wiki — in that order, before anything more advanced.
+  </div>
+
+  <h2>Try it — diagnose a crash log</h2>
+  <p>A mod causes a crash. Read the mock log below, then pick the most likely cause.</p>
+
+  <div class="widget">
+    <p class="widget-label">Try It — Crash Log Viewer</p>
+    <pre class="code-block" style="margin-bottom:0.9rem;"><code>[12:04:01] Loading mod: BetterWeaponsMod v1.2
+[12:04:01] Reading weapon_stats.ini... OK
+[12:04:02] Loading texture: sword_diffuse.dds... OK
+[12:04:02] Loading model: iron_sword.fbx...
+[12:04:02] ERROR: Model vertex count (2,048) does not match rig bone weight data (expected 1,024). Crash.</code></pre>
+    <div id="diagnosis-choices" style="display:flex; flex-direction:column; gap:0.5rem;"></div>
+    <p id="diagnosis-feedback" style="margin-top:0.7rem;"></p>
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. Why are log files useful for debugging a mod, even without any reverse-engineering tools?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">They're a plain-text record the game itself already writes, often including exactly which step failed and why.</button>
+      <button class="quiz-choice" data-correct="false">They require a decompiler to open at all.</button>
+      <button class="quiz-choice" data-correct="false">They only exist for games with an official modding SDK.</button>
+      <button class="quiz-choice" data-correct="false">They are always encrypted and unreadable without special tools.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Log files are typically plain, human-readable text — no special tools needed, just knowing where to look.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. What makes trial-and-error debugging effective for modding problems specifically?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">It's accessible even with no source code or detailed documentation — just one small, deliberate change at a time.</button>
+      <button class="quiz-choice" data-correct="false">It always finds the exact root cause immediately.</button>
+      <button class="quiz-choice" data-correct="false">It requires a decompiler to perform correctly.</button>
+      <button class="quiz-choice" data-correct="false">It only works on games with an official SDK.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Trial-and-error is valuable precisely because it needs no special access — just patience and one change at a time.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why does the lesson call checking a community wiki "the single highest-value debugging step" before reverse-engineering?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Other modders have often already hit and solved the exact same undocumented problem.</button>
+      <button class="quiz-choice" data-correct="false">Community wikis are always more accurate than a game's own official documentation.</button>
+      <button class="quiz-choice" data-correct="false">Reverse-engineering tools are illegal to use under any circumstance.</button>
+      <button class="quiz-choice" data-correct="false">Wikis eliminate the need for any log files.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A community wiki often already contains an answer built from someone else's earlier trial and error, saving the effort of rediscovering it.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="log file|log">
+    <p class="quiz-prompt">4. Fill in the blank: a plain-text record of what a game's internal systems did during play, often including errors, is called a ___ file.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Log files are one of the most accessible debugging resources a modder has, requiring no special tools to read.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="community wiki|wiki">
+    <p class="quiz-prompt">5. Fill in the blank: a collaboratively edited modding reference maintained by a game's player community, rather than its developer, is called a ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A community wiki often surpasses official documentation for modding-specific problems, because it's written by the people who actually hit them.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: the Nexus Mods wiki's <a href="https://wiki.nexusmods.com/">modding wiki hub</a> is itself a working example of exactly the kind of community-maintained troubleshooting resource this lesson describes.</p>
+
+  <p class="ask-teacher">Stuck on anything above, or want to read through a real crash-log troubleshooting thread? Ask your teacher — that's what I'm here for. Next up: the legal line reverse-engineering can cross, closing out Unit 5.</p>
+
+  <footer class="lesson-footer">STEM+ · Video Game Modding · Lesson 14</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var container = document.getElementById('diagnosis-choices');
+  var feedback = document.getElementById('diagnosis-feedback');
+  var options = [
+    { text: 'The replacement model has a different vertex count than its rig expects.', correct: true },
+    { text: 'The weapon_stats.ini file is missing entirely.', correct: false },
+    { text: 'The texture file failed to load.', correct: false },
+    { text: 'The mod was never actually installed.', correct: false }
+  ];
+  var answered = false;
+  options.forEach(function (opt) {
+    var btn = document.createElement('button');
+    btn.className = 'quiz-choice';
+    btn.type = 'button';
+    btn.textContent = opt.text;
+    btn.addEventListener('click', function () {
+      if (answered) return;
+      answered = true;
+      container.querySelectorAll('.quiz-choice').forEach(function (b) { b.disabled = true; });
+      if (opt.correct) {
+        btn.classList.add('is-correct');
+        feedback.innerHTML = '<span style="color:var(--correct); font-weight:600;">Correct.</span> The log explicitly states a vertex count / rig mismatch — a classic case of the model-replacement problem from Unit 4, Lesson 10, diagnosed here purely from log text.';
+      } else {
+        btn.classList.add('is-incorrect');
+        feedback.innerHTML = '<span style="color:var(--incorrect); font-weight:600;">Not quite.</span> Re-read the last log line — it names the exact mismatch directly.';
+      }
+    });
+    container.appendChild(btn);
+  });
+});
+</script>

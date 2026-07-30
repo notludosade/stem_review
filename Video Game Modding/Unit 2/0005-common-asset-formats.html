@@ -1,0 +1,138 @@
+<meta charset="UTF-8">
+<title>Lesson 5: Common Asset Formats at a High Level — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · Video Game Modding · Unit 2 · Lesson 5</span>
+  <h1>Common Asset Formats (Textures, Models, Audio) at a High Level</h1>
+  <p class="subtitle">An unpacked archive is a folder full of unfamiliar file extensions. This lesson is a map, at a high level, of what's actually inside each major asset type — enough to recognize what you're looking at, not a deep format specification.</p>
+  <p class="nav-links"><a href="0004-archive-formats-and-unpacking-game-data.html" class="nav-prev">← Lesson 4</a> <a href="0006-finding-and-reading-a-games-configuration-files.html" class="nav-next">Lesson 6 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Once Lesson 4's extractor has produced a folder tree, the files inside break down into a small number of asset categories, each with its own common formats. None of this requires deep technical mastery of any one format to start modding — most modding tools already understand the popular ones and handle the conversion automatically. What matters is recognizing which category a file belongs to and roughly what it controls.</p>
+
+  <h2>Textures</h2>
+  <p>A <strong>texture map</strong> is an image applied to the surface of a 3D model — color, roughness, bumps, glow, all painted onto the model's surface using a 2D image. Games commonly use <strong>DDS</strong> (DirectDraw Surface), a format pre-compressed specifically for how graphics hardware reads it, alongside more familiar formats like PNG, and plenty of studio-proprietary compressed variants. The reason DDS specifically shows up so often is performance: it's designed to be read directly by the graphics card with minimal extra processing.</p>
+
+  <h2>Models</h2>
+  <p>A <strong>mesh</strong> is the 3D geometry of an object — a grid of points, edges, and surfaces defining its shape. A model file bundles that mesh with texture coordinates (how the 2D texture wraps onto the 3D shape) and, for anything that moves, a <strong>rig</strong> or <strong>skeleton</strong> — an internal bone structure the mesh deforms around during animation. Common interchange formats include <code class="inline-code">.fbx</code> and <code class="inline-code">.obj</code>, though in-game the model is often stored in a studio-proprietary format that a modding tool converts to and from one of these interchange formats.</p>
+
+  <h2>Audio</h2>
+  <p>Sound effects and music are commonly stored as <code class="inline-code">.ogg</code> or <code class="inline-code">.wav</code> files, but many games route audio through an <strong>audio bank</strong> system — middleware like FMOD or Wwise that manages which sound plays when, with what volume and pitch variation, rather than the game code calling a raw sound file directly. Modding a bank-based game's audio often means replacing the file inside the bank while keeping the bank's own reference to it intact, not simply dropping in a new file.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    A <strong>proprietary format</strong> is one designed and documented (if at all) by a single studio or engine vendor, versus an <strong>open format</strong> like PNG or OBJ, published and usable by anyone — proprietary formats are what make community-built converters and extractors necessary in the first place.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why it matters here</span>
+    Unit 4's asset-replacement techniques all depend on recognizing what kind of file you're editing and what format the game engine actually expects back. A texture in the wrong format, a mesh with a different vertex count than its rig expects, or a raw file dropped in place of a bank reference are the three most common ways a "simple" asset swap breaks the game instead of improving it.
+  </div>
+
+  <h2>Try it — asset type explorer</h2>
+  <p>Click a category to see its common formats and what each one actually controls.</p>
+
+  <div class="widget">
+    <p class="widget-label">Try It — Asset Format Explorer</p>
+    <div class="fm-tabs" id="asset-tabs"></div>
+    <div class="fm-panel" id="asset-panel"></div>
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. Why does DDS show up so often as a game texture format specifically?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">It's pre-compressed to be read directly by graphics hardware with minimal extra processing.</button>
+      <button class="quiz-choice" data-correct="false">It is the only format any graphics card can display.</button>
+      <button class="quiz-choice" data-correct="false">It is required by every game engine's license terms.</button>
+      <button class="quiz-choice" data-correct="false">It cannot be converted to or from PNG.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>DDS's specific advantage is performance — it's designed for direct, low-overhead reading by graphics hardware.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. What does a model's "rig" or "skeleton" actually provide?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">An internal bone structure the mesh deforms around during animation.</button>
+      <button class="quiz-choice" data-correct="false">The texture map applied to the model's surface.</button>
+      <button class="quiz-choice" data-correct="false">The audio bank associated with the model.</button>
+      <button class="quiz-choice" data-correct="false">The archive format the model is stored in.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A rig or skeleton is the internal bone structure that lets a mesh deform realistically when animated — separate from the mesh's raw geometry.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why can't audio in a bank-based system (FMOD, Wwise) always be replaced just by dropping in a new sound file?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">The bank manages references to sounds along with volume and pitch behavior, so a raw file drop can break that reference.</button>
+      <button class="quiz-choice" data-correct="false">Bank-based audio systems never allow any modding at all.</button>
+      <button class="quiz-choice" data-correct="false">Audio banks only ever contain a single sound file total.</button>
+      <button class="quiz-choice" data-correct="false">FMOD and Wwise are exclusively used for background music, never sound effects.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A bank system manages which sound plays when and how, so replacing audio usually means editing the file the bank already references, not adding a loose new one.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="mesh">
+    <p class="quiz-prompt">4. Fill in the blank: the 3D geometry of an object — points, edges, and surfaces defining its shape — is called its ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The mesh is the raw shape; the rig or skeleton is a separate structure describing how that shape moves.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="texture map|texture">
+    <p class="quiz-prompt">5. Fill in the blank: a 2D image applied to a 3D model's surface to define its color, roughness, or other visual detail is called a ___ ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Texture maps are what most cosmetic reskins (Lesson 1) actually change.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: Khronos Group's <a href="https://www.khronos.org/gltf/">glTF overview</a> shows what a modern, fully open 3D model interchange format looks like — a useful contrast against the proprietary in-game formats this lesson described.</p>
+
+  <p class="ask-teacher">Stuck on anything above, or want help identifying a specific file extension? Ask your teacher — that's what I'm here for. Next up: the last major category of unpacked file — plain-text configuration.</p>
+
+  <footer class="lesson-footer">STEM+ · Video Game Modding · Lesson 5</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var tabsEl = document.getElementById('asset-tabs');
+  var panel = document.getElementById('asset-panel');
+  var cats = [
+    { name: 'Textures', text: '<strong>Common formats:</strong> .dds, .png, studio-proprietary compressed formats.<br>DDS is pre-compressed for direct graphics-hardware reading. A texture defines color, roughness, bumps, or glow on a model\'s surface.' },
+    { name: 'Models', text: '<strong>Common formats:</strong> .fbx, .obj (interchange), often a proprietary in-game format.<br>Bundles a mesh (geometry), texture coordinates, and — for anything animated — a rig/skeleton.' },
+    { name: 'Audio', text: '<strong>Common formats:</strong> .ogg, .wav, or entries inside an audio bank (FMOD, Wwise).<br>Bank systems manage which sound plays when, with what volume and pitch — not just the raw file.' }
+  ];
+  function renderPanel(i) {
+    panel.innerHTML = '<p>' + cats[i].text + '</p>';
+  }
+  function renderTabs() {
+    tabsEl.innerHTML = '';
+    cats.forEach(function (c, i) {
+      var btn = document.createElement('button');
+      btn.className = 'fm-tab' + (i === 0 ? ' is-active' : '');
+      btn.type = 'button';
+      btn.textContent = c.name;
+      btn.addEventListener('click', function () {
+        tabsEl.querySelectorAll('.fm-tab').forEach(function (t) { t.classList.remove('is-active'); });
+        btn.classList.add('is-active');
+        renderPanel(i);
+      });
+      tabsEl.appendChild(btn);
+    });
+  }
+  renderTabs();
+  renderPanel(0);
+});
+</script>

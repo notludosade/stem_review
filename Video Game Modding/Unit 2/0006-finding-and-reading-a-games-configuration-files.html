@@ -1,0 +1,116 @@
+<meta charset="UTF-8">
+<title>Lesson 6: Finding and Reading a Game's Configuration Files — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · Video Game Modding · Unit 2 · Lesson 6</span>
+  <h1>Finding and Reading a Game's Configuration Files</h1>
+  <p class="subtitle">Of everything an unpacked archive contains, config files are the easiest and safest place to start modding — no repacking, no recompiling, just a text editor and a value that already means something to the game.</p>
+  <p class="nav-links"><a href="0005-common-asset-formats.html" class="nav-prev">← Lesson 5</a> <a href="../Unit%203/0007-embedded-scripting-languages-in-games.html" class="nav-next">Unit 3, Lesson 7 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Alongside binary textures, models, and audio, most unpacked archives also contain <strong>config files</strong> — plain, human-readable text in formats like <code class="inline-code">.ini</code>, <code class="inline-code">.cfg</code>, <code class="inline-code">.json</code>, or <code class="inline-code">.xml</code>. These hold exactly the kind of values Lesson 1 called "config tweaks": weapon damage, enemy spawn rates, key bindings, difficulty curves — numbers and settings the game reads at startup or during play, rather than values baked into compiled code.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    A <strong>human-readable format</strong> is one a person can open in a plain text editor and understand directly, as opposed to a <strong>binary format</strong>, which requires a specialized tool or parser to make sense of — most config files are human-readable by design.
+  </div>
+
+  <h2>Why config files are the easy on-ramp</h2>
+  <p>This is <strong>data-driven design</strong>: instead of hardcoding "the sword does 10 damage" directly into compiled game logic, the logic instead reads a variable — <code class="inline-code">damage</code> — from a config file, and that same logic works no matter what number the file holds. Studios build games this way for their own convenience: it lets a designer balance the game by editing numbers instead of asking a programmer to recompile the engine every time a value needs tuning. That same convenience is exactly what makes config files the lowest-risk entry point for a modder — editing a number in a text file can't corrupt a binary format, break a mesh's vertex count, or require any programming knowledge at all. It's also usually the most legally uncomplicated kind of mod, since it changes no copyrighted assets or code, only values.</p>
+
+  <div class="box why">
+    <span class="box-label">Why it matters here</span>
+    Unit 4's entire final lesson — balancing and data-driven mods — is built on exactly this technique, scaled up. Learning to recognize a config value and what it controls here is the whole skill; everything later just applies it to bigger, more interesting numbers.
+  </div>
+
+  <h2>Try it — edit a config file</h2>
+  <p>Change the highlighted value below and watch the "in-game" preview update — the same cause and effect as opening a real <code class="inline-code">weapon_stats.ini</code> in a text editor.</p>
+
+  <div class="widget">
+    <p class="widget-label">Try It — Mock Config Editor</p>
+    <div style="font-family:'SF Mono',Menlo,Consolas,monospace; font-size:0.88rem; background:var(--bg); border:1px solid var(--border); border-radius:6px; padding:0.8rem 1rem; line-height:1.7;">
+      [Sword]<br>
+      name=Iron Sword<br>
+      damage=<input type="number" id="cfg-damage" value="10" min="0" max="999" style="width:4.5rem; font-family:inherit; font-size:inherit; border:1px solid var(--border); border-radius:3px; background:var(--code-bg); color:var(--accent); padding:0.1rem 0.3rem;"><br>
+      attack_speed=1.2
+    </div>
+    <p class="plot-readout" id="cfg-readout" style="margin-top:0.8rem;">In-game preview: Iron Sword deals <strong>10</strong> damage per hit.</p>
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. Why are config files generally the safest entry point for a new modder?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Editing a plain-text value requires no programming and can't corrupt binary assets like a texture or mesh.</button>
+      <button class="quiz-choice" data-correct="false">Config files are always encrypted and thus tamper-proof.</button>
+      <button class="quiz-choice" data-correct="false">Config files never affect anything visible in the game.</button>
+      <button class="quiz-choice" data-correct="false">Editing a config file always requires recompiling the game engine.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A plain-text value is edited with nothing but a text editor and can't break a binary format the way a mismatched asset can.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. What does "data-driven design" mean in the context of a game's damage value?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Game logic reads a variable from a config file instead of having the value hardcoded directly into compiled code.</button>
+      <button class="quiz-choice" data-correct="false">All game data is stored exclusively in a remote database.</button>
+      <button class="quiz-choice" data-correct="false">The game generates all of its numbers randomly at runtime.</button>
+      <button class="quiz-choice" data-correct="false">Data-driven design means no config files are used at all.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Data-driven design separates the logic ("read the damage variable") from the specific value, which is exactly what makes that value editable without recompiling.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why do studios build games with data-driven config values in the first place, even before modders get involved?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">It lets designers balance the game by editing numbers, without needing a programmer to recompile the engine each time.</button>
+      <button class="quiz-choice" data-correct="false">It is required by every game platform's certification process.</button>
+      <button class="quiz-choice" data-correct="false">It makes the game's files impossible to unpack.</button>
+      <button class="quiz-choice" data-correct="false">It removes the need for any archive format at all.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Data-driven design is primarily a development convenience — modders benefit from it, but studios build this way for their own designers' sake.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="config file|configuration file">
+    <p class="quiz-prompt">4. Fill in the blank: a plain, human-readable text file holding settings the game reads rather than values baked into compiled code is called a ___ file.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Common config formats include .ini, .cfg, .json, and .xml — all plain, human-readable text.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="data-driven design|data-driven">
+    <p class="quiz-prompt">5. Fill in the blank: building game logic to read values from external data instead of hardcoding them is called ___ ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Data-driven design is the underlying reason config-only mods are possible at all.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: Wikipedia's <a href="https://en.wikipedia.org/wiki/INI_file">INI file overview</a> covers the format's structure and history — one of the most common config formats you'll actually find inside an unpacked archive.</p>
+
+  <p class="ask-teacher">Stuck on anything above, or want to see a real weapon_stats.ini from a well-known game? Ask your teacher — that's what I'm here for. Unit 2 is complete. Next up: Unit 3 moves past static config values into scripting APIs that can add entirely new behavior.</p>
+
+  <footer class="lesson-footer">STEM+ · Video Game Modding · Lesson 6</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var input = document.getElementById('cfg-damage');
+  var readout = document.getElementById('cfg-readout');
+  input.addEventListener('input', function () {
+    var v = input.value === '' ? 0 : input.value;
+    readout.innerHTML = 'In-game preview: Iron Sword deals <strong>' + v + '</strong> damage per hit.';
+  });
+});
+</script>

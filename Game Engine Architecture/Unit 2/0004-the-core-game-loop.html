@@ -1,0 +1,165 @@
+<meta charset="UTF-8">
+<title>Lesson 4: The Core Game Loop — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="advanced">
+  <span class="kicker">STEM+ · Game Engine Architecture · Unit 2 · Lesson 4</span>
+  <h1>The Core Game Loop</h1>
+  <p class="subtitle">Every subsystem from Unit 1 has to run over and over, dozens of times a second, for the entire lifetime of the program. There's exactly one piece of code responsible for making that happen — and it's a lot simpler than it sounds.</p>
+  <p class="nav-links"><a href="../Unit%201/0003-major-subsystems-at-a-glance.html" class="nav-prev">← Unit 1, Lesson 3</a> <a href="0005-fixed-vs-variable-timestep.html" class="nav-next">Lesson 5 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>A word processor waits for you to type, then reacts. A web server waits for a request, then responds. A game can't just sit and wait — the world has to keep moving even if the player does nothing at all, an enemy needs to keep walking, gravity needs to keep pulling. That requires something running continuously, all on its own.</p>
+
+  <h2>Three steps, repeated forever</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    The <strong>game loop</strong> is the top-level loop that runs for the entire life of a game, repeatedly executing three phases in order: <strong>process input</strong> (read what the player did since last time), <strong>update</strong> (advance the game world — physics, AI, animation, game logic), and <strong>render</strong> (draw the current state of the world to the screen). It runs this cycle continuously, typically dozens of times per second, until the player quits.
+  </div>
+
+  <pre class="code-block"><code><span class="code-comment">// the shape of nearly every game loop ever written</span>
+while (game_is_running) {
+    process_input();   <span class="code-comment">// read keyboard/controller/mouse</span>
+    update(delta_time); <span class="code-comment">// advance the world by one step</span>
+    render();           <span class="code-comment">// draw the current state</span>
+}</code></pre>
+
+  <h2>Try it: step through the loop</h2>
+  <p>Run the loop and watch each phase highlight in order. Notice that nothing in the loop waits for you — it just keeps cycling.</p>
+
+  <div class="widget" id="loop-widget">
+    <p class="widget-label">Interactive: the game loop, one phase at a time</p>
+    <div class="fm-row">
+      <div id="loop-phase-input" class="box" style="padding:0.6rem 1rem; margin:0;">Process Input</div>
+      <span class="fm-arrow">→</span>
+      <div id="loop-phase-update" class="box" style="padding:0.6rem 1rem; margin:0;">Update</div>
+      <span class="fm-arrow">→</span>
+      <div id="loop-phase-render" class="box" style="padding:0.6rem 1rem; margin:0;">Render</div>
+      <span class="fm-arrow">→</span>
+      <span style="color:var(--muted);">(loops back)</span>
+    </div>
+    <p class="fm-row">
+      <button class="widget-btn" type="button" data-loop-start>Start Loop</button>
+      <button class="widget-btn" type="button" data-loop-stop>Stop Loop</button>
+      <button class="widget-btn" type="button" data-loop-step>Step Once</button>
+    </p>
+    <p class="plot-readout" data-loop-readout>Frame count: 0.</p>
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Worked example</span>
+    Say the player holds the "move right" key with nothing else happening. Every single frame, <code class="inline-code">process_input()</code> notices the key is still down, <code class="inline-code">update()</code> moves the character's position a little further right and advances any walk animation, and <code class="inline-code">render()</code> draws the character in its new spot. Sixty times in one second, that's sixty tiny position changes — which is exactly what makes "holding a direction" look like smooth, continuous motion instead of a single jump.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why render always comes last</span>
+    Rendering has to come after update, every single frame, because the screen should always show the world <em>after</em> this frame's changes — never a half-updated or stale state. If a loop rendered before updating, the screen would always be showing last frame's world one step late. This ordering constraint seems obvious in isolation, but it becomes one of the trickiest things to get right once physics and animation both need to affect what gets drawn, which Unit 4 and Unit 5 come back to.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What are the three phases of a basic game loop, in order?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Process input, update, render.</button>
+      <button class="quiz-choice" data-correct="false">Render, update, process input.</button>
+      <button class="quiz-choice" data-correct="false">Update, render, process input.</button>
+      <button class="quiz-choice" data-correct="false">Only render — input and update aren't separate phases.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Input is read first, the world is advanced next, and the result is drawn last.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why does a game need a continuously running loop, unlike a word processor that just waits for input?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">The game world has to keep advancing — gravity, AI, animation — even if the player does nothing at all.</button>
+      <button class="quiz-choice" data-correct="false">Games never actually respond to player input.</button>
+      <button class="quiz-choice" data-correct="false">A word processor also runs a continuous loop identical to a game's.</button>
+      <button class="quiz-choice" data-correct="false">Continuous loops are only needed for multiplayer games.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A game world must keep moving on its own, unlike an application that's purely reactive.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why must render always run after update in the loop, not before?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">So the screen shows the world's state after this frame's changes, not a stale state from before them.</button>
+      <button class="quiz-choice" data-correct="false">Rendering before updating makes the game run faster.</button>
+      <button class="quiz-choice" data-correct="false">The order of render and update never actually matters.</button>
+      <button class="quiz-choice" data-correct="false">Update depends on render having already drawn a frame.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Rendering must reflect the freshest state, which only exists after update has run.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="game loop">
+    <p class="quiz-prompt">4. Fill in the blank: the top-level loop that repeatedly processes input, updates the world, and renders it for the entire life of a game is the ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>This is the term defined at the top of the lesson.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="update">
+    <p class="quiz-prompt">5. Fill in the blank: the phase of the loop responsible for advancing physics, AI, and animation is called ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Update is the phase that advances the state of the game world.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: Robert Nystrom's <a href="https://gameprogrammingpatterns.com/game-loop.html">"Game Loop" chapter</a> in <em>Game Programming Patterns</em> is the classic, freely-available treatment of this exact pattern.</p>
+
+  <p class="ask-teacher">Curious what happens if update() takes longer than one frame's worth of time to run? Ask your teacher — that's what I'm here for. Next up: two very different ways to decide how much time update() thinks has passed — and why the choice matters more than it looks.</p>
+
+  <footer class="lesson-footer">STEM+ · Game Engine Architecture · Lesson 4 of the course sequence</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var phases = ['input', 'update', 'render'];
+  var els = {
+    input: document.getElementById('loop-phase-input'),
+    update: document.getElementById('loop-phase-update'),
+    render: document.getElementById('loop-phase-render')
+  };
+  var readout = document.querySelector('[data-loop-readout]');
+  var idx = 0;
+  var frameCount = 0;
+  var timer = null;
+
+  function highlight() {
+    phases.forEach(function (p) { els[p].classList.remove('why'); els[p].className = 'box'; });
+    els[phases[idx]].className = 'box why';
+    readout.textContent = 'Frame count: ' + frameCount + '. Current phase: ' + phases[idx] + '().';
+  }
+
+  function step() {
+    idx = (idx + 1) % 3;
+    if (idx === 0) frameCount++;
+    highlight();
+  }
+
+  document.querySelector('[data-loop-start]').addEventListener('click', function () {
+    if (timer) return;
+    timer = setInterval(step, 500);
+  });
+  document.querySelector('[data-loop-stop]').addEventListener('click', function () {
+    clearInterval(timer);
+    timer = null;
+  });
+  document.querySelector('[data-loop-step]').addEventListener('click', function () {
+    if (timer) return;
+    step();
+  });
+
+  highlight();
+});
+</script>

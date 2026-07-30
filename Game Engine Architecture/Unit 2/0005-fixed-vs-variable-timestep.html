@@ -1,0 +1,166 @@
+<meta charset="UTF-8">
+<title>Lesson 5: Fixed vs. Variable Timestep — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="advanced">
+  <span class="kicker">STEM+ · Game Engine Architecture · Unit 2 · Lesson 5</span>
+  <h1>Fixed vs. Variable Timestep</h1>
+  <p class="subtitle">Lesson 4's update(delta_time) took "how much time to advance the world by" as a given. Deciding what that number actually is turns out to be one of the most consequential choices in an engine's whole architecture.</p>
+  <p class="nav-links"><a href="0004-the-core-game-loop.html" class="nav-prev">← Lesson 4</a> <a href="0006-frame-rate-delta-time-and-why-physics-breaks-without-it.html" class="nav-next">Lesson 6 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>A frame doesn't take exactly the same amount of time every time. One frame might take 16 milliseconds, the next 22, the next 15 — depending on what's on screen, what the CPU is doing elsewhere, and the hardware it's running on. The question this lesson answers: should <code class="inline-code">update()</code> be told the real, wobbly duration of the frame that just happened, or a fixed number it can always count on?</p>
+
+  <h2>Two strategies, two very different guarantees</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    A <strong>variable timestep</strong> passes <code class="inline-code">update()</code> the actual, measured duration of the previous frame — it's always accurate to real elapsed time, but never exactly the same number twice. A <strong>fixed timestep</strong> always advances the simulation by the same constant amount (say, exactly 1/60th of a second) regardless of how long the frame actually took, running update() zero, one, or multiple times per rendered frame to keep pace with real time.
+  </div>
+
+  <h2>Try it: fixed vs. variable under a rough frame</h2>
+  <p>Simulate a frame that takes an unusually long time (a "hitch," like a hard drive stall or garbage collection pause) and see how each strategy responds.</p>
+
+  <div class="widget" id="timestep-widget">
+    <div class="fm-tabs" id="ts-tabs">
+      <button class="fm-tab is-active" type="button" data-ts-mode="variable">Variable Timestep</button>
+      <button class="fm-tab" type="button" data-ts-mode="fixed">Fixed Timestep</button>
+    </div>
+    <p class="fm-row">
+      <button class="widget-btn" type="button" data-ts-normal>Run a normal frame (16ms)</button>
+      <button class="widget-btn" type="button" data-ts-hitch>Run a hitched frame (250ms)</button>
+      <button class="widget-btn" type="button" data-ts-reset>Reset</button>
+    </p>
+    <p class="verdict" data-ts-verdict>Simulated time advanced: 0ms.</p>
+    <p class="plot-readout" data-ts-readout></p>
+    <p class="plot-hint">Watch what a single 250ms hitch does to the simulation's position jump in each mode.</p>
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Worked example</span>
+    A ball is moving at a steady 100 pixels/second. Under variable timestep, a 250ms hitch (maybe fifteen normal frames' worth of time) makes update() advance the ball 25 pixels in one single jump — visibly teleporting, and worse, a fast-moving object could tunnel straight through a thin wall it should have collided with. Under fixed timestep, that same 250ms of real time still gets simulated in a burst of fifteen small 1/60-second steps, so the ball still ends up 25 pixels further along — but as fifteen small, physically consistent steps a collision system can actually catch, not one impossible leap.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why fixed timestep is the default choice for physics</span>
+    Physics math (Unit 5 covers this directly) assumes small, roughly-equal time steps — a spring, a collision response, or gravity integrated over one giant 250ms leap can produce wildly different, sometimes unstable results compared to the same real duration simulated in fifteen small steps. A fixed timestep makes the simulation's behavior reproducible and independent of frame rate: the same inputs produce the same physics outcome on a fast gaming PC and a slower laptop alike, which variable timestep cannot promise.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What does a fixed timestep guarantee that variable timestep does not?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">That the simulation always advances in the same small, consistent step size, regardless of how long a real frame took.</button>
+      <button class="quiz-choice" data-correct="false">That every frame renders in exactly the same amount of real time.</button>
+      <button class="quiz-choice" data-correct="false">That the game never needs to read player input.</button>
+      <button class="quiz-choice" data-correct="false">That rendering happens before update every frame.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Fixed timestep guarantees a constant, small simulation step, decoupled from real frame duration.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. What can go wrong under variable timestep when a single frame takes an unusually long time (a "hitch")?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">A fast-moving object can jump so far in one step that it tunnels straight through something it should have collided with.</button>
+      <button class="quiz-choice" data-correct="false">The game crashes immediately and unconditionally.</button>
+      <button class="quiz-choice" data-correct="false">Nothing — variable timestep is immune to hitches by design.</button>
+      <button class="quiz-choice" data-correct="false">Rendering stops working entirely for the rest of the session.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A single huge timestep can move an object past a thin collider entirely in one leap.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why is fixed timestep generally preferred for physics simulation specifically?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Physics math assumes small, roughly-equal steps, and a huge single step can produce unstable or inconsistent results.</button>
+      <button class="quiz-choice" data-correct="false">Physics engines are technically incapable of running under variable timestep.</button>
+      <button class="quiz-choice" data-correct="false">Fixed timestep always makes a game render at a higher frame rate.</button>
+      <button class="quiz-choice" data-correct="false">There is no real difference for physics between the two approaches.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Small, consistent steps are what keep physics math numerically stable and reproducible.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="fixed timestep|fixed">
+    <p class="quiz-prompt">4. Fill in the blank: always advancing the simulation by the same constant time step, running update() multiple times if needed to keep pace with real time, is called a ___ timestep.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Fixed timestep is defined by its constant, unchanging step size.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="variable timestep|variable">
+    <p class="quiz-prompt">5. Fill in the blank: passing update() the actual, measured duration of the previous frame — accurate but never the same number twice — is called a ___ timestep.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Variable timestep passes whatever real duration actually elapsed, frame by frame.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: Glenn Fiedler's <a href="https://gafferongames.com/post/fix_your_timestep/">"Fix Your Timestep!"</a> is the widely-cited reference every working game programmer eventually runs into on this exact topic.</p>
+
+  <p class="ask-teacher">Curious how an engine handles running update() multiple times in one rendered frame without falling behind forever? Ask your teacher — that's what I'm here for. Next up: the concept underneath both strategies — delta time — and exactly why forgetting to use it at all breaks physics on every machine but yours.</p>
+
+  <footer class="lesson-footer">STEM+ · Game Engine Architecture · Lesson 5 of the course sequence</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var mode = 'variable';
+  var state = { variable: { time: 0, lastJump: 0 }, fixed: { time: 0, lastJump: 0 } };
+  var tabs = document.querySelectorAll('#ts-tabs [data-ts-mode]');
+  var verdict = document.querySelector('[data-ts-verdict]');
+  var readout = document.querySelector('[data-ts-readout]');
+
+  function render() {
+    var s = state[mode];
+    verdict.textContent = 'Simulated time advanced: ' + s.time + 'ms.';
+    if (mode === 'variable') {
+      readout.textContent = s.lastJump > 16
+        ? 'Last update() call advanced the world by a single ' + s.lastJump + 'ms jump — a fast object could tunnel through a thin wall in that one step.'
+        : 'Last update() call advanced the world by ' + s.lastJump + 'ms — a normal, small step.';
+    } else {
+      var steps = Math.round(s.lastJump / 16.67);
+      readout.textContent = steps > 1
+        ? 'That same ' + s.lastJump + 'ms was simulated as ' + steps + ' separate ~16.67ms steps — physically consistent, nothing to tunnel through.'
+        : 'Simulated as one normal ~16.67ms step.';
+    }
+  }
+
+  tabs.forEach(function (tab) {
+    tab.addEventListener('click', function () {
+      tabs.forEach(function (t) { t.classList.remove('is-active'); });
+      tab.classList.add('is-active');
+      mode = tab.getAttribute('data-ts-mode');
+      render();
+    });
+  });
+
+  document.querySelector('[data-ts-normal]').addEventListener('click', function () {
+    var s = state[mode];
+    s.time += 16;
+    s.lastJump = 16;
+    render();
+  });
+  document.querySelector('[data-ts-hitch]').addEventListener('click', function () {
+    var s = state[mode];
+    s.time += 250;
+    s.lastJump = 250;
+    render();
+  });
+  document.querySelector('[data-ts-reset]').addEventListener('click', function () {
+    state.variable = { time: 0, lastJump: 0 };
+    state.fixed = { time: 0, lastJump: 0 };
+    render();
+  });
+
+  render();
+});
+</script>
