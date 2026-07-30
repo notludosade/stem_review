@@ -1,0 +1,97 @@
+<meta charset="UTF-8">
+<title>Scaling a Viral App Overnight — Applications — STEM+</title>
+<link rel="stylesheet" href="../assets/style.css">
+<script src="../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · Applications · Scaling a Viral App Overnight</span>
+  <h1>Scaling a Viral App Overnight</h1>
+  <p class="subtitle">10pm: a creator with four million followers posts a video using your app. By 10:15 your normal 500 requests/second is 22,000/second and climbing. You have maybe ten minutes before this either becomes a great story or a very bad one.</p>
+  <p class="nav-links"><a href="../applications.html" class="nav-toc">← Applications</a> <a href="../index.html" class="nav-toc">STEM+ Home →</a></p>
+
+  <div class="box">
+    <span class="box-label">The Concept, From Cloud Computing A</span>
+    Two ideas do all the real work here: <strong>elasticity</strong> (an auto scaling group that adds servers automatically as load rises, and removes them once it falls) and a <strong>load balancer</strong> sitting in front of that fleet, spreading incoming requests across whichever servers are currently healthy and available.
+  </div>
+
+  <h2>Why one bigger server doesn't save you</h2>
+  <p>The instinctive fix — "give the server more CPU and RAM" — is vertical scaling, and it has a hard ceiling: there's a biggest instance size your provider sells, and you can't provision it, reboot onto it, and warm caches back up in the ten minutes you actually have. Horizontal scaling sidesteps the ceiling entirely: instead of one bigger server, an auto scaling group launches more copies of the same modest-sized server, and the load balancer immediately starts routing new requests to them.</p>
+
+  <div class="box why">
+    <span class="box-label">Why the auto scaling group's maximum matters as much as its minimum</span>
+    Without a cap, a runaway spike (or a bug generating retry storms) can scale a fleet — and a bill — without limit. The maximum is a deliberate circuit breaker: past it, requests start queuing or getting rejected instead of the account taking unbounded damage. A real incident response plan decides in advance whether "some users see errors" or "the bill has no ceiling" is the worse outcome — and picks the maximum accordingly.
+  </div>
+
+  <h2>Try it: route traffic across a scaling fleet</h2>
+  <div class="widget" id="scale-widget">
+    <p class="widget-label">Interactive: watch the load balancer add capacity as traffic rises</p>
+    <div class="fm-row" style="gap:0.6rem; flex-wrap:wrap;">
+      <button class="widget-btn" type="button" data-traffic="normal">Normal traffic (500 req/s)</button>
+      <button class="widget-btn" type="button" data-traffic="spike">Viral spike (22,000 req/s)</button>
+      <button class="widget-btn" type="button" data-traffic="cooldown">Traffic falls back down</button>
+    </div>
+    <p class="plot-readout" id="scale-readout">Servers active: 2 · Status: healthy</p>
+    <p class="plot-hint" id="scale-hint">Click "Viral spike" to see the auto scaling group react.</p>
+  </div>
+
+  <h2>Check your understanding</h2>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. Why does horizontal scaling handle a 44x traffic spike better than vertical scaling?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">It adds more servers of a size you can always provision quickly, instead of hitting a ceiling on how big one server can get</button>
+      <button class="quiz-choice" data-correct="false">It's always cheaper than vertical scaling under every circumstance</button>
+      <button class="quiz-choice" data-correct="false">Vertical scaling is impossible to configure on any cloud provider</button>
+      <button class="quiz-choice" data-correct="false">Horizontal scaling doesn't require a load balancer</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Vertical scaling caps out at the largest instance size a provider offers and often needs a restart; horizontal scaling just launches more of what you already have.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. What's the real purpose of setting a maximum on an auto scaling group, not just a minimum?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">It caps runaway cost and resource usage if traffic (or a bug) spikes without bound</button>
+      <button class="quiz-choice" data-correct="false">It has no real function beyond looking cautious in a config file</button>
+      <button class="quiz-choice" data-correct="false">It determines how many geographic regions the app runs in</button>
+      <button class="quiz-choice" data-correct="false">Only the minimum matters; providers ignore the maximum</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The maximum is a deliberate circuit breaker on cost and blast radius, not a formality.</p>
+  </div>
+
+  <p class="ask-teacher">Curious what happens when the load balancer's health checks catch a server that's up but broken? That's covered in Cloud Computing A, Unit 4. Ask your teacher if you want to go deeper — that's what I'm here for.</p>
+
+  <p class="nav-links">Goes deeper in: <a href="../Cloud%20Computing%20A/index.html">Cloud Computing A</a></p>
+
+  <footer class="lesson-footer">STEM+ · Applications · built on ideas from Cloud Computing A</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var readout = document.getElementById('scale-readout');
+  var hint = document.getElementById('scale-hint');
+  var buttons = document.querySelectorAll('#scale-widget [data-traffic]');
+  var state = { servers: 2, status: 'healthy' };
+
+  function render() {
+    readout.textContent = 'Servers active: ' + state.servers + ' · Status: ' + state.status;
+  }
+
+  buttons.forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var mode = btn.getAttribute('data-traffic');
+      if (mode === 'normal') {
+        state.servers = 2; state.status = 'healthy';
+        hint.textContent = 'Steady state: the auto scaling group holds at its minimum.';
+      } else if (mode === 'spike') {
+        state.servers = 18; state.status = 'scaling out — load balancer routing to new healthy servers as they pass their health check';
+        hint.textContent = 'The group scaled from 2 to 18 servers; the load balancer only sends traffic to ones that pass health checks.';
+      } else if (mode === 'cooldown') {
+        state.servers = 3; state.status = 'scaling in — draining connections before removing servers';
+        hint.textContent = 'As traffic falls, the group scales back in — but drains existing connections first instead of dropping them.';
+      }
+      render();
+    });
+  });
+});
+</script>
