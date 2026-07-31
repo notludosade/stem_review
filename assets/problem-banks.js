@@ -422,6 +422,404 @@
     return questions;
   }
 
+  function precalculus() {
+    const questions = [];
+    for (let i = 0; i < 10; i += 1) {
+      const a = 1 + (i % 3);
+      const b = (i % 5) - 2;
+      const c = 3 - (i % 4);
+      const x = i - 4;
+      const answer = a * x * x + b * x + c;
+      questions.push(qNumber(
+        `precalc-function-${i + 1}`, 'Functions',
+        `If f(x) = ${a}x² ${term(b, 'x')} ${term(c, '')}, find f(${x}).`,
+        answer, `Substitute x = ${x}: f(${x}) = ${answer}.`,
+        { kind: 'quadratic-eval', a, b, c, x }
+      ));
+    }
+    for (let i = 0; i < 10; i += 1) {
+      const a = 2 + (i % 3);
+      const b = (i % 4) - 1;
+      const c = 1 + (i % 4);
+      const d = 2 - (i % 5);
+      const x = i - 3;
+      const answer = a * (c * x + d) + b;
+      questions.push(qNumber(
+        `precalc-composition-${i + 1}`, 'Composition and inverses',
+        `Let f(x) = ${a}x ${term(b, '')} and g(x) = ${c}x ${term(d, '')}. Find (f ∘ g)(${x}).`,
+        answer, `First g(${x}) = ${c * x + d}; then f(${c * x + d}) = ${answer}.`,
+        { kind: 'linear-composition', a, b, c, d, x }
+      ));
+    }
+    for (let i = 0; i < 10; i += 1) {
+      const r1 = i - 5;
+      const r2 = i + 2;
+      const sum = r1 + r2;
+      const product = r1 * r2;
+      questions.push(qNumber(
+        `precalc-polynomial-${i + 1}`, 'Polynomial functions',
+        `What is the larger zero of x² ${term(-sum, 'x')} ${term(product, '')}?`,
+        Math.max(r1, r2), `Factoring gives (x − ${r1})(x − ${r2}), so the larger zero is ${Math.max(r1, r2)}.`,
+        { kind: 'quadratic-larger-root', sum, product }
+      ));
+    }
+    for (let i = 0; i < 10; i += 1) {
+      const base = 2 + (i % 4);
+      const exponent = 1 + (i % 6);
+      const value = base ** exponent;
+      questions.push(qNumber(
+        `precalc-exponential-${i + 1}`, 'Exponential and logarithmic functions',
+        `Solve for x: ${base}^x = ${value}.`,
+        exponent, `Because ${value} = ${base}^${exponent}, x = ${exponent}.`,
+        { kind: 'exponential-solve', base, value }
+      ));
+    }
+    const triples = [[3, 4], [5, 12], [8, 15], [7, 24], [9, 12], [12, 16], [15, 20], [10, 24], [18, 24], [20, 21]];
+    triples.forEach(([opposite, adjacent], i) => {
+      const hypotenuse = Math.hypot(opposite, adjacent);
+      questions.push(qNumber(
+        `precalc-trig-${i + 1}`, 'Trigonometry',
+        `In a right triangle, angle θ has opposite side ${opposite} and adjacent side ${adjacent}. Find sin θ.`,
+        opposite / hypotenuse,
+        `The hypotenuse is ${hypotenuse}, so sin θ = opposite/hypotenuse = ${opposite}/${hypotenuse} = ${fmt(opposite / hypotenuse)}.`,
+        { kind: 'right-triangle-sine', opposite, adjacent }
+      ));
+    });
+    for (let i = 0; i < 10; i += 1) {
+      const n = 4 + i;
+      if (i % 2 === 0) {
+        const first = 2 + i;
+        const difference = 1 + (i % 4);
+        const answer = first + (n - 1) * difference;
+        questions.push(qNumber(
+          `precalc-sequence-${i + 1}`, 'Sequences',
+          `An arithmetic sequence has a₁ = ${first} and common difference ${difference}. Find a_${n}.`,
+          answer, `a_n = a₁ + (n − 1)d = ${first} + (${n} − 1)(${difference}) = ${answer}.`,
+          { kind: 'arithmetic-term', first, difference, n }
+        ));
+      } else {
+        const first = 1 + (i % 3);
+        const ratio = 2 + (i % 2);
+        const answer = first * ratio ** (n - 1);
+        questions.push(qNumber(
+          `precalc-sequence-${i + 1}`, 'Sequences',
+          `A geometric sequence has a₁ = ${first} and common ratio ${ratio}. Find a_${n}.`,
+          answer, `a_n = a₁r^(n−1) = ${first}(${ratio}^${n - 1}) = ${answer}.`,
+          { kind: 'geometric-term', first, ratio, n }
+        ));
+      }
+    }
+    return questions;
+  }
+
+  function multivariableCalculus() {
+    const questions = [];
+    for (let i = 0; i < 10; i += 1) {
+      const u = [i + 1, 2 - (i % 4), (i % 5) - 2];
+      const v = [2 + (i % 3), i - 3, 1 + (i % 4)];
+      const answer = u.reduce((sum, value, index) => sum + value * v[index], 0);
+      questions.push(qNumber(
+        `multi-dot-${i + 1}`, 'Vectors and dot products',
+        `Find ⟨${u.join(', ')}⟩ · ⟨${v.join(', ')}⟩.`,
+        answer, `Multiply matching components and add: the dot product is ${answer}.`,
+        { kind: 'vector-dot', u, v }
+      ));
+    }
+    for (let i = 0; i < 10; i += 1) {
+      const a = 1 + i;
+      const b = 2 + (i % 4);
+      const c = (i % 5) - 2;
+      const d = 3 + (i % 3);
+      const answer = a * d - b * c;
+      questions.push(qNumber(
+        `multi-cross-${i + 1}`, 'Cross products',
+        `Find the z-component of ⟨${a}, ${b}, 0⟩ × ⟨${c}, ${d}, 0⟩.`,
+        answer, `The z-component is ad − bc = ${a}(${d}) − ${b}(${c}) = ${answer}.`,
+        { kind: 'cross-z', a, b, c, d }
+      ));
+    }
+    for (let i = 0; i < 10; i += 1) {
+      const a = 1 + (i % 4);
+      const b = (i % 5) - 2;
+      const c = 1 + (i % 3);
+      const x = (i % 5) - 2;
+      const y = i - 3;
+      const answer = 2 * a * x + b * y;
+      questions.push(qNumber(
+        `multi-partial-x-${i + 1}`, 'Partial derivatives',
+        `For f(x,y) = ${a}x² ${term(b, 'xy')} ${term(c, 'y²')}, find f_x(${x}, ${y}).`,
+        answer, `Holding y constant gives f_x = ${2 * a}x ${term(b, 'y')}. At (${x}, ${y}), this is ${answer}.`,
+        { kind: 'partial-x', a, b, x, y }
+      ));
+    }
+    for (let i = 0; i < 10; i += 1) {
+      const a = 1 + (i % 3);
+      const b = (i % 5) - 2;
+      const c = 2 + (i % 4);
+      const x = i - 4;
+      const y = (i % 5) - 1;
+      const answer = b * x + 2 * c * y;
+      questions.push(qNumber(
+        `multi-gradient-${i + 1}`, 'Gradients',
+        `For f(x,y) = ${a}x² ${term(b, 'xy')} ${term(c, 'y²')}, find the y-component of ∇f at (${x}, ${y}).`,
+        answer, `The y-component is f_y = ${b}x ${term(2 * c, 'y')}. Substitution gives ${answer}.`,
+        { kind: 'partial-y', b, c, x, y }
+      ));
+    }
+    for (let i = 0; i < 10; i += 1) {
+      const a = 1 + (i % 3);
+      const b = 1 + (i % 4);
+      const width = 1 + (i % 5);
+      const height = 2 + (i % 4);
+      const answer = a * width ** 2 * height / 2 + b * width * height ** 2 / 2;
+      questions.push(qNumber(
+        `multi-double-integral-${i + 1}`, 'Multiple integrals',
+        `Evaluate ∬_R (${a}x + ${b}y) dA over 0 ≤ x ≤ ${width}, 0 ≤ y ≤ ${height}.`,
+        answer, `Integrating over the rectangle gives (${a}/2)(${width}²)(${height}) + (${b}/2)(${width})(${height}²) = ${fmt(answer)}.`,
+        { kind: 'double-integral-linear', a, b, width, height }
+      ));
+    }
+    for (let i = 0; i < 10; i += 1) {
+      const a = 1 + (i % 3);
+      const b = 2 + (i % 4);
+      const c = 1 + (i % 5);
+      const x = (i % 4) - 1;
+      const y = i - 3;
+      const z = (i % 5) - 2;
+      const answer = 2 * a * x + 2 * b * y + 2 * c * z;
+      questions.push(qNumber(
+        `multi-divergence-${i + 1}`, 'Vector fields',
+        `For F = ⟨${a}x², ${b}y², ${c}z²⟩, find div F at (${x}, ${y}, ${z}).`,
+        answer, `div F = ${2 * a}x + ${2 * b}y + ${2 * c}z. At the point, this equals ${answer}.`,
+        { kind: 'divergence-quadratic', a, b, c, x, y, z }
+      ));
+    }
+    return questions;
+  }
+
+  function programmingTwo() {
+    const questions = [];
+    const addConcepts = (prefix, topic, rows) => rows.forEach(([prompt, choices, answer, explanation], i) => {
+      questions.push(qChoice(`${prefix}-${i + 1}`, topic, prompt, choices, answer, explanation, { kind: 'concept', expected: answer }));
+    });
+    addConcepts('cp2-oop', 'Object-oriented programming', [
+      ['What relationship does inheritance model?', ['An “is-a” relationship', 'A file path', 'A loop condition', 'A database join'], 'An “is-a” relationship', 'A subclass is a specialized kind of its parent class.'],
+      ['What does method overriding do?', ['Replaces inherited behavior in a subclass', 'Deletes every parent field', 'Runs two loops together', 'Catches an exception'], 'Replaces inherited behavior in a subclass', 'An override supplies subclass-specific behavior with the same method contract.'],
+      ['What is polymorphism?', ['One interface with multiple implementations', 'One variable with no type', 'One loop with many counters', 'One file with many names'], 'One interface with multiple implementations', 'Polymorphism lets callers use a shared contract while runtime behavior varies by concrete type.'],
+      ['What does an interface primarily define?', ['A behavior contract', 'Object storage size', 'A sorting order', 'A network address'], 'A behavior contract', 'An interface states which operations an implementation must provide.'],
+      ['Why use an abstract class?', ['Share implementation while preventing direct instantiation', 'Make every method private', 'Avoid all inheritance', 'Store SQL rows'], 'Share implementation while preventing direct instantiation', 'Abstract classes can hold shared state and behavior but represent incomplete base types.'],
+      ['What principle hides internal state behind methods?', ['Encapsulation', 'Recursion', 'Memoization', 'Serialization'], 'Encapsulation', 'Encapsulation protects invariants by controlling access to state.'],
+      ['What is dynamic dispatch?', ['Choosing an overridden method at runtime', 'Allocating an array at compile time', 'Opening a dynamic file', 'Sorting by insertion'], 'Choosing an overridden method at runtime', 'Runtime type determines which overridden implementation runs.'],
+      ['Which design usually favors composition?', ['Building behavior from contained objects', 'Extending every available class', 'Using only global variables', 'Replacing functions with comments'], 'Building behavior from contained objects', 'Composition combines focused objects without forcing an is-a hierarchy.'],
+      ['What must a subclass constructor initialize?', ['Its own required state and the parent state', 'Only static methods', 'Every object in memory', 'The program entry point'], 'Its own required state and the parent state', 'A complete object includes both inherited and subclass state.'],
+      ['What is a concrete class?', ['A class that can be instantiated', 'A class with no methods', 'A comment-only class', 'A database schema'], 'A class that can be instantiated', 'Concrete classes implement all required behavior and can create instances.']
+    ]);
+    addConcepts('cp2-exception', 'Exceptions', [
+      ['What code belongs in a try block?', ['Code that may raise an expected exception', 'Every comment', 'Only variable declarations', 'Code that cannot fail'], 'Code that may raise an expected exception', 'The try block surrounds the operation whose failure you plan to handle.'],
+      ['What does catch or except receive?', ['A thrown exception', 'A loop index', 'A class constructor', 'A file extension'], 'A thrown exception', 'The handler receives a matching exception from the try block.'],
+      ['What does throw or raise do?', ['Signals an exceptional condition', 'Returns a normal value', 'Starts a thread', 'Sorts a list'], 'Signals an exceptional condition', 'Throwing transfers control to a matching handler.'],
+      ['Why create a custom exception?', ['Represent a domain-specific failure clearly', 'Make arithmetic faster', 'Avoid all error messages', 'Replace input validation'], 'Represent a domain-specific failure clearly', 'A named domain exception communicates what failed and supports targeted handling.'],
+      ['What is a finally block for?', ['Cleanup that must run whether failure occurs or not', 'Retrying forever', 'Declaring a subclass', 'Computing Big-O'], 'Cleanup that must run whether failure occurs or not', 'finally is suited to releasing resources on both success and failure paths.'],
+      ['What is defensive handling?', ['Checking conditions before a risky operation', 'Ignoring exceptions', 'Catching every error at the top level', 'Deleting invalid data silently'], 'Checking conditions before a risky operation', 'Defensive code validates known preconditions first.'],
+      ['What is corrective handling?', ['Attempting work and responding to a specific failure', 'Preventing functions from returning', 'Using only if statements', 'Converting every value to text'], 'Attempting work and responding to a specific failure', 'Corrective handling reacts after an operation reports failure.'],
+      ['Why avoid an empty catch block?', ['It hides failures and leaves no recovery evidence', 'It uses too much memory', 'It makes code compile twice', 'It creates a subclass'], 'It hides failures and leaves no recovery evidence', 'Silently swallowed failures make incorrect state hard to detect.'],
+      ['Which handler should come first?', ['The most specific matching exception', 'The broadest possible exception', 'A handler with no type', 'The finally block'], 'The most specific matching exception', 'A broad handler first can swallow failures meant for targeted recovery.'],
+      ['What is exception propagation?', ['An unhandled exception moving up the call stack', 'Copying an array', 'Sending data over a network', 'Repeating a loop'], 'An unhandled exception moving up the call stack', 'If a function cannot handle an exception, its caller gets the chance.']
+    ]);
+    addConcepts('cp2-structure', 'Data structures', [
+      ['Which order does a stack use?', ['Last in, first out', 'First in, first out', 'Sorted order only', 'Random order'], 'Last in, first out', 'The most recently pushed item is popped first.'],
+      ['Which order does a queue use?', ['First in, first out', 'Last in, first out', 'Largest first', 'Random order'], 'First in, first out', 'The earliest enqueued item is removed first.'],
+      ['What does each linked-list node store?', ['A value and link to another node', 'Every list value', 'A hash function only', 'A SQL query'], 'A value and link to another node', 'Links connect separately allocated nodes into a sequence.'],
+      ['What is average hash-map lookup complexity?', ['O(1)', 'O(log n)', 'O(n)', 'O(n²)'], 'O(1)', 'A good hash function usually locates a bucket in constant time.'],
+      ['Which operation is naturally O(1) on a singly linked list?', ['Insert at the head', 'Access index n/2', 'Binary search', 'Sort all nodes'], 'Insert at the head', 'Head insertion changes only a small fixed number of links.'],
+      ['Which structure supports undo history naturally?', ['Stack', 'Queue', 'Hash set', 'Binary file'], 'Stack', 'Undo removes the most recent action first.'],
+      ['Which structure supports first-come task processing?', ['Queue', 'Stack', 'Set', 'Tree leaf'], 'Queue', 'FIFO ordering preserves arrival order.'],
+      ['What problem do hash collisions describe?', ['Different keys mapping to the same bucket', 'Two arrays sharing a length', 'A loop reaching zero', 'Two files sharing text'], 'Different keys mapping to the same bucket', 'Hash maps need collision handling because bucket ranges are finite.'],
+      ['What does a set enforce?', ['Unique elements', 'Sorted elements in every implementation', 'Numeric elements only', 'Exactly two elements'], 'Unique elements', 'Sets represent membership without duplicates.'],
+      ['Why choose an array over a linked list for indexed access?', ['Arrays provide direct index lookup', 'Arrays never use memory', 'Linked lists cannot store values', 'Arrays are always sorted'], 'Arrays provide direct index lookup', 'Contiguous array layout supports constant-time indexing.']
+    ]);
+    for (let i = 0; i < 10; i += 1) {
+      const n = 3 + i;
+      questions.push(qNumber(
+        `cp2-recursion-${i + 1}`, 'Recursion',
+        `A recursive factorial function uses fact(0) = 1 and fact(n) = n · fact(n−1). Find fact(${n}).`,
+        factorial(n), `Expanding the recurrence gives ${n}! = ${factorial(n)}.`,
+        { kind: 'factorial', n }
+      ));
+    }
+    for (let i = 0; i < 10; i += 1) {
+      const halvings = i + 3;
+      const size = 2 ** halvings;
+      questions.push(qNumber(
+        `cp2-complexity-${i + 1}`, 'Algorithms and complexity',
+        `A binary-search interval contains ${size} elements. How many exact halvings reduce it to one element?`,
+        halvings, `${size} = 2^${halvings}, so ${halvings} halvings leave one candidate.`,
+        { kind: 'binary-halvings', size }
+      ));
+    }
+    addConcepts('cp2-memory', 'Memory and concurrency', [
+      ['Where do ordinary function call frames live?', ['Call stack', 'Database heap table', 'Network queue', 'Source file'], 'Call stack', 'Each active call owns a stack frame until it returns.'],
+      ['Where do dynamically allocated objects generally live?', ['Heap', 'Instruction pointer', 'Comment block', 'Import list'], 'Heap', 'Heap allocation supports lifetimes independent of one function call.'],
+      ['What does garbage collection reclaim?', ['Unreachable managed objects', 'Every local variable immediately', 'Source code comments', 'Network packets'], 'Unreachable managed objects', 'A collector finds managed allocations no live reference can reach.'],
+      ['What is a memory leak?', ['Allocated memory that is no longer useful but remains retained', 'A syntax error', 'A sorted array', 'A successful exception handler'], 'Allocated memory that is no longer useful but remains retained', 'Leaks grow memory use because obsolete allocations are never released.'],
+      ['What is a race condition?', ['Result depends on uncontrolled thread timing', 'Two loops have equal length', 'A function returns early', 'A file has duplicate lines'], 'Result depends on uncontrolled thread timing', 'Unsynchronized shared access can produce timing-dependent results.'],
+      ['What does a mutex protect?', ['A critical section of shared state', 'Every function parameter', 'A compiler executable', 'A CSS selector'], 'A critical section of shared state', 'A mutex allows one holder at a time into protected code.'],
+      ['How does a process differ from a thread?', ['A process has an isolated address space', 'A process cannot execute code', 'A thread owns a separate computer', 'They are always identical'], 'A process has an isolated address space', 'Threads usually share their process memory; separate processes do not.'],
+      ['What is deadlock?', ['Tasks wait forever for resources held by each other', 'A loop reaches its base case', 'A map finds a key', 'A file closes normally'], 'Tasks wait forever for resources held by each other', 'Circular resource waits can prevent every participant from progressing.'],
+      ['What is a dangling reference?', ['A reference to memory whose lifetime ended', 'A valid global constant', 'A recursive return value', 'A queue front'], 'A reference to memory whose lifetime ended', 'Using an object after its storage is released is unsafe.'],
+      ['Why minimize shared mutable state?', ['It reduces synchronization bugs', 'It makes every algorithm O(1)', 'It prevents all exceptions', 'It removes the need for tests'], 'It reduces synchronization bugs', 'Less shared mutation means fewer timing-sensitive interactions.']
+    ]);
+    return questions;
+  }
+
+  function dataHandling() {
+    const questions = [];
+    const addConcepts = (prefix, topic, rows) => rows.forEach(([prompt, choices, answer, explanation], i) => {
+      questions.push(qChoice(`${prefix}-${i + 1}`, topic, prompt, choices, answer, explanation, { kind: 'concept', expected: answer }));
+    });
+    for (let i = 0; i < 10; i += 1) {
+      const values = [i + 2, i + 4, i + 6, i + 8];
+      const answer = values.reduce((sum, value) => sum + value, 0) / values.length;
+      questions.push(qNumber(
+        `data-sheet-${i + 1}`, 'Spreadsheets',
+        `A spreadsheet range contains ${values.join(', ')}. What does AVERAGE return?`,
+        answer, `AVERAGE adds the four values and divides by 4, giving ${answer}.`,
+        { kind: 'average', values }
+      ));
+    }
+    addConcepts('data-sql', 'SQL and databases', [
+      ['Which SQL clause chooses columns to return?', ['SELECT', 'WHERE', 'JOIN', 'GROUP BY'], 'SELECT', 'SELECT defines the output columns.'],
+      ['Which SQL clause filters rows before aggregation?', ['WHERE', 'ORDER BY', 'SELECT', 'AS'], 'WHERE', 'WHERE keeps only rows satisfying its condition.'],
+      ['Which join keeps only matching rows from both tables?', ['INNER JOIN', 'LEFT JOIN', 'CROSS JOIN', 'FULL JOIN'], 'INNER JOIN', 'INNER JOIN returns rows with a match on both sides.'],
+      ['Which join keeps every row from the left table?', ['LEFT JOIN', 'INNER JOIN', 'CROSS JOIN', 'SELF JOIN only'], 'LEFT JOIN', 'LEFT JOIN preserves left rows and fills missing right values with NULL.'],
+      ['Which function counts rows?', ['COUNT', 'SUM', 'AVG', 'MAX'], 'COUNT', 'COUNT returns the number of qualifying rows or non-NULL values.'],
+      ['What does GROUP BY do?', ['Forms groups for aggregate calculations', 'Deletes duplicate tables', 'Sorts text alphabetically only', 'Renames a database'], 'Forms groups for aggregate calculations', 'GROUP BY partitions rows before COUNT, SUM, AVG, and similar functions.'],
+      ['What uniquely identifies a table row?', ['Primary key', 'Foreign key only', 'Column alias', 'WHERE clause'], 'Primary key', 'A primary key is unique and non-NULL for each row.'],
+      ['What does a foreign key represent?', ['A relationship to another table’s key', 'A computed average', 'A file name', 'A chart axis'], 'A relationship to another table’s key', 'Foreign keys connect related records and support referential integrity.'],
+      ['Which value represents missing or unknown SQL data?', ['NULL', '0', 'Empty table', 'FALSE always'], 'NULL', 'NULL is distinct from zero and empty text.'],
+      ['Why use a CTE?', ['Name an intermediate query for clarity and reuse', 'Encrypt every row', 'Replace all indexes', 'Open a spreadsheet'], 'Name an intermediate query for clarity and reuse', 'WITH clauses make multi-step queries easier to read.']
+    ]);
+    for (let i = 0; i < 10; i += 1) {
+      const values = [i, i + 2, i + 4, i + 8, i + 12];
+      questions.push(qNumber(
+        `data-stats-${i + 1}`, 'Descriptive statistics',
+        `Find the median of ${values.join(', ')}.`,
+        values[2], `The values are ordered, so the middle value is ${values[2]}.`,
+        { kind: 'median', values }
+      ));
+    }
+    addConcepts('data-cleaning', 'Data quality and cleaning', [
+      ['What does completeness measure?', ['Whether required values are present', 'Whether values are sorted', 'Whether a chart has color', 'Whether SQL uses aliases'], 'Whether required values are present', 'Completeness tracks missing required data.'],
+      ['What does validity measure?', ['Whether values follow allowed rules and formats', 'Whether every value is unique', 'Whether a mean is large', 'Whether a file is compressed'], 'Whether values follow allowed rules and formats', 'Validity compares data against its domain constraints.'],
+      ['What should happen before deleting an outlier?', ['Investigate whether it is error or genuine', 'Delete it automatically', 'Replace it with zero', 'Hide the entire column'], 'Investigate whether it is error or genuine', 'Extreme values may carry real information rather than represent mistakes.'],
+      ['What is deduplication?', ['Finding and resolving repeated records', 'Sorting rows by date', 'Calculating a median', 'Joining every table'], 'Finding and resolving repeated records', 'Deduplication prevents one entity from being counted multiple times.'],
+      ['What does standardization fix?', ['Equivalent values stored in inconsistent forms', 'Every missing value', 'All sampling bias', 'Every SQL error'], 'Equivalent values stored in inconsistent forms', 'Standardization makes representations such as dates and categories consistent.'],
+      ['What does MCAR mean?', ['Missingness unrelated to observed or missing values', 'Every value is present', 'Data is sorted randomly', 'Missingness caused by the missing value itself'], 'Missingness unrelated to observed or missing values', 'MCAR describes missingness with no systematic relationship to the data.'],
+      ['Why keep a cleaning log?', ['Make transformations reproducible and reviewable', 'Increase chart colors', 'Avoid primary keys', 'Remove every outlier'], 'Make transformations reproducible and reviewable', 'A log records what changed and why.'],
+      ['What is input validation?', ['Rejecting or constraining invalid values at entry', 'Drawing a histogram', 'Running a regression', 'Creating duplicate records'], 'Rejecting or constraining invalid values at entry', 'Preventing bad input is cheaper than repairing it later.'],
+      ['What is a fuzzy duplicate?', ['A repeated entity with non-identical spelling or formatting', 'A row with a NULL value', 'A perfectly identical row', 'A chart without labels'], 'A repeated entity with non-identical spelling or formatting', 'Names and addresses often vary while referring to the same entity.'],
+      ['Which action best preserves raw data?', ['Create a cleaned copy and leave source unchanged', 'Overwrite the source immediately', 'Delete rejected rows permanently', 'Round every number'], 'Create a cleaned copy and leave source unchanged', 'An immutable raw source supports auditing and recovery.']
+    ]);
+    for (let i = 0; i < 10; i += 1) {
+      const x1 = i;
+      const x2 = i + 2 + (i % 3);
+      const slope = (i % 5) - 2 || 3;
+      const y1 = 2 * i - 1;
+      const y2 = y1 + slope * (x2 - x1);
+      questions.push(qNumber(
+        `data-regression-${i + 1}`, 'Correlation and regression',
+        `A fitted line passes through (${x1}, ${y1}) and (${x2}, ${y2}). Find its slope.`,
+        slope, `Slope = (${y2} − ${y1})/(${x2} − ${x1}) = ${slope}.`,
+        { kind: 'two-point-slope', x1, y1, x2, y2 }
+      ));
+    }
+    addConcepts('data-visual', 'Visualization and storytelling', [
+      ['Best chart for change over time?', ['Line chart', 'Pie chart', 'Scatterplot only', 'Unlabeled table'], 'Line chart', 'Connected positions emphasize temporal movement.'],
+      ['Best chart for two quantitative variables?', ['Scatterplot', 'Pie chart', 'Single bar', 'Flowchart'], 'Scatterplot', 'A scatterplot reveals association, clusters, and outliers between two numeric variables.'],
+      ['Best chart for comparing category totals?', ['Bar chart', 'Line chart with dates missing', 'Pie chart with 30 slices', 'Map without geography'], 'Bar chart', 'Position and length make category comparisons clear.'],
+      ['Why can a truncated bar-chart axis mislead?', ['It exaggerates visual differences', 'It changes stored values', 'It prevents labels', 'It sorts categories'], 'It exaggerates visual differences', 'Bars encode magnitude from a baseline, so truncation distorts relative lengths.'],
+      ['What does correlation establish by itself?', ['Association, not causation', 'Causation', 'A randomized experiment', 'Perfect prediction'], 'Association, not causation', 'Confounding and reverse causality remain possible.'],
+      ['What should a chart title communicate?', ['The main question or finding', 'Only the file name', 'Every raw row', 'The software version'], 'The main question or finding', 'A useful title helps the audience interpret the display.'],
+      ['Why avoid unnecessary 3D effects?', ['They distort comparison and add clutter', 'They make values exact', 'They remove legends', 'They calculate averages'], 'They distort comparison and add clutter', 'Perspective effects add no data and can change perceived size.'],
+      ['What does data-ink ratio encourage?', ['More informative marks and less decoration', 'More gradients', 'More chart borders', 'Removing all labels'], 'More informative marks and less decoration', 'Visual elements should carry information or support comprehension.'],
+      ['What belongs in a data story after the finding?', ['Its implication or recommended action', 'An unrelated chart', 'Every discarded draft', 'A hidden axis'], 'Its implication or recommended action', 'Context, finding, and implication connect evidence to a decision.'],
+      ['Why label units on axes?', ['Numbers need measurement context', 'Units increase sample size', 'Units remove outliers', 'Units imply causation'], 'Numbers need measurement context', 'A value is ambiguous without its scale or measurement unit.']
+    ]);
+    return questions;
+  }
+
+  function physicsTwo() {
+    const questions = [];
+    for (let i = 0; i < 10; i += 1) {
+      const mass = 1 + (i % 5);
+      const specificHeat = 2 + (i % 4);
+      const temperatureChange = 3 + i;
+      const answer = mass * specificHeat * temperatureChange;
+      questions.push(qNumber(
+        `physics2-thermal-${i + 1}`, 'Thermodynamics',
+        `A ${mass} kg sample with specific heat ${specificHeat} J/(kg·°C) warms by ${temperatureChange}°C. How much heat is added, in joules?`,
+        answer, `Q = mcΔT = ${mass}(${specificHeat})(${temperatureChange}) = ${answer} J.`,
+        { kind: 'specific-heat', mass, specificHeat, temperatureChange }
+      ));
+    }
+    for (let i = 0; i < 10; i += 1) {
+      const charge1 = 1 + (i % 5);
+      const charge2 = 2 + (i % 4);
+      const distance = 1 + (i % 3);
+      const answer = 0.009 * charge1 * charge2 / distance ** 2;
+      questions.push(qNumber(
+        `physics2-electric-${i + 1}`, 'Electrostatics',
+        `Charges ${charge1} μC and ${charge2} μC are ${distance} m apart. Find the Coulomb-force magnitude in newtons; use k = 9.0×10⁹.`,
+        answer, `F = k|q₁q₂|/r² = ${fmt(answer)} N.`,
+        { kind: 'coulomb-micro', charge1, charge2, distance }
+      ));
+    }
+    for (let i = 0; i < 10; i += 1) {
+      const resistance = 2 + (i % 6);
+      const current = 1 + (i % 5);
+      const voltage = resistance * current;
+      questions.push(qNumber(
+        `physics2-circuit-${i + 1}`, 'Electric circuits',
+        `A ${resistance} Ω resistor has ${voltage} V across it. Find the current in amperes.`,
+        current, `Ohm’s law gives I = V/R = ${voltage}/${resistance} = ${current} A.`,
+        { kind: 'ohms-law-current', voltage, resistance }
+      ));
+    }
+    for (let i = 0; i < 10; i += 1) {
+      const charge = 1 + (i % 5);
+      const velocity = 2 + (i % 6);
+      const field = 0.5 + (i % 4) * 0.5;
+      const answer = charge * velocity * field;
+      questions.push(qNumber(
+        `physics2-magnetic-${i + 1}`, 'Magnetism',
+        `A ${charge} μC charge moves perpendicular to a ${field} T field at ${velocity} m/s. Find the magnetic-force magnitude in μN.`,
+        answer, `F = qvB. With q in μC, the result is ${charge}(${velocity})(${field}) = ${fmt(answer)} μN.`,
+        { kind: 'magnetic-force-micro', charge, velocity, field }
+      ));
+    }
+    for (let i = 0; i < 10; i += 1) {
+      const focalLength = 2 + i;
+      const objectDistance = 2 * focalLength;
+      questions.push(qNumber(
+        `physics2-optics-${i + 1}`, 'Geometric optics',
+        `A converging lens has focal length ${focalLength} cm. An object is ${objectDistance} cm away. Find the image distance in centimeters.`,
+        objectDistance, `1/f = 1/dₒ + 1/dᵢ. With dₒ = 2f, dᵢ = 2f = ${objectDistance} cm.`,
+        { kind: 'thin-lens-image', focalLength, objectDistance }
+      ));
+    }
+    const wavelengths = [620, 496, 400, 310, 248, 200, 155, 124, 100, 80];
+    wavelengths.forEach((wavelength, i) => {
+      const answer = 1240 / wavelength;
+      questions.push(qNumber(
+        `physics2-quantum-${i + 1}`, 'Modern physics',
+        `Using hc = 1240 eV·nm, find the energy in eV of a photon with wavelength ${wavelength} nm.`,
+        answer, `E = hc/λ = 1240/${wavelength} = ${fmt(answer)} eV.`,
+        { kind: 'photon-energy', wavelength }
+      ));
+    });
+    return questions;
+  }
+
   const courses = [
     {
       slug: 'algebra-geometry',
@@ -457,6 +855,41 @@
       tier: 'intro',
       summary: 'Kinematics, forces, energy, momentum, rotation, and circular motion.',
       questions: physics()
+    },
+    {
+      slug: 'precalculus',
+      title: 'Precalculus',
+      tier: 'core',
+      summary: 'Functions, composition, polynomials, exponentials, trigonometry, and sequences.',
+      questions: precalculus()
+    },
+    {
+      slug: 'multivariable-calculus',
+      title: 'Multivariable Calculus',
+      tier: 'advanced',
+      summary: 'Vectors, cross products, partial derivatives, gradients, multiple integrals, and vector fields.',
+      questions: multivariableCalculus()
+    },
+    {
+      slug: 'computer-programming-2',
+      title: 'Computer Programming 2',
+      tier: 'core',
+      summary: 'OOP, exceptions, data structures, recursion, complexity, memory, and concurrency.',
+      questions: programmingTwo()
+    },
+    {
+      slug: 'data-handling-cb',
+      title: 'Data Handling CB',
+      tier: 'core',
+      summary: 'Spreadsheets, SQL, descriptive statistics, cleaning, regression, and visualization.',
+      questions: dataHandling()
+    },
+    {
+      slug: 'ap-physics-2',
+      title: 'AP Physics 2',
+      tier: 'core',
+      summary: 'Thermodynamics, electrostatics, circuits, magnetism, optics, and modern physics.',
+      questions: physicsTwo()
     }
   ];
   const courseBySlug = Object.fromEntries(courses.map((course) => [course.slug, course]));

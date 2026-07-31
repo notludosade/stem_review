@@ -48,6 +48,29 @@ const expectedAnswer = ({ meta }) => {
     case 'inelastic-collision': return (m.mass1 * m.velocity1 + m.mass2 * m.velocity2) / (m.mass1 + m.mass2);
     case 'torque': return m.force * m.radius;
     case 'centripetal-force': return m.mass * m.velocity ** 2 / m.radius;
+    case 'quadratic-eval': return m.a * m.x ** 2 + m.b * m.x + m.c;
+    case 'linear-composition': return m.a * (m.c * m.x + m.d) + m.b;
+    case 'exponential-solve': return Math.log(m.value) / Math.log(m.base);
+    case 'right-triangle-sine': return m.opposite / Math.hypot(m.opposite, m.adjacent);
+    case 'arithmetic-term': return m.first + (m.n - 1) * m.difference;
+    case 'geometric-term': return m.first * m.ratio ** (m.n - 1);
+    case 'vector-dot': return m.u.reduce((sum, value, index) => sum + value * m.v[index], 0);
+    case 'cross-z': return m.a * m.d - m.b * m.c;
+    case 'partial-x': return 2 * m.a * m.x + m.b * m.y;
+    case 'partial-y': return m.b * m.x + 2 * m.c * m.y;
+    case 'double-integral-linear': return m.a * m.width ** 2 * m.height / 2 + m.b * m.width * m.height ** 2 / 2;
+    case 'divergence-quadratic': return 2 * m.a * m.x + 2 * m.b * m.y + 2 * m.c * m.z;
+    case 'factorial': return factorial(m.n);
+    case 'binary-halvings': return Math.log2(m.size);
+    case 'average': return m.values.reduce((sum, value) => sum + value, 0) / m.values.length;
+    case 'median': return m.values.slice().sort((a, b) => a - b)[Math.floor(m.values.length / 2)];
+    case 'two-point-slope': return (m.y2 - m.y1) / (m.x2 - m.x1);
+    case 'specific-heat': return m.mass * m.specificHeat * m.temperatureChange;
+    case 'coulomb-micro': return 9e9 * (m.charge1 * 1e-6) * (m.charge2 * 1e-6) / m.distance ** 2;
+    case 'ohms-law-current': return m.voltage / m.resistance;
+    case 'magnetic-force-micro': return m.charge * m.velocity * m.field;
+    case 'thin-lens-image': return 1 / (1 / m.focalLength - 1 / m.objectDistance);
+    case 'photon-energy': return 1240 / m.wavelength;
     default: throw new Error(`Unknown audit kind: ${m.kind}`);
   }
 };
@@ -58,7 +81,7 @@ const assert = (condition, message) => {
   if (!condition) throw new Error(message);
 };
 
-assert(courses.length === 5, `Expected 5 courses, found ${courses.length}`);
+assert(courses.length === 10, `Expected 10 courses, found ${courses.length}`);
 const ids = new Set();
 let total = 0;
 
@@ -90,7 +113,7 @@ courses.forEach((course) => {
   total += course.questions.length;
 });
 
-assert(total === 300, `Expected 300 total questions, found ${total}`);
+assert(total === 600, `Expected 600 total questions, found ${total}`);
 
 const root = path.resolve(__dirname, '..');
 const pages = ['index.html', 'problem-sets.html', 'problem-set.html', 'sandbox.html'];
