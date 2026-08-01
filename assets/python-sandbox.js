@@ -134,6 +134,7 @@
     });
   });
 
+  const difficultySelect = document.querySelector('[data-python-difficulty]');
   const topicSelect = document.querySelector('[data-python-topic]');
   const problemPicker = document.querySelector('[data-python-picker]');
   const progressText = document.querySelector('[data-python-progress]');
@@ -155,13 +156,19 @@
   let state = loadState();
   let currentProblem = null;
 
-  const filteredProblems = () => topicSelect.value === 'all'
-    ? api.problems
-    : api.problems.filter((problem) => problem.topic === topicSelect.value);
+  const filteredProblems = () => api.problems.filter((problem) => (
+    (difficultySelect.value === 'all' || problem.difficulty === difficultySelect.value)
+    && (topicSelect.value === 'all' || problem.topic === topicSelect.value)
+  ));
 
   const renderProgress = () => {
     const solvedCount = api.problems.filter((problem) => state.solved[problem.id]).length;
-    progressText.textContent = `${solvedCount}/${api.problems.length} problems solved`;
+    const difficultyProgress = ['Easy', 'Medium', 'Hard'].map((difficulty) => {
+      const problems = api.problems.filter((problem) => problem.difficulty === difficulty);
+      const solved = problems.filter((problem) => state.solved[problem.id]).length;
+      return `${solved}/${problems.length} ${difficulty}`;
+    });
+    progressText.textContent = `${solvedCount}/${api.problems.length} solved · ${difficultyProgress.join(' · ')}`;
   };
 
   const populatePicker = (preferredId) => {
@@ -172,7 +179,7 @@
     filtered.forEach((problem) => {
       const option = document.createElement('option');
       option.value = problem.id;
-      option.textContent = `${state.solved[problem.id] ? '✓ ' : ''}${problem.id.slice(3)} · ${problem.title}`;
+      option.textContent = `${state.solved[problem.id] ? '✓ ' : ''}${problem.id.slice(3)} · ${problem.title} · ${problem.difficulty}`;
       option.selected = problem.id === selectedId;
       problemPicker.appendChild(option);
     });
@@ -182,7 +189,7 @@
     currentProblem = api.getProblem(problemPicker.value);
     const index = api.problems.indexOf(currentProblem);
     numberText.textContent = `Problem ${index + 1} of ${api.problems.length}`;
-    problemTopic.textContent = currentProblem.topic;
+    problemTopic.textContent = `${currentProblem.difficulty} · ${currentProblem.topic}`;
     title.textContent = currentProblem.title;
     prompt.textContent = currentProblem.prompt;
     solved.textContent = state.solved[currentProblem.id] ? 'Solved' : 'Not solved yet';
@@ -256,6 +263,10 @@
   topicSelect.prepend(allOption);
   topicSelect.value = 'all';
 
+  difficultySelect.addEventListener('change', () => {
+    populatePicker();
+    renderProblem();
+  });
   topicSelect.addEventListener('change', () => {
     populatePicker();
     renderProblem();
@@ -288,6 +299,7 @@
     const codeAtRun = editor.value;
     runButton.disabled = true;
     editor.disabled = true;
+    difficultySelect.disabled = true;
     topicSelect.disabled = true;
     problemPicker.disabled = true;
     nextButton.disabled = true;
@@ -317,6 +329,7 @@
     } finally {
       runButton.disabled = false;
       editor.disabled = false;
+      difficultySelect.disabled = false;
       topicSelect.disabled = false;
       problemPicker.disabled = false;
       nextButton.disabled = false;
