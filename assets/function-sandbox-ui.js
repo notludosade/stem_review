@@ -4,6 +4,7 @@
   const config = window.STEMFunctionSandbox;
   if (!config || !config.api) return;
   const api = config.api;
+  const difficulties = config.difficulties || ['Easy', 'Medium', 'Hard'];
   const $ = (name) => document.querySelector(`[data-code-${name}]`);
   const DEFAULT_STATE = { solved: {}, drafts: {}, freestyle: config.defaultFreeCode };
   const loadState = () => {
@@ -58,7 +59,7 @@
   ));
   const renderProgress = () => {
     const total = api.problems.filter((problem) => state.solved[problem.id]).length;
-    const groups = ['Easy', 'Medium', 'Hard'].map((level) => {
+    const groups = difficulties.map((level) => {
       const problems = api.problems.filter((problem) => problem.difficulty === level);
       return `${problems.filter((problem) => state.solved[problem.id]).length}/${problems.length} ${level}`;
     });
