@@ -1,0 +1,177 @@
+<meta charset="UTF-8">
+<title>Game Engine Architecture Glossary — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<div class="page" data-tier="advanced">
+  <span class="kicker">STEM+ · Game Engine Architecture · Reference</span>
+  <h1>Glossary</h1>
+  <p class="subtitle">Definitions in the exact form used across lessons. When a lesson introduces a new term, it gets added here — this file is the single source of truth for wording.</p>
+  <p class="nav-links"><a href="../Unit%207/0021-designing-a-small-engines-architecture.html" class="nav-prev">← Lesson 21: Capstone — Designing a Small Engine's Architecture</a> <a href="../index.html" class="nav-toc">Contents</a></p>
+
+  <h2>Unit 1 — The Anatomy of a Game Engine</h2>
+  <div class="term-grid">
+    <div class="term-card">
+      <p class="term-name">Game engine</p>
+      <p>The reusable software layer providing the general-purpose systems every game needs — rendering, physics, audio, input, asset loading, and object organization — so a team can write the logic unique to their game instead of re-solving already-solved problems.</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">Engine code vs. game code</p>
+      <p>Code belongs to the engine if it has no knowledge of any particular game's rules, manipulating only generic concepts; it belongs to the game if it encodes a rule specific to that title, like what "damage" or "winning" means.</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">Subsystem</p>
+      <p>A self-contained part of an engine responsible for one category of work — rendering, physics, audio, input, or scripting — with its own internal data and logic, exposed through a defined interface rather than internals other code reaches into directly.</p>
+    </div>
+  </div>
+
+  <h2>Unit 2 — The Game Loop &amp; Timing</h2>
+  <div class="term-grid">
+    <div class="term-card">
+      <p class="term-name">Game loop</p>
+      <p>The top-level loop that runs for the entire life of a game, repeatedly executing process input, update, and render, in that order, until the player quits.</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">Fixed timestep / Variable timestep</p>
+      <p>A fixed timestep always advances the simulation by the same constant amount, running update() multiple times per rendered frame if needed; a variable timestep passes the actual, measured duration of the previous frame — accurate, but never the same number twice.</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">Frame rate (FPS)</p>
+      <p>How many times per second the game loop completes.</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">Delta time (dt)</p>
+      <p>The amount of real time, in seconds, that elapsed since the last frame — multiplied into any per-second rate (movement, rotation, a timer) so it stays consistent regardless of frame rate.</p>
+    </div>
+  </div>
+
+  <h2>Unit 3 — Entity-Component Systems</h2>
+  <div class="term-grid">
+    <div class="term-card">
+      <p class="term-name">Diamond problem / Multiple inheritance</p>
+      <p>Multiple inheritance is needing a class to inherit from two unrelated parent classes at once; the diamond problem is the resulting ambiguity over which parent's method a child inherits when both define it.</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">Entity</p>
+      <p>An identifier — often just an integer ID — with no behavior and no data of its own; its effective "type" is whichever components happen to be attached to it right now.</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">Component</p>
+      <p>A plain bundle of data (Position, Health, Velocity) with no logic attached, stored in a component store keyed by entity ID.</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">System</p>
+      <p>A function, run every frame, that queries for every entity with a specific combination of components and operates on their data — where all ECS logic lives.</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">Query</p>
+      <p>The operation a system performs to find every entity ID present in all of its required component stores at once.</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">Component store</p>
+      <p>A map from entity ID to that component type's data, one per component type — often stored contiguously for fast, cache-friendly iteration at scale.</p>
+    </div>
+  </div>
+
+  <h2>Unit 4 — Rendering Basics</h2>
+  <div class="term-grid">
+    <div class="term-card">
+      <p class="term-name">Render pipeline (graphics pipeline)</p>
+      <p>The fixed sequence of GPU stages every triangle passes through: vertex processing, rasterization, fragment/pixel processing, then writing the result to the framebuffer.</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">Rasterization / Framebuffer</p>
+      <p>Rasterization determines exactly which screen pixels a triangle covers; the framebuffer is the block of memory holding the final pixel colors that get displayed.</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">Scene graph</p>
+      <p>A tree arranging every object in a scene, where each node's transform is stored relative to its parent rather than as an absolute world position.</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">World-space transform</p>
+      <p>An object's true position in the scene, computed by combining its local transform with every parent's transform up to the root.</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">View frustum / Frustum culling</p>
+      <p>The frustum is the pyramid-shaped region of space a camera can see; frustum culling discards objects entirely outside it before the render pipeline processes them.</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">Draw call</p>
+      <p>An instruction telling the GPU to render one object, typically issued once per visible object, carrying its own fixed overhead regardless of triangle count.</p>
+    </div>
+  </div>
+
+  <h2>Unit 5 — Physics Integration</h2>
+  <div class="term-grid">
+    <div class="term-card">
+      <p class="term-name">AABB (Axis-Aligned Bounding Box)</p>
+      <p>The smallest non-rotated rectangle (or box, in 3D) fully containing an object, used for cheap overlap checks at broad phase.</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">Broad phase / Narrow phase</p>
+      <p>Broad phase uses cheap AABB checks to rule out most object pairs quickly; narrow phase then runs the expensive, exact collision test on the small handful of pairs broad phase couldn't rule out.</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">Rigid body</p>
+      <p>An object treated as a solid, non-deformable shape with mass, position, and velocity, that forces like gravity or a collision can act on.</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">Numerical integration (Euler integration)</p>
+      <p>Updating a rigid body's velocity and position each small timestep by accumulating forces — velocity first, then position, using that new velocity.</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">Physics engine</p>
+      <p>The subsystem handling collision detection, collision response, integration, and constraints as one complete simulation loop — usually an existing library (Box2D, Bullet, PhysX) rather than a custom one.</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">Collision response / Constraint</p>
+      <p>Collision response resolves overlap and updates velocities so bodies push apart realistically; a constraint is a rule, like a joint, that must keep holding true as the simulation runs.</p>
+    </div>
+  </div>
+
+  <h2>Unit 6 — Asset Pipelines &amp; Resource Management</h2>
+  <div class="term-grid">
+    <div class="term-card">
+      <p class="term-name">Source asset / Runtime asset</p>
+      <p>A source asset is the file an artist edits, optimized for editing convenience; a runtime asset is the converted, engine-native format optimized for fast loading and direct use.</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">Import pipeline</p>
+      <p>The automated process that converts a source asset into its runtime form, typically once, ahead of time, rather than on every game launch.</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">Mipmap</p>
+      <p>A smaller, pre-shrunk copy of a texture, generated during import, used when an object is far enough away that full resolution would be wasted detail.</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">Memory budget</p>
+      <p>The fixed amount of fast memory a game may use for assets at any one time, set by the target hardware, not the developer.</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">Eviction</p>
+      <p>Unloading an already-loaded asset from memory to make room for a newly-needed one, usually the asset judged least likely to be needed again soon.</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">Streaming / Level of detail (LOD)</p>
+      <p>Streaming loads and unloads assets in the background based on player position, bounding memory usage; LOD swaps in a lower-triangle-count version of a model as it gets farther from the camera, bounding rendering cost.</p>
+    </div>
+  </div>
+
+  <h2>Unit 7 — Scripting, Scenes &amp; Putting It Together</h2>
+  <div class="term-grid">
+    <div class="term-card">
+      <p class="term-name">Scripting layer</p>
+      <p>A separate, usually interpreted language embedded in an engine, used to write game-specific logic that can iterate faster than the compiled engine core.</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">Hot-reloading</p>
+      <p>Editing a script's logic and seeing the change take effect immediately in a running game, with no recompile and no restart.</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">Scene</p>
+      <p>A distinct, loadable collection of game state — a menu, a level, a loading screen — usually with its own scene graph.</p>
+    </div>
+    <div class="term-card">
+      <p class="term-name">State machine / Transition</p>
+      <p>A state machine is always in exactly one of a fixed set of named states, moving between them only along explicitly defined transitions — used to manage which scene is active without ever running two incompatible modes at once.</p>
+    </div>
+  </div>
+</div>

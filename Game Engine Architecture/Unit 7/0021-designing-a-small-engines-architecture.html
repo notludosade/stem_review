@@ -1,0 +1,168 @@
+<meta charset="UTF-8">
+<title>Lesson 21: Capstone — Designing a Small Engine's Architecture — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="advanced">
+  <span class="kicker">STEM+ · Game Engine Architecture · Unit 7 · Lesson 21 · Capstone</span>
+  <h1>Capstone — Designing a Small Engine's Architecture</h1>
+  <p class="subtitle">Twenty lessons, seven subsystems, one question left: how does it all actually fit together, in one running program? This capstone pulls every unit into a single architecture diagram and traces one frame end to end.</p>
+  <p class="nav-links"><a href="0020-scene-management-and-state-machines.html" class="nav-prev">← Lesson 20</a> <a href="../index.html" class="nav-next">Course Contents →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Every piece has been introduced in isolation: the loop, the ECS, the pipeline, the physics step, the asset budget, the scripting layer, the state machine. None of them actually do anything alone. This lesson is about the wiring — which subsystem calls which, in what order, every single frame.</p>
+
+  <h2>One frame, every subsystem, in order</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    A minimal but complete engine's per-frame architecture is: the <strong>state machine</strong> (Unit 7) determines which <strong>scene</strong> is active; the <strong>game loop</strong> (Unit 2), using a <strong>fixed timestep</strong>, drives that scene's <strong>ECS</strong> (Unit 3) — <strong>process input</strong>, then run each <strong>system</strong> in a defined order (typically scripting logic, then physics integration and collision, then animation), then the <strong>scene graph</strong> (Unit 4) resolves world transforms, then the <strong>render pipeline</strong> culls, batches, and draws. Underneath all of it, the <strong>asset manager</strong> (Unit 6) streams what's needed into the fixed memory budget and evicts what isn't.
+  </div>
+
+  <h2>Try it: compose your own small engine</h2>
+  <p>Pick one approach for each subsystem category. There's no single right combination — but some choices genuinely conflict, and the summary will call that out.</p>
+
+  <div class="widget" id="capstone-widget">
+    <p class="widget-label">Interactive: assemble an engine's architecture</p>
+    <div id="capstone-choices"></div>
+    <p class="verdict" data-capstone-verdict>Choose one option in each category to see your engine summarized below.</p>
+    <div id="capstone-summary"></div>
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Worked example</span>
+    Trace a single frame of a platformer: the state machine confirms the game is in <strong>Playing</strong>. The loop's fixed timestep fires. Input is read: right arrow held. The scripting system reads that input and sets the player entity's velocity component. The physics system integrates every entity with Position + Velocity, then checks AABBs for collisions — the player's feet AABB overlaps a platform, so collision response zeroes vertical velocity. The scene graph recomputes world transforms for the player and anything parented to it. The renderer culls anything outside the frustum, batches draw calls, and pushes pixels to the framebuffer. Meanwhile, the asset manager has already streamed in the next screen's tileset, just in case the player walks that far. All twenty prior lessons, one frame.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why this ordering isn't arbitrary</span>
+    Scripting runs before physics because gameplay logic (a jump button press) needs to set intent — a velocity, a force — before physics integrates it that same frame, not one frame late. Physics runs before the scene graph resolves transforms because collision response can change an object's position, and the render pipeline must draw where things ended up after physics, not before. Every ordering decision in this diagram traces back to a single rule from Lesson 4: each stage must see the freshest correct input from the stage before it, or the whole frame is one step behind itself.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. Why does the scripting system typically run before the physics system in a single frame?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Gameplay logic needs to set intent (like velocity from a jump) before physics integrates it that same frame.</button>
+      <button class="quiz-choice" data-correct="false">Scripting always runs slower than physics, so it must go first to keep up.</button>
+      <button class="quiz-choice" data-correct="false">Physics has no dependency on any values scripting sets.</button>
+      <button class="quiz-choice" data-correct="false">The two systems never interact within the same frame at all.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Physics needs fresh intent from scripting before it integrates that frame.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why must the scene graph resolve world transforms after physics runs, not before?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Collision response can change an object's position, and rendering must reflect where things actually ended up.</button>
+      <button class="quiz-choice" data-correct="false">The scene graph has no relationship to physics whatsoever.</button>
+      <button class="quiz-choice" data-correct="false">Rendering always happens before physics runs, in every engine.</button>
+      <button class="quiz-choice" data-correct="false">Transform hierarchies are recalculated only once, at the start of the entire game.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Rendering needs post-physics positions, so scene graph resolution must follow physics.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. What single rule from Lesson 4 explains nearly every subsystem ordering decision in this capstone?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Each stage must see the freshest correct input from the stage before it, or the frame ends up one step behind itself.</button>
+      <button class="quiz-choice" data-correct="false">Every subsystem must run in a random order to remain fair.</button>
+      <button class="quiz-choice" data-correct="false">Rendering must always be the very first stage of any frame.</button>
+      <button class="quiz-choice" data-correct="false">Subsystem order has no effect on correctness, only on performance.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Freshness of input to each stage is the underlying reason for the whole frame's ordering.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="asset manager">
+    <p class="quiz-prompt">4. Fill in the blank: the piece that streams needed assets into a fixed memory budget and evicts what isn't needed, running underneath every other subsystem, is the ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The asset manager operates continuously alongside every other per-frame subsystem.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="state machine">
+    <p class="quiz-prompt">5. Fill in the blank: the system that determines which scene is currently active — menu, playing, paused — is the ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The state machine gates which scene the rest of the frame's work applies to.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before you're done: <a href="https://gameprogrammingpatterns.com/">Game Programming Patterns</a>'s full table of contents (free online) is worth skimming end to end now — nearly every pattern in it maps directly onto a subsystem this course covered.</p>
+
+  <p class="ask-teacher">Curious how a real, specific open-source engine (Godot, or a small one like raylib) actually implements this exact per-frame ordering in its own source? Ask your teacher — that's what I'm here for. This is the last lesson — the course exam draws from all seven units, and the progress report will show exactly where you stand.</p>
+
+  <footer class="lesson-footer">STEM+ · Game Engine Architecture · Lesson 21 of the course sequence — Capstone</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var categories = [
+    { key: 'timestep', label: 'Timestep strategy', options: ['Fixed timestep', 'Variable timestep'] },
+    { key: 'objects', label: 'Object model', options: ['ECS (composition)', 'Deep inheritance hierarchy'] },
+    { key: 'physics', label: 'Physics approach', options: ['Existing physics engine (Box2D/Bullet)', 'Hand-rolled AABB + Euler integration'] },
+    { key: 'assets', label: 'Asset strategy', options: ['Streaming + LOD', 'Load everything upfront'] },
+    { key: 'logic', label: 'Gameplay logic', options: ['Scripting layer (hot-reload)', 'All logic in compiled core'] }
+  ];
+  var chosen = {};
+  var container = document.getElementById('capstone-choices');
+  var summary = document.getElementById('capstone-summary');
+  var verdict = document.querySelector('[data-capstone-verdict]');
+
+  function render() {
+    container.innerHTML = '';
+    categories.forEach(function (cat) {
+      var row = document.createElement('div');
+      row.style.margin = '0.5rem 0';
+      row.innerHTML = '<strong>' + cat.label + ':</strong> ';
+      cat.options.forEach(function (opt) {
+        var btn = document.createElement('button');
+        btn.className = 'widget-btn';
+        btn.type = 'button';
+        btn.style.margin = '0.2rem';
+        if (chosen[cat.key] === opt) btn.style.background = 'var(--accent)';
+        btn.textContent = opt;
+        btn.addEventListener('click', function () {
+          chosen[cat.key] = opt;
+          render();
+        });
+        row.appendChild(btn);
+      });
+      container.appendChild(row);
+    });
+
+    var count = Object.keys(chosen).length;
+    if (count === 0) {
+      summary.innerHTML = '';
+      verdict.textContent = 'Choose one option in each category to see your engine summarized below.';
+      return;
+    }
+    var notes = [];
+    if (chosen.timestep === 'Variable timestep' && chosen.physics && chosen.physics.indexOf('AABB') !== -1) {
+      notes.push('Variable timestep + hand-rolled physics is a rough combination — Unit 5 warned this risks tunneling under a hitch.');
+    }
+    if (chosen.objects === 'Deep inheritance hierarchy') {
+      notes.push('A deep inheritance hierarchy will strain the moment you need an object combining two unrelated behaviors (Unit 3).');
+    }
+    if (chosen.assets === 'Load everything upfront') {
+      notes.push('Loading everything upfront works for a small game, but won\'t scale to a large open world without Unit 6\'s streaming.');
+    }
+    var lines = categories.filter(function (c) { return chosen[c.key]; }).map(function (c) {
+      return '<div class="box" style="margin:0.3rem 0; padding:0.4rem 0.7rem;"><strong>' + c.label + ':</strong> ' + chosen[c.key] + '</div>';
+    });
+    summary.innerHTML = lines.join('') + (notes.length ? '<div class="box why" style="margin-top:0.5rem;">' + notes.join('<br>') + '</div>' : '');
+    verdict.textContent = count + ' of ' + categories.length + ' architecture decisions made.';
+    verdict.className = 'verdict' + (count === categories.length ? ' is-pass' : '');
+  }
+
+  render();
+});
+</script>
