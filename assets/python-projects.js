@@ -104,7 +104,8 @@
       tests: DAY_SETS.map((days) => test([days], longestStreak(days)))
     },
     {
-      title: 'Create a ProgressTracker Class', entry: 'ProgressTracker', entryType: 'tracker', course: 'Computer Programming 2+',
+      title: 'Create a ProgressTracker Class', entry: 'ProgressTracker', entryType: 'class', course: 'Computer Programming 2+',
+      classCheck: { addMethod: 'add_learner', outputs: { learners: 'learner_summaries', courses: 'course_report' } },
       prompt: 'Complete ProgressTracker. __init__ creates record storage, add_learner appends a record, learner_summaries returns ranked summaries, and course_report returns grouped performance.',
       requirements: ['Keep state on self.records.', 'Methods must reuse sort_learners and group_course_performance.', 'A new tracker starts empty.'],
       hint: 'The class is a thin stateful wrapper around your tested functions.', maxLines: 18, runtimeBudgetMs: 22,

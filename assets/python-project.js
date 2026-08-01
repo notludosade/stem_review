@@ -3,7 +3,7 @@
 
   const project = window.STEMPythonProject;
   if (!project) return;
-  const STORAGE_KEY = 'stemplus:python-project:progress-engine:v1';
+  const STORAGE_KEY = `stemplus:python-project:${project.id.replace(/^python-/, '')}:v1`;
   const load = () => {
     try {
       const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
@@ -63,7 +63,7 @@
       const id = ++requestId;
       const timer = setTimeout(() => { const error = new Error('Project check stopped after 12 seconds.'); pending.delete(id); stop(error); reject(error); }, 12000);
       pending.set(id, { resolve, reject, timer });
-      worker.postMessage({ id, code: editor.value, tasks: tasks.map(({ id: taskId, entry, entryType, tests }) => ({ id: taskId, entry, entryType, tests })) });
+      worker.postMessage({ id, code: editor.value, tasks: tasks.map(({ id: taskId, entry, entryType, classCheck, tests }) => ({ id: taskId, entry, entryType, classCheck, tests })) });
     });
   };
 

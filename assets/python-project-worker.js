@@ -62,11 +62,13 @@ try:
             try:
                 arguments = copy.deepcopy(case['args'])
                 with contextlib.redirect_stdout(stdout):
-                    if task['entryType'] == 'tracker':
-                        tracker = entry()
+                    if task['entryType'] == 'class':
+                        instance = entry()
+                        class_check = task['classCheck']
+                        add_method = getattr(instance, class_check['addMethod'])
                         for record in arguments[0]:
-                            tracker.add_learner(record)
-                        actual = {'learners': tracker.learner_summaries(), 'courses': tracker.course_report()}
+                            add_method(record)
+                        actual = {key: getattr(instance, method)() for key, method in class_check['outputs'].items()}
                     else:
                         actual = entry(*arguments)
                 actual = _normalize(actual)
