@@ -83,7 +83,25 @@
     pre.innerHTML = html + '\n';
   };
 
-  const attach = () => {};
+  const attachOne = (editor) => {
+    const wrap = editor.closest('.sandbox-editor-wrap');
+    if (!wrap || wrap.querySelector('.sandbox-editor-highlight')) return;
+    const pre = document.createElement('pre');
+    pre.className = 'sandbox-editor-highlight';
+    pre.setAttribute('aria-hidden', 'true');
+    wrap.insertBefore(pre, editor);
+
+    const language = () => editor.closest('[data-language]')?.dataset.language;
+    const update = () => render(pre, editor.value, language());
+    editor.addEventListener('input', update);
+    editor.addEventListener('scroll', () => {
+      pre.scrollTop = editor.scrollTop;
+      pre.scrollLeft = editor.scrollLeft;
+    });
+    update();
+  };
+
+  const attach = (editors) => editors.forEach(attachOne);
 
   return { attach, tokenize, render, RULES };
 }));
