@@ -59,6 +59,16 @@
     { type: 'function', re: /[A-Za-z_$]\w*(?=\s*\()/g },
   ];
 
+  const CPP_KEYWORDS = /\b(?:alignas|alignof|auto|bool|break|case|catch|char|class|const|constexpr|continue|default|delete|do|double|else|enum|explicit|export|extern|false|float|for|friend|if|inline|int|long|mutable|namespace|new|noexcept|nullptr|operator|private|protected|public|return|short|signed|sizeof|static|struct|switch|template|this|throw|true|try|typedef|typename|union|unsigned|using|virtual|void|volatile|while)\b/g;
+  RULES.cpp = [
+    { type: 'comment', re: /\/\/[^\n]*|\/\*[\s\S]*?\*\//g },
+    { type: 'string', re: /"(?:[^"\\\n]|\\.)*"|'(?:[^'\\\n]|\\.)*'/g },
+    { type: 'keyword', re: /#\s*\w+/g },
+    { type: 'number', re: /\b\d+\.?\d*(?:[eE][+-]?\d+)?[fFlLuU]*\b/g },
+    { type: 'keyword', re: CPP_KEYWORDS },
+    { type: 'function', re: /[A-Za-z_]\w*(?=\s*\()/g },
+  ];
+
   const tokenize = (code, language) => {
     const rules = RULES[language];
     if (!rules) return [{ type: 'text', text: code }];

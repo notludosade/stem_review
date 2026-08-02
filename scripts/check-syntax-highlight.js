@@ -36,10 +36,18 @@ assert(found.includes('comment:// sum'), 'JavaScript comment not detected');
 found = types('const msg = `hi ${1}`;\n', 'javascript');
 assert(found.some((t) => t.startsWith('string:') && t.includes('hi')), 'JavaScript template string not detected');
 
+// C++
+found = types('#include <iostream>\nint main() {\n  std::cout << "hi"; // print\n}\n', 'cpp');
+assert(found.includes('keyword:#include'), 'C++ preprocessor directive not detected');
+assert(found.includes('keyword:int'), 'C++ keyword not detected');
+assert(found.includes('function:main'), 'C++ function-call name not detected');
+assert(found.includes('comment:// print'), 'C++ comment not detected');
+assert(found.includes('string:"hi"'), 'C++ string not detected');
+
 // render()
 const fakePre = { innerHTML: '' };
 render(fakePre, 'def f():', 'python');
 assert(fakePre.innerHTML.includes('<span class="tok-keyword">def</span>'), 'render() should wrap keyword tokens in a tok-keyword span');
 assert(fakePre.innerHTML.includes('<span class="tok-function">f</span>'), 'render() should wrap function-call tokens in a tok-function span');
 
-console.log('check-syntax-highlight: Python, Java, JavaScript OK');
+console.log('check-syntax-highlight: Python, Java, JavaScript, C++ OK');
