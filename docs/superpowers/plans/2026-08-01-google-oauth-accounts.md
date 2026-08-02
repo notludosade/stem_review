@@ -365,7 +365,9 @@ git commit -m "Add Google OAuth endpoints"
 git push
 ```
 
-On the deployed preview URL: visit `/api/auth/google`, complete the Google consent screen, confirm you land back on `/` with a `session` cookie set, and that `/api/me` returns your Google profile (`id`, `email`, `name`, `avatar_url`) as JSON. Then visit `/api/auth/logout` and confirm `/api/me` now returns `401`.
+On the production domain (not the deployed preview URL — `redirect_uri` is derived from `req.headers.host`, and only the production domain is registered as an authorized redirect URI in Step 5, so a preview URL will fail with `redirect_uri_mismatch`): visit `/api/auth/google`, complete the Google consent screen, confirm you land back on `/` with a `session` cookie set, and that `/api/me` returns your Google profile (`id`, `email`, `name`, `avatar_url`) as JSON. Then visit `/api/auth/logout` and confirm `/api/me` now returns `401`.
+
+If preview-testing is specifically wanted, a Vercel branch-alias URL (`<project>-git-<branch>-<team>.vercel.app`, stable across pushes to the branch) can be added as a second authorized redirect URI in the Google OAuth client — but production is the default path for this verification step.
 
 ---
 
