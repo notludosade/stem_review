@@ -6,59 +6,89 @@ const path = require('node:path');
 const { spawnSync } = require('node:child_process');
 const projects = require('../assets/guided-language-projects.js');
 const assert = (condition, message) => { if (!condition) throw new Error(message); };
-const supportedTypes = new Set(['int', 'double', 'boolean', 'String', 'int[]', 'double[]', 'String[]']);
-const matchesType = (type, value) => {
-  if (type.endsWith('[]')) return Array.isArray(value) && value.every((item) => matchesType(type.slice(0, -2), item));
-  if (type === 'String') return typeof value === 'string';
-  if (type === 'boolean') return typeof value === 'boolean';
-  if (type === 'double') return typeof value === 'number' && Number.isFinite(value);
-  return Number.isInteger(value);
-};
 const round = (value) => Number(value.toFixed(2));
-const reference = {
-  normalizeTopic: (topic) => topic.trim().replace(/\s+/g, ' ').toUpperCase(),
-  totalMinutes: (minutes) => minutes.reduce((sum, value) => sum + value, 0),
-  averageScore: (scores) => scores.length ? round(scores.reduce((sum, value) => sum + value, 0) / scores.length) : 0,
-  masteryBand: (average) => average >= 90 ? 'Mastery' : average >= 80 ? 'Proficient' : average >= 70 ? 'Developing' : average >= 60 ? 'Emerging' : 'Beginning',
-  countPassed: (scores) => scores.filter((score) => score >= 60).length,
-  longestStudyStreak(days) {
-    const ordered = [...new Set(days)].sort((a, b) => a - b);
-    let best = 0, run = 0, previous = null;
-    ordered.forEach((day) => { run = previous !== null && day === previous + 1 ? run + 1 : 1; best = Math.max(best, run); previous = day; });
-    return best;
-  }
+const supportedTypes = new Set(['int', 'double', 'boolean', 'String', 'int[]', 'double[]', 'String[]']);
+const matchesType = (type, value) => type.endsWith('[]') ? Array.isArray(value) && value.every((item) => matchesType(type.slice(0, -2), item))
+  : type === 'String' ? typeof value === 'string' : type === 'boolean' ? typeof value === 'boolean' : type === 'double' ? typeof value === 'number' && Number.isFinite(value) : Number.isInteger(value);
+const same = (actual, expected) => typeof actual === 'number' && typeof expected === 'number' ? Math.abs(actual - expected) <= 1e-9 : JSON.stringify(actual) === JSON.stringify(expected);
+
+const java = {};
+java.normalizeSku = (value) => value.trim().toUpperCase().replace(/[\s-]+/g, '_').replace(/^_+|_+$/g, '');
+java.isValidItem = (sku, quantity, price) => java.normalizeSku(sku) !== '' && Number.isInteger(quantity) && quantity >= 0 && Number.isFinite(price) && price >= 0;
+java.inventoryValue = (quantities, prices) => quantities.length === prices.length && quantities.every((value) => Number.isInteger(value) && value >= 0) && prices.every((value) => Number.isFinite(value) && value >= 0) ? round(quantities.reduce((sum, quantity, index) => sum + quantity * prices[index], 0)) : 0;
+java.stockStatus = (quantity) => quantity <= 0 ? 'OUT' : quantity <= 5 ? 'LOW' : quantity <= 50 ? 'IN_STOCK' : 'OVERSTOCKED';
+java.countLowStock = (quantities) => quantities.filter((quantity) => quantity >= 0 && quantity <= 5).length;
+java.sortedSkus = (skus) => [...new Set(skus.map(java.normalizeSku).filter(Boolean))].sort();
+java.restockQuantities = (quantities, target) => quantities.map((quantity) => Math.max(0, target - quantity));
+java.highestValueSku = (skus, quantities, prices) => !skus.length || skus.length !== quantities.length || skus.length !== prices.length ? '' : skus.map((sku, index) => ({ sku: java.normalizeSku(sku), value: quantities[index] * prices[index] })).sort((a, b) => b.value - a.value || a.sku.localeCompare(b.sku))[0].sku;
+java.reorderCost = (quantities, prices, target) => quantities.length === prices.length ? round(java.restockQuantities(quantities, target).reduce((sum, amount, index) => sum + amount * prices[index], 0)) : 0;
+java.buildInventoryReport = (skus, quantities, prices, target) => {
+  const names = [], counts = [], costs = [];
+  for (let index = 0; index < Math.min(skus.length, quantities.length, prices.length); index += 1) if (java.isValidItem(skus[index], quantities[index], prices[index])) { names.push(skus[index]); counts.push(quantities[index]); costs.push(prices[index]); }
+  const units = counts.reduce((sum, value) => sum + value, 0);
+  return `skus=${java.sortedSkus(names).join('|')};items=${names.length};units=${units};value=${java.inventoryValue(counts, costs).toFixed(2)};low=${java.countLowStock(counts)};top=${java.highestValueSku(names, counts, costs)};reorder=${java.reorderCost(counts, costs, target).toFixed(2)};stock=${java.stockStatus(units)}`;
 };
-reference.isValidSession = (topic, minutes, score) => reference.normalizeTopic(topic) !== '' && Number.isInteger(minutes) && minutes >= 1 && minutes <= 1440 && Number.isFinite(score) && score >= 0 && score <= 100;
-reference.uniqueTopics = (topics) => [...new Set(topics.map(reference.normalizeTopic).filter(Boolean))].sort();
-reference.productivityScore = (minutes, scores) => minutes.length && minutes.length === scores.length ? round(reference.totalMinutes(minutes) * reference.averageScore(scores) / 100) : 0;
-reference.buildStudyReport = (topics, minutes, scores, days) => {
-  const keptTopics = [], keptMinutes = [], keptScores = [];
-  for (let index = 0; index < Math.min(topics.length, minutes.length, scores.length); index += 1) {
-    if (reference.isValidSession(topics[index], minutes[index], scores[index])) { keptTopics.push(topics[index]); keptMinutes.push(minutes[index]); keptScores.push(scores[index]); }
-  }
-  const average = reference.averageScore(keptScores);
-  return `topics=${reference.uniqueTopics(keptTopics).join('|')};sessions=${keptTopics.length};minutes=${reference.totalMinutes(keptMinutes)};average=${average.toFixed(2)};band=${reference.masteryBand(average)};passed=${reference.countPassed(keptScores)};streak=${reference.longestStudyStreak(days)};productivity=${reference.productivityScore(keptMinutes, keptScores).toFixed(2)}`;
+
+const javascript = {};
+javascript.normalizeAnswer = (value) => value.trim().toLowerCase().replace(/\s+/g, ' ');
+javascript.answersMatch = (answer, expected) => javascript.normalizeAnswer(answer) === javascript.normalizeAnswer(expected);
+javascript.scoreQuiz = (answers, key) => answers.length === key.length ? answers.filter((answer, index) => javascript.answersMatch(answer, key[index])).length : 0;
+javascript.scorePercent = (correct, total) => total > 0 && correct >= 0 ? round(100 * correct / total) : 0;
+javascript.feedbackBand = (percent) => percent >= 100 ? 'Perfect' : percent >= 80 ? 'Great' : percent >= 60 ? 'Keep Practicing' : 'Review Needed';
+javascript.missedQuestions = (answers, key) => answers.length === key.length ? answers.flatMap((answer, index) => javascript.answersMatch(answer, key[index]) ? [] : [index + 1]) : [];
+javascript.topicAccuracy = (topics, answers, key) => {
+  if (topics.length !== answers.length || topics.length !== key.length) return [];
+  const groups = {};
+  topics.forEach((topic, index) => { const name = topic.trim().replace(/\s+/g, ' ').toUpperCase(); if (name) { const group = groups[name] ||= [0, 0]; group[1] += 1; if (javascript.answersMatch(answers[index], key[index])) group[0] += 1; } });
+  return Object.keys(groups).sort().map((name) => `${name}=${javascript.scorePercent(groups[name][0], groups[name][1]).toFixed(2)}%`);
 };
-const equivalent = (actual, expected) => typeof actual === 'number' && typeof expected === 'number'
-  ? Math.abs(actual - expected) <= 1e-9 : JSON.stringify(actual) === JSON.stringify(expected);
+javascript.longestCorrectStreak = (answers, key) => { if (answers.length !== key.length) return 0; let best = 0, run = 0; answers.forEach((answer, index) => { run = javascript.answersMatch(answer, key[index]) ? run + 1 : 0; best = Math.max(best, run); }); return best; };
+javascript.weightedScore = (answers, key, weights) => {
+  if (!answers.length || answers.length !== key.length || answers.length !== weights.length || weights.some((weight) => weight < 0)) return 0;
+  const total = weights.reduce((sum, weight) => sum + weight, 0);
+  return total ? round(100 * weights.reduce((sum, weight, index) => sum + (javascript.answersMatch(answers[index], key[index]) ? weight : 0), 0) / total) : 0;
+};
+javascript.buildQuizReport = (topics, answers, key, weights) => {
+  if (topics.length !== answers.length || answers.length !== key.length || key.length !== weights.length) return 'invalid quiz';
+  const correct = javascript.scoreQuiz(answers, key), percent = javascript.scorePercent(correct, key.length), missed = javascript.missedQuestions(answers, key);
+  return `questions=${key.length};correct=${correct};percent=${percent.toFixed(2)};feedback=${javascript.feedbackBand(percent)};missed=${missed.length ? missed.join(',') : 'none'};topics=${javascript.topicAccuracy(topics, answers, key).join('|')};streak=${javascript.longestCorrectStreak(answers, key)};weighted=${javascript.weightedScore(answers, key, weights).toFixed(2)}`;
+};
+
+const cpp = {};
+cpp.normalizeRobotId = (value) => value.trim().toUpperCase().replace(/[\s-]+/g, '_').replace(/^_+|_+$/g, '');
+cpp.clampMotorSignal = (signal) => Math.max(-100, Math.min(100, signal));
+cpp.isSafeTemperature = (temperature) => temperature >= -20 && temperature <= 85;
+cpp.calibrateReadings = (readings, offset) => readings.map((value) => round(value + offset));
+cpp.averageReading = (readings) => readings.length ? round(readings.reduce((sum, value) => sum + value, 0) / readings.length) : 0;
+cpp.countUnsafeTemperatures = (temperatures) => temperatures.filter((value) => !cpp.isSafeTemperature(value)).length;
+cpp.peakMotorMagnitude = (signals) => signals.reduce((best, signal) => Math.max(best, Math.abs(cpp.clampMotorSignal(signal))), 0);
+cpp.longestStableRun = (readings, tolerance) => { if (!readings.length || tolerance < 0) return 0; let best = 1, run = 1; for (let index = 1; index < readings.length; index += 1) { run = Math.abs(readings[index] - readings[index - 1]) <= tolerance ? run + 1 : 1; best = Math.max(best, run); } return best; };
+cpp.energyEstimate = (signals, durations) => signals.length === durations.length && durations.every((value) => value >= 0) ? round(signals.reduce((sum, signal, index) => sum + Math.abs(cpp.clampMotorSignal(signal)) / 100 * durations[index], 0)) : 0;
+cpp.buildTelemetryReport = (robotId, signals, temperatures, durations, offset) => {
+  if (!cpp.normalizeRobotId(robotId) || signals.length !== temperatures.length || signals.length !== durations.length) return 'invalid telemetry';
+  const calibrated = cpp.calibrateReadings(temperatures, offset);
+  return `robot=${cpp.normalizeRobotId(robotId)};samples=${signals.length};peak=${cpp.peakMotorMagnitude(signals)};averageTemp=${cpp.averageReading(calibrated).toFixed(2)};unsafe=${cpp.countUnsafeTemperatures(calibrated)};stable=${cpp.longestStableRun(calibrated, 1.5)};energy=${cpp.energyEstimate(signals, durations).toFixed(2)}`;
+};
+const references = { java, javascript, cpp };
 
 assert(JSON.stringify(Object.keys(projects).sort()) === JSON.stringify(['cpp', 'java', 'javascript']), 'Expected Java, JavaScript, and C++ projects');
+assert(new Set(Object.values(projects).map((item) => item.title)).size === 3, 'Project titles must be distinct');
 Object.values(projects).forEach((project) => {
   assert(project.tasks.length === 10, `${project.language}: expected 10 tasks`);
   assert(new Set(project.tasks.map((task) => task.course)).size === 3, `${project.language}: expected all three course levels`);
   project.tasks.forEach((task, index) => {
-    assert(task.id === `${project.key}-study-project-task-${index + 1}`, `${task.id}: broken task sequence`);
+    assert(task.id === `${project.key}-project-task-${index + 1}`, `${task.id}: broken task sequence`);
     assert(task.tests.length >= 4, `${task.id}: fewer than four tests`);
     assert(supportedTypes.has(task.returnType), `${task.id}: unsupported return type`);
     assert(task.parameters.every(([type, name]) => supportedTypes.has(type) && /^\w+$/.test(name)), `${task.id}: invalid parameter`);
     assert(project.starter.includes(task.entry), `${task.id}: starter entry missing`);
-    assert(task.concepts.length >= 2, `${task.id}: insufficient course-application checks`);
+    assert(typeof references[project.key][task.entry] === 'function', `${task.id}: independent reference missing`);
     task.concepts.forEach((concept) => concept.patterns.forEach((pattern) => new RegExp(pattern, 'm')));
-    task.tests.forEach((test, testIndex) => {
-      assert(test.args.length === task.parameters.length, `${task.id} test ${testIndex + 1}: wrong argument count`);
-      test.args.forEach((value, argIndex) => assert(matchesType(task.parameters[argIndex][0], value), `${task.id} test ${testIndex + 1}: invalid argument`));
-      assert(matchesType(task.returnType, test.expected), `${task.id} test ${testIndex + 1}: invalid expected value`);
-      assert(equivalent(reference[task.entry](...JSON.parse(JSON.stringify(test.args))), test.expected), `${task.id} test ${testIndex + 1}: incorrect answer`);
+    task.tests.forEach((caseData, testIndex) => {
+      assert(caseData.args.length === task.parameters.length, `${task.id} test ${testIndex + 1}: wrong argument count`);
+      caseData.args.forEach((value, argIndex) => assert(matchesType(task.parameters[argIndex][0], value), `${task.id} test ${testIndex + 1}: invalid argument`));
+      assert(matchesType(task.returnType, caseData.expected), `${task.id} test ${testIndex + 1}: invalid expected value`);
+      assert(same(references[project.key][task.entry](...JSON.parse(JSON.stringify(caseData.args))), caseData.expected), `${task.id} test ${testIndex + 1}: incorrect answer`);
     });
   });
 });
@@ -66,12 +96,10 @@ Object.values(projects).forEach((project) => {
 new Function(`${projects.javascript.starter}\nreturn true;`)();
 const temporary = fs.mkdtempSync(path.join(os.tmpdir(), 'stem-guided-projects-'));
 try {
-  const javaSource = path.join(temporary, 'Main.java');
-  fs.writeFileSync(javaSource, projects.java.starter);
+  const javaSource = path.join(temporary, 'Main.java'); fs.writeFileSync(javaSource, projects.java.starter);
   const javaCompile = spawnSync('javac', [javaSource], { encoding: 'utf8' });
   assert(javaCompile.status === 0 || /Unable to locate a Java Runtime/.test(javaCompile.stderr), `Java starter does not compile:\n${javaCompile.stderr}`);
-  const cppSource = path.join(temporary, 'project.cpp');
-  const cppBinary = path.join(temporary, 'project');
+  const cppSource = path.join(temporary, 'project.cpp'), cppBinary = path.join(temporary, 'project');
   fs.writeFileSync(cppSource, `${projects.cpp.starter}\nint main() { return 0; }\n`);
   const cppCompile = spawnSync('c++', ['-std=c++20', cppSource, '-o', cppBinary], { encoding: 'utf8' });
   assert(cppCompile.status === 0, `C++ starter does not compile:\n${cppCompile.stderr}`);
@@ -88,6 +116,7 @@ const root = path.resolve(__dirname, '..');
 });
 const picker = fs.readFileSync(path.join(root, 'python-projects.html'), 'utf8');
 Object.keys(projects).forEach((key) => assert(picker.includes(`guided-language-project.html?project=${key}`), `Project picker lacks ${key}`));
+Object.values(projects).forEach((item) => assert(picker.includes(item.title), `Project picker lacks ${item.title}`));
 
-const tests = Object.values(projects).reduce((sum, project) => sum + project.tasks.reduce((count, task) => count + task.tests.length, 0), 0);
-console.log(`Guided language-project audit passed: 3 projects, 30 tasks, and ${tests} independently recomputed answers.`);
+const tests = Object.values(projects).reduce((sum, item) => sum + item.tasks.reduce((count, task) => count + task.tests.length, 0), 0);
+console.log(`Distinct guided-project audit passed: 3 projects, 30 tasks, and ${tests} independently recomputed answers.`);
