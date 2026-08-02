@@ -431,21 +431,67 @@ figcaption { text-align: center; color: var(--muted); font-size: 0.85rem; margin
   font-weight: 700;
   color: var(--muted);
 }
-.sandbox-editor {
-  display: block;
+.sandbox-editor-wrap {
+  display: grid;
+}
+.sandbox-editor-wrap > .sandbox-editor,
+.sandbox-editor-wrap > .sandbox-editor-highlight {
+  grid-area: 1 / 1;
   width: 100%;
-  min-height: 18rem;
-  resize: vertical;
+  height: 100%;
+  margin: 0;
+  box-sizing: border-box;
   border: 1px solid var(--border);
   border-radius: 6px;
   padding: 0.85rem 1rem;
-  background: var(--code-bg);
-  color: var(--text);
   font: 0.9rem/1.55 "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
   tab-size: 4;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  scrollbar-gutter: stable;
 }
-.sandbox-editor:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
-.sandbox-editor-free { min-height: 22rem; }
+.sandbox-editor-wrap > .sandbox-editor {
+  display: block;
+  min-height: 18rem;
+  resize: vertical;
+  overflow: auto;
+  background: transparent;
+  color: transparent;
+  caret-color: var(--text);
+}
+.sandbox-editor-wrap > .sandbox-editor:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+.sandbox-editor-wrap > .sandbox-editor::selection { background: rgba(90, 130, 220, 0.28); }
+.sandbox-editor-wrap > .sandbox-editor.sandbox-editor-free { min-height: 22rem; }
+.sandbox-editor-wrap > .sandbox-editor-highlight {
+  /* height: 0 keeps the pre's full content height from growing the shared grid row;
+     removing it would make the editor grow unbounded instead of scrolling. */
+  height: 0;
+  min-height: 100%;
+  overflow: hidden;
+  pointer-events: none;
+  background: var(--code-bg);
+  color: var(--text);
+  border-color: transparent;
+}
+.tok-keyword { color: #3a4fa0; font-weight: 600; }
+.tok-string { color: #0f6e7a; }
+.tok-comment { color: var(--muted); font-style: italic; }
+.tok-number { color: #8a3d8a; }
+.tok-function { color: #9c5a1f; }
+@media (prefers-color-scheme: dark) {
+  .tok-keyword { color: #9aa8e8; }
+  .tok-string { color: #6fc9d6; }
+  .tok-number { color: #d98fd9; }
+  .tok-function { color: #e0a35f; }
+}
+:root[data-theme="dark"] .tok-keyword { color: #9aa8e8; }
+:root[data-theme="dark"] .tok-string { color: #6fc9d6; }
+:root[data-theme="dark"] .tok-number { color: #d98fd9; }
+:root[data-theme="dark"] .tok-function { color: #e0a35f; }
+:root[data-theme="light"] .tok-keyword { color: #3a4fa0; }
+:root[data-theme="light"] .tok-string { color: #0f6e7a; }
+:root[data-theme="light"] .tok-number { color: #8a3d8a; }
+:root[data-theme="light"] .tok-function { color: #9c5a1f; }
 
 .project-task-list {
   display: grid;

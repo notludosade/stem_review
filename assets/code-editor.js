@@ -65,6 +65,18 @@
     return true;
   };
 
+  const backspace = (editor) => {
+    const { value, selectionStart: start, selectionEnd: end } = editor;
+    if (start !== end) return false;
+    const first = lineStart(value, start);
+    const before = value.slice(first, start);
+    if (before.length === 0 || !/^ *$/.test(before)) return false;
+    const size = indentSize(editor);
+    const remove = ((before.length - 1) % size) + 1;
+    change(editor, start - remove, start, '', start - remove);
+    return true;
+  };
+
   const keydown = (editor, event) => {
     if (event.key === 'Tab') {
       event.preventDefault();
@@ -72,6 +84,8 @@
     } else if (event.key === 'Enter') {
       event.preventDefault();
       enter(editor);
+    } else if (event.key === 'Backspace' && backspace(editor)) {
+      event.preventDefault();
     } else if ('}])'.includes(event.key) && close(editor, event.key)) event.preventDefault();
   };
   const attach = (editors) => editors.forEach((editor) => editor.addEventListener('keydown', (event) => keydown(editor, event)));

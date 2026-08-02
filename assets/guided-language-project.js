@@ -331,6 +331,7 @@ ${checks}
 
   document.title = `${project.language} Guided Project — STEM+`;
   document.querySelector('.page').dataset.indentSize = project.indent;
+  document.querySelector('.page').dataset.language = project.key;
   document.querySelector('[data-project-kicker]').textContent = `STEM+ · Guided Sandbox Project · ${project.language}`;
   document.querySelector('[data-project-page-title]').textContent = project.title;
   document.querySelector('[data-project-subtitle]').textContent = project.description;
