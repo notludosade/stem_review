@@ -73,6 +73,30 @@
 :root[data-theme="light"] .page[data-tier="intro"], :root[data-theme="light"] .toc-item[data-tier="intro"] { --accent: #1f7a63; --accent-soft: #dcf1ea; }
 :root[data-theme="light"] .page[data-tier="advanced"], :root[data-theme="light"] .toc-item[data-tier="advanced"] { --accent: #3d3a7a; --accent-soft: #e5e3f7; }
 
+/* Section-category identity colors: Track/Problem Sets/Sandbox each get their own
+   --accent/--accent-soft so the site's top-level sections read as visually distinct.
+   Subject has no rule here — it keeps the default brown accent. Declared after the
+   difficulty-tier block above so category outranks tier: the sandbox/project pages
+   below carry a default data-tier="intro" (sandboxes aren't meaningfully "intro vs.
+   advanced"), which would otherwise hide the sandbox category color entirely. Declared
+   before the pathway block below so a specific pathway still outranks its parent
+   category (not currently reachable — no page carries both — but keeps the priority
+   order consistent: tier < category < pathway, most-specific wins). */
+.page[data-category="track"], .toc-item[data-category="track"] { --accent: #2f4a7a; --accent-soft: #dde5f2; }
+.page[data-category="problem-sets"], .toc-item[data-category="problem-sets"] { --accent: #8a3355; --accent-soft: #f5dde6; }
+.page[data-category="sandbox"], .toc-item[data-category="sandbox"] { --accent: #1f6b3d; --accent-soft: #d9f0e0; }
+@media (prefers-color-scheme: dark) {
+  .page[data-category="track"], .toc-item[data-category="track"] { --accent: #7fa3d9; --accent-soft: #1f2d40; }
+  .page[data-category="problem-sets"], .toc-item[data-category="problem-sets"] { --accent: #d97fa0; --accent-soft: #331420; }
+  .page[data-category="sandbox"], .toc-item[data-category="sandbox"] { --accent: #6fc98f; --accent-soft: #16301f; }
+}
+:root[data-theme="dark"] .page[data-category="track"], :root[data-theme="dark"] .toc-item[data-category="track"] { --accent: #7fa3d9; --accent-soft: #1f2d40; }
+:root[data-theme="dark"] .page[data-category="problem-sets"], :root[data-theme="dark"] .toc-item[data-category="problem-sets"] { --accent: #d97fa0; --accent-soft: #331420; }
+:root[data-theme="dark"] .page[data-category="sandbox"], :root[data-theme="dark"] .toc-item[data-category="sandbox"] { --accent: #6fc98f; --accent-soft: #16301f; }
+:root[data-theme="light"] .page[data-category="track"], :root[data-theme="light"] .toc-item[data-category="track"] { --accent: #2f4a7a; --accent-soft: #dde5f2; }
+:root[data-theme="light"] .page[data-category="problem-sets"], :root[data-theme="light"] .toc-item[data-category="problem-sets"] { --accent: #8a3355; --accent-soft: #f5dde6; }
+:root[data-theme="light"] .page[data-category="sandbox"], :root[data-theme="light"] .toc-item[data-category="sandbox"] { --accent: #1f6b3d; --accent-soft: #d9f0e0; }
+
 /* Pathway identity colors: each published pathway (and its capstone project) gets its own
    --accent/--accent-soft so the whole track reads as one visual thread — distinct from the
    difficulty-mood tiers above, which grade a single course instead of a multi-course track. */
@@ -730,8 +754,14 @@ footer.lesson-footer {
   padding: 0.7rem 1rem;
   text-decoration: none;
   color: inherit;
+  transition: box-shadow 180ms ease, transform 180ms ease, border-color 180ms ease, background 180ms ease;
 }
-.toc-item:hover { border-color: var(--accent); background: var(--accent-soft); }
+.toc-item:hover, .toc-item:focus-visible {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  box-shadow: 0 0 0 1px var(--accent), 0 6px 24px -8px color-mix(in srgb, var(--accent) 45%, transparent);
+  transform: translateY(-1px);
+}
 .toc-num {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   font-size: 0.72rem;
@@ -759,7 +789,12 @@ footer.lesson-footer {
   border-style: dashed;
   cursor: default;
 }
-.toc-item.is-soon:hover { border-color: var(--border); background: none; }
+.toc-item.is-soon:hover, .toc-item.is-soon:focus-visible {
+  border-color: var(--border);
+  background: none;
+  box-shadow: none;
+  transform: none;
+}
 .toc-item.is-soon .toc-num { color: var(--muted); }
 
 /* Project lock badges — dropped into a hub/pathway listing's .toc-sub by mountProjectStatus(),
