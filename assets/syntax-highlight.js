@@ -41,6 +41,15 @@
     { type: 'function', re: /[A-Za-z_]\w*(?=\s*\()/g },
   ];
 
+  const JAVA_KEYWORDS = /\b(?:abstract|assert|boolean|break|byte|case|catch|char|class|const|continue|default|do|double|else|enum|extends|final|finally|float|for|goto|if|implements|import|instanceof|int|interface|long|native|new|package|private|protected|public|return|short|static|strictfp|super|switch|synchronized|this|throw|throws|transient|try|void|volatile|while|true|false|null)\b/g;
+  RULES.java = [
+    { type: 'comment', re: /\/\/[^\n]*|\/\*[\s\S]*?\*\//g },
+    { type: 'string', re: /"(?:[^"\\\n]|\\.)*"|'(?:[^'\\\n]|\\.)*'/g },
+    { type: 'number', re: /\b\d+\.?\d*(?:[eE][+-]?\d+)?[fFdDlL]?\b/g },
+    { type: 'keyword', re: JAVA_KEYWORDS },
+    { type: 'function', re: /[A-Za-z_]\w*(?=\s*\()/g },
+  ];
+
   const tokenize = (code, language) => {
     const rules = RULES[language];
     if (!rules) return [{ type: 'text', text: code }];

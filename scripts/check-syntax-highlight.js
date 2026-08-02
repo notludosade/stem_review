@@ -17,10 +17,20 @@ assert(found.includes('number:3.5'), 'Python number not detected');
 found = types('doc = """line one\nline two"""\n', 'python');
 assert(found.some((t) => t.startsWith('string:') && t.includes('line one') && t.includes('line two')), 'Python multi-line string not detected');
 
+// Java
+found = types('public class Main {\n  // entry\n  public static void main(String[] args) {\n    System.out.println("hi");\n  }\n}\n', 'java');
+assert(found.includes('keyword:public'), 'Java keyword not detected');
+assert(found.includes('comment:// entry'), 'Java line comment not detected');
+assert(found.includes('function:println'), 'Java function-call name not detected');
+assert(found.includes('string:"hi"'), 'Java string not detected');
+
+found = types('/* block\ncomment */\nint x = 5;\n', 'java');
+assert(found.some((t) => t.startsWith('comment:') && t.includes('block') && t.includes('comment')), 'Java multi-line comment not detected');
+
 // render()
 const fakePre = { innerHTML: '' };
 render(fakePre, 'def f():', 'python');
 assert(fakePre.innerHTML.includes('<span class="tok-keyword">def</span>'), 'render() should wrap keyword tokens in a tok-keyword span');
 assert(fakePre.innerHTML.includes('<span class="tok-function">f</span>'), 'render() should wrap function-call tokens in a tok-function span');
 
-console.log('check-syntax-highlight: Python OK');
+console.log('check-syntax-highlight: Python, Java OK');
