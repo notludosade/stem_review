@@ -37,9 +37,9 @@ target = editor('    ', 4);
 press(target, '}');
 assert(target.value === '}', 'Closing-brace outdent failed');
 
-target = editor('    return 1;', 4, 4, 4);
+target = editor('      return 1;', 6, 6, 4);
 press(target, 'Backspace');
-assert(target.value === 'return 1;' && target.selectionStart === 0, 'Backspace should snap to the previous indent stop');
+assert(target.value === '    return 1;' && target.selectionStart === 4, 'Backspace should snap to the previous indent stop');
 
 target = editor('    x', 4, 4, 4);
 press(target, 'Backspace');
