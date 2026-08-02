@@ -8,25 +8,24 @@
 
   const scan = (code, rules) => {
     const tokens = [];
+    const next = rules.map(() => ({ index: -1, text: null, done: false }));
     let pos = 0;
-    let textStart = 0;
     while (pos < code.length) {
-      let matched = null;
-      for (const rule of rules) {
-        rule.re.lastIndex = pos;
-        const m = rule.re.exec(code);
-        if (m && m.index === pos) { matched = { type: rule.type, text: m[0] }; break; }
+      let best = null;
+      for (let i = 0; i < rules.length; i++) {
+        const c = next[i];
+        if (!c.done && c.index < pos) {
+          rules[i].re.lastIndex = pos;
+          const m = rules[i].re.exec(code);
+          if (m) { c.index = m.index; c.text = m[0]; } else { c.done = true; }
+        }
+        if (!c.done && (best === null || c.index < best.index)) best = { index: c.index, type: rules[i].type, text: c.text };
       }
-      if (matched) {
-        if (pos > textStart) tokens.push({ type: 'text', text: code.slice(textStart, pos) });
-        tokens.push(matched);
-        pos += matched.text.length;
-        textStart = pos;
-      } else {
-        pos += 1;
-      }
+      if (!best) { tokens.push({ type: 'text', text: code.slice(pos) }); return tokens; }
+      if (best.index > pos) tokens.push({ type: 'text', text: code.slice(pos, best.index) });
+      tokens.push({ type: best.type, text: best.text });
+      pos = best.index + best.text.length;
     }
-    if (code.length > textStart) tokens.push({ type: 'text', text: code.slice(textStart, code.length) });
     return tokens;
   };
 
@@ -50,7 +49,7 @@
     { type: 'function', re: /[A-Za-z_]\w*(?=\s*\()/g },
   ];
 
-  const JAVASCRIPT_KEYWORDS = /\b(?:async|await|break|case|catch|class|const|continue|default|delete|do|else|export|extends|finally|for|function|get|if|import|in|instanceof|let|new|of|return|set|static|super|switch|this|throw|try|typeof|var|void|while|with|yield|true|false|null|undefined)\b/g;
+  const JAVASCRIPT_KEYWORDS = /\b(?:async|await|break|case|catch|class|const|continue|default|delete|do|else|export|extends|finally|for|function|if|import|in|instanceof|let|new|of|return|static|super|switch|this|throw|try|typeof|var|void|while|with|yield|true|false|null|undefined)\b/g;
   RULES.javascript = [
     { type: 'comment', re: /\/\/[^\n]*|\/\*[\s\S]*?\*\//g },
     { type: 'string', re: /`(?:[^`\\]|\\.)*`|"(?:[^"\\\n]|\\.)*"|'(?:[^'\\\n]|\\.)*'/g },
@@ -92,8 +91,17 @@
     wrap.insertBefore(pre, editor);
 
     const language = () => editor.closest('[data-language]')?.dataset.language;
-    const update = () => render(pre, editor.value, language());
+    const sync = () => {
+      pre.scrollTop = editor.scrollTop;
+      pre.scrollLeft = editor.scrollLeft;
+    };
+    const update = () => {
+      render(pre, editor.value, language());
+      sync();
+    };
 
+    // Several sandbox pages set .value programmatically (problem switching, reset buttons),
+    // which doesn't fire a native input event, so this override keeps the overlay in sync regardless.
     const valueDescriptor = Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype, 'value');
     Object.defineProperty(editor, 'value', {
       configurable: true,
@@ -105,10 +113,7 @@
     });
 
     editor.addEventListener('input', update);
-    editor.addEventListener('scroll', () => {
-      pre.scrollTop = editor.scrollTop;
-      pre.scrollLeft = editor.scrollLeft;
-    });
+    editor.addEventListener('scroll', sync);
     update();
   };
 
