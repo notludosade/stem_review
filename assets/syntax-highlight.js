@@ -93,6 +93,17 @@
 
     const language = () => editor.closest('[data-language]')?.dataset.language;
     const update = () => render(pre, editor.value, language());
+
+    const valueDescriptor = Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype, 'value');
+    Object.defineProperty(editor, 'value', {
+      configurable: true,
+      get: valueDescriptor.get,
+      set(v) {
+        valueDescriptor.set.call(this, v);
+        update();
+      },
+    });
+
     editor.addEventListener('input', update);
     editor.addEventListener('scroll', () => {
       pre.scrollTop = editor.scrollTop;
