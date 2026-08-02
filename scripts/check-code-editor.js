@@ -37,4 +37,20 @@ target = editor('    ', 4);
 press(target, '}');
 assert(target.value === '}', 'Closing-brace outdent failed');
 
-console.log('Code editor audit passed: Tab, Shift+Tab, selections, auto-indent, brace pairs, and smart outdent.');
+target = editor('    return 1;', 4, 4, 4);
+press(target, 'Backspace');
+assert(target.value === 'return 1;' && target.selectionStart === 0, 'Backspace should snap to the previous indent stop');
+
+target = editor('    x', 4, 4, 4);
+press(target, 'Backspace');
+assert(target.value === 'x' && target.selectionStart === 0, 'Backspace at an exact indent stop should remove a full indent unit');
+
+target = editor('  return 1;', 2, 2, 4);
+press(target, 'Backspace');
+assert(target.value === 'return 1;' && target.selectionStart === 0, 'Backspace with less than one indent unit of whitespace should remove all of it');
+
+target = editor('return 1;', 3, 3, 4);
+press(target, 'Backspace');
+assert(target.value === 'return 1;' && target.selectionStart === 3, 'Backspace after non-whitespace should not be intercepted, leaving native default behavior to apply');
+
+console.log('Code editor audit passed: Tab, Shift+Tab, selections, auto-indent, brace pairs, smart outdent, and backspace-dedent.');
