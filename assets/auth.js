@@ -6,7 +6,15 @@
     const res = await fetch('/api/me');
     if (res.ok) {
       const user = await res.json();
-      slot.innerHTML = `<span>${user.name}</span> · <a href="/api/auth/logout">Sign out</a>`;
+      slot.innerHTML = '';
+      const nameSpan = document.createElement('span');
+      nameSpan.textContent = user.name;
+      const logoutLink = document.createElement('a');
+      logoutLink.href = '/api/auth/logout';
+      logoutLink.textContent = 'Sign out';
+      slot.appendChild(nameSpan);
+      slot.appendChild(document.createTextNode(' · '));
+      slot.appendChild(logoutLink);
     } else {
       slot.innerHTML = '<a href="/api/auth/google">Sign in with Google</a>';
     }
