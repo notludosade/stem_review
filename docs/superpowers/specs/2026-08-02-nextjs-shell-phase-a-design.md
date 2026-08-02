@@ -39,6 +39,10 @@ Tailwind + shadcn for the shell (`<Layout>`, nav, header) only — this was an e
 
 Existing content pages are completely unaffected: Tailwind utility classes appear only in the new `Layout`/nav component's own JSX, never in the injected legacy HTML.
 
+## Language
+
+All new Next.js files (`.tsx`/`.ts`) are TypeScript — an explicit choice, not a default. Nothing else in this codebase uses TypeScript (the 100+ HTML pages, every `assets/*.js` file, the existing `api/*.js` auth functions are all plain JS), so this does introduce a second convention alongside the untouched legacy code. Chosen anyway because shadcn's CLI and generated components are TypeScript-first, and it's the ecosystem default for new Next.js work — consistent with treating the shell as a deliberately more "modern stack" layer distinct from the legacy content it wraps. `tsconfig.json` is scoped to what Next.js needs (its own `create-next-app`-equivalent defaults); nothing under `content/`, `assets/`, or `scripts/` is affected or type-checked.
+
 ## Components
 
 - `pages/_app.tsx` — global wrapper (Tailwind CSS import, wraps every page in `<Layout>`).
