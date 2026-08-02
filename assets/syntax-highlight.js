@@ -50,6 +50,15 @@
     { type: 'function', re: /[A-Za-z_]\w*(?=\s*\()/g },
   ];
 
+  const JAVASCRIPT_KEYWORDS = /\b(?:async|await|break|case|catch|class|const|continue|default|delete|do|else|export|extends|finally|for|function|get|if|import|in|instanceof|let|new|of|return|set|static|super|switch|this|throw|try|typeof|var|void|while|with|yield|true|false|null|undefined)\b/g;
+  RULES.javascript = [
+    { type: 'comment', re: /\/\/[^\n]*|\/\*[\s\S]*?\*\//g },
+    { type: 'string', re: /`(?:[^`\\]|\\.)*`|"(?:[^"\\\n]|\\.)*"|'(?:[^'\\\n]|\\.)*'/g },
+    { type: 'number', re: /\b\d+\.?\d*(?:[eE][+-]?\d+)?\b/g },
+    { type: 'keyword', re: JAVASCRIPT_KEYWORDS },
+    { type: 'function', re: /[A-Za-z_$]\w*(?=\s*\()/g },
+  ];
+
   const tokenize = (code, language) => {
     const rules = RULES[language];
     if (!rules) return [{ type: 'text', text: code }];

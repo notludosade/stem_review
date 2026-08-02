@@ -27,10 +27,19 @@ assert(found.includes('string:"hi"'), 'Java string not detected');
 found = types('/* block\ncomment */\nint x = 5;\n', 'java');
 assert(found.some((t) => t.startsWith('comment:') && t.includes('block') && t.includes('comment')), 'Java multi-line comment not detected');
 
+// JavaScript
+found = types('function add(a, b) {\n  return a + b; // sum\n}\n', 'javascript');
+assert(found.includes('keyword:function'), 'JavaScript keyword not detected');
+assert(found.includes('function:add'), 'JavaScript function-call name not detected');
+assert(found.includes('comment:// sum'), 'JavaScript comment not detected');
+
+found = types('const msg = `hi ${1}`;\n', 'javascript');
+assert(found.some((t) => t.startsWith('string:') && t.includes('hi')), 'JavaScript template string not detected');
+
 // render()
 const fakePre = { innerHTML: '' };
 render(fakePre, 'def f():', 'python');
 assert(fakePre.innerHTML.includes('<span class="tok-keyword">def</span>'), 'render() should wrap keyword tokens in a tok-keyword span');
 assert(fakePre.innerHTML.includes('<span class="tok-function">f</span>'), 'render() should wrap function-call tokens in a tok-function span');
 
-console.log('check-syntax-highlight: Python, Java OK');
+console.log('check-syntax-highlight: Python, Java, JavaScript OK');
