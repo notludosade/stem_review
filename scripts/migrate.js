@@ -8,10 +8,9 @@ async function main() {
   await sql`
     create table if not exists users (
       id serial primary key,
-      google_sub text unique not null,
-      email text not null,
+      email text unique not null,
+      password_hash text not null,
       name text,
-      avatar_url text,
       created_at timestamptz not null default now()
     )
   `;

@@ -1,0 +1,57 @@
+<meta charset="UTF-8">
+<link rel="icon" href="favicon.ico?v=1" type="image/x-icon">
+<title>Sign in — STEM+</title>
+<link rel="stylesheet" href="assets/style.css">
+<div class="page">
+  <span class="kicker">STEM+</span>
+  <h1>Sign in</h1>
+  <p class="subtitle" id="form-error" style="display:none;"></p>
+
+  <form id="login-form">
+    <p><label>Email<br><input type="email" name="email" required autocomplete="email"></label></p>
+    <p><label>Password<br><input type="password" name="password" required autocomplete="current-password"></label></p>
+    <p><button type="submit">Sign in</button></p>
+  </form>
+
+  <h2>New here?</h2>
+  <form id="signup-form">
+    <p><label>Name<br><input type="text" name="name" autocomplete="name"></label></p>
+    <p><label>Email<br><input type="email" name="email" required autocomplete="email"></label></p>
+    <p><label>Password (min 8 characters)<br><input type="password" name="password" required minlength="8" autocomplete="new-password"></label></p>
+    <p><button type="submit">Create account</button></p>
+  </form>
+
+  <footer class="lesson-footer"><a href="index.html">Back to STEM+</a></footer>
+</div>
+<script>
+  function showError(message) {
+    const el = document.getElementById('form-error');
+    el.textContent = message;
+    el.style.display = '';
+  }
+
+  async function submitForm(endpoint, form) {
+    const body = Object.fromEntries(new FormData(form).entries());
+    const res = await fetch(endpoint, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      showError(data.error || 'something went wrong');
+      return;
+    }
+    location.href = '/';
+  }
+
+  document.getElementById('login-form').addEventListener('submit', (e) => {
+    e.preventDefault();
+    submitForm('/api/auth/login', e.target).catch(() => showError('something went wrong'));
+  });
+
+  document.getElementById('signup-form').addEventListener('submit', (e) => {
+    e.preventDefault();
+    submitForm('/api/auth/signup', e.target).catch(() => showError('something went wrong'));
+  });
+</script>

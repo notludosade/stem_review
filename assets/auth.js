@@ -4,14 +4,9 @@
 
   function renderSignIn() {
     slot.innerHTML = '';
-    if (new URLSearchParams(location.search).has('auth_error')) {
-      const errorSpan = document.createElement('span');
-      errorSpan.textContent = 'Sign-in failed — try again. ';
-      slot.appendChild(errorSpan);
-    }
     const signInLink = document.createElement('a');
-    signInLink.href = '/api/auth/google';
-    signInLink.textContent = 'Sign in with Google';
+    signInLink.href = '/login.html';
+    signInLink.textContent = 'Sign in';
     slot.appendChild(signInLink);
   }
 
@@ -21,7 +16,7 @@
       const user = await res.json();
       slot.innerHTML = '';
       const nameSpan = document.createElement('span');
-      nameSpan.textContent = user.name;
+      nameSpan.textContent = user.name || user.email;
       const logoutLink = document.createElement('a');
       logoutLink.href = '/api/auth/logout';
       logoutLink.textContent = 'Sign out';
