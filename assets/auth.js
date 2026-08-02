@@ -2,6 +2,19 @@
   const slot = document.querySelector('.auth-slot');
   if (!slot) return;
 
+  function renderSignIn() {
+    slot.innerHTML = '';
+    if (new URLSearchParams(location.search).has('auth_error')) {
+      const errorSpan = document.createElement('span');
+      errorSpan.textContent = 'Sign-in failed — try again. ';
+      slot.appendChild(errorSpan);
+    }
+    const signInLink = document.createElement('a');
+    signInLink.href = '/api/auth/google';
+    signInLink.textContent = 'Sign in with Google';
+    slot.appendChild(signInLink);
+  }
+
   try {
     const res = await fetch('/api/me');
     if (res.ok) {
@@ -16,9 +29,9 @@
       slot.appendChild(document.createTextNode(' · '));
       slot.appendChild(logoutLink);
     } else {
-      slot.innerHTML = '<a href="/api/auth/google">Sign in with Google</a>';
+      renderSignIn();
     }
   } catch (err) {
-    slot.innerHTML = '<a href="/api/auth/google">Sign in with Google</a>';
+    renderSignIn();
   }
 })();

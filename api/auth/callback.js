@@ -55,6 +55,7 @@ module.exports = async (req, res) => {
     res.writeHead(302, { Location: '/' });
     res.end();
   } catch (err) {
+    console.error('auth callback failed', err);
     res.writeHead(302, { Location: '/?auth_error=1' });
     res.end();
   }
