@@ -4,7 +4,7 @@ import type { GetStaticPaths, GetStaticProps } from 'next';
 import { Layout } from '../components/Layout';
 import { LegacyContent } from '../components/LegacyContent';
 import { splitHtmlFragment } from '../lib/content';
-import { extractScripts } from '../lib/scripts';
+import { extractScripts, stripScripts } from '../lib/scripts';
 
 const CONTENT_DIR = path.join(process.cwd(), 'content');
 
@@ -53,5 +53,9 @@ export const getStaticProps: GetStaticProps<PageProps> = async ({ params }) => {
   // .auth-slot markup itself is harmless (invisible, unpopulated) and is left
   // alone; only the script that would populate it is filtered out.
   const scripts = extractScripts(html).filter((script) => script.src !== 'assets/auth.js');
-  return { props: { title, body, scripts } };
+  // Strip every <script> tag from `body` itself so the only execution path
+  // left is LegacyContent's deliberate re-creation from `scripts` above —
+  // otherwise the raw tags surviving in `body` fire a second, uncontrolled
+  // time via the browser's native parse of the initial page (see stripScripts).
+  return { props: { title, body: stripScripts(body), scripts } };
 };

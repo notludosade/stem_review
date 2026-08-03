@@ -11,7 +11,17 @@
    Prefixed --site-* (rather than plain --bg/--text/etc.) to avoid colliding
    with shadcn/ui's own standard token names (--background/--muted/--border/
    --accent/...) below, and with public/assets/style.css's plain-named tokens
-   once both stylesheets load on the same document (Task 6). */
+   once both stylesheets load on the same document (Task 6).
+
+   The whole block below (including shadcn's own --muted/--border/--accent/
+   etc.) is wrapped in @layer base so it's always LOWER priority than
+   public/assets/style.css's unlayered :root rules — cascade layers rank
+   below specificity/order, so an unlayered rule always beats a layered one
+   regardless of which stylesheet loads last. Without this, shadcn's bare
+   --muted/--accent (mapped to a pale cream, not the site's actual muted
+   gray/brown) would silently win over legacy content's own --muted/--accent
+   on any page that loads both stylesheets, making secondary text unreadable. */
+@layer base {
 :root {
   --site-bg: #fdfcf9;
   --site-text: #1c1a17;
@@ -80,6 +90,7 @@
   --site-border: #e2ddd2;
   --site-accent: #8a4f2b;
   --site-accent-soft: #f4e8dc;
+}
 }
 
 @theme inline {
