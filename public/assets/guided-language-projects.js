@@ -8,10 +8,10 @@
   const clone = (value) => JSON.parse(JSON.stringify(value));
   const round = (value) => Number(value.toFixed(2));
   const test = (args, expected) => ({ args: clone(args), expected: clone(expected) });
-  const project = (key, meta, sources, starter) => ({
+  const project = (key, meta, sources, starter, answers) => ({
     key, ...meta, starter,
     tasks: sources.map((source, index) => ({
-      ...clone(source), id: `${key}-project-task-${index + 1}`, number: index + 1,
+      ...clone(source), id: `${key}-project-task-${index + 1}`, number: index + 1, answer: answers[source.entry],
       runtimeBudgetMs: key === 'javascript' ? 25 : key === 'java' ? 5000 : 8000,
       concepts: [{ label: 'Function or method', patterns: [`${source.entry}\\s*\\(`] }, ...source.checks.map(([label, ...patterns]) => ({ label, patterns }))]
     }))
@@ -219,9 +219,242 @@ std::string buildTelemetryReport(const std::string& robotId, const std::vector<i
 }
 `;
 
+  const javaAnswers = {
+    normalizeSku: `public static String normalizeSku(String sku) {
+        return sku.trim().toUpperCase().replaceAll("[\\\\s-]+", "_").replaceAll("^_+|_+$", "");
+    }`,
+    isValidItem: `public static boolean isValidItem(String sku, int quantity, double price) {
+        return !normalizeSku(sku).isEmpty() && quantity >= 0 && Double.isFinite(price) && price >= 0;
+    }`,
+    inventoryValue: `public static double inventoryValue(int[] quantities, double[] prices) {
+        if (quantities.length != prices.length) return 0;
+        double total = 0;
+        for (int index = 0; index < quantities.length; index++) {
+            if (quantities[index] < 0 || !Double.isFinite(prices[index]) || prices[index] < 0) return 0;
+            total += quantities[index] * prices[index];
+        }
+        return Math.round(total * 100) / 100.0;
+    }`,
+    stockStatus: `public static String stockStatus(int quantity) {
+        if (quantity <= 0) return "OUT";
+        if (quantity <= 5) return "LOW";
+        if (quantity <= 50) return "IN_STOCK";
+        return "OVERSTOCKED";
+    }`,
+    countLowStock: `public static int countLowStock(int[] quantities) {
+        int count = 0;
+        for (int quantity : quantities) if (quantity >= 0 && quantity <= 5) count++;
+        return count;
+    }`,
+    sortedSkus: `public static String[] sortedSkus(String[] skus) {
+        Set<String> unique = new TreeSet<>();
+        for (String sku : skus) {
+            String normalized = normalizeSku(sku);
+            if (!normalized.isEmpty()) unique.add(normalized);
+        }
+        return unique.toArray(new String[0]);
+    }`,
+    restockQuantities: `public static int[] restockQuantities(int[] quantities, int target) {
+        int[] result = new int[quantities.length];
+        for (int index = 0; index < quantities.length; index++) {
+            result[index] = Math.max(0, target - quantities[index]);
+        }
+        return result;
+    }`,
+    highestValueSku: `public static String highestValueSku(String[] skus, int[] quantities, double[] prices) {
+        if (skus.length == 0 || skus.length != quantities.length || skus.length != prices.length) return "";
+        String bestSku = "";
+        double bestValue = Double.NEGATIVE_INFINITY;
+        for (int index = 0; index < skus.length; index++) {
+            String sku = normalizeSku(skus[index]);
+            double value = quantities[index] * prices[index];
+            if (value > bestValue || (value == bestValue && sku.compareTo(bestSku) < 0)) {
+                bestSku = sku;
+                bestValue = value;
+            }
+        }
+        return bestSku;
+    }`,
+    reorderCost: `public static double reorderCost(int[] quantities, double[] prices, int target) {
+        if (quantities.length != prices.length) return 0;
+        int[] needed = restockQuantities(quantities, target);
+        double total = 0;
+        for (int index = 0; index < needed.length; index++) total += needed[index] * prices[index];
+        return Math.round(total * 100) / 100.0;
+    }`,
+    buildInventoryReport: `public static String buildInventoryReport(String[] skus, int[] quantities, double[] prices, int target) {
+        List<String> names = new ArrayList<>();
+        List<Integer> counts = new ArrayList<>();
+        List<Double> costs = new ArrayList<>();
+        int size = Math.min(skus.length, Math.min(quantities.length, prices.length));
+        for (int index = 0; index < size; index++) {
+            if (isValidItem(skus[index], quantities[index], prices[index])) {
+                names.add(skus[index]);
+                counts.add(quantities[index]);
+                costs.add(prices[index]);
+            }
+        }
+        String[] keptSkus = names.toArray(new String[0]);
+        int[] keptQuantities = counts.stream().mapToInt(Integer::intValue).toArray();
+        double[] keptPrices = costs.stream().mapToDouble(Double::doubleValue).toArray();
+        int units = counts.stream().mapToInt(Integer::intValue).sum();
+        return "skus=" + String.join("|", sortedSkus(keptSkus))
+            + ";items=" + names.size() + ";units=" + units
+            + ";value=" + String.format(Locale.ROOT, "%.2f", inventoryValue(keptQuantities, keptPrices))
+            + ";low=" + countLowStock(keptQuantities) + ";top=" + highestValueSku(keptSkus, keptQuantities, keptPrices)
+            + ";reorder=" + String.format(Locale.ROOT, "%.2f", reorderCost(keptQuantities, keptPrices, target))
+            + ";stock=" + stockStatus(units);
+    }`
+  };
+
+  const javascriptAnswers = {
+    normalizeAnswer: `function normalizeAnswer(answer) {
+  return answer.trim().toLowerCase().replace(/\\s+/g, ' ');
+}`,
+    answersMatch: `function answersMatch(answer, expected) {
+  return normalizeAnswer(answer) === normalizeAnswer(expected);
+}`,
+    scoreQuiz: `function scoreQuiz(answers, key) {
+  if (answers.length !== key.length) return 0;
+  return answers.filter((answer, index) => answersMatch(answer, key[index])).length;
+}`,
+    scorePercent: `function scorePercent(correct, total) {
+  if (total <= 0 || correct < 0) return 0;
+  return Math.round(10000 * correct / total) / 100;
+}`,
+    feedbackBand: `function feedbackBand(percent) {
+  if (percent >= 100) return 'Perfect';
+  if (percent >= 80) return 'Great';
+  if (percent >= 60) return 'Keep Practicing';
+  return 'Review Needed';
+}`,
+    missedQuestions: `function missedQuestions(answers, key) {
+  if (answers.length !== key.length) return [];
+  const missed = [];
+  answers.forEach((answer, index) => {
+    if (!answersMatch(answer, key[index])) missed.push(index + 1);
+  });
+  return missed;
+}`,
+    topicAccuracy: `function topicAccuracy(topics, answers, key) {
+  if (topics.length !== answers.length || topics.length !== key.length) return [];
+  const groups = {};
+  topics.forEach((topic, index) => {
+    const name = topic.trim().replace(/\\s+/g, ' ').toUpperCase();
+    if (!name) return;
+    if (!groups[name]) groups[name] = [0, 0];
+    groups[name][1] += 1;
+    if (answersMatch(answers[index], key[index])) groups[name][0] += 1;
+  });
+  return Object.keys(groups).sort().map((name) => name + '=' + scorePercent(groups[name][0], groups[name][1]).toFixed(2) + '%');
+}`,
+    longestCorrectStreak: `function longestCorrectStreak(answers, key) {
+  if (answers.length !== key.length) return 0;
+  let best = 0;
+  let run = 0;
+  answers.forEach((answer, index) => {
+    run = answersMatch(answer, key[index]) ? run + 1 : 0;
+    best = Math.max(best, run);
+  });
+  return best;
+}`,
+    weightedScore: `function weightedScore(answers, key, weights) {
+  if (!answers.length || answers.length !== key.length || answers.length !== weights.length || weights.some((weight) => weight < 0)) return 0;
+  const total = weights.reduce((sum, weight) => sum + weight, 0);
+  if (!total) return 0;
+  const earned = weights.reduce((sum, weight, index) => sum + (answersMatch(answers[index], key[index]) ? weight : 0), 0);
+  return Math.round(10000 * earned / total) / 100;
+}`,
+    buildQuizReport: `function buildQuizReport(topics, answers, key, weights) {
+  if (topics.length !== answers.length || answers.length !== key.length || key.length !== weights.length) return 'invalid quiz';
+  const correct = scoreQuiz(answers, key);
+  const percent = scorePercent(correct, key.length);
+  const missed = missedQuestions(answers, key);
+  return 'questions=' + key.length + ';correct=' + correct + ';percent=' + percent.toFixed(2)
+    + ';feedback=' + feedbackBand(percent) + ';missed=' + (missed.length ? missed.join(',') : 'none')
+    + ';topics=' + topicAccuracy(topics, answers, key).join('|') + ';streak=' + longestCorrectStreak(answers, key)
+    + ';weighted=' + weightedScore(answers, key, weights).toFixed(2);
+}`
+  };
+
+  const cppAnswers = {
+    normalizeRobotId: `std::string normalizeRobotId(const std::string& robotId) {
+    std::string result;
+    bool pendingSeparator = false;
+    for (char character : robotId) {
+        bool separator = character == '-' || character == ' ' || character == '\\t' || character == '\\n' || character == '\\r';
+        if (separator) {
+            if (!result.empty()) pendingSeparator = true;
+            continue;
+        }
+        if (pendingSeparator) result += '_';
+        pendingSeparator = false;
+        if (character >= 'a' && character <= 'z') character = static_cast<char>(character - 'a' + 'A');
+        result += character;
+    }
+    return result;
+}`,
+    clampMotorSignal: `int clampMotorSignal(int signal) {
+    return std::clamp(signal, -100, 100);
+}`,
+    isSafeTemperature: `bool isSafeTemperature(double temperature) {
+    return temperature >= -20 && temperature <= 85;
+}`,
+    calibrateReadings: `std::vector<double> calibrateReadings(const std::vector<double>& readings, double offset) {
+    std::vector<double> result;
+    for (double reading : readings) result.push_back(std::round((reading + offset) * 100) / 100);
+    return result;
+}`,
+    averageReading: `double averageReading(const std::vector<double>& readings) {
+    if (readings.empty()) return 0;
+    double total = std::accumulate(readings.begin(), readings.end(), 0.0);
+    return std::round(total / readings.size() * 100) / 100;
+}`,
+    countUnsafeTemperatures: `int countUnsafeTemperatures(const std::vector<double>& temperatures) {
+    int count = 0;
+    for (double temperature : temperatures) if (!isSafeTemperature(temperature)) count++;
+    return count;
+}`,
+    peakMotorMagnitude: `int peakMotorMagnitude(const std::vector<int>& signals) {
+    int peak = 0;
+    for (int signal : signals) peak = std::max(peak, std::abs(clampMotorSignal(signal)));
+    return peak;
+}`,
+    longestStableRun: `int longestStableRun(const std::vector<double>& readings, double tolerance) {
+    if (readings.empty() || tolerance < 0) return 0;
+    int best = 1;
+    int run = 1;
+    for (std::size_t index = 1; index < readings.size(); ++index) {
+        run = std::abs(readings[index] - readings[index - 1]) <= tolerance ? run + 1 : 1;
+        best = std::max(best, run);
+    }
+    return best;
+}`,
+    energyEstimate: `double energyEstimate(const std::vector<int>& signals, const std::vector<double>& durations) {
+    if (signals.size() != durations.size()) return 0;
+    double total = 0;
+    for (std::size_t index = 0; index < signals.size(); ++index) {
+        if (durations[index] < 0) return 0;
+        total += std::abs(clampMotorSignal(signals[index])) / 100.0 * durations[index];
+    }
+    return std::round(total * 100) / 100;
+}`,
+    buildTelemetryReport: `std::string buildTelemetryReport(const std::string& robotId, const std::vector<int>& signals, const std::vector<double>& temperatures, const std::vector<double>& durations, double offset) {
+    std::string normalized = normalizeRobotId(robotId);
+    if (normalized.empty() || signals.size() != temperatures.size() || signals.size() != durations.size()) return "invalid telemetry";
+    std::vector<double> calibrated = calibrateReadings(temperatures, offset);
+    std::ostringstream report;
+    report << std::fixed << std::setprecision(2);
+    report << "robot=" << normalized << ";samples=" << signals.size() << ";peak=" << peakMotorMagnitude(signals)
+           << ";averageTemp=" << averageReading(calibrated) << ";unsafe=" << countUnsafeTemperatures(calibrated)
+           << ";stable=" << longestStableRun(calibrated, 1.5) << ";energy=" << energyEstimate(signals, durations);
+    return report.str();
+}`
+  };
+
   return {
-    java: project('java', { id: 'java-inventory-system', language: 'Java', title: 'Smart Inventory Management System', description: 'Build a cumulative Java inventory system using validation, arrays, collections, sorting, and reporting.', problemHref: 'java-sandbox.html', indent: 4 }, javaTasks, javaStarter),
-    javascript: project('javascript', { id: 'javascript-quiz-engine', language: 'JavaScript', title: 'Interactive Quiz Analytics Engine', description: 'Build a cumulative JavaScript quiz engine using answer normalization, array analytics, grouping, weights, and feedback.', problemHref: 'javascript-sandbox.html', indent: 2 }, javascriptTasks, javascriptStarter),
-    cpp: project('cpp', { id: 'cpp-robotics-telemetry', language: 'C++', title: 'Robotics Telemetry Analyzer', description: 'Build a cumulative C++ robotics analyzer using safe bounds, vectors, calibration, telemetry statistics, and reporting.', problemHref: 'cpp-sandbox.html', indent: 4 }, cppTasks, cppStarter)
+    java: project('java', { id: 'java-inventory-system', language: 'Java', title: 'Smart Inventory Management System', description: 'Build a cumulative Java inventory system using validation, arrays, collections, sorting, and reporting.', problemHref: 'java-sandbox.html', indent: 4 }, javaTasks, javaStarter, javaAnswers),
+    javascript: project('javascript', { id: 'javascript-quiz-engine', language: 'JavaScript', title: 'Interactive Quiz Analytics Engine', description: 'Build a cumulative JavaScript quiz engine using answer normalization, array analytics, grouping, weights, and feedback.', problemHref: 'javascript-sandbox.html', indent: 2 }, javascriptTasks, javascriptStarter, javascriptAnswers),
+    cpp: project('cpp', { id: 'cpp-robotics-telemetry', language: 'C++', title: 'Robotics Telemetry Analyzer', description: 'Build a cumulative C++ robotics analyzer using safe bounds, vectors, calibration, telemetry statistics, and reporting.', problemHref: 'cpp-sandbox.html', indent: 4 }, cppTasks, cppStarter, cppAnswers)
   };
 }));

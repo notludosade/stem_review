@@ -82,6 +82,7 @@ Object.values(projects).forEach((project) => {
     assert(supportedTypes.has(task.returnType), `${task.id}: unsupported return type`);
     assert(task.parameters.every(([type, name]) => supportedTypes.has(type) && /^\w+$/.test(name)), `${task.id}: invalid parameter`);
     assert(project.starter.includes(task.entry), `${task.id}: starter entry missing`);
+    assert(task.answer.includes(task.entry), `${task.id}: reference answer missing`);
     assert(typeof references[project.key][task.entry] === 'function', `${task.id}: independent reference missing`);
     task.concepts.forEach((concept) => concept.patterns.forEach((pattern) => new RegExp(pattern, 'm')));
     task.tests.forEach((caseData, testIndex) => {
@@ -93,30 +94,69 @@ Object.values(projects).forEach((project) => {
   });
 });
 
-new Function(`${projects.javascript.starter}\nreturn true;`)();
+const javascriptApi = new Function(`${projects.javascript.tasks.map((task) => task.answer).join('\n\n')}\nreturn { ${projects.javascript.tasks.map((task) => task.entry).join(', ')} };`)();
+projects.javascript.tasks.forEach((task) => task.tests.forEach((caseData, index) => {
+  const actual = javascriptApi[task.entry](...JSON.parse(JSON.stringify(caseData.args)));
+  assert(same(actual, caseData.expected), `${task.id} answer test ${index + 1}: incorrect result`);
+}));
+
+const javaLiteral = (type, value) => {
+  if (type.endsWith('[]')) return `new ${type.slice(0, -2)}[]{${value.map((item) => javaLiteral(type.slice(0, -2), item)).join(',')}}`;
+  if (type === 'String') return JSON.stringify(value);
+  if (type === 'double') return Number.isInteger(value) ? `${value}.0` : String(value);
+  return String(value);
+};
+const cppLiteral = (type, value) => {
+  if (type.endsWith('[]')) return `std::vector<${type.slice(0, -2) === 'String' ? 'std::string' : type.slice(0, -2)}>{${value.map((item) => cppLiteral(type.slice(0, -2), item)).join(',')}}`;
+  if (type === 'String') return JSON.stringify(value);
+  if (type === 'double') return Number.isInteger(value) ? `${value}.0` : String(value);
+  return String(value);
+};
 const temporary = fs.mkdtempSync(path.join(os.tmpdir(), 'stem-guided-projects-'));
 try {
-  const javaSource = path.join(temporary, 'Main.java'); fs.writeFileSync(javaSource, projects.java.starter);
+  const javaFinal = projects.java.tasks.at(-1);
+  const javaChecks = javaFinal.tests.map((caseData, index) => {
+    const args = caseData.args.map((value, argIndex) => javaLiteral(javaFinal.parameters[argIndex][0], value)).join(', ');
+    return `if (!buildInventoryReport(${args}).equals(${javaLiteral('String', caseData.expected)})) throw new AssertionError("case ${index + 1}");`;
+  }).join('\n        ');
+  const javaImports = projects.java.starter.split(/\n(?=public class Main)/)[0];
+  const javaProgram = `${javaImports}\npublic class Main {\n${projects.java.tasks.map((task) => task.answer).join('\n\n')}\n    public static void main(String[] args) {\n        ${javaChecks}\n    }\n}\n`;
+  const javaSource = path.join(temporary, 'Main.java'); fs.writeFileSync(javaSource, javaProgram);
   const javaCompile = spawnSync('javac', [javaSource], { encoding: 'utf8' });
-  assert(javaCompile.status === 0 || /Unable to locate a Java Runtime/.test(javaCompile.stderr), `Java starter does not compile:\n${javaCompile.stderr}`);
+  assert(javaCompile.status === 0 || /Unable to locate a Java Runtime/.test(javaCompile.stderr), `Java answers do not compile:\n${javaCompile.stderr}`);
+  if (javaCompile.status === 0) {
+    const javaRun = spawnSync('java', ['-cp', temporary, 'Main'], { encoding: 'utf8' });
+    assert(javaRun.status === 0, `Java answers failed:\n${javaRun.stderr}`);
+  }
+  const cppFinal = projects.cpp.tasks.at(-1);
+  const cppChecks = cppFinal.tests.map((caseData, index) => {
+    const args = caseData.args.map((value, argIndex) => cppLiteral(cppFinal.parameters[argIndex][0], value)).join(', ');
+    return `if (buildTelemetryReport(${args}) != ${cppLiteral('String', caseData.expected)}) return ${index + 1};`;
+  }).join('\n    ');
+  const cppIncludes = projects.cpp.starter.split(/\n(?=std::string normalizeRobotId)/)[0];
   const cppSource = path.join(temporary, 'project.cpp'), cppBinary = path.join(temporary, 'project');
-  fs.writeFileSync(cppSource, `${projects.cpp.starter}\nint main() { return 0; }\n`);
+  fs.writeFileSync(cppSource, `${cppIncludes}\n${projects.cpp.tasks.map((task) => task.answer).join('\n\n')}\nint main() {\n    ${cppChecks}\n    return 0;\n}\n`);
   const cppCompile = spawnSync('c++', ['-std=c++20', cppSource, '-o', cppBinary], { encoding: 'utf8' });
-  assert(cppCompile.status === 0, `C++ starter does not compile:\n${cppCompile.stderr}`);
+  assert(cppCompile.status === 0, `C++ answers do not compile:\n${cppCompile.stderr}`);
+  const cppRun = spawnSync(cppBinary, [], { encoding: 'utf8' });
+  assert(cppRun.status === 0, `C++ answers failed final reports (case ${cppRun.status}).`);
 } finally { fs.rmSync(temporary, { recursive: true, force: true }); }
 
-const root = path.resolve(__dirname, '..');
-['index.html', 'sandbox.html', 'python-projects.html', 'guided-language-project.html'].forEach((page) => {
+const root = path.resolve(__dirname, '../public');
+['sandbox.html', 'python-projects.html', 'guided-language-project.html'].forEach((page) => {
   const html = fs.readFileSync(path.join(root, page), 'utf8');
   for (const match of html.matchAll(/(?:href|src)="([^"]+)"/g)) {
     const target = match[1].split(/[?#]/)[0];
-    if (!target || /^(?:https?:|mailto:)/.test(target)) continue;
+    if (!target || target === 'index.html' || /^(?:https?:|mailto:)/.test(target)) continue;
     assert(fs.existsSync(path.resolve(root, target)), `${page}: broken local reference ${match[1]}`);
   }
 });
 const picker = fs.readFileSync(path.join(root, 'python-projects.html'), 'utf8');
 Object.keys(projects).forEach((key) => assert(picker.includes(`guided-language-project.html?project=${key}`), `Project picker lacks ${key}`));
 Object.values(projects).forEach((item) => assert(picker.includes(item.title), `Project picker lacks ${item.title}`));
+const projectPage = fs.readFileSync(path.join(root, 'guided-language-project.html'), 'utf8');
+assert(projectPage.includes('data-project-answer-button'), 'guided-language-project.html: missing Show Answer button');
+assert(projectPage.includes('data-project-answer-code'), 'guided-language-project.html: missing reference-answer panel');
 
 const tests = Object.values(projects).reduce((sum, item) => sum + item.tasks.reduce((count, task) => count + task.tests.length, 0), 0);
 console.log(`Distinct guided-project audit passed: 3 projects, 30 tasks, and ${tests} independently recomputed answers.`);

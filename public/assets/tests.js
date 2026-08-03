@@ -116,7 +116,7 @@ window.STEMPlusTests = (function () {
   var STORAGE_KEY = 'stemplus:results:v1';
   var PROJECTS_STORAGE_KEY = 'stemplus:projects:v1';
   var DEV_MODE_KEY = 'stemplus:devmode:v1';
-  var DEV_CODE = 'STEMPLUS-DEV-ACCESS';
+  var DEV_CODE = 'stem_developer67!';
 
   function passThresholdFor(kind) {
     return Object.prototype.hasOwnProperty.call(PASS_THRESHOLDS, kind) ? PASS_THRESHOLDS[kind] : DEFAULT_PASS_THRESHOLD;

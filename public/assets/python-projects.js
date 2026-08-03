@@ -52,7 +52,7 @@
       prompt: 'Implement validate_scores(scores). Return true only for a nonempty list of int/float scores from 0 through 100. Boolean values are invalid.',
       requirements: ['Reject empty lists.', 'Reject booleans even though bool subclasses int in Python.', 'Accept boundary scores 0 and 100.'],
       hint: 'Combine a nonempty check with all(...), and test bool separately.', maxLines: 7, runtimeBudgetMs: 8,
-      concepts: concepts(['Function', '^def\\s+validate_scores'], ['Conditionals or boolean logic', '\bif\b', '\band\b', '\ball\\s*\\('], ['Iteration', '\bfor\b', '\ball\\s*\\(']),
+      concepts: concepts(['Function', '^def\\s+validate_scores'], ['Conditionals or boolean logic', '\\bif\\b', '\\band\\b', '\\ball\\s*\\('], ['Iteration', '\\bfor\\b', '\\ball\\s*\\(']),
       tests: [[[90, 80, 100]], [[]], [[0, 100, 50.5]], [[true, 80]], [[-1, 80]]].map(([scores]) => test([scores], validScores(scores)))
     },
     {
@@ -60,7 +60,7 @@
       prompt: 'Implement average_score(scores). Return the arithmetic mean rounded to two decimals, or 0 for an empty list.',
       requirements: ['Handle empty input without division by zero.', 'Round only the final result.', 'Return a number.'],
       hint: 'Guard the empty case, then divide sum(scores) by len(scores).', maxLines: 6, runtimeBudgetMs: 8,
-      concepts: concepts(['Function', '^def\\s+average_score'], ['Aggregation', '\bsum\\s*\\(', '\bfor\b'], ['Empty-case branch', '\bif\b', '\bor\s+0']),
+      concepts: concepts(['Function', '^def\\s+average_score'], ['Aggregation', '\\bsum\\s*\\(', '\\bfor\\b'], ['Empty-case branch', '\\bif\\b', '\\bor\\s+0']),
       tests: [[90, 80, 100], [1, 2], [], [99.9, 80.25]].map((scores) => test([scores], averageScore(scores)))
     },
     {
@@ -68,7 +68,7 @@
       prompt: 'Implement assign_level(average) using A≥90, B≥80, C≥70, D≥60, otherwise F.',
       requirements: ['Check thresholds from highest to lowest.', 'Boundary values belong to the higher level.', 'Return one uppercase letter.'],
       hint: 'An if/elif chain expresses the rubric directly.', maxLines: 12, runtimeBudgetMs: 8,
-      concepts: concepts(['Function', '^def\\s+assign_level'], ['Branching', '\bif\b'], ['Multiple cases', '\belif\b', '\belse\b']),
+      concepts: concepts(['Function', '^def\\s+assign_level'], ['Branching', '\\bif\\b'], ['Multiple cases', '\\belif\\b', '\\belse\\b']),
       tests: [100, 90, 89.99, 80, 70, 60, 0].map((score) => test([score], assignLevel(score)))
     },
     {
@@ -84,7 +84,7 @@
       prompt: 'Implement sort_learners(records). Summarize every record, then sort by average descending and normalized name ascending.',
       requirements: ['Return a new list of summary dictionaries.', 'Do not mutate records.', 'Name resolves equal-average ties.'],
       hint: 'sorted supports a tuple key; negate average for descending order.', maxLines: 10, runtimeBudgetMs: 15,
-      concepts: concepts(['Collection transformation', '\bfor\b', '\bmap\\s*\\(', '\[[^\]]*for\b'], ['Sorting', '\bsorted\\s*\\(', '\\.sort\\s*\\('], ['Helper reuse', 'summarize_learner\\s*\\(']),
+      concepts: concepts(['Collection transformation', '\\bfor\\b', '\\bmap\\s*\\(', '\\[[^\\]]*for\\b'], ['Sorting', '\\bsorted\\s*\\(', '\\.sort\\s*\\('], ['Helper reuse', 'summarize_learner\\s*\\(']),
       tests: RECORD_SETS.map((records) => test([records], sortLearners(records)))
     },
     {
@@ -92,7 +92,7 @@
       prompt: 'Implement group_course_performance(records). Group by normalized course and return learner_count, average_score, and percentage pass_rate, both rounded to two decimals.',
       requirements: ['Return course keys in alphabetical insertion order.', 'Reuse learner summaries.', 'Empty input returns an empty dictionary.'],
       hint: 'Build a dictionary of summary lists, then aggregate each group.', maxLines: 24, runtimeBudgetMs: 22,
-      concepts: concepts(['Dictionary grouping', '\bdict\\s*\\(', '\{', '\\.setdefault\\s*\\('], ['Iteration', '\bfor\b'], ['Aggregation', '\bsum\\s*\\(', 'average_score'], ['Helper reuse', 'summarize_learner\\s*\\(']),
+      concepts: concepts(['Dictionary grouping', '\\bdict\\s*\\(', '\{', '\\.setdefault\\s*\\('], ['Iteration', '\\bfor\\b'], ['Aggregation', '\\bsum\\s*\\(', 'average_score'], ['Helper reuse', 'summarize_learner\\s*\\(']),
       tests: RECORD_SETS.map((records) => test([records], coursePerformance(records)))
     },
     {
@@ -100,7 +100,7 @@
       prompt: 'Implement longest_completion_streak(days). Dates are YYYY-MM-DD strings in any order with possible duplicates. Return the longest run of consecutive calendar days.',
       requirements: ['Deduplicate dates.', 'Work across month and year boundaries.', 'Empty input returns 0.'],
       hint: 'Convert with date.fromisoformat after sorting unique values, then compare one-day differences.', maxLines: 18, runtimeBudgetMs: 18,
-      concepts: concepts(['Set or deduplication', '\bset\\s*\\(', '\bdict\\.fromkeys'], ['Ordering', '\bsorted\\s*\\(', '\\.sort\\s*\\('], ['Stateful iteration', '\bfor\b', '\bwhile\b'], ['Date handling', 'date\\.fromisoformat', 'timedelta']),
+      concepts: concepts(['Set or deduplication', '\\bset\\s*\\(', '\\bdict\\.fromkeys'], ['Ordering', '\\bsorted\\s*\\(', '\\.sort\\s*\\('], ['Stateful iteration', '\\bfor\\b', '\\bwhile\\b'], ['Date handling', 'date\\.fromisoformat', 'timedelta']),
       tests: DAY_SETS.map((days) => test([days], longestStreak(days)))
     },
     {
@@ -117,12 +117,90 @@
       prompt: 'Implement build_progress_report(records, completion_days). Integrate the full project into one report with learner_count, learners, courses, top_learner, and longest_streak.',
       requirements: ['Reuse earlier functions or ProgressTracker.', 'top_learner is the first ranked summary or None.', 'The empty project still returns every required key.'],
       hint: 'Compose existing helpers; this function should contain little new logic.', maxLines: 16, runtimeBudgetMs: 28,
-      concepts: concepts(['Composition', 'sort_learners\\s*\\(', 'ProgressTracker\\s*\\('], ['Course report reuse', 'group_course_performance\\s*\\(', 'course_report\\s*\\('], ['Streak reuse', 'longest_completion_streak\\s*\\('], ['Empty handling', '\bif\b', '\bor\\s+None']),
+      concepts: concepts(['Composition', 'sort_learners\\s*\\(', 'ProgressTracker\\s*\\('], ['Course report reuse', 'group_course_performance\\s*\\(', 'course_report\\s*\\('], ['Streak reuse', 'longest_completion_streak\\s*\\('], ['Empty handling', '\\bif\\b', '\\bor\\s+None']),
       tests: RECORD_SETS.map((records, index) => { const learners = sortLearners(records); return test([records, DAY_SETS[index]], { learner_count: records.length, learners, courses: coursePerformance(records), top_learner: learners[0] || null, longest_streak: longestStreak(DAY_SETS[index]) }); })
     }
   ];
 
-  tasks.forEach((task, index) => { task.id = `python-project-task-${index + 1}`; task.number = index + 1; });
+  const answers = {
+    normalize_name: `def normalize_name(name):
+    return ' '.join(name.strip().lower().split()).title()`,
+    validate_scores: `def validate_scores(scores):
+    return bool(scores) and all(
+        type(score) in (int, float) and 0 <= score <= 100
+        for score in scores
+    )`,
+    average_score: `def average_score(scores):
+    return round(sum(scores) / len(scores), 2) if scores else 0`,
+    assign_level: `def assign_level(average):
+    if average >= 90:
+        return 'A'
+    if average >= 80:
+        return 'B'
+    if average >= 70:
+        return 'C'
+    if average >= 60:
+        return 'D'
+    return 'F'`,
+    summarize_learner: `def summarize_learner(record):
+    average = average_score(record['scores'])
+    return {
+        'name': normalize_name(record['name']),
+        'course': record['course'].strip().upper(),
+        'average': average,
+        'level': assign_level(average),
+        'passed': average >= 60,
+        'completion_count': len(record['scores'])
+    }`,
+    sort_learners: `def sort_learners(records):
+    learners = [summarize_learner(record) for record in records]
+    return sorted(learners, key=lambda item: (-item['average'], item['name']))`,
+    group_course_performance: `def group_course_performance(records):
+    groups = {}
+    for record in records:
+        learner = summarize_learner(record)
+        groups.setdefault(learner['course'], []).append(learner)
+    report = {}
+    for course in sorted(groups):
+        learners = groups[course]
+        report[course] = {
+            'learner_count': len(learners),
+            'average_score': round(sum(item['average'] for item in learners) / len(learners), 2),
+            'pass_rate': round(100 * sum(item['passed'] for item in learners) / len(learners), 2)
+        }
+    return report`,
+    longest_completion_streak: `def longest_completion_streak(days):
+    ordered = sorted({date.fromisoformat(day) for day in days})
+    best = run = 0
+    previous = None
+    for current in ordered:
+        run = run + 1 if previous and current - previous == timedelta(days=1) else 1
+        best = max(best, run)
+        previous = current
+    return best`,
+    ProgressTracker: `class ProgressTracker:
+    def __init__(self):
+        self.records = []
+
+    def add_learner(self, record):
+        self.records.append(record)
+
+    def learner_summaries(self):
+        return sort_learners(self.records)
+
+    def course_report(self):
+        return group_course_performance(self.records)`,
+    build_progress_report: `def build_progress_report(records, completion_days):
+    learners = sort_learners(records)
+    return {
+        'learner_count': len(records),
+        'learners': learners,
+        'courses': group_course_performance(records),
+        'top_learner': learners[0] if learners else None,
+        'longest_streak': longest_completion_streak(completion_days)
+    }`
+  };
+  tasks.forEach((task, index) => { task.id = `python-project-task-${index + 1}`; task.number = index + 1; task.answer = answers[task.entry]; });
   const starter = `from datetime import date, timedelta
 
 def normalize_name(name):

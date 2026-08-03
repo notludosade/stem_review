@@ -252,6 +252,9 @@ ${checks}
   const previousButton = document.querySelector('[data-project-previous]');
   const hintButton = document.querySelector('[data-project-hint-button]');
   const hint = document.querySelector('[data-project-hint]');
+  const answer = document.querySelector('[data-project-answer]');
+  const answerCode = document.querySelector('[data-project-answer-code]');
+  const answerButton = document.querySelector('[data-project-answer-button]');
   const firstIncomplete = () => { const index = project.tasks.findIndex((task) => !state.completed[task.id]); return index < 0 ? project.tasks.length : index; };
   const targetBlock = (code, entry) => {
     const patterns = {
@@ -312,7 +315,9 @@ ${checks}
     document.querySelector('[data-project-requirements]').replaceChildren(...task.requirements.map((text) => { const item = document.createElement('li'); item.textContent = text; return item; }));
     const examples = document.querySelector('[data-project-examples]'); examples.replaceChildren();
     task.tests.slice(0, 2).forEach((test) => { const pre = document.createElement('pre'); pre.className = 'code-block'; pre.textContent = `${exampleCall(task, test.args)}\n// expected ${show(test.expected)}`; examples.appendChild(pre); });
-    hint.textContent = task.hint; hint.hidden = true; hintButton.textContent = 'Show Hint'; results.hidden = true;
+    hint.textContent = task.hint; hint.hidden = true; hintButton.textContent = 'Show Hint';
+    answerCode.textContent = task.answer; answer.hidden = true; answerButton.textContent = 'Show Answer'; answerButton.setAttribute('aria-expanded', 'false');
+    results.hidden = true;
     status.textContent = state.completed[task.id] ? 'Task completed. Recheck after later edits to confirm it still passes.' : 'Check this task to run its tests and all prior regression tests.';
     previousButton.disabled = active === 0; nextButton.disabled = active === project.tasks.length - 1 || !state.completed[task.id];
     renderScores(state.scores[task.id]); renderTaskList();
@@ -342,6 +347,7 @@ ${checks}
   editor.value = state.code;
   editor.addEventListener('input', () => { state.code = editor.value; save(); });
   hintButton.addEventListener('click', () => { hint.hidden = !hint.hidden; hintButton.textContent = hint.hidden ? 'Show Hint' : 'Hide Hint'; });
+  answerButton.addEventListener('click', () => { answer.hidden = !answer.hidden; answerButton.textContent = answer.hidden ? 'Show Answer' : 'Hide Answer'; answerButton.setAttribute('aria-expanded', String(!answer.hidden)); });
   document.querySelector('[data-project-jump]').addEventListener('click', () => { const block = targetBlock(editor.value, project.tasks[active].entry); if (!block) return; const index = editor.value.indexOf(block); editor.focus(); editor.setSelectionRange(index, index + block.split(/[\n{]/)[0].length); });
   previousButton.addEventListener('click', () => { if (active > 0) { active -= 1; save(); render(); } });
   nextButton.addEventListener('click', () => { if (active < project.tasks.length - 1 && state.completed[project.tasks[active].id]) { active += 1; save(); render(); } });

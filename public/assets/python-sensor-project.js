@@ -196,7 +196,113 @@
     }
   ];
 
-  tasks.forEach((task, index) => { task.id = `python-sensor-task-${index + 1}`; task.number = index + 1; });
+  const answers = {
+    normalize_sensor_id: `def normalize_sensor_id(sensor_id):
+    return '_'.join(sensor_id.replace('-', ' ').upper().split())`,
+    validate_reading: `def validate_reading(record):
+    from math import isfinite
+    if not isinstance(record, dict):
+        return False
+    sensor = record.get('sensor')
+    temperature = record.get('temperature_c')
+    pm25 = record.get('pm25')
+    timestamp = record.get('timestamp')
+    if not isinstance(sensor, str) or not normalize_sensor_id(sensor):
+        return False
+    if type(temperature) not in (int, float) or not isfinite(temperature) or not -80 <= temperature <= 80:
+        return False
+    if type(pm25) not in (int, float) or not isfinite(pm25) or pm25 < 0:
+        return False
+    if type(record.get('active')) is not bool or not isinstance(timestamp, str):
+        return False
+    try:
+        parsed = datetime.strptime(timestamp, '%Y-%m-%d %H:%M')
+    except ValueError:
+        return False
+    return parsed.strftime('%Y-%m-%d %H:%M') == timestamp`,
+    celsius_to_fahrenheit: `def celsius_to_fahrenheit(temperature_c):
+    return round(temperature_c * 9 / 5 + 32, 2)`,
+    air_quality_band: `def air_quality_band(pm25):
+    if pm25 <= 12:
+        return 'Good'
+    if pm25 <= 35.4:
+        return 'Moderate'
+    if pm25 <= 55.4:
+        return 'Unhealthy for Sensitive Groups'
+    if pm25 <= 150.4:
+        return 'Unhealthy'
+    if pm25 <= 250.4:
+        return 'Very Unhealthy'
+    return 'Hazardous'`,
+    normalize_reading: `def normalize_reading(record):
+    return {
+        'sensor': normalize_sensor_id(record['sensor']),
+        'temperature_c': round(record['temperature_c'], 2),
+        'temperature_f': celsius_to_fahrenheit(record['temperature_c']),
+        'pm25': round(record['pm25'], 2),
+        'air_quality': air_quality_band(record['pm25']),
+        'timestamp': record['timestamp'],
+        'active': record['active']
+    }`,
+    active_readings: `def active_readings(records):
+    cleaned = [
+        normalize_reading(record)
+        for record in records
+        if validate_reading(record) and record['active']
+    ]
+    return sorted(cleaned, key=lambda item: (item['timestamp'], item['sensor']))`,
+    sensor_statistics: `def sensor_statistics(records):
+    groups = {}
+    for reading in active_readings(records):
+        groups.setdefault(reading['sensor'], []).append(reading)
+    report = {}
+    for sensor in sorted(groups):
+        readings = groups[sensor]
+        report[sensor] = {
+            'reading_count': len(readings),
+            'average_temperature_c': round(sum(item['temperature_c'] for item in readings) / len(readings), 2),
+            'average_pm25': round(sum(item['pm25'] for item in readings) / len(readings), 2),
+            'maximum_pm25': round(max(item['pm25'] for item in readings), 2)
+        }
+    return report`,
+    longest_alert_streak: `def longest_alert_streak(records, threshold=35.4):
+    groups = {}
+    for reading in active_readings(records):
+        groups.setdefault(reading['sensor'], []).append(reading)
+    result = {}
+    for sensor in sorted(groups):
+        best = run = 0
+        for reading in groups[sensor]:
+            run = run + 1 if reading['pm25'] > threshold else 0
+            best = max(best, run)
+        result[sensor] = best
+    return result`,
+    SensorNetwork: `class SensorNetwork:
+    def __init__(self):
+        self.records = []
+
+    def add_reading(self, record):
+        self.records.append(record)
+
+    def cleaned_readings(self):
+        return active_readings(self.records)
+
+    def sensor_report(self):
+        return sensor_statistics(self.records)`,
+    build_environment_report: `def build_environment_report(records):
+    readings = active_readings(records)
+    sensors = sensor_statistics(records)
+    ranked = sorted(sensors, key=lambda sensor: (-sensors[sensor]['maximum_pm25'], sensor))
+    return {
+        'reading_count': len(readings),
+        'readings': readings,
+        'sensors': sensors,
+        'alerts': longest_alert_streak(records),
+        'overall_average_pm25': round(sum(item['pm25'] for item in readings) / len(readings), 2) if readings else 0,
+        'highest_risk_sensor': ranked[0] if ranked else None
+    }`
+  };
+  tasks.forEach((task, index) => { task.id = `python-sensor-task-${index + 1}`; task.number = index + 1; task.answer = answers[task.entry]; });
   const starter = `from datetime import datetime
 
 def normalize_sensor_id(sensor_id):
