@@ -1,5 +1,5 @@
-const { getDb } = require('../lib/db');
-const { verify } = require('../lib/session');
+const { getDb } = require('../../lib/db');
+const { verify } = require('../../lib/session');
 
 module.exports = async (req, res) => {
   try {

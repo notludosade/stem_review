@@ -1,6 +1,6 @@
-const { getDb } = require('../../lib/db');
-const { verifyPassword, hashPassword } = require('../../lib/password');
-const { sign } = require('../../lib/session');
+const { getDb } = require('../../../lib/db');
+const { verifyPassword, hashPassword } = require('../../../lib/password');
+const { sign } = require('../../../lib/session');
 
 // Decoy hash so a nonexistent email still pays the scrypt cost below —
 // otherwise a missing row returns fast and a wrong password returns slow,

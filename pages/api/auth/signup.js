@@ -1,6 +1,6 @@
-const { getDb } = require('../../lib/db');
-const { hashPassword } = require('../../lib/password');
-const { sign } = require('../../lib/session');
+const { getDb } = require('../../../lib/db');
+const { hashPassword } = require('../../../lib/password');
+const { sign } = require('../../../lib/session');
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
