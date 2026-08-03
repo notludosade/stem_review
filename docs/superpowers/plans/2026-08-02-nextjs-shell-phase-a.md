@@ -608,7 +608,9 @@ git commit -m "Add the shell's Layout component (nav, header, auth status)"
 - Consumes: `splitHtmlFragment` (Task 4), `extractScripts` (Task 4), `Layout` (Task 5).
 - Produces: the actual working end-to-end proof — visiting `/` renders `index.html`'s real content inside the new shell, with its embedded scripts (if any) executing.
 
-`index.html` itself has no `<script>` tags (confirmed by reading the file — it's a pure links/content page), so this specific page doesn't exercise the script-re-execution path at runtime, but the mechanism is built and unit-tested (Task 4) since Phase B's pages do have scripts.
+**Update, discovered during Task 4's review, before this task was dispatched:** the original design here called `extractScripts` client-side, inside `LegacyContent`, on the `body` string alone. A sweep of all 23 real files that will eventually live under `content/` (Phase B) found that 11 of them — including every sandbox/code-editor page from the syntax-highlighting feature shipped just before this one — have their `<script>` tags in the *head*, before the first `<div>`. `splitHtmlFragment`'s `body` excludes everything before the first `<div>` by design (that's how it separates head from body in the first place), so calling `extractScripts(body)` would silently find zero scripts on any of those pages. Fixed by moving the `extractScripts` call server-side, into `getStaticProps`, called on the *full* raw file content (not `body`) — so it sees script tags regardless of whether they're in the head or body portion of the source file. The extracted list is passed to `LegacyContent` as a prop instead of being re-derived client-side from a body-only string.
+
+`index.html` itself has no `<script>` tags (confirmed by reading the file — it's a pure links/content page), so this specific page doesn't exercise the script-re-execution path at runtime, but the mechanism is built, unit-tested (Task 4), and now correctly wired to receive scripts from anywhere in the source file, not just the body — this matters starting with Phase B's pages, not this one, which is exactly why it needed catching now rather than after Phase B silently shipped broken sandbox pages.
 
 - [ ] **Step 1: Move index.html into content/**
 
@@ -619,19 +621,25 @@ git mv index.html content/index.html
 
 - [ ] **Step 2: Write the LegacyContent client component**
 
+`extractScripts` is called by the catch-all route (Step 3), not here — this component just renders whatever `scripts` list it's given. `lib/scripts.js` is plain JS with no exported TypeScript type, so the shape is declared locally as `ExtractedScript`.
+
 ```tsx
 import { useEffect, useRef } from 'react';
-import { extractScripts } from '../lib/scripts';
 
-interface LegacyContentProps {
-  html: string;
+interface ExtractedScript {
+  src: string | null;
+  content: string | null;
 }
 
-export function LegacyContent({ html }: LegacyContentProps) {
+interface LegacyContentProps {
+  body: string;
+  scripts: ExtractedScript[];
+}
+
+export function LegacyContent({ body, scripts }: LegacyContentProps) {
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const scripts = extractScripts(html);
     const created: HTMLScriptElement[] = [];
     for (const script of scripts) {
       const el = document.createElement('script');
@@ -647,10 +655,10 @@ export function LegacyContent({ html }: LegacyContentProps) {
     return () => {
       created.forEach((el) => el.remove());
     };
-  }, [html]);
+  }, [scripts]);
 
   // eslint-disable-next-line react/no-danger
-  return <div ref={containerRef} dangerouslySetInnerHTML={{ __html: html }} />;
+  return <div ref={containerRef} dangerouslySetInnerHTML={{ __html: body }} />;
 }
 ```
 
@@ -663,18 +671,25 @@ import type { GetStaticPaths, GetStaticProps } from 'next';
 import { Layout } from '../components/Layout';
 import { LegacyContent } from '../components/LegacyContent';
 import { splitHtmlFragment } from '../lib/content';
+import { extractScripts } from '../lib/scripts';
 
 const CONTENT_DIR = path.join(process.cwd(), 'content');
+
+interface ExtractedScript {
+  src: string | null;
+  content: string | null;
+}
 
 interface PageProps {
   title: string;
   body: string;
+  scripts: ExtractedScript[];
 }
 
-export default function CatchAllPage({ title, body }: PageProps) {
+export default function CatchAllPage({ title, body, scripts }: PageProps) {
   return (
     <Layout title={title}>
-      <LegacyContent html={body} />
+      <LegacyContent body={body} scripts={scripts} />
     </Layout>
   );
 }
@@ -694,9 +709,12 @@ export const getStaticProps: GetStaticProps<PageProps> = async ({ params }) => {
   const filePath = path.join(CONTENT_DIR, fileName);
   const html = fs.readFileSync(filePath, 'utf8');
   const { title, body } = splitHtmlFragment(html);
-  return { props: { title, body } };
+  const scripts = extractScripts(html);
+  return { props: { title, body, scripts } };
 };
 ```
+
+Note `extractScripts(html)` runs on `html` (the full, unsplit file content read straight from disk), not `body` — this is the fix. `splitHtmlFragment` is still called separately to get `title`/`body` for rendering; both functions independently receive the full original string, each extracting what it needs from wherever in that string it actually appears.
 
 - [ ] **Step 4: Delete the Task 1 placeholder home page**
 
