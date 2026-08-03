@@ -624,7 +624,7 @@ git mv index.html content/index.html
 `extractScripts` is called by the catch-all route (Step 3), not here — this component just renders whatever `scripts` list it's given. `lib/scripts.js` is plain JS with no exported TypeScript type, so the shape is declared locally as `ExtractedScript`.
 
 ```tsx
-import { useEffect, useRef } from 'react';
+import { useEffect } from 'react';
 
 interface ExtractedScript {
   src: string | null;
@@ -637,15 +637,19 @@ interface LegacyContentProps {
 }
 
 export function LegacyContent({ body, scripts }: LegacyContentProps) {
-  const containerRef = useRef<HTMLDivElement>(null);
-
   useEffect(() => {
     const created: HTMLScriptElement[] = [];
     for (const script of scripts) {
       const el = document.createElement('script');
       if (script.src) {
         el.src = script.src;
-        el.defer = true;
+        // `defer` is meaningless on a script inserted this way — the defer
+        // attribute only affects parser-inserted <script> tags. Scripts
+        // created via document.createElement default to async=true, which
+        // executes in network-completion order rather than document order.
+        // Phase B's pages depend on document order (data files before the
+        // logic that reads them, etc.) — async=false restores that.
+        el.async = false;
       } else if (script.content) {
         el.textContent = script.content;
       }
@@ -658,7 +662,7 @@ export function LegacyContent({ body, scripts }: LegacyContentProps) {
   }, [scripts]);
 
   // eslint-disable-next-line react/no-danger
-  return <div ref={containerRef} dangerouslySetInnerHTML={{ __html: body }} />;
+  return <div dangerouslySetInnerHTML={{ __html: body }} />;
 }
 ```
 
@@ -709,7 +713,13 @@ export const getStaticProps: GetStaticProps<PageProps> = async ({ params }) => {
   const filePath = path.join(CONTENT_DIR, fileName);
   const html = fs.readFileSync(filePath, 'utf8');
   const { title, body } = splitHtmlFragment(html);
-  const scripts = extractScripts(html);
+  // The shell's own Layout/AuthStatus (Task 5) now owns sign-in/sign-out UI
+  // for every page rendered through this route. Legacy pages carry their own
+  // <span class="auth-slot"> populated by assets/auth.js — re-executing that
+  // script here would duplicate the shell's auth UI on-page. The empty
+  // .auth-slot markup itself is harmless (invisible, unpopulated) and is left
+  // alone; only the script that would populate it is filtered out.
+  const scripts = extractScripts(html).filter((script) => script.src !== 'assets/auth.js');
   return { props: { title, body, scripts } };
 };
 ```
