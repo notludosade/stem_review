@@ -1,6 +1,6 @@
 'use strict';
 
-const { tokenize, render } = require('../assets/syntax-highlight.js');
+const { tokenize, render } = require('../public/assets/syntax-highlight.js');
 const assert = (condition, message) => { if (!condition) throw new Error(message); };
 const types = (code, lang) => tokenize(code, lang).filter((t) => t.type !== 'text').map((t) => `${t.type}:${t.text}`);
 

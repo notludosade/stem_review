@@ -4,8 +4,8 @@ const fs = require('node:fs');
 const path = require('node:path');
 const assert = (condition, message) => { if (!condition) throw new Error(message); };
 const projects = [
-  { project: require('../assets/python-projects.js'), idPrefix: 'python-project-task-' },
-  { project: require('../assets/python-sensor-project.js'), idPrefix: 'python-sensor-task-' }
+  { project: require('../public/assets/python-projects.js'), idPrefix: 'python-project-task-' },
+  { project: require('../public/assets/python-sensor-project.js'), idPrefix: 'python-sensor-task-' }
 ];
 
 projects.forEach(({ project, idPrefix }) => {

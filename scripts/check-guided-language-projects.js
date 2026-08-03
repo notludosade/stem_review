@@ -4,7 +4,7 @@ const fs = require('node:fs');
 const os = require('node:os');
 const path = require('node:path');
 const { spawnSync } = require('node:child_process');
-const projects = require('../assets/guided-language-projects.js');
+const projects = require('../public/assets/guided-language-projects.js');
 const assert = (condition, message) => { if (!condition) throw new Error(message); };
 const round = (value) => Number(value.toFixed(2));
 const supportedTypes = new Set(['int', 'double', 'boolean', 'String', 'int[]', 'double[]', 'String[]']);

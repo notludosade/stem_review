@@ -3,7 +3,7 @@
 const { spawnSync } = require('node:child_process');
 const fs = require('node:fs');
 const path = require('node:path');
-const { problems, topics } = require('../assets/python-problems.js');
+const { problems, topics } = require('../public/assets/python-problems.js');
 
 const assert = (condition, message) => {
   if (!condition) throw new Error(message);
@@ -82,6 +82,6 @@ let localReferences = 0;
     localReferences += 1;
   }
 });
-assert(fs.existsSync(path.join(root, 'assets/python-worker.js')), 'Missing Python worker');
+assert(fs.existsSync(path.join(root, 'public/assets/python-worker.js')), 'Missing Python worker');
 
 console.log(`Python sandbox audit passed: ${problems.length} problems, ${problems.reduce((sum, problem) => sum + problem.tests.length, 0)} tests, ${localReferences} local references.`);

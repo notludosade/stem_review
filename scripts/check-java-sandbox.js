@@ -2,7 +2,7 @@
 
 const fs = require('node:fs');
 const path = require('node:path');
-const { problems, topics } = require('../assets/java-problems.js');
+const { problems, topics } = require('../public/assets/java-problems.js');
 
 const assert = (condition, message) => { if (!condition) throw new Error(message); };
 const supportedTypes = new Set(['int', 'long', 'double', 'boolean', 'String', 'int[]', 'double[]', 'boolean[]', 'String[]', 'int[][]']);

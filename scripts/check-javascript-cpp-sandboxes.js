@@ -4,8 +4,8 @@ const fs = require('node:fs');
 const os = require('node:os');
 const path = require('node:path');
 const { spawnSync } = require('node:child_process');
-const javascript = require('../assets/javascript-problems.js');
-const cpp = require('../assets/cpp-problems.js');
+const javascript = require('../public/assets/javascript-problems.js');
+const cpp = require('../public/assets/cpp-problems.js');
 
 const assert = (condition, message) => { if (!condition) throw new Error(message); };
 const counts = (api, prefix) => {
@@ -25,7 +25,7 @@ counts(cpp, 'cpp');
 
 global.window = global;
 global.STEMCppProblems = cpp;
-const { buildHarness } = require('../assets/cpp-sandbox.js');
+const { buildHarness } = require('../public/assets/cpp-sandbox.js');
 const solutions = new Map([
   ['cpp-001', '#include <string>\n#include <vector>\nint addNumbers(int a, int b) { return a + b; }'],
   ['cpp-031', '#include <string>\n#include <vector>\nstd::string greet(std::string name) { return "Hello, " + name + "!"; }'],

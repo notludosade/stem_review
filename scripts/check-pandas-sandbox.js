@@ -2,7 +2,7 @@
 
 const fs = require('node:fs');
 const path = require('node:path');
-const { problems, topics } = require('../assets/pandas-problems.js');
+const { problems, topics } = require('../public/assets/pandas-problems.js');
 const assert = (condition, message) => { if (!condition) throw new Error(message); };
 
 assert(problems.length === 190, `Expected 190 Pandas problems, found ${problems.length}`);

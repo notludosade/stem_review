@@ -2,7 +2,7 @@
 
 const fs = require('node:fs');
 const path = require('node:path');
-const { courses } = require('../assets/problem-banks.js');
+const { courses } = require('../public/assets/problem-banks.js');
 
 const factorial = (n) => {
   let value = 1;

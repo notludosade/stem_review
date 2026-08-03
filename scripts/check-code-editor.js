@@ -1,6 +1,6 @@
 'use strict';
 
-const { keydown } = require('../assets/code-editor.js');
+const { keydown } = require('../public/assets/code-editor.js');
 const assert = (condition, message) => { if (!condition) throw new Error(message); };
 const editor = (value, start, end = start, size = 4) => ({
   value,
