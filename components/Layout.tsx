@@ -58,19 +58,19 @@ export function Layout({ title, children }: LayoutProps) {
       </Head>
       <header
         className={cn(
-          'sticky top-0 z-10 flex items-center justify-between',
-          'border-b border-[var(--site-border)] bg-[var(--site-bg)] px-6 py-3'
+          'sticky top-0 z-10 flex flex-wrap items-center justify-between gap-x-4 gap-y-2',
+          'border-b border-[var(--site-border)] bg-[var(--site-bg)] px-4 py-3 sm:px-6'
         )}
       >
         <Link href="/" className="font-semibold text-[var(--site-text)]">
           STEM+
         </Link>
-        <nav className="flex items-center gap-6">
+        <nav className="flex flex-wrap items-center gap-x-3 gap-y-1 sm:gap-x-6">
           {NAV_LINKS.map((link) => (
             <a
               key={link.href}
               href={link.href}
-              className="text-sm text-[var(--site-text)] hover:text-[var(--site-accent)]"
+              className="text-sm whitespace-nowrap text-[var(--site-text)] hover:text-[var(--site-accent)]"
             >
               {link.label}
             </a>
