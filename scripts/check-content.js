@@ -23,4 +23,8 @@ assert.strictEqual(scripts[0].content, null, 'external script should have no inl
 assert.strictEqual(scripts[1].src, null, 'inline script should have no src');
 assert.strictEqual(scripts[1].content, 'console.log("inline");', 'inline script content should be captured');
 
+const headScriptExample = '<script src="a.js"></script>\n<title>T</title>\n<div class="page">x</div>';
+assert.strictEqual(extractScripts(headScriptExample).length, 1, 'extractScripts must find scripts before the first <div>, not just inside it');
+assert.strictEqual(extractScripts(splitHtmlFragment(headScriptExample).body).length, 0, 'sanity check: confirms body alone would miss the head script — this is why getStaticProps calls extractScripts(html), never extractScripts(body)');
+
 console.log('check-content: OK');

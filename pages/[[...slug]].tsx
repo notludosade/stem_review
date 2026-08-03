@@ -42,6 +42,16 @@ export const getStaticProps: GetStaticProps<PageProps> = async ({ params }) => {
   const filePath = path.join(CONTENT_DIR, fileName);
   const html = fs.readFileSync(filePath, 'utf8');
   const { title, body } = splitHtmlFragment(html);
-  const scripts = extractScripts(html);
+  // extractScripts must run on the full `html`, never on `body` alone: 11 of
+  // the 23 real content files have their <script> tags in the head, before
+  // the first <div>, which `body` excludes by design.
+  //
+  // The shell's own Layout/AuthStatus (Task 5) now owns sign-in/sign-out UI
+  // for every page rendered through this route. Legacy pages carry their own
+  // <span class="auth-slot"> populated by assets/auth.js — re-executing that
+  // script here would duplicate the shell's auth UI on-page. The empty
+  // .auth-slot markup itself is harmless (invisible, unpopulated) and is left
+  // alone; only the script that would populate it is filtered out.
+  const scripts = extractScripts(html).filter((script) => script.src !== 'assets/auth.js');
   return { props: { title, body, scripts } };
 };
