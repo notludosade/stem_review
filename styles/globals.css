@@ -1,52 +1,147 @@
 @import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
 
 /* Mirrors the base :root color tokens in public/assets/style.css (lines 3-60).
    Deliberately duplicated rather than imported — this file is a small, stable
    set of base tokens; the shell doesn't need style.css's hundreds of lines of
-   content-page rules. Keep these values in sync if the base palette changes. */
+   content-page rules. Keep these values in sync if the base palette changes.
+   Prefixed --site-* (rather than plain --bg/--text/etc.) to avoid colliding
+   with shadcn/ui's own standard token names (--background/--muted/--border/
+   --accent/...) below, and with public/assets/style.css's plain-named tokens
+   once both stylesheets load on the same document (Task 6). */
 :root {
-  --bg: #fdfcf9;
-  --text: #1c1a17;
-  --muted: #6b675f;
-  --border: #e2ddd2;
-  --accent: #8a4f2b;
-  --accent-soft: #f4e8dc;
+  --site-bg: #fdfcf9;
+  --site-text: #1c1a17;
+  --site-muted: #6b675f;
+  --site-border: #e2ddd2;
+  --site-accent: #8a4f2b;
+  --site-accent-soft: #f4e8dc;
+  --background: var(--site-bg);
+  --foreground: var(--site-text);
+  --card: var(--site-bg);
+  --card-foreground: var(--site-text);
+  --popover: var(--site-bg);
+  --popover-foreground: var(--site-text);
+  --primary: var(--site-accent);
+  --primary-foreground: var(--site-bg);
+  --secondary: oklch(0.97 0 0);
+  --secondary-foreground: oklch(0.205 0 0);
+  --muted: var(--site-accent-soft);
+  --muted-foreground: var(--site-muted);
+  --accent: var(--site-accent-soft);
+  --accent-foreground: var(--site-text);
+  --destructive: oklch(0.577 0.245 27.325);
+  --border: var(--site-border);
+  --input: var(--site-border);
+  --ring: oklch(0.708 0 0);
+  --chart-1: oklch(0.87 0 0);
+  --chart-2: oklch(0.556 0 0);
+  --chart-3: oklch(0.439 0 0);
+  --chart-4: oklch(0.371 0 0);
+  --chart-5: oklch(0.269 0 0);
+  --radius: 0.625rem;
+  --sidebar: oklch(0.985 0 0);
+  --sidebar-foreground: oklch(0.145 0 0);
+  --sidebar-primary: oklch(0.205 0 0);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.97 0 0);
+  --sidebar-accent-foreground: oklch(0.205 0 0);
+  --sidebar-border: oklch(0.922 0 0);
+  --sidebar-ring: oklch(0.708 0 0);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg: #17150f;
-    --text: #e9e5da;
-    --muted: #a39d8e;
-    --border: #3a362c;
-    --accent: #e0a56f;
-    --accent-soft: #2c2419;
+    --site-bg: #17150f;
+    --site-text: #e9e5da;
+    --site-muted: #a39d8e;
+    --site-border: #3a362c;
+    --site-accent: #e0a56f;
+    --site-accent-soft: #2c2419;
   }
 }
 
 :root[data-theme="dark"] {
-  --bg: #17150f;
-  --text: #e9e5da;
-  --muted: #a39d8e;
-  --border: #3a362c;
-  --accent: #e0a56f;
-  --accent-soft: #2c2419;
+  --site-bg: #17150f;
+  --site-text: #e9e5da;
+  --site-muted: #a39d8e;
+  --site-border: #3a362c;
+  --site-accent: #e0a56f;
+  --site-accent-soft: #2c2419;
 }
 
 :root[data-theme="light"] {
-  --bg: #fdfcf9;
-  --text: #1c1a17;
-  --muted: #6b675f;
-  --border: #e2ddd2;
-  --accent: #8a4f2b;
-  --accent-soft: #f4e8dc;
+  --site-bg: #fdfcf9;
+  --site-text: #1c1a17;
+  --site-muted: #6b675f;
+  --site-border: #e2ddd2;
+  --site-accent: #8a4f2b;
+  --site-accent-soft: #f4e8dc;
 }
 
 @theme {
-  --color-bg: var(--bg);
-  --color-text: var(--text);
-  --color-muted: var(--muted);
+  --color-bg: var(--site-bg);
+  --color-text: var(--site-text);
+  --color-muted: var(--site-muted);
+  --color-border: var(--site-border);
+  --color-accent: var(--site-accent);
+  --color-accent-soft: var(--site-accent-soft);
+}
+
+@theme inline {
+  --font-heading: var(--font-sans);
+  --font-sans: var(--font-sans);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
   --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
   --color-accent: var(--accent);
-  --color-accent-soft: var(--accent-soft);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --color-foreground: var(--foreground);
+  --color-background: var(--background);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+  html {
+    @apply font-sans;
+  }
 }
