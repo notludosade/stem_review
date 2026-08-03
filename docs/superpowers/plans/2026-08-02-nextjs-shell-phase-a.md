@@ -283,8 +283,13 @@ git commit -m "Add Tailwind v4, themed to the site's existing warm palette"
 
 **Interfaces:**
 - Produces: `lib/utils.ts` exports `cn(...)` (shadcn's standard class-merging helper — `clsx` + `tailwind-merge`), used by every shadcn component and by `Layout.tsx` in Task 5.
+- Produces: Task 2's six site tokens, renamed from `--bg`/`--text`/`--muted`/`--border`/`--accent`/`--accent-soft` to `--site-bg`/`--site-text`/`--site-muted`/`--site-border`/`--site-accent`/`--site-accent-soft` (values unchanged — pure rename). See "The collision" below for why. Every later task that references these by name (Task 5's `Layout.tsx`) uses the `--site-*` names.
 
-`shadcn init` auto-detects the framework from files already in place (Next.js + Tailwind + `pages/` directory all exist after Tasks 1-2), auto-installs its own dependencies (`class-variance-authority`, `clsx`, `tailwind-merge`, `lucide-react`, plus whichever Radix UI packages the components added in this task need), and generates its own `--background`/`--foreground`/`--primary`/etc. CSS variable block appended to `styles/globals.css` with a neutral gray default palette. Step 2 below re-colors those generated values to the site's palette — same names (so every shadcn component's `bg-background`/`text-foreground`/etc. classes keep working unchanged), different values.
+**Update, discovered during execution, not anticipated when this task was first drafted:** `shadcn init` does not append a separate, distinctly-named CSS block the way this task originally assumed. It parses whatever `:root { ... }` block already exists in `styles/globals.css` and merges its own variables directly into it. Three of shadcn's standard names — `--muted`, `--border`, `--accent` — collide exactly with three of the six names Task 2 chose (mirroring `public/assets/style.css`'s legacy convention). CSS custom properties are name-keyed regardless of which rule declared them — there is only one `--border` in the cascade — so shadcn's writer treated Task 2's `--muted`/`--border`/`--accent` as "already declared, update in place" and overwrote their values with its own neutral-gray defaults. Applying the original recolor mapping (below, now superseded) literally would have produced a self-referential, guaranteed-invalid declaration (`--border: var(--border)`) for one property and silently redefined the other two's semantic role (Task 2's `--muted` was a muted *text* color; shadcn's `--muted` convention is a muted *background* tint paired with `--muted-foreground`).
+
+**The resolution: rename Task 2's tokens, not shadcn's.** shadcn's naming is the standard every current and future shadcn component assumes unmodified — adapting Task 2's tokens once is cheaper than fighting that convention on every component added from here on. It's also more semantically correct: Task 2's `--accent` (the site's primary brand color) actually corresponds to shadcn's `--primary` slot, not shadcn's own `--accent` slot (a subtle secondary-highlight role) — they were never really the same concept, just accidentally the same name. This also incidentally resolves a second, separate collision: `public/assets/style.css` (the legacy stylesheet, loaded on the same document as this shell once Task 5/6 wire up `<link rel="stylesheet" href="/assets/style.css">`) declares its own plain `--bg`/`--text`/`--muted`/`--border`/`--accent`/`--accent-soft` on `:root` — renaming the shell's copy to `--site-*` frees the plain names for the legacy file to own exclusively, with zero shell interference.
+
+Also observed during execution, neither blocking nor requiring action: the current `shadcn@latest` (`4.16.1` as of this task) defaults to a `"base-nova"` style using `@base-ui/react` rather than Radix UI, generates `components/ui/button.tsx` (unused by anything in Phase A — harmless), adds `@import "tw-animate-css";`/`@import "shadcn/tailwind.css";` to `styles/globals.css`, and produces a `components.json` with a few extra fields beyond what's described below (`menuColor`, `menuAccent`, `registries`, `iconLibrary`). None of this collides with anything or needs correcting — it's the tool's current defaults, not a deviation to fight.
 
 - [ ] **Step 1: Run shadcn init non-interactively**
 
@@ -292,27 +297,46 @@ git commit -m "Add Tailwind v4, themed to the site's existing warm palette"
 npx shadcn@latest init -d
 ```
 
-Expected: creates `components.json`, creates `lib/utils.ts`, appends a shadcn CSS variable block to `styles/globals.css`, adds shadcn's dependencies to `package.json`.
+Expected: creates `components.json`, creates `lib/utils.ts`, creates `components/ui/button.tsx`, merges its own CSS variables into `styles/globals.css`'s existing `:root` block (and adds a `.dark { ... }` class-scoped block, a `@theme inline` block, and a `@layer base` block), adds shadcn's dependencies to `package.json`.
 
-- [ ] **Step 2: Verify and fix components.json for Pages Router**
+- [ ] **Step 2: Verify components.json's `rsc` field**
 
-Open `components.json`. shadcn's Next.js preset may set `"rsc": true` (React Server Components) by default — Pages Router has no RSC support, so this must be `false`. Check the file; if it reads `"rsc": true`, change it to `"rsc": false`. Every other field (`style`, `tailwind`, `aliases`) should already be correct from auto-detection — don't change anything else.
+Open `components.json`. Confirm `"rsc": false` (Pages Router has no React Server Components support). Current shadcn versions already default this correctly for a detected Pages Router project — if it somehow reads `true`, change it to `false`. Don't change any other field.
 
-- [ ] **Step 3: Recolor the generated CSS variables**
+- [ ] **Step 3: Rename Task 2's six tokens to avoid the collision**
 
-Open `styles/globals.css`. shadcn's `init` appended a new block (after the block from Task 2) containing `--background`, `--foreground`, `--primary`, `--secondary`, `--muted`, `--muted-foreground`, `--accent`, `--accent-foreground`, `--border`, etc., inside a `:root { ... }` rule and a dark-mode variant. Replace the neutral/gray hex values in that generated block with the site's palette, reusing the CSS variables already defined in Task 2's `:root` block (`var(--bg)`, `var(--text)`, `var(--muted)`, `var(--border)`, `var(--accent)`, `var(--accent-soft)`) instead of new hardcoded hex values — this keeps one single source of truth for the actual color values:
+In `styles/globals.css`, rename `--bg`/`--text`/`--muted`/`--border`/`--accent`/`--accent-soft` to `--site-bg`/`--site-text`/`--site-muted`/`--site-border`/`--site-accent`/`--site-accent-soft` everywhere they're declared — the default `:root` block, the `@media (prefers-color-scheme: dark)` block, the `:root[data-theme="dark"]` block, and the `:root[data-theme="light"]` block (all four, from Task 2). Values stay exactly the same — this is a pure rename. Then update Task 2's own `@theme` block so the Tailwind theme keys (`--color-bg` etc. — unchanged, so any future `bg-bg`/`text-text` Tailwind utility class names stay stable) point at the renamed properties:
 
-- `--background` → `var(--bg)`
-- `--foreground` → `var(--text)`
-- `--muted` → `var(--accent-soft)`, `--muted-foreground` → `var(--muted)`
-- `--accent` → `var(--accent-soft)`, `--accent-foreground` → `var(--text)`
-- `--primary` → `var(--accent)`, `--primary-foreground` → `var(--bg)`
-- `--border`, `--input` → `var(--border)`
-- `--card`, `--popover` → `var(--bg)`; `--card-foreground`, `--popover-foreground` → `var(--text)`
+```css
+@theme {
+  --color-bg: var(--site-bg);
+  --color-text: var(--site-text);
+  --color-muted: var(--site-muted);
+  --color-border: var(--site-border);
+  --color-accent: var(--site-accent);
+  --color-accent-soft: var(--site-accent-soft);
+}
+```
 
-If shadcn generated a separate dark-mode block (e.g. under a `.dark` class selector), delete that selector entirely — dark mode here is driven by Task 2's `prefers-color-scheme`/`data-theme` blocks on the underlying `--bg`/`--text`/etc. variables, which these shadcn variables now reference by `var(...)`, so they automatically pick up the correct value in dark mode with no separate `.dark`-scoped block needed.
+- [ ] **Step 4: Recolor shadcn's generated CSS variables, using the renamed tokens**
 
-- [ ] **Step 4: Verify the build**
+In the same `:root` block (now containing both the renamed `--site-*` properties and shadcn's own generated ones side by side), replace shadcn's neutral-gray values for these specific properties:
+
+- `--background` → `var(--site-bg)`
+- `--foreground` → `var(--site-text)`
+- `--muted` → `var(--site-accent-soft)`, `--muted-foreground` → `var(--site-muted)`
+- `--accent` → `var(--site-accent-soft)`, `--accent-foreground` → `var(--site-text)`
+- `--primary` → `var(--site-accent)`, `--primary-foreground` → `var(--site-bg)`
+- `--border`, `--input` → `var(--site-border)`
+- `--card`, `--popover` → `var(--site-bg)`; `--card-foreground`, `--popover-foreground` → `var(--site-text)`
+
+Leave every other shadcn-generated property at its default (`--destructive`, `--ring`, `--chart-*`, `--sidebar-*`, the `--radius*` values, the `@theme inline` block, the `@layer base` block, the `tw-animate-css`/`shadcn/tailwind.css` imports) — none of them collide with anything, and Phase A's minimal nav doesn't exercise those roles.
+
+- [ ] **Step 5: Delete the `.dark` class-scoped block**
+
+shadcn's init adds a `.dark { ... }` selector with its own dark-mode variable values. Delete that entire rule — dark mode here is driven by the `prefers-color-scheme`/`data-theme` blocks on the underlying `--site-*` variables (Task 2), which the recolored shadcn variables now reference via `var(...)`, so they pick up the correct value in dark mode automatically with no separate `.dark`-scoped block needed.
+
+- [ ] **Step 6: Verify the build**
 
 ```bash
 npx next build
@@ -320,11 +344,11 @@ npx next build
 
 Expected: succeeds.
 
-- [ ] **Step 5: Commit**
+- [ ] **Step 7: Commit**
 
 ```bash
-git add components.json lib/utils.ts styles/globals.css package.json package-lock.json
-git commit -m "Init shadcn/ui, recolored to the site's existing palette"
+git add components.json lib/utils.ts components/ui/button.tsx styles/globals.css package.json package-lock.json
+git commit -m "Init shadcn/ui; rename Task 2's tokens to --site-* to resolve a naming collision with shadcn's standard variable names, then recolor shadcn's variables to the site palette"
 ```
 
 ---
@@ -457,10 +481,12 @@ git commit -m "Add content-extraction and script-detection logic, with tests"
 - Create: `components/Layout.tsx`
 
 **Interfaces:**
-- Consumes: `cn` from `lib/utils.ts` (Task 3).
-- Produces: `Layout` — a React component taking `{ title: string; children: React.ReactNode }`, rendering `<Head><title>{title}</title></Head>` plus a persistent top nav (logo/home link, 4 top-level section links, auth status) and `{children}` below it. Used by the catch-all route in Task 6.
+- Consumes: `cn` from `lib/utils.ts` (Task 3). Consumes the `--site-*` CSS custom properties (`--site-bg`, `--site-text`, `--site-muted`, `--site-border`, `--site-accent`) that Task 3 renamed Task 2's original `--bg`/`--text`/`--muted`/`--border`/`--accent` tokens to, after discovering those names collided with shadcn's own standard variable names (shadcn's `--muted`/`--border`/`--accent` are real, different-valued properties that would otherwise silently override or be overridden by these).
+- Produces: `Layout` — a React component taking `{ title: string; children: React.ReactNode }`, rendering `<Head>` with the page `<title>` AND a `<link rel="stylesheet" href="/assets/style.css">` (every legacy content page under `content/` uses this exact same stylesheet path — see note below), plus a persistent top nav (logo/home link, 4 top-level section links, auth status) and `{children}` below it. Used by the catch-all route in Task 6.
 
 Per the design spec, Phase A's nav is intentionally minimal — logo, the 4 top-level links, auth status. No mega-menus/dropdowns (that's Phase B). Auth status calls `/api/me` (the endpoint doesn't exist under `pages/api/` until Task 7 — this component works and type-checks now regardless, since `fetch` isn't resolved at build time; it becomes functionally live once Task 7 lands).
+
+**Why the stylesheet link lives here, not extracted per-page:** `lib/content.js`'s `splitHtmlFragment` (Task 4) only extracts the `<title>` from each legacy page's head — it deliberately does not parse out the `<link rel="stylesheet" href="assets/style.css">` tag each page also has, because that path is identical across literally every one of the 100+ existing pages (confirmed throughout this project). Rather than parsing and re-injecting something that never varies, `Layout` just always includes it once, statically. Without this, the injected legacy content (`LegacyContent`, Task 6) would render with none of its own CSS applied — every `.toc-item`/`.kicker`/`.subtitle`/etc. rule lives in `assets/style.css`, not in Tailwind or shadcn's styles.
 
 - [ ] **Step 1: Write the component**
 
@@ -501,15 +527,15 @@ function AuthStatus() {
   if (me === undefined) return null;
   if (me === null) {
     return (
-      <a href="/login.html" className="text-sm text-[var(--accent)] hover:underline">
+      <a href="/login.html" className="text-sm text-[var(--site-accent)] hover:underline">
         Sign in
       </a>
     );
   }
   return (
-    <span className="text-sm text-[var(--muted)]">
+    <span className="text-sm text-[var(--site-muted)]">
       {me.name || me.email} ·{' '}
-      <a href="/api/auth/logout" className="text-[var(--accent)] hover:underline">
+      <a href="/api/auth/logout" className="text-[var(--site-accent)] hover:underline">
         Sign out
       </a>
     </span>
@@ -521,14 +547,15 @@ export function Layout({ title, children }: LayoutProps) {
     <>
       <Head>
         <title>{title}</title>
+        <link rel="stylesheet" href="/assets/style.css" />
       </Head>
       <header
         className={cn(
           'sticky top-0 z-10 flex items-center justify-between',
-          'border-b border-[var(--border)] bg-[var(--bg)] px-6 py-3'
+          'border-b border-[var(--site-border)] bg-[var(--site-bg)] px-6 py-3'
         )}
       >
-        <Link href="/" className="font-semibold text-[var(--text)]">
+        <Link href="/" className="font-semibold text-[var(--site-text)]">
           STEM+
         </Link>
         <nav className="flex items-center gap-6">
@@ -536,7 +563,7 @@ export function Layout({ title, children }: LayoutProps) {
             <a
               key={link.href}
               href={link.href}
-              className="text-sm text-[var(--text)] hover:text-[var(--accent)]"
+              className="text-sm text-[var(--site-text)] hover:text-[var(--site-accent)]"
             >
               {link.label}
             </a>
