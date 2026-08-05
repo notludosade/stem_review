@@ -1,0 +1,169 @@
+<meta charset="UTF-8">
+<link rel="icon" href="../../favicon.ico?v=1" type="image/x-icon">
+<title>Lesson 15: RC Discharging and Time Constants — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="advanced">
+  <span class="kicker">STEM+ · AP Physics C: Electricity and Magnetism · Unit 5 · Lesson 15</span>
+  <h1>RC Discharging and Time Constants</h1>
+  <p class="subtitle">Disconnect the battery from a charged capacitor and let it push its own charge back out through a resistor. Same time constant, same exponential shape, opposite direction — charging and discharging are two faces of one framework.</p>
+  <p class="nav-links"><a href="0014-rc-circuits-as-a-differential-equation.html" class="nav-prev">← Lesson 14</a> <a href="../Unit%206/0016-magnetic-force-on-moving-charges.html" class="nav-next">Unit 6, Lesson 16 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <div class="box">
+    <span class="box-label">Setup — The Loop Rule Around a Discharging Capacitor</span>
+    A capacitor, already charged to Q₀ = CV₀, is connected across a resistor R with no battery anywhere in the loop. With no EMF term, the loop rule reads <strong>Q/C − IR = 0</strong>, and now the current is charge <em>leaving</em> the capacitor: <strong>I = −dQ/dt</strong>. Substituting gives <strong>−R(dQ/dt) = Q/C</strong>, or <strong>dQ/dt = −Q/(RC)</strong> — the same kind of first-order differential equation as charging, but now proportional to −Q instead of to (Cε − Q).
+  </div>
+
+  <div class="box">
+    <span class="box-label">Method — Solving the Discharge Equation</span>
+    Separating variables: <strong>dQ/Q = −dt/(RC)</strong>. Integrating with the initial condition Q(0) = Q₀ gives <strong>Q(t) = Q₀e^(−t/RC)</strong>, and dividing by C converts this to <strong>V(t) = V₀e^(−t/RC)</strong>. Differentiating gives the discharge current <strong>I(t) = (V₀/R)e^(−t/RC) = I₀e^(−t/RC)</strong>. Compare this side by side with charging: <strong>charging rises, V(t) = V_max(1 − e^(−t/τ)); discharging falls, V(t) = V₀e^(−t/τ)</strong> — same τ = RC in both, just one curve climbing toward V_max and the other decaying toward zero.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why "Fully Charged" and "Fully Discharged" Are Both Approximations</span>
+    At t = τ, charging has reached 63.2% of V_max while discharging has fallen to 36.8% of V₀ — note these are complements of each other (0.632 + 0.368 = 1), which makes sense since both curves are built from the same e^(−t/τ) factor, just added to or subtracted from 1. Neither exponential ever mathematically reaches its limit in finite time, so engineers use the convention that a circuit is "practically" done after <strong>five time constants (5τ)</strong>, by which point charging is over 99% complete and discharging has under 1% of V₀ left — close enough for any real measurement to call it finished.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Worked Example — Discharging Curve</span>
+    A capacitor charged to V₀ = 9 V discharges through R = 3000 Ω and C = 1000 μF = 1×10⁻³ F. Time constant: τ = RC = (3000)(1×10⁻³) = <strong>3 s</strong>. At t = τ = 3 s: V = 9e⁻¹ ≈ 9(0.368) ≈ <strong>3.31 V</strong>. At t = 2τ = 6 s: V = 9e⁻² ≈ 9(0.135) ≈ <strong>1.22 V</strong> — already down to about 14% of the starting voltage after just two time constants.
+  </div>
+
+  <h2>Try it — charge or discharge</h2>
+  <p>Toggle between charging and discharging, then adjust R, C, and t to compare how each curve behaves at the same time constant.</p>
+
+  <div class="widget">
+    <div class="widget-label">Try It — Charging vs. Discharging</div>
+    <div class="slider-row">
+      <button class="widget-btn" id="rc15-btn-charge" type="button">Charging</button>
+      <button class="widget-btn" id="rc15-btn-discharge" type="button">Discharging</button>
+    </div>
+    <div class="slider-row">
+      <label for="rc15-v0">V_max / V₀ (V)</label>
+      <input type="range" id="rc15-v0" min="5" max="20" step="1" value="12">
+      <span class="slider-value" id="rc15-v0-val">12 V</span>
+    </div>
+    <div class="slider-row">
+      <label for="rc15-r">R (Ω)</label>
+      <input type="range" id="rc15-r" min="200" max="5000" step="100" value="2000">
+      <span class="slider-value" id="rc15-r-val">2000 Ω</span>
+    </div>
+    <div class="slider-row">
+      <label for="rc15-c">C (μF)</label>
+      <input type="range" id="rc15-c" min="100" max="2000" step="100" value="500">
+      <span class="slider-value" id="rc15-c-val">500 μF</span>
+    </div>
+    <div class="slider-row">
+      <label for="rc15-t">t (s)</label>
+      <input type="range" id="rc15-t" min="0" max="5" step="0.1" value="1">
+      <span class="slider-value" id="rc15-t-val">1.0 s</span>
+    </div>
+    <p class="plot-readout" id="rc15-readout">Charging: τ = 1.00 s. At t = 1.0 s: V = 7.59 V (63% of V_max).</p>
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. A capacitor charged to V₀ discharges through a resistor R with no battery in the loop. Its voltage as a function of time is:</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">V(t) = V₀e^(−t/RC), starting at V₀ and decaying toward 0</button>
+      <button class="quiz-choice" data-correct="false">V(t) = V₀(1 − e^(−t/RC)), starting at 0 and rising toward V₀</button>
+      <button class="quiz-choice" data-correct="false">V(t) = V₀ − t/RC, a straight-line decrease</button>
+      <button class="quiz-choice" data-correct="false">V(t) = V₀, constant for all time</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Solving dQ/dt = −Q/(RC) gives exponential decay, Q(t) = Q₀e^(−t/RC), and dividing by C gives V(t) = V₀e^(−t/RC) — the mirror image of the charging curve.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="5.52|5.5">
+    <p class="quiz-prompt">2. Fill in the blank: a capacitor charged to V₀ = 15 V discharges through a circuit with τ = 2 s. At t = 2 s (= τ), V ≈ ___ V (2 decimal places).</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>V(τ) = V₀e⁻¹ = 15(0.3679) ≈ 5.52 V.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. At t = τ, a charging capacitor has reached 63.2% of V_max. At that same t = τ, an otherwise identical discharging capacitor has fallen to what percentage of its starting voltage V₀?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">36.8% (since e⁻¹ ≈ 0.368, and 0.632 + 0.368 = 1)</button>
+      <button class="quiz-choice" data-correct="false">63.2%, the same percentage as charging</button>
+      <button class="quiz-choice" data-correct="false">50%, exactly half</button>
+      <button class="quiz-choice" data-correct="false">0%, already fully discharged</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Charging's fraction is (1 − e^(−t/τ)) and discharging's fraction is e^(−t/τ) — complements of each other built from the same exponential, so at t = τ they're 63.2% and 36.8% respectively, summing to 100%.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">4. A discharging RC circuit has its resistance R doubled, with C left unchanged. The time it takes to discharge to any given fraction of V₀ will:</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Double, since τ = RC is directly proportional to R</button>
+      <button class="quiz-choice" data-correct="false">Be cut in half</button>
+      <button class="quiz-choice" data-correct="false">Stay exactly the same</button>
+      <button class="quiz-choice" data-correct="false">Quadruple</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>V(t) = V₀e^(−t/RC) depends on t only through the ratio t/RC, so doubling R doubles RC, which doubles the time needed to reach any particular fraction of V₀ — the same scaling applies to charging's time constant too.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: OpenStax <em>University Physics Volume 2</em>, <a href="https://openstax.org/books/university-physics-volume-2/pages/10-5-rc-circuits">Section 10.5, "RC Circuits,"</a> works through the same discharging derivation immediately after the charging case.</p>
+
+  <p class="ask-teacher">Ask your teacher for a real device that relies on an RC time constant — a camera flash, a windshield-wiper delay, or a heart pacemaker are all classic examples — and have them explain which part of the cycle (charging or discharging) actually does the useful work. Unit 6 leaves circuits behind and turns to magnetic fields — the force a moving charge feels that a stationary one never does.</p>
+
+  <footer class="lesson-footer">STEM+ · AP Physics C: Electricity and Magnetism · Unit 5 · Lesson 15 of 21</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var v0Slider = document.getElementById('rc15-v0');
+  var v0Val = document.getElementById('rc15-v0-val');
+  var rSlider = document.getElementById('rc15-r');
+  var rVal = document.getElementById('rc15-r-val');
+  var cSlider = document.getElementById('rc15-c');
+  var cVal = document.getElementById('rc15-c-val');
+  var tSlider = document.getElementById('rc15-t');
+  var tVal = document.getElementById('rc15-t-val');
+  var readout = document.getElementById('rc15-readout');
+  var btnCharge = document.getElementById('rc15-btn-charge');
+  var btnDischarge = document.getElementById('rc15-btn-discharge');
+  var mode = 'charge';
+
+  function update() {
+    var v0 = Number(v0Slider.value);
+    var r = Number(rSlider.value);
+    var cMicro = Number(cSlider.value);
+    var t = Number(tSlider.value);
+    v0Val.textContent = v0 + ' V';
+    rVal.textContent = r + ' Ω';
+    cVal.textContent = cMicro + ' μF';
+    tVal.textContent = t.toFixed(1) + ' s';
+
+    var c = cMicro * 1e-6;
+    var tau = r * c;
+    var text;
+    if (mode === 'charge') {
+      var v = v0 * (1 - Math.exp(-t / tau));
+      var pct = 100 * (1 - Math.exp(-t / tau));
+      text = 'Charging: τ = ' + tau.toFixed(2) + ' s. At t = ' + t.toFixed(1) + ' s: V = ' + v.toFixed(2) + ' V (' + pct.toFixed(0) + '% of V_max).';
+    } else {
+      var vd = v0 * Math.exp(-t / tau);
+      var pctd = 100 * Math.exp(-t / tau);
+      text = 'Discharging: τ = ' + tau.toFixed(2) + ' s. At t = ' + t.toFixed(1) + ' s: V = ' + vd.toFixed(2) + ' V (' + pctd.toFixed(0) + '% of V₀ remaining).';
+    }
+    readout.textContent = text;
+  }
+
+  btnCharge.addEventListener('click', function () { mode = 'charge'; update(); });
+  btnDischarge.addEventListener('click', function () { mode = 'discharge'; update(); });
+  v0Slider.addEventListener('input', update);
+  rSlider.addEventListener('input', update);
+  cSlider.addEventListener('input', update);
+  tSlider.addEventListener('input', update);
+  update();
+});
+</script>

@@ -1,0 +1,166 @@
+<meta charset="UTF-8">
+<link rel="icon" href="../../favicon.ico?v=1" type="image/x-icon">
+<title>Lesson 20: Lenz's Law, Self-Inductance, and RL Circuits — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="advanced">
+  <span class="kicker">STEM+ · AP Physics C: Electricity and Magnetism · Unit 7 · Lesson 20</span>
+  <h1>Lenz's Law, Self-Inductance, and RL Circuits</h1>
+  <p class="subtitle">Faraday's law says an EMF gets induced. It doesn't say which way the current flows — that direction is never arbitrary, and getting it backwards would mean building a machine that generates energy from nothing.</p>
+  <p class="nav-links"><a href="0019-electromagnetic-induction-and-faradays-law.html" class="nav-prev">← Lesson 19</a> <a href="0021-maxwells-equations-and-electromagnetic-waves.html" class="nav-next">Lesson 21 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <div class="box">
+    <span class="box-label">Definition — Lenz's Law</span>
+    <strong>An induced current always flows in the direction that opposes the change in flux that produced it.</strong> If flux through a loop is increasing, the induced current creates its own magnetic field opposing that increase; if flux is decreasing, the induced current creates a field reinforcing it, fighting the decrease. This is exactly the minus sign in Faraday's law, EMF = −dΦ_B/dt, made concrete: a direction rule, not just an afterthought.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why Lenz's Law Has to Be True</span>
+    Suppose it were backwards — suppose the induced current reinforced the change in flux instead of opposing it. A small initial increase in flux would induce a current that increases the flux further, which induces more current, which increases the flux even more — current spiraling upward forever with no energy input at all. That's a free-energy machine, and those don't exist. Lenz's law isn't a separate, independent law of nature bolted onto Faraday's law — it's <em>required</em> by conservation of energy. It's also why pushing a magnet toward a loop always feels like pushing against resistance: the induced current's own field pushes back on the magnet, and the mechanical work needed to overcome that push is exactly what becomes the electrical energy delivered to the circuit.
+  </div>
+
+  <div class="box">
+    <span class="box-label">Definition — Self-Inductance</span>
+    A coil carrying a changing current creates its own changing flux through itself, and by Faraday's law, that induces an EMF back on the coil — opposing the current's own change, by Lenz's law. <strong>EMF = −L dI/dt</strong>, where <strong>L</strong> is the coil's <strong>self-inductance</strong> (unit: the henry, H = V·s/A), a geometric property of the coil itself, playing the same role for current that capacitance plays for voltage.
+  </div>
+
+  <div class="box">
+    <span class="box-label">Worked Derivation — The RL Circuit</span>
+    A battery of EMF ε, resistor R, and inductor L in series, switch closed at t = 0. Kirchhoff's loop rule: ε − IR − L(dI/dt) = 0, a first-order differential equation in I(t) — structurally identical to Unit 5's RC circuit equation with I standing in for charge's role. Solving with I(0) = 0 gives <strong>I(t) = (ε/R)(1 − e^(−t/τ))</strong>, charging toward I_max = ε/R, with time constant <strong>τ = L/R</strong>. Remove the battery from an already-current-carrying LR loop instead, and the current decays as <strong>I(t) = I₀e^(−t/τ)</strong> — the same exponential decay shape RC discharge used.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Paralleling the RC Circuit From Unit 5</span>
+    <table>
+      <thead><tr><th>RC Circuit (Unit 5)</th><th>RL Circuit (this lesson)</th></tr></thead>
+      <tbody>
+        <tr><td>Capacitor resists a sudden change in <strong>voltage</strong></td><td>Inductor resists a sudden change in <strong>current</strong></td></tr>
+        <tr><td>Charging: q(t) = Cε(1 − e^(−t/τ))</td><td>Charging: I(t) = (ε/R)(1 − e^(−t/τ))</td></tr>
+        <tr><td>Time constant τ = RC</td><td>Time constant τ = L/R</td></tr>
+        <tr><td>Discharging decays as e^(−t/τ)</td><td>Discharging decays as e^(−t/τ)</td></tr>
+      </tbody>
+    </table>
+    Every RC result from Unit 5 has a direct RL mirror — swap "charge can't jump instantaneously" for "current can't jump instantaneously," and swap RC for L/R.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Worked Example</span>
+    A series RL circuit has L = 0.1 H, R = 20 Ω, and ε = 12 V. τ = L/R = 0.1/20 = 0.005 s = 5 ms. I_max = ε/R = 12/20 = 0.6 A. At t = τ, the current has reached the same universal 63.2% of its final value that RC charging reaches at one time constant: I(τ) ≈ (0.632)(0.6) ≈ <strong>0.379 A</strong>.
+  </div>
+
+  <h2>Try it — RL charging curve</h2>
+  <p>The curve below is plotted in units of τ, so its shape never changes — only what τ actually equals, and what current that corresponds to, depends on L and R. A fixed 12 V battery drives the circuit.</p>
+
+  <div class="widget">
+    <div class="widget-label">Try It — τ = L/R and the 63.2% Point</div>
+    <div class="slider-row">
+      <label for="rl-l">Inductance L (mH)</label>
+      <input type="range" id="rl-l" min="10" max="200" step="10" value="100">
+      <span class="slider-value" id="rl-l-val">100 mH</span>
+    </div>
+    <div class="slider-row">
+      <label for="rl-r">Resistance R (Ω)</label>
+      <input type="range" id="rl-r" min="5" max="50" step="5" value="20">
+      <span class="slider-value" id="rl-r-val">20 Ω</span>
+    </div>
+    <div class="plot-wrap">
+      <svg id="rl-svg" viewBox="0 0 460 160" width="460" height="160" role="img" aria-label="A charging curve for current in an RL circuit versus time in units of the time constant tau, rising from zero toward its maximum value">
+        <line x1="40" y1="140" x2="420" y2="140" stroke="var(--border)" stroke-width="2"></line>
+        <line x1="40" y1="20" x2="40" y2="140" stroke="var(--border)" stroke-width="2"></line>
+        <line x1="116" y1="70.5" x2="116" y2="140" stroke="var(--muted)" stroke-width="1" stroke-dasharray="4,3"></line>
+        <line x1="40" y1="70.5" x2="116" y2="70.5" stroke="var(--muted)" stroke-width="1" stroke-dasharray="4,3"></line>
+        <circle cx="116" cy="70.5" r="4" fill="#b5542c"></circle>
+        <polyline points="40,140 59,115.7 78,96.7 97,82.0 116,70.5 135,61.5 154,54.5 173,49.1 192,44.9 230,39.0 268,35.5 306,33.3 344,32.0 382,31.2 420,30.7" fill="none" stroke="#2c5f8a" stroke-width="2.5"></polyline>
+        <text x="116" y="152" class="fig-label" text-anchor="middle" font-size="12">τ</text>
+        <text x="192" y="152" class="fig-label" text-anchor="middle" font-size="12">2τ</text>
+        <text x="268" y="152" class="fig-label" text-anchor="middle" font-size="12">3τ</text>
+        <text x="344" y="152" class="fig-label" text-anchor="middle" font-size="12">4τ</text>
+        <text x="420" y="152" class="fig-label" text-anchor="middle" font-size="12">5τ</text>
+        <text x="10" y="75" class="fig-label" text-anchor="middle" font-size="11">63%</text>
+      </svg>
+    </div>
+    <p class="plot-readout" id="rl-readout">L = 100 mH, R = 20 Ω: τ = L/R = 5.0 ms. With ε = 12 V, I_max = ε/R = 0.60 A; at t = τ the current has reached 63.2% of I_max ≈ 0.379 A.</p>
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. A bar magnet's north pole approaches a wire loop head-on. By Lenz's law, the induced current in the loop:</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Creates a magnetic field that opposes the approaching flux — the loop's near face effectively becomes a north pole, repelling the magnet</button>
+      <button class="quiz-choice" data-correct="false">Creates a field that pulls the magnet in faster</button>
+      <button class="quiz-choice" data-correct="false">Flows in a direction that has nothing to do with the magnet's motion</button>
+      <button class="quiz-choice" data-correct="false">Is zero, since the magnet never touches the loop</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Lenz's law: the induced current opposes the change that caused it. An approaching north pole means increasing flux into the loop's face, so the induced current opposes that increase by presenting its own north pole toward the magnet — a repulsive force.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="5|5.0">
+    <p class="quiz-prompt">2. Fill in the blank: an RL circuit has L = 40 mH and R = 8 Ω. Its time constant τ is ___ ms.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>τ = L/R = 0.040/8 = 0.005 s = 5 ms.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Suppose induced currents worked backwards — reinforcing, rather than opposing, the change in flux that caused them. What would this imply?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">A small flux change would runaway into ever-increasing current with no energy input — a violation of energy conservation</button>
+      <button class="quiz-choice" data-correct="false">Circuits would behave exactly the same either way</button>
+      <button class="quiz-choice" data-correct="false">Faraday's law would still hold, just with a different value of L</button>
+      <button class="quiz-choice" data-correct="false">Magnets would simply need to be stronger to induce any current</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Reinforcement instead of opposition creates positive feedback — current growing without bound and without any energy source — which is exactly why Lenz's law is required by, not separate from, conservation of energy.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">4. An inductor in a circuit opposes a sudden change in ___, the same role a capacitor plays opposing a sudden change in ___.</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Current; voltage</button>
+      <button class="quiz-choice" data-correct="false">Voltage; current</button>
+      <button class="quiz-choice" data-correct="false">Resistance; capacitance</button>
+      <button class="quiz-choice" data-correct="false">Current; current</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>An inductor's EMF = −L dI/dt fights any sudden jump in current; a capacitor's charge q = CV can't jump instantaneously either, so it fights any sudden jump in voltage. The two components are mirror images of each other.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: OpenStax <em>University Physics Volume 2</em>, <a href="https://openstax.org/books/university-physics-volume-2/pages/14-4-rl-circuits">Section 14.4, "RL Circuits,"</a> works through the charging and discharging derivations in full.</p>
+
+  <p class="ask-teacher">Ask your teacher what physically stores the energy an inductor's magnetic field holds — it's U = ½LI², nearly a mirror image of a capacitor's U = ½CV². Lesson 21 gathers every field law from this entire course — Gauss's law, no magnetic monopoles, Faraday's law, and one more piece still missing — into four equations. Out of those four equations falls one of the most remarkable predictions in the history of physics.</p>
+
+  <footer class="lesson-footer">STEM+ · AP Physics C: Electricity and Magnetism · Unit 7 · Lesson 20 of 21</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var lSlider = document.getElementById('rl-l');
+  var lVal = document.getElementById('rl-l-val');
+  var rSlider = document.getElementById('rl-r');
+  var rVal = document.getElementById('rl-r-val');
+  var readout = document.getElementById('rl-readout');
+  var EMF = 12;
+
+  function update() {
+    var Lmh = Number(lSlider.value);
+    var R = Number(rSlider.value);
+    lVal.textContent = Lmh + ' mH';
+    rVal.textContent = R + ' Ω';
+    var tauMs = Lmh / R;
+    var Imax = EMF / R;
+    var Itau = 0.632 * Imax;
+    readout.textContent = 'L = ' + Lmh + ' mH, R = ' + R + ' Ω: τ = L/R = ' + tauMs.toFixed(1) + ' ms. With ε = 12 V, I_max = ε/R = ' + Imax.toFixed(2) + ' A; at t = τ the current has reached 63.2% of I_max ≈ ' + Itau.toFixed(3) + ' A.';
+  }
+
+  lSlider.addEventListener('input', update);
+  rSlider.addEventListener('input', update);
+  update();
+});
+</script>

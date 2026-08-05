@@ -1,0 +1,154 @@
+<meta charset="UTF-8">
+<link rel="icon" href="../../favicon.ico?v=1" type="image/x-icon">
+<title>Lesson 14: RC Circuits as a Differential Equation — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="advanced">
+  <span class="kicker">STEM+ · AP Physics C: Electricity and Magnetism · Unit 5 · Lesson 14</span>
+  <h1>RC Circuits as a Differential Equation</h1>
+  <p class="subtitle">Every circuit so far has reduced to algebra. Add a capacitor to a loop with a resistor and the loop rule stops being an equation you solve once — it becomes a differential equation in charge, and its solution is a curve that unfolds over time.</p>
+  <p class="nav-links"><a href="0013-kirchhoffs-laws.html" class="nav-prev">← Lesson 13</a> <a href="0015-rc-discharging-and-time-constants.html" class="nav-next">Lesson 15 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <div class="box">
+    <span class="box-label">Setup — The Loop Rule Around a Charging Capacitor</span>
+    A battery of EMF ε, a resistor R, and an initially uncharged capacitor C are wired in a single series loop; a switch closes at t = 0. Applying the loop rule at any instant: <strong>ε − IR − Q/C = 0</strong>. Unlike every earlier circuit, I isn't a fixed number here — it's the rate charge is arriving on the capacitor, <strong>I = dQ/dt</strong>. Substituting turns the loop rule into <strong>R(dQ/dt) + Q/C = ε</strong>, a first-order differential equation for Q(t) instead of a plain algebraic equation for I.
+  </div>
+
+  <div class="box">
+    <span class="box-label">Method — Solving by Separation of Variables</span>
+    Rearrange to <strong>dQ/dt = (Cε − Q)/(RC)</strong>, then separate the variables: <strong>dQ/(Cε − Q) = dt/(RC)</strong>. Integrating both sides and applying the initial condition Q(0) = 0 gives <strong>Q(t) = Cε(1 − e^(−t/RC))</strong>. Dividing by C (and noting Cε = Q_max = the final charge) converts this into a voltage statement: <strong>V(t) = V_max(1 − e^(−t/RC))</strong>, where V_max = ε. Differentiating Q(t) back to get the current gives <strong>I(t) = (ε/R)e^(−t/RC)</strong> — current starts at ε/R (the capacitor briefly acts like a wire) and decays toward zero as the capacitor fills up.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why τ = RC Is the Only Time Scale in the Problem</span>
+    The combination <strong>τ = RC</strong>, the <strong>time constant</strong>, is the one quantity in V(t) = V_max(1 − e^(−t/τ)) with units of time — check: Ω·F = (V/A)·(C/V) = C/A = s. At t = τ, the exponential term is e⁻¹ ≈ 0.368, so the capacitor has reached <strong>1 − 0.368 = 63.2%</strong> of V_max, regardless of what ε, R, or C individually are. By t = 5τ, it's over 99% charged — "fully charged" is only ever an approximation, but a good enough one by then. Bigger R slows charging by limiting current; bigger C slows charging by demanding more charge to reach the same voltage — either one alone stretches τ.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Worked Example — Charging Curve</span>
+    ε = 12 V, R = 2000 Ω, C = 500 μF = 5×10⁻⁴ F. Time constant: τ = RC = (2000)(5×10⁻⁴) = <strong>1 s</strong>. At t = τ = 1 s: V = 12(1 − e⁻¹) ≈ 12(0.632) ≈ <strong>7.59 V</strong>. The current at that same instant: I_max = ε/R = 12/2000 = 6 mA at t = 0, falling to I(1 s) = 6 mA × e⁻¹ ≈ <strong>2.21 mA</strong> — already down to about a third of its starting value, exactly as the exponential predicts.
+  </div>
+
+  <h2>Try it — charge a capacitor</h2>
+  <p>Set ε, R, and C, then slide t forward and watch V(t) and I(t) climb and fall along their exponential curves.</p>
+
+  <div class="widget">
+    <div class="widget-label">Try It — Charging a Capacitor</div>
+    <div class="slider-row">
+      <label for="rc14-eps">ε (V)</label>
+      <input type="range" id="rc14-eps" min="5" max="20" step="1" value="12">
+      <span class="slider-value" id="rc14-eps-val">12 V</span>
+    </div>
+    <div class="slider-row">
+      <label for="rc14-r">R (Ω)</label>
+      <input type="range" id="rc14-r" min="200" max="5000" step="100" value="2000">
+      <span class="slider-value" id="rc14-r-val">2000 Ω</span>
+    </div>
+    <div class="slider-row">
+      <label for="rc14-c">C (μF)</label>
+      <input type="range" id="rc14-c" min="100" max="2000" step="100" value="500">
+      <span class="slider-value" id="rc14-c-val">500 μF</span>
+    </div>
+    <div class="slider-row">
+      <label for="rc14-t">t (s)</label>
+      <input type="range" id="rc14-t" min="0" max="5" step="0.1" value="1">
+      <span class="slider-value" id="rc14-t-val">1.0 s</span>
+    </div>
+    <p class="plot-readout" id="rc14-readout">τ = 1.00 s. At t = 1.0 s: V = 7.59 V (63% of V_max), I = 2.21 mA.</p>
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. Applying Kirchhoff's loop rule around a series circuit with a battery ε, resistor R, and charging capacitor C, using I = dQ/dt, gives:</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">R(dQ/dt) + Q/C = ε</button>
+      <button class="quiz-choice" data-correct="false">R(dQ/dt) − Q/C = ε</button>
+      <button class="quiz-choice" data-correct="false">ε = IR only, since the loop rule doesn't apply to capacitors</button>
+      <button class="quiz-choice" data-correct="false">Q = εC, with no time dependence at all</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The loop rule gives ε − IR − Q/C = 0; substituting I = dQ/dt and rearranging gives R(dQ/dt) + Q/C = ε, a differential equation because I itself depends on how fast Q is changing.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="1">
+    <p class="quiz-prompt">2. Fill in the blank: a series RC circuit has R = 4000 Ω and C = 250 μF. Its time constant is τ = ___ s.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>τ = RC = (4000)(250×10⁻⁶) = (4000)(2.5×10⁻⁴) = 1 s.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. As t → ∞ in a charging RC circuit, V(t) = V_max(1 − e^(−t/RC)) approaches:</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">V_max = ε, while the current approaches 0</button>
+      <button class="quiz-choice" data-correct="false">0, while the current approaches ε/R</button>
+      <button class="quiz-choice" data-correct="false">Infinity</button>
+      <button class="quiz-choice" data-correct="false">V_max/2, the circuit's steady-state balance point</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>As t → ∞, e^(−t/RC) → 0, so V → V_max = ε. With the capacitor fully charged, it draws no more current, so I = (ε/R)e^(−t/RC) → 0 as well.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">4. Physically, why does the charging current I(t) = (ε/R)e^(−t/RC) shrink over time even though the battery's EMF ε never changes?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">The capacitor's own voltage Q/C grows and opposes the battery, leaving less net voltage to drive current through R</button>
+      <button class="quiz-choice" data-correct="false">The battery itself weakens as the capacitor charges</button>
+      <button class="quiz-choice" data-correct="false">The resistor's resistance increases as current flows through it</button>
+      <button class="quiz-choice" data-correct="false">Current only decreases if the capacitor is defective</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>From ε − IR − Q/C = 0, the current is I = (ε − Q/C)/R. As Q builds up, Q/C rises toward ε, shrinking the net voltage (ε − Q/C) available to push current through R — the capacitor's rising voltage is doing the throttling, not any change in the battery or resistor.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: OpenStax <em>University Physics Volume 2</em>, <a href="https://openstax.org/books/university-physics-volume-2/pages/10-5-rc-circuits">Section 10.5, "RC Circuits,"</a> derives this same charging equation and works several numeric examples.</p>
+
+  <p class="ask-teacher">Ask your teacher to sketch the I(t) and V(t) curves for a charging capacitor on the same axes and explain, without doing any algebra, why one curve must start at its maximum while the other starts at zero. Lesson 15 runs the same circuit backward — a charged capacitor giving its charge back up.</p>
+
+  <footer class="lesson-footer">STEM+ · AP Physics C: Electricity and Magnetism · Unit 5 · Lesson 14 of 21</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var epsSlider = document.getElementById('rc14-eps');
+  var epsVal = document.getElementById('rc14-eps-val');
+  var rSlider = document.getElementById('rc14-r');
+  var rVal = document.getElementById('rc14-r-val');
+  var cSlider = document.getElementById('rc14-c');
+  var cVal = document.getElementById('rc14-c-val');
+  var tSlider = document.getElementById('rc14-t');
+  var tVal = document.getElementById('rc14-t-val');
+  var readout = document.getElementById('rc14-readout');
+
+  function update() {
+    var eps = Number(epsSlider.value);
+    var r = Number(rSlider.value);
+    var cMicro = Number(cSlider.value);
+    var t = Number(tSlider.value);
+    epsVal.textContent = eps + ' V';
+    rVal.textContent = r + ' Ω';
+    cVal.textContent = cMicro + ' μF';
+    tVal.textContent = t.toFixed(1) + ' s';
+
+    var c = cMicro * 1e-6;
+    var tau = r * c;
+    var v = eps * (1 - Math.exp(-t / tau));
+    var iAmps = (eps / r) * Math.exp(-t / tau);
+    var pct = 100 * (1 - Math.exp(-t / tau));
+
+    readout.textContent = 'τ = ' + tau.toFixed(2) + ' s. At t = ' + t.toFixed(1) + ' s: V = ' + v.toFixed(2) + ' V (' + pct.toFixed(0) + '% of V_max), I = ' + (iAmps * 1000).toFixed(2) + ' mA.';
+  }
+
+  epsSlider.addEventListener('input', update);
+  rSlider.addEventListener('input', update);
+  cSlider.addEventListener('input', update);
+  tSlider.addEventListener('input', update);
+  update();
+});
+</script>
