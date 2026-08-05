@@ -71,6 +71,50 @@ const expectedAnswer = ({ meta }) => {
     case 'magnetic-force-micro': return m.charge * m.velocity * m.field;
     case 'thin-lens-image': return 1 / (1 / m.focalLength - 1 / m.objectDistance);
     case 'photon-energy': return 1240 / m.wavelength;
+    case 'determinant-2': return m.a * m.d - m.b * m.c;
+    case 'sum-values': return m.values.reduce((sum, value) => sum + value, 0);
+    case 'max-values': return Math.max(...m.values);
+    case 'exponential-derivative-zero': return m.coefficient * m.rate;
+    case 'geometric-term-zero': return m.initial * m.ratio ** m.time;
+    case 'euler-step-linear': return m.y + m.h * (m.a * m.y + m.b);
+    case 'angular-frequency': return Math.sqrt(m.spring / m.mass);
+    case 'laplace-power': return factorial(m.power) / m.s ** (m.power + 1);
+    case 'logic-number':
+      if (m.operation === 'and') return Number(m.p && m.q);
+      if (m.operation === 'or') return Number(m.p || m.q);
+      if (m.operation === 'implies') return Number(!m.p || m.q);
+      return Number(m.p === m.q);
+    case 'sum-parity': return (m.a + m.b) % 2;
+    case 'division': return m.dividend / m.divisor;
+    case 'count-divisible': return Math.floor(m.limit / m.divisor);
+    case 'propagation-ms': return m.distance / m.speedThousands;
+    case 'subnet-hosts': return 2 ** m.hostBits - 2;
+    case 'cidr-addresses': return 2 ** (32 - m.prefix);
+    case 'bandwidth-delay-bytes': return m.rateMbps * m.rttMs * 125;
+    case 'inclusive-count': return m.high - m.low + 1;
+    case 'binary-value': return Number.parseInt(m.binary, 2);
+    case 'hex-value': return Number.parseInt(m.hex, 16);
+    case 'twos-complement': return m.unsigned >= 2 ** (m.bits - 1) ? m.unsigned - 2 ** m.bits : m.unsigned;
+    case 'array-address': return m.base + m.index * m.width;
+    case 'cache-average': return m.hitRate * m.hitTime + (1 - m.hitRate) * m.missTime;
+    case 'turnaround': return m.start + m.burst - m.arrival;
+    case 'meters-to-mm': return m.meters * 1000;
+    case 'cubic-position-velocity': return 3 * m.a * m.t ** 2 + 2 * m.b * m.t;
+    case 'product': return m.a * m.b;
+    case 'square-over': return m.value ** 2 / m.divisor;
+    case 'triple-product-division': return m.a * m.b / m.divisor;
+    case 'difference': return m.a - m.b;
+    case 'reciprocal': return 1 / m.value;
+    case 'square-times': return m.value ** 2 * m.factor;
+    case 'absolute-difference': return Math.abs(m.a - m.b);
+    case 'identity': return m.value;
+    case 'limit-sequence-term': return m.limit + 1 / m.n;
+    case 'epsilon-n-reciprocal': return Math.floor(1 / m.epsilon) + 1;
+    case 'nearest-endpoint': return Math.min(Math.abs(m.point - m.left), Math.abs(m.right - m.point));
+    case 'right-riemann-x': return (m.n + 1) / (2 * m.n);
+    case 'n-log2-n': return m.n * Math.log2(m.n);
+    case 'fibonacci': { let a = 0, b = 1; for (let i = 0; i < m.n; i += 1) [a, b] = [b, a + b]; return a; }
+    case 'power-two': return 2 ** m.exponent;
     default: throw new Error(`Unknown audit kind: ${m.kind}`);
   }
 };
@@ -81,7 +125,8 @@ const assert = (condition, message) => {
   if (!condition) throw new Error(message);
 };
 
-assert(courses.length === 10, `Expected 10 courses, found ${courses.length}`);
+assert(courses.length === 20, `Expected 20 courses, found ${courses.length}`);
+['real-analysis-a', 'advanced-algorithms'].forEach((slug) => assert(courses.some((course) => course.slug === slug && course.tier === 'advanced'), `Missing Advanced+ problem set: ${slug}`));
 const ids = new Set();
 let total = 0;
 
@@ -113,19 +158,22 @@ courses.forEach((course) => {
   total += course.questions.length;
 });
 
-assert(total === 600, `Expected 600 total questions, found ${total}`);
+assert(total === 1200, `Expected 1200 total questions, found ${total}`);
 
-const root = path.resolve(__dirname, '..');
-const pages = ['index.html', 'problem-sets.html', 'problem-set.html', 'sandbox.html'];
+const root = path.resolve(__dirname, '../public');
+const pages = ['problem-sets.html', 'problem-set.html', 'sandbox.html'];
 let localLinks = 0;
 pages.forEach((page) => {
   const html = fs.readFileSync(path.join(root, page), 'utf8');
   for (const match of html.matchAll(/(?:href|src)="([^"]+)"/g)) {
     const target = match[1].split(/[?#]/)[0];
-    if (!target || /^(?:https?:|mailto:)/.test(target)) continue;
+    if (!target || target === 'index.html' || /^(?:https?:|mailto:)/.test(target)) continue;
     assert(fs.existsSync(path.resolve(root, target)), `${page}: broken local reference ${match[1]}`);
     localLinks += 1;
   }
 });
+const catalog = fs.readFileSync(path.join(root, 'problem-sets.html'), 'utf8');
+courses.forEach((course) => assert(catalog.includes(`problem-set.html?course=${course.slug}`), `Catalog missing ${course.slug}`));
+assert((catalog.match(/problem-set\.html\?course=/g) || []).length === courses.length, 'Catalog course count does not match bank data');
 
 console.log(`Problem-bank audit passed: ${courses.length} courses, ${total} answers recomputed, ${localLinks} local references checked.`);

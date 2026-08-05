@@ -820,6 +820,128 @@
     return questions;
   }
 
+  const generatedCourse = (prefix, topics) => {
+    const questions = [];
+    topics.forEach(([topic, build]) => {
+      for (let i = 0; i < 10; i += 1) {
+        const item = build(i);
+        questions.push(qNumber(`${prefix}-${questions.length + 1}`, topic, item.prompt, item.answer, item.explanation, item.meta, item.tolerance));
+      }
+    });
+    return questions;
+  };
+
+  function linearAlgebra() {
+    return generatedCourse('la', [
+      ['Vectors and dot products', (i) => { const u = [i + 1, i % 4 - 2], v = [i % 3 + 2, 3 - i]; const answer = u[0] * v[0] + u[1] * v[1]; return { prompt: `Find (${u.join(', ')}) · (${v.join(', ')}).`, answer, explanation: `Multiply aligned components and add: ${answer}.`, meta: { kind: 'vector-dot', u, v } }; }],
+      ['Vector magnitude', (i) => { const a = i + 3, b = 2 * i + 4; const answer = Math.hypot(a, b); return { prompt: `Find the magnitude of vector (${a}, ${b}).`, answer, explanation: `The magnitude is √(${a}² + ${b}²) = ${fmt(answer)}.`, meta: { kind: 'pythagorean', a, b } }; }],
+      ['Matrix determinants', (i) => { const a = i + 1, b = i % 4, c = 2 - i, d = i % 5 + 2, answer = a * d - b * c; return { prompt: `Find det([[${a}, ${b}], [${c}, ${d}]]).`, answer, explanation: `For a 2×2 matrix, det = ad − bc = ${answer}.`, meta: { kind: 'determinant-2', a, b, c, d } }; }],
+      ['Matrix traces', (i) => { const diagonal = [i - 3, i + 2, 2 * i + 1], answer = diagonal.reduce((sum, value) => sum + value, 0); return { prompt: `Find the trace of a 3×3 matrix whose diagonal entries are ${diagonal.join(', ')}.`, answer, explanation: `The trace is the sum of diagonal entries: ${answer}.`, meta: { kind: 'sum-values', values: diagonal } }; }],
+      ['Matrix multiplication', (i) => { const row = [i + 1, 2 - i], column = [i % 3 + 1, i + 2], answer = row[0] * column[0] + row[1] * column[1]; return { prompt: `A matrix row is [${row.join(', ')}] and the aligned column is [${column.join(', ')}]. Find their product entry.`, answer, explanation: `The entry is the row-column dot product: ${answer}.`, meta: { kind: 'vector-dot', u: row, v: column } }; }],
+      ['Eigenvalues', (i) => { const values = [i - 2, 2 * i + 1, 5 - i], answer = Math.max(...values); return { prompt: `A diagonal matrix has diagonal entries ${values.join(', ')}. Find its largest eigenvalue.`, answer, explanation: `A diagonal matrix’s eigenvalues are its diagonal entries, so the largest is ${answer}.`, meta: { kind: 'max-values', values } }; }]
+    ]);
+  }
+
+  function differentialEquations() {
+    return generatedCourse('de', [
+      ['Differential equations', (i) => { const coefficient = i + 2, rate = i % 5 - 2, answer = coefficient * rate; return { prompt: `If y = ${coefficient}e^(${rate}t), find y′(0).`, answer, explanation: `y′ = ${coefficient * rate}e^(${rate}t), so y′(0) = ${answer}.`, meta: { kind: 'exponential-derivative-zero', coefficient, rate } }; }],
+      ['Growth and decay', (i) => { const initial = i + 3, ratio = i % 2 ? 0.5 : 2, time = i % 4 + 1, answer = initial * ratio ** time; return { prompt: `A model satisfies y(t) = ${initial}(${ratio})^t. Find y(${time}).`, answer, explanation: `Substitution gives ${initial}(${ratio})^${time} = ${fmt(answer)}.`, meta: { kind: 'geometric-term-zero', initial, ratio, time } }; }],
+      ['Characteristic equations', (i) => { const r1 = i % 5 - 3, r2 = i + 1, sum = r1 + r2, product = r1 * r2; return { prompt: `Find the larger root of r² − ${sum}r + ${product} = 0.`, answer: Math.max(r1, r2), explanation: `The polynomial factors with roots ${r1} and ${r2}.`, meta: { kind: 'quadratic-larger-root', sum, product } }; }],
+      ['Euler’s method', (i) => { const y = i + 1, h = 0.1 * (i % 4 + 1), a = i % 3 + 1, b = i - 2, answer = y + h * (a * y + b); return { prompt: `Use one Euler step for y′ = ${a}y ${term(b, '')}, starting at y = ${y} with h = ${fmt(h)}. Find the next y-value.`, answer, explanation: `y_next = y + h·f = ${fmt(answer)}.`, meta: { kind: 'euler-step-linear', y, h, a, b } }; }],
+      ['Oscillations', (i) => { const mass = i % 4 + 1, omega = i % 5 + 1, spring = mass * omega ** 2; return { prompt: `A mass-spring system has m = ${mass} kg and k = ${spring} N/m. Find angular frequency ω in rad/s.`, answer: omega, explanation: `ω = √(k/m) = √(${spring}/${mass}) = ${omega}.`, meta: { kind: 'angular-frequency', mass, spring } }; }],
+      ['Laplace transforms', (i) => { const power = i % 5, s = i % 4 + 1, answer = factorial(power) / s ** (power + 1); return { prompt: `For F(s) = L{t^${power}} = ${power}!/s^${power + 1}, find F(${s}).`, answer, explanation: `Evaluate ${power}!/${s}^${power + 1} = ${fmt(answer)}.`, meta: { kind: 'laplace-power', power, s } }; }]
+    ]);
+  }
+
+  function mathematicalProofs() {
+    const logicCases = [[true, true, 'and'], [true, false, 'and'], [false, true, 'or'], [false, false, 'or'], [true, true, 'implies'], [true, false, 'implies'], [false, true, 'implies'], [false, false, 'implies'], [true, true, 'biconditional'], [true, false, 'biconditional']];
+    return generatedCourse('proof', [
+      ['Statements and logic', (i) => { const [p, q, operation] = logicCases[i]; const truth = operation === 'and' ? p && q : operation === 'or' ? p || q : operation === 'implies' ? !p || q : p === q; return { prompt: `Encode true as 1 and false as 0. With p=${Number(p)} and q=${Number(q)}, evaluate p ${operation} q.`, answer: Number(truth), explanation: `The truth table gives ${Number(truth)}.`, meta: { kind: 'logic-number', p, q, operation } }; }],
+      ['Parity and divisibility', (i) => { const a = 2 * i + 1, b = 3 * i + 2, answer = (a + b) % 2; return { prompt: `Encode even as 0 and odd as 1. What is the parity of ${a} + ${b}?`, answer, explanation: `${a + b} has parity ${answer}.`, meta: { kind: 'sum-parity', a, b } }; }],
+      ['Direct proofs', (i) => { const divisor = i % 5 + 2, multiple = i + 3, value = divisor * multiple; return { prompt: `In a direct divisibility proof, ${value} = ${divisor}k. What integer value of k witnesses that ${divisor} divides ${value}?`, answer: multiple, explanation: `${value} = ${divisor}(${multiple}), so k = ${multiple}.`, meta: { kind: 'division', dividend: value, divisor } }; }],
+      ['Proofs about sets', (i) => { const a = Array.from({ length: 6 }, (_, n) => n + i).filter((n) => n % 2 === 0), b = Array.from({ length: 7 }, (_, n) => n + i).filter((n) => n % 3 !== 0), answer = new Set(a.filter((value) => b.includes(value))).size; return { prompt: `Find |A ∩ B| for A={${a.join(', ')}} and B={${b.join(', ')}}.`, answer, explanation: `Counting the shared elements gives ${answer}.`, meta: { kind: 'intersection-size', a, b } }; }],
+      ['Mathematical induction', (i) => { const n = i + 4, answer = n * (n + 1) / 2; return { prompt: `The induction formula is 1 + ··· + n = n(n+1)/2. Evaluate its right side for n=${n}.`, answer, explanation: `${n}(${n + 1})/2 = ${answer}.`, meta: { kind: 'loop-sum', n } }; }],
+      ['Quantifiers and witnesses', (i) => { const limit = i + 8, divisor = i % 4 + 2, values = Array.from({ length: limit }, (_, n) => n + 1), answer = values.filter((value) => value % divisor === 0).length; return { prompt: `Over integers 1 through ${limit}, how many witnesses satisfy “${divisor} divides x”?`, answer, explanation: `The satisfying integers are the multiples of ${divisor}; there are ${answer}.`, meta: { kind: 'count-divisible', limit, divisor } }; }]
+    ]);
+  }
+
+  function networking() {
+    return generatedCourse('net', [
+      ['Bandwidth and transmission', (i) => { const bits = (i + 2) * 1000, rate = (i % 5 + 1) * 1000, answer = bits / rate; return { prompt: `How many seconds transmit ${bits} bits over a ${rate} bit/s link?`, answer, explanation: `Transmission time = bits/rate = ${fmt(answer)} s.`, meta: { kind: 'division', dividend: bits, divisor: rate } }; }],
+      ['Latency and propagation', (i) => { const distance = (i + 1) * 200, speed = 200, answer = distance / speed; return { prompt: `A signal travels ${distance} km through fiber at 200,000 km/s. Find propagation delay in milliseconds.`, answer, explanation: `(${distance}/200000)×1000 = ${answer} ms.`, meta: { kind: 'propagation-ms', distance, speedThousands: speed } }; }],
+      ['IPv4 addressing', (i) => { const hostBits = i + 2, answer = 2 ** hostBits - 2; return { prompt: `A traditional IPv4 subnet has ${hostBits} host bits. How many usable host addresses does it provide?`, answer, explanation: `2^${hostBits} − 2 = ${answer} usable addresses.`, meta: { kind: 'subnet-hosts', hostBits } }; }],
+      ['CIDR notation', (i) => { const prefix = 22 + i, answer = 2 ** (32 - prefix); return { prompt: `How many total IPv4 addresses are in a /${prefix} block?`, answer, explanation: `A /${prefix} leaves ${32 - prefix} bits, so the block has ${answer} addresses.`, meta: { kind: 'cidr-addresses', prefix } }; }],
+      ['Bandwidth-delay product', (i) => { const rateMbps = i + 1, rttMs = (i % 5 + 1) * 10, answer = rateMbps * rttMs * 125; return { prompt: `Find the bandwidth-delay product in bytes for ${rateMbps} Mb/s and ${rttMs} ms RTT.`, answer, explanation: `Mb/s × ms converts to 1000 bits; divide by 8: ${answer} bytes.`, meta: { kind: 'bandwidth-delay-bytes', rateMbps, rttMs } }; }],
+      ['Ports and multiplexing', (i) => { const low = 1000 + i * 100, high = low + 20 + i; return { prompt: `How many inclusive port numbers are in the range ${low}–${high}?`, answer: high - low + 1, explanation: `${high} − ${low} + 1 = ${high - low + 1}.`, meta: { kind: 'inclusive-count', low, high } }; }]
+    ]);
+  }
+
+  function systemsProgramming() {
+    return generatedCourse('sys', [
+      ['Binary representation', (i) => { const value = i * 7 + 5, binary = value.toString(2); return { prompt: `Convert binary ${binary} to decimal.`, answer: value, explanation: `Summing its powers of two gives ${value}.`, meta: { kind: 'binary-value', binary } }; }],
+      ['Hexadecimal', (i) => { const value = i * 19 + 16, hex = value.toString(16).toUpperCase(); return { prompt: `Convert hexadecimal 0x${hex} to decimal.`, answer: value, explanation: `Base-16 expansion gives ${value}.`, meta: { kind: 'hex-value', hex } }; }],
+      ['Two’s complement', (i) => { const bits = 8, unsigned = 128 + i * 7; return { prompt: `Interpret 8-bit two’s-complement ${unsigned.toString(2).padStart(8, '0')} as a signed decimal integer.`, answer: unsigned - 256, explanation: `The sign bit is 1, so subtract 256: ${unsigned - 256}.`, meta: { kind: 'twos-complement', unsigned, bits } }; }],
+      ['Memory addressing', (i) => { const base = 1024 + i * 64, index = i + 2, width = i % 4 + 1, answer = base + index * width; return { prompt: `An array begins at byte address ${base}; elements are ${width} bytes. Find the address of element ${index}.`, answer, explanation: `base + index×width = ${answer}.`, meta: { kind: 'array-address', base, index, width } }; }],
+      ['Cache performance', (i) => { const hitRate = 0.8 + i * 0.01, hitTime = 1 + i % 3, missTime = 40 + i, answer = hitRate * hitTime + (1 - hitRate) * missTime; return { prompt: `A cache hits with probability ${fmt(hitRate)}, taking ${hitTime} ns; a miss takes ${missTime} ns. Find average access time in ns.`, answer, explanation: `Weighted average = ${fmt(answer)} ns.`, meta: { kind: 'cache-average', hitRate, hitTime, missTime } }; }],
+      ['CPU scheduling', (i) => { const arrival = i, burst = i % 5 + 2, start = arrival + i % 3, answer = start + burst - arrival; return { prompt: `A process arrives at t=${arrival}, starts at t=${start}, and runs for ${burst} time units. Find turnaround time.`, answer, explanation: `Completion is ${start + burst}; turnaround = completion − arrival = ${answer}.`, meta: { kind: 'turnaround', arrival, start, burst } }; }]
+    ]);
+  }
+
+  function engineeringOne() {
+    return generatedCourse('eng', [
+      ['Units and measurement', (i) => { const meters = i + 1.25, answer = meters * 1000; return { prompt: `Convert ${meters} meters to millimeters.`, answer, explanation: `Multiply by 1000: ${answer} mm.`, meta: { kind: 'meters-to-mm', meters } }; }],
+      ['Vectors and resultants', (i) => { const a = i + 3, b = i * 2 + 4; return { prompt: `Perpendicular forces have magnitudes ${a} N and ${b} N. Find the resultant magnitude.`, answer: Math.hypot(a, b), explanation: `Use the Pythagorean theorem: ${fmt(Math.hypot(a, b))} N.`, meta: { kind: 'pythagorean', a, b } }; }],
+      ['Statics and moments', (i) => { const force = i + 5, distance = i % 4 + 0.5, answer = force * distance; return { prompt: `A perpendicular ${force} N force acts ${distance} m from a pivot. Find its moment in N·m.`, answer, explanation: `Moment = Fd = ${fmt(answer)} N·m.`, meta: { kind: 'torque', force, radius: distance } }; }],
+      ['Stress and strain', (i) => { const force = (i + 2) * 1000, area = (i % 5 + 1) * 100, answer = force / area; return { prompt: `A member carries ${force} N over ${area} mm². Find stress in N/mm².`, answer, explanation: `Stress = force/area = ${fmt(answer)} N/mm².`, meta: { kind: 'division', dividend: force, divisor: area } }; }],
+      ['Work and power', (i) => { const work = (i + 2) * 120, time = i % 5 + 2, answer = work / time; return { prompt: `A system performs ${work} J of work in ${time} s. Find average power in watts.`, answer, explanation: `P = W/t = ${answer} W.`, meta: { kind: 'division', dividend: work, divisor: time } }; }],
+      ['Electric circuits', (i) => { const resistance = i % 6 + 2, current = i + 1, voltage = resistance * current; return { prompt: `A ${resistance} Ω resistor has ${voltage} V across it. Find current in amperes.`, answer: current, explanation: `I = V/R = ${current} A.`, meta: { kind: 'ohms-law-current', voltage, resistance } }; }]
+    ]);
+  }
+
+  function physicsCMechanics() {
+    return generatedCourse('physc', [
+      ['Calculus-based kinematics', (i) => { const a = i % 4 + 1, b = i - 2, t = i % 5 + 1, answer = 3 * a * t ** 2 + 2 * b * t; return { prompt: `Position is x(t)=${a}t³ ${term(b, 't²')}. Find velocity at t=${t}.`, answer, explanation: `v=3(${a})t²+2(${b})t, giving ${answer}.`, meta: { kind: 'cubic-position-velocity', a, b, t } }; }],
+      ['Force and acceleration', (i) => { const mass = i % 5 + 1, force = (i + 2) * mass; return { prompt: `A ${mass} kg mass experiences net force ${force} N. Find acceleration in m/s².`, answer: force / mass, explanation: `a=F/m=${force / mass} m/s².`, meta: { kind: 'division', dividend: force, divisor: mass } }; }],
+      ['Work by variable forces', (i) => { const k = i + 2, upper = i % 5 + 1, answer = k * upper ** 2 / 2; return { prompt: `Evaluate the work ∫₀^${upper} ${k}x dx, in joules.`, answer, explanation: `Work = (${k}/2)(${upper})² = ${fmt(answer)} J.`, meta: { kind: 'linear-integral', m: k, b: 0, upper } }; }],
+      ['Impulse and momentum', (i) => { const force = i + 3, duration = i % 4 + 0.5, answer = force * duration; return { prompt: `A constant ${force} N force acts for ${duration} s. Find impulse in N·s.`, answer, explanation: `J=FΔt=${fmt(answer)} N·s.`, meta: { kind: 'product', a: force, b: duration } }; }],
+      ['Rotational dynamics', (i) => { const torque = (i + 2) * (i % 4 + 1), inertia = i % 4 + 1; return { prompt: `Net torque is ${torque} N·m and moment of inertia is ${inertia} kg·m². Find angular acceleration.`, answer: torque / inertia, explanation: `α=τ/I=${torque / inertia} rad/s².`, meta: { kind: 'division', dividend: torque, divisor: inertia } }; }],
+      ['Gravitation and orbits', (i) => { const radius = i % 5 + 1, speed = i + 2; return { prompt: `In scaled units, a circular orbit has speed ${speed} and radius ${radius}. Find centripetal acceleration v²/r.`, answer: speed ** 2 / radius, explanation: `a=v²/r=${fmt(speed ** 2 / radius)}.`, meta: { kind: 'square-over', value: speed, divisor: radius } }; }]
+    ]);
+  }
+
+  function quantumPhysicsOptics() {
+    return generatedCourse('quantum', [
+      ['Wave optics', (i) => { const wavelength = i + 2, distance = i % 5 + 1, slit = i % 4 + 1, answer = wavelength * distance / slit; return { prompt: `In scaled units, double-slit spacing is Δy=λL/d. Find Δy for λ=${wavelength}, L=${distance}, d=${slit}.`, answer, explanation: `Δy=${wavelength}(${distance})/${slit}=${fmt(answer)}.`, meta: { kind: 'triple-product-division', a: wavelength, b: distance, divisor: slit } }; }],
+      ['Diffraction', (i) => { const wavelength = i % 5 + 1, slit = wavelength * (i + 2); return { prompt: `For first-minimum diffraction, sin θ=λ/a. Find sin θ when λ=${wavelength} and a=${slit}.`, answer: wavelength / slit, explanation: `sin θ=λ/a=${fmt(wavelength / slit)}.`, meta: { kind: 'division', dividend: wavelength, divisor: slit } }; }],
+      ['Photons', (i) => { const wavelength = 100 + i * 40, answer = 1240 / wavelength; return { prompt: `Using hc=1240 eV·nm, find photon energy for λ=${wavelength} nm.`, answer, explanation: `E=1240/${wavelength}=${fmt(answer)} eV.`, meta: { kind: 'photon-energy', wavelength } }; }],
+      ['Photoelectric effect', (i) => { const photon = i + 4, workFunction = i % 3 + 1.5, answer = photon - workFunction; return { prompt: `A photon has energy ${photon} eV and the work function is ${workFunction} eV. Find maximum electron kinetic energy.`, answer, explanation: `Kmax=E−φ=${answer} eV.`, meta: { kind: 'difference', a: photon, b: workFunction } }; }],
+      ['Matter waves', (i) => { const momentum = i + 2, answer = 1 / momentum; return { prompt: `In units where h=1, find de Broglie wavelength for momentum p=${momentum}.`, answer, explanation: `λ=h/p=1/${momentum}=${fmt(answer)}.`, meta: { kind: 'reciprocal', value: momentum } }; }],
+      ['Particle in a box', (i) => { const n = i % 5 + 1, baseEnergy = i + 2, answer = n ** 2 * baseEnergy; return { prompt: `For a particle in a box, Eₙ=n²E₁. Find E_${n} when E₁=${baseEnergy}.`, answer, explanation: `E_${n}=${n}²(${baseEnergy})=${answer}.`, meta: { kind: 'square-times', value: n, factor: baseEnergy } }; }]
+    ]);
+  }
+
+  function realAnalysisA() {
+    return generatedCourse('real', [
+      ['Absolute value and bounds', (i) => { const x = i - 6, center = i % 4 - 1; return { prompt: `Find the distance |${x}−(${center})| on the real line.`, answer: Math.abs(x - center), explanation: `Absolute value gives distance: ${Math.abs(x - center)}.`, meta: { kind: 'absolute-difference', a: x, b: center } }; }],
+      ['Supremum and infimum', (i) => { const lower = i - 3, upper = lower + i % 5 + 1; return { prompt: `Find sup S for S=(${lower}, ${upper}).`, answer: upper, explanation: `The least upper bound is ${upper}, whether or not it belongs to S.`, meta: { kind: 'identity', value: upper } }; }],
+      ['Sequences and limits', (i) => { const limit = i - 4, n = (i + 2) * 10, answer = limit + 1 / n; return { prompt: `For aₙ=${limit}+1/n, find a_${n}.`, answer, explanation: `Substitute n=${n}: ${fmt(answer)}.`, meta: { kind: 'limit-sequence-term', limit, n } }; }],
+      ['Epsilon-N arguments', (i) => { const epsilon = 1 / (i + 2), answer = i + 3; return { prompt: `For aₙ=1/n, give the smallest positive integer N such that 1/n<${fmt(epsilon)} for every n≥N.`, answer, explanation: `n must exceed ${i + 2}, so the smallest N is ${answer}.`, meta: { kind: 'epsilon-n-reciprocal', epsilon } }; }],
+      ['Topology of the real line', (i) => { const left = i - 5, right = left + i % 4 + 2, point = i % 2 ? left : (left + right) / 2, answer = Math.min(Math.abs(point - left), Math.abs(right - point)); return { prompt: `For interval (${left}, ${right}) and point x=${point}, find the distance from x to the nearer endpoint.`, answer, explanation: `The endpoint distances are ${fmt(Math.abs(point - left))} and ${fmt(Math.abs(right - point))}; minimum ${fmt(answer)}.`, meta: { kind: 'nearest-endpoint', left, right, point } }; }],
+      ['Riemann integration', (i) => { const n = i + 2, width = 1 / n, sum = width * Array.from({ length: n }, (_, k) => (k + 1) / n).reduce((total, x) => total + x, 0); return { prompt: `Use ${n} equal subintervals and right endpoints to approximate ∫₀¹x dx.`, answer: sum, explanation: `The right sum is (1/${n})Σ(k/${n})=${fmt(sum)}.`, meta: { kind: 'right-riemann-x', n } }; }]
+    ]);
+  }
+
+  function advancedAlgorithms() {
+    return generatedCourse('algo', [
+      ['Asymptotic analysis', (i) => { const exponent = i + 3, size = 2 ** exponent; return { prompt: `How many exact halvings reduce an input of size ${size} to 1?`, answer: exponent, explanation: `${size}=2^${exponent}, so ${exponent} halvings are required.`, meta: { kind: 'binary-halvings', size } }; }],
+      ['Divide and conquer', (i) => { const exponent = i + 2, n = 2 ** exponent, answer = n * exponent; return { prompt: `A merge-style recurrence performs n log₂n units. Evaluate it for n=${n}.`, answer, explanation: `${n}·${exponent}=${answer}.`, meta: { kind: 'n-log2-n', n } }; }],
+      ['Minimum spanning trees', (i) => { const vertices = i + 5; return { prompt: `Any spanning tree on ${vertices} vertices has how many edges?`, answer: vertices - 1, explanation: `Every tree on V vertices has V−1=${vertices - 1} edges.`, meta: { kind: 'tree-edges', vertices } }; }],
+      ['Shortest paths', (i) => { const edges = [i + 2, i % 4 + 1, i + 5], answer = edges.reduce((sum, edge) => sum + edge, 0); return { prompt: `A path uses edge weights ${edges.join(', ')}. Find its total weight.`, answer, explanation: `Path length is the edge-weight sum: ${answer}.`, meta: { kind: 'sum-values', values: edges } }; }],
+      ['Dynamic programming', (i) => { const n = i + 5, sequence = [0, 1]; for (let k = 2; k <= n; k += 1) sequence[k] = sequence[k - 1] + sequence[k - 2]; return { prompt: `Using F₀=0, F₁=1, and Fₙ=Fₙ₋₁+Fₙ₋₂, find F_${n}.`, answer: sequence[n], explanation: `Building the DP table gives F_${n}=${sequence[n]}.`, meta: { kind: 'fibonacci', n } }; }],
+      ['Bitmask algorithms', (i) => { const bits = i + 1, answer = 2 ** bits; return { prompt: `How many subsets can a ${bits}-bit mask represent?`, answer, explanation: `Each bit has two states, so there are 2^${bits}=${answer} subsets.`, meta: { kind: 'power-two', exponent: bits } }; }]
+    ]);
+  }
+
   const courses = [
     {
       slug: 'algebra-geometry',
@@ -890,6 +1012,46 @@
       tier: 'core',
       summary: 'Thermodynamics, electrostatics, circuits, magnetism, optics, and modern physics.',
       questions: physicsTwo()
+    },
+    {
+      slug: 'linear-algebra-a', title: 'Linear Algebra A', tier: 'core',
+      summary: 'Vectors, matrices, determinants, transformations, and eigenvalues.', questions: linearAlgebra()
+    },
+    {
+      slug: 'differential-equations', title: 'Differential Equations', tier: 'core',
+      summary: 'First-order models, characteristic equations, Euler’s method, oscillations, and Laplace transforms.', questions: differentialEquations()
+    },
+    {
+      slug: 'mathematical-proofs', title: 'Mathematical Proofs', tier: 'core',
+      summary: 'Logic, divisibility, sets, direct arguments, induction, and quantifiers.', questions: mathematicalProofs()
+    },
+    {
+      slug: 'computer-networking-fundamentals', title: 'Computer Networking Fundamentals', tier: 'intro',
+      summary: 'Bandwidth, latency, IPv4, CIDR, bandwidth-delay products, and ports.', questions: networking()
+    },
+    {
+      slug: 'systems-programming-architecture', title: 'Systems Programming & Architecture', tier: 'core',
+      summary: 'Binary, hexadecimal, two’s complement, memory, caches, and CPU scheduling.', questions: systemsProgramming()
+    },
+    {
+      slug: 'engineering-1', title: 'Engineering 1', tier: 'intro',
+      summary: 'Measurement, vectors, statics, stress, power, and circuits.', questions: engineeringOne()
+    },
+    {
+      slug: 'ap-physics-c-mechanics', title: 'AP Physics C: Mechanics', tier: 'core',
+      summary: 'Calculus-based motion, forces, work, impulse, rotation, and gravitation.', questions: physicsCMechanics()
+    },
+    {
+      slug: 'quantum-physics-optics', title: 'Quantum Physics and Optics', tier: 'core',
+      summary: 'Wave optics, diffraction, photons, photoelectricity, matter waves, and quantum energy.', questions: quantumPhysicsOptics()
+    },
+    {
+      slug: 'real-analysis-a', title: 'Real Analysis A', tier: 'advanced',
+      summary: 'Bounds, sequences, epsilon arguments, topology, continuity, and Riemann integration.', questions: realAnalysisA()
+    },
+    {
+      slug: 'advanced-algorithms', title: 'Advanced Algorithms', tier: 'advanced',
+      summary: 'Asymptotic analysis, divide and conquer, graph algorithms, dynamic programming, and bitmasks.', questions: advancedAlgorithms()
     }
   ];
   const courseBySlug = Object.fromEntries(courses.map((course) => [course.slug, course]));
