@@ -1,0 +1,165 @@
+<meta charset="UTF-8">
+<link rel="icon" href="../../favicon.ico?v=1" type="image/x-icon">
+<title>Lesson 3: Heat Transfer Mechanisms — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="advanced">
+  <span class="kicker">STEM+ · Thermodynamics · Unit 1 · Lesson 3</span>
+  <h1>Heat Transfer Mechanisms</h1>
+  <p class="subtitle">Heat moves in exactly three ways — conduction, convection, and radiation — and only one of them reduces to a clean formula you can compute by hand at this level.</p>
+  <p class="nav-links"><a href="0002-heat-work-and-internal-energy.html" class="nav-prev">← Lesson 2</a> <a href="../Unit%202/0004-the-first-law-of-thermodynamics.html" class="nav-next">Unit 2, Lesson 4 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <div class="box">
+    <span class="box-label">Definition — Conduction and Fourier's Law</span>
+    <strong>Conduction</strong> transfers heat through direct molecular contact within a material (or between touching materials), with no bulk motion of the material itself — faster-vibrating molecules pass energy to their slower neighbors. For a slab of material, the steady-state rate of heat flow is <strong>Fourier's law: Q̇ = kAΔT/L</strong>, where k is the material's thermal conductivity (W/(m·K)), A is the cross-sectional area perpendicular to the heat flow (m²), ΔT is the temperature difference across the slab (K), and L is the slab's thickness in the direction of flow (m). Q̇ is a <em>rate</em> (watts, J/s) — the energy transferred over a time t is Q = Q̇t only while the rate stays constant.
+  </div>
+
+  <div class="box">
+    <span class="box-label">Definition — Convection and Radiation</span>
+    <strong>Convection</strong> transfers heat by the bulk motion of a fluid carrying thermal energy from one place to another — <em>natural</em> convection when density differences alone drive the flow (warm air rising), <em>forced</em> convection when a fan or pump drives it. <strong>Radiation</strong> transfers heat via electromagnetic waves and needs no medium at all — the only one of the three that works through a vacuum, which is how sunlight reaches Earth. A hotter surface radiates dramatically more strongly (radiated power scales with T⁴, the Stefan–Boltzmann law) — this course only needs that qualitative point, not the full calculation.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why Conduction Is the One We Compute Precisely</span>
+    Conduction is the only mechanism of the three with a single clean formula suitable for hand computation at this level — convection depends on fluid dynamics condensed into empirically-measured convection coefficients, and radiation's T⁴ dependence makes it nonlinear. Real structures lose heat through all three simultaneously (a wall loses heat by conduction through the material, convection at both faces, and radiation to its surroundings) — but Fourier's law is the natural entry point precisely because it's linear in every one of its variables.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Worked Example — Heat Loss Through a Window Pane</span>
+    A single glass pane (k = 0.8 W/(m·K)) has area A = 1.5 m² and thickness L = 0.005 m (5 mm), with a temperature difference ΔT = 20 K between inside and outside.<br>
+    Q̇ = kAΔT/L = (0.8)(1.5)(20)/(0.005) = 24/0.005 = <strong>4800 W</strong>.<br>
+    That's a startlingly large number for one window — and exactly why real windows use multiple panes separated by an insulating gas gap (effectively adding thickness L and swapping in a much lower-conductivity gas) rather than a single sheet of glass.
+  </div>
+
+  <h2>Try it — conduction rate calculator</h2>
+  <p>Pick a material and adjust the temperature difference and thickness to see Fourier's law respond.</p>
+
+  <div class="widget">
+    <div class="widget-label">Try It — Conduction Through a Slab (A = 0.01 m² fixed)</div>
+    <div class="slider-row">
+      <button class="widget-btn" id="ft-copper" type="button">Copper (k=400)</button>
+      <button class="widget-btn" id="ft-steel" type="button">Steel (k=50)</button>
+      <button class="widget-btn" id="ft-glass" type="button">Glass (k=0.8)</button>
+      <button class="widget-btn" id="ft-wood" type="button">Wood (k=0.15)</button>
+    </div>
+    <div class="slider-row">
+      <label for="ft-dt">ΔT (K)</label>
+      <input type="range" id="ft-dt" min="5" max="100" step="5" value="50">
+      <span class="slider-value" id="ft-dt-val">50 K</span>
+    </div>
+    <div class="slider-row">
+      <label for="ft-l">Thickness L (m)</label>
+      <input type="range" id="ft-l" min="0.005" max="0.5" step="0.005" value="0.05">
+      <span class="slider-value" id="ft-l-val">0.050 m</span>
+    </div>
+    <div class="plot-wrap">
+      <svg id="ft-svg" viewBox="0 0 460 140" width="460" height="140" role="img" aria-label="A slab between a hot side and a cold side, with an arrow through it whose thickness represents the conduction rate">
+        <rect x="30" y="30" width="30" height="80" fill="#c0392b"></rect>
+        <text x="45" y="20" font-size="12" text-anchor="middle" fill="var(--fg)">Hot</text>
+        <rect id="ft-slab" x="200" y="30" width="60" height="80" fill="var(--code-bg)" stroke="var(--border)" stroke-width="2"></rect>
+        <rect x="400" y="30" width="30" height="80" fill="#2c5f8a"></rect>
+        <text x="415" y="20" font-size="12" text-anchor="middle" fill="var(--fg)">Cold</text>
+        <line id="ft-arrow" x1="65" y1="70" x2="195" y2="70" stroke="#c0392b" stroke-width="4" marker-end="url(#ft-arrowhead)"></line>
+        <defs>
+          <marker id="ft-arrowhead" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#c0392b"></path></marker>
+        </defs>
+      </svg>
+    </div>
+    <p class="plot-readout" id="ft-readout">Copper, A = 0.01 m², ΔT = 50 K, L = 0.050 m: Q̇ = kAΔT/L = 4000 W.</p>
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. In Fourier's law Q̇ = kAΔT/L, if the slab's thickness L is doubled while k, A, and ΔT stay fixed, the conduction rate Q̇:</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Is cut in half</button>
+      <button class="quiz-choice" data-correct="false">Doubles</button>
+      <button class="quiz-choice" data-correct="false">Stays the same</button>
+      <button class="quiz-choice" data-correct="false">Quadruples</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Q̇ is inversely proportional to L, so doubling the thickness halves the rate — a thicker barrier conducts heat more slowly.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Conduction transfers heat by:</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Direct molecular contact within or between touching materials, with no bulk motion of the material itself</button>
+      <button class="quiz-choice" data-correct="false">Electromagnetic waves that need no medium at all</button>
+      <button class="quiz-choice" data-correct="false">Bulk motion of a fluid carrying thermal energy from place to place</button>
+      <button class="quiz-choice" data-correct="false">Only ever happening in a vacuum</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Conduction is molecule-to-molecule energy transfer with no bulk material movement — the fluid-motion description is convection, and the vacuum-capable, wave-based description is radiation.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="14350|14,350">
+    <p class="quiz-prompt">3. Fill in the blank: an aluminum plate (k = 205 W/(m·K)) has area A = 0.02 m² and thickness L = 0.01 m, with ΔT = 35 K across it. The conduction rate is Q̇ = ___ W.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Q̇ = kAΔT/L = (205)(0.02)(35)/(0.01) = 143.5/0.01 = 14,350 W.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">4. Which of the three heat transfer mechanisms can carry heat through a total vacuum, with no medium present at all?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Radiation</button>
+      <button class="quiz-choice" data-correct="false">Conduction</button>
+      <button class="quiz-choice" data-correct="false">Convection</button>
+      <button class="quiz-choice" data-correct="false">None of the three can cross a vacuum</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Radiation is electromagnetic waves, which propagate through empty space with no medium required — it's how the Sun's heat reaches Earth across essentially a vacuum.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: OpenStax <em>University Physics Volume 2</em>, <a href="https://openstax.org/books/university-physics-volume-2/pages/1-6-mechanisms-of-heat-transfer">Section 1.6, "Mechanisms of Heat Transfer,"</a> covers all three mechanisms with additional worked examples.</p>
+
+  <p class="ask-teacher">Ask your teacher for a real building material's k value and estimate how much heat a house loses through its walls on a cold night — Fourier's law scales from a single window pane up to an entire structure without changing form. Next up: leaving Unit 1's definitions behind and promoting heat and work into one formal bookkeeping equation — the first law of thermodynamics.</p>
+
+  <footer class="lesson-footer">STEM+ · Thermodynamics · Unit 1 · Lesson 3 of 18</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var dtSlider = document.getElementById('ft-dt');
+  var dtVal = document.getElementById('ft-dt-val');
+  var lSlider = document.getElementById('ft-l');
+  var lVal = document.getElementById('ft-l-val');
+  var arrow = document.getElementById('ft-arrow');
+  var readout = document.getElementById('ft-readout');
+  var A = 0.01;
+  var materials = { copper: { k: 400, label: 'Copper' }, steel: { k: 50, label: 'Steel' }, glass: { k: 0.8, label: 'Glass' }, wood: { k: 0.15, label: 'Wood' } };
+  var current = 'copper';
+
+  function update() {
+    var dT = Number(dtSlider.value);
+    var L = Number(lSlider.value);
+    dtVal.textContent = dT + ' K';
+    lVal.textContent = L.toFixed(3) + ' m';
+    var k = materials[current].k;
+    var Qdot = k * A * dT / L;
+    var width = Math.max(2, Math.min(10, 2 + Math.log10(Qdot + 1) * 1.5));
+    arrow.setAttribute('stroke-width', width);
+    readout.textContent = materials[current].label + ', A = 0.01 m², ΔT = ' + dT + ' K, L = ' + L.toFixed(3) + ' m: Q̇ = kAΔT/L = ' + Qdot.toFixed(1) + ' W.';
+  }
+
+  function setMaterial(m) {
+    current = m;
+    update();
+  }
+
+  document.getElementById('ft-copper').addEventListener('click', function () { setMaterial('copper'); });
+  document.getElementById('ft-steel').addEventListener('click', function () { setMaterial('steel'); });
+  document.getElementById('ft-glass').addEventListener('click', function () { setMaterial('glass'); });
+  document.getElementById('ft-wood').addEventListener('click', function () { setMaterial('wood'); });
+  dtSlider.addEventListener('input', update);
+  lSlider.addEventListener('input', update);
+  update();
+});
+</script>

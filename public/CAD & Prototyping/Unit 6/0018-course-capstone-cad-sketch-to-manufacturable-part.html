@@ -1,0 +1,107 @@
+<meta charset="UTF-8">
+<link rel="icon" href="../../favicon.ico?v=1" type="image/x-icon">
+<title>Lesson 18: Course Capstone — Sketch to Manufacturable Part — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · CAD &amp; Prototyping · Unit 6 · Lesson 18 · Course Capstone</span>
+  <h1>Course Capstone — From Parametric Sketch to Manufacturable Part</h1>
+  <p class="subtitle">Every stage of this course — sketch to assembly to tolerance to manufacturing method — converges on one decision: given a real design goal, how should it actually get made?</p>
+  <p class="nav-links"><a href="0017-joinery-for-laser-cut-parts-and-kerf-compensation-math.html" class="nav-prev">← Lesson 17</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Eighteen lessons ago, this course opened with a single constrained line in a 2D sketch. Since then, sketches became parametric models, single parts became assemblies with tracked degrees of freedom, nominal dimensions grew tolerances and fits, and materials met the physical limits of two very different manufacturing processes. This capstone walks one design goal through that entire pipeline, ending where every real project ends: choosing how to actually make the thing.</p>
+
+  <h2>The design goal</h2>
+  <div class="box">
+    <span class="box-label">Design Brief</span>
+    A small desk-organizer bracket, roughly 100mm × 60mm × 30mm, needs to hold a phone at a fixed angle. It's needed in a batch of 5 for a class project, and it includes a slot that must snugly hold a 3mm-thick phone case — no compound-curved surfaces anywhere in the design.
+  </div>
+
+  <h2>The pipeline, briefly retraced</h2>
+  <p>A parametric sketch (Unit 1) defines the bracket's profile with named parameters — width, height, slot width — so the slot dimension can be tuned without rebuilding the model from scratch. If the bracket were split into a base and a separate wedge support, assembly mates (Unit 2) would define exactly how they fit and what stays free to move. The slot itself needs a deliberate fit choice (Unit 3): holding a 3mm phone case without rattling calls for something closer to a transition fit than a loose clearance fit. And the material and process choice (Unit 4 and this unit) decide whether that fit is even achievable at the scale this part needs.</p>
+
+  <h2>3D printing vs. laser cutting, for this specific design</h2>
+  <div class="box">
+    <span class="box-label">Decision Framework, Applied to This Brief</span>
+    <table>
+      <thead><tr><th>Factor</th><th>FDM 3D Printing</th><th>Laser Cutting</th></tr></thead>
+      <tbody>
+        <tr><td>Geometry fit</td><td>Handles any 3D shape, including compound curves</td><td>Flat stock only — geometrically cannot produce a compound-curved surface</td></tr>
+        <tr><td>Slot tolerance</td><td>Typically ±0.1–0.2mm on X/Y features on a well-tuned consumer printer</td><td>Typically ±0.05–0.1mm once kerf-compensated (Lesson 17), and more repeatable part-to-part without recalibration</td></tr>
+        <tr><td>Batch of 5, flat design</td><td>Prints sequentially — often on the order of a couple hours per part for a part this size</td><td>All 5 nest onto one sheet and cut in a single job — often just minutes total, regardless of quantity</td></tr>
+        <tr><td>Finishing detail</td><td>Possible but adds print time (raised text, etc.)</td><td>Raster engraving (Lesson 16) adds a logo or label cheaply in the same job</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="box why">
+    <span class="box-label">The Verdict — and Why It's Quantitative, Not a Guess</span>
+    This specific brief has no compound-curved surfaces — it's fundamentally a flat, 2.5D shape. That single fact already rules out the one advantage that would force 3D printing regardless of cost: laser cutting cannot produce a true compound curve, but this design doesn't need one. Given that, the batch-of-5 math and slot tolerance both favor laser cutting: nesting five flat panels on one sheet and cutting them in one job (minutes) beats five sequential prints (hours, stacking up), and a kerf-compensated slot (Lesson 17) reliably lands within the tolerance a snug phone-case fit needs, without the part-to-part calibration drift consumer FDM printers are more prone to. <strong>Laser cutting wins for this brief</strong> — not because it's always better, but because none of this design's requirements happen to need what only 3D printing can do. Change one requirement — say, a compound-curved cradle instead of a flat angled slot — and the verdict flips immediately, regardless of the cost and time numbers above, because that requirement becomes a hard geometric constraint laser cutting simply cannot satisfy.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. For a flat, batch-of-5 design with no compound curves, why does laser cutting typically win on cost and time over FDM printing?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because FDM printers cannot print flat parts at all.</button>
+      <button class="quiz-choice" data-correct="true">Because all 5 copies can be nested onto one sheet and cut in a single job (minutes), while FDM prints each part sequentially (hours, adding up across the batch).</button>
+      <button class="quiz-choice" data-correct="false">Because laser cutters are always cheaper to purchase than 3D printers.</button>
+      <button class="quiz-choice" data-correct="false">Because FDM printing cannot achieve any tolerance tighter than 5mm.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Nesting a batch onto one flat sheet is a decisive time advantage for laser cutting specifically when the design is flat enough to nest — it doesn't apply to every design.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. What would flip this capstone's verdict from laser cutting to 3D printing, regardless of the cost/time numbers?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Needing more than one unit in the batch.</button>
+      <button class="quiz-choice" data-correct="true">Adding a compound-curved surface to the design — a hard geometric constraint laser cutting cannot satisfy at all, regardless of cost.</button>
+      <button class="quiz-choice" data-correct="false">Needing the slot to hold a 3mm-thick object instead of some other thickness.</button>
+      <button class="quiz-choice" data-correct="false">Wanting the part to be a different color.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A compound curve is a hard geometric limit — laser cutting works on flat stock only, so no amount of favorable cost or time math can substitute for a process that can't produce the shape at all.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why does this bracket's slot call for something closer to a transition fit rather than a loose clearance fit?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because clearance fits are impossible to manufacture with either 3D printing or laser cutting.</button>
+      <button class="quiz-choice" data-correct="true">Because the slot needs to hold the phone case snugly without rattling — a guaranteed-gap clearance fit would leave it loose.</button>
+      <button class="quiz-choice" data-correct="false">Because transition fits require no manufacturing tolerance at all.</button>
+      <button class="quiz-choice" data-correct="false">Because interference fits are always required for anything that holds a phone.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A clearance fit guarantees a gap, which is exactly wrong for a slot meant to hold something snugly — the same reasoning as Lesson 8's dowel-pin example.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="kerf compensation|compensation">
+    <p class="quiz-prompt">4. Fill in the blank: hitting a tight slot tolerance on the laser-cut version of this bracket depends directly on applying ___ from Lesson 17.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Without kerf compensation, the slot would come out systematically oversized by roughly the kerf width, undermining the snug fit the design needs.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="parametric|parameters">
+    <p class="quiz-prompt">5. Fill in the blank: defining the bracket's slot width as a named variable in the sketch, rather than a fixed typed-in number, is what makes the design ___ (Unit 1) — able to be re-tuned for a different phone case thickness without rebuilding the model.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A parametric slot width means adapting the bracket to a different phone case is a one-parameter change, not a redesign.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this to close out the course: <a href="https://ocw.mit.edu/courses/2-810-manufacturing-processes-and-systems-fall-2015/">MIT OpenCourseWare's 2.810 Manufacturing Processes and Systems</a> covers process-selection trade-offs — cost, tolerance, and geometry — across a much wider range of manufacturing methods than fit in this course.</p>
+
+  <p class="ask-teacher">Looking back across all six units, which single stage of the pipeline — sketching, assemblies, tolerancing, materials, printing, or cutting — do you feel least confident about? That's worth a direct conversation with your teacher before the course exam. Course complete: the course exam awaits once every unit test is cleared.</p>
+
+  <footer class="lesson-footer">STEM+ · CAD &amp; Prototyping · Unit 6 · Lesson 18 of 18 — course complete</footer>
+</div>

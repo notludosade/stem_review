@@ -1,0 +1,106 @@
+<meta charset="UTF-8">
+<link rel="icon" href="../../../favicon.ico?v=1" type="image/x-icon">
+<title>Lesson 17: The Spectral Theorem — STEM+</title>
+<link rel="stylesheet" href="../../../assets/style.css">
+<script src="../../../assets/quiz.js" defer></script>
+<div class="page" data-tier="advanced">
+  <span class="kicker">STEM+ · Linear Algebra B · Unit 6 · Lesson 17</span>
+  <h1>The Spectral Theorem</h1>
+  <p class="subtitle">Lesson 11 proved diagonalizability can fail. This lesson proves it never fails for a self-adjoint operator — not only is a full eigenbasis guaranteed, it can always be chosen orthonormal.</p>
+  <p class="nav-links"><a href="0016-adjoint-operators-and-self-adjoint-operators.html" class="nav-prev">← Lesson 16</a> <a href="0018-the-singular-value-decomposition.html" class="nav-next">Lesson 18 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Lesson 11's defective matrix — a repeated eigenvalue with too few eigenvectors — is impossible for a self-adjoint operator. This lesson proves why, by building an orthonormal eigenbasis one dimension at a time, peeling off an invariant orthogonal complement at each step.</p>
+
+  <h2>The theorem</h2>
+  <div class="box">
+    <span class="box-label">Theorem — The Spectral Theorem</span>
+    If T is a self-adjoint operator on a finite-dimensional inner product space V, then V has an orthonormal basis consisting entirely of eigenvectors of T. Equivalently, in matrix form: every real symmetric matrix A factors as A = QDQᵀ, with Q orthogonal (Qᵀ=Q⁻¹, columns an orthonormal eigenbasis) and D diagonal (real eigenvalues on the diagonal).
+  </div>
+  <div class="box">
+    <span class="box-label">Proof Sketch (induction on dim(V))</span>
+    <em>Base case, dim(V)=1:</em> any nonzero vector, normalized, is trivially both an eigenvector (every operator on a 1-dimensional space is multiplication by some scalar) and an orthonormal basis.
+    <br><br>
+    <em>Inductive step:</em> assume the theorem holds for every self-adjoint operator on a space of dimension less than n; let T be self-adjoint on n-dimensional V. T's characteristic polynomial has a root (every polynomial of degree ≥1 has a root over ℂ), and Lesson 16 proved that root — call it λ₁ — is real; a corresponding eigenvector can be taken to have real entries as well, so normalize it to unit length: e₁, with T(e₁)=λ₁e₁, ‖e₁‖=1.
+    <br><br>
+    Let W = span{e₁}<sup>⊥</sup> (dimension n−1, Lesson 15). <strong>W is T-invariant:</strong> for w ∈ W, ⟨T(w),e₁⟩ = ⟨w,T(e₁)⟩ (self-adjointness) = ⟨w,λ₁e₁⟩ = λ₁⟨w,e₁⟩ = λ₁·0 = 0 (since w ∈ e₁<sup>⊥</sup>). So T(w) ∈ e₁<sup>⊥</sup> = W too.
+    <br><br>
+    T restricted to W is still self-adjoint (the defining property ⟨T(v),w⟩=⟨v,T(w)⟩ holds for all v,w ∈ V, hence in particular for v,w ∈ W), and W has dimension n−1 — so the inductive hypothesis gives an orthonormal eigenbasis {e₂,…,e<sub>n</sub>} of T restricted to W. Since W is T-invariant, these are genuine eigenvectors of T on all of V too.
+    <br><br>
+    {e₁,e₂,…,e<sub>n</sub>} is orthonormal (e₁ ⊥ W by construction, and {e₂,…,e<sub>n</sub>} is orthonormal within W) and consists entirely of eigenvectors of T — an orthonormal eigenbasis of V. ∎
+  </div>
+  <div class="box why">
+    <span class="box-label">Why this proof structurally cannot hit Lesson 11's defective case</span>
+    At every step, the theorem peels off one confirmed eigenvector and continues on a strictly smaller invariant subspace — it never needs to ask whether enough eigenvectors exist within a single eigenspace, the exact question that broke down for the defective matrix. Self-adjointness guarantees the peeled-off complement is always T-invariant, which is what makes the induction possible at all; that guarantee (Lesson 16's orthogonality theorem) fails for a general operator.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Worked Example — Full Spectral Decomposition</span>
+    Continuing Lesson 16's A=[[5,2],[2,5]], with eigenvalues 7, 3 and eigenvectors (1,1), (1,−1): normalize to e₁=(1/√2, 1/√2), e₂=(1/√2, −1/√2). Then Q = [[1/√2, 1/√2], [1/√2, −1/√2]] and D = [[7,0],[0,3]]. Check Q is orthogonal: QᵀQ = [[1/√2,1/√2],[1/√2,−1/√2]]·[[1/√2,1/√2],[1/√2,−1/√2]] = [[1/2+1/2, 1/2−1/2],[1/2−1/2, 1/2+1/2]] = [[1,0],[0,1]] = I. ✓ A = QDQᵀ reconstructs the original symmetric matrix exactly.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. In the proof's inductive step, why is W = span{e₁}<sup>⊥</sup> T-invariant?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">For w ∈ W, self-adjointness rewrites ⟨T(w),e₁⟩ as ⟨w,T(e₁)⟩ = λ₁⟨w,e₁⟩ = 0, since w ⊥ e₁ — so T(w) stays orthogonal to e₁, i.e. stays in W.</button>
+      <button class="quiz-choice" data-correct="false">Because W always equals all of V.</button>
+      <button class="quiz-choice" data-correct="false">Because e₁ is assumed to be the zero vector.</button>
+      <button class="quiz-choice" data-correct="false">T-invariance of W is simply assumed, with no proof given.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Self-adjointness is exactly what lets ⟨T(w),e₁⟩ be rewritten in terms of ⟨w,e₁⟩=0, proving T(w) never leaves W.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why can the inductive hypothesis be applied to T restricted to W?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">W has dimension n−1 (less than n), and T|<sub>W</sub> is still self-adjoint, since the defining property holds for all of V and hence for W in particular.</button>
+      <button class="quiz-choice" data-correct="false">Because W is always 1-dimensional.</button>
+      <button class="quiz-choice" data-correct="false">Because e₁ must be in W too.</button>
+      <button class="quiz-choice" data-correct="false">The inductive hypothesis can't be applied here — it only works for the original V.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>W's dimension is strictly smaller (n−1), and self-adjointness restricts to any T-invariant subspace automatically, satisfying exactly the induction's requirements.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="orthonormal">
+    <p class="quiz-prompt">3. Fill in the blank: the Spectral Theorem guarantees not just a basis of eigenvectors, but an ___ one.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Orthonormality — not just linear independence — is the theorem's stronger guarantee, coming directly from Lesson 16's orthogonal-eigenvectors theorem plus the induction's use of an orthogonal complement.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">4. In the worked example, what is Q for A=[[5,2],[2,5]]?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">[[1/√2, 1/√2], [1/√2, −1/√2]]</button>
+      <button class="quiz-choice" data-correct="false">[[7,0],[0,3]]</button>
+      <button class="quiz-choice" data-correct="false">[[1,1],[1,−1]] (unnormalized)</button>
+      <button class="quiz-choice" data-correct="false">[[5,2],[2,5]]</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Q's columns are the normalized (unit-length) eigenvectors — dividing (1,1) and (1,−1) each by √2.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="1">
+    <p class="quiz-prompt">5. Fill in the blank: checking QᵀQ = I confirms Q is ___ (orthogonal), where I is the identity matrix.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>QᵀQ=I is exactly the defining property of an orthogonal matrix — its columns form an orthonormal set. (If the blank confused you, the point is: this equals the identity matrix, confirmed entrywise as 1's on the diagonal.)</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Treil's <a href="https://www.math.brown.edu/streil/papers/LADW/LADW.html"><em>Linear Algebra Done Wrong</em></a>, Chapter 6.2, proves the same induction on invariant orthogonal complements, for both the real symmetric and complex Hermitian cases.</p>
+
+  <p class="ask-teacher">Ask your teacher to run the proof's induction by hand on a 3×3 symmetric matrix — peeling off one eigenvector, restricting to a 2-dimensional invariant complement, then finishing with the base case — if you want to see every step traced through. Next up: the Singular Value Decomposition, which extends this idea to matrices that aren't even square.</p>
+
+  <footer class="lesson-footer">STEM+ · Linear Algebra B · Unit 6 · Lesson 17 of 21</footer>
+</div>

@@ -1,0 +1,172 @@
+<meta charset="UTF-8">
+<link rel="icon" href="../../favicon.ico?v=1" type="image/x-icon">
+<title>Lesson 12: Factor of Safety and a Basic Stress Estimate — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · CAD &amp; Prototyping · Unit 4 · Lesson 12</span>
+  <h1>Factor of Safety and a Basic Stress/Load Estimate</h1>
+  <p class="subtitle">Before printing or cutting a load-bearing part, a quick stress estimate answers a question CAD geometry alone can't: will this cross-section actually hold?</p>
+  <p class="nav-links"><a href="0011-design-for-manufacturability-draft-walls-undercuts.html" class="nav-prev">← Lesson 11</a> <a href="../Unit%205/0013-fdm-printing-fundamentals-layers-infill-supports-orientation.html" class="nav-next">Unit 5, Lesson 13 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Unit 4 has covered what a material is (Lesson 10) and whether a process can produce a given shape (Lesson 11). This lesson closes the unit with the question that actually determines whether a part survives: given an expected load and a cross-section, is there enough margin before failure?</p>
+
+  <h2>Stress: force over area, again</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    <strong>Stress</strong> (σ) is internal force divided by the cross-sectional area carrying it: σ = F / A. A given force spreads over a small area produces far higher stress than the same force spread over a large area — which is exactly why a part's cross-section, not just the raw force on it, determines whether it survives.
+  </div>
+  <div class="expr-block">σ = F / A</div>
+
+  <h2>Factor of safety</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    The <strong>factor of safety (FS)</strong> is the ratio of a material's failure (yield) strength to the actual stress the part is expected to experience: FS = yield strength / expected stress. FS = 1 means a part is designed to fail at exactly its expected load; real designs almost always target FS well above 1.
+  </div>
+  <div class="expr-block">FS = yield strength / expected stress</div>
+
+  <div class="box example">
+    <span class="box-label">Worked Example — A Printed PLA Bracket Tab</span>
+    A tab on a PLA bracket must support 150N. Its cross-section is 6mm wide × 3mm thick = 18mm² = 18×10⁻⁶ m². Stress: σ = F/A = 150 / (18×10⁻⁶) ≈ <strong>8.33×10⁶ Pa ≈ 8.33 MPa</strong>. PLA's yield strength (Lesson 10's table) is about 60 MPa, so FS = 60 / 8.33 ≈ <strong>7.2</strong>.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why a printed part's real strength usually isn't the bulk material's strength</span>
+    Published material strengths (like PLA's ~60 MPa) describe fully solid, bulk material — but a printed part built from fused layers, with less-than-100% infill, typically achieves only about <strong>60–80% of the bulk material's rated strength</strong>, depending on print orientation, infill, and settings (Unit 5 covers exactly why). A prudent designer derates the strength before computing FS rather than assuming full bulk strength: using 70% of PLA's 60 MPa gives an effective yield of 42 MPa, and the bracket tab's FS becomes 42 / 8.33 ≈ <strong>5.0</strong> — still healthy, but a real drop from the naive 7.2.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">How much FS is "enough"</span>
+    For typical prototyping applications — jigs, brackets, enclosures, non-critical mechanisms — an FS of roughly <strong>2 to 4</strong> is a common conservative rule of thumb, after any appropriate derating. Safety-critical applications need far more rigorous engineering analysis than a single FS number from a classroom estimate, and should always be physically tested, not designed from hand-calculation alone.
+  </div>
+
+  <h2>Try it — stress and factor of safety</h2>
+  <p>Set a force and a rectangular cross-section, and see the resulting stress and factor of safety against a fixed 60 MPa (PLA) yield strength.</p>
+
+  <div class="widget">
+    <div class="widget-label">Try It — σ = F/A and FS = Yield / σ (PLA, yield = 60 MPa)</div>
+    <div class="slider-row">
+      <label for="cad12-f">Force (N)</label>
+      <input type="range" id="cad12-f" min="20" max="400" step="5" value="150">
+      <span class="slider-value" id="cad12-f-val">150</span>
+    </div>
+    <div class="slider-row">
+      <label for="cad12-w">Width (mm)</label>
+      <input type="range" id="cad12-w" min="2" max="20" step="0.5" value="6">
+      <span class="slider-value" id="cad12-w-val">6.0</span>
+    </div>
+    <div class="slider-row">
+      <label for="cad12-t">Thickness (mm)</label>
+      <input type="range" id="cad12-t" min="1" max="10" step="0.5" value="3">
+      <span class="slider-value" id="cad12-t-val">3.0</span>
+    </div>
+    <p class="plot-readout" id="cad12-readout">—</p>
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. A part carries a force of 80N over a cross-section 5mm × 2mm (10mm²). What is the stress?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">≈8.0 MPa</button>
+      <button class="quiz-choice" data-correct="false">≈0.8 MPa</button>
+      <button class="quiz-choice" data-correct="false">≈80 MPa</button>
+      <button class="quiz-choice" data-correct="false">≈16.0 MPa</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>σ = F/A = 80 / (10×10⁻⁶ m²) = 8×10⁶ Pa = 8.0 MPa.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Using the 8.0 MPa stress from question 1, and a PLA yield strength of 60 MPa, what is the factor of safety?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">0.13</button>
+      <button class="quiz-choice" data-correct="true">7.5</button>
+      <button class="quiz-choice" data-correct="false">52</button>
+      <button class="quiz-choice" data-correct="false">68</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>FS = yield / stress = 60 / 8.0 = 7.5.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why should a designer derate a printed material's rated bulk strength before computing FS for a printed part?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because rated bulk strength values are always fabricated and meaningless.</button>
+      <button class="quiz-choice" data-correct="true">Because a printed part built from fused layers with less-than-100% infill typically achieves only a fraction — roughly 60–80% — of the bulk material's rated strength.</button>
+      <button class="quiz-choice" data-correct="false">Because derating always makes the part stronger than the bulk material.</button>
+      <button class="quiz-choice" data-correct="false">Because factor of safety only applies to metals, never plastics.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Layer adhesion and infill mean printed parts generally underperform bulk-material strength ratings — ignoring this overstates the real factor of safety.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="stress">
+    <p class="quiz-prompt">4. Fill in the blank: internal force divided by cross-sectional area is called ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>σ = F/A — stress is what actually determines whether a cross-section survives a given force, not the raw force alone.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="2|2 to 4|2-4">
+    <p class="quiz-prompt">5. Fill in the blank: for typical non-critical prototyping applications like jigs and brackets, a common conservative factor-of-safety rule of thumb is roughly ___ (the low end of the usual target range).</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Roughly 2 to 4 is a common target range for non-critical prototyping applications, after accounting for any appropriate derating.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: <a href="https://www.matweb.com/">MatWeb's material property database</a> lists yield strength values you can use to redo this calculation for other materials from Lesson 10's table.</p>
+
+  <p class="ask-teacher">Stuck on estimating stress for a part you're actually designing? Ask your teacher — that's what I'm here for. Next up: the 3D printing process itself, and how its layer-by-layer nature shapes strength, accuracy, and time.</p>
+
+  <footer class="lesson-footer">STEM+ · CAD &amp; Prototyping · Unit 4 · Lesson 12 of 18</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var fS = document.getElementById('cad12-f');
+  var wS = document.getElementById('cad12-w');
+  var tS = document.getElementById('cad12-t');
+  var fL = document.getElementById('cad12-f-val');
+  var wL = document.getElementById('cad12-w-val');
+  var tL = document.getElementById('cad12-t-val');
+  var readout = document.getElementById('cad12-readout');
+  var YIELD_MPA = 60;
+
+  function render() {
+    var F = Number(fS.value);
+    var w = Number(wS.value);
+    var t = Number(tS.value);
+    fL.textContent = F;
+    wL.textContent = w.toFixed(1);
+    tL.textContent = t.toFixed(1);
+
+    var A_m2 = (w * t) * 1e-6;
+    var sigmaPa = F / A_m2;
+    var sigmaMPa = sigmaPa / 1e6;
+    var fs = YIELD_MPA / sigmaMPa;
+
+    readout.classList.remove('is-pass', 'is-fail');
+    var msg = 'σ = F/A = ' + F + 'N / ' + (w * t).toFixed(1) + 'mm² ≈ ' + sigmaMPa.toFixed(2) + ' MPa. FS = 60 / ' + sigmaMPa.toFixed(2) + ' ≈ ' + fs.toFixed(2) + '.';
+    if (fs >= 2) {
+      msg += ' Above the FS ≥ 2 rule of thumb for non-critical parts.';
+      readout.classList.add('is-pass');
+    } else {
+      msg += ' Below the FS ≥ 2 rule of thumb — reduce force or increase cross-section.';
+      readout.classList.add('is-fail');
+    }
+    readout.textContent = msg;
+  }
+
+  [fS, wS, tS].forEach(function (s) { s.addEventListener('input', render); });
+  render();
+});
+</script>

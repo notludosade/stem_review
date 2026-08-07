@@ -1,0 +1,146 @@
+<meta charset="UTF-8">
+<link rel="icon" href="../../favicon.ico?v=1" type="image/x-icon">
+<title>Lesson 14: Slicing Settings — Strength, Accuracy, and Time — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · CAD &amp; Prototyping · Unit 5 · Lesson 14</span>
+  <h1>Slicing Settings and Their Quantitative Effects on Strength, Accuracy, and Print Time</h1>
+  <p class="subtitle">Layer height isn't just a quality slider — it's a direct multiplier on how many layers a print needs, and that number drives almost everything else.</p>
+  <p class="nav-links"><a href="0013-fdm-printing-fundamentals-layers-infill-supports-orientation.html" class="nav-prev">← Lesson 13</a> <a href="0015-print-troubleshooting-and-design-rules-overhangs-bridging.html" class="nav-next">Lesson 15 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Lesson 13 introduced layer height and infill conceptually. This lesson puts numbers on them — specifically, the layer-count math that drives print time and dimensional accuracy, and the strength logic behind why walls often matter more than infill.</p>
+
+  <h2>The slicer's job</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    A <strong>slicer</strong> converts a 3D model into layer-by-layer toolpath instructions (G-code) for the printer, based on settings the user sets: layer height, infill percentage, wall (perimeter) count, print speed, and more.
+  </div>
+
+  <h2>Layer count — the number underneath print time</h2>
+  <div class="expr-block">number of layers = part height / layer height</div>
+  <div class="box example">
+    <span class="box-label">Worked Example — Layer Count at Two Settings</span>
+    A part is 40mm tall. At 0.20mm layer height: 40 / 0.20 = <strong>200 layers</strong>. Switching to a finer 0.12mm layer height: 40 / 0.12 ≈ <strong>333 layers</strong> — about <strong>67% more layers</strong> for the same part. Since most of a print's time comes from depositing material layer by layer, this is roughly proportional to added print time for the vertical portion of the print — though not exactly 1:1, since the horizontal travel distance per layer stays about the same regardless of layer height, so the relationship is close to, but not perfectly, linear.
+  </div>
+
+  <h2>Why walls often add more strength per gram than infill</h2>
+  <div class="box why">
+    <span class="box-label">Diminishing returns from infill, and why walls matter more for bending</span>
+    Infill density isn't linearly free — going from a moderate to a very high infill percentage adds a lot of material and print time for comparatively little extra strength, because the outer walls (perimeters) already carry a large share of most loads regardless of what's inside. This mirrors basic beam theory: material far from a part's neutral bending axis (the outer surface) contributes far more to bending strength and stiffness than material near the center. Increasing the number of perimeter walls (shell thickness) is often a more material-efficient way to add strength to a part loaded in bending than simply cranking up infill percentage — a genuinely useful rule of thumb, though exact numbers vary enough by geometry and material that they're best confirmed with a real test print rather than treated as a fixed formula.
+  </div>
+
+  <h2>Accuracy: fewer visible steps on angled surfaces</h2>
+  <p>A curved or angled surface printed in discrete flat layers always shows some "stair-stepping" — visible ridges where each layer's edge doesn't perfectly match the ideal smooth surface. Finer layer height directly reduces the height of each visible step, which is exactly why layer height is often the first setting tightened when a part's surface finish or dimensional accuracy on angled features matters more than print speed.</p>
+
+  <h2>Try it — layer count and relative print-time multiplier</h2>
+  <p>Set a part height and layer height, and see how the layer count compares to a 0.20mm baseline.</p>
+
+  <div class="widget">
+    <div class="widget-label">Try It — Number of Layers = Part Height / Layer Height</div>
+    <div class="slider-row">
+      <label for="cad14-h">Part height (mm)</label>
+      <input type="range" id="cad14-h" min="10" max="100" step="5" value="50">
+      <span class="slider-value" id="cad14-h-val">50</span>
+    </div>
+    <div class="slider-row">
+      <label for="cad14-lh">Layer height (mm)</label>
+      <input type="range" id="cad14-lh" min="0.08" max="0.32" step="0.02" value="0.2">
+      <span class="slider-value" id="cad14-lh-val">0.20</span>
+    </div>
+    <p class="plot-readout" id="cad14-readout">—</p>
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. A part is 24mm tall, printed at 0.15mm layer height. How many layers does it need?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">160</button>
+      <button class="quiz-choice" data-correct="false">3.6</button>
+      <button class="quiz-choice" data-correct="false">24</button>
+      <button class="quiz-choice" data-correct="false">80</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>number of layers = 24 / 0.15 = 160.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why does switching from 0.20mm to a finer 0.12mm layer height increase print time, but not by an exactly proportional amount?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because layer height has no effect on print time at all.</button>
+      <button class="quiz-choice" data-correct="true">Because layer count scales inversely with layer height, but horizontal travel distance per layer stays about the same regardless of layer height.</button>
+      <button class="quiz-choice" data-correct="false">Because finer layers always print at exactly double the speed.</button>
+      <button class="quiz-choice" data-correct="false">Because print time only depends on infill percentage, never layer height.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>More, thinner layers mean more total layer changes and more total horizontal travel passes — but each individual layer's travel distance doesn't shrink just because the layer got thinner, so the relationship is close to, but not perfectly, linear.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why can increasing wall (perimeter) count add more bending strength per gram of material than increasing infill percentage?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because infill is always made from a weaker material than the walls.</button>
+      <button class="quiz-choice" data-correct="true">Because material farther from a part's neutral bending axis — the outer walls — contributes more to bending strength and stiffness than material near the center.</button>
+      <button class="quiz-choice" data-correct="false">Because walls are printed at a hotter temperature than infill.</button>
+      <button class="quiz-choice" data-correct="false">Because infill percentage has no effect on a part's strength whatsoever.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>This is the same logic as beam theory: outer material does more work resisting bending than material near the neutral axis, so walls are often the more efficient place to add strength.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="slicer">
+    <p class="quiz-prompt">4. Fill in the blank: the software that converts a 3D model into layer-by-layer printer instructions is called a ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A slicer takes settings like layer height, infill, and wall count and turns them into the actual toolpath the printer follows.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="stair-stepping|stair stepping|stairstepping">
+    <p class="quiz-prompt">5. Fill in the blank: the visible ridged pattern on a curved or angled surface, caused by printing in discrete flat layers, is often called ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Finer layer height directly reduces the height of each visible step, which is why it's often the first setting tightened for surface finish.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: <a href="https://help.prusa3d.com/">Prusa's official 3D printing knowledge base</a> documents how layer height, infill, and wall count interact in a real slicer.</p>
+
+  <p class="ask-teacher">Stuck on estimating print time or strength for a real part? Ask your teacher — that's what I'm here for. Next up: the design rules that keep a print from failing in the first place.</p>
+
+  <footer class="lesson-footer">STEM+ · CAD &amp; Prototyping · Unit 5 · Lesson 14 of 18</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var hS = document.getElementById('cad14-h');
+  var lhS = document.getElementById('cad14-lh');
+  var hL = document.getElementById('cad14-h-val');
+  var lhL = document.getElementById('cad14-lh-val');
+  var readout = document.getElementById('cad14-readout');
+
+  function render() {
+    var h = Number(hS.value);
+    var lh = Number(lhS.value);
+    hL.textContent = h;
+    lhL.textContent = lh.toFixed(2);
+
+    var layers = h / lh;
+    var baselineLayers = h / 0.20;
+    var ratio = layers / baselineLayers;
+
+    readout.textContent = 'At ' + lh.toFixed(2) + 'mm layers, a ' + h + 'mm-tall part needs ' + Math.ceil(layers) + ' layers (~' + ratio.toFixed(2) + '× the layer count of a 0.20mm baseline).';
+  }
+
+  hS.addEventListener('input', render);
+  lhS.addEventListener('input', render);
+  render();
+});
+</script>

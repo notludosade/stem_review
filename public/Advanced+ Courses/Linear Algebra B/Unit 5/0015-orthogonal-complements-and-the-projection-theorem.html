@@ -1,0 +1,119 @@
+<meta charset="UTF-8">
+<link rel="icon" href="../../../favicon.ico?v=1" type="image/x-icon">
+<title>Lesson 15: Orthogonal Complements and the Projection Theorem — STEM+</title>
+<link rel="stylesheet" href="../../../assets/style.css">
+<script src="../../../assets/quiz.js" defer></script>
+<div class="page" data-tier="advanced">
+  <span class="kicker">STEM+ · Linear Algebra B · Unit 5 · Lesson 15</span>
+  <h1>Orthogonal Complements and the Projection Theorem</h1>
+  <p class="subtitle">Every subspace splits V into two orthogonal pieces, and every vector's closest point in a subspace turns out to be exactly the piece that lands inside it. This lesson proves both, using Gram-Schmidt as the construction tool.</p>
+  <p class="nav-links"><a href="0014-orthogonality-and-the-gram-schmidt-process.html" class="nav-prev">← Lesson 14</a> <a href="../Unit%206/0016-adjoint-operators-and-self-adjoint-operators.html" class="nav-next">Lesson 16 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <h2>1. The orthogonal complement</h2>
+  <div class="box">
+    <span class="box-label">Definition — Orthogonal Complement</span>
+    For a subspace W of V, the <strong>orthogonal complement</strong> is W<sup>⊥</sup> = {v ∈ V : ⟨v,w⟩ = 0 for every w ∈ W}.
+  </div>
+  <p>W<sup>⊥</sup> is itself a subspace (0 ∈ W<sup>⊥</sup> trivially, and closure under addition/scalar multiplication follows directly from bilinearity of the inner product — the same style of check as every subspace test so far).</p>
+
+  <h2>2. V splits exactly into W and its complement</h2>
+  <div class="box">
+    <span class="box-label">Theorem — V = W ⊕ W<sup>⊥</sup></span>
+    For a finite-dimensional inner product space V and subspace W: W ∩ W<sup>⊥</sup> = {0}, and W + W<sup>⊥</sup> = V. Equivalently, every v ∈ V has a unique decomposition v = w + u with w ∈ W, u ∈ W<sup>⊥</sup>.
+  </div>
+  <div class="box">
+    <span class="box-label">Proof</span>
+    Take a basis of W and run Gram-Schmidt (Lesson 14) to get an orthogonal basis {w₁,…,w<sub>m</sub>} of W. Extend to a basis of all of V and run Gram-Schmidt on the full extended list — since w₁,…,w<sub>m</sub> are already orthogonal, they pass through Gram-Schmidt unchanged, producing an orthogonal basis {w₁,…,w<sub>m</sub>,z₁,…,z<sub>n−m</sub>} of V. By construction, each z<sub>i</sub> is orthogonal to every vector processed before it — including all of w₁,…,w<sub>m</sub> — so z<sub>i</sub> ∈ W<sup>⊥</sup> for every i.
+    <br><br>
+    <em>W<sup>⊥</sup> = span{z₁,…,z<sub>n−m</sub>}:</em> the ⊇ direction is immediate from the previous paragraph. For ⊆, take any v ∈ W<sup>⊥</sup> and write it in the full orthogonal basis: v = a₁w₁+⋯+a<sub>m</sub>w<sub>m</sub>+b₁z₁+⋯+b<sub>n−m</sub>z<sub>n−m</sub>. Take the inner product with w<sub>k</sub>: orthogonality kills every term except a<sub>k</sub>⟨w<sub>k</sub>,w<sub>k</sub>⟩, so ⟨v,w<sub>k</sub>⟩ = a<sub>k</sub>⟨w<sub>k</sub>,w<sub>k</sub>⟩. But v ∈ W<sup>⊥</sup> and w<sub>k</sub> ∈ W means ⟨v,w<sub>k</sub>⟩ = 0, forcing a<sub>k</sub> = 0 for every k. So v = b₁z₁+⋯+b<sub>n−m</sub>z<sub>n−m</sub> ∈ span{z's}.
+    <br><br>
+    Since W = span{w's} and W<sup>⊥</sup> = span{z's} together span V (the full extended basis), W+W<sup>⊥</sup> = V. And if v ∈ W ∩ W<sup>⊥</sup>, then v ∈ W<sup>⊥</sup> forces ⟨v,w⟩=0 for every w ∈ W — in particular for w=v itself (since v ∈ W too) — giving ⟨v,v⟩=0, which by positive-definiteness means v=0. So W ∩ W<sup>⊥</sup> = {0}. ∎
+  </div>
+
+  <h2>3. The Projection Theorem</h2>
+  <div class="box">
+    <span class="box-label">Theorem — Projection Onto a Subspace</span>
+    For v ∈ V and subspace W, write v = w + u (the unique decomposition from above, w ∈ W, u ∈ W<sup>⊥</sup>). Then w is the unique closest point to v inside W: ‖v−w‖ ≤ ‖v−w′‖ for every w′ ∈ W, with equality only when w′=w.
+  </div>
+  <div class="box">
+    <span class="box-label">Proof</span>
+    For any w′ ∈ W: v−w′ = (w−w′) + u, where w−w′ ∈ W (subspace, closed under subtraction) and u ∈ W<sup>⊥</sup>. Since w−w′ and u are orthogonal, ‖v−w′‖² = ⟨(w−w′)+u, (w−w′)+u⟩ = ‖w−w′‖² + 2⟨w−w′,u⟩ + ‖u‖² = ‖w−w′‖² + ‖u‖² (the cross term vanishes by orthogonality). This is minimized exactly when ‖w−w′‖² = 0, i.e. w′ = w, giving the minimum value ‖u‖². Any other w′ gives a strictly larger ‖v−w′‖² (since ‖w−w′‖²>0 whenever w′≠w). ∎
+  </div>
+  <div class="box why">
+    <span class="box-label">Why "closest point" and "orthogonal remainder" are the same fact</span>
+    The proof shows the minimizing w′ is characterized by making v−w′ orthogonal to all of W — not by any calculus-style derivative argument. This is the exact fact behind least-squares regression: the "error" vector between data and the best-fit prediction is always orthogonal to the subspace of predictions being searched over.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Worked Example — Projecting onto a Plane in ℝ³</span>
+    Let W = span{u₁,u₂} with u₁=(1,1,0), u₂=(1/2,−1/2,1) (Lesson 14's orthogonal basis), and v=(2,0,0). The projection formula for an orthogonal basis is proj<sub>W</sub>(v) = (⟨v,u₁⟩/⟨u₁,u₁⟩)u₁ + (⟨v,u₂⟩/⟨u₂,u₂⟩)u₂. ⟨v,u₁⟩=2, ⟨u₁,u₁⟩=2, so the first coefficient is 1. ⟨v,u₂⟩=1, ⟨u₂,u₂⟩=3/2, so the second coefficient is 2/3. proj<sub>W</sub>(v) = 1·(1,1,0) + (2/3)(1/2,−1/2,1) = (4/3, 2/3, 2/3).
+    <br><br>
+    Check: v − proj<sub>W</sub>(v) = (2/3, −2/3, −2/3). Its inner product with u₁ is 2/3−2/3+0=0, and with u₂ is 1/3+1/3−2/3=0 — orthogonal to all of W, exactly as the Projection Theorem requires.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. In the proof that W<sup>⊥</sup> = span{z₁,…,zₙ₋ₘ}, why does taking the inner product of v ∈ W<sup>⊥</sup> with wₖ force aₖ = 0?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Orthogonality of the full basis reduces ⟨v,wₖ⟩ to aₖ⟨wₖ,wₖ⟩, and since v ∈ W<sup>⊥</sup>, that inner product must be 0 — forcing aₖ = 0 since ⟨wₖ,wₖ⟩≠0.</button>
+      <button class="quiz-choice" data-correct="false">Because wₖ is always the zero vector.</button>
+      <button class="quiz-choice" data-correct="false">Because W<sup>⊥</sup> is assumed to equal all of V.</button>
+      <button class="quiz-choice" data-correct="false">It doesn't force aₖ=0 — the bₖ coefficients are the ones set to 0 instead.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Every cross term in ⟨v,wₖ⟩ vanishes except aₖ⟨wₖ,wₖ⟩; since v∈W<sup>⊥</sup> forces this to be 0, and wₖ≠0 makes ⟨wₖ,wₖ⟩≠0, aₖ itself must be 0.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. In the Projection Theorem's proof, why does ‖v−w′‖² = ‖w−w′‖² + ‖u‖² have no cross term?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">w−w′ ∈ W and u ∈ W<sup>⊥</sup> are orthogonal to each other, so ⟨w−w′,u⟩ = 0.</button>
+      <button class="quiz-choice" data-correct="false">Because w′ is always equal to w.</button>
+      <button class="quiz-choice" data-correct="false">Because ‖u‖ = 0 always.</button>
+      <button class="quiz-choice" data-correct="false">Cross terms are never present in any norm expansion.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>w−w′ lies in W (closed under subtraction) while u lies in W<sup>⊥</sup> by construction — orthogonality between the two subspaces is exactly what kills the cross term.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="0|zero">
+    <p class="quiz-prompt">3. Fill in the blank: ‖v−w′‖² is minimized exactly when ‖w−w′‖² = ___, i.e. w′ = w.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Since ‖w−w′‖² ≥ 0 always, the smallest possible value of ‖v−w′‖² = ‖w−w′‖²+‖u‖² occurs when the ‖w−w′‖² term drops to exactly 0.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">4. In the worked example, what is the coefficient on u₂ in proj<sub>W</sub>(v) for v=(2,0,0)?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">2/3</button>
+      <button class="quiz-choice" data-correct="false">1</button>
+      <button class="quiz-choice" data-correct="false">3/2</button>
+      <button class="quiz-choice" data-correct="false">1/2</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>⟨v,u₂⟩=1 and ⟨u₂,u₂⟩=3/2, so the coefficient is 1÷(3/2) = 2/3.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="4/3|1.333|1.3333">
+    <p class="quiz-prompt">5. In the worked example, proj<sub>W</sub>(v) = (___, 2/3, 2/3). Fill in the first coordinate (as a fraction like 4/3).</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>1·(1,1,0) + (2/3)(1/2,−1/2,1) = (1,1,0)+(1/3,−1/3,2/3) = (4/3, 2/3, 2/3).</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Treil's <a href="https://www.math.brown.edu/streil/papers/LADW/LADW.html"><em>Linear Algebra Done Wrong</em></a>, Chapter 5.3, proves the same V = W ⊕ W<sup>⊥</sup> decomposition and the Projection Theorem, and connects both directly to least-squares approximation. This closes Unit 5.</p>
+
+  <p class="ask-teacher">Ask your teacher to connect today's Projection Theorem to least-squares line fitting — the "closest point in the column space of the design matrix" is exactly this theorem in disguise — if you want to see a concrete application. Next up: adjoint operators, and the operators — self-adjoint and Hermitian — that behave best under an inner product.</p>
+
+  <footer class="lesson-footer">STEM+ · Linear Algebra B · Unit 5 · Lesson 15 of 21</footer>
+</div>

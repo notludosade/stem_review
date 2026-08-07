@@ -1,0 +1,122 @@
+<meta charset="UTF-8">
+<link rel="icon" href="../../../favicon.ico?v=1" type="image/x-icon">
+<title>Lesson 19: Generalized Eigenspaces and Nilpotent Operators — STEM+</title>
+<link rel="stylesheet" href="../../../assets/style.css">
+<script src="../../../assets/quiz.js" defer></script>
+<div class="page" data-tier="advanced">
+  <span class="kicker">STEM+ · Linear Algebra B · Unit 7 · Lesson 19</span>
+  <h1>Generalized Eigenspaces and Nilpotent Operators</h1>
+  <p class="subtitle">Lesson 12 defined generalized eigenspaces and left their inner structure unexamined. This lesson opens them up: every generalized eigenspace is exactly an eigenvalue plus a nilpotent operator, and a nilpotent operator's own structure is a chain.</p>
+  <p class="nav-links"><a href="../Unit%206/0018-the-singular-value-decomposition.html" class="nav-prev">← Lesson 18</a> <a href="0020-jordan-canonical-form.html" class="nav-next">Lesson 20 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <h2>1. Nilpotent operators</h2>
+  <div class="box">
+    <span class="box-label">Definition — Nilpotent</span>
+    An operator N: V → V is <strong>nilpotent</strong> if N<sup>k</sup> = 0 for some positive integer k. The smallest such k is N's <strong>index</strong> of nilpotency.
+  </div>
+  <div class="box">
+    <span class="box-label">Theorem — A Nilpotent Operator's Only Eigenvalue Is 0</span>
+    If N is nilpotent (N<sup>k</sup>=0) and Nv=λv for some v≠0, then λ=0.
+  </div>
+  <div class="box">
+    <span class="box-label">Proof</span>
+    Applying N repeatedly, N<sup>k</sup>v = λ<sup>k</sup>v (each application of N multiplies by λ again, since v stays an eigenvector of N throughout — Nʲv=λʲv by induction on j). But N<sup>k</sup>=0, so N<sup>k</sup>v=0, giving λ<sup>k</sup>v=0. Since v≠0, λ<sup>k</sup>=0, forcing λ=0. ∎
+  </div>
+
+  <h2>2. Every generalized eigenspace is "eigenvalue plus nilpotent"</h2>
+  <div class="box">
+    <span class="box-label">Theorem — Structure of T Restricted to K<sub>λ</sub></span>
+    K<sub>λ</sub> is T-invariant, and T restricted to K<sub>λ</sub> equals λI + N, where N = (T−λI)|<sub>K<sub>λ</sub></sub> is nilpotent on K<sub>λ</sub>.
+  </div>
+  <div class="box">
+    <span class="box-label">Proof</span>
+    First, K<sub>λ</sub> is (T−λI)-invariant: if v ∈ K<sub>λ</sub>, then (T−λI)<sup>k</sup>v=0 for some k (Lesson 12), so (T−λI)<sup>k</sup>[(T−λI)v] = (T−λI)<sup>k+1</sup>v = (T−λI)[(T−λI)<sup>k</sup>v] = (T−λI)(0) = 0 — so (T−λI)v ∈ K<sub>λ</sub> too. Since T = (T−λI) + λI and both pieces keep K<sub>λ</sub> inside itself, K<sub>λ</sub> is T-invariant.
+    <br><br>
+    Let N = (T−λI)|<sub>K<sub>λ</sub></sub>. By Lesson 12, the kernel chain for T−λI stabilizes by exponent n=dim(V) at the latest, and K<sub>λ</sub> = ker((T−λI)<sup>n</sup>) — meaning every v ∈ K<sub>λ</sub> satisfies (T−λI)<sup>n</sup>v = 0, i.e. N<sup>n</sup> = 0 on K<sub>λ</sub>. So N is nilpotent. And T|<sub>K<sub>λ</sub></sub> = (T−λI)|<sub>K<sub>λ</sub></sub> + λI|<sub>K<sub>λ</sub></sub> = N + λI. ∎
+  </div>
+  <div class="box why">
+    <span class="box-label">Why this is the fix Lesson 12 promised</span>
+    Within K<sub>λ</sub>, T doesn't act like a single scalar λ (that would just be E<sub>λ</sub> again) — it acts like λ plus a nilpotent "leftover" N. Lesson 20's Jordan form is exactly the choice of basis that makes this leftover N as simple as possible: a chain of 1's just off the diagonal.
+  </div>
+
+  <h2>3. Nilpotent chains</h2>
+  <div class="box">
+    <span class="box-label">Theorem — A Nilpotent Chain Is Independent</span>
+    If N<sup>k−1</sup>v ≠ 0 for some vector v (with N<sup>k</sup>=0), then {v, Nv, N²v, …, N<sup>k−1</sup>v} is linearly independent.
+  </div>
+  <div class="box">
+    <span class="box-label">Proof</span>
+    Suppose c₀v + c₁Nv + ⋯ + c<sub>k−1</sub>N<sup>k−1</sup>v = 0. Apply N<sup>k−1</sup> to both sides: every term cᵢN<sup>k−1</sup>(Nⁱv) = cᵢN<sup>k−1+i</sup>v vanishes for i≥1 (since k−1+i ≥ k, and N<sup>k</sup>=0 already kills it), leaving only c₀N<sup>k−1</sup>v = 0. Since N<sup>k−1</sup>v ≠ 0, c₀=0. The relation becomes c₁Nv+⋯+c<sub>k−1</sub>N<sup>k−1</sup>v=0; apply N<sup>k−2</sup> the same way to force c₁=0, and continue. Each step isolates and zeroes one more coefficient, until every cᵢ=0. ∎
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Worked Example — The Chain Inside a Defective Matrix</span>
+    Revisiting Lesson 11's A=[[2,1,0],[0,2,0],[0,0,3]]: K₂ = ker((A−2I)²) = {(v₁,v₂,0)} (Lesson 12), a 2-dimensional space. N = (A−2I)|<sub>K₂</sub> sends (v₁,v₂,0) ↦ (v₂,0,0) — reading off row 1 of A−2I=[[0,1,0],[0,0,0],[0,0,1]] restricted to v₃=0. Take v=(0,1,0): Nv=(1,0,0)≠0, and N²v = N(1,0,0) = (0,0,0). So {v,Nv} = {(0,1,0),(1,0,0)} is a nilpotent chain of length 2 — and it's independent, matching dim(K₂)=2 exactly. This chain, reordered {Nv,v} = {(1,0,0),(0,1,0)}, is precisely the basis that will produce a Jordan block in Lesson 20.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. Why does N<sup>k</sup>v=0 combined with Nv=λv force λ=0?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">N<sup>k</sup>v=λ<sup>k</sup>v by repeated application, so N<sup>k</sup>v=0 forces λ<sup>k</sup>v=0, and since v≠0, λ<sup>k</sup>=0, so λ=0.</button>
+      <button class="quiz-choice" data-correct="false">Because v is assumed to be 0.</button>
+      <button class="quiz-choice" data-correct="false">Because N is always the zero operator.</button>
+      <button class="quiz-choice" data-correct="false">It doesn't force λ=0 in general.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Repeatedly applying N to an eigenvector just repeatedly multiplies by λ, so N<sup>k</sup>v=λ<sup>k</sup>v — combined with N<sup>k</sup>=0 and v≠0, this pins λ<sup>k</sup>=0, hence λ=0.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. In the proof that K<sub>λ</sub> is T-invariant, what is shown first?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">That K<sub>λ</sub> is (T−λI)-invariant, by tracking (T−λI)v through the kernel-power definition of K<sub>λ</sub>.</button>
+      <button class="quiz-choice" data-correct="false">That K<sub>λ</sub> equals E<sub>λ</sub>.</button>
+      <button class="quiz-choice" data-correct="false">That N has index exactly 1.</button>
+      <button class="quiz-choice" data-correct="false">That T is invertible on K<sub>λ</sub>.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Showing (T−λI)-invariance first is what makes the rest of the argument work — combined with λI trivially keeping K<sub>λ</sub> inside itself, T=(T−λI)+λI is then automatically T-invariant too.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="0">
+    <p class="quiz-prompt">3. Fill in the blank: in the nilpotent chain independence proof, applying N^(k−1) to the dependency relation isolates c₀N^(k−1)v = ___, since every other term already vanishes.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Every term with i≥1 gets hit by an exponent ≥ k after applying N^(k−1), vanishing since N^k=0 — leaving only the c₀ term equal to 0.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">4. For A=[[2,1,0],[0,2,0],[0,0,3]] and N=(A−2I)|<sub>K₂</sub>, what is N²v for v=(0,1,0)?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">(0,0,0)</button>
+      <button class="quiz-choice" data-correct="false">(1,0,0)</button>
+      <button class="quiz-choice" data-correct="false">(0,1,0)</button>
+      <button class="quiz-choice" data-correct="false">(1,1,0)</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Nv=(1,0,0), and N(1,0,0)=(0,0,0) — the chain terminates after one more step, confirming N²=0 on K₂.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="2">
+    <p class="quiz-prompt">5. Fill in the blank: the chain {v,Nv} from the worked example has length ___, exactly matching dim(K₂).</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The chain has 2 vectors, v and Nv, matching the 2-dimensional K₂ exactly — a single chain spans the whole generalized eigenspace here.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Treil's <a href="https://www.math.brown.edu/streil/papers/LADW/LADW.html"><em>Linear Algebra Done Wrong</em></a>, Chapter 7.1, proves the same nilpotent-chain independence result and the λI+N decomposition of generalized eigenspaces.</p>
+
+  <p class="ask-teacher">Ask your teacher to verify N³=0 (not just N²=0) trivially follows once N²=0 is established on K₂, and to connect this "index of nilpotency" back to the size of the eventual Jordan block. Next up: assembling nilpotent chains across every eigenvalue into the Jordan canonical form.</p>
+
+  <footer class="lesson-footer">STEM+ · Linear Algebra B · Unit 7 · Lesson 19 of 21</footer>
+</div>

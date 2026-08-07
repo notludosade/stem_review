@@ -1,0 +1,165 @@
+<meta charset="UTF-8">
+<link rel="icon" href="../../../favicon.ico?v=1" type="image/x-icon">
+<title>Lesson 14: Orthogonality and the Gram-Schmidt Process — STEM+</title>
+<link rel="stylesheet" href="../../../assets/style.css">
+<script src="../../../assets/quiz.js" defer></script>
+<div class="page" data-tier="advanced">
+  <span class="kicker">STEM+ · Linear Algebra B · Unit 5 · Lesson 14</span>
+  <h1>Orthogonality and the Gram-Schmidt Process</h1>
+  <p class="subtitle">Any independent set can be reshaped into an orthogonal one spanning exactly the same subspaces along the way — one projection-and-subtract step at a time. This lesson derives the formula and runs it on a concrete example.</p>
+  <p class="nav-links"><a href="0013-inner-products-norms-and-cauchy-schwarz.html" class="nav-prev">← Lesson 13</a> <a href="0015-orthogonal-complements-and-the-projection-theorem.html" class="nav-next">Lesson 15 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <h2>1. Orthogonality</h2>
+  <div class="box">
+    <span class="box-label">Definition — Orthogonal, Orthonormal</span>
+    Vectors u, v are <strong>orthogonal</strong> if ⟨u,v⟩ = 0. A set is <strong>orthogonal</strong> if every pair of its vectors is orthogonal, and <strong>orthonormal</strong> if it's orthogonal and every vector also has norm 1.
+  </div>
+  <div class="box">
+    <span class="box-label">Fact — Orthogonal Nonzero Vectors Are Independent</span>
+    If u₁,…,u<sub>k</sub> are nonzero and pairwise orthogonal, they are linearly independent.
+  </div>
+  <div class="box">
+    <span class="box-label">Proof</span>
+    Suppose c₁u₁+⋯+c<sub>k</sub>u<sub>k</sub> = 0. Take the inner product of both sides with u<sub>j</sub> (for any fixed j): ⟨c₁u₁+⋯+c<sub>k</sub>u<sub>k</sub>, u<sub>j</sub>⟩ = 0. By bilinearity, this expands to c₁⟨u₁,u<sub>j</sub>⟩+⋯+c<sub>k</sub>⟨u<sub>k</sub>,u<sub>j</sub>⟩ = 0. Every term with a different index vanishes by orthogonality, leaving only c<sub>j</sub>⟨u<sub>j</sub>,u<sub>j</sub>⟩ = 0. Since u<sub>j</sub> ≠ 0, ⟨u<sub>j</sub>,u<sub>j</sub>⟩ ≠ 0 (positive-definiteness), so c<sub>j</sub> = 0. This holds for every j, so every coefficient is 0. ∎
+  </div>
+
+  <h2>2. The Gram-Schmidt process, derived</h2>
+  <div class="box">
+    <span class="box-label">Theorem — Gram-Schmidt</span>
+    Given a linearly independent set {v₁,…,v<sub>k</sub>}, define u₁ = v₁ and, for i = 2,…,k: u<sub>i</sub> = v<sub>i</sub> − Σ<sub>j&lt;i</sub> (⟨v<sub>i</sub>,u<sub>j</sub>⟩/⟨u<sub>j</sub>,u<sub>j</sub>⟩) u<sub>j</sub>. Then {u₁,…,u<sub>k</sub>} is orthogonal, every u<sub>i</sub> ≠ 0, and span{u₁,…,u<sub>i</sub>} = span{v₁,…,v<sub>i</sub>} for every i.
+  </div>
+  <div class="box">
+    <span class="box-label">Proof (induction on i)</span>
+    i=1: u₁=v₁≠0 (independent sets contain no zero vector), and span{u₁}=span{v₁} trivially.
+    <br><br>
+    Inductive step: assume the claim holds through i−1. For any j &lt; i, compute ⟨u<sub>i</sub>,u<sub>j</sub>⟩ = ⟨v<sub>i</sub>,u<sub>j</sub>⟩ − Σ<sub>l&lt;i</sub>(⟨v<sub>i</sub>,u<sub>l</sub>⟩/⟨u<sub>l</sub>,u<sub>l</sub>⟩)⟨u<sub>l</sub>,u<sub>j</sub>⟩. By the inductive orthogonality of u₁,…,u<sub>i−1</sub>, every term with l≠j vanishes, leaving only the l=j term: (⟨v<sub>i</sub>,u<sub>j</sub>⟩/⟨u<sub>j</sub>,u<sub>j</sub>⟩)⟨u<sub>j</sub>,u<sub>j</sub>⟩ = ⟨v<sub>i</sub>,u<sub>j</sub>⟩. So ⟨u<sub>i</sub>,u<sub>j</sub>⟩ = ⟨v<sub>i</sub>,u<sub>j</sub>⟩ − ⟨v<sub>i</sub>,u<sub>j</sub>⟩ = 0 — orthogonal to every earlier u.
+    <br><br>
+    u<sub>i</sub> ≠ 0: u<sub>i</sub> is v<sub>i</sub> minus a combination of u₁,…,u<sub>i−1</sub> ∈ span{v₁,…,v<sub>i−1</sub>} (by the inductive spanning claim). If u<sub>i</sub> were 0, v<sub>i</sub> would lie in span{v₁,…,v<sub>i−1</sub>}, contradicting the independence of {v₁,…,v<sub>i</sub>}.
+    <br><br>
+    Spanning: u<sub>i</sub> is v<sub>i</sub> minus a combination of earlier u's (themselves combinations of v₁,…,v<sub>i−1</sub>), so u<sub>i</sub> ∈ span{v₁,…,v<sub>i</sub>}, giving span{u₁,…,u<sub>i</sub>} ⊆ span{v₁,…,v<sub>i</sub>}. Conversely, v<sub>i</sub> = u<sub>i</sub> + (that same combination of earlier u's), so v<sub>i</sub> ∈ span{u₁,…,u<sub>i</sub>}; together with v₁,…,v<sub>i−1</sub> ∈ span{u₁,…,u<sub>i−1</sub>} ⊆ span{u₁,…,u<sub>i</sub>} (inductive hypothesis), this gives span{v₁,…,v<sub>i</sub>} ⊆ span{u₁,…,u<sub>i</sub>}. Both inclusions together give equality. ∎
+  </div>
+  <p>Dividing each u<sub>i</sub> by its own norm produces an <strong>orthonormal</strong> basis e<sub>i</sub> = u<sub>i</sub>/‖u<sub>i</sub>‖ spanning the same subspaces at every stage.</p>
+
+  <div class="box example">
+    <span class="box-label">Worked Example — Gram-Schmidt on Three Vectors in ℝ³</span>
+    v₁=(1,1,0), v₂=(1,0,1), v₃=(0,1,1). u₁ = v₁ = (1,1,0), with ⟨u₁,u₁⟩ = 2.
+    <br>u₂ = v₂ − (⟨v₂,u₁⟩/⟨u₁,u₁⟩)u₁ = (1,0,1) − (1/2)(1,1,0) = (1/2, −1/2, 1). Check: ⟨u₂,u₁⟩ = 1/2 − 1/2 + 0 = 0. ✓ ⟨u₂,u₂⟩ = 1/4+1/4+1 = 3/2.
+    <br>u₃ = v₃ − (⟨v₃,u₁⟩/⟨u₁,u₁⟩)u₁ − (⟨v₃,u₂⟩/⟨u₂,u₂⟩)u₂. ⟨v₃,u₁⟩ = 0+1+0 = 1, so the first projection is (1/2)(1,1,0) = (1/2,1/2,0). ⟨v₃,u₂⟩ = 0(1/2)+1(−1/2)+1(1) = 1/2, so the second projection is (1/3)(1/2,−1/2,1) = (1/6,−1/6,1/3). Subtracting both from v₃: u₃ = (0,1,1) − (1/2,1/2,0) − (1/6,−1/6,1/3) = (−2/3, 2/3, 2/3). Check: ⟨u₃,u₁⟩ = −2/3+2/3+0 = 0 ✓, and ⟨u₃,u₂⟩ = (−2/3)(1/2)+(2/3)(−1/2)+(2/3)(1) = −1/3−1/3+2/3 = 0 ✓.
+  </div>
+
+  <div class="widget">
+    <div class="widget-label">Try It — Gram-Schmidt in ℝ³</div>
+    <p>Enter three independent vectors and watch the orthogonal output update.</p>
+    <div class="fm-row" style="gap: 1rem; flex-wrap: wrap;">
+      <span>v1 = (<input type="number" class="fm-input" id="l14-v1x" value="1" style="width:3rem;">, <input type="number" class="fm-input" id="l14-v1y" value="1" style="width:3rem;">, <input type="number" class="fm-input" id="l14-v1z" value="0" style="width:3rem;">)</span>
+    </div>
+    <div class="fm-row" style="gap: 1rem; flex-wrap: wrap; margin-top: 0.5rem;">
+      <span>v2 = (<input type="number" class="fm-input" id="l14-v2x" value="1" style="width:3rem;">, <input type="number" class="fm-input" id="l14-v2y" value="0" style="width:3rem;">, <input type="number" class="fm-input" id="l14-v2z" value="1" style="width:3rem;">)</span>
+    </div>
+    <div class="fm-row" style="gap: 1rem; flex-wrap: wrap; margin-top: 0.5rem;">
+      <span>v3 = (<input type="number" class="fm-input" id="l14-v3x" value="0" style="width:3rem;">, <input type="number" class="fm-input" id="l14-v3y" value="1" style="width:3rem;">, <input type="number" class="fm-input" id="l14-v3z" value="1" style="width:3rem;">)</span>
+    </div>
+    <p class="plot-readout" id="l14-readout" style="margin-top: 0.8rem;"></p>
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. In the proof that orthogonal nonzero vectors are independent, what happens after taking the inner product of c₁u₁+⋯+cₖuₖ=0 with a fixed uⱼ?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Every term except cⱼ⟨uⱼ,uⱼ⟩ vanishes by orthogonality, leaving cⱼ⟨uⱼ,uⱼ⟩=0, which forces cⱼ=0 since uⱼ≠0.</button>
+      <button class="quiz-choice" data-correct="false">All terms vanish immediately, with no further conclusion possible.</button>
+      <button class="quiz-choice" data-correct="false">The equation shows uⱼ = 0, contradicting the hypothesis.</button>
+      <button class="quiz-choice" data-correct="false">It shows the set must actually be orthonormal, not just orthogonal.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Orthogonality kills every cross term ⟨uᵢ,uⱼ⟩ for i≠j, isolating cⱼ⟨uⱼ,uⱼ⟩=0 — and positive-definiteness (uⱼ≠0 ⟹ ⟨uⱼ,uⱼ⟩≠0) forces cⱼ=0.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. In the Gram-Schmidt proof, why does ⟨uᵢ,uⱼ⟩ reduce to just ⟨vᵢ,uⱼ⟩ − ⟨vᵢ,uⱼ⟩ for j &lt; i?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">The inductive orthogonality of u₁,…,uᵢ₋₁ kills every term in the sum except the one matching index j, which exactly cancels ⟨vᵢ,uⱼ⟩.</button>
+      <button class="quiz-choice" data-correct="false">Because vᵢ is assumed to already be orthogonal to uⱼ.</button>
+      <button class="quiz-choice" data-correct="false">Because uⱼ = 0 for all j &lt; i.</button>
+      <button class="quiz-choice" data-correct="false">It doesn't reduce that way — the full sum survives.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Only the l=j term in the projection sum survives orthogonality, and it's constructed to exactly equal ⟨vᵢ,uⱼ⟩ — canceling the leading term and leaving 0.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="independence|independent">
+    <p class="quiz-prompt">3. Fill in the blank: the proof that uᵢ≠0 relies on the ___ of {v₁,…,vᵢ} — if uᵢ were 0, vᵢ would be a combination of v₁,…,vᵢ₋₁.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>uᵢ=0 would mean vᵢ equals exactly the subtracted combination of earlier u's (themselves combinations of earlier v's) — contradicting independence of the original set.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">4. In the worked example, what is ⟨u₁,u₁⟩ for u₁=(1,1,0)?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">2</button>
+      <button class="quiz-choice" data-correct="false">1</button>
+      <button class="quiz-choice" data-correct="false">0</button>
+      <button class="quiz-choice" data-correct="false">√2</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>⟨u₁,u₁⟩ = 1²+1²+0² = 2.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="-2/3|-0.667|-0.6667|-2÷3">
+    <p class="quiz-prompt">5. In the worked example, u₃ = (___, 2/3, 2/3). Fill in the first coordinate (as a fraction like -2/3).</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Subtracting both projections from v₃ gives u₃ = (0,1,1) − (1/2,1/2,0) − (1/6,−1/6,1/3) = (−2/3, 2/3, 2/3).</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Treil's <a href="https://www.math.brown.edu/streil/papers/LADW/LADW.html"><em>Linear Algebra Done Wrong</em></a>, Chapter 5.2, derives Gram-Schmidt in the same induction style and works through additional numeric examples in both ℝ³ and function spaces.</p>
+
+  <p class="ask-teacher">Ask your teacher to run Gram-Schmidt on {1, x, x²} in P₂(ℝ) with the integral inner product ⟨p,q⟩=∫₋₁¹p(x)q(x)dx if you want to see the Legendre polynomials emerge (up to scaling). Next up: orthogonal complements, and the theorem that finds the closest point in a subspace.</p>
+
+  <footer class="lesson-footer">STEM+ · Linear Algebra B · Unit 5 · Lesson 14 of 21</footer>
+</div>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var ids = ['l14-v1x','l14-v1y','l14-v1z','l14-v2x','l14-v2y','l14-v2z','l14-v3x','l14-v3y','l14-v3z'];
+  var els = {};
+  ids.forEach(function (id) { els[id] = document.getElementById(id); });
+  var out = document.getElementById('l14-readout');
+
+  function num(id) { var v = parseFloat(els[id].value); return isNaN(v) ? 0 : v; }
+  function dot(a, b) { return a[0]*b[0] + a[1]*b[1] + a[2]*b[2]; }
+  function sub(a, b) { return [a[0]-b[0], a[1]-b[1], a[2]-b[2]]; }
+  function scale(a, c) { return [a[0]*c, a[1]*c, a[2]*c]; }
+  function fmt(v) { return String(Math.round(v * 1000) / 1000); }
+  function fmtVec(v) { return '(' + v.map(fmt).join(', ') + ')'; }
+
+  function render() {
+    var v1 = [num('l14-v1x'), num('l14-v1y'), num('l14-v1z')];
+    var v2 = [num('l14-v2x'), num('l14-v2y'), num('l14-v2z')];
+    var v3 = [num('l14-v3x'), num('l14-v3y'), num('l14-v3z')];
+
+    var u1 = v1;
+    var d11 = dot(u1, u1);
+    if (d11 === 0) { out.textContent = 'v1 cannot be the zero vector.'; return; }
+    var u2 = sub(v2, scale(u1, dot(v2, u1) / d11));
+    var d22 = dot(u2, u2);
+    if (d22 === 0) { out.textContent = 'v1 and v2 are not independent — u2 collapsed to 0.'; return; }
+    var u3 = sub(sub(v3, scale(u1, dot(v3, u1) / d11)), scale(u2, dot(v3, u2) / d22));
+    var d33 = dot(u3, u3);
+
+    out.textContent = 'u1 = ' + fmtVec(u1) + '   u2 = ' + fmtVec(u2) + '   u3 = ' + fmtVec(u3) +
+      (d33 === 0 ? '  (v1,v2,v3 are not independent)' : '');
+  }
+  ids.forEach(function (id) { els[id].addEventListener('input', render); });
+  render();
+});
+</script>

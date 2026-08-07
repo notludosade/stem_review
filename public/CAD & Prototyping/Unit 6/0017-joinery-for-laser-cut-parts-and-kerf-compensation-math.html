@@ -1,0 +1,159 @@
+<meta charset="UTF-8">
+<link rel="icon" href="../../favicon.ico?v=1" type="image/x-icon">
+<title>Lesson 17: Joinery and Kerf Compensation — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · CAD &amp; Prototyping · Unit 6 · Lesson 17</span>
+  <h1>Joinery for Laser-Cut Parts — Finger Joints, Tabs, Living Hinges, and Kerf Compensation</h1>
+  <p class="subtitle">Draw a tab and its slot at the exact same nominal width, and the kerf makes them fit sloppily by twice its width — every single time, in the same direction. The fix is arithmetic, not luck.</p>
+  <p class="nav-links"><a href="0016-laser-cutting-workflow-kerf-vector-vs-raster-material-thickness.html" class="nav-prev">← Lesson 16</a> <a href="0018-course-capstone-cad-sketch-to-manufacturable-part.html" class="nav-next">Lesson 18 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Lesson 16 established that kerf shrinks a cut piece relative to its drawn outline. This lesson works out exactly what that does to an interlocking joint, and how to compensate for it so the physical parts actually fit the way the file intended.</p>
+
+  <h2>Common laser-cut joints</h2>
+  <div class="box example">
+    <span class="box-label">Finger joints / tabs</span>
+    Interlocking rectangular protrusions (fingers or tabs) cut into the edges of two mating panels, alternating with matching slots, so the panels lock together at a right angle without fasteners — though glue is often added for a permanent joint. Common in laser-cut boxes and enclosures.
+  </div>
+  <div class="box example">
+    <span class="box-label">Living hinge</span>
+    A flexible joint cut directly into an otherwise rigid sheet — commonly plywood or acrylic — using a dense pattern of short parallel slits. The material bends along that line by distributing bending strain across many small flexible strips instead of concentrating it in one rigid piece, letting a rigid material fold like a hinge with no separate hardware.
+  </div>
+
+  <h2>Working out the kerf compensation math</h2>
+  <p>Consider a tab designed at nominal width <em>w</em>, meant to plug into a slot also drawn at that same nominal width <em>w</em>. The laser removes kerf, centered on every cut line, on <em>both</em> the tab's outline and the slot's outline:</p>
+  <div class="box">
+    <span class="box-label">What actually happens, uncompensated</span>
+    Cutting the tab's outline removes kerf/2 from each side of the tab, so the <strong>actual tab width = w − kerf</strong> (material lost on both edges). Cutting the slot removes kerf/2 from each side of the slot's opening too — but for a slot, that loss makes the opening <em>bigger</em>, so the <strong>actual slot width = w + kerf</strong>. Uncompensated, drawing both at the same nominal w leaves a total mismatch of (w + kerf) − (w − kerf) = <strong>2 × kerf</strong> of slop — the joint comes out sloppy by exactly twice the kerf, no matter what w was.
+  </div>
+  <div class="expr-block">uncompensated slop = 2 × kerf</div>
+
+  <div class="box">
+    <span class="box-label">The compensation</span>
+    To make the finished, post-cut parts land on the true nominal width w: draw the tab slightly <em>oversized</em> by the kerf, and the slot slightly <em>undersized</em> by the kerf.
+    <br><strong>Draw tab width = w + kerf</strong> → actual cut tab = (w + kerf) − kerf = <strong>w</strong>. ✓
+    <br><strong>Draw slot width = w − kerf</strong> → actual cut slot = (w − kerf) + kerf = <strong>w</strong>. ✓
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Worked Example — kerf = 0.15mm, nominal joint width = 6.00mm</span>
+    Draw the tab at 6.00 + 0.15 = <strong>6.15mm</strong> in the file → actual cut tab = 6.15 − 0.15 = 6.00mm. Draw the slot at 6.00 − 0.15 = <strong>5.85mm</strong> in the file → actual cut slot = 5.85 + 0.15 = 6.00mm. Both land exactly on the intended 6.00mm, for a snug fit. Left uncompensated at 6.00mm for both, the real result would have been a 5.85mm tab in a 6.15mm slot — 0.30mm of slop, exactly 2 × kerf as the general formula predicts.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Snug isn't always the goal</span>
+    A dead-tight, fully kerf-compensated fit can be hard to assemble by hand — this echoes Lesson 8's clearance-vs-interference choice directly. Designers of finger-jointed boxes sometimes intentionally add a small amount of extra clearance on top of full kerf compensation (commonly 0.05–0.1mm) for an easier push-fit rather than a true press-fit, trading a little rattle for assembly that doesn't require a mallet.
+  </div>
+
+  <h2>Try it — kerf compensation calculator</h2>
+  <p>Set a kerf width and a nominal joint width, and see the compensated tab/slot dimensions and the uncompensated slop they avoid.</p>
+
+  <div class="widget">
+    <div class="widget-label">Try It — Compensated Tab/Slot Widths</div>
+    <div class="slider-row">
+      <label for="cad17-kerf">Kerf (mm)</label>
+      <input type="range" id="cad17-kerf" min="0.05" max="0.35" step="0.01" value="0.15">
+      <span class="slider-value" id="cad17-kerf-val">0.15</span>
+    </div>
+    <div class="slider-row">
+      <label for="cad17-w">Nominal joint width (mm)</label>
+      <input type="range" id="cad17-w" min="2" max="20" step="0.5" value="6">
+      <span class="slider-value" id="cad17-w-val">6.0</span>
+    </div>
+    <p class="plot-readout" id="cad17-readout">—</p>
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. A tab and its slot are both drawn at the same nominal width, with no kerf compensation applied. What actually happens after cutting?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">They fit perfectly, since kerf only affects curved cuts.</button>
+      <button class="quiz-choice" data-correct="true">The tab comes out narrower and the slot comes out wider than nominal, leaving 2× the kerf of slop.</button>
+      <button class="quiz-choice" data-correct="false">The tab comes out wider and the slot comes out narrower, so the joint is too tight to assemble.</button>
+      <button class="quiz-choice" data-correct="false">Kerf only affects the slot, never the tab.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The tab loses material on both edges (narrower); the slot's opening gains on both edges (wider) — a combined 2×kerf mismatch.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Kerf = 0.20mm, nominal joint width = 8.00mm. What should the tab and slot be drawn at, respectively, for a snug post-cut fit?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Tab: 8.20mm, Slot: 7.80mm</button>
+      <button class="quiz-choice" data-correct="false">Tab: 7.80mm, Slot: 8.20mm</button>
+      <button class="quiz-choice" data-correct="false">Tab: 8.00mm, Slot: 8.00mm</button>
+      <button class="quiz-choice" data-correct="false">Tab: 8.40mm, Slot: 7.60mm</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Draw tab = w + kerf = 8.00 + 0.20 = 8.20mm; draw slot = w − kerf = 8.00 − 0.20 = 7.80mm — both cut down to the true 8.00mm nominal.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why might a designer add a little extra clearance on top of full kerf compensation for a finger-jointed box?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because kerf compensation is never accurate enough to use alone.</button>
+      <button class="quiz-choice" data-correct="true">To make the joint an easier push-fit by hand rather than a dead-tight press-fit, trading a little rattle for easier assembly.</button>
+      <button class="quiz-choice" data-correct="false">Because laser cutters cannot cut dimensions smaller than 0.1mm apart.</button>
+      <button class="quiz-choice" data-correct="false">Because extra clearance eliminates the need to account for kerf at all.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>This mirrors the clearance-vs-interference choice from Lesson 8 — a small deliberate extra gap trades tightness for ease of assembly.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="living hinge">
+    <p class="quiz-prompt">4. Fill in the blank: a flexible joint cut into rigid sheet material as a dense pattern of short parallel slits, letting it bend without hardware, is called a ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A living hinge distributes bending strain across many small flexible strips instead of concentrating it in one rigid piece.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="kerf compensation|compensation">
+    <p class="quiz-prompt">5. Fill in the blank: drawing a tab slightly oversized and a slot slightly undersized by the kerf width, so both land on the true nominal size after cutting, is called kerf ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Kerf compensation corrects for the beam's real material removal so the physical part matches the file's intended nominal dimensions.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: <a href="https://www.makercase.com/">MakerCase</a>, a free parametric laser-cut box generator, builds kerf compensation directly into its finger-joint math — worth exploring to see this lesson's formulas in a real tool.</p>
+
+  <p class="ask-teacher">Stuck on measuring your own laser's actual kerf for a specific material? Ask your teacher — that's what I'm here for. Next up: the course capstone — carrying one design through every stage covered so far.</p>
+
+  <footer class="lesson-footer">STEM+ · CAD &amp; Prototyping · Unit 6 · Lesson 17 of 18</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var kerfS = document.getElementById('cad17-kerf');
+  var wS = document.getElementById('cad17-w');
+  var kerfL = document.getElementById('cad17-kerf-val');
+  var wL = document.getElementById('cad17-w-val');
+  var readout = document.getElementById('cad17-readout');
+
+  function render() {
+    var kerf = Number(kerfS.value);
+    var w = Number(wS.value);
+    kerfL.textContent = kerf.toFixed(2);
+    wL.textContent = w.toFixed(1);
+
+    var tab = w + kerf;
+    var slot = w - kerf;
+    var slop = 2 * kerf;
+
+    readout.textContent = 'Draw tab = ' + tab.toFixed(2) + 'mm, draw slot = ' + slot.toFixed(2) + 'mm → both cut down to ' + w.toFixed(2) + 'mm nominal. Uncompensated, the same nominal width on both would leave ' + slop.toFixed(2) + 'mm of slop.';
+  }
+
+  kerfS.addEventListener('input', render);
+  wS.addEventListener('input', render);
+  render();
+});
+</script>

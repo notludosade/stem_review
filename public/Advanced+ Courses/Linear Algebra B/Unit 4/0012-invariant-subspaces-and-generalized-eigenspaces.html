@@ -1,0 +1,116 @@
+<meta charset="UTF-8">
+<link rel="icon" href="../../../favicon.ico?v=1" type="image/x-icon">
+<title>Lesson 12: Invariant Subspaces and Generalized Eigenspaces — STEM+</title>
+<link rel="stylesheet" href="../../../assets/style.css">
+<script src="../../../assets/quiz.js" defer></script>
+<div class="page" data-tier="advanced">
+  <span class="kicker">STEM+ · Linear Algebra B · Unit 4 · Lesson 12</span>
+  <h1>Invariant Subspaces and Generalized Eigenspaces</h1>
+  <p class="subtitle">Lesson 11 ended on a defective matrix with too few eigenvectors. This lesson builds the fix: powers of (T−λI) eventually recover exactly enough vectors, closing Unit 4 and setting up Unit 7's Jordan form.</p>
+  <p class="nav-links"><a href="0011-diagonalizability-necessary-and-sufficient.html" class="nav-prev">← Lesson 11</a> <a href="../Unit%205/0013-inner-products-norms-and-cauchy-schwarz.html" class="nav-next">Lesson 13 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <h2>1. Invariant subspaces</h2>
+  <div class="box">
+    <span class="box-label">Definition — T-Invariant Subspace</span>
+    A subspace W ⊆ V is <strong>T-invariant</strong> if T(w) ∈ W for every w ∈ W — T never sends a vector in W outside of W.
+  </div>
+  <div class="box">
+    <span class="box-label">Fact — Eigenspaces Are T-Invariant</span>
+    Every eigenspace E<sub>λ</sub> is T-invariant: for v ∈ E<sub>λ</sub>, T(v) = λv, and E<sub>λ</sub> is a subspace, so it's closed under scalar multiplication — λv ∈ E<sub>λ</sub>.
+  </div>
+  <p>Invariance matters because it lets T "restrict" sensibly: T|<sub>W</sub>: W → W is a genuine, well-defined linear operator on W alone, using nothing outside W. This is the technique Unit 6's spectral theorem proof leans on directly.</p>
+
+  <h2>2. Generalized eigenvectors: chasing the kernel further</h2>
+  <p>The defective matrix from Lesson 11, A = [[2,1,0],[0,2,0],[0,0,3]], had only a 1-dimensional eigenspace E₂ where algebraic multiplicity predicted 2. The missing dimension isn't lost — it shows up one power later.</p>
+  <div class="box">
+    <span class="box-label">Definition — Generalized Eigenvector and Generalized Eigenspace</span>
+    A vector v is a <strong>generalized eigenvector</strong> for λ if (T−λI)<sup>k</sup>v = 0 for some positive integer k. The <strong>generalized eigenspace</strong> is K<sub>λ</sub> = {v : (T−λI)<sup>k</sup>v = 0 for some k ≥ 1} = ⋃<sub>k≥1</sub> ker((T−λI)<sup>k</sup>).
+  </div>
+  <div class="box">
+    <span class="box-label">Theorem — The Kernel Chain Stabilizes</span>
+    ker(T−λI) ⊆ ker((T−λI)²) ⊆ ker((T−λI)³) ⊆ ⋯ is an increasing chain of subspaces of V that stabilizes — once ker((T−λI)<sup>k</sup>) = ker((T−λI)<sup>k+1</sup>) for some k, equality continues to hold for every larger exponent too, and this happens by k = n = dim(V) at the very latest. Consequently K<sub>λ</sub> = ker((T−λI)<sup>n</sup>).
+  </div>
+  <div class="box">
+    <span class="box-label">Proof</span>
+    <em>Increasing:</em> if (T−λI)<sup>k</sup>v = 0, apply (T−λI) to both sides: (T−λI)<sup>k+1</sup>v = (T−λI)(0) = 0. So ker((T−λI)<sup>k</sup>) ⊆ ker((T−λI)<sup>k+1</sup>).
+    <br><br>
+    <em>Bounded, hence stabilizes:</em> each kernel's dimension is a nondecreasing integer sequence bounded above by n = dim(V). A nondecreasing integer sequence bounded by n cannot strictly increase more than n times, so two consecutive terms must eventually be equal — at the latest by the n-th term.
+    <br><br>
+    <em>Stays equal once it repeats:</em> suppose ker((T−λI)<sup>k</sup>) = ker((T−λI)<sup>k+1</sup>) for some k. Take any v with (T−λI)<sup>k+2</sup>v = 0, i.e. (T−λI)<sup>k+1</sup>[(T−λI)v] = 0 — so (T−λI)v ∈ ker((T−λI)<sup>k+1</sup>) = ker((T−λI)<sup>k</sup>) (by assumption), meaning (T−λI)<sup>k</sup>[(T−λI)v] = 0, i.e. (T−λI)<sup>k+1</sup>v = 0. So ker((T−λI)<sup>k+2</sup>) ⊆ ker((T−λI)<sup>k+1</sup>), and the reverse inclusion always holds (the chain is increasing) — so they're equal. Repeating this argument shows every later kernel in the chain equals ker((T−λI)<sup>k</sup>) too. ∎
+  </div>
+  <div class="box why">
+    <span class="box-label">Why this is the right fix for the defective case</span>
+    dim(K<sub>λ</sub>) always turns out to equal the algebraic multiplicity of λ exactly (proved in Unit 7, once nilpotent operators are available) — unlike dim(E<sub>λ</sub>), which Lesson 11 showed can fall short. Generalized eigenvectors recover precisely the dimensions ordinary eigenvectors miss, without changing the eigenvalue itself.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Worked Example — Recovering the Missing Dimension</span>
+    For A = [[2,1,0],[0,2,0],[0,0,3]], A−2I = [[0,1,0],[0,0,0],[0,0,1]]. Squaring: (A−2I)² = [[0,1,0],[0,0,0],[0,0,1]]·[[0,1,0],[0,0,0],[0,0,1]] = [[0,0,0],[0,0,0],[0,0,1]] (row 1: 0·0+1·0+0·0, 0·1+1·0+0·0, 0·0+1·0+0·1 = 0,0,0; row 3: 0,0,1 unchanged since row 3 of A−2I was already (0,0,1)). Solving (A−2I)²v=0 means only v₃=0 is required — v₁, v₂ are both free. dim(ker((A−2I)²)) = 2, exactly matching λ=2's algebraic multiplicity, up from dim(E₂)=1 at the first power.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. Why is every eigenspace E<sub>λ</sub> automatically T-invariant?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">For v ∈ E<sub>λ</sub>, T(v) = λv, and E<sub>λ</sub> being a subspace means it's closed under scalar multiplication, so λv ∈ E<sub>λ</sub> too.</button>
+      <button class="quiz-choice" data-correct="false">Because T is always the identity map on E<sub>λ</sub>.</button>
+      <button class="quiz-choice" data-correct="false">Because E<sub>λ</sub> is always all of V.</button>
+      <button class="quiz-choice" data-correct="false">It isn't automatic — it depends on which basis is chosen.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Scaling by λ keeps a vector inside E<sub>λ</sub> simply because E<sub>λ</sub> is a subspace and thus closed under scalar multiplication — no basis choice is involved.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. In the "stays equal once it repeats" part of the proof, what is shown about ker((T−λI)^(k+2)) once ker((T−λI)^k) = ker((T−λI)^(k+1))?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">ker((T−λI)^(k+2)) ⊆ ker((T−λI)^(k+1)), which combined with the automatic reverse inclusion gives equality.</button>
+      <button class="quiz-choice" data-correct="false">ker((T−λI)^(k+2)) is strictly larger than ker((T−λI)^(k+1)).</button>
+      <button class="quiz-choice" data-correct="false">ker((T−λI)^(k+2)) must equal all of V.</button>
+      <button class="quiz-choice" data-correct="false">ker((T−λI)^(k+2)) is empty.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Tracking (T−λI)v through the assumed equality at step k shows any vector killed by (T−λI)^(k+2) was already killed by (T−λI)^(k+1), giving the needed inclusion (and the reverse inclusion is automatic from the chain being increasing).</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="n|dim(v)|dim v">
+    <p class="quiz-prompt">3. Fill in the blank: the kernel chain is guaranteed to stabilize by exponent k = ___ at the latest, where n = dim(V).</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A nondecreasing integer sequence bounded by n can strictly increase at most n times, forcing stabilization by the n-th kernel.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">4. For A=[[2,1,0],[0,2,0],[0,0,3]], what is dim(ker((A−2I)²))?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">2 — only v₃=0 is required, leaving v₁, v₂ free.</button>
+      <button class="quiz-choice" data-correct="false">1 — the same as dim(E₂).</button>
+      <button class="quiz-choice" data-correct="false">3 — the whole space.</button>
+      <button class="quiz-choice" data-correct="false">0</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>(A−2I)² = [[0,0,0],[0,0,0],[0,0,1]], whose kernel only constrains v₃=0, leaving a 2-dimensional solution set.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="algebraic multiplicity|algebraic">
+    <p class="quiz-prompt">5. Fill in the blank: dim(K<sub>λ</sub>), the dimension of the generalized eigenspace, always turns out to equal λ's ___ multiplicity — unlike dim(E<sub>λ</sub>), which can fall short.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Generalized eigenspaces are exactly large enough to match algebraic multiplicity — the fact Unit 7 proves in full using nilpotent operators.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Treil's <a href="https://www.math.brown.edu/streil/papers/LADW/LADW.html"><em>Linear Algebra Done Wrong</em></a>, Chapter 4.5, proves the kernel-chain stabilization lemma and previews generalized eigenspaces in the same style, ahead of the Jordan form construction. This closes Unit 4.</p>
+
+  <p class="ask-teacher">Ask your teacher to check that ker((A−2I)³) equals ker((A−2I)²) for today's example matrix — confirming the chain really has stabilized by k=2 — if you want to see the stabilization proof verified by hand. Next up: inner products, norms, and the Cauchy-Schwarz inequality.</p>
+
+  <footer class="lesson-footer">STEM+ · Linear Algebra B · Unit 4 · Lesson 12 of 21</footer>
+</div>

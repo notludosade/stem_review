@@ -1,0 +1,121 @@
+<meta charset="UTF-8">
+<link rel="icon" href="../../../favicon.ico?v=1" type="image/x-icon">
+<title>Lesson 11: Diagonalizability — Necessary and Sufficient — STEM+</title>
+<link rel="stylesheet" href="../../../assets/style.css">
+<script src="../../../assets/quiz.js" defer></script>
+<div class="page" data-tier="advanced">
+  <span class="kicker">STEM+ · Linear Algebra B · Unit 4 · Lesson 11</span>
+  <h1>Diagonalizability — Necessary and Sufficient</h1>
+  <p class="subtitle">Linear Algebra A's diagonalization recipe worked when it worked, with no explanation of why some matrices resist it entirely. This lesson proves the exact condition — geometric multiplicity must match algebraic multiplicity, for every eigenvalue.</p>
+  <p class="nav-links"><a href="0010-eigenvalues-and-the-characteristic-polynomial-proven.html" class="nav-prev">← Lesson 10</a> <a href="0012-invariant-subspaces-and-generalized-eigenspaces.html" class="nav-next">Lesson 12 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Linear Algebra A's Lesson 18 defined A = PDP⁻¹ and worked examples where P had a full set of independent eigenvectors, without ever addressing what happens when it doesn't. This lesson names the two competing counts — algebraic and geometric multiplicity — and proves exactly when they line up.</p>
+
+  <h2>1. Two multiplicities, and an inequality between them</h2>
+  <div class="box">
+    <span class="box-label">Definition — Algebraic and Geometric Multiplicity</span>
+    For eigenvalue λ of T, its <strong>algebraic multiplicity</strong> is λ's multiplicity as a root of the characteristic polynomial; its <strong>geometric multiplicity</strong> is dim(E<sub>λ</sub>).
+  </div>
+  <div class="box">
+    <span class="box-label">Theorem — Geometric ≤ Algebraic</span>
+    For any eigenvalue λ: 1 ≤ geometric multiplicity(λ) ≤ algebraic multiplicity(λ).
+  </div>
+  <div class="box">
+    <span class="box-label">Proof</span>
+    Geometric multiplicity ≥ 1 since λ being an eigenvalue means E<sub>λ</sub> ≠ {0}. For the upper bound: let m = dim(E<sub>λ</sub>), pick a basis {v₁,…,v<sub>m</sub>} of E<sub>λ</sub>, and extend it to a basis {v₁,…,v<sub>m</sub>,u₁,…,u<sub>n−m</sub>} of V. Since T(vᵢ) = λvᵢ for i ≤ m, the matrix [T] relative to this basis has block form [[λI<sub>m</sub>, B], [0, C]] — the first m columns are λ times the standard basis vectors, with 0 in every row below m. For a block upper-triangular matrix, det([T]−xI) = det(λI<sub>m</sub>−xI<sub>m</sub>)·det(C−xI<sub>n−m</sub>) = (λ−x)<sup>m</sup>·det(C−xI<sub>n−m</sub>) — so (x−λ)<sup>m</sup> divides the characteristic polynomial. That means the algebraic multiplicity of λ is at least m = geometric multiplicity. ∎
+  </div>
+
+  <h2>2. When eigenspaces from different eigenvalues never overlap</h2>
+  <div class="box">
+    <span class="box-label">Lemma — Eigenspace Sums Are Direct</span>
+    If λ₁,…,λ<sub>k</sub> are distinct eigenvalues of T and w₁+⋯+w<sub>k</sub> = 0 with each w<sub>i</sub> ∈ E<sub>λᵢ</sub>, then every w<sub>i</sub> = 0.
+  </div>
+  <div class="box">
+    <span class="box-label">Proof</span>
+    Suppose not every w<sub>i</sub> is 0. Discard the zero terms and relabel the remaining nonzero ones v₁,…,v<sub>p</sub> — each is a genuine eigenvector for a distinct eigenvalue among λ₁,…,λ<sub>k</sub>, and v₁+⋯+v<sub>p</sub> = 0 is a nontrivial dependency (every coefficient is 1) among eigenvectors of distinct eigenvalues — contradicting Lesson 10's independence theorem. So every w<sub>i</sub> = 0. ∎
+  </div>
+  <p>Consequence: combining a basis from each of several eigenspaces (for distinct eigenvalues) always produces a linearly independent set — group any dependency by eigenspace, apply the Lemma to force each group's contribution to 0, then use each eigenspace's own basis independence to force every individual coefficient to 0.</p>
+
+  <h2>3. The diagonalizability criterion</h2>
+  <div class="box">
+    <span class="box-label">Theorem — Diagonalizability Criterion</span>
+    Suppose T's characteristic polynomial splits into linear factors over F, with distinct eigenvalues λ₁,…,λ<sub>k</sub> and algebraic multiplicities a₁,…,a<sub>k</sub> (a₁+⋯+a<sub>k</sub> = n = dim(V)). Then T is diagonalizable if and only if dim(E<sub>λᵢ</sub>) = a<sub>i</sub> for every i.
+  </div>
+  <div class="box">
+    <span class="box-label">Proof</span>
+    (⟸) If dim(E<sub>λᵢ</sub>) = a<sub>i</sub> for every i, combine a basis from each E<sub>λᵢ</sub>: total size Σaᵢ = n, and by the Lemma's consequence this combined set is independent. n independent vectors in an n-dimensional space form a basis (Lesson 4) — a basis entirely of eigenvectors, so [T] relative to it is diagonal.
+    <br><br>
+    (⟹) If T is diagonalizable, some basis B of V consists entirely of eigenvectors. Group B's vectors by eigenvalue: the vectors in B belonging to E<sub>λᵢ</sub> are independent (a subset of the independent B) and lie in E<sub>λᵢ</sub>, so their count is ≤ dim(E<sub>λᵢ</sub>). Summing over all k eigenvalues, n = |B| ≤ Σdim(E<sub>λᵢ</sub>) ≤ Σaᵢ = n (the last inequality from the previous theorem). Equality must hold all the way through, which forces dim(E<sub>λᵢ</sub>) = aᵢ for every single i — any strict inequality anywhere would make the sum fall short of n. ∎
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Worked Example — A Defective Matrix</span>
+    A = [[2,1,0],[0,2,0],[0,0,3]]. Characteristic polynomial: (2−λ)²(3−λ), so λ=2 has algebraic multiplicity 2. Solving (A−2I)v=0: [[0,1,0],[0,0,0],[0,0,1]]v=0 forces v₂=0, v₃=0, leaving v₁ free — dim(E₂) = 1. Since 1 ≠ 2, the criterion fails: A is <strong>not</strong> diagonalizable. Contrast this with B = [[2,0,0],[0,2,0],[0,0,3]] (already diagonal): here dim(E₂) = 2 = algebraic multiplicity, and B trivially satisfies the criterion (it's its own diagonalization).
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. In the proof of Geometric ≤ Algebraic, why does the matrix [T] have block form [[λI<sub>m</sub>, B], [0, C]] relative to the extended basis?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">The first m basis vectors are eigenvectors for λ, so T sends each to exactly λ times itself, filling the first m columns with λ times standard basis vectors.</button>
+      <button class="quiz-choice" data-correct="false">Every matrix has this block form regardless of the basis chosen.</button>
+      <button class="quiz-choice" data-correct="false">Because C must equal λI<sub>n−m</sub> too.</button>
+      <button class="quiz-choice" data-correct="false">Because T is assumed diagonalizable from the start.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>T(vᵢ)=λvᵢ for the first m (eigenvector) basis vectors is exactly what produces the λI<sub>m</sub> block and the zero block beneath it — no assumption about diagonalizability is needed.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. In the Lemma's proof, why does discarding the zero wᵢ terms produce a contradiction with Lesson 10's independence theorem?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">What remains is a nontrivial (all-coefficients-1) dependency among genuine eigenvectors for distinct eigenvalues — which Lesson 10 proved impossible.</button>
+      <button class="quiz-choice" data-correct="false">Because eigenvectors can never sum to 0.</button>
+      <button class="quiz-choice" data-correct="false">Because the remaining vectors must all share the same eigenvalue.</button>
+      <button class="quiz-choice" data-correct="false">Because T would fail to be linear.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>After discarding zeros, the surviving vectors are genuine nonzero eigenvectors for pairwise distinct eigenvalues, and their sum being 0 is exactly the nontrivial dependency Lesson 10's theorem rules out.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="1">
+    <p class="quiz-prompt">3. Fill in the blank: for the defective matrix A=[[2,1,0],[0,2,0],[0,0,3]], dim(E₂) = ___, while the algebraic multiplicity of λ=2 is 2.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Solving (A−2I)v=0 leaves only v₁ free, giving a 1-dimensional eigenspace — strictly less than the algebraic multiplicity 2.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">4. In the (⟹) direction of the Diagonalizability Criterion's proof, what forces dim(E<sub>λᵢ</sub>) = aᵢ for every i, rather than just Σdim(E<sub>λᵢ</sub>) = n overall?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Since dim(E<sub>λᵢ</sub>) ≤ aᵢ already holds for each i individually, and the sums Σdim(E<sub>λᵢ</sub>) and Σaᵢ are forced equal (both pinned to n), no individual term can be strictly less without breaking the total.</button>
+      <button class="quiz-choice" data-correct="false">It doesn't — only the total sum is guaranteed, not each individual eigenvalue.</button>
+      <button class="quiz-choice" data-correct="false">Because every aᵢ is assumed equal to 1.</button>
+      <button class="quiz-choice" data-correct="false">Because B is assumed to be the standard basis.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A sum of nonnegative "slack" terms (aᵢ − dim(E<sub>λᵢ</sub>) ≥ 0) that must total exactly 0 forces every individual slack term to be 0.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="diagonal|is diagonal">
+    <p class="quiz-prompt">5. Fill in the blank: if n independent eigenvectors are combined into a basis of V, the matrix [T] relative to that basis is exactly ___, with the eigenvalues down the diagonal.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Each basis vector being an eigenvector sends column i of [T] to λᵢ times the i-th standard basis vector — exactly a diagonal matrix.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Treil's <a href="https://www.math.brown.edu/streil/papers/LADW/LADW.html"><em>Linear Algebra Done Wrong</em></a>, Chapter 4.2, proves the same geometric-≤-algebraic inequality and diagonalizability criterion.</p>
+
+  <p class="ask-teacher">Ask your teacher to find a 3×3 matrix with a repeated eigenvalue that <em>is</em> diagonalizable (geometric = algebraic multiplicity 2) to contrast with today's defective example. Next up: subspaces a linear map sends into itself, and a first look at generalized eigenspaces — the fix for exactly the defective case above.</p>
+
+  <footer class="lesson-footer">STEM+ · Linear Algebra B · Unit 4 · Lesson 11 of 21</footer>
+</div>

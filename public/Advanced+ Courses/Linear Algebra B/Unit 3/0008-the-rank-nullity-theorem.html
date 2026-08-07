@@ -1,0 +1,108 @@
+<meta charset="UTF-8">
+<link rel="icon" href="../../../favicon.ico?v=1" type="image/x-icon">
+<title>Lesson 8: The Rank-Nullity Theorem — STEM+</title>
+<link rel="stylesheet" href="../../../assets/style.css">
+<script src="../../../assets/quiz.js" defer></script>
+<div class="page" data-tier="advanced">
+  <span class="kicker">STEM+ · Linear Algebra B · Unit 3 · Lesson 8</span>
+  <h1>The Rank-Nullity Theorem</h1>
+  <p class="subtitle">Kernel and image trade off against each other exactly — every dimension that collapses into the kernel is a dimension the image can no longer reach. This lesson proves the exact accounting.</p>
+  <p class="nav-links"><a href="0007-linear-maps-kernel-and-image.html" class="nav-prev">← Lesson 7</a> <a href="0009-matrix-representation-and-change-of-basis.html" class="nav-next">Lesson 9 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Linear Algebra A's Lesson 9 tied rank to pivots and free variables, but never connected it back to the kernel and image as subspaces in their own right. This lesson proves the identity underneath all of it, for any linear map between finite-dimensional spaces — not just matrix row-reduction.</p>
+
+  <h2>1. Rank and nullity, defined</h2>
+  <div class="box">
+    <span class="box-label">Definition — Rank and Nullity</span>
+    For a linear map T: V → W with V finite-dimensional, the <strong>rank</strong> of T is rank(T) = dim(im(T)), and the <strong>nullity</strong> of T is nullity(T) = dim(ker(T)).
+  </div>
+
+  <h2>2. The theorem</h2>
+  <div class="box">
+    <span class="box-label">Theorem — Rank-Nullity</span>
+    For a linear map T: V → W with V finite-dimensional: dim(V) = rank(T) + nullity(T).
+  </div>
+  <div class="box">
+    <span class="box-label">Proof</span>
+    Let {u₁,…,u<sub>k</sub>} be a basis for ker(T) (so nullity(T) = k). Extend it (Lesson 3's Extension Theorem) to a basis {u₁,…,u<sub>k</sub>, v₁,…,v<sub>p</sub>} of V, so dim(V) = k+p. The claim is that {T(v₁),…,T(v<sub>p</sub>)} is a basis for im(T) — proving rank(T) = p, and hence dim(V) = k+p = nullity(T) + rank(T).
+    <br><br>
+    <em>Spans im(T):</em> any w ∈ im(T) is w = T(v) for some v ∈ V. Write v = a₁u₁+⋯+a<sub>k</sub>u<sub>k</sub>+b₁v₁+⋯+b<sub>p</sub>v<sub>p</sub> using the extended basis. Apply T: w = T(v) = a₁T(u₁)+⋯+a<sub>k</sub>T(u<sub>k</sub>)+b₁T(v₁)+⋯+b<sub>p</sub>T(v<sub>p</sub>). Since each uᵢ ∈ ker(T), every T(uᵢ) = 0, leaving w = b₁T(v₁)+⋯+b<sub>p</sub>T(v<sub>p</sub>) — a combination of T(v₁),…,T(v<sub>p</sub>) alone.
+    <br><br>
+    <em>Independent:</em> suppose c₁T(v₁)+⋯+c<sub>p</sub>T(v<sub>p</sub>) = 0. By linearity, T(c₁v₁+⋯+c<sub>p</sub>v<sub>p</sub>) = 0, so c₁v₁+⋯+c<sub>p</sub>v<sub>p</sub> ∈ ker(T) — expressible as d₁u₁+⋯+d<sub>k</sub>u<sub>k</sub> for some scalars d<sub>i</sub>. Rearranged: c₁v₁+⋯+c<sub>p</sub>v<sub>p</sub> − d₁u₁−⋯−d<sub>k</sub>u<sub>k</sub> = 0 — a dependency among {u₁,…,u<sub>k</sub>,v₁,…,v<sub>p</sub>}, the basis of V, which is independent. So every c<sub>i</sub> = 0 (and every d<sub>j</sub> = 0). {T(v₁),…,T(v<sub>p</sub>)} is independent. ∎
+  </div>
+  <div class="box why">
+    <span class="box-label">Why extending from a kernel basis is exactly the right move</span>
+    Splitting V's basis into "kernel part" (the u's) and "the rest" (the v's) is what makes the accounting exact: the u's contribute nothing to the image (they all vanish under T), while the v's map to a genuine basis of the image — one-to-one, no collisions, by the independence argument above. Every dimension of V ends up counted on exactly one side of the ledger.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Worked Example — T: ℝ³ → ℝ², T(x,y,z) = (x+y, y+z)</span>
+    Kernel: solve x+y=0 and y+z=0, giving y=−x and z=−y=x. So ker(T) = {(x,−x,x) : x ∈ ℝ} = span{(1,−1,1)}, a 1-dimensional subspace — nullity(T) = 1. By Rank-Nullity, rank(T) = dim(ℝ³) − nullity(T) = 3 − 1 = 2. Since im(T) ⊆ ℝ² and rank(T) = 2 = dim(ℝ²), im(T) must be all of ℝ² — confirmed directly, since T(1,0,0)=(1,0) and T(0,0,1)=(0,1) already give a spanning set for ℝ².
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. In the proof's "spans im(T)" half, why does every T(uᵢ) term vanish when T is applied to v = a₁u₁+⋯+aₖuₖ+b₁v₁+⋯+bₚvₚ?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Each uᵢ was chosen as a basis vector of ker(T), so T(uᵢ) = 0 by definition of the kernel.</button>
+      <button class="quiz-choice" data-correct="false">Because aᵢ = 0 for every i.</button>
+      <button class="quiz-choice" data-correct="false">Because T is assumed injective.</button>
+      <button class="quiz-choice" data-correct="false">Because the vᵢ's are also in the kernel.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The u's were specifically chosen as a basis for ker(T), so by the very definition of kernel, T sends each one to 0 — regardless of the coefficients aᵢ.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. In the "independent" half of the proof, what happens after c₁v₁+⋯+cₚvₚ is shown to lie in ker(T)?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">It's rewritten using the u-basis of ker(T), producing a dependency among the full basis {u₁,…,uₖ,v₁,…,vₚ} of V, forcing every coefficient to 0.</button>
+      <button class="quiz-choice" data-correct="false">The proof concludes immediately that T is injective.</button>
+      <button class="quiz-choice" data-correct="false">It's discarded, since ker(T) elements don't affect im(T).</button>
+      <button class="quiz-choice" data-correct="false">The Reduction Theorem is applied to shrink the basis of V.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Rewriting c₁v₁+⋯+cₚvₚ in terms of the kernel's own basis produces an equation entirely in terms of V's full basis — and since that basis is independent, every coefficient (both the c's and the d's) must be 0.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="rank|rank(t)">
+    <p class="quiz-prompt">3. Fill in the blank: dim(V) = ___(T) + nullity(T), the Rank-Nullity Theorem.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>rank(T) = dim(im(T)) is the other term in the identity, alongside nullity(T) = dim(ker(T)).</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">4. For T: ℝ³ → ℝ², T(x,y,z) = (x+y, y+z), what is nullity(T)?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">1 — ker(T) = span{(1,−1,1)}.</button>
+      <button class="quiz-choice" data-correct="false">0</button>
+      <button class="quiz-choice" data-correct="false">2</button>
+      <button class="quiz-choice" data-correct="false">3</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Solving x+y=0, y+z=0 gives a 1-parameter family (x,−x,x), a 1-dimensional kernel.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="2">
+    <p class="quiz-prompt">5. Using Rank-Nullity, if dim(V) = 5 and nullity(T) = 3, what is rank(T)?</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>rank(T) = dim(V) − nullity(T) = 5 − 3 = 2.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Treil's <a href="https://www.math.brown.edu/streil/papers/LADW/LADW.html"><em>Linear Algebra Done Wrong</em></a>, Chapter 3.2, proves Rank-Nullity in the same basis-extension style and connects it back to the pivot-counting rank from Linear Algebra A.</p>
+
+  <p class="ask-teacher">Ask your teacher to verify Rank-Nullity on the trace map T: M₂(ℝ)→ℝ from Lesson 7 (nullity 3, rank 1, dim M₂(ℝ) = 4) if you want a second worked check. Next up: representing a linear map as an actual matrix, once a basis has been chosen on each side.</p>
+
+  <footer class="lesson-footer">STEM+ · Linear Algebra B · Unit 3 · Lesson 8 of 21</footer>
+</div>

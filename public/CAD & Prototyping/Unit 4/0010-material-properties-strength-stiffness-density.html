@@ -1,0 +1,113 @@
+<meta charset="UTF-8">
+<link rel="icon" href="../../favicon.ico?v=1" type="image/x-icon">
+<title>Lesson 10: Material Properties for Design — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · CAD &amp; Prototyping · Unit 4 · Lesson 10</span>
+  <h1>Material Properties for Design — Strength, Stiffness, and Density</h1>
+  <p class="subtitle">A CAD model is geometry-agnostic about material until you choose one — and that choice changes everything about whether the design actually works.</p>
+  <p class="nav-links"><a href="../Unit%203/0009-gdt-basics-flatness-perpendicularity-position.html" class="nav-prev">← Unit 3, Lesson 9</a> <a href="0011-design-for-manufacturability-draft-walls-undercuts.html" class="nav-next">Lesson 11 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Everything so far — sketches, features, assemblies, tolerances — applies regardless of what a part is made of. Unit 4 turns to material choice itself, starting with the three properties that come up in almost every design decision.</p>
+
+  <h2>Three properties, three different questions</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    <strong>Yield strength</strong> is the stress at which a material begins to permanently (plastically) deform — it answers "how much load before this part is damaged?" <strong>Stiffness</strong> (measured by the modulus of elasticity, E) is resistance to elastic deformation under load — it answers "how much does this part flex under load, before any damage happens at all?" <strong>Density</strong> is mass per unit volume — it answers "how heavy is this part for its size?"
+  </div>
+  <p>These are genuinely independent properties. A material can be stiff but weak and brittle (glass barely flexes, but shatters at low stress). A material can be strong but flexible (spring steel is both strong and deliberately springy, designed to flex elastically over a large range without yielding). Picking a material by only one of these three numbers is a common and avoidable mistake.</p>
+
+  <div class="box">
+    <span class="box-label">Common CAD/Prototyping Materials — Approximate Values</span>
+    <table>
+      <thead><tr><th>Material</th><th>Yield strength (MPa)</th><th>Modulus E (GPa)</th><th>Density (g/cm³)</th></tr></thead>
+      <tbody>
+        <tr><td>PLA (3D printed)</td><td>~60</td><td>~3.5</td><td>~1.24</td></tr>
+        <tr><td>ABS (3D printed)</td><td>~40</td><td>~2.3</td><td>~1.04</td></tr>
+        <tr><td>Nylon PA12 (3D printed)</td><td>~45</td><td>~1.7</td><td>~1.01</td></tr>
+        <tr><td>Acrylic (laser-cut)</td><td>~70</td><td>~3.2</td><td>~1.18</td></tr>
+        <tr><td>Birch plywood (laser-cut)</td><td>~60</td><td>~10</td><td>~0.68</td></tr>
+        <tr><td>Aluminum 6061-T6</td><td>~276</td><td>~69</td><td>~2.70</td></tr>
+        <tr><td>Mild steel (A36)</td><td>~250</td><td>~200</td><td>~7.85</td></tr>
+      </tbody>
+    </table>
+    Representative published values — real material batches vary, especially for 3D-printed plastics, where actual strength depends heavily on print settings (Unit 5 covers this directly).
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why density often decides the comparison, not strength alone</span>
+    When weight matters — aerospace parts, drones, anything worn on a body — raw strength or stiffness isn't the right comparison at all; <strong>specific strength</strong> (strength ÷ density) and <strong>specific stiffness</strong> (E ÷ density) usually are. From the table: aluminum 6061 has roughly 4.6× the yield strength of PLA (276 vs. 60 MPa), but only about 2.2× PLA's density — so aluminum still wins decisively on specific strength for a weight-limited design, but the margin is smaller than the raw strength numbers alone suggest. Plywood, meanwhile, has a lower yield strength than acrylic (about 60 vs. 70 MPa), but its much lower density (0.68 vs. 1.18 g/cm³) gives it a <em>higher</em> specific strength overall — exactly the kind of reversal raw strength numbers alone would hide.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Example — Choosing Among Three 3D-Printing Plastics</span>
+    A bracket needs to survive being dropped occasionally. PLA is the stiffest of the three and easiest to print cleanly, but the most brittle — it has the least give before cracking under a sudden impact. ABS is tougher and more heat-resistant, but tends to warp more during printing and often needs an enclosed printer. Nylon is the toughest and most flexible of the three, but absorbs moisture from the air (weakening it over time if stored improperly) and is generally the hardest of the three to print well. There is no universally "best" material here — the right choice depends on which property (stiffness, toughness, heat resistance, printability) the specific application actually needs most.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What does a material's modulus of elasticity (E) actually describe?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">The stress at which the material permanently deforms.</button>
+      <button class="quiz-choice" data-correct="true">How much the material elastically deflects under a given load — its stiffness.</button>
+      <button class="quiz-choice" data-correct="false">The material's mass per unit volume.</button>
+      <button class="quiz-choice" data-correct="false">The material's color and surface finish.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Modulus of elasticity measures stiffness — resistance to elastic (temporary, recoverable) deformation — which is a separate question from strength.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why can a material be described as "stiff but weak"?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">This is a contradiction — a stiff material is always strong.</button>
+      <button class="quiz-choice" data-correct="true">Stiffness (resistance to elastic deflection) and strength (stress at which permanent damage begins) are independent properties — glass is a common example, barely flexing before it shatters at low stress.</button>
+      <button class="quiz-choice" data-correct="false">Because "weak" only ever refers to a material's density.</button>
+      <button class="quiz-choice" data-correct="false">Because stiffness only applies to metals.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Stiffness and strength answer different questions — how much it flexes versus how much load it takes to damage it — and a material can rank very differently on each.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why is "specific strength" (strength ÷ density) often more useful than raw strength for a weight-limited design?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because raw strength values are never accurate for real materials.</button>
+      <button class="quiz-choice" data-correct="true">Because a design limited by weight cares about how much strength comes per unit of mass, not just the material's absolute strength number.</button>
+      <button class="quiz-choice" data-correct="false">Because specific strength is always numerically identical to raw strength.</button>
+      <button class="quiz-choice" data-correct="false">Because density has no real effect on aerospace or wearable designs.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Two materials can have very different densities alongside similar strength — specific strength normalizes for that, which matters directly whenever weight is a hard constraint.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="yield strength|yield">
+    <p class="quiz-prompt">4. Fill in the blank: the stress at which a material begins to permanently deform is called its ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Yield strength marks the boundary between elastic (recoverable) and plastic (permanent) deformation.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="density">
+    <p class="quiz-prompt">5. Fill in the blank: mass per unit volume, the property that matters most whenever a design is weight-limited, is called ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Density is independent of both strength and stiffness, which is exactly why specific strength and specific stiffness need to be computed separately.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: <a href="https://www.matweb.com/">MatWeb's material property database</a> is a searchable reference for real published mechanical properties across thousands of materials, including the ones in the table above.</p>
+
+  <p class="ask-teacher">Stuck on comparing two materials for a specific application? Ask your teacher — that's what I'm here for. Next up: designing a part so the manufacturing process it's meant for can actually produce it.</p>
+
+  <footer class="lesson-footer">STEM+ · CAD &amp; Prototyping · Unit 4 · Lesson 10 of 18</footer>
+</div>

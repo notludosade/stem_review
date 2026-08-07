@@ -1,0 +1,111 @@
+<meta charset="UTF-8">
+<link rel="icon" href="../../favicon.ico?v=1" type="image/x-icon">
+<title>Lesson 6: Design Intent and the Feature Tree — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · CAD &amp; Prototyping · Unit 2 · Lesson 6</span>
+  <h1>Design Intent — Editing a Feature Tree Without Breaking Downstream Features</h1>
+  <p class="subtitle">Every CAD user eventually deletes or resizes a feature and watches three other features turn red. This lesson is about why that happens, and how to design so it happens less.</p>
+  <p class="nav-links"><a href="0005-degrees-of-freedom-in-an-assembly-and-fully-constrained.html" class="nav-prev">← Lesson 5</a> <a href="../Unit%203/0007-dimensional-tolerance-and-tolerance-stack-up.html" class="nav-next">Unit 3, Lesson 7 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Lesson 3 introduced the feature tree as a record of what happened, in order. This lesson is about what it takes to <em>change</em> that record safely — which turns out to be the single most common source of frustration in real CAD work.</p>
+
+  <h2>Parent and child features</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    A <strong>parent</strong> feature is one that a later feature depends on for its geometry — a face, edge, sketch plane, or dimension it references. A <strong>child</strong> feature is the one doing the referencing. A single feature can be a parent to several children, and a child to several parents at once.
+  </div>
+  <p>Editing or deleting a parent forces every child to recompute against the new (or missing) geometry. If a child referenced something specific — a particular edge, a particular face — that no longer exists in the same form after the edit, the child feature fails to rebuild. Most CAD software makes this visible immediately: the failed feature is flagged, usually in red, in the tree.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    <strong>Design intent</strong> is the plan for how a model is supposed to behave as it's edited — which surfaces, edges, and relationships are meant to stay meaningful as parameters change, and which are just incidental byproducts of how the geometry happens to look right now.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Worked Example — A Broken Reference</span>
+    A bracket has <strong>Sketch2</strong> (mounting holes) drawn on the flat top face created by <strong>Extrude1</strong>. Later, <strong>Fillet1</strong> rounds the bracket's front edge. Still later, a designer adds <strong>Sketch3</strong> (a label engraving) referencing the new rounded edge that Fillet1 just created, instead of the original flat face. Weeks later, someone increases Fillet1's radius to meet a new safety spec — and Sketch3 fails to rebuild, because the specific edge geometry it was anchored to no longer exists in the same shape. The label engraving is now broken, for a reason that has nothing to do with the label itself.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why this is the most common real-world CAD frustration</span>
+    A small, reasonable-looking early change — resizing one hole, adjusting one fillet — can cascade into failed features throughout the rest of the tree, often in places that seem unrelated to the change on its face. This isn't a bug; it's the direct consequence of every feature depending on specific geometry left behind by earlier ones. The fix isn't avoiding the feature tree — it's deliberate about which features are safe to reference.
+  </div>
+
+  <h2>Practices that preserve design intent</h2>
+  <div class="box example">
+    <span class="box-label">Reference stable geometry, not incidental geometry</span>
+    Where possible, reference original, stable faces and named planes rather than edges created by rounding or chamfering operations — those are exactly the features most likely to be tuned later, and least likely to be something a later feature should actually depend on.
+  </div>
+  <div class="box example">
+    <span class="box-label">Order refinement features last</span>
+    Build a model's rough shape first (the sketches and extrudes that define its basic form), then add refinement features — fillets, chamfers, cosmetic details — toward the end of the tree. Refinement features are the most likely to be tweaked repeatedly during a design's life, and putting them last means tweaking them has nothing built on top of them left to break.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What is a "child" feature, in feature-tree terms?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Any feature created after 5:00 PM.</button>
+      <button class="quiz-choice" data-correct="true">A feature that references geometry created by an earlier ("parent") feature.</button>
+      <button class="quiz-choice" data-correct="false">A feature with no dimensions.</button>
+      <button class="quiz-choice" data-correct="false">A feature that cannot ever be edited.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A child feature depends on geometry (a face, edge, sketch plane, or dimension) that a parent feature produced.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. In the worked example, why does increasing Fillet1's radius break Sketch3, even though Sketch3 is nominally about a label engraving, not a fillet?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because fillets and sketches are always incompatible with each other.</button>
+      <button class="quiz-choice" data-correct="true">Because Sketch3 was anchored to the specific edge geometry Fillet1 created, and that geometry changed shape when the fillet radius changed.</button>
+      <button class="quiz-choice" data-correct="false">Because CAD software limits every model to at most three features.</button>
+      <button class="quiz-choice" data-correct="false">Because Sketch3 was created before Fillet1 in the tree.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Sketch3 referenced Fillet1's rounded edge specifically — when that edge's shape changed, the reference Sketch3 depended on no longer matched, so it failed to rebuild.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why is it good practice to place cosmetic features like fillets and chamfers late in the feature tree?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because CAD software requires fillets to be the very last feature in every model.</button>
+      <button class="quiz-choice" data-correct="true">Because fillets are frequently re-tuned later, and placing them last means fewer downstream features are put at risk of breaking when they change.</button>
+      <button class="quiz-choice" data-correct="false">Because fillets take longer to compute than any other feature type.</button>
+      <button class="quiz-choice" data-correct="false">Because early features in the tree cannot be edited once later features exist.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Refinement features like fillets are among the most likely to change during a design's life — ordering them last minimizes how much downstream work depends on geometry that's still likely to move.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="parent">
+    <p class="quiz-prompt">4. Fill in the blank: a feature that a later feature depends on for its geometry is called that later feature's ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The feature being depended on is the parent; the dependent feature is its child.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="design intent|intent">
+    <p class="quiz-prompt">5. Fill in the blank: the plan for which relationships in a model should stay meaningful as parameters change, rather than being incidental, is called ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Design intent is what separates a model that edits gracefully from one that shatters at the first parameter change.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: <a href="https://cad.onshape.com/help/">Onshape's help documentation on feature rebuild errors</a> covers exactly this kind of broken-reference failure and how to trace it back to its source.</p>
+
+  <p class="ask-teacher">Stuck on tracing a broken reference in a real model? Ask your teacher — that's what I'm here for. Next up: tolerances — because even a perfectly designed model still has to account for the fact that no two manufactured parts come out exactly the same.</p>
+
+  <footer class="lesson-footer">STEM+ · CAD &amp; Prototyping · Unit 2 · Lesson 6 of 18</footer>
+</div>

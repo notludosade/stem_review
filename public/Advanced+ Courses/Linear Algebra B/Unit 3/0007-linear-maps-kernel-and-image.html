@@ -1,0 +1,127 @@
+<meta charset="UTF-8">
+<link rel="icon" href="../../../favicon.ico?v=1" type="image/x-icon">
+<title>Lesson 7: Linear Maps, Kernel, and Image — STEM+</title>
+<link rel="stylesheet" href="../../../assets/style.css">
+<script src="../../../assets/quiz.js" defer></script>
+<div class="page" data-tier="advanced">
+  <span class="kicker">STEM+ · Linear Algebra B · Unit 3 · Lesson 7</span>
+  <h1>Linear Maps, Kernel, and Image</h1>
+  <p class="subtitle">Linear Algebra A only ever saw T: ℝⁿ → ℝᵐ, T(v) = Av. The same definition, unchanged, describes maps between any two vector spaces — derivatives, traces, evaluations — and every one of them carries two built-in subspaces worth naming.</p>
+  <p class="nav-links"><a href="../Unit%202/0006-coordinate-vectors-and-change-of-basis.html" class="nav-prev">← Lesson 6</a> <a href="0008-the-rank-nullity-theorem.html" class="nav-next">Lesson 8 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Linear Algebra A's Lesson 12 defined a linear transformation as T(u+v) = T(u)+T(v) and T(cv) = cT(v), then only ever tested it on matrix-vector products T(v) = Av. Nothing in that definition actually requires V and W to be ℝⁿ and ℝᵐ — and once that restriction is dropped, derivatives and traces turn out to be linear maps too.</p>
+
+  <h2>1. Linear maps between any two vector spaces</h2>
+  <div class="box">
+    <span class="box-label">Definition — Linear Map</span>
+    For vector spaces V, W over the same field F, a function T: V → W is a <strong>linear map</strong> if T(u+v) = T(u)+T(v) and T(cv) = cT(v) for all u, v ∈ V and c ∈ F.
+  </div>
+  <div class="box example">
+    <span class="box-label">Two Linear Maps That Are Not Matrix-Vector Products</span>
+    (a) T: P₂(ℝ) → P₁(ℝ), T(p) = p′ (the derivative). Linearity is exactly the sum rule and constant-multiple rule from calculus: (p+q)′ = p′+q′ and (cp)′ = cp′.
+    <br>(b) T: M₂(ℝ) → ℝ, T(A) = tr(A) (the trace, sum of diagonal entries). tr(A+B) = tr(A)+tr(B) and tr(cA) = c·tr(A) both hold entry-by-entry.
+  </div>
+
+  <h2>2. Kernel and image are subspaces</h2>
+  <div class="box">
+    <span class="box-label">Definition — Kernel and Image</span>
+    For a linear map T: V → W, the <strong>kernel</strong> is ker(T) = {v ∈ V : T(v) = 0}, and the <strong>image</strong> is im(T) = {T(v) : v ∈ V} ⊆ W.
+  </div>
+  <div class="box">
+    <span class="box-label">Theorem — Kernel and Image Are Subspaces</span>
+    ker(T) is a subspace of V, and im(T) is a subspace of W.
+  </div>
+  <div class="box">
+    <span class="box-label">Proof</span>
+    <em>ker(T):</em> T(0) = T(0·0) = 0·T(0) = 0, so 0 ∈ ker(T). If T(u)=0 and T(v)=0, then T(u+v) = T(u)+T(v) = 0+0 = 0, so u+v ∈ ker(T). If T(u)=0, then T(cu) = cT(u) = c·0 = 0, so cu ∈ ker(T). All three subspace-test conditions hold.
+    <br><br>
+    <em>im(T):</em> 0 = T(0) ∈ im(T). If w₁ = T(v₁) and w₂ = T(v₂) are both in im(T), then w₁+w₂ = T(v₁)+T(v₂) = T(v₁+v₂) ∈ im(T) (it's the image of v₁+v₂). If w = T(v) ∈ im(T), then cw = cT(v) = T(cv) ∈ im(T). All three conditions hold. ∎
+  </div>
+
+  <h2>3. Injectivity is exactly a trivial kernel</h2>
+  <div class="box">
+    <span class="box-label">Theorem — T Is Injective ⟺ ker(T) = {0}</span>
+    A linear map T: V → W is injective (one-to-one) if and only if ker(T) = {0}.
+  </div>
+  <div class="box">
+    <span class="box-label">Proof</span>
+    (⟹) Suppose T is injective. If v ∈ ker(T), then T(v) = 0 = T(0). Injectivity forces v = 0. So ker(T) ⊆ {0}, and since 0 ∈ ker(T) always, ker(T) = {0}.
+    <br><br>
+    (⟸) Suppose ker(T) = {0}. If T(u) = T(v) for some u, v ∈ V, then T(u−v) = T(u)−T(v) = 0 (using linearity: T(u−v) = T(u) + T(−v) = T(u) − T(v)), so u−v ∈ ker(T) = {0}, meaning u−v = 0, i.e. u = v. So T is injective. ∎
+  </div>
+  <div class="box why">
+    <span class="box-label">Why this shortcut is worth having</span>
+    Checking injectivity directly means checking "T(u)=T(v) ⟹ u=v" for every pair of vectors — infinitely many pairs. This theorem reduces the entire check to a single question: does T(v)=0 have any solution besides v=0? For a matrix map T(v)=Av, that's exactly Linear Algebra A's homogeneous-system test, now proved to be the right test rather than just asserted.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Worked Example — Kernel and Image of the Derivative Map</span>
+    For T: P₂(ℝ) → P₁(ℝ), T(p) = p′: ker(T) = {p ∈ P₂(ℝ) : p′ = 0} = the constant polynomials, span{1} — a 1-dimensional subspace. Since ker(T) ≠ {0}, T is not injective (e.g. T(x² ) = T(x²+1) = 2x). For the image: any q(x) = ax+b ∈ P₁(ℝ) is T(½ax² + bx) = ax+b, so every element of P₁(ℝ) is reached — im(T) = P₁(ℝ), all of it.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. Which of the following is a linear map?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">T: M₂(ℝ) → ℝ, T(A) = tr(A).</button>
+      <button class="quiz-choice" data-correct="false">T: P₂(ℝ) → P₂(ℝ), T(p) = p + 1.</button>
+      <button class="quiz-choice" data-correct="false">T: ℝ² → ℝ, T(x,y) = xy.</button>
+      <button class="quiz-choice" data-correct="false">T: ℝ → ℝ, T(x) = x².</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Trace satisfies both linearity conditions directly. T(p)=p+1 fails T(0)=1≠0; T(x,y)=xy and T(x)=x² are both nonlinear (quadratic) — none of the others preserve addition and scalar multiplication.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. In the proof that ker(T) is a subspace, how is T(0) = 0 established?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">T(0) = T(0·0) = 0·T(0) = 0, using scalar multiplication by 0 and Lesson 1's fact that 0 times any vector is 0.</button>
+      <button class="quiz-choice" data-correct="false">It's assumed as part of the definition of a linear map.</button>
+      <button class="quiz-choice" data-correct="false">It only holds when T is injective.</button>
+      <button class="quiz-choice" data-correct="false">It follows from im(T) being a subspace.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Writing 0 = 0·0 and applying T's scalar-multiplication rule directly proves T(0)=0 for every linear map, without any extra assumption.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="0|zero|{0}">
+    <p class="quiz-prompt">3. Fill in the blank: a linear map T is injective if and only if ker(T) = ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>ker(T) = {0} (only the zero vector maps to zero) is exactly equivalent to injectivity, proved in both directions in this lesson.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">4. For T: P₂(ℝ) → P₁(ℝ), T(p) = p′, what is ker(T)?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">The constant polynomials, span{1} — a 1-dimensional subspace of P₂(ℝ).</button>
+      <button class="quiz-choice" data-correct="false">Just the zero polynomial.</button>
+      <button class="quiz-choice" data-correct="false">All of P₂(ℝ).</button>
+      <button class="quiz-choice" data-correct="false">P₁(ℝ).</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>p′ = 0 exactly when p is constant, since any nonzero-degree term in p contributes a nonzero derivative term.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="u-v|u−v|u minus v">
+    <p class="quiz-prompt">5. Fill in the blank: the (⟸) direction of the injectivity theorem shows T(u)=T(v) implies T(___) = 0, then uses ker(T)={0} to conclude u=v.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>T(u−v) = T(u)−T(v) = 0 by linearity, and this is exactly what puts u−v into the kernel, forcing u−v=0.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Treil's <a href="https://www.math.brown.edu/streil/papers/LADW/LADW.html"><em>Linear Algebra Done Wrong</em></a>, Chapter 3.1, defines linear transformations between general vector spaces and proves the same kernel/image subspace facts.</p>
+
+  <p class="ask-teacher">Ask your teacher whether the trace map T: M₂(ℝ)→ℝ from this lesson is injective (it isn't — ker(T) is the 3-dimensional trace-zero subspace from Unit 1's test) if you want to trace through the theorem on a second example. Next up: the exact relationship between dim(ker T) and dim(im T) — the Rank-Nullity Theorem, proved.</p>
+
+  <footer class="lesson-footer">STEM+ · Linear Algebra B · Unit 3 · Lesson 7 of 21</footer>
+</div>

@@ -1,0 +1,176 @@
+<meta charset="UTF-8">
+<link rel="icon" href="../../favicon.ico?v=1" type="image/x-icon">
+<title>Lesson 7: Tolerance and Tolerance Stack-Up — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · CAD &amp; Prototyping · Unit 3 · Lesson 7</span>
+  <h1>Dimensional Tolerance and Tolerance Stack-Up</h1>
+  <p class="subtitle">No manufactured part ever comes out at exactly its nominal size. Tolerance says how much variation is acceptable — and a chain of tolerances adds up fast.</p>
+  <p class="nav-links"><a href="../Unit%202/0006-design-intent-editing-a-feature-tree-without-breaking-downstream-features.html" class="nav-prev">← Unit 2, Lesson 6</a> <a href="0008-fit-types-clearance-transition-interference.html" class="nav-next">Lesson 8 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Units 1 and 2 treated dimensions as exact numbers. In the real world, they never are — every cutting, printing, and machining process produces parts that land somewhere near their target size, not exactly on it. This lesson is about how CAD dimensions actually account for that.</p>
+
+  <h2>Nominal size and tolerance</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    The <strong>nominal size</strong> is a dimension's target value — what the drawing calls it, in round numbers. The <strong>tolerance</strong> is the allowable range of variation around that nominal size, usually written as upper and lower limits. A dimension written <strong>25.00 ± 0.05mm</strong> means the part is acceptable anywhere from <strong>24.95mm</strong> (lower limit) to <strong>25.05mm</strong> (upper limit) — nominal 25.00mm, tolerance ±0.05mm.
+  </div>
+  <p>Tighter tolerance (a smaller ± value) means less allowed variation, which generally means a slower, more expensive, or more carefully controlled manufacturing process. Tolerance is a deliberate choice, not just a formality: too loose, and the part might not function; too tight, and it costs far more than necessary to make.</p>
+
+  <h2>Tolerance stack-up</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    <strong>Tolerance stack-up</strong> happens when several toleranced dimensions combine in a chain — several parts stacked end to end, or several dimensions locating one feature. The individual tolerances add together, so the total possible variation across the whole chain can be substantially larger than any single dimension's own tolerance.
+  </div>
+  <p>For dimensions that add in a simple chain, the <strong>worst-case</strong> total tolerance is the straightforward sum of the individual tolerances, since in the worst case every part in the chain could simultaneously land at its own extreme:</p>
+  <div class="expr-block">T_total (worst-case) = T₁ + T₂ + T₃ + …</div>
+
+  <div class="box example">
+    <span class="box-label">Worked Example — Three Parts in a Housing</span>
+    Three parts are stacked inside a housing: Part A = 10.00 ± 0.05mm, Part B = 15.00 ± 0.03mm, Part C = 8.00 ± 0.02mm. Nominal stack length = 10.00 + 15.00 + 8.00 = <strong>33.00mm</strong>. Worst-case tolerance = 0.05 + 0.03 + 0.02 = <strong>±0.10mm</strong>. So the actual stack could measure anywhere from 32.90mm to 33.10mm, even though every individual part is perfectly within its own spec.
+  </div>
+
+  <div class="box">
+    <span class="box-label">A less conservative alternative: RSS (statistical) stack-up</span>
+    Worst-case stack-up assumes every part lands at its extreme simultaneously — unlikely in practice, since manufacturing variation is usually random and roughly independent across parts. A common statistical alternative, <strong>root-sum-square (RSS)</strong> stack-up, gives a less conservative (but not guaranteed-safe) estimate: T_total(RSS) = √(T₁² + T₂² + T₃² + …). For the example above: √(0.05² + 0.03² + 0.02²) = √0.0038 ≈ <strong>0.062mm</strong> — notably smaller than the worst-case 0.10mm, because it's very unlikely all three parts hit their extremes at once. Worst-case is the safer number to design against when a small batch or a safety-critical fit is involved; RSS is common in high-volume production where the statistics genuinely apply.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why this can't be assumed away</span>
+    An assembly designed only against nominal dimensions can look perfectly fine on paper, while the real worst-case stack-up quietly eats all the clearance meant for something else — a gap meant for a moving part, room for a gasket, the slop a fastener needs to actually thread in. Every dimension in a chain adds to (or eats into) the final tolerance budget; stack-up has to be checked deliberately, dimension by dimension, not assumed to work out.
+  </div>
+
+  <h2>Try it — worst-case tolerance stack-up</h2>
+  <p>Set three individual part tolerances and a required clearance, and see whether the worst-case stack-up still fits.</p>
+
+  <div class="widget">
+    <div class="widget-label">Try It — Worst-Case Stack-Up vs. Required Clearance</div>
+    <div class="slider-row">
+      <label for="cad7-t1">Part 1 tolerance (±mm)</label>
+      <input type="range" id="cad7-t1" min="0" max="0.10" step="0.01" value="0.05">
+      <span class="slider-value" id="cad7-t1-val">0.05</span>
+    </div>
+    <div class="slider-row">
+      <label for="cad7-t2">Part 2 tolerance (±mm)</label>
+      <input type="range" id="cad7-t2" min="0" max="0.10" step="0.01" value="0.03">
+      <span class="slider-value" id="cad7-t2-val">0.03</span>
+    </div>
+    <div class="slider-row">
+      <label for="cad7-t3">Part 3 tolerance (±mm)</label>
+      <input type="range" id="cad7-t3" min="0" max="0.10" step="0.01" value="0.02">
+      <span class="slider-value" id="cad7-t3-val">0.02</span>
+    </div>
+    <div class="slider-row">
+      <label for="cad7-clear">Required clearance (mm)</label>
+      <input type="range" id="cad7-clear" min="0" max="0.20" step="0.01" value="0.10">
+      <span class="slider-value" id="cad7-clear-val">0.10</span>
+    </div>
+    <p class="plot-readout" id="cad7-readout">—</p>
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. A dimension is written 40.00 ± 0.08mm. What is the lower limit?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">40.08mm</button>
+      <button class="quiz-choice" data-correct="true">39.92mm</button>
+      <button class="quiz-choice" data-correct="false">39.08mm</button>
+      <button class="quiz-choice" data-correct="false">40.00mm</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Lower limit = nominal − tolerance = 40.00 − 0.08 = 39.92mm.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Two dimensions in a chain, 20.00 ± 0.04mm and 12.00 ± 0.03mm, stack end to end. What is the worst-case total tolerance?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">±0.035mm</button>
+      <button class="quiz-choice" data-correct="true">±0.07mm</button>
+      <button class="quiz-choice" data-correct="false">±0.12mm</button>
+      <button class="quiz-choice" data-correct="false">±0.01mm</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Worst-case stack-up sums the individual tolerances: 0.04 + 0.03 = ±0.07mm.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why does worst-case stack-up assume all parts land at their extreme simultaneously, while RSS stack-up gives a smaller number?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">RSS accounts for the low statistical likelihood that every part in the chain hits its extreme at exactly the same time; worst-case is the guaranteed-safe (but more conservative) bound.</button>
+      <button class="quiz-choice" data-correct="false">RSS and worst-case always give exactly the same answer.</button>
+      <button class="quiz-choice" data-correct="false">RSS ignores tolerance entirely and only uses nominal dimensions.</button>
+      <button class="quiz-choice" data-correct="false">Worst-case only applies to parts made from metal.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Worst-case is the safer, guaranteed bound; RSS is a less conservative statistical estimate appropriate when variation across many parts is genuinely independent and random.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="nominal">
+    <p class="quiz-prompt">4. Fill in the blank: the target value a dimension is written around, before tolerance is applied, is called its ___ size.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Nominal size is the round-number target; tolerance is the allowed variation around it.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="stack-up|stack up|tolerance stack-up">
+    <p class="quiz-prompt">5. Fill in the blank: when several toleranced dimensions combine in a chain and their individual tolerances add together, this is called tolerance ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Tolerance stack-up is exactly this accumulation — the reason a chain of "acceptable" parts can still fail to fit as an assembly.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: <a href="https://www.nist.gov/pml/engineering-physics-division">NIST's Engineering Physics Division resources on dimensional metrology</a> cover how tolerance and measurement uncertainty are handled in real manufacturing.</p>
+
+  <p class="ask-teacher">Stuck on a stack-up calculation for a specific assembly? Ask your teacher — that's what I'm here for. Next up: what a tolerance actually implies about how two mating parts will fit together.</p>
+
+  <footer class="lesson-footer">STEM+ · CAD &amp; Prototyping · Unit 3 · Lesson 7 of 18</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var ids = ['cad7-t1', 'cad7-t2', 'cad7-t3', 'cad7-clear'];
+  var sliders = {}, labels = {};
+  ids.forEach(function (id) {
+    sliders[id] = document.getElementById(id);
+    labels[id] = document.getElementById(id + '-val');
+  });
+  var readout = document.getElementById('cad7-readout');
+
+  function render() {
+    var t1 = Number(sliders['cad7-t1'].value);
+    var t2 = Number(sliders['cad7-t2'].value);
+    var t3 = Number(sliders['cad7-t3'].value);
+    var clear = Number(sliders['cad7-clear'].value);
+    ['cad7-t1', 'cad7-t2', 'cad7-t3', 'cad7-clear'].forEach(function (id) {
+      labels[id].textContent = Number(sliders[id].value).toFixed(2);
+    });
+    var worst = t1 + t2 + t3;
+    var rss = Math.sqrt(t1 * t1 + t2 * t2 + t3 * t3);
+    readout.classList.remove('is-pass', 'is-fail');
+    var msg = 'Worst-case = ' + worst.toFixed(3) + 'mm, RSS ≈ ' + rss.toFixed(3) + 'mm, required clearance = ' + clear.toFixed(2) + 'mm. ';
+    if (worst <= clear) {
+      msg += 'Fits even in the worst case.';
+      readout.classList.add('is-pass');
+    } else if (rss <= clear) {
+      msg += 'Worst-case exceeds clearance, but RSS fits — risky for a small batch.';
+    } else {
+      msg += 'Exceeds required clearance even under RSS — tighten tolerances or increase clearance.';
+      readout.classList.add('is-fail');
+    }
+    readout.textContent = msg;
+  }
+
+  ids.forEach(function (id) { sliders[id].addEventListener('input', render); });
+  render();
+});
+</script>

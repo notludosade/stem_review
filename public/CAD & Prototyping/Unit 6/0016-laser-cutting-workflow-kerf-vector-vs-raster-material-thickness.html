@@ -1,0 +1,110 @@
+<meta charset="UTF-8">
+<link rel="icon" href="../../favicon.ico?v=1" type="image/x-icon">
+<title>Lesson 16: The 2D Laser-Cutting Workflow — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · CAD &amp; Prototyping · Unit 6 · Lesson 16</span>
+  <h1>The 2D Laser-Cutting Workflow — Kerf, Vector vs. Raster, and Material Thickness</h1>
+  <p class="subtitle">Additive, layer-by-layer 3D printing is only half the prototyping picture. Laser cutting is subtractive and flat — and it removes real material every time it cuts.</p>
+  <p class="nav-links"><a href="../Unit%205/0015-print-troubleshooting-and-design-rules-overhangs-bridging.html" class="nav-prev">← Unit 5, Lesson 15</a> <a href="0017-joinery-for-laser-cut-parts-and-kerf-compensation-math.html" class="nav-next">Lesson 17 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Unit 5 built parts up from nothing, one layer at a time. Laser cutting works in the opposite direction: it starts with a flat sheet of material and removes exactly what a 2D file tells it to. This unit covers that workflow, and the one geometric quirk — kerf — that shapes everything about designing for it.</p>
+
+  <h2>The workflow, and how it differs from 3D printing</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    Laser cutting is driven by a <strong>2D vector file</strong> — paths, not a pixel image — that guides a laser beam along each path to either cut fully through flat stock or etch its surface. It's a <strong>subtractive</strong>, strictly 2D process: it works only on flat material, with no layer-by-layer buildup the way FDM printing does.
+  </div>
+
+  <h2>Kerf</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    <strong>Kerf</strong> is the width of material actually removed by the laser as it cuts — the beam itself has a small but nonzero width, and it vaporizes or burns away a thin channel as it passes through. Typically 0.1mm to 0.3mm, depending on the material, its thickness, the laser's power, and the cut speed.
+  </div>
+  <p>Because the beam is centered on the drawn line and removes material on both sides of it as it passes, a cut piece always ends up slightly smaller than its vector outline — by roughly half the kerf width on each edge, since the material lost is split between the piece you keep and the offcut falling away.</p>
+
+  <h2>Vector vs. raster</h2>
+  <div class="box example">
+    <span class="box-label">Vector cutting/scoring</span>
+    The laser follows a drawn path at full power to cut all the way through, or at reduced power to score — mark a line on the surface without cutting through. This is how shapes, holes, and joints are made.
+  </div>
+  <div class="box example">
+    <span class="box-label">Raster engraving</span>
+    The laser scans line by line across an area, like an inkjet printer, varying power or dwell time to burn a grayscale image into the surface. Used for text, images, or textures rather than cutting a shape.
+  </div>
+
+  <h2>Material thickness</h2>
+  <p>Every laser/material combination has a practical maximum thickness — wood and acrylic commonly range from a few millimeters up to roughly 10–20mm depending on the laser's power, with thicker stock needing slower speed, higher power, or multiple passes. Kerf and edge charring both tend to increase with material thickness. Thickness also directly sets the depth of any interlocking joinery (Lesson 17) — a joint has to be sized to the sheet's actual thickness, not just look right in the 2D file.</p>
+
+  <div class="box why">
+    <span class="box-label">Why kerf can't be ignored in the file</span>
+    Because a cut part always comes out smaller than its drawn outline by the kerf, any dimension that has to precisely mate with another laser-cut part — a box's side panels, an interlocking tab and slot — is affected by kerf directly. Left uncompensated, every mating pair of parts comes out systematically loose (or systematically tight) in the same predictable direction, every single time. This isn't a manufacturing tolerance problem at all — it's a fully predictable geometric offset, and Lesson 17 works out exactly how to correct for it in the file.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. Why does a laser-cut part always end up slightly smaller than its drawn vector outline?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because laser cutters always scale files down by a fixed percentage.</button>
+      <button class="quiz-choice" data-correct="true">Because the laser beam has a nonzero width (the kerf) and removes material centered on the drawn line, splitting the loss between the piece and the offcut.</button>
+      <button class="quiz-choice" data-correct="false">Because the material always shrinks after being cut.</button>
+      <button class="quiz-choice" data-correct="false">It doesn't — laser-cut parts always come out exactly to the drawn size.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The kerf is real material removed along the cut path, centered on the drawn line — half is lost from the kept piece's edge, half from the offcut.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. What is the difference between vector cutting and raster engraving?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">They are two names for the exact same process.</button>
+      <button class="quiz-choice" data-correct="true">Vector cutting/scoring follows a path at full or reduced power; raster engraving scans line by line to burn a grayscale image into the surface.</button>
+      <button class="quiz-choice" data-correct="false">Raster engraving is only used for cutting through material completely.</button>
+      <button class="quiz-choice" data-correct="false">Vector cutting can only be used on metal.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Vector work follows drawn paths (for cutting or scoring lines); raster work scans area by area, like a printer, to render images or textures.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why does material thickness matter for laser-cut joinery specifically?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">It doesn't — joinery dimensions never depend on material thickness.</button>
+      <button class="quiz-choice" data-correct="true">Because an interlocking joint has to be sized to the sheet's actual thickness to physically fit, not just look correct in the 2D file.</button>
+      <button class="quiz-choice" data-correct="false">Because thicker material always cuts with zero kerf.</button>
+      <button class="quiz-choice" data-correct="false">Because thickness only affects raster engraving, never vector cuts.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A finger joint or tab is only as deep as the material is thick — the 2D file's joint dimensions have to match the real stock thickness being cut.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="kerf">
+    <p class="quiz-prompt">4. Fill in the blank: the width of material actually removed by the laser beam as it cuts is called ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Kerf is a real, predictable amount of material loss — typically 0.1 to 0.3mm — centered on the cut path.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="subtractive">
+    <p class="quiz-prompt">5. Fill in the blank: unlike FDM printing's additive, layer-by-layer process, laser cutting is a ___ process — it removes material from a flat sheet rather than building it up.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Laser cutting is subtractive and strictly 2D — it starts with flat stock and removes what the vector file specifies.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: <a href="https://www.matweb.com/">MatWeb's material database</a>, alongside a laser manufacturer's cut-settings chart, is a common way to look up how kerf and speed vary by material and thickness.</p>
+
+  <p class="ask-teacher">Stuck on estimating kerf for a specific laser and material? Ask your teacher — that's what I'm here for. Next up: designing joints that actually fit, by building kerf directly into the math.</p>
+
+  <footer class="lesson-footer">STEM+ · CAD &amp; Prototyping · Unit 6 · Lesson 16 of 18</footer>
+</div>

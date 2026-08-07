@@ -1,0 +1,118 @@
+<meta charset="UTF-8">
+<link rel="icon" href="../../favicon.ico?v=1" type="image/x-icon">
+<title>Lesson 13: FDM Printing Fundamentals — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · CAD &amp; Prototyping · Unit 5 · Lesson 13</span>
+  <h1>FDM Printing Fundamentals — Layers, Infill, Supports, and Orientation</h1>
+  <p class="subtitle">A 3D printer doesn't see a solid model — it sees a stack of flat slices, printed one at a time, each one needing something solid underneath it.</p>
+  <p class="nav-links"><a href="../Unit%204/0012-factor-of-safety-and-a-basic-stress-load-estimate.html" class="nav-prev">← Unit 4, Lesson 12</a> <a href="0014-slicing-settings-quantitative-effects-on-strength-accuracy-time.html" class="nav-next">Lesson 14 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Everything up to this unit was about the design existing as geometry. This unit is about actually making it — starting with FDM, the most common desktop 3D printing process, and the handful of concepts that shape nearly every decision a designer makes about a printed part.</p>
+
+  <h2>FDM: building up, one layer at a time</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    <strong>FDM (Fused Deposition Modeling)</strong> builds a part by extruding molten thermoplastic filament through a heated nozzle, depositing it in a pattern one thin layer at a time, from the bottom up — each new layer fusing to the one directly below it as it cools.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Layer height</span>
+    The thickness of each individual deposited layer — commonly 0.1mm to 0.3mm. Smaller layer height gives finer surface detail and less visible stepping on curved or angled surfaces, at the cost of more layers and longer print time. Larger layer height prints faster but shows more visible "stair-stepping."
+  </div>
+  <div class="box example">
+    <span class="box-label">Infill percentage</span>
+    The density of the internal lattice pattern printed inside a part that isn't fully solid. 0% is a hollow shell; 100% is fully solid. Most functional parts land somewhere between 10% and 50% — a deliberate strength/weight/print-time trade-off, covered quantitatively next lesson.
+  </div>
+  <div class="box example">
+    <span class="box-label">Supports</span>
+    Temporary printed structures generated under overhanging geometry that would otherwise be printed into empty air, then removed after printing finishes. They exist because FDM fundamentally can't print into nothing — every new layer needs something solid directly beneath it to fuse onto.
+  </div>
+
+  <h2>Print orientation — a free decision with outsized consequences</h2>
+  <p>How a part is rotated on the print bed, before slicing even begins, affects three things at once, none of which require changing the model's geometry:</p>
+  <div class="box example">
+    <span class="box-label">Support requirements</span>
+    Orientations that minimize steep overhangs reduce (or eliminate) support material, print time, and the surface marring supports leave behind when removed.
+  </div>
+  <div class="box example">
+    <span class="box-label">Strength direction</span>
+    Layers bond less strongly to each other than the plastic within a single layer bonds to itself. A part loaded in a direction that tries to peel layers apart is meaningfully weaker than the same part loaded along the layer plane instead — this becomes central in Lesson 15.
+  </div>
+  <div class="box example">
+    <span class="box-label">Print time</span>
+    A taller orientation generally means more layers, and more layers generally means a longer print — the exact relationship is Lesson 14's subject.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why orientation should be decided before tuning slicer settings</span>
+    An L-shaped bracket printed flat (both legs on the bed) needs zero support for the horizontal leg, and the vertical leg's height becomes many thin layers running along its length — if the load is applied vertically, that's strong layer bonding in the load direction. The same bracket printed on its side may need support at the corner, and now the layer lines run <em>perpendicular</em> to that same vertical load, making it more prone to splitting along a layer line. No slicer setting fixes a bad orientation choice — it should be decided first, since it changes strength and support needs more than nearly any other single setting.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. Why does FDM printing need support material under steep overhangs?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because the plastic filament is too heavy to hold its own shape at any point.</button>
+      <button class="quiz-choice" data-correct="true">Because each new layer needs something solid directly beneath it to fuse onto — FDM can't print into empty air.</button>
+      <button class="quiz-choice" data-correct="false">Because supports are required by law for any FDM print.</button>
+      <button class="quiz-choice" data-correct="false">Because overhangs always melt the layer below them.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>FDM builds strictly bottom-up, layer by layer — without something solid underneath, a new layer has nothing to fuse to and can't form correctly.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. What is the main trade-off of choosing a smaller layer height?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Smaller layer height always makes a part weaker.</button>
+      <button class="quiz-choice" data-correct="true">Finer surface detail and less visible stepping, at the cost of more layers and longer print time.</button>
+      <button class="quiz-choice" data-correct="false">Smaller layer height requires a completely different printer.</button>
+      <button class="quiz-choice" data-correct="false">There is no trade-off — smaller is always strictly better.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A fixed part height divided into more, thinner layers takes proportionally longer to print — that's the direct cost of the smoother surface finish.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why does print orientation affect a part's strength, independent of any slicer setting?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">It doesn't — orientation only affects appearance, never strength.</button>
+      <button class="quiz-choice" data-correct="true">Because layers bond less strongly to each other than the plastic within a layer bonds to itself, so which direction the layer lines run relative to the load matters.</button>
+      <button class="quiz-choice" data-correct="false">Because orientation changes which material the printer uses.</button>
+      <button class="quiz-choice" data-correct="false">Because taller orientations always print at a different temperature.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Layer-to-layer bonds are inherently weaker than within-layer bonds — orientation decides whether an expected load tries to peel layers apart or loads them in-plane.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="infill">
+    <p class="quiz-prompt">4. Fill in the blank: the density of the internal lattice pattern printed inside a part, ranging from 0% (hollow) to 100% (solid), is called ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Infill percentage is a deliberate strength/weight/print-time trade-off, not simply "more is always better."</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="orientation|print orientation">
+    <p class="quiz-prompt">5. Fill in the blank: rotating a part on the print bed before slicing, which affects support needs, layer-bond strength direction, and print time all at once, is called print ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Orientation is a free decision — no geometry change required — with a bigger real-world effect on print success and strength than most slicer settings.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: <a href="https://help.prusa3d.com/">Prusa's official 3D printing knowledge base</a> covers FDM fundamentals with the same layer, infill, and support concepts, from an actual working printer's documentation.</p>
+
+  <p class="ask-teacher">Stuck on picking an orientation for a part you're printing? Ask your teacher — that's what I'm here for. Next up: putting real numbers on how slicer settings actually affect strength, accuracy, and time.</p>
+
+  <footer class="lesson-footer">STEM+ · CAD &amp; Prototyping · Unit 5 · Lesson 13 of 18</footer>
+</div>

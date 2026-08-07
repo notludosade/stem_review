@@ -1,0 +1,115 @@
+<meta charset="UTF-8">
+<link rel="icon" href="../../../favicon.ico?v=1" type="image/x-icon">
+<title>Lesson 9: Matrix Representation and Change of Basis — STEM+</title>
+<link rel="stylesheet" href="../../../assets/style.css">
+<script src="../../../assets/quiz.js" defer></script>
+<div class="page" data-tier="advanced">
+  <span class="kicker">STEM+ · Linear Algebra B · Unit 3 · Lesson 9</span>
+  <h1>Matrix Representation and Change of Basis</h1>
+  <p class="subtitle">Every linear map becomes an actual matrix once bases are chosen on both sides — and changing the basis changes the matrix in an exactly predictable way: by conjugating with the change-of-basis matrix.</p>
+  <p class="nav-links"><a href="0008-the-rank-nullity-theorem.html" class="nav-prev">← Lesson 8</a> <a href="../Unit%204/0010-eigenvalues-and-the-characteristic-polynomial-proven.html" class="nav-next">Lesson 10 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Linear Algebra A only ever wrote a linear map as a matrix relative to the standard basis. This lesson builds the matrix relative to <em>any</em> chosen bases, then proves exactly how that matrix changes when the bases do — the fact behind "similar matrices," used constantly starting in Unit 4.</p>
+
+  <h2>1. The matrix of a linear map, relative to chosen bases</h2>
+  <div class="box">
+    <span class="box-label">Definition — Matrix Representation</span>
+    For a linear map T: V → W, a basis B = {v₁,…,v<sub>n</sub>} of V, and a basis C of W, the <strong>matrix of T relative to B and C</strong>, written [T]<sub>C←B</sub>, is the matrix whose j-th column is [T(v<sub>j</sub>)]<sub>C</sub> — the coordinates, relative to C, of where T sends the j-th basis vector of B.
+  </div>
+  <div class="box">
+    <span class="box-label">Theorem — What [T]<sub>C←B</sub> Does</span>
+    For every v ∈ V: [T(v)]<sub>C</sub> = [T]<sub>C←B</sub> [v]<sub>B</sub>.
+  </div>
+  <div class="box">
+    <span class="box-label">Proof</span>
+    Write v = c₁v₁+⋯+c<sub>n</sub>v<sub>n</sub>, so [v]<sub>B</sub> = (c₁,…,c<sub>n</sub>). By linearity of T, T(v) = c₁T(v₁)+⋯+c<sub>n</sub>T(v<sub>n</sub>). Apply the (linear, Lesson 6) coordinate map relative to C: [T(v)]<sub>C</sub> = c₁[T(v₁)]<sub>C</sub>+⋯+c<sub>n</sub>[T(v<sub>n</sub>)]<sub>C</sub> — exactly c₁ times column 1 of [T]<sub>C←B</sub> plus ⋯ plus c<sub>n</sub> times column n, which is the matrix-vector product [T]<sub>C←B</sub>(c₁,…,c<sub>n</sub>) = [T]<sub>C←B</sub>[v]<sub>B</sub>. ∎
+  </div>
+
+  <h2>2. Changing the basis: similar matrices</h2>
+  <p>For an operator T: V → V (same space on both sides), comparing its matrix relative to two different bases B and B′ of the same V produces the single most useful relationship in the rest of this course.</p>
+  <div class="box">
+    <span class="box-label">Theorem — Change of Basis for an Operator</span>
+    Let T: V → V, let B, B′ be bases of V, and let P = P<sub>B←B′</sub> (Lesson 6's change-of-basis matrix). Then [T]<sub>B′</sub> = P⁻¹ [T]<sub>B</sub> P.
+  </div>
+  <div class="box">
+    <span class="box-label">Proof</span>
+    For any v ∈ V, apply Lesson 6's formula and the previous theorem: [T(v)]<sub>B</sub> = [T]<sub>B</sub>[v]<sub>B</sub> = [T]<sub>B</sub> P [v]<sub>B′</sub> (using [v]<sub>B</sub> = P[v]<sub>B′</sub>). On the other hand, converting T(v)'s own coordinates from B back to B′ uses P⁻¹ (Lesson 6's change-of-basis matrices are always invertible, since P<sub>B′←B</sub> = P⁻¹ undoes the conversion): [T(v)]<sub>B′</sub> = P⁻¹[T(v)]<sub>B</sub> = P⁻¹[T]<sub>B</sub>P[v]<sub>B′</sub>. But by definition, [T(v)]<sub>B′</sub> = [T]<sub>B′</sub>[v]<sub>B′</sub> too. Since this holds for every v — in particular for each basis vector of B′, which pins down every column — [T]<sub>B′</sub> = P⁻¹[T]<sub>B</sub>P. ∎
+  </div>
+  <div class="box why">
+    <span class="box-label">Why this is worth naming: similarity</span>
+    Two matrices A and A′ related by A′ = P⁻¹AP for some invertible P are called <strong>similar</strong>. This theorem says exactly this: the matrices representing the <em>same</em> linear operator relative to two different bases are always similar. Unit 4's entire point — that eigenvalues don't depend on which basis you happened to compute in — is a direct consequence, proved formally in Lesson 10.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Worked Example — T(x,y) = (x+2y, 3y), Standard Basis vs. B′ = {(1,1), (0,1)}</span>
+    Relative to the standard basis, [T]<sub>B</sub> = [[1,2],[0,3]] (columns are T(1,0)=(1,0) and T(0,1)=(2,3), written in standard coordinates). Now compute [T]<sub>B′</sub> directly: T(1,1) = (1+2, 3) = (3,3); writing (3,3) = a(1,1)+b(0,1) gives a=3, b=0, so column 1 is (3,0). T(0,1) = (2,3); writing (2,3) = a(1,1)+b(0,1) gives a=2, b=1, so column 2 is (2,1). So [T]<sub>B′</sub> = [[3,2],[0,1]].
+    <br><br>
+    Check against the theorem: P = P<sub>B←B′</sub> = [[1,0],[1,1]] (columns are B′'s vectors, already in standard coordinates), and P⁻¹ = [[1,0],[−1,1]]. Computing P⁻¹[T]<sub>B</sub>P: first [T]<sub>B</sub>P = [[1,2],[0,3]][[1,0],[1,1]] = [[3,2],[3,3]]; then P⁻¹(that) = [[1,0],[−1,1]][[3,2],[3,3]] = [[3,2],[0,1]]. Matches [T]<sub>B′</sub> exactly. ✓
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What goes in column j of [T]<sub>C←B</sub>?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">[T(vⱼ)]<sub>C</sub> — the C-coordinates of where T sends the j-th vector of B.</button>
+      <button class="quiz-choice" data-correct="false">[vⱼ]<sub>B</sub> — the B-coordinates of vⱼ itself.</button>
+      <button class="quiz-choice" data-correct="false">The j-th vector of C, unchanged.</button>
+      <button class="quiz-choice" data-correct="false">The zero vector, always.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Each column tracks where one of B's basis vectors is sent by T, expressed in C's coordinate system — exactly what's needed for matrix-vector multiplication to reproduce [T(v)]<sub>C</sub>.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. In the proof of [T]<sub>B′</sub> = P⁻¹[T]<sub>B</sub>P, why is P invertible in the first place?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">P<sub>B←B′</sub> and P<sub>B′←B</sub> are inverse change-of-basis matrices — converting coordinates from B′ to B and back again must return the original vector.</button>
+      <button class="quiz-choice" data-correct="false">P is invertible only because T is invertible.</button>
+      <button class="quiz-choice" data-correct="false">P is invertible because B = B′.</button>
+      <button class="quiz-choice" data-correct="false">Invertibility of P is simply assumed, with no justification.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Since converting B′-coordinates to B-coordinates and back is the identity operation, P<sub>B←B′</sub> and P<sub>B′←B</sub> are genuine two-sided inverses of each other.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="similar">
+    <p class="quiz-prompt">3. Fill in the blank: matrices A and A′ with A′ = P⁻¹AP for some invertible P are called ___ matrices.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Similarity is exactly the relationship this lesson's theorem proves holds between any two matrix representations of the same operator.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">4. In the worked example, what is column 1 of [T]<sub>B′</sub> for B′ = {(1,1),(0,1)}?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">(3, 0), from T(1,1) = (3,3) = 3(1,1) + 0(0,1).</button>
+      <button class="quiz-choice" data-correct="false">(1, 2), the first column of [T]<sub>B</sub>.</button>
+      <button class="quiz-choice" data-correct="false">(2, 1)</button>
+      <button class="quiz-choice" data-correct="false">(3, 3)</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>T(1,1) = (3,3), and expressing (3,3) in B′-coordinates (solving a(1,1)+b(0,1)=(3,3)) gives a=3, b=0.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="1">
+    <p class="quiz-prompt">5. In the worked example, [T]<sub>B′</sub> = [[3,2],[0,___]]. Fill in the blank.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Column 2 comes from T(0,1) = (2,3) = 2(1,1) + 1(0,1), giving (2,1) — so the bottom-right entry is 1.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Treil's <a href="https://www.math.brown.edu/streil/papers/LADW/LADW.html"><em>Linear Algebra Done Wrong</em></a>, Chapter 3.3, derives the same [T]<sub>C←B</sub> construction and the similarity relation A′ = P⁻¹AP for change of basis on an operator. This closes Unit 3.</p>
+
+  <p class="ask-teacher">Ask your teacher to verify the worked example's P⁻¹[T]<sub>B</sub>P computation by hand, one matrix product at a time, if you want to see every entry checked. Next up: eigenvalues and eigenvectors, proven properly this time — starting with why similar matrices always share the same characteristic polynomial.</p>
+
+  <footer class="lesson-footer">STEM+ · Linear Algebra B · Unit 3 · Lesson 9 of 21</footer>
+</div>

@@ -1,0 +1,113 @@
+<meta charset="UTF-8">
+<link rel="icon" href="../../favicon.ico?v=1" type="image/x-icon">
+<title>Lesson 3: Extrude, Revolve, and the Feature Tree — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · CAD &amp; Prototyping · Unit 1 · Lesson 3</span>
+  <h1>Basic 3D Features — Extrude, Revolve, and the Feature Tree</h1>
+  <p class="subtitle">A flat sketch becomes a solid through one of a small number of basic operations — and every one of them gets recorded, in order, in a history that later features depend on.</p>
+  <p class="nav-links"><a href="0002-parametric-design-features-driven-by-parameters.html" class="nav-prev">← Lesson 2</a> <a href="../Unit%202/0004-mating-parts-with-assembly-constraints.html" class="nav-next">Unit 2, Lesson 4 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Lessons 1 and 2 built and parameterized flat sketches. Neither one is a 3D part yet. This lesson covers the two most common operations that turn a 2D profile into a solid, and the record-keeping structure — the feature tree — that ties every step of a model's history together.</p>
+
+  <h2>Extrude: push a profile along an axis</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    An <strong>extrude</strong> feature takes a closed 2D sketch profile and pushes it a specified distance perpendicular to the sketch plane, sweeping out a solid. Common variants: <strong>blind</strong> (a fixed distance), <strong>through all</strong> (all the way through existing geometry), and <strong>symmetric</strong> (extruding half the distance in each direction from the sketch plane).
+  </div>
+  <p>Extrude is the default way to turn a flat outline — a rectangle, an L-shape, a profile with holes already cut into it — into a block, a plate, or a wall with that cross-section.</p>
+
+  <h2>Revolve: spin a profile around an axis</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    A <strong>revolve</strong> feature takes a 2D sketch profile and rotates it around a specified axis, sweeping out a solid of revolution. The angle is itself a parameter — commonly a full 360° for a bolt, a knob, or a bottle, but a partial revolve (say, 180°) is equally valid for a part that's only a slice of a full round shape.
+  </div>
+  <div class="box example">
+    <span class="box-label">Example</span>
+    A bolt's shaft and head are almost always modeled with a single revolve: sketch just the outline of one half of the bolt's cross-section (a 2D profile that looks like the bolt sliced down the middle), then revolve it 360° around its centerline. Every point on that profile sweeps out a circle, and the whole solid appears from one sketch.
+  </div>
+
+  <h2>The feature tree</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    The <strong>feature tree</strong> (or history tree) is the sequential list every CAD program keeps of every feature applied to a model — each sketch, extrude, revolve, fillet, hole, and so on, in the order it was created. Each feature is built on top of the geometry that exists at that point in the tree, not the finished part as it looks today.
+  </div>
+  <p>This has a direct consequence: editing an earlier feature doesn't just change that one feature — it forces every feature listed after it in the tree to recompute, because each one depends on the geometry the previous ones left behind.</p>
+
+  <div class="box example">
+    <span class="box-label">Worked Example — A Bracket's Feature Tree</span>
+    A simple bracket might be built as: <strong>Sketch1</strong> (the base outline) → <strong>Extrude1</strong> (the flat base plate) → <strong>Sketch2</strong> (drawn on Extrude1's top face, for a mounting boss) → <strong>Extrude2</strong> (the boss) → <strong>Fillet1</strong> (rounding the base plate's corners). Change Sketch1's width, and Extrude1 recomputes to the new size — which forces Sketch2's plane (Extrude1's top face) to move, which forces Extrude2 to recompute in its new position, which forces Fillet1 to re-round whatever corners exist at that point. One edit, four downstream recomputations, entirely automatic.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why order matters</span>
+    Because every feature depends on what came before it, the order features appear in the tree is part of the design, not just bookkeeping. Two models with identical final geometry can behave completely differently when edited, depending on which feature was built first and what later features reference. Lesson 6 comes back to this directly: what it actually takes to edit a feature tree without breaking the features built on top of it.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What does an extrude feature do to a 2D sketch profile?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Rotates it around a specified axis to sweep out a solid of revolution.</button>
+      <button class="quiz-choice" data-correct="true">Pushes it a specified distance perpendicular to the sketch plane, sweeping out a solid.</button>
+      <button class="quiz-choice" data-correct="false">Deletes the sketch and replaces it with a default cube.</button>
+      <button class="quiz-choice" data-correct="false">Rounds every sharp corner in the profile.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Extrude pushes a flat profile along an axis perpendicular to its sketch plane, turning a 2D outline into a 3D solid.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why can a bolt's entire head-and-shaft shape usually be modeled from a single 2D sketch?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because bolts don't require any 3D geometry at all.</button>
+      <button class="quiz-choice" data-correct="true">Because revolving one half-profile 360° around the centerline sweeps out the whole solid of revolution.</button>
+      <button class="quiz-choice" data-correct="false">Because CAD software automatically generates bolts from a library, without any sketch.</button>
+      <button class="quiz-choice" data-correct="false">Because extrude features can only be used on round parts.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A revolve feature sweeps a 2D profile around an axis, so a single half-cross-section profile is enough to generate the entire rotationally symmetric solid.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. In the bracket example, why does editing Sketch1's width also change Fillet1's result, even though Fillet1 never directly references Sketch1?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Because every feature listed later in the tree depends, directly or indirectly, on the geometry the earlier features left behind.</button>
+      <button class="quiz-choice" data-correct="false">It doesn't — Fillet1 is completely independent of every other feature in the tree.</button>
+      <button class="quiz-choice" data-correct="false">Because fillets are recalculated randomly every time any sketch changes.</button>
+      <button class="quiz-choice" data-correct="false">Because Sketch1 and Fillet1 are actually the same feature under different names.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Changes cascade down the tree: Sketch1 → Extrude1 → Sketch2 → Extrude2 → Fillet1, each depending on the one before it, so an early change forces every later feature to recompute.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="feature tree|history tree|tree">
+    <p class="quiz-prompt">4. Fill in the blank: the sequential, ordered record of every feature applied to a CAD model is called the ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The feature tree (or history tree) records each feature in creation order, and each one builds on the geometry that existed at that point.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="order">
+    <p class="quiz-prompt">5. Fill in the blank: because every feature depends on what came before it, the ___ features appear in the tree is part of the design itself, not just bookkeeping.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Two models with identical final geometry can behave very differently when edited, depending purely on feature order and what later features chose to reference.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: <a href="https://cad.onshape.com/help/">Onshape's help documentation</a> on extrude, revolve, and the feature timeline shows these same operations in a real modeling environment.</p>
+
+  <p class="ask-teacher">Stuck on when to use extrude versus revolve for a shape you have in mind? Ask your teacher — that's what I'm here for. Next up: combining multiple parts into an assembly, and the mates that define how they fit together.</p>
+
+  <footer class="lesson-footer">STEM+ · CAD &amp; Prototyping · Unit 1 · Lesson 3 of 18</footer>
+</div>

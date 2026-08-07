@@ -1,0 +1,134 @@
+<meta charset="UTF-8">
+<link rel="icon" href="../../../favicon.ico?v=1" type="image/x-icon">
+<title>Lesson 3: Span, Independence, and the Existence of a Basis — STEM+</title>
+<link rel="stylesheet" href="../../../assets/style.css">
+<script src="../../../assets/quiz.js" defer></script>
+<div class="page" data-tier="advanced">
+  <span class="kicker">STEM+ · Linear Algebra B · Unit 1 · Lesson 3</span>
+  <h1>Span, Independence, and the Existence of a Basis</h1>
+  <p class="subtitle">Linear Algebra A asserted that a basis gives every vector exactly one representation, and never proved that a basis exists at all. Both get proved here.</p>
+  <p class="nav-links"><a href="0002-subspaces-the-abstract-subspace-test.html" class="nav-prev">← Lesson 2</a> <a href="../Unit%202/0004-basis-and-dimension.html" class="nav-next">Lesson 4 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Two facts from Linear Algebra A were used constantly but never proved: that a basis represents every vector <em>uniquely</em>, and that a basis exists in the first place — you were only ever handed one (usually the standard basis) rather than shown one could always be found. This lesson proves both, for any finite-dimensional vector space over any field.</p>
+
+  <h2>1. Span is the smallest subspace containing a set</h2>
+  <div class="box">
+    <span class="box-label">Definition — Span</span>
+    For a subset S = {v₁, …, v<sub>k</sub>} of a vector space V, span(S) is the set of every linear combination c₁v₁ + ⋯ + c<sub>k</sub>v<sub>k</sub>, with c₁, …, c<sub>k</sub> ∈ F.
+  </div>
+  <div class="box">
+    <span class="box-label">Theorem — span(S) Is the Smallest Subspace Containing S</span>
+    span(S) is a subspace of V, and if W is any subspace with S ⊆ W, then span(S) ⊆ W.
+  </div>
+  <div class="box">
+    <span class="box-label">Proof</span>
+    span(S) is a subspace: it contains 0 (take every cᵢ = 0), and it's closed under addition and scalar multiplication, since a sum of two linear combinations of S is again a linear combination of S, and scaling a linear combination of S by a is again one (distribute a across each cᵢvᵢ term). By the Subspace Test, span(S) is a subspace.
+    <br><br>
+    Minimality: suppose W is a subspace with S ⊆ W. Since W is closed under addition and scalar multiplication, any linear combination c₁v₁ + ⋯ + c<sub>k</sub>v<sub>k</sub> of vectors already in W must itself be in W. So every element of span(S) is in W — span(S) ⊆ W. ∎
+  </div>
+
+  <h2>2. A basis gives unique coordinates</h2>
+  <p>Linear independence keeps its Linear Algebra A definition unchanged: v₁, …, v<sub>k</sub> are linearly independent if the only solution to c₁v₁ + ⋯ + c<sub>k</sub>v<sub>k</sub> = 0 is c₁ = ⋯ = c<sub>k</sub> = 0. A basis is still an independent spanning set. What Linear Algebra A never proved is why that combination is exactly what makes representations unique.</p>
+  <div class="box">
+    <span class="box-label">Theorem — Uniqueness of Basis Representation</span>
+    If B = {v₁, …, v<sub>n</sub>} is a basis for V, every vector v ∈ V can be written as v = c₁v₁ + ⋯ + c<sub>n</sub>v<sub>n</sub> for exactly one choice of scalars c₁, …, c<sub>n</sub>.
+  </div>
+  <div class="box">
+    <span class="box-label">Proof</span>
+    <em>Existence:</em> B spans V, so some choice of scalars works — that's the definition of span.
+    <br><br>
+    <em>Uniqueness:</em> suppose v = c₁v₁ + ⋯ + c<sub>n</sub>v<sub>n</sub> and also v = d₁v₁ + ⋯ + d<sub>n</sub>v<sub>n</sub>. Subtracting, 0 = (c₁ − d₁)v₁ + ⋯ + (c<sub>n</sub> − d<sub>n</sub>)v<sub>n</sub>. Since B is linearly independent, the only solution to this is the trivial one: cᵢ − dᵢ = 0 for every i, i.e. cᵢ = dᵢ for every i. So the two representations were identical all along. ∎
+  </div>
+  <div class="box why">
+    <span class="box-label">Why independence, specifically, is what forces uniqueness</span>
+    Spanning alone guarantees a representation exists; it says nothing about how many. It's independence — applied to the <em>difference</em> of two hypothetical representations — that collapses "a representation" into "the one and only representation." This is exactly why a basis needs both properties together, and why coordinates relative to a basis (Lesson 6) are well-defined at all.
+  </div>
+
+  <h2>3. Existence: every finite spanning set contains a basis</h2>
+  <p>A vector space is <strong>finite-dimensional</strong> if it has a finite spanning set. (P<sub>n</sub>(ℝ) and M<sub>m×n</sub>(ℝ) both qualify; C[a, b] does not — no finite set of continuous functions spans all of it.) The theorem below is what guarantees a basis exists at all, for any finite-dimensional space.</p>
+  <div class="box">
+    <span class="box-label">Theorem — The Reduction Theorem</span>
+    If S = {v₁, …, v<sub>m</sub>} spans V, then some subset of S is a basis for V.
+  </div>
+  <div class="box">
+    <span class="box-label">Proof</span>
+    If S is already linearly independent, S itself is a basis (independent and spanning) — done. Otherwise, S is dependent, so some nontrivial combination c₁v₁ + ⋯ + c<sub>m</sub>v<sub>m</sub> = 0 exists with some cⱼ ≠ 0. Solve for vⱼ: vⱼ = −(1/cⱼ)(sum of the other terms), so vⱼ is a linear combination of the remaining vectors. Remove vⱼ from S to form S′ — the span is unchanged, since anywhere vⱼ was used in a combination, its own expression in terms of the rest of S′ can be substituted in instead. S′ still spans V, with one fewer vector.
+    <br><br>
+    Repeat: if S′ is independent, stop — it's a basis. Otherwise remove another redundant vector the same way. Since S is finite, this process must terminate after at most m − 1 removals (it cannot remove every vector, since a spanning set for a nonzero space can't shrink to ∅ and still span; if V = {0}, the process correctly terminates at the empty set, which is the basis for the zero space by convention). Whatever set remains when the process stops is independent and still spans V — a basis. ∎
+  </div>
+  <div class="box why">
+    <span class="box-label">Why this settles existence for good</span>
+    Every finite-dimensional space has, by definition, at least one finite spanning set. The Reduction Theorem turns that single spanning set into an actual basis by construction — deleting exactly the redundant vectors span already flagged. Combined with Lesson 4's proof that every basis has the same size, "the dimension of V" is now a fully justified, well-defined number for any finite-dimensional space, not just ℝⁿ.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Worked Example — Reducing a Spanning Set of P₂(ℝ)</span>
+    Let S = {1, x, 2 + x, x²} — does it span P₂(ℝ), and if so, find a basis inside it. S spans P₂(ℝ) since 1, x, x² alone already reach every polynomial a + bx + cx². Is S independent? Check: 2 + x is itself a combination of the other two: 2 + x = 2(1) + 1(x). So c₁(1) + c₂(x) + c₃(2+x) + c₄(x²) = 0 has the nontrivial solution c₁ = 2, c₂ = 1, c₃ = −1, c₄ = 0 — S is dependent. Removing 2 + x (the vector solved for) leaves {1, x, x²}, which is independent and still spans P₂(ℝ) — a basis, recovered from a redundant spanning set exactly as the Reduction Theorem's proof describes.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. In the proof that span(S) is the smallest subspace containing S, what does the minimality half of the proof actually show?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Any subspace W containing S must also contain every linear combination of S's vectors, since W is closed under + and scalar multiplication.</button>
+      <button class="quiz-choice" data-correct="false">span(S) is always equal to V itself.</button>
+      <button class="quiz-choice" data-correct="false">S must be linearly independent for span(S) to be a subspace.</button>
+      <button class="quiz-choice" data-correct="false">W must be finite-dimensional for the argument to work.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Since W is closed under the vector space operations and contains S, it's forced to contain every linear combination of S's vectors — which is exactly span(S) — regardless of whether S is independent or W is finite-dimensional.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. In the proof of uniqueness of basis representation, what step is taken after assuming v has two representations, c₁v₁+⋯+cₙvₙ and d₁v₁+⋯+dₙvₙ?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Subtract the two representations to get 0 = (c₁−d₁)v₁ + ⋯ + (cₙ−dₙ)vₙ, then apply linear independence.</button>
+      <button class="quiz-choice" data-correct="false">Apply the Reduction Theorem directly to v.</button>
+      <button class="quiz-choice" data-correct="false">Show that v itself must equal 0.</button>
+      <button class="quiz-choice" data-correct="false">Assume the basis is the standard basis of ℝⁿ.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Subtracting the two representations produces a combination of the basis vectors equal to 0; linear independence then forces every coefficient (cᵢ − dᵢ) to be 0, proving the two representations were identical.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="independence|linear independence|linearly independent">
+    <p class="quiz-prompt">3. Fill in the blank: spanning alone guarantees a representation exists; it is ___ that forces there to be only one.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Applying independence to the difference of two hypothetical representations is exactly what collapses them into a single, unique representation.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">4. In the Reduction Theorem's proof, once a dependent relation c₁v₁+⋯+cₘvₘ = 0 is found with some cⱼ ≠ 0, why is it safe to remove vⱼ from S without shrinking the span?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">vⱼ can be solved for as a linear combination of the other vectors, so anywhere vⱼ appeared in a combination, that expression can be substituted in instead.</button>
+      <button class="quiz-choice" data-correct="false">Removing any single vector from a spanning set never changes its span.</button>
+      <button class="quiz-choice" data-correct="false">vⱼ must be the zero vector.</button>
+      <button class="quiz-choice" data-correct="false">S was already independent before vⱼ was found.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Because vⱼ is redundant — expressible using the rest of S — every combination that used vⱼ can be rewritten without it, so the span is exactly preserved by the removal.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="finite-dimensional|finite dimensional">
+    <p class="quiz-prompt">5. Fill in the blank: the Reduction Theorem guarantees a basis exists for every ___ vector space — one with at least one finite spanning set.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Finite-dimensional is defined exactly as "has a finite spanning set" — precisely the hypothesis the Reduction Theorem needs to construct a basis.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Treil's <a href="https://www.math.brown.edu/streil/papers/LADW/LADW.html"><em>Linear Algebra Done Wrong</em></a>, Chapter 2.1, proves the Reduction Theorem (there called the "spanning set" theorem) in the same style and also proves the dual Extension Theorem — every independent set extends to a basis.</p>
+
+  <p class="ask-teacher">Ask your teacher to show you the Extension Theorem's proof (every independent set can be grown into a basis, the mirror image of today's Reduction Theorem) if you want to see both directions. Next up: proving every basis of the same space has exactly the same size.</p>
+
+  <footer class="lesson-footer">STEM+ · Linear Algebra B · Unit 1 · Lesson 3 of 21</footer>
+</div>

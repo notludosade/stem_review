@@ -1,0 +1,120 @@
+<meta charset="UTF-8">
+<link rel="icon" href="../../favicon.ico?v=1" type="image/x-icon">
+<title>Lesson 1: 2D Sketch Fundamentals — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · CAD &amp; Prototyping · Unit 1 · Lesson 1</span>
+  <h1>2D Sketch Fundamentals — Constraints, Dimensions, and Degrees of Freedom</h1>
+  <p class="subtitle">Every 3D feature in a CAD model starts life as a flat, 2D sketch — and how tightly that sketch is pinned down decides whether the model behaves or falls apart later.</p>
+  <p class="nav-links"><a href="0002-parametric-design-features-driven-by-parameters.html" class="nav-next">Lesson 2 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Almost every solid a CAD program can build — a bracket, a housing, a gear — starts from a flat 2D sketch that later gets extruded, revolved, or otherwise turned into 3D geometry. Before any of that, the sketch itself has to be under control. This lesson is about what "under control" actually means, precisely enough to check it.</p>
+
+  <h2>Sketch entities and two kinds of constraints</h2>
+  <p>A sketch is built from simple entities — lines, arcs, circles, points — and controlled two different ways:</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    <strong>Geometric constraints</strong> fix the <em>relationship</em> between entities without specifying a number: coincident (two points touch), horizontal, vertical, parallel, perpendicular, tangent, equal (two lengths or radii match), symmetric. <strong>Dimensional constraints</strong> fix an actual <em>measurement</em>: a distance, a length, a radius or diameter, an angle.
+  </div>
+  <p>Both kinds do the same underlying job — removing ambiguity about where the geometry sits — but a sketch built only from dimensions with no geometric constraints is usually fragile (nothing stops two lines that are supposed to be parallel from drifting apart if a length changes), so real sketches combine both.</p>
+
+  <h2>Degrees of freedom</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    A 2D point has two <strong>degrees of freedom (DOF)</strong>: it can move in x and in y. A sketch's total DOF is the sum of every unconstrained way its entities are still free to move. Each constraint removes some number of DOF. A sketch is <strong>fully constrained</strong> when 0 DOF remain — no entity can move at all without violating a constraint.
+  </div>
+  <p>Most CAD programs color sketch geometry to show this at a glance: underdefined entities (DOF remaining) are usually blue and can be dragged around; fully constrained entities are usually black or a different fixed color and won't move no matter where you click and drag.</p>
+
+  <div class="box example">
+    <span class="box-label">Worked Example — Constraining a Single Line</span>
+    A line has two endpoints, so it starts with 4 DOF (2 per endpoint). Add a coincident constraint pinning one endpoint to the sketch origin: that endpoint's 2 DOF are removed, leaving 2 (the other endpoint can still be anywhere on a circle around the first). Add a length dimension: that removes 1 more DOF, leaving 1 — the free endpoint can now only slide around a fixed-radius arc. Add an angle dimension from the x-axis: the last DOF is removed. 4 − 2 − 1 − 1 = 0. The line is fully constrained.
+  </div>
+
+  <h2>Underdefined, fully defined, and overdefined</h2>
+  <p>A sketch can end up in one of three states, and CAD software tracks the difference automatically:</p>
+  <div class="box example">
+    <span class="box-label">Underdefined</span>
+    DOF &gt; 0. Some geometry can still move. Not an error — early in sketching, most geometry is underdefined on purpose — but a sketch that's still underdefined when a feature is built from it can shift unpredictably if anything upstream changes.
+  </div>
+  <div class="box example">
+    <span class="box-label">Fully defined</span>
+    DOF = 0. Every entity's position is pinned down by some combination of geometric and dimensional constraints, with no conflicts. This is the target state before building a feature from the sketch.
+  </div>
+  <div class="box example">
+    <span class="box-label">Overdefined / conflicting</span>
+    A constraint is added that contradicts another already in place — for example, constraining a line horizontal and then also giving it a nonzero vertical-distance dimension between its endpoints. CAD software flags this as an error rather than silently choosing one; it has to be resolved by deleting the conflicting constraint, not worked around.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why fully constraining a sketch matters</span>
+    An underdefined sketch isn't just untidy — it's a hidden risk. If a teammate (or you, six months later) accidentally drags an underdefined entity while editing something else, the geometry can shift with no warning, and every feature built from that sketch shifts with it. Fully constraining a sketch before building on it is what makes a model's behavior predictable — which becomes essential the moment dimensions are driven by parameters instead of typed-in numbers, the subject of the next lesson.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What removes degrees of freedom from a 2D sketch?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Only dimensional constraints — geometric constraints don't affect DOF.</button>
+      <button class="quiz-choice" data-correct="false">Only geometric constraints — dimensions are just labels.</button>
+      <button class="quiz-choice" data-correct="true">Both geometric constraints (like coincident or parallel) and dimensional constraints (like length or angle).</button>
+      <button class="quiz-choice" data-correct="false">Nothing — DOF is fixed by how many entities the sketch contains.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Both kinds of constraint remove ambiguity about position — geometric constraints fix relationships, dimensional constraints fix measurements, and a well-built sketch normally uses both.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. How many degrees of freedom does a single, completely unconstrained 2D point have?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">1</button>
+      <button class="quiz-choice" data-correct="true">2</button>
+      <button class="quiz-choice" data-correct="false">3</button>
+      <button class="quiz-choice" data-correct="false">4</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A 2D point can move in x and in y — 2 DOF. (A 2D line has 4, since it's two points.)</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. What happens when a new constraint directly contradicts one already applied to the sketch?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">CAD software silently keeps the newer constraint and discards the older one.</button>
+      <button class="quiz-choice" data-correct="false">CAD software silently keeps the older constraint and ignores the new one.</button>
+      <button class="quiz-choice" data-correct="true">CAD software flags it as overdefined/conflicting rather than resolving it automatically.</button>
+      <button class="quiz-choice" data-correct="false">The sketch is deleted entirely.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A conflict is flagged as an error the designer has to resolve — CAD software won't guess which constraint you actually meant.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="underdefined|under-defined|under defined">
+    <p class="quiz-prompt">4. Fill in the blank: a sketch with DOF greater than 0, where some geometry can still be dragged, is called ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Underdefined geometry still has freedom to move — it isn't wrong, but it isn't finished either.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="0|zero">
+    <p class="quiz-prompt">5. Fill in the blank: a sketch is fully constrained when exactly ___ degrees of freedom remain.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Zero DOF means no entity in the sketch can move without breaking a constraint — the geometry is completely pinned down.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: <a href="https://cad.onshape.com/help/">Onshape's help documentation on sketching</a> shows the same constraint and DOF concepts in a real, browser-based CAD tool you can try immediately.</p>
+
+  <p class="ask-teacher">Stuck on counting DOF for a specific shape, or want to work through a trickier sketch together? Ask your teacher — that's what I'm here for. Next up: turning fixed numbers into parameters, so a design can be edited instead of rebuilt.</p>
+
+  <footer class="lesson-footer">STEM+ · CAD &amp; Prototyping · Unit 1 · Lesson 1 of 18</footer>
+</div>

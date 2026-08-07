@@ -1,0 +1,128 @@
+<meta charset="UTF-8">
+<link rel="icon" href="../../../favicon.ico?v=1" type="image/x-icon">
+<title>Lesson 16: Adjoint Operators and Self-Adjoint Operators — STEM+</title>
+<link rel="stylesheet" href="../../../assets/style.css">
+<script src="../../../assets/quiz.js" defer></script>
+<div class="page" data-tier="advanced">
+  <span class="kicker">STEM+ · Linear Algebra B · Unit 6 · Lesson 16</span>
+  <h1>Adjoint Operators and Self-Adjoint Operators</h1>
+  <p class="subtitle">Symmetric matrices behave better than generic ones under an inner product — real eigenvalues, orthogonal eigenvectors, guaranteed. This lesson names the reason: they equal their own adjoint.</p>
+  <p class="nav-links"><a href="../Unit%205/0015-orthogonal-complements-and-the-projection-theorem.html" class="nav-prev">← Lesson 15</a> <a href="0017-the-spectral-theorem.html" class="nav-next">Lesson 17 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Linear Algebra A never singled out symmetric matrices as special for eigenvalues. This lesson proves exactly why they are: a symmetric matrix is its own <strong>adjoint</strong>, and that single algebraic fact forces both real eigenvalues and orthogonal eigenvectors.</p>
+
+  <h2>1. The adjoint operator</h2>
+  <div class="box">
+    <span class="box-label">Definition — Adjoint</span>
+    For an operator T: V → V on a finite-dimensional inner product space, the <strong>adjoint</strong> T* is the operator satisfying ⟨T(v),w⟩ = ⟨v,T*(w)⟩ for all v, w ∈ V.
+  </div>
+  <div class="box">
+    <span class="box-label">Theorem — T* Exists, Is Unique, and Is [T]ᵀ in an Orthonormal Basis</span>
+    T* exists and is unique. Relative to any orthonormal basis, [T*] = [T]ᵀ (real case) — the matrix transpose.
+  </div>
+  <div class="box">
+    <span class="box-label">Proof</span>
+    <em>Existence:</em> fix an orthonormal basis; in it, ⟨v,w⟩ is just the dot product of coordinate vectors (orthonormal bases make this identification exact). Define S by [S] = [T]ᵀ. Then ⟨T(v),w⟩ = ([T]v)·w = v·([T]ᵀw) = ⟨v,S(w)⟩, using the standard matrix identity (Ax)·y = x·(Aᵀy). So S satisfies the defining property — T* exists, with matrix [T]ᵀ.
+    <br><br>
+    <em>Uniqueness:</em> suppose S₁, S₂ both satisfy ⟨v,Sᵢ(w)⟩=⟨T(v),w⟩ for all v. Subtracting: ⟨v, S₁(w)−S₂(w)⟩ = 0 for every v. Taking v = S₁(w)−S₂(w) gives ‖S₁(w)−S₂(w)‖² = 0, so S₁(w)=S₂(w) by positive-definiteness. This holds for every w, so S₁=S₂. ∎
+  </div>
+
+  <h2>2. Self-adjoint (symmetric / Hermitian) operators</h2>
+  <div class="box">
+    <span class="box-label">Definition — Self-Adjoint</span>
+    T is <strong>self-adjoint</strong> if T* = T, i.e. ⟨T(v),w⟩ = ⟨v,T(w)⟩ for all v, w. Relative to an orthonormal basis, this means A = Aᵀ over ℝ (<strong>symmetric</strong>) or A = A* (conjugate transpose) over ℂ (<strong>Hermitian</strong>).
+  </div>
+
+  <h2>3. Two guaranteed facts about self-adjoint operators</h2>
+  <div class="box">
+    <span class="box-label">Theorem — Eigenvalues Are Real</span>
+    Every eigenvalue of a self-adjoint operator is real, even when eigenvectors are sought over ℂ.
+  </div>
+  <div class="box">
+    <span class="box-label">Proof</span>
+    Using the Hermitian inner product ⟨u,w⟩ = u·<span style="text-decoration:overline">w</span> (linear in the first slot, conjugate-linear in the second — the standard convention that makes ⟨v,v⟩ real and positive), suppose T(v)=λv with v≠0. On one hand, ⟨T(v),v⟩ = ⟨λv,v⟩ = λ⟨v,v⟩ = λ‖v‖² (linearity in the first slot). On the other, self-adjointness gives ⟨T(v),v⟩ = ⟨v,T(v)⟩ = ⟨v,λv⟩ = <span style="text-decoration:overline">λ</span>⟨v,v⟩ = <span style="text-decoration:overline">λ</span>‖v‖² (conjugate-linearity in the second slot). Equating: λ‖v‖² = <span style="text-decoration:overline">λ</span>‖v‖². Since v≠0, ‖v‖²>0, so λ = <span style="text-decoration:overline">λ</span> — meaning λ is real. ∎
+  </div>
+  <div class="box">
+    <span class="box-label">Theorem — Eigenvectors for Distinct Eigenvalues Are Orthogonal</span>
+    If T is self-adjoint with T(v₁)=λ₁v₁, T(v₂)=λ₂v₂, and λ₁≠λ₂, then ⟨v₁,v₂⟩=0.
+  </div>
+  <div class="box">
+    <span class="box-label">Proof</span>
+    λ₁⟨v₁,v₂⟩ = ⟨T(v₁),v₂⟩ = ⟨v₁,T(v₂)⟩ (self-adjointness) = ⟨v₁,λ₂v₂⟩ = <span style="text-decoration:overline">λ₂</span>⟨v₁,v₂⟩ = λ₂⟨v₁,v₂⟩ (λ₂ is real, by the previous theorem). So (λ₁−λ₂)⟨v₁,v₂⟩ = 0. Since λ₁≠λ₂, ⟨v₁,v₂⟩ = 0. ∎
+  </div>
+  <div class="box why">
+    <span class="box-label">Why this is stronger than Lesson 10's independence theorem</span>
+    Lesson 10 proved eigenvectors of distinct eigenvalues are independent, for <em>any</em> operator. This theorem proves something strictly stronger for self-adjoint operators specifically: not merely independent, but exactly orthogonal — no Gram-Schmidt step required to make them so. This is the fact Lesson 17's Spectral Theorem builds an entire orthonormal eigenbasis from.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Worked Example — Real Eigenvalues and Orthogonal Eigenvectors</span>
+    A = [[5,2],[2,5]] is symmetric. Characteristic polynomial: (5−λ)²−4 = λ²−10λ+21 = (λ−7)(λ−3) — both real roots, as guaranteed. For λ=7: (A−7I) = [[−2,2],[2,−2]], giving eigenvector (1,1). For λ=3: (A−3I) = [[2,2],[2,2]], giving eigenvector (1,−1). Check orthogonality: ⟨(1,1),(1,−1)⟩ = 1−1 = 0. ✓ — exactly as the theorem guarantees, with no extra work needed.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. In the proof that T* exists, what identity is used to show [T]ᵀ satisfies the defining adjoint property?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">(Ax)·y = x·(Aᵀy), the standard matrix-transpose identity for the dot product.</button>
+      <button class="quiz-choice" data-correct="false">Aᵀ = A⁻¹ for every matrix A.</button>
+      <button class="quiz-choice" data-correct="false">det(A) = det(Aᵀ).</button>
+      <button class="quiz-choice" data-correct="false">Every matrix is symmetric in an orthonormal basis.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>This dot-product identity is exactly what translates ⟨T(v),w⟩ into ⟨v,S(w)⟩ for S with matrix [T]ᵀ — no assumption that A is invertible or symmetric is used.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. In the proof that eigenvalues of a self-adjoint operator are real, what does equating ⟨T(v),v⟩ computed two ways actually show?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">λ‖v‖² = <span style="text-decoration:overline">λ</span>‖v‖², and since ‖v‖²&gt;0 (v≠0), this forces λ = <span style="text-decoration:overline">λ</span>, i.e. λ is real.</button>
+      <button class="quiz-choice" data-correct="false">That v must be the zero vector.</button>
+      <button class="quiz-choice" data-correct="false">That T is never invertible.</button>
+      <button class="quiz-choice" data-correct="false">That λ must equal 0.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Computing ⟨T(v),v⟩ via linearity in the first slot gives λ‖v‖²; via self-adjointness and conjugate-linearity in the second slot gives conj(λ)‖v‖² — equating and dividing by the positive ‖v‖² forces λ real.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="0|zero">
+    <p class="quiz-prompt">3. Fill in the blank: the orthogonality proof concludes (λ₁−λ₂)⟨v₁,v₂⟩ = 0; since λ₁≠λ₂, this forces ⟨v₁,v₂⟩ = ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Since λ₁−λ₂≠0, the only way the product can be 0 is if ⟨v₁,v₂⟩ itself is 0 — exactly orthogonality.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">4. For A=[[5,2],[2,5]], what are the eigenvalues?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">7 and 3</button>
+      <button class="quiz-choice" data-correct="false">5 and 2</button>
+      <button class="quiz-choice" data-correct="false">10 and 21</button>
+      <button class="quiz-choice" data-correct="false">2 and −2</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>det(A−λI) = (5−λ)²−4 = λ²−10λ+21 = (λ−7)(λ−3), giving eigenvalues 7 and 3.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="0">
+    <p class="quiz-prompt">5. For the eigenvectors (1,1) and (1,−1) of A=[[5,2],[2,5]], ⟨(1,1),(1,−1)⟩ = ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>1(1) + 1(−1) = 0 — the two eigenvectors are orthogonal, exactly as guaranteed for a symmetric matrix's distinct eigenvalues.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Treil's <a href="https://www.math.brown.edu/streil/papers/LADW/LADW.html"><em>Linear Algebra Done Wrong</em></a>, Chapter 6.1, defines the adjoint and proves the same real-eigenvalue and orthogonal-eigenvector theorems for self-adjoint operators.</p>
+
+  <p class="ask-teacher">Ask your teacher to verify the adjoint's matrix identity ⟨Av,w⟩=⟨v,Aᵀw⟩ by hand on a 3×3 example if you want to see the transpose relationship confirmed directly. Next up: the Spectral Theorem — every self-adjoint operator has a full orthonormal eigenbasis.</p>
+
+  <footer class="lesson-footer">STEM+ · Linear Algebra B · Unit 6 · Lesson 16 of 21</footer>
+</div>

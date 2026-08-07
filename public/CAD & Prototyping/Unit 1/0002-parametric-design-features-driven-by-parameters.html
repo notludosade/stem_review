@@ -1,0 +1,142 @@
+<meta charset="UTF-8">
+<link rel="icon" href="../../favicon.ico?v=1" type="image/x-icon">
+<title>Lesson 2: Parametric Design — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · CAD &amp; Prototyping · Unit 1 · Lesson 2</span>
+  <h1>Parametric Design — Features Driven by Parameters, Not Fixed Numbers</h1>
+  <p class="subtitle">Type in "20mm" and a redesign means hunting down every place 20mm appears. Define it as a formula instead, and a redesign means changing one number.</p>
+  <p class="nav-links"><a href="0001-2d-sketch-fundamentals-constraints-dimensions-and-degrees-of-freedom.html" class="nav-prev">← Lesson 1</a> <a href="0003-basic-3d-features-extrude-revolve-and-the-feature-tree.html" class="nav-next">Lesson 3 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Lesson 1 fully constrained a sketch with fixed dimensions. That's necessary, but it's not the whole story — a fully constrained sketch can still be "dumb," in the sense that every number in it is typed in by hand, independent of every other number. Parametric modeling fixes that.</p>
+
+  <h2>What "parametric" actually means</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    In a <strong>parametric</strong> model, dimensions and features are driven by named <strong>parameters</strong> (variables) and expressions relating them, instead of independent fixed numbers. Change one parameter, and every dimension that references it — directly or through a formula — recomputes automatically.
+  </div>
+  <p>Contrast this with plain "dumb" direct modeling, where a dimension is just a number: changing it changes that one feature and nothing else. In a parametric model, a dimension can instead be an expression like <code>(width − 2 × margin) / (holes − 1)</code> — a formula, not a constant — so it updates itself whenever <code>width</code>, <code>margin</code>, or <code>holes</code> changes anywhere in the design.</p>
+
+  <div class="box example">
+    <span class="box-label">Worked Example — A Mounting Plate</span>
+    A plate has parameters <code>width = 100mm</code>, <code>margin = 10mm</code> (the gap from each edge to the nearest hole), and <code>holes = 5</code> (evenly spaced). The spacing between adjacent holes is defined as a formula, not typed in directly: <strong>spacing = (width − 2×margin) / (holes − 1) = (100 − 20) / 4 = 20mm</strong>. Later, the plate needs to widen to fit a bigger enclosure — a redesign bumps <code>width</code> to 140mm and <code>margin</code> to 12mm. Every hole shifts automatically to the new spacing of (140 − 24) / 4 ≈ 38.7mm, with zero manual editing of individual holes.
+  </div>
+  <div class="expr-block">spacing = (width − 2 × margin) / (holes − 1)</div>
+
+  <div class="box why">
+    <span class="box-label">Why this matters for design iteration</span>
+    Real designs get revised constantly — a part that has to fit a new enclosure, a redesign that adds a mounting hole, a change requested after the first prototype fails a test. Without parametric relationships, every one of those changes means manually finding and re-editing every dependent dimension by hand: slow, and one missed dimension away from a part that no longer actually fits together. Parametric design turns "redesign the plate" into "change one number and let the model recompute."
+  </div>
+
+  <h2>Parameters can drive more than distances</h2>
+  <p>A parameter isn't limited to linear dimensions. Common CAD tools let a parameter drive a pattern count (how many holes), a feature's size (a fillet radius, a boss diameter), or even whether a feature exists at all — some tools let a formula suppress an optional feature entirely when a condition isn't met, letting one model represent several configurations of the same basic part.</p>
+
+  <h2>Try it — parametric hole spacing</h2>
+  <p>Drag the sliders and watch the spacing recompute — exactly what happens inside the CAD model when a parameter changes.</p>
+
+  <div class="widget">
+    <div class="widget-label">Try It — Hole Spacing from Plate Width and Hole Count</div>
+    <div class="slider-row">
+      <label for="cad2-width">Plate width (mm)</label>
+      <input type="range" id="cad2-width" min="60" max="220" step="5" value="100">
+      <span class="slider-value" id="cad2-width-val">100</span>
+    </div>
+    <div class="slider-row">
+      <label for="cad2-holes">Hole count</label>
+      <input type="range" id="cad2-holes" min="2" max="8" step="1" value="5">
+      <span class="slider-value" id="cad2-holes-val">5</span>
+    </div>
+    <p class="plot-readout" id="cad2-readout">—</p>
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What is the defining feature of a parametric model, as opposed to plain "dumb" direct modeling?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Every dimension is stored as a fixed number that never changes once entered.</button>
+      <button class="quiz-choice" data-correct="true">Dimensions are driven by named parameters and formulas, so changing one parameter updates every dependent dimension automatically.</button>
+      <button class="quiz-choice" data-correct="false">The model has no dimensions at all, only sketches.</button>
+      <button class="quiz-choice" data-correct="false">Every feature must be built from a circle.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Parametric modeling ties dimensions together through formulas referencing named parameters, so one change can propagate through the whole design.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. A plate has width = 140mm, margin = 12mm, and 4 evenly spaced holes. Using spacing = (width − 2×margin) / (holes − 1), what is the hole spacing?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">≈38.7mm</button>
+      <button class="quiz-choice" data-correct="false">29mm</button>
+      <button class="quiz-choice" data-correct="false">35mm</button>
+      <button class="quiz-choice" data-correct="false">≈46.7mm</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>spacing = (140 − 2×12) / (4 − 1) = (140 − 24) / 3 = 116 / 3 ≈ 38.7mm.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Besides linear distances, what else can a parameter reasonably drive in a parametric model?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Nothing — parameters only ever control distances between points.</button>
+      <button class="quiz-choice" data-correct="true">Pattern counts, feature sizes like a fillet radius, and even whether an optional feature exists at all.</button>
+      <button class="quiz-choice" data-correct="false">Only the color of the rendered model.</button>
+      <button class="quiz-choice" data-correct="false">Only which CAD software the file opens in.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Parameters can drive pattern counts, feature sizes, and conditional suppression of whole features — not just distances.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="formula|expression|formulas|expressions">
+    <p class="quiz-prompt">4. Fill in the blank: instead of typing a fixed number, a parametric dimension can be defined as a ___ referencing other named parameters.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A formula/expression is what lets a dimension recompute automatically whenever the parameters it references change.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="one|1|a single number|one number">
+    <p class="quiz-prompt">5. Fill in the blank: the practical payoff of parametric design is that a redesign affecting many dependent dimensions becomes a matter of changing just ___ number, instead of manually re-editing every dimension by hand.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>That's the whole point of the parameter/formula relationship — one change at the source propagates everywhere it's referenced.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: <a href="https://cad.onshape.com/help/">Onshape's help documentation</a> covers variables and configurations — the same parametric ideas here, in a tool you can experiment with directly.</p>
+
+  <p class="ask-teacher">Stuck on writing a formula for a dimension you have in mind? Ask your teacher — that's what I'm here for. Next up: turning a constrained sketch into an actual 3D solid, and the feature tree that records how it got there.</p>
+
+  <footer class="lesson-footer">STEM+ · CAD &amp; Prototyping · Unit 1 · Lesson 2 of 18</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var widthS = document.getElementById('cad2-width');
+  var holesS = document.getElementById('cad2-holes');
+  var widthL = document.getElementById('cad2-width-val');
+  var holesL = document.getElementById('cad2-holes-val');
+  var readout = document.getElementById('cad2-readout');
+  var margin = 10;
+
+  function render() {
+    var width = Number(widthS.value);
+    var holes = Number(holesS.value);
+    widthL.textContent = width;
+    holesL.textContent = holes;
+    var spacing = (width - 2 * margin) / (holes - 1);
+    readout.textContent = 'spacing = (' + width + ' − 2×' + margin + ') / (' + holes + ' − 1) = ' + spacing.toFixed(2) + ' mm between holes.';
+  }
+
+  widthS.addEventListener('input', render);
+  holesS.addEventListener('input', render);
+  render();
+});
+</script>

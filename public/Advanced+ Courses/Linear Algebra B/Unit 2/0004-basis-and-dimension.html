@@ -1,0 +1,117 @@
+<meta charset="UTF-8">
+<link rel="icon" href="../../../favicon.ico?v=1" type="image/x-icon">
+<title>Lesson 4: Basis and Dimension — STEM+</title>
+<link rel="stylesheet" href="../../../assets/style.css">
+<script src="../../../assets/quiz.js" defer></script>
+<div class="page" data-tier="advanced">
+  <span class="kicker">STEM+ · Linear Algebra B · Unit 2 · Lesson 4</span>
+  <h1>Basis and Dimension</h1>
+  <p class="subtitle">Linear Algebra A stated, without proof, that every basis of a space has the same size. This lesson proves it — the single fact that makes "the dimension of V" a well-defined number at all.</p>
+  <p class="nav-links"><a href="../Unit%201/0003-span-independence-and-the-existence-of-a-basis.html" class="nav-prev">← Lesson 3</a> <a href="0005-dimension-formulas-for-subspaces.html" class="nav-next">Lesson 5 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Linear Algebra A's Lesson 11 asserted that "every basis of a given vector space has exactly the same number of vectors" and moved on. But nothing said so far rules out V having a basis of 3 vectors <em>and</em> a basis of 5 vectors — until the theorem below closes that gap for good.</p>
+
+  <h2>1. The Exchange Lemma</h2>
+  <div class="box">
+    <span class="box-label">Theorem — Steinitz Exchange Lemma</span>
+    Let V be a vector space. If {v₁, …, v<sub>n</sub>} spans V and {w₁, …, w<sub>m</sub>} ⊆ V is linearly independent, then m ≤ n.
+  </div>
+  <div class="box">
+    <span class="box-label">Proof</span>
+    Build up the w's one at a time, each time swapping one out for one of the v's, and track that the result still spans V.
+    <br><br>
+    <em>Step 0:</em> {v₁, …, v<sub>n</sub>} spans V (given).
+    <br><br>
+    <em>Inductive step (k → k+1, assuming k &lt; m):</em> suppose after k swaps, some relabeling gives a spanning set {w₁, …, w<sub>k</sub>, v<sub>k+1</sub>, …, v<sub>n</sub>} (k of the original v's replaced by w₁,…,w<sub>k</sub>). If k = n already, no v's remain — the spanning set is exactly {w₁,…,w<sub>n</sub>}, so w<sub>n+1</sub> would have to be a linear combination of w₁,…,w<sub>n</sub>, contradicting the independence of {w₁,…,w<sub>m</sub>} (which contains w₁,…,w<sub>n+1</sub> since k+1 = n+1 ≤ m). So this case forces the process to already have used up all m of the w's, meaning m ≤ n and the theorem holds.
+    <br><br>
+    Otherwise k &lt; n, so some v's remain. Since {w₁,…,w<sub>k</sub>,v<sub>k+1</sub>,…,v<sub>n</sub>} spans V, w<sub>k+1</sub> is some combination c₁w₁+⋯+c<sub>k</sub>w<sub>k</sub>+d<sub>k+1</sub>v<sub>k+1</sub>+⋯+d<sub>n</sub>v<sub>n</sub>. Not every d<sub>j</sub> can be 0 — otherwise w<sub>k+1</sub> would be a combination of w₁,…,w<sub>k</sub> alone, giving a nontrivial dependency among w₁,…,w<sub>k+1</sub> (coefficient −1 on w<sub>k+1</sub>), contradicting independence of the w's. So some d<sub>j</sub> ≠ 0; solve for v<sub>j</sub> in terms of the rest and swap it out for w<sub>k+1</sub>. The new set {w₁,…,w<sub>k+1</sub>, remaining v's} still spans V, by the same substitution argument as the Reduction Theorem's proof (Lesson 3).
+    <br><br>
+    Repeating this for k = 0, 1, …, m−1 either runs out of v's first (forcing m ≤ n, as shown above) or successfully reaches k = m with m ≤ n throughout. Either way, m ≤ n. ∎
+  </div>
+  <div class="box why">
+    <span class="box-label">Why "exchange," not just "count"</span>
+    The proof doesn't just compare sizes — it actively trades a vᵢ for a wⱼ at every step, and the argument for why a trade is always possible (some dⱼ ≠ 0) is exactly where independence of the w's gets used. Counting alone would say nothing about whether the exchange is even legal; the mechanism is the proof.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">A Small Case, Traced by Hand</span>
+    In ℝ², let {v₁, v₂, v₃} = {e₁, e₂, e₁+e₂} (spans ℝ², since e₁, e₂ alone already do) and {w₁} = {e₁ − e₂} (independent, being nonzero). Write w₁ = 1·e₁ + (−1)·e₂ + 0·(e₁+e₂) — the coefficient on e₁ is nonzero, so e₁ can be swapped out: {e₁−e₂, e₂, e₁+e₂} spans ℝ² too (e₂ is present directly, and e₁ = (e₁−e₂) + e₂ is recoverable). The lemma's conclusion, m ≤ n, reads 1 ≤ 3 here — true, and with room to spare since the original spanning set was redundant.
+  </div>
+
+  <h2>2. Dimension is well-defined</h2>
+  <div class="box">
+    <span class="box-label">Corollary — Every Basis Has the Same Size</span>
+    If B₁ = {v₁,…,v<sub>n</sub>} and B₂ = {w₁,…,w<sub>m</sub>} are both bases of a finite-dimensional vector space V, then n = m.
+  </div>
+  <div class="box">
+    <span class="box-label">Proof</span>
+    B₁ spans V and B₂ is independent (both basis properties) — the Exchange Lemma gives m ≤ n. Symmetrically, B₂ spans V and B₁ is independent — the Exchange Lemma gives n ≤ m. So n = m. ∎
+  </div>
+  <p>With this proved, <strong>dimension</strong> is legitimate: dim(V) is defined as the common size of every basis of V, and the Exchange Lemma is exactly what guarantees "the common size" is a single well-defined number rather than a range of possibilities.</p>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. In the Exchange Lemma's proof, what goes wrong if every coefficient dⱼ on the remaining v's is 0 when expressing w<sub>k+1</sub>?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">w<sub>k+1</sub> would be a combination of w₁,…,w<sub>k</sub> alone, producing a nontrivial dependency among w₁,…,w<sub>k+1</sub> — contradicting their independence.</button>
+      <button class="quiz-choice" data-correct="false">The spanning set would stop spanning V.</button>
+      <button class="quiz-choice" data-correct="false">n would have to be infinite.</button>
+      <button class="quiz-choice" data-correct="false">Nothing goes wrong — the proof proceeds identically either way.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>If wₖ₊₁ were expressible using only w₁,…,wₖ, that combination minus wₖ₊₁ itself would be a nontrivial relation among w₁,…,wₖ₊₁ — but those are assumed independent, so this is exactly the contradiction that forces some dⱼ ≠ 0.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. In the Corollary's proof, why does applying the Exchange Lemma twice (once each direction) prove n = m?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">The first application gives m ≤ n; the second (swapping the roles of B₁ and B₂) gives n ≤ m; together these force n = m.</button>
+      <button class="quiz-choice" data-correct="false">Applying it twice doubles the count, giving 2n = 2m directly.</button>
+      <button class="quiz-choice" data-correct="false">Only one application is actually needed; the second is redundant.</button>
+      <button class="quiz-choice" data-correct="false">The lemma only applies when B₁ and B₂ are equal as sets.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Since both B₁ and B₂ are simultaneously spanning sets and independent sets, the lemma applies in both directions — and two inequalities pointing opposite ways force equality.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="independent|linearly independent">
+    <p class="quiz-prompt">3. Fill in the blank: the Exchange Lemma requires {v₁,…,vₙ} to span V, and {w₁,…,wₘ} to be ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The roles are not symmetric — one set must span, the other must be independent — and the conclusion m ≤ n only follows with that specific pairing.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">4. In the worked ℝ² example, why is it legal to swap e₁ out of {e₁, e₂, e₁+e₂} for w₁ = e₁ − e₂?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">w₁'s expression in terms of {e₁, e₂, e₁+e₂} has a nonzero coefficient (1) on e₁, so e₁ can be solved for and substituted out.</button>
+      <button class="quiz-choice" data-correct="false">e₁ and w₁ are actually equal.</button>
+      <button class="quiz-choice" data-correct="false">e₂ has a zero coefficient in w₁'s expression, so it must be the one removed instead.</button>
+      <button class="quiz-choice" data-correct="false">Any vector in the spanning set can always be swapped out for any independent vector, regardless of coefficients.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The nonzero coefficient on e₁ (specifically, 1) is exactly what the proof requires to solve for e₁ and legally substitute it out while preserving the span.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="dimension|dim(V)|dim v">
+    <p class="quiz-prompt">5. Fill in the blank: because every basis of V has the same size, that common size can be called the ___ of V without ambiguity.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Dimension is defined as this common size — a definition that only makes sense once the Corollary guarantees the size really is common to every basis.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Treil's <a href="https://www.math.brown.edu/streil/papers/LADW/LADW.html"><em>Linear Algebra Done Wrong</em></a>, Chapter 2.3, proves the Exchange Lemma (there stated as the "main lemma" of the dimension theory chapter) in the same swap-by-swap style.</p>
+
+  <p class="ask-teacher">Ask your teacher to trace the Exchange Lemma's proof on a size-3 example (a spanning set of 4 vectors, an independent set of 3) if you want to watch the swapping happen twice in a row. Next up: dimension formulas for the sum and intersection of two subspaces.</p>
+
+  <footer class="lesson-footer">STEM+ · Linear Algebra B · Unit 2 · Lesson 4 of 21</footer>
+</div>

@@ -1,0 +1,121 @@
+<meta charset="UTF-8">
+<link rel="icon" href="../../../favicon.ico?v=1" type="image/x-icon">
+<title>Lesson 6: Coordinate Vectors and Change of Basis — STEM+</title>
+<link rel="stylesheet" href="../../../assets/style.css">
+<script src="../../../assets/quiz.js" defer></script>
+<div class="page" data-tier="advanced">
+  <span class="kicker">STEM+ · Linear Algebra B · Unit 2 · Lesson 6</span>
+  <h1>Coordinate Vectors and Change of Basis</h1>
+  <p class="subtitle">Every n-dimensional vector space, no matter how abstract, turns into ordinary Fⁿ once a basis is chosen. This lesson proves that translation is a genuine isomorphism, then finds the matrix that translates between two different choices of basis.</p>
+  <p class="nav-links"><a href="0005-dimension-formulas-for-subspaces.html" class="nav-prev">← Lesson 5</a> <a href="../Unit%203/0007-linear-maps-kernel-and-image.html" class="nav-next">Lesson 7 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Lesson 3 proved every vector in V has a unique representation relative to a basis B. That representation has a name — the <strong>coordinate vector</strong> — and this lesson proves it does far more than just organize a computation: it sets up an exact correspondence between V and Fⁿ, valid for polynomials and matrices exactly as much as for ℝⁿ.</p>
+
+  <h2>1. The coordinate map</h2>
+  <div class="box">
+    <span class="box-label">Definition — Coordinate Vector</span>
+    For a basis B = {v₁,…,v<sub>n</sub>} of V and a vector v = c₁v₁+⋯+c<sub>n</sub>v<sub>n</sub>, the <strong>coordinate vector</strong> of v relative to B is [v]<sub>B</sub> = (c₁,…,c<sub>n</sub>) ∈ Fⁿ. Lesson 3 guarantees this is well-defined — exactly one tuple works for each v.
+  </div>
+  <div class="box">
+    <span class="box-label">Theorem — The Coordinate Map Is an Isomorphism</span>
+    The map φ<sub>B</sub>: V → Fⁿ, φ<sub>B</sub>(v) = [v]<sub>B</sub>, is linear and bijective.
+  </div>
+  <div class="box">
+    <span class="box-label">Proof</span>
+    <em>Linear:</em> write u = a₁v₁+⋯+a<sub>n</sub>v<sub>n</sub> and w = b₁v₁+⋯+b<sub>n</sub>v<sub>n</sub>, so [u]<sub>B</sub> = (a₁,…,a<sub>n</sub>) and [w]<sub>B</sub> = (b₁,…,b<sub>n</sub>). Then u+w = (a₁+b₁)v₁+⋯+(a<sub>n</sub>+b<sub>n</sub>)v<sub>n</sub>, so [u+w]<sub>B</sub> = (a₁+b₁,…,a<sub>n</sub>+b<sub>n</sub>) = [u]<sub>B</sub>+[w]<sub>B</sub>. Similarly [cu]<sub>B</sub> = c[u]<sub>B</sub>, directly from cu = ca₁v₁+⋯+ca<sub>n</sub>v<sub>n</sub>.
+    <br><br>
+    <em>Bijective:</em> define ψ: Fⁿ → V by ψ(c₁,…,c<sub>n</sub>) = c₁v₁+⋯+c<sub>n</sub>v<sub>n</sub>. By construction φ<sub>B</sub>(ψ(c₁,…,c<sub>n</sub>)) = (c₁,…,c<sub>n</sub>) (existence half of Lesson 3's theorem), and ψ(φ<sub>B</sub>(v)) = v (rebuilding v from its own coordinates). So ψ is a two-sided inverse of φ<sub>B</sub>, making φ<sub>B</sub> bijective. ∎
+  </div>
+  <div class="box why">
+    <span class="box-label">Why "isomorphism" is the right word</span>
+    A linear bijection is exactly what it means for two vector spaces to be structurally identical — every vector space fact (spanning, independence, subspaces) translates back and forth through φ<sub>B</sub> without loss. This is the precise sense in which "P₂(ℝ) is basically ℝ³" or "the 2×2 matrices are basically ℝ⁴": pick a basis, and φ<sub>B</sub> makes the resemblance exact, not just a vague analogy.
+  </div>
+
+  <h2>2. Changing which basis you're using</h2>
+  <p>A vector's coordinate vector depends entirely on which basis was chosen — the same v gets a different tuple relative to a different basis. The <strong>change-of-basis matrix</strong> converts one basis's coordinates directly into another's, without ever going back through v itself.</p>
+  <div class="box">
+    <span class="box-label">Definition — Change-of-Basis Matrix</span>
+    For bases B = {v₁,…,v<sub>n</sub>} and B′ = {v₁′,…,v<sub>n</sub>′} of V, the change-of-basis matrix P<sub>B←B′</sub> is the n×n matrix whose j-th column is [v<sub>j</sub>′]<sub>B</sub> — the coordinates of B′'s j-th vector, expressed in B.
+  </div>
+  <div class="box">
+    <span class="box-label">Theorem — What P<sub>B←B′</sub> Does</span>
+    For every v ∈ V, [v]<sub>B</sub> = P<sub>B←B′</sub> [v]<sub>B′</sub>.
+  </div>
+  <div class="box">
+    <span class="box-label">Proof</span>
+    Let [v]<sub>B′</sub> = (c₁,…,c<sub>n</sub>), i.e. v = c₁v₁′+⋯+c<sub>n</sub>v<sub>n</sub>′. Apply φ<sub>B</sub> and use its linearity (proved above): [v]<sub>B</sub> = [c₁v₁′+⋯+c<sub>n</sub>v<sub>n</sub>′]<sub>B</sub> = c₁[v₁′]<sub>B</sub> + ⋯ + c<sub>n</sub>[v<sub>n</sub>′]<sub>B</sub>. The right-hand side is exactly c₁ times column 1 of P<sub>B←B′</sub>, plus ⋯ plus c<sub>n</sub> times column n — which is precisely the matrix-vector product P<sub>B←B′</sub>(c₁,…,c<sub>n</sub>) = P<sub>B←B′</sub>[v]<sub>B′</sub>. ∎
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Worked Example — Converting Standard Coordinates into a Tilted Basis</span>
+    Let B = {(1,1), (1,−1)} and B′ = {(1,0), (0,1)} (the standard basis) in ℝ². Build P<sub>B←B′</sub>: column 1 is [(1,0)]<sub>B</sub>, found by solving (1,0) = a(1,1)+b(1,−1) → a+b=1, a−b=0 → a=b=1/2. Column 2 is [(0,1)]<sub>B</sub>, from (0,1)=a(1,1)+b(1,−1) → a+b=0, a−b=1 → a=1/2, b=−1/2. So P<sub>B←B′</sub> = [[1/2, 1/2], [1/2, −1/2]].
+    <br><br>
+    For v = (3, 5), [v]<sub>B′</sub> = (3, 5) (B′ is the standard basis, so coordinates match components exactly). Then [v]<sub>B</sub> = P<sub>B←B′</sub>(3,5) = (1/2·3 + 1/2·5, 1/2·3 − 1/2·5) = (4, −1). Check directly: 4(1,1) + (−1)(1,−1) = (4,4) + (−1,1) = (3,5) = v. ✓.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. In the proof that φ<sub>B</sub> is bijective, what role does the map ψ(c₁,…,cₙ) = c₁v₁+⋯+cₙvₙ play?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">It's a two-sided inverse of φ<sub>B</sub>, which is exactly what proves φ<sub>B</sub> is a bijection.</button>
+      <button class="quiz-choice" data-correct="false">It shows φ<sub>B</sub> is linear, not that it's bijective.</button>
+      <button class="quiz-choice" data-correct="false">It proves V and Fⁿ have different dimensions.</button>
+      <button class="quiz-choice" data-correct="false">It's only defined when B is the standard basis.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Showing ψ∘φ<sub>B</sub> and φ<sub>B</sub>∘ψ are both identity maps is precisely what it means for φ<sub>B</sub> to have an inverse — and having a two-sided inverse is equivalent to being a bijection.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. What goes in column j of the change-of-basis matrix P<sub>B←B′</sub>?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">The coordinates of B′'s j-th basis vector, expressed relative to B — that is, [vⱼ′]<sub>B</sub>.</button>
+      <button class="quiz-choice" data-correct="false">The j-th basis vector of B itself, in its own coordinates.</button>
+      <button class="quiz-choice" data-correct="false">The coordinates of v relative to B′.</button>
+      <button class="quiz-choice" data-correct="false">A row of zeros except a single 1 in position j.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Each column records where one of B′'s basis vectors lands when expressed in B's coordinates — that's exactly what the proof's linear combination c₁[v₁′]<sub>B</sub>+⋯+cₙ[vₙ′]<sub>B</sub> needs to match a matrix-vector product.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="linearity|linear">
+    <p class="quiz-prompt">3. Fill in the blank: the proof that [v]<sub>B</sub> = P<sub>B←B′</sub>[v]<sub>B′</sub> relies directly on the ___ of the coordinate map φ<sub>B</sub>, applied to v = c₁v₁′+⋯+cₙvₙ′.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Linearity is exactly what turns [c₁v₁′+⋯+cₙvₙ′]<sub>B</sub> into c₁[v₁′]<sub>B</sub>+⋯+cₙ[vₙ′]<sub>B</sub>, the linear combination of P's columns.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">4. In the worked example, why does [v]<sub>B′</sub> for v=(3,5) simply equal (3,5) itself?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">B′ is the standard basis, so a vector's coordinates relative to it are just its own components.</button>
+      <button class="quiz-choice" data-correct="false">Every vector's coordinates equal its components, regardless of basis.</button>
+      <button class="quiz-choice" data-correct="false">v happens to already lie in B.</button>
+      <button class="quiz-choice" data-correct="false">P<sub>B←B′</sub> is the identity matrix.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Only for the standard basis do coordinates and components coincide automatically — (3,5) = 3(1,0) + 5(0,1) is trivially true. For any other basis (like B here) this shortcut fails, which is exactly why P is needed to convert.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="-1|−1">
+    <p class="quiz-prompt">5. Fill in the blank: in the worked example, [v]<sub>B</sub> for v=(3,5) was computed as (4, ___).</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>P<sub>B←B′</sub>(3,5) = (1/2·3+1/2·5, 1/2·3−1/2·5) = (4, −1), confirmed by 4(1,1) + (−1)(1,−1) = (3,5).</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Treil's <a href="https://www.math.brown.edu/streil/papers/LADW/LADW.html"><em>Linear Algebra Done Wrong</em></a>, Chapter 2.7, proves the coordinate-map isomorphism and derives the change-of-basis matrix in the same column-by-column style.</p>
+
+  <p class="ask-teacher">Ask your teacher to show that P<sub>B′←B</sub> = (P<sub>B←B′</sub>)⁻¹ (the two change-of-basis matrices are inverses of each other) if you want to see why the direction of a basis change is always reversible. This closes Unit 2. Next up: linear maps between vector spaces, and the two subspaces — kernel and image — every one of them carries.</p>
+
+  <footer class="lesson-footer">STEM+ · Linear Algebra B · Unit 2 · Lesson 6 of 21</footer>
+</div>

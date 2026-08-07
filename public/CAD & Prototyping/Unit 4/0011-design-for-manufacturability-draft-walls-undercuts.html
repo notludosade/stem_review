@@ -1,0 +1,107 @@
+<meta charset="UTF-8">
+<link rel="icon" href="../../favicon.ico?v=1" type="image/x-icon">
+<title>Lesson 11: Design for Manufacturability — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · CAD &amp; Prototyping · Unit 4 · Lesson 11</span>
+  <h1>Design for Manufacturability — Draft Angles, Minimum Wall Thickness, and Undercuts</h1>
+  <p class="subtitle">A geometrically perfect CAD model can still be physically impossible for a given process to produce. DFM is the process's physical limits, folded back into the design decision.</p>
+  <p class="nav-links"><a href="0010-material-properties-strength-stiffness-density.html" class="nav-prev">← Lesson 10</a> <a href="0012-factor-of-safety-and-a-basic-stress-load-estimate.html" class="nav-next">Lesson 12 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Every manufacturing process has physical rules a CAD model can violate without the software ever complaining — the model will render fine, the file will save fine, and the part will still be impossible to actually make. Design for manufacturability (DFM) means designing around those rules from the start.</p>
+
+  <h2>Draft angle</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    A <strong>draft angle</strong> is a slight taper — typically 1° to 3° per side — added to a part's vertical walls so it can be pulled out of a mold or cast without scraping or sticking. Without draft, a wall parallel to the pull direction can grip the mold through friction or vacuum even when it's dimensionally free to release.
+  </div>
+  <p>Draft matters specifically for mold- and cast-based processes (injection molding, die casting). It's not relevant to FDM 3D printing or laser cutting — neither process pulls a part out of a rigid tool — but it's worth designing in from the start if a part might later move to mass production by molding, since retrofitting draft onto an already-finalized model can force other dimensions to shift with it.</p>
+
+  <h2>Minimum wall thickness</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    <strong>Minimum wall thickness</strong> is the thinnest a wall can be made and still reliably fill, print, or cut without warping, breaking, or failing to form. It's process-dependent: injection-molded ABS commonly needs walls of at least 1.0–1.5mm to fill reliably; FDM 3D printing commonly needs at least 0.8–1.2mm depending on nozzle width (Unit 5 covers this quantitatively). Laser-cut parts are inherently the full stock thickness everywhere — "wall thickness" there really means the minimum <em>width</em> of a thin feature, so a sliver doesn't snap off during cutting or handling.
+  </div>
+
+  <h2>Undercuts</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    An <strong>undercut</strong> is a feature that blocks a part from being made cleanly by a given process — a hook or internal lip that a mold can't pull straight past, an overhang an FDM printer can't print without added support material, or a feature a 2-axis laser cutter simply cannot reach because it only cuts straight through flat stock.
+  </div>
+  <div class="box example">
+    <span class="box-label">Example — A Snap-Fit Clip</span>
+    A one-piece molded snap-fit clip needs a retention hook that, by definition, blocks the mold from pulling straight up and off the part — an undercut relative to the main pull direction. Handling it means either a mold with a side-action or lifter (added tooling cost), or redesigning the hook as a flexible cantilever the mold <em>can</em> release straight up, trading a small amount of holding force for a dramatically simpler (and cheaper) mold.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why DFM rules aren't arbitrary restrictions</span>
+    Every one of these rules is the physical process talking back to the design, not an arbitrary style guideline. A wall too thin to fill, a wall with no draft that grips its mold, an undercut with nowhere for the tool to go — none of these are things a CAD file can "just handle" through better modeling technique. Catching them during design is close to free; catching them after a mold is cut or a print run has already failed is not.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What is a draft angle for, and which processes does it matter for?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">It controls print speed, and matters only for FDM 3D printing.</button>
+      <button class="quiz-choice" data-correct="true">A slight taper letting a part release from a mold or cast without sticking — it matters for mold- and cast-based processes like injection molding.</button>
+      <button class="quiz-choice" data-correct="false">It sets the laser's cutting angle, and matters only for laser cutting.</button>
+      <button class="quiz-choice" data-correct="false">It has no real manufacturing purpose — it's purely a cosmetic style choice.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Draft angle exists specifically so a molded or cast part can be pulled free of its tool without friction or vacuum grip — it isn't relevant to processes that don't use a pull-apart mold.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. What does "minimum wall thickness" mean for a laser-cut part, specifically?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">The maximum stock thickness the laser can cut through in one pass.</button>
+      <button class="quiz-choice" data-correct="true">The minimum width of a thin feature, so it doesn't snap off during cutting or handling — since laser-cut parts are otherwise the full stock thickness everywhere.</button>
+      <button class="quiz-choice" data-correct="false">The distance between the laser head and the material.</button>
+      <button class="quiz-choice" data-correct="false">It doesn't apply to laser cutting at all.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Since a laser-cut part is always the full material thickness, the relevant "wall thickness" concern shifts to how narrow a thin feature can be before it's too fragile to survive cutting and handling.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. In the snap-fit clip example, what makes the retention hook an "undercut" specifically?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">It's made from a different material than the rest of the part.</button>
+      <button class="quiz-choice" data-correct="true">It blocks the mold from pulling straight off the part along the main pull direction.</button>
+      <button class="quiz-choice" data-correct="false">It's positioned exactly at the part's center of mass.</button>
+      <button class="quiz-choice" data-correct="false">It has a fillet applied to it.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>An undercut is defined relative to a specific process's motion or reach — here, the hook geometrically blocks the mold's straight-line pull direction.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="undercut">
+    <p class="quiz-prompt">4. Fill in the blank: a feature that geometrically blocks a given manufacturing process from producing a part cleanly — like a hook a mold can't pull past — is called an ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Undercuts are process-specific — a feature that's fine for one process (like FDM printing with support material) may be a hard blocker for another (like injection molding without a side-action).</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="DFM|design for manufacturability">
+    <p class="quiz-prompt">5. Fill in the blank: designing a part around a specific manufacturing process's physical limits, from the start, is called ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>DFM folds the manufacturing process's real physical constraints back into the design decision, rather than discovering them after the fact.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: <a href="https://ocw.mit.edu/courses/2-810-manufacturing-processes-and-systems-fall-2015/">MIT OpenCourseWare's 2.810 Manufacturing Processes and Systems</a> covers draft, wall thickness, and undercut rules across a wide range of real manufacturing processes.</p>
+
+  <p class="ask-teacher">Stuck on whether a specific feature counts as an undercut for a process you have in mind? Ask your teacher — that's what I'm here for. Next up: putting a real number on how much margin a design actually has before it fails.</p>
+
+  <footer class="lesson-footer">STEM+ · CAD &amp; Prototyping · Unit 4 · Lesson 11 of 18</footer>
+</div>

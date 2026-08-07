@@ -1,0 +1,167 @@
+<meta charset="UTF-8">
+<link rel="icon" href="../../favicon.ico?v=1" type="image/x-icon">
+<title>Lesson 5: Degrees of Freedom in an Assembly — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · CAD &amp; Prototyping · Unit 2 · Lesson 5</span>
+  <h1>Degrees of Freedom in an Assembly — What "Fully Constrained" Means</h1>
+  <p class="subtitle">Every rigid part starts with 6 ways it can move in 3D space. Mates spend that budget down, one mate at a time, until nothing (or exactly the intended something) is left.</p>
+  <p class="nav-links"><a href="0004-mating-parts-with-assembly-constraints.html" class="nav-prev">← Lesson 4</a> <a href="0006-design-intent-editing-a-feature-tree-without-breaking-downstream-features.html" class="nav-next">Lesson 6 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Lesson 1 counted degrees of freedom for 2D sketch geometry. This lesson does the same thing one dimension up: a rigid 3D part has 6 degrees of freedom, and every mate removes some specific number of them.</p>
+
+  <h2>Six degrees of freedom in 3D</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    A free rigid body in 3D space has <strong>6 degrees of freedom</strong>: 3 <strong>translational</strong> (sliding along x, y, and z) and 3 <strong>rotational</strong> (spinning about x, y, and z). An assembly component starts with all 6 the moment it's dropped into an assembly with no mates applied yet.
+  </div>
+
+  <h2>A simplified DOF-removal model per mate</h2>
+  <p>Different mate types remove different amounts of freedom. The table below is a common simplified accounting used for reasoning about a <em>fresh</em> mate applied to freedoms nothing else has touched yet:</p>
+  <div class="box">
+    <span class="box-label">Simplified Mate Budget</span>
+    <table>
+      <thead><tr><th>Mate</th><th>DOF removed</th><th>What it fixes</th></tr></thead>
+      <tbody>
+        <tr><td>Coincident (planar face-to-face)</td><td>3</td><td>1 translation (perpendicular to the face) + 2 rotations (tilt)</td></tr>
+        <tr><td>Concentric (cylindrical axis-to-axis)</td><td>4</td><td>2 translations (radial position) + 2 rotations (axis direction)</td></tr>
+        <tr><td>Distance</td><td>1</td><td>1 translation along the constrained direction</td></tr>
+        <tr><td>Angle</td><td>1</td><td>1 rotation about the constrained axis</td></tr>
+      </tbody>
+    </table>
+    This model assumes each new mate is constraining freedom nothing earlier has already touched. Real assemblies aren't always that clean — the worked example below shows exactly what happens when a later mate overlaps with one already applied.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Worked Example — Fully Constraining the Pin from Lesson 4</span>
+    Start at 6 DOF. <strong>Concentric</strong> mate (pin axis to hole axis): removes 4 DOF (2 radial translations + 2 tilt rotations) → 2 DOF remain (slide along the axis, spin about the axis). <strong>Coincident</strong> mate (pin's shoulder face to bracket face): in general this removes 3 DOF, but the concentric mate already removed both tilt rotations — the only freedom left for this face-to-face contact to remove is the 1 remaining axial translation. 2 − 1 = 1 DOF remains (spin only). A final <strong>angle</strong> mate (aligning a flat on the pin to a matching flat on the bracket) removes the last DOF — the spin. 1 − 1 = 0. Fully constrained, using exactly 4 + 1 + 1 = 6 DOF worth of mates against a 6 DOF budget.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why you can't just sum the table blindly</span>
+    The coincident mate in the example above "should" remove 3 DOF by the general rule, but only had 1 left to give, because the concentric mate had already claimed the other 2. CAD software doesn't sum a fixed table at all — it tracks the assembly's actual remaining freedom directly, and flags a mate as <strong>redundant</strong> if it tries to remove freedom that's already gone (harmless if the redundant mate agrees with what's already true, an error if it conflicts) or <strong>under-constrained</strong> if freedom remains. The table above is a reasoning tool for a human, not the literal algorithm running underneath.
+  </div>
+
+  <p>Just as with sketches (Lesson 1), an assembly component can be <strong>under-constrained</strong> (DOF &gt; 0 — it can still be dragged around, which is exactly right for a hinge pin or a slider that's supposed to move), <strong>fully constrained</strong> (0 DOF — locked in place), or produce a <strong>conflict error</strong> if two mates demand contradictory positions for the same freedom.</p>
+
+  <h2>Try it — assembly DOF budget</h2>
+  <p>Check off mates as if applying them fresh, one at a time, to a single 6-DOF part. This models the simple non-overlapping case from the table above — the pin example shows what happens when mates overlap instead.</p>
+
+  <div class="widget">
+    <div class="widget-label">Try It — DOF Remaining as Mates Are Added</div>
+    <p class="plot-hint">Starting from 6 DOF (a free part). Check any combination of mates below.</p>
+    <div class="slider-row"><label><input type="checkbox" id="cad5-c1"> Concentric (−4 DOF)</label></div>
+    <div class="slider-row"><label><input type="checkbox" id="cad5-c2"> Coincident, planar (−3 DOF)</label></div>
+    <div class="slider-row"><label><input type="checkbox" id="cad5-c3"> Distance (−1 DOF)</label></div>
+    <div class="slider-row"><label><input type="checkbox" id="cad5-c4"> Angle (−1 DOF)</label></div>
+    <p class="plot-readout" id="cad5-readout">—</p>
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. How many total degrees of freedom does a free rigid part have in 3D space, before any mates are applied?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">3</button>
+      <button class="quiz-choice" data-correct="true">6</button>
+      <button class="quiz-choice" data-correct="false">4</button>
+      <button class="quiz-choice" data-correct="false">9</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>3 translational (x, y, z) + 3 rotational (about x, y, z) = 6 total.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. In the pin worked example, why does the coincident (shoulder-face) mate only remove 1 DOF instead of the usual 3?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because coincident mates never remove more than 1 DOF, in any situation.</button>
+      <button class="quiz-choice" data-correct="true">Because the earlier concentric mate had already removed both tilt rotations, leaving only the axial translation for this mate to remove.</button>
+      <button class="quiz-choice" data-correct="false">Because the pin is made of a flexible material.</button>
+      <button class="quiz-choice" data-correct="false">Because coincident mates only apply to sketches, not assemblies.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The general rule (3 DOF) assumes no prior overlap — here, the concentric mate already claimed 2 of those 3 freedoms, leaving only 1 for the coincident mate to actually remove.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. What does CAD software do when a new mate tries to remove a degree of freedom that's already been removed by an earlier mate, and the two mates disagree?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">It silently ignores the conflict and picks a position at random.</button>
+      <button class="quiz-choice" data-correct="true">It flags an error — a conflicting or redundant mate — rather than resolving it automatically.</button>
+      <button class="quiz-choice" data-correct="false">It deletes the part from the assembly entirely.</button>
+      <button class="quiz-choice" data-correct="false">It automatically adds 6 more degrees of freedom to compensate.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Two mates that disagree about the same already-removed freedom produce a conflict error — the same "flag it, don't guess" behavior as an overdefined sketch.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="0|zero">
+    <p class="quiz-prompt">4. Fill in the blank: an assembly component is fully constrained when exactly ___ degrees of freedom remain.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Same idea as a fully constrained sketch: zero DOF means the part can't move at all without violating a mate.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="redundant|redundancy">
+    <p class="quiz-prompt">5. Fill in the blank: a mate that tries to remove a degree of freedom already removed by an earlier mate — and agrees with it rather than conflicting — is called ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A redundant mate is harmless (it agrees with an already-established position) but still worth noticing, since it can hide the fact that the "real" constraint doing the work is somewhere else.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: <a href="https://cad.onshape.com/help/">Onshape's help documentation on mate connectors and degrees of freedom</a> covers how a real CAD kernel actually tracks assembly freedom.</p>
+
+  <p class="ask-teacher">Stuck on counting DOF for a specific mate combination? Ask your teacher — that's what I'm here for. Next up: what happens when an earlier feature gets edited, and how to keep the rest of the tree from breaking.</p>
+
+  <footer class="lesson-footer">STEM+ · CAD &amp; Prototyping · Unit 2 · Lesson 5 of 18</footer>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var boxes = {
+    c1: { el: document.getElementById('cad5-c1'), dof: 4, label: 'Concentric' },
+    c2: { el: document.getElementById('cad5-c2'), dof: 3, label: 'Coincident' },
+    c3: { el: document.getElementById('cad5-c3'), dof: 1, label: 'Distance' },
+    c4: { el: document.getElementById('cad5-c4'), dof: 1, label: 'Angle' }
+  };
+  var readout = document.getElementById('cad5-readout');
+
+  function render() {
+    var removed = 0;
+    var applied = [];
+    Object.keys(boxes).forEach(function (k) {
+      if (boxes[k].el.checked) {
+        removed += boxes[k].dof;
+        applied.push(boxes[k].label);
+      }
+    });
+    var remaining = 6 - removed;
+    readout.classList.remove('is-pass', 'is-fail');
+    if (applied.length === 0) {
+      readout.textContent = '6 DOF remain — no mates applied yet, the part is completely free.';
+      return;
+    }
+    if (remaining > 0) {
+      readout.textContent = applied.join(' + ') + ' remove ' + removed + ' DOF → ' + remaining + ' DOF remain. Under-constrained: the part can still move.';
+    } else if (remaining === 0) {
+      readout.textContent = applied.join(' + ') + ' remove exactly 6 DOF → 0 remain. Fully constrained.';
+      readout.classList.add('is-pass');
+    } else {
+      readout.textContent = applied.join(' + ') + ' would remove ' + removed + ' DOF, ' + Math.abs(remaining) + ' more than the 6 available — over-constrained: check for a redundant or conflicting mate.';
+      readout.classList.add('is-fail');
+    }
+  }
+
+  Object.keys(boxes).forEach(function (k) { boxes[k].el.addEventListener('change', render); });
+  render();
+});
+</script>

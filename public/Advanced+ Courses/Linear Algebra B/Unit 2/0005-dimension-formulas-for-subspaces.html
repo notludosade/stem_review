@@ -1,0 +1,116 @@
+<meta charset="UTF-8">
+<link rel="icon" href="../../../favicon.ico?v=1" type="image/x-icon">
+<title>Lesson 5: Dimension Formulas for Sums and Intersections — STEM+</title>
+<link rel="stylesheet" href="../../../assets/style.css">
+<script src="../../../assets/quiz.js" defer></script>
+<div class="page" data-tier="advanced">
+  <span class="kicker">STEM+ · Linear Algebra B · Unit 2 · Lesson 5</span>
+  <h1>Dimension Formulas for Sums and Intersections</h1>
+  <p class="subtitle">Two subspaces of the same space can be combined two ways — added together, or intersected. Their dimensions turn out to obey an exact formula, proved by building one careful basis.</p>
+  <p class="nav-links"><a href="0004-basis-and-dimension.html" class="nav-prev">← Lesson 4</a> <a href="0006-coordinate-vectors-and-change-of-basis.html" class="nav-next">Lesson 6 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Given two subspaces U and W of the same vector space V, two new subspaces come for free: their intersection U ∩ W, and their <strong>sum</strong> U + W = {u + w : u ∈ U, w ∈ W} — every vector reachable by adding one vector from each. This lesson proves both really are subspaces, then proves the dimension formula tying all four numbers — dim(U), dim(W), dim(U∩W), dim(U+W) — together exactly.</p>
+
+  <h2>1. U ∩ W and U + W are subspaces</h2>
+  <div class="box">
+    <span class="box-label">Fact — Both Are Subspaces</span>
+    For subspaces U, W of V, both U ∩ W and U + W are subspaces of V.
+  </div>
+  <div class="box">
+    <span class="box-label">Proof</span>
+    <em>U ∩ W:</em> 0 ∈ U and 0 ∈ W (both subspaces), so 0 ∈ U ∩ W. If u₁, u₂ ∈ U ∩ W, then u₁, u₂ ∈ U gives u₁+u₂ ∈ U (U is closed), and likewise u₁+u₂ ∈ W — so u₁+u₂ ∈ U ∩ W. The scalar case is identical. All three subspace-test conditions hold.
+    <br><br>
+    <em>U + W:</em> 0 = 0 + 0 ∈ U + W. Given (u₁+w₁) and (u₂+w₂) in U+W, their sum is (u₁+u₂) + (w₁+w₂) — a sum of a U-vector and a W-vector, since U, W are each closed under addition — so it's in U+W. Scaling: c(u+w) = cu + cw, again a U-vector plus a W-vector. All three conditions hold. ∎
+  </div>
+
+  <h2>2. The dimension formula</h2>
+  <div class="box">
+    <span class="box-label">Theorem — Dimension of a Sum</span>
+    For finite-dimensional subspaces U, W of V: dim(U + W) = dim(U) + dim(W) − dim(U ∩ W).
+  </div>
+  <div class="box">
+    <span class="box-label">Proof</span>
+    Let {x₁,…,x<sub>k</sub>} be a basis for U ∩ W (dim(U∩W) = k). Extend it (Lesson 3's Extension Theorem) to a basis {x₁,…,x<sub>k</sub>, u₁,…,u<sub>p</sub>} of U (so dim(U) = k+p), and separately to a basis {x₁,…,x<sub>k</sub>, w₁,…,w<sub>q</sub>} of W (dim(W) = k+q). Claim: {x₁,…,x<sub>k</sub>, u₁,…,u<sub>p</sub>, w₁,…,w<sub>q</sub>} — k+p+q vectors — is a basis for U+W.
+    <br><br>
+    <em>Spans U+W:</em> any element of U+W is u+w for some u ∈ U, w ∈ W. Write u using U's basis and w using W's basis; adding the two expressions writes u+w as a combination of all k+p+q vectors together.
+    <br><br>
+    <em>Independent:</em> suppose a₁x₁+⋯+a<sub>k</sub>x<sub>k</sub> + b₁u₁+⋯+b<sub>p</sub>u<sub>p</sub> + c₁w₁+⋯+c<sub>q</sub>w<sub>q</sub> = 0. Let v = a₁x₁+⋯+a<sub>k</sub>x<sub>k</sub>+b₁u₁+⋯+b<sub>p</sub>u<sub>p</sub> — this is in U (a combination of U's basis vectors). The equation says v = −(c₁w₁+⋯+c<sub>q</sub>w<sub>q</sub>), which is in W. So v ∈ U ∩ W, meaning v is also expressible using {x₁,…,x<sub>k</sub>} alone. But v already has a representation in terms of U's basis {x₁,…,x<sub>k</sub>,u₁,…,u<sub>p</sub>} — and since U's basis representation is unique (Lesson 3), comparing the two forces every b<sub>i</sub> = 0. With the b's gone, the original equation reduces to a₁x₁+⋯+a<sub>k</sub>x<sub>k</sub> + c₁w₁+⋯+c<sub>q</sub>w<sub>q</sub> = 0 — a dependency among W's own basis {x₁,…,x<sub>k</sub>,w₁,…,w<sub>q</sub>}, which is independent, so every a<sub>i</sub> = 0 and every c<sub>j</sub> = 0 too. Every coefficient is 0 — the combined set is independent.
+    <br><br>
+    So dim(U+W) = k+p+q = (k+p) + (k+q) − k = dim(U) + dim(W) − dim(U∩W). ∎
+  </div>
+  <div class="box why">
+    <span class="box-label">Why the shared basis vectors x₁,…,x<sub>k</sub> are the whole trick</span>
+    Starting the construction from a basis of the overlap U ∩ W, rather than building U's and W's bases independently, is what prevents double-counting. Every vector genuinely shared between U and W gets counted once (among the x's); the u's and w's cover exactly what's left over in each subspace separately. That's the entire content of the "−dim(U∩W)" correction term.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Worked Example — Two Planes Through the Origin</span>
+    In ℝ³, let U = span{(1,0,0), (0,1,0)} (the xy-plane) and W = span{(0,1,0), (0,0,1)} (the yz-plane). U ∩ W = span{(0,1,0)} (any vector in both planes has first and third coordinates 0), so dim(U∩W) = 1. dim(U) = dim(W) = 2. U + W contains (1,0,0), (0,1,0), and (0,0,1) — the full standard basis of ℝ³ — so U+W = ℝ³ and dim(U+W) = 3. Checking the formula: dim(U)+dim(W)−dim(U∩W) = 2+2−1 = 3. ✓.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. Why does U + W need the subspace test proof to check "sum of two elements of U+W is again in U+W" rather than something more specific?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Because an element of U+W is only known to be some u-plus-some-w — closure has to be verified directly from that form, using that U and W are each closed under addition.</button>
+      <button class="quiz-choice" data-correct="false">Because U+W is never actually closed under addition.</button>
+      <button class="quiz-choice" data-correct="false">Because U and W must be disjoint for the proof to work.</button>
+      <button class="quiz-choice" data-correct="false">Because U+W only contains vectors from U, never from W.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Elements of U+W are exactly u+w pairs, so proving closure means showing (u₁+w₁)+(u₂+w₂) can be regrouped into a valid U-vector plus a valid W-vector — which works precisely because U and W are each individually closed.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. In the dimension formula's proof, why does the construction start from a basis of U ∩ W rather than starting separately with bases of U and W?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Starting from the overlap avoids double-counting vectors that belong to both U and W when the combined basis for U+W is assembled.</button>
+      <button class="quiz-choice" data-correct="false">U ∩ W is always larger than U or W individually.</button>
+      <button class="quiz-choice" data-correct="false">It makes the proof shorter, but the same formula could be proved without it.</button>
+      <button class="quiz-choice" data-correct="false">Bases of U and W individually are never extendable.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Building outward from a shared basis of the overlap is exactly what makes the "−dim(U∩W)" correction term appear naturally — every overlap vector is counted exactly once.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="unique|uniqueness">
+    <p class="quiz-prompt">3. Fill in the blank: the independence half of the proof relies on Lesson 3's theorem that every basis representation is ___, to force the b coefficients to 0.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Comparing v's two representations — one via U's basis, one via {x₁,…,xₖ} alone — only forces the b coefficients to vanish because U's basis representation is guaranteed unique.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">4. In the worked example (U = xy-plane, W = yz-plane in ℝ³), what is dim(U ∩ W)?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">1 — the intersection is exactly the y-axis, span{(0,1,0)}.</button>
+      <button class="quiz-choice" data-correct="false">0 — the two planes only share the origin.</button>
+      <button class="quiz-choice" data-correct="false">2 — the intersection is a whole plane.</button>
+      <button class="quiz-choice" data-correct="false">3 — the intersection is all of ℝ³.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A vector is in both planes exactly when its first and third coordinates are both 0 — that's the y-axis, a 1-dimensional subspace.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="5">
+    <p class="quiz-prompt">5. Using the formula, if dim(U) = 4, dim(W) = 3, and dim(U∩W) = 2, what is dim(U+W)?</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>dim(U+W) = dim(U) + dim(W) − dim(U∩W) = 4 + 3 − 2 = 5.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Treil's <a href="https://www.math.brown.edu/streil/papers/LADW/LADW.html"><em>Linear Algebra Done Wrong</em></a>, Chapter 2.6, proves this same dimension formula and discusses the special case U ∩ W = {0} (a <strong>direct sum</strong>), where the formula simplifies to dim(U⊕W) = dim(U) + dim(W).</p>
+
+  <p class="ask-teacher">Ask your teacher for two subspaces of ℝ⁴ to test the formula on if you want more practice finding U ∩ W and U + W by hand. Next up: coordinate vectors relative to a chosen basis, and how they change when the basis does.</p>
+
+  <footer class="lesson-footer">STEM+ · Linear Algebra B · Unit 2 · Lesson 5 of 21</footer>
+</div>

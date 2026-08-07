@@ -1,0 +1,109 @@
+<meta charset="UTF-8">
+<link rel="icon" href="../../../favicon.ico?v=1" type="image/x-icon">
+<title>Lesson 21: Capstone — The Spectral Theorem in Practice — STEM+</title>
+<link rel="stylesheet" href="../../../assets/style.css">
+<script src="../../../assets/quiz.js" defer></script>
+<div class="page" data-tier="advanced">
+  <span class="kicker">STEM+ · Linear Algebra B · Unit 7 · Lesson 21</span>
+  <h1>Capstone — The Spectral Theorem in Practice</h1>
+  <p class="subtitle">Every proof in this course was building toward one guarantee: a symmetric matrix always diagonalizes, orthogonally. This closing lesson uses that guarantee to classify quadratic forms outright, and reconnects it to PCA — a fact Linear Algebra A used without ever proving it worked.</p>
+  <p class="nav-links"><a href="0020-jordan-canonical-form.html" class="nav-prev">← Lesson 20</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>This closing lesson adds one new tool — the quadratic form — and no new machinery beyond it: everything below is Lesson 17's Spectral Theorem, applied.</p>
+
+  <h2>1. Quadratic forms, diagonalized</h2>
+  <div class="box">
+    <span class="box-label">Definition — Quadratic Form</span>
+    A <strong>quadratic form</strong> on ℝⁿ is a function Q(x) = xᵀAx for a symmetric matrix A. Expanded, Q(x) = Σᵢaᵢᵢxᵢ² + Σᵢ≠ⱼaᵢⱼxᵢxⱼ — every pure-quadratic expression in n variables can be written this way, uniquely, with A symmetric.
+  </div>
+  <div class="box">
+    <span class="box-label">Theorem — The Principal Axis Theorem</span>
+    For Q(x)=xᵀAx with spectral decomposition A=QDQᵀ (eigenvalues λ₁,…,λ<sub>n</sub>), the substitution y=Qᵀx turns Q into Q = λ₁y₁²+⋯+λ<sub>n</sub>y<sub>n</sub>² — a pure sum of squares, with no cross terms at all.
+  </div>
+  <div class="box">
+    <span class="box-label">Proof</span>
+    Q(x) = xᵀAx = xᵀ(QDQᵀ)x = (Qᵀx)ᵀD(Qᵀx), using (QDQᵀ)=A and regrouping (Qᵀx)ᵀ=xᵀQ. Setting y=Qᵀx: Q = yᵀDy = Σλᵢyᵢ², since D is diagonal. ∎
+  </div>
+  <div class="box why">
+    <span class="box-label">Why this is the Spectral Theorem doing real work</span>
+    Without a guaranteed orthogonal Q, "diagonalize the cross terms away" would be just a hope — some quadratic forms might resist it entirely, the same way Lesson 11's defective matrix resisted ordinary diagonalization. Because A is always symmetric here, Lesson 17 guarantees Q exists, is orthogonal, and this substitution always works, for every quadratic form, with no exceptions.
+  </div>
+  <div class="box example">
+    <span class="box-label">Worked Example — Classifying Q(x₁,x₂) = 5x₁² + 4x₁x₂ + 5x₂²</span>
+    This is xᵀAx for A=[[5,2],[2,5]] — Lesson 16's running example, with eigenvalues 7 and 3 (both positive) and orthonormal eigenvectors (1/√2,1/√2), (1/√2,−1/√2). In principal-axis coordinates, Q = 7y₁² + 3y₂². Since every coefficient is positive, Q(x) &gt; 0 for every x≠0 — Q is <strong>positive definite</strong>. (In general: Q is positive definite exactly when every eigenvalue of A is positive, since a sum of positive multiples of squares can only be 0 when every yᵢ=0, i.e. y=0, i.e. x=0.)
+  </div>
+
+  <h2>2. Reconnecting to PCA</h2>
+  <p>Linear Algebra A's Lesson 21 introduced Principal Component Analysis — "projection onto covariance eigenvectors ordered by captured variance" — as a recipe, without ever explaining why the covariance matrix's eigenvectors behave so well. This course now can: a covariance matrix Σ is always symmetric (Σᵢⱼ = Σⱼᵢ, since covariance itself is symmetric in its two variables), so the Spectral Theorem applies directly. Its eigenvalues are the variances captured along each principal axis — literally the λᵢ's in the Principal Axis Theorem above, applied to the quadratic form Q(x)=xᵀΣx measuring variance in direction x. The eigenvectors are orthonormal for free (Lesson 16), which is exactly why principal components never overlap or need re-orthogonalizing by hand. PCA was never a heuristic — it was the Spectral Theorem the entire time.</p>
+
+  <div class="box">
+    <span class="box-label">Looking Ahead — Quantum Computing</span>
+    The next course in this sequence, <strong>Quantum Computing</strong>, picks up exactly here. A qubit's state lives in a complex inner product space; quantum gates are unitary operators — the complex analogue of the orthogonal matrices built throughout Unit 6; and every measurement outcome comes directly from the spectral decomposition of a Hermitian operator: its real eigenvalues (Lesson 16) are the only possible measured values, and its orthonormal eigenvectors are the possible states the system collapses into. The Spectral Theorem, stated in Lesson 17 for real symmetric matrices but remarked there to hold identically for complex Hermitian ones, is not background material for that course — it is the operating principle every measurement in it runs on.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. In the Principal Axis Theorem's proof, what substitution turns xᵀAx into a pure sum of squares?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">y = Qᵀx, using A's spectral decomposition A = QDQᵀ.</button>
+      <button class="quiz-choice" data-correct="false">y = Ax.</button>
+      <button class="quiz-choice" data-correct="false">y = x + D.</button>
+      <button class="quiz-choice" data-correct="false">No substitution is needed — xᵀAx is already a sum of squares.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Substituting y=Qᵀx (equivalently, changing to eigenvector coordinates) is exactly what turns (Qᵀx)ᵀD(Qᵀx) into yᵀDy, a pure sum of squares.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. For Q(x₁,x₂)=5x₁²+4x₁x₂+5x₂², what does the Principal Axis Theorem give in principal-axis coordinates?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">7y₁² + 3y₂²</button>
+      <button class="quiz-choice" data-correct="false">5y₁² + 5y₂²</button>
+      <button class="quiz-choice" data-correct="false">7y₁² − 3y₂²</button>
+      <button class="quiz-choice" data-correct="false">4y₁y₂</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The eigenvalues of A=[[5,2],[2,5]] are 7 and 3 (Lesson 16), and the Principal Axis Theorem replaces the cross-term expression with exactly those eigenvalues as coefficients of the squared new coordinates.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="positive definite|positive-definite">
+    <p class="quiz-prompt">3. Fill in the blank: a quadratic form whose every eigenvalue is positive is called ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Positive definiteness of a quadratic form corresponds exactly to every eigenvalue of its symmetric matrix being positive.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">4. Why is a covariance matrix always symmetric?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Covariance itself is symmetric in its two input variables — Cov(X,Y) = Cov(Y,X) — so Σᵢⱼ = Σⱼᵢ automatically.</button>
+      <button class="quiz-choice" data-correct="false">Because every matrix is symmetric.</button>
+      <button class="quiz-choice" data-correct="false">Because covariance matrices are always diagonal to begin with.</button>
+      <button class="quiz-choice" data-correct="false">It isn't always symmetric — only for normally distributed data.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Covariance is symmetric in its two variables by definition, for any data distribution, which is exactly what forces Σᵢⱼ=Σⱼᵢ — no distributional assumption required.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="Hermitian|hermitian">
+    <p class="quiz-prompt">5. Fill in the blank: Quantum Computing needs the Spectral Theorem's complex-numbers version, for ___ operators — the complex analogue of a symmetric real matrix.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Hermitian is exactly the complex generalization of symmetric (A=A*, conjugate transpose, instead of A=Aᵀ), and Lesson 16 remarked that every proof in Unit 6 carries over to it unchanged.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this to consolidate the whole course: Treil's <a href="https://www.math.brown.edu/streil/papers/LADW/LADW.html"><em>Linear Algebra Done Wrong</em></a>, in full — every chapter cited across this course's 21 lessons is drawn from it, and rereading it end to end now connects every proof into one continuous argument, from the vector space axioms to the Jordan form.</p>
+
+  <p class="ask-teacher">Stuck on anything above, or want to talk through which single proof in this course you found most surprising, now that you can see how they build on each other? Ask your teacher — that's what I'm here for. This closes Linear Algebra B — vector spaces, dimension theory, linear transformations, eigentheory, inner product spaces, spectral theory, and Jordan form, all proved from the axioms Linear Algebra A used without deriving.</p>
+
+  <footer class="lesson-footer">STEM+ · Linear Algebra B · Unit 7 · Lesson 21 of 21 — course complete</footer>
+</div>

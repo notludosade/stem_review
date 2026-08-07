@@ -1,0 +1,121 @@
+<meta charset="UTF-8">
+<link rel="icon" href="../../favicon.ico?v=1" type="image/x-icon">
+<title>Lesson 15: Print Troubleshooting and Design Rules — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · CAD &amp; Prototyping · Unit 5 · Lesson 15</span>
+  <h1>Print Troubleshooting and Design Rules — Overhang Angle and Bridging Distance</h1>
+  <p class="subtitle">Most print failures trace back to a design decision, not a printer malfunction — and most of them are avoidable before the print ever starts.</p>
+  <p class="nav-links"><a href="0014-slicing-settings-quantitative-effects-on-strength-accuracy-time.html" class="nav-prev">← Lesson 14</a> <a href="../Unit%206/0016-laser-cutting-workflow-kerf-vector-vs-raster-material-thickness.html" class="nav-next">Unit 6, Lesson 16 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Unit 5 closes with the failures every FDM print eventually runs into, and the design rules — decided in CAD, before slicing — that avoid most of them.</p>
+
+  <h2>Common failure modes</h2>
+  <div class="box example">
+    <span class="box-label">Warping</span>
+    Corners or edges lift off the bed mid-print, usually from uneven cooling and shrinkage as the plastic solidifies. Worse for materials that shrink more as they cool (ABS is notably more prone to this than PLA).
+  </div>
+  <div class="box example">
+    <span class="box-label">Stringing</span>
+    Thin wisps of plastic left between separate features, from filament oozing out of the nozzle during travel moves between them.
+  </div>
+  <div class="box example">
+    <span class="box-label">Layer shifting</span>
+    Layers suddenly offset partway through a print — almost always a mechanical issue (a belt skipping, an obstruction), not a design issue.
+  </div>
+  <div class="box example">
+    <span class="box-label">Poor bed adhesion</span>
+    The first layer fails to stick reliably, risking the whole print detaching partway through.
+  </div>
+
+  <h2>Maximum unsupported overhang angle</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    The <strong>overhang angle</strong>, as used in this lesson, is measured from horizontal — how far a surface leans away from vertical, toward flat. A common rule of thumb across FDM printers and slicers: surfaces within about <strong>45° of vertical</strong> (equivalently, steeper than 45° from horizontal) typically self-support and print cleanly without added support material. Surfaces shallower than that — closer to flat, more overhanging — generally need support to print reliably.
+  </div>
+  <p>This 45° figure is a rule of thumb, not a hard physical law — it varies somewhat by printer, cooling, and material — but it's a reliable enough starting point that most slicers default to flagging overhangs beyond it automatically.</p>
+
+  <h2>Bridging</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    <strong>Bridging</strong> is printing a horizontal span between two already-supported points with nothing underneath at all — the extreme case of an overhang, at 0° from horizontal. It relies on the extruded filament, under slight tension, cooling fast enough to hold its shape before it can sag. Every printer and material combination has a practical maximum reliable bridging distance — commonly cited as roughly 5–10mm for a well-tuned PLA setup with good part cooling, though this is genuinely dependent on material, fan setup, and speed, and shouldn't be treated as a fixed universal number.
+  </div>
+
+  <h2>Designing around these limits instead of fighting them</h2>
+  <div class="box why">
+    <span class="box-label">Redesign beats slicer tricks</span>
+    Chamfering a downward-facing corner to bring it back under the 45° threshold, reorienting the whole part so a problematic overhang becomes a flat bottom face instead (Lesson 13), or breaking one long unsupported span into several shorter bridges with small internal gussets — all of these are CAD-level design decisions that eliminate a problem outright, rather than papering over it with more support material and post-print cleanup. This is the same design-for-manufacturability logic from Lesson 11, applied specifically to FDM's layer-by-layer constraints.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why catching this in CAD is worth it</span>
+    A failed print costs filament, machine time, and — if it's discovered late — a missed deadline. A design decision made once in CAD, before the first print attempt, is free by comparison. The same logic from Lesson 11's DFM discussion applies again here: it's far cheaper to fix a problem in the model than to discover it in a failed print.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. Using this lesson's convention (angle measured from horizontal), roughly what overhang angle is the common threshold for printing cleanly without support?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">10° from horizontal</button>
+      <button class="quiz-choice" data-correct="true">About 45° from horizontal</button>
+      <button class="quiz-choice" data-correct="false">90° from horizontal (fully vertical)</button>
+      <button class="quiz-choice" data-correct="false">There is no meaningful threshold — every overhang always needs support.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Surfaces steeper than about 45° from horizontal (within 45° of vertical) commonly self-support; shallower than that usually needs added support material.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. What makes bridging different from a typical steep overhang?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Bridging only happens with metal filament.</button>
+      <button class="quiz-choice" data-correct="true">Bridging is the extreme case — a fully horizontal (0°) span with nothing underneath at all, relying on the filament cooling fast enough not to sag.</button>
+      <button class="quiz-choice" data-correct="false">Bridging requires the printer to pause and manually add a support structure by hand.</button>
+      <button class="quiz-choice" data-correct="false">Bridging is not affected by material or cooling at all.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Bridging is the 0°-from-horizontal extreme, with no support directly underneath — it depends entirely on the filament's cooling speed to avoid sagging across the gap.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why is warping more commonly associated with ABS than with PLA?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">ABS cannot be printed on any FDM printer.</button>
+      <button class="quiz-choice" data-correct="true">ABS tends to shrink more as it cools, increasing the stress that lifts corners off the bed during uneven cooling.</button>
+      <button class="quiz-choice" data-correct="false">ABS is always printed without a heated bed, unlike PLA.</button>
+      <button class="quiz-choice" data-correct="false">Warping is entirely unrelated to material choice.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Greater shrinkage during cooling means more internal stress pulling at corners and edges — a material property difference, not a printer setting.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="bridging">
+    <p class="quiz-prompt">4. Fill in the blank: printing a horizontal span between two supported points with nothing underneath at all is called ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Bridging relies on the filament cooling fast enough to hold its own shape across the unsupported gap.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="orientation|reorienting|reorient|redesign">
+    <p class="quiz-prompt">5. Fill in the blank: rather than relying on more support material and cleanup, the more reliable fix for a problematic overhang is usually changing the part's ___ (or its geometry) at the CAD stage.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Reorienting the part, or redesigning the geometry itself (like adding a chamfer), removes the problem outright rather than working around it after the fact.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: <a href="https://help.prusa3d.com/">Prusa's official 3D printing knowledge base</a> has a dedicated troubleshooting section covering warping, stringing, and overhang failures with photos of each.</p>
+
+  <p class="ask-teacher">Stuck diagnosing a specific print failure? Ask your teacher — that's what I'm here for. Next up: leaving additive manufacturing behind for a subtractive, 2D process — laser cutting.</p>
+
+  <footer class="lesson-footer">STEM+ · CAD &amp; Prototyping · Unit 5 · Lesson 15 of 18</footer>
+</div>

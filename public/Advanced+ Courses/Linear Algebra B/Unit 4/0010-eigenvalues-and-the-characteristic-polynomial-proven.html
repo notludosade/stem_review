@@ -1,0 +1,154 @@
+<meta charset="UTF-8">
+<link rel="icon" href="../../../favicon.ico?v=1" type="image/x-icon">
+<title>Lesson 10: Eigenvalues and the Characteristic Polynomial, Proven Properly — STEM+</title>
+<link rel="stylesheet" href="../../../assets/style.css">
+<script src="../../../assets/quiz.js" defer></script>
+<div class="page" data-tier="advanced">
+  <span class="kicker">STEM+ · Linear Algebra B · Unit 4 · Lesson 10</span>
+  <h1>Eigenvalues and the Characteristic Polynomial, Proven Properly</h1>
+  <p class="subtitle">Linear Algebra A computed eigenvalues by solving det(A−λI)=0 without ever proving that expression is a polynomial, or that eigenvalues survive a change of basis. Both get proved here — plus the independence fact Unit 6 depends on.</p>
+  <p class="nav-links"><a href="../Unit%203/0009-matrix-representation-and-change-of-basis.html" class="nav-prev">← Lesson 9</a> <a href="0011-diagonalizability-necessary-and-sufficient.html" class="nav-next">Lesson 11 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Linear Algebra A's Lesson 16 defined eigenvalue and eigenvector exactly as they'll be used here: Av = λv for some nonzero v. What it never justified is why det(A−λI) is even a polynomial (rather than some other function of λ), why eigenvalues don't secretly depend on which basis A happens to be written in, or why eigenvectors for different eigenvalues never collide. This lesson proves all three.</p>
+
+  <h2>1. Eigenspaces are subspaces</h2>
+  <div class="box">
+    <span class="box-label">Definition — Eigenvalue, Eigenvector, Eigenspace</span>
+    For a linear operator T: V → V, a scalar λ is an <strong>eigenvalue</strong> if T(v) = λv for some nonzero v ∈ V, and any such v is an <strong>eigenvector</strong>. The <strong>eigenspace</strong> E<sub>λ</sub> = {v ∈ V : T(v) = λv} = ker(T − λI) is the set of all eigenvectors for λ, together with 0.
+  </div>
+  <p>E<sub>λ</sub> = ker(T − λI) is a kernel of the linear map T − λI (itself linear, since T is and λI is), so Lesson 7's theorem already proves E<sub>λ</sub> is a subspace of V — no new argument needed.</p>
+
+  <h2>2. The characteristic polynomial really is a polynomial</h2>
+  <div class="box">
+    <span class="box-label">Theorem — Degree and Leading Term</span>
+    For an n×n matrix A, det(A − λI) is a polynomial in λ of degree exactly n, with leading term (−1)ⁿλⁿ.
+  </div>
+  <div class="box">
+    <span class="box-label">Proof Sketch (induction on n, via cofactor expansion)</span>
+    n=1: det(A−λI) = a₁₁−λ, degree 1 with leading term −λ = (−1)¹λ¹. ✓
+    <br><br>
+    Inductive step: expand det(A−λI) along row 1: det(A−λI) = Σⱼ (−1)^{1+j}(A−λI)<sub>1j</sub> M<sub>1j</sub>, where M<sub>1j</sub> is the (n−1)×(n−1) minor from deleting row 1 and column j. The j=1 term is (a₁₁−λ)·M₁₁, and M₁₁ is exactly det(A′−λI′) for the (n−1)×(n−1) submatrix A′ — by the inductive hypothesis, degree n−1 with leading term (−1)^{n−1}λ^{n−1}. So (a₁₁−λ)M₁₁ contributes degree n, leading term (−λ)(−1)^{n−1}λ^{n−1} = (−1)ⁿλⁿ. Every other term (j≠1) deletes column j≠1, which removes one of the diagonal (aᵢᵢ−λ) entries without replacing it — so that minor has at most n−2 diagonal λ-terms, giving degree ≤ n−2, too low to affect the λⁿ coefficient. So det(A−λI) has degree n, leading term (−1)ⁿλⁿ. ∎
+  </div>
+  <div class="box">
+    <span class="box-label">Fact — Eigenvalues Are Exactly the Roots</span>
+    λ is an eigenvalue of A if and only if det(A−λI) = 0. (A−λI has a nonzero kernel exactly when it's singular, i.e. non-invertible — precisely when its determinant is 0, by Linear Algebra A's determinant-invertibility connection.)
+  </div>
+
+  <h2>3. Similar matrices share the same characteristic polynomial</h2>
+  <div class="box">
+    <span class="box-label">Theorem</span>
+    If A′ = P⁻¹AP for some invertible P, then det(A′−λI) = det(A−λI) for every λ. So similar matrices — in particular, [T]<sub>B</sub> and [T]<sub>B′</sub> for any two bases (Lesson 9) — always have the same characteristic polynomial.
+  </div>
+  <div class="box">
+    <span class="box-label">Proof</span>
+    A′ − λI = P⁻¹AP − λI = P⁻¹AP − λP⁻¹P = P⁻¹(A − λI)P, using P⁻¹P = I. Taking determinants and using multiplicativity (det(XY) = det(X)det(Y), from Linear Algebra A): det(A′−λI) = det(P⁻¹)·det(A−λI)·det(P) = det(P⁻¹)det(P)·det(A−λI) = det(P⁻¹P)·det(A−λI) = det(I)·det(A−λI) = det(A−λI). ∎
+  </div>
+  <div class="box why">
+    <span class="box-label">Why this settles a real gap</span>
+    Without this theorem, "the eigenvalues of T" wouldn't even be well-defined — computing det([T]<sub>B</sub> − λI) in one basis could, in principle, give a different answer than computing it in another. This theorem proves that never happens: eigenvalues belong to the operator T itself, not to whatever basis was used to compute them.
+  </div>
+
+  <h2>4. Eigenvectors for distinct eigenvalues are independent</h2>
+  <div class="box">
+    <span class="box-label">Theorem</span>
+    If λ₁,…,λ<sub>k</sub> are distinct eigenvalues of T with eigenvectors v₁,…,v<sub>k</sub>, then {v₁,…,v<sub>k</sub>} is linearly independent.
+  </div>
+  <div class="box">
+    <span class="box-label">Proof (induction on k)</span>
+    k=1: v₁ ≠ 0 is automatically independent (Linear Algebra A). Inductive step: assume {v₁,…,v<sub>k−1</sub>} is independent, and suppose c₁v₁+⋯+c<sub>k</sub>v<sub>k</sub> = 0 (∗). Apply T, using T(vᵢ)=λᵢvᵢ: c₁λ₁v₁+⋯+c<sub>k</sub>λ<sub>k</sub>v<sub>k</sub> = 0 (∗∗). Multiply (∗) by λ<sub>k</sub>: c₁λ<sub>k</sub>v₁+⋯+c<sub>k</sub>λ<sub>k</sub>v<sub>k</sub> = 0 (∗∗∗). Subtract (∗∗)−(∗∗∗): c₁(λ₁−λ<sub>k</sub>)v₁+⋯+c<sub>k−1</sub>(λ<sub>k−1</sub>−λ<sub>k</sub>)v<sub>k−1</sub> = 0 (the v<sub>k</sub> terms cancel exactly). By the inductive hypothesis, {v₁,…,v<sub>k−1</sub>} is independent, so every coefficient is 0: cᵢ(λᵢ−λ<sub>k</sub>) = 0 for i < k. Since the eigenvalues are distinct, λᵢ ≠ λ<sub>k</sub>, forcing cᵢ = 0 for i = 1,…,k−1. Substituting back into (∗): c<sub>k</sub>v<sub>k</sub> = 0, and v<sub>k</sub> ≠ 0 forces c<sub>k</sub> = 0 too. Every coefficient is 0. ∎
+  </div>
+
+  <div class="widget">
+    <div class="widget-label">Try It — Eigenvalues of a Symmetric 2×2 Matrix</div>
+    <p>A = [[a, b], [b, d]]. Adjust a, b, d and watch λ = (tr ± √(tr² − 4det)) / 2 update.</p>
+    <div class="fm-row" style="gap: 1rem; flex-wrap: wrap;">
+      <label>a <input type="range" id="l10-a" min="-4" max="4" step="1" value="3"></label>
+      <label>b <input type="range" id="l10-b" min="-4" max="4" step="1" value="1"></label>
+      <label>d <input type="range" id="l10-d" min="-4" max="4" step="1" value="2"></label>
+    </div>
+    <p class="plot-readout" id="l10-readout"></p>
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. Why is E<sub>λ</sub> automatically a subspace, with no new proof needed in this lesson?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">E<sub>λ</sub> = ker(T − λI), and Lesson 7 already proved every kernel of a linear map is a subspace.</button>
+      <button class="quiz-choice" data-correct="false">Because every eigenvalue is automatically 0.</button>
+      <button class="quiz-choice" data-correct="false">Because E<sub>λ</sub> always equals all of V.</button>
+      <button class="quiz-choice" data-correct="false">It isn't automatic — it needs a separate proof each time.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>T − λI is itself a linear map, so its kernel is a subspace by the general kernel theorem from Unit 3 — no eigenvalue-specific argument is required.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. In the proof that det(A−λI) has degree n, why do the j≠1 terms in the cofactor expansion not affect the λⁿ leading coefficient?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Deleting column j≠1 removes one of the diagonal (aᵢᵢ−λ) factors without replacing it, capping that term's degree in λ at n−2.</button>
+      <button class="quiz-choice" data-correct="false">Those terms are always exactly 0.</button>
+      <button class="quiz-choice" data-correct="false">Only the j=1 term is allowed by the definition of a determinant.</button>
+      <button class="quiz-choice" data-correct="false">Those terms have degree n+1, higher than the leading term.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Every λ in the expansion comes from a diagonal entry; skipping column j≠1 while keeping row 1 loses one guaranteed diagonal λ-term, capping the degree contribution below n.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="multiplicativity|multiplicative">
+    <p class="quiz-prompt">3. Fill in the blank: the proof that similar matrices share a characteristic polynomial relies on the ___ of the determinant, det(XY)=det(X)det(Y).</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Splitting det(P⁻¹(A−λI)P) into det(P⁻¹)det(A−λI)det(P), then regrouping det(P⁻¹)det(P)=det(I)=1, is exactly the multiplicativity property doing the work.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">4. In the proof that eigenvectors of distinct eigenvalues are independent, what is the purpose of computing (∗∗) − (∗∗∗)?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">It cancels the vₖ term exactly, producing a relation entirely among v₁,…,vₖ₋₁, where the inductive hypothesis already applies.</button>
+      <button class="quiz-choice" data-correct="false">It shows T is not linear.</button>
+      <button class="quiz-choice" data-correct="false">It proves λₖ = 0.</button>
+      <button class="quiz-choice" data-correct="false">It shows v₁,…,vₖ₋₁ must all be eigenvectors for the same eigenvalue.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Both (∗∗) and (∗∗∗) have identical cₖλₖvₖ terms, so subtracting eliminates vₖ entirely, leaving a dependency only among the first k−1 vectors — exactly what the inductive hypothesis can handle.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="0|zero">
+    <p class="quiz-prompt">5. Fill in the blank: in the same proof, once every cᵢ for i&lt;k is shown to be 0, substituting back into (∗) leaves cₖvₖ = 0, and since vₖ ≠ 0, this forces cₖ = ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A nonzero vector times a scalar can only equal 0 if the scalar itself is 0 — the same single-nonzero-vector fact from the base case.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Treil's <a href="https://www.math.brown.edu/streil/papers/LADW/LADW.html"><em>Linear Algebra Done Wrong</em></a>, Chapter 4.1, proves the same degree/leading-term fact and the distinct-eigenvalue independence theorem, in the same induction style.</p>
+
+  <p class="ask-teacher">Ask your teacher to trace through why det(A−λI) = det(Aᵀ−λI) (same characteristic polynomial for A and Aᵀ) if you want a related fact to test the same techniques on. Next up: exactly when a full eigenbasis exists — diagonalizability, characterized and proved.</p>
+
+  <footer class="lesson-footer">STEM+ · Linear Algebra B · Unit 4 · Lesson 10 of 21</footer>
+</div>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var a = document.getElementById('l10-a'), b = document.getElementById('l10-b'), d = document.getElementById('l10-d');
+  var out = document.getElementById('l10-readout');
+  function draw() {
+    var av = +a.value, bv = +b.value, dv = +d.value;
+    var tr = av + dv, det = av * dv - bv * bv;
+    var disc = tr * tr - 4 * det;
+    var sq = Math.sqrt(Math.max(disc, 0));
+    var l1 = (tr + sq) / 2, l2 = (tr - sq) / 2;
+    function fmt(x) { return String(Math.round(x * 100) / 100); }
+    out.textContent = 'char. poly: λ² − ' + fmt(tr) + 'λ + ' + fmt(det) + ' = 0  →  λ = ' + fmt(l1) + ', ' + fmt(l2) + ' (always real, since A is symmetric).';
+  }
+  [a, b, d].forEach(function (el) { el.addEventListener('input', draw); });
+  draw();
+});
+</script>

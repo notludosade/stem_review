@@ -1,0 +1,104 @@
+<meta charset="UTF-8">
+<link rel="icon" href="../../../favicon.ico?v=1" type="image/x-icon">
+<title>Lesson 18: The Singular Value Decomposition — STEM+</title>
+<link rel="stylesheet" href="../../../assets/style.css">
+<script src="../../../assets/quiz.js" defer></script>
+<div class="page" data-tier="advanced">
+  <span class="kicker">STEM+ · Linear Algebra B · Unit 6 · Lesson 18</span>
+  <h1>The Singular Value Decomposition</h1>
+  <p class="subtitle">The Spectral Theorem needs a square, self-adjoint operator. Most matrices — including every non-square one — are neither. The SVD gets a diagonalization-like decomposition anyway, by applying the Spectral Theorem one step removed.</p>
+  <p class="nav-links"><a href="0017-the-spectral-theorem.html" class="nav-prev">← Lesson 17</a> <a href="../Unit%207/0019-generalized-eigenspaces-and-nilpotent-operators.html" class="nav-next">Lesson 19 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Linear Algebra A's Lesson 21 used PCA's covariance eigenvectors without connecting them to a general-purpose decomposition. The Singular Value Decomposition is that decomposition — it applies to <em>any</em> m×n matrix, built directly from the Spectral Theorem applied to AᵀA.</p>
+
+  <h2>The theorem</h2>
+  <div class="box">
+    <span class="box-label">Theorem — Existence of the SVD</span>
+    Every m×n matrix A factors as A = UΣVᵀ, where U is an m×m orthogonal matrix, V is an n×n orthogonal matrix, and Σ is an m×n matrix that is 0 off its main diagonal, with nonnegative entries σ₁≥σ₂≥⋯≥0 (the <strong>singular values</strong>) down that diagonal.
+  </div>
+  <div class="box">
+    <span class="box-label">Proof (Construction)</span>
+    AᵀA is an n×n matrix, and it's symmetric: (AᵀA)ᵀ = Aᵀ(Aᵀ)ᵀ = AᵀA. By the Spectral Theorem (Lesson 17), AᵀA has an orthonormal eigenbasis {v₁,…,v<sub>n</sub>} with real eigenvalues λ₁≥⋯≥λ<sub>n</sub>. These eigenvalues are automatically nonnegative: for eigenvector v<sub>i</sub>, λ<sub>i</sub> = λ<sub>i</sub>⟨v<sub>i</sub>,v<sub>i</sub>⟩ = ⟨AᵀAv<sub>i</sub>,v<sub>i</sub>⟩ = ⟨Av<sub>i</sub>,Av<sub>i</sub>⟩ = ‖Av<sub>i</sub>‖² ≥ 0. Define σ<sub>i</sub> = √λ<sub>i</sub> ≥ 0.
+    <br><br>
+    For each i with σ<sub>i</sub> &gt; 0 (say there are r of them, r = rank(A)), define u<sub>i</sub> = Av<sub>i</sub>/σ<sub>i</sub>. These are orthonormal: ⟨u<sub>i</sub>,u<sub>j</sub>⟩ = ⟨Av<sub>i</sub>,Av<sub>j</sub>⟩/(σ<sub>i</sub>σ<sub>j</sub>) = ⟨AᵀAv<sub>i</sub>,v<sub>j</sub>⟩/(σ<sub>i</sub>σ<sub>j</sub>) = λ<sub>i</sub>⟨v<sub>i</sub>,v<sub>j</sub>⟩/(σ<sub>i</sub>σ<sub>j</sub>), which is 0 for i≠j (orthonormality of the v's) and σ<sub>i</sub>²/σ<sub>i</sub>² = 1 for i=j. Extend {u₁,…,u<sub>r</sub>} to a full orthonormal basis {u₁,…,u<sub>m</sub>} of ℝᵐ using the Extension Theorem and Gram-Schmidt (Lessons 3, 14) if r &lt; m.
+    <br><br>
+    By construction, Av<sub>i</sub> = σ<sub>i</sub>u<sub>i</sub> for i ≤ r. For i &gt; r, λ<sub>i</sub>=0 means ‖Av<sub>i</sub>‖²=λ<sub>i</sub>=0, so Av<sub>i</sub>=0 too — consistent with a 0 entry in Σ. Assembling U = [u₁ ⋯ u<sub>m</sub>], V = [v₁ ⋯ v<sub>n</sub>], and Σ with σ₁,…,σ<sub>r</sub> on the diagonal (0 elsewhere): AV = UΣ (column by column, this is exactly Av<sub>i</sub>=σ<sub>i</sub>u<sub>i</sub> or Av<sub>i</sub>=0). Since V is orthogonal (Vᵀ=V⁻¹), multiplying both sides by Vᵀ gives A = UΣVᵀ. ∎
+  </div>
+  <div class="box why">
+    <span class="box-label">Why AᵀA, specifically</span>
+    A itself need not be square, so it has no eigenvalues of its own to appeal to. AᵀA is always square and always symmetric, regardless of A's shape — which is exactly what makes the Spectral Theorem applicable at all. Every step of the SVD after that point is just unpacking what AᵀA's eigen-decomposition implies about A.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Worked Example — SVD of a 3×2 Matrix</span>
+    A = [[1,0],[0,1],[1,1]]. AᵀA = [[1,0,1],[0,1,1]]·[[1,0],[0,1],[1,1]] = [[2,1],[1,2]]. Characteristic polynomial: (2−λ)²−1 = λ²−4λ+3 = (λ−3)(λ−1), eigenvalues 3 and 1 — so σ₁=√3, σ₂=1. Eigenvectors: v₁=(1/√2,1/√2) for λ=3, v₂=(1/√2,−1/√2) for λ=1 (both check directly against AᵀA, exactly as in Lesson 17's style).
+    <br><br>
+    u₁ = Av₁/σ₁ = (1/√2,1/√2,√2)/√3 = (1/√6, 1/√6, 2/√6). u₂ = Av₂/σ₂ = (1/√2,−1/√2,0)/1 = (1/√2,−1/√2,0). Extending {u₁,u₂} to an orthonormal basis of ℝ³ gives u₃=(1/√3,1/√3,−1/√3) (orthogonal to both, found via Gram-Schmidt). So A = UΣVᵀ with U = [u₁ u₂ u₃], Σ = [[√3,0],[0,1],[0,0]], V = [v₁ v₂].
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. Why does the SVD construction start from AᵀA rather than A itself?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">AᵀA is always square and symmetric regardless of A's shape, so the Spectral Theorem applies to it even when A isn't square.</button>
+      <button class="quiz-choice" data-correct="false">AᵀA is always equal to A.</button>
+      <button class="quiz-choice" data-correct="false">A always has real eigenvalues already, making AᵀA unnecessary.</button>
+      <button class="quiz-choice" data-correct="false">AᵀA is used only to compute det(A).</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A itself may not even be square, so "eigenvalues of A" may not make sense — AᵀA is square and symmetric no matter what, making it the natural object the Spectral Theorem can act on.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. In the proof, why is λᵢ = ‖Avᵢ‖² for each eigenvalue of AᵀA?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">λᵢ⟨vᵢ,vᵢ⟩ = ⟨AᵀAvᵢ,vᵢ⟩ = ⟨Avᵢ,Avᵢ⟩ by definition of the eigen-relation and the adjoint property, and ⟨vᵢ,vᵢ⟩=1 since vᵢ is a unit vector.</button>
+      <button class="quiz-choice" data-correct="false">Because A is assumed symmetric.</button>
+      <button class="quiz-choice" data-correct="false">Because σᵢ is always equal to 1.</button>
+      <button class="quiz-choice" data-correct="false">It isn't generally true — only in special cases.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Moving one factor of A across the inner product (⟨AᵀAv,v⟩=⟨Av,Av⟩) is exactly the adjoint relationship, and combined with the unit-norm eigenvector this pins λᵢ down as a squared norm — automatically nonnegative.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="0">
+    <p class="quiz-prompt">3. Fill in the blank: for i &gt; r (where r = rank(A)), λᵢ=0 forces ‖Avᵢ‖²=0, meaning Avᵢ = ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A norm of 0 forces the vector itself to be the zero vector — matching the 0 entries Σ has past the r-th diagonal position.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">4. For A=[[1,0],[0,1],[1,1]], what are the singular values?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">√3 and 1</button>
+      <button class="quiz-choice" data-correct="false">3 and 1</button>
+      <button class="quiz-choice" data-correct="false">2 and 1</button>
+      <button class="quiz-choice" data-correct="false">√2 and √2</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>AᵀA=[[2,1],[1,2]] has eigenvalues 3 and 1 — the singular values are the square roots, √3 and 1.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="3">
+    <p class="quiz-prompt">5. Fill in the blank: Σ for this example is a 3×2 matrix; the diagonal entry in row 1 is √___ (as an integer under the radical).</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>σ₁ = √λ₁ = √3, the larger of AᵀA's two eigenvalues.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Treil's <a href="https://www.math.brown.edu/streil/papers/LADW/LADW.html"><em>Linear Algebra Done Wrong</em></a>, Chapter 6.3, proves the same AᵀA-based SVD construction and connects it to low-rank approximation. This closes Unit 6.</p>
+
+  <p class="ask-teacher">Ask your teacher to verify u₃=(1/√3,1/√3,−1/√3) is genuinely orthogonal to both u₁ and u₂ from today's example by computing both inner products directly. Next up: generalized eigenspaces made precise, and nilpotent operators — the building blocks of Jordan form.</p>
+
+  <footer class="lesson-footer">STEM+ · Linear Algebra B · Unit 6 · Lesson 18 of 21</footer>
+</div>

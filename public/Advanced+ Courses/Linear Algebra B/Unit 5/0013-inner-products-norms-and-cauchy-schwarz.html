@@ -1,0 +1,123 @@
+<meta charset="UTF-8">
+<link rel="icon" href="../../../favicon.ico?v=1" type="image/x-icon">
+<title>Lesson 13: Inner Products, Norms, and Cauchy-Schwarz — STEM+</title>
+<link rel="stylesheet" href="../../../assets/style.css">
+<script src="../../../assets/quiz.js" defer></script>
+<div class="page" data-tier="advanced">
+  <span class="kicker">STEM+ · Linear Algebra B · Unit 5 · Lesson 13</span>
+  <h1>Inner Products, Norms, and Cauchy-Schwarz</h1>
+  <p class="subtitle">Length and angle were always computed with the dot product in Linear Algebra A, without ever asking what makes the dot product special. This lesson generalizes it — and proves the inequality every later "angle makes sense" argument in this course depends on.</p>
+  <p class="nav-links"><a href="../Unit%204/0012-invariant-subspaces-and-generalized-eigenspaces.html" class="nav-prev">← Lesson 12</a> <a href="0014-orthogonality-and-the-gram-schmidt-process.html" class="nav-next">Lesson 14 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Linear Algebra A used u·v = u₁v₁+⋯+uₙvₙ freely for length and angle, but never asked what properties of that formula actually make "length" and "angle" behave sensibly. This lesson names those properties as axioms, generalizes past the dot product, and proves the inequality that keeps "angle" well-defined at all.</p>
+
+  <h2>1. Inner products, generalized</h2>
+  <div class="box">
+    <span class="box-label">Definition — Inner Product (Real Vector Space)</span>
+    An <strong>inner product</strong> on a real vector space V is a function ⟨·,·⟩: V × V → ℝ satisfying, for all u, v, w ∈ V and c ∈ ℝ: symmetry ⟨u,v⟩ = ⟨v,u⟩; bilinearity ⟨u+w,v⟩ = ⟨u,v⟩+⟨w,v⟩ and ⟨cu,v⟩ = c⟨u,v⟩; and positive-definiteness ⟨v,v⟩ ≥ 0, with equality only when v = 0. The <strong>norm</strong> of v is ‖v‖ = √⟨v,v⟩.
+  </div>
+  <div class="box example">
+    <span class="box-label">Inner Products Beyond the Dot Product</span>
+    (a) The standard dot product on ℝⁿ, ⟨u,v⟩ = u₁v₁+⋯+uₙvₙ, is one inner product among many — not the only possible one. (b) On C[0,1], ⟨f,g⟩ = ∫₀¹f(x)g(x)dx satisfies all four properties, using properties of the integral instead of finite sums. (c) On P₂(ℝ), ⟨p,q⟩ = p(−1)q(−1) + p(0)q(0) + p(1)q(1) (evaluating and multiplying at three fixed points) is also a valid inner product.
+  </div>
+  <div class="box">
+    <span class="box-label">Remark — Complex Inner Products</span>
+    Over ℂ, "symmetry" is relaxed to conjugate symmetry, ⟨u,v⟩ = <span style="text-decoration:overline">⟨v,u⟩</span>, so that ⟨v,v⟩ stays real and positive-definiteness still makes sense. This adjustment is what Unit 6 needs for Hermitian operators and complex spectral theory — everything proved below for ℝ carries over with this one change.
+  </div>
+
+  <h2>2. The Cauchy-Schwarz Inequality</h2>
+  <div class="box">
+    <span class="box-label">Theorem — Cauchy-Schwarz</span>
+    For any u, v in an inner product space: |⟨u,v⟩| ≤ ‖u‖‖v‖, with equality if and only if u, v are linearly dependent.
+  </div>
+  <div class="box">
+    <span class="box-label">Proof</span>
+    If v = 0, both sides are 0 and the inequality holds trivially (with u, v dependent, since {0} is always dependent — Lesson 10 of Linear Algebra A). Assume v ≠ 0. For any real t, positive-definiteness gives 0 ≤ ⟨u−tv, u−tv⟩. Expanding using bilinearity and symmetry: 0 ≤ ‖u‖² − 2t⟨u,v⟩ + t²‖v‖². This is a quadratic in t that is never negative, so its discriminant cannot be positive: (2⟨u,v⟩)² − 4‖v‖²‖u‖² ≤ 0, i.e. ⟨u,v⟩² ≤ ‖u‖²‖v‖². Taking square roots: |⟨u,v⟩| ≤ ‖u‖‖v‖.
+    <br><br>
+    Equality holds exactly when the discriminant is 0, i.e. the quadratic has a real root t₀ — meaning ⟨u−t₀v, u−t₀v⟩ = 0, which by positive-definiteness forces u−t₀v = 0, i.e. u = t₀v. That's exactly u, v being linearly dependent. ∎
+  </div>
+  <div class="box why">
+    <span class="box-label">Why this is what makes "angle" well-defined</span>
+    Cosine of the angle between u and v is defined as ⟨u,v⟩/(‖u‖‖v‖) — and that formula only ever produces a value in [−1,1], which cos requires, precisely because Cauchy-Schwarz bounds |⟨u,v⟩| by ‖u‖‖v‖. Without this theorem, "angle" in a general inner product space wouldn't even be a coherent definition.
+  </div>
+
+  <div class="box">
+    <span class="box-label">Corollary — The Triangle Inequality</span>
+    ‖u+v‖ ≤ ‖u‖+‖v‖.
+  </div>
+  <div class="box">
+    <span class="box-label">Proof</span>
+    ‖u+v‖² = ⟨u+v,u+v⟩ = ‖u‖² + 2⟨u,v⟩ + ‖v‖² ≤ ‖u‖² + 2‖u‖‖v‖ + ‖v‖² = (‖u‖+‖v‖)², using Cauchy-Schwarz (⟨u,v⟩ ≤ |⟨u,v⟩| ≤ ‖u‖‖v‖) in the middle step. Taking square roots of both sides (both nonnegative) gives ‖u+v‖ ≤ ‖u‖+‖v‖. ∎
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Worked Example — Checking Cauchy-Schwarz Numerically</span>
+    In ℝ³ with the dot product, let u = (1,2,2) and v = (2,2,1). ⟨u,v⟩ = 1(2)+2(2)+2(1) = 2+4+2 = 8. ‖u‖ = √(1+4+4) = √9 = 3, and ‖v‖ = √(4+4+1) = √9 = 3. Cauchy-Schwarz predicts |8| ≤ 3·3 = 9 — true, and not an equality, confirming u and v are not parallel (indeed, (1,2,2) is not a scalar multiple of (2,2,1)).
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. Which of the following is one of the four inner product axioms?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">⟨v,v⟩ ≥ 0, with equality only when v = 0 (positive-definiteness).</button>
+      <button class="quiz-choice" data-correct="false">⟨u,v⟩ = ⟨u,u⟩ for all v.</button>
+      <button class="quiz-choice" data-correct="false">‖v‖ must always equal 1.</button>
+      <button class="quiz-choice" data-correct="false">⟨u,v⟩ must always be a positive integer.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Positive-definiteness is one of the four defining axioms; the other options aren't part of the definition at all — norms need not be 1, and ⟨u,v⟩ can be negative or non-integer.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. In the Cauchy-Schwarz proof, why must the quadratic 0 ≤ ‖u‖² − 2t⟨u,v⟩ + t²‖v‖² have a nonpositive discriminant?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Because the quadratic is never negative for any real t, a positive discriminant would force it to have two real roots and dip below 0 between them.</button>
+      <button class="quiz-choice" data-correct="false">Because ‖v‖² is always negative.</button>
+      <button class="quiz-choice" data-correct="false">Because u and v are assumed equal.</button>
+      <button class="quiz-choice" data-correct="false">Discriminants are always nonpositive for any quadratic.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A quadratic with positive leading coefficient and a positive discriminant necessarily dips negative between its two roots — which would contradict the quadratic being ⟨u−tv,u−tv⟩, always ≥ 0 by positive-definiteness.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="dependent|linearly dependent">
+    <p class="quiz-prompt">3. Fill in the blank: equality in Cauchy-Schwarz, |⟨u,v⟩| = ‖u‖‖v‖, holds exactly when u and v are linearly ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A zero discriminant means u = t₀v for some scalar t₀ — exactly linear dependence.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">4. In the Triangle Inequality's proof, where specifically is Cauchy-Schwarz used?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">To bound the cross term ⟨u,v⟩ from above by ‖u‖‖v‖, inside the expansion of ‖u+v‖².</button>
+      <button class="quiz-choice" data-correct="false">To prove ‖u+v‖ is always negative.</button>
+      <button class="quiz-choice" data-correct="false">To show u and v must be orthogonal.</button>
+      <button class="quiz-choice" data-correct="false">Cauchy-Schwarz isn't actually used in this proof.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Replacing the cross term 2⟨u,v⟩ with its Cauchy-Schwarz upper bound 2‖u‖‖v‖ is exactly the step that turns ‖u+v‖² into (‖u‖+‖v‖)² as an upper bound.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="9">
+    <p class="quiz-prompt">5. For u=(1,2,2), v=(2,2,1) in ℝ³, ‖u‖=‖v‖=3. Cauchy-Schwarz predicts |⟨u,v⟩| ≤ ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>‖u‖‖v‖ = 3×3 = 9, and indeed ⟨u,v⟩=8 ≤ 9.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Treil's <a href="https://www.math.brown.edu/streil/papers/LADW/LADW.html"><em>Linear Algebra Done Wrong</em></a>, Chapter 5.1, proves Cauchy-Schwarz in the same discriminant style and works through several non-dot-product inner products.</p>
+
+  <p class="ask-teacher">Ask your teacher to verify that ⟨p,q⟩ = p(−1)q(−1)+p(0)q(0)+p(1)q(1) really satisfies all four inner product axioms on P₂(ℝ) if you want to see a non-integral example checked in full. Next up: orthogonality, and the process that builds an orthogonal basis out of any independent set.</p>
+
+  <footer class="lesson-footer">STEM+ · Linear Algebra B · Unit 5 · Lesson 13 of 21</footer>
+</div>

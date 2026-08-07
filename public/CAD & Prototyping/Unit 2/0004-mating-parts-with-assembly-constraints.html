@@ -1,0 +1,114 @@
+<meta charset="UTF-8">
+<link rel="icon" href="../../favicon.ico?v=1" type="image/x-icon">
+<title>Lesson 4: Mating Parts with Assembly Constraints — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · CAD &amp; Prototyping · Unit 2 · Lesson 4</span>
+  <h1>Mating Parts with Assembly Constraints</h1>
+  <p class="subtitle">A single part is just geometry. An assembly is a claim about how several parts are supposed to move — or not move — relative to each other, and mates are how that claim gets written down.</p>
+  <p class="nav-links"><a href="../Unit%201/0003-basic-3d-features-extrude-revolve-and-the-feature-tree.html" class="nav-prev">← Unit 1, Lesson 3</a> <a href="0005-degrees-of-freedom-in-an-assembly-and-fully-constrained.html" class="nav-next">Lesson 5 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Unit 1 built single parts. Most real designs are assemblies — several parts that have to fit together, move correctly relative to each other, and stay that way. What ties them together are mates: constraints between parts, playing a very similar role to the constraints Lesson 1 used inside a single sketch.</p>
+
+  <h2>What an assembly mate is</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    An <strong>assembly</strong> is a collection of separate part files (components) combined with <strong>mates</strong> — constraints that fix or limit how each part can move relative to the others. A part with no mates applied floats freely in space; each mate removes some of that freedom.
+  </div>
+  <p>This is a different job from a sketch constraint. A sketch constraint controls 2D geometry within one sketch (Lesson 1). A mate controls the relative position — and, importantly, the relative <em>motion</em> — between two entire 3D parts. A hinge needs to actually rotate; a mate is what tells the assembly that rotation is allowed while everything else about the joint is fixed.</p>
+
+  <h2>Four common mate types</h2>
+  <div class="box example">
+    <span class="box-label">Coincident</span>
+    Forces two faces, planes, or points to touch flush against each other — no gap, no overlap. A plate resting flat on a table's surface is a coincident mate between the plate's bottom face and the table's top face.
+  </div>
+  <div class="box example">
+    <span class="box-label">Concentric</span>
+    Forces two cylindrical (or circular) features to share the same axis. A pin fitting into a round hole, or a bolt shaft inside a clearance hole, is a concentric mate between the pin's axis and the hole's axis.
+  </div>
+  <div class="box example">
+    <span class="box-label">Distance</span>
+    Fixes a specific offset between two faces or points, rather than forcing them to touch. A 5mm standoff gap deliberately left between a circuit board and its enclosure wall is a distance mate.
+  </div>
+  <div class="box example">
+    <span class="box-label">Angle</span>
+    Fixes a specific angular relationship between two faces or axes. A folding bracket held open at exactly 45° is an angle mate between its two halves.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Worked Example — A Pin in a Bracket</span>
+    Assembling a cylindrical pin into a bracket's round hole: a <strong>concentric</strong> mate locks the pin's axis to the hole's axis (the pin can no longer drift sideways), and a <strong>coincident</strong> mate between the pin's shoulder face and the bracket's outer face sets exactly how far the pin is inserted. Together they locate the pin precisely — but the pin can still freely spin about its own axis, since neither mate says anything about rotation around that axis. Whether that's fine (a pin that's meant to spin) or a problem (a pin that needs to stay in a fixed rotational position) depends entirely on the part's actual job.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why mates encode design intent, not just appearance</span>
+    Two assemblies can look identical on screen while meaning something completely different underneath. A gap that should be a <strong>distance</strong> mate of exactly 2mm, mistakenly built instead as a loose, unconstrained placement that merely looks like 2mm on screen, will drift the instant anything upstream changes. Choosing the right mate type is choosing what's actually supposed to stay true about the design — not just what it happens to look like right now. Lesson 5 makes this precise by counting exactly how much freedom each mate type removes.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What is the key difference between a sketch constraint (Unit 1) and an assembly mate?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">There is no difference — they are the same thing with different names.</button>
+      <button class="quiz-choice" data-correct="true">A sketch constraint controls 2D geometry within one sketch; a mate controls the relative position and motion between separate 3D parts.</button>
+      <button class="quiz-choice" data-correct="false">Sketch constraints only apply to circles, while mates only apply to flat faces.</button>
+      <button class="quiz-choice" data-correct="false">Mates are optional and have no effect on how an assembly behaves.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Sketch constraints operate within a single 2D sketch; mates operate between whole 3D parts in an assembly, controlling both position and allowed motion.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Which mate type would you use to force a bolt's cylindrical shaft to share the same axis as the round hole it passes through?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Coincident</button>
+      <button class="quiz-choice" data-correct="true">Concentric</button>
+      <button class="quiz-choice" data-correct="false">Distance</button>
+      <button class="quiz-choice" data-correct="false">Angle</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Concentric mates align two cylindrical (or circular) features to a shared axis — exactly the relationship between a shaft and the hole it sits inside.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. In the pin-in-bracket example, what motion is the pin still free to make after the concentric and coincident mates are applied?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">It can still slide sideways, off the hole's axis.</button>
+      <button class="quiz-choice" data-correct="false">It can still slide in and out along its own axis.</button>
+      <button class="quiz-choice" data-correct="true">It can still spin freely about its own axis.</button>
+      <button class="quiz-choice" data-correct="false">It is completely fixed — no motion remains at all.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Concentric fixes the axis and coincident fixes the axial (insertion-depth) position, but neither mate says anything about rotation around the pin's own axis — that freedom remains.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="distance">
+    <p class="quiz-prompt">4. Fill in the blank: a mate that fixes a specific offset gap between two faces, without forcing them to touch, is called a ___ mate.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A distance mate fixes a specific offset — like a deliberate 5mm standoff gap — rather than forcing flush contact.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="intent|design intent">
+    <p class="quiz-prompt">5. Fill in the blank: choosing the correct mate type — rather than a loose placement that merely looks correct on screen — is how an assembly actually encodes the designer's ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>An unconstrained placement that merely resembles the intended gap will drift the moment anything upstream changes — a real mate is what locks in the design intent.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: <a href="https://cad.onshape.com/help/">Onshape's help documentation on assembly mates</a> walks through each mate type with interactive examples.</p>
+
+  <p class="ask-teacher">Stuck on which mate type fits a joint you're picturing? Ask your teacher — that's what I'm here for. Next up: counting exactly how much freedom each mate removes, and what "fully constrained" means for a whole assembly.</p>
+
+  <footer class="lesson-footer">STEM+ · CAD &amp; Prototyping · Unit 2 · Lesson 4 of 18</footer>
+</div>

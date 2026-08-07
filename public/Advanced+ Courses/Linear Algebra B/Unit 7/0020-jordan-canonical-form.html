@@ -1,0 +1,113 @@
+<meta charset="UTF-8">
+<link rel="icon" href="../../../favicon.ico?v=1" type="image/x-icon">
+<title>Lesson 20: Jordan Canonical Form — STEM+</title>
+<link rel="stylesheet" href="../../../assets/style.css">
+<script src="../../../assets/quiz.js" defer></script>
+<div class="page" data-tier="advanced">
+  <span class="kicker">STEM+ · Linear Algebra B · Unit 7 · Lesson 20</span>
+  <h1>Jordan Canonical Form</h1>
+  <p class="subtitle">Lesson 19's chains inside a nilpotent operator turn out to be exactly the right basis: ordered correctly, each chain becomes one block of a matrix that's the closest thing to diagonal every operator is guaranteed to have.</p>
+  <p class="nav-links"><a href="0019-generalized-eigenspaces-and-nilpotent-operators.html" class="nav-prev">← Lesson 19</a> <a href="0021-capstone-the-spectral-theorem-in-practice.html" class="nav-next">Lesson 21 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <h2>1. The Jordan block</h2>
+  <div class="box">
+    <span class="box-label">Definition — Jordan Block</span>
+    The <strong>Jordan block</strong> J<sub>k</sub>(λ) is the k×k matrix with λ on every diagonal entry, 1 on every entry directly above the diagonal, and 0 everywhere else. (J₁(λ) = [λ], a single entry; J₂(λ) = [[λ,1],[0,λ]]; and so on.)
+  </div>
+
+  <h2>2. The theorem</h2>
+  <div class="box">
+    <span class="box-label">Theorem — Jordan Canonical Form</span>
+    If T's characteristic polynomial splits into linear factors over F (always true over ℂ), then V has a basis relative to which [T] is block diagonal, with every block a Jordan block. The blocks for eigenvalue λ have sizes summing to λ's algebraic multiplicity, and this matrix — the <strong>Jordan canonical form</strong> of T — is unique up to reordering the blocks.
+  </div>
+  <p>This uses two facts stated here without full proof (both genuine theorems, just beyond this course's scope to prove completely): first, that V decomposes as a direct sum V = K<sub>λ₁</sub> ⊕ ⋯ ⊕ K<sub>λm</sub> of all the generalized eigenspaces — the natural extension of Lesson 11's "eigenspace sums are direct" lemma to generalized eigenspaces; and second, that every nilpotent operator's space decomposes into a direct sum of chains like Lesson 19's. What <em>is</em> fully provable, and is the actual content of this lesson, is exactly what a single chain contributes once you have one.</p>
+
+  <h2>3. From a chain to a Jordan block</h2>
+  <div class="box">
+    <span class="box-label">Theorem — A Chain Produces a Jordan Block</span>
+    Let N = (T−λI)|<sub>K<sub>λ</sub></sub>, and let {v, Nv, …, N<sup>k−1</sup>v} be a chain with N<sup>k−1</sup>v≠0, N<sup>k</sup>v=0 (Lesson 19). Order the basis w₁=N<sup>k−1</sup>v, w₂=N<sup>k−2</sup>v, …, w<sub>k</sub>=v (from the "top" of the chain down to v itself). Relative to (w₁,…,w<sub>k</sub>), T acts exactly as the Jordan block J<sub>k</sub>(λ).
+  </div>
+  <div class="box">
+    <span class="box-label">Proof</span>
+    For i ≥ 2: T(w<sub>i</sub>) = T(N<sup>k−i</sup>v) = (N+λI)(N<sup>k−i</sup>v) = N<sup>k−i+1</sup>v + λN<sup>k−i</sup>v = w<sub>i−1</sub> + λw<sub>i</sub> (using T=N+λI on K<sub>λ</sub>, Lesson 19). For i=1: T(w₁) = T(N<sup>k−1</sup>v) = N<sup>k</sup>v + λN<sup>k−1</sup>v = 0 + λw₁ = λw₁ (using N<sup>k</sup>v=0). So column i of [T] in this basis is: λ in row i, 1 in row i−1 (for i≥2), 0 elsewhere — exactly J<sub>k</sub>(λ)'s columns. ∎
+  </div>
+  <div class="box why">
+    <span class="box-label">Why the chain has to be read top-down, not bottom-up</span>
+    w₁ = N<sup>k−1</sup>v is the vector N finally kills — it's a genuine eigenvector (T(w₁)=λw₁ exactly, no leftover term), which is why it has to occupy the "first" position with nothing feeding into it. Every other w<sub>i</sub> gets sent to λw<sub>i</sub> plus the vector one step closer to being killed, w<sub>i−1</sub> — which is exactly the single superdiagonal 1 in J<sub>k</sub>(λ).
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Worked Example — Recovering a Jordan Block from a Scrambled Basis</span>
+    Let C = [[1,1],[−1,3]]. Characteristic polynomial: trace=4, det=1(3)−1(−1)=4, so λ²−4λ+4=(λ−2)², a repeated eigenvalue λ=2. (C−2I) = [[−1,1],[−1,1]]; solving (C−2I)v=0 gives only v=(1,1) (up to scaling) — a defective eigenspace, dim(E₂)=1 &lt; algebraic multiplicity 2.
+    <br><br>
+    N=(C−2I) is nilpotent: N² = [[−1,1],[−1,1]]² = [[0,0],[0,0]] (direct computation), so K₂=ℝ². Build a chain: try v=(1,0). Nv = (C−2I)(1,0) = (−1,−1) ≠ 0, and N²v=0 (confirmed above). So {(1,0), (−1,−1)} is a chain, with w₁=Nv=(−1,−1) and w₂=v=(1,0).
+    <br><br>
+    P = [w₁ w₂] = [[−1,1],[−1,0]]. Direct computation confirms CP = P·[[2,1],[0,2]] (both sides equal [[−2,1],[−2,−1]]), so P⁻¹CP = [[2,1],[0,2]] = J₂(2) — the Jordan canonical form of C, recovered entirely from one chain.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. In the proof that a chain produces a Jordan block, why does T(w₁)=λw₁ exactly, with no extra term?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">w₁=N^(k−1)v satisfies Nw₁=N^k v=0 (the chain's top vector is genuinely killed by N), so T(w₁)=Nw₁+λw₁ reduces to just λw₁.</button>
+      <button class="quiz-choice" data-correct="false">Because w₁ is always the zero vector.</button>
+      <button class="quiz-choice" data-correct="false">Because k is assumed to be 1.</button>
+      <button class="quiz-choice" data-correct="false">Because T is always diagonalizable.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>N^k=0 is exactly what makes Nw₁ vanish, leaving T(w₁) with only its λw₁ term — the one genuine eigenvector inside the chain.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. What forces the two facts cited without full proof (V=⊕K_λ and every nilpotent decomposes into chains) to be labeled that way in this lesson?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Both are true and standard, but proving them in full generality requires more machinery (a general induction beyond what's been built) than this course has room for.</button>
+      <button class="quiz-choice" data-correct="false">They are actually false in general.</button>
+      <button class="quiz-choice" data-correct="false">They only hold for 2×2 matrices.</button>
+      <button class="quiz-choice" data-correct="false">They follow trivially from the Spectral Theorem alone.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Both facts are genuine, provable theorems — they're just more involved than what this course's proof toolkit (built through Lesson 19) covers in full generality.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="1">
+    <p class="quiz-prompt">3. Fill in the blank: in J<sub>k</sub>(λ), every entry directly above the diagonal is ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The superdiagonal entries are always exactly 1 in a Jordan block — that's what encodes each w_{i-1}=N(w_i) relationship.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">4. For C=[[1,1],[−1,3]], what is dim(E₂), the ordinary eigenspace for λ=2?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">1 — only (1,1) (up to scaling) solves (C−2I)v=0.</button>
+      <button class="quiz-choice" data-correct="false">2 — C is already diagonalizable.</button>
+      <button class="quiz-choice" data-correct="false">0</button>
+      <button class="quiz-choice" data-correct="false">4</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>(C−2I)=[[−1,1],[−1,1]] has a 1-dimensional solution set, confirming C is defective — exactly why a Jordan block (not a diagonal matrix) is needed.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="-2|−2">
+    <p class="quiz-prompt">5. In the worked example, w₁=Nv for v=(1,0), giving w₁=(−1,−1). Fill in the blank: since w₁ is a genuine eigenvector, Cw₁ should equal 2w₁ = (−2, ___).</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>2w₁ = 2(−1,−1) = (−2,−2), so the second coordinate is −2. (Check directly: C(−1,−1) = (1(−1)+1(−1), −1(−1)+3(−1)) = (−2,−2). ✓)</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Treil's <a href="https://www.math.brown.edu/streil/papers/LADW/LADW.html"><em>Linear Algebra Done Wrong</em></a>, Chapter 7.2–7.3, proves the full chain-decomposition existence theorem this lesson states without proof, and works through several more Jordan form examples.</p>
+
+  <p class="ask-teacher">Ask your teacher to construct a 3×3 matrix with Jordan form diag-block(J₂(1), J₁(1)) — two blocks for the same eigenvalue — if you want to see a case with more than one chain per eigenvalue. Next up: the course capstone, tying the Spectral Theorem back to a concrete application.</p>
+
+  <footer class="lesson-footer">STEM+ · Linear Algebra B · Unit 7 · Lesson 20 of 21</footer>
+</div>

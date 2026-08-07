@@ -1,0 +1,117 @@
+<meta charset="UTF-8">
+<link rel="icon" href="../../../favicon.ico?v=1" type="image/x-icon">
+<title>Lesson 11: The Heine-Borel Theorem — STEM+</title>
+<link rel="stylesheet" href="../../../assets/style.css">
+<script src="../../../assets/quiz.js" defer></script>
+<div class="page" data-tier="advanced">
+  <span class="kicker">STEM+ · Topology: Fundamentals · Unit 4 · Lesson 11</span>
+  <h1>The Heine-Borel Theorem</h1>
+  <p class="subtitle">Compact subsets of ℝⁿ are exactly the closed, bounded ones — reproved by bisection from the open-cover definition, and extended past ℝ to every dimension at once.</p>
+  <p class="nav-links"><a href="0010-compactness-via-open-covers.html" class="nav-prev">← Lesson 10</a> <a href="0012-compactness-continuity-and-the-extreme-value-theorem.html" class="nav-next">Lesson 12 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Real Analysis A, Unit 3, Lesson 17 proved that a subset of ℝ is (sequentially) compact if and only if it is closed and bounded. This lesson proves the identical characterization using Lesson 10's open-cover definition, first for a closed bounded interval [a, b], then for general closed bounded subsets of ℝⁿ.</p>
+
+  <h2>Step 1 — [a, b] is compact</h2>
+  <div class="box">
+    <span class="box-label">Theorem</span>
+    Every closed, bounded interval [a, b] ⊆ ℝ is compact.
+  </div>
+  <div class="box">
+    <span class="box-label">Proof sketch (bisection)</span>
+    Suppose toward contradiction some open cover 𝒰 of [a, b] has no finite subcover. Bisect [a, b] into two closed halves of equal length; if both halves had a finite subcover from 𝒰, their union would give a finite subcover of [a, b], contradicting the assumption — so at least one half, call it I₁, also has no finite subcover. Repeat: bisect I₁, get I₂ with no finite subcover, and so on, producing a nested sequence [a,b] = I₀ ⊇ I₁ ⊇ I₂ ⊇ ⋯ of closed intervals, each with no finite subcover, and lengths shrinking to 0. The endpoints of the Iₙ's form sequences squeezing toward a single point c (a consequence of the completeness axiom, Real Analysis A Unit 1 Lesson 5 — the nested interval property). Since c ∈ [a, b], some U ∈ 𝒰 contains c, and U being open means some ε-ball around c lies in U. Once the intervals Iₙ shrink below width ε, Iₙ ⊆ U — meaning the single set U is already a finite (one-element) subcover of Iₙ, contradicting that Iₙ was chosen to have no finite subcover. ∎
+  </div>
+  <div class="box why">
+    <span class="box-label">Why completeness resurfaces here</span>
+    The nested intervals shrinking to a single point c is not automatic — it fails over ℚ for exactly the reason Real Analysis A opened the entire course with (Unit 1, Lesson 1's √2 example). Compactness of [a,b], the theorem underlying this entire unit, ultimately still traces back to the completeness axiom, just reached by a different route than Real Analysis A's original sequential proof.
+  </div>
+
+  <h2>Step 2 — general closed, bounded subsets of ℝⁿ</h2>
+  <div class="box">
+    <span class="box-label">Theorem — Heine-Borel Theorem</span>
+    A subset K ⊆ ℝⁿ is compact (open-cover sense) if and only if K is closed and bounded.
+  </div>
+  <div class="box">
+    <span class="box-label">Proof sketch (⇐, closed + bounded ⇒ compact)</span>
+    If K is bounded, K fits inside some closed box [−M, M]ⁿ = [−M,M] × ⋯ × [−M,M]. Each factor [−M, M] is compact (Step 1). A finite product of compact spaces is compact (a fact this course states here and proves properly once the product topology is built in Unit 5, Lesson 13) — so [−M, M]ⁿ is compact. K is a closed subset of this compact box (closed in ℝⁿ, hence closed in the box's subspace topology too), so by Lesson 10's closed-subset theorem, K is compact.
+  </div>
+  <div class="box">
+    <span class="box-label">Proof sketch (⇒, compact ⇒ closed + bounded)</span>
+    <strong>Bounded:</strong> the collection of open balls {B(0, m) : m = 1, 2, 3, …} covers ℝⁿ, hence covers K; compactness of K extracts a finite subcover B(0, m₁), …, B(0, m<sub>k</sub>), and taking M = max(mᵢ) shows K ⊆ B(0, M) — bounded. <strong>Closed:</strong> fix x ∉ K. For each k ∈ K, since x ≠ k, the balls B(x, |x−k|/2) and B(k, |x−k|/2) are disjoint. The collection {B(k, |x−k|/2) : k ∈ K} covers K; extract a finite subcover around k₁, …, k<sub>m</sub>. Then the intersection of the corresponding disjoint x-balls, ⋂B(x, |x−kᵢ|/2), is a single open neighborhood of x missing K entirely (it's disjoint from every one of the finitely many covering k-balls). So every point outside K has an open neighborhood avoiding K — meaning ℝⁿ \ K is open, so K is closed. ∎
+  </div>
+  <div class="box why">
+    <span class="box-label">Why the "closed" half of this proof previews Unit 6</span>
+    The disjoint-balls trick used above — separating a point x from a set K using two disjoint open balls — is exactly the defining property of a Hausdorff space, formalized in Unit 6, Lesson 16. It works here because ℝⁿ has a metric to build the balls from; that same separation trick will need to be assumed as an axiom, rather than derived, once metrics are no longer available.
+  </div>
+
+  <h2>Connecting back explicitly</h2>
+  <div class="box example">
+    <span class="box-label">Example — Comparing to Real Analysis A</span>
+    Real Analysis A, Unit 3, Lesson 17 proved [a, b] is (sequentially) compact via the Bolzano-Weierstrass theorem: every sequence in [a,b] has a convergent subsequence, landing back in [a,b] because [a,b] is closed. This lesson reaches the identical conclusion — compactness of [a, b] — via bisection and open covers instead, with no sequences anywhere in the argument. Both proofs ultimately draw on completeness; only the packaging differs, and this lesson's version is the one that extends past ℝ to ℝⁿ (and, as Lesson 10 noted, past ℝⁿ to any topological space) without modification.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. In the bisection proof that [a,b] is compact, what property of ℝ guarantees the nested intervals Iₙ shrink to a single point c?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">The Archimedean Property alone.</button>
+      <button class="quiz-choice" data-correct="true">The completeness axiom, via the nested interval property.</button>
+      <button class="quiz-choice" data-correct="false">The fact that ℚ is dense in ℝ.</button>
+      <button class="quiz-choice" data-correct="false">The definition of continuity.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The nested interval property, which guarantees the shrinking intervals squeeze down to a single point, is itself a consequence of completeness — the same axiom Real Analysis A opened the entire course with.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. According to the Heine-Borel theorem, which subsets of ℝⁿ are compact?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Only the finite ones.</button>
+      <button class="quiz-choice" data-correct="true">Exactly the closed and bounded ones.</button>
+      <button class="quiz-choice" data-correct="false">Every subset of ℝⁿ, without exception.</button>
+      <button class="quiz-choice" data-correct="false">Only the open ones.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Closed and bounded together are exactly equivalent to compactness in ℝⁿ — neither condition alone suffices, as (0,1) (bounded, not closed) shows.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. In the proof that compact ⇒ closed, what does the disjoint-balls construction around x and each k ∈ K accomplish?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">It shows K is actually open.</button>
+      <button class="quiz-choice" data-correct="true">It produces, after extracting a finite subcover, a single open neighborhood of x that avoids K entirely — showing the complement of K is open.</button>
+      <button class="quiz-choice" data-correct="false">It shows x must actually belong to K.</button>
+      <button class="quiz-choice" data-correct="false">It proves K is unbounded.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Intersecting finitely many disjoint x-balls (one per point of a finite subcover of K) yields a single open set around x missing K — exactly what's needed to show ℝⁿ \ K is open.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="bisection">
+    <p class="quiz-prompt">4. Fill in the blank: the proof that [a,b] is compact uses repeated ___ — halving the interval at each step to locate a point where the open cover argument breaks down.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Bisection is the technique that produces the nested shrinking intervals central to the proof.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="Hausdorff">
+    <p class="quiz-prompt">5. Fill in the blank: the disjoint-balls separation trick used in the "closed" half of the Heine-Borel proof previews the ___ property, formalized in Unit 6.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Hausdorff is the axiom that abstracts exactly this "separate any two points/point-and-set with disjoint open sets" trick, once a metric is no longer available to build the balls from directly.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: Munkres's <em>Topology</em>, Section 27 ("Compact Subspaces of the Real Line"), proves the Heine-Borel theorem via this same bisection strategy.</p>
+
+  <p class="ask-teacher">Stuck on anything above, or want to see the "finite product of compact spaces is compact" fact proved in full once Unit 5's product topology is available? Ask your teacher — that's what I'm here for. Next up: compactness under continuous maps, and the Extreme Value Theorem rebuilt from it.</p>
+
+  <footer class="lesson-footer">STEM+ · Topology: Fundamentals · Unit 4 · Lesson 11 of 21</footer>
+</div>
