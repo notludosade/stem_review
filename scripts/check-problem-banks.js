@@ -3,6 +3,7 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const { courses } = require('../public/assets/problem-banks.js');
+const { parseNumber, answersClose } = require('../public/assets/problem-sets.js');
 
 const factorial = (n) => {
   let value = 1;
@@ -124,6 +125,12 @@ const equal = (left, right) => typeof left === 'number'
 const assert = (condition, message) => {
   if (!condition) throw new Error(message);
 };
+
+assert(parseNumber('1/3') === 1 / 3, 'Fraction input parsing failed');
+assert(parseNumber('25%') === 0.25, 'Percent input parsing failed');
+assert(parseNumber('−2.5') === -2.5, 'Unicode-minus input parsing failed');
+assert(answersClose(3.14, Math.PI, 0.001), 'Rounded decimal should be accepted');
+assert(!answersClose(99, 100, 0.001), 'Different whole-number answer should be rejected');
 
 assert(courses.length === 20, `Expected 20 courses, found ${courses.length}`);
 ['real-analysis-a', 'advanced-algorithms'].forEach((slug) => assert(courses.some((course) => course.slug === slug && course.tier === 'advanced'), `Missing Advanced+ problem set: ${slug}`));

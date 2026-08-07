@@ -1,8 +1,11 @@
 'use strict';
 
 const assert = require('assert');
+const fs = require('fs');
+const path = require('path');
 const { splitHtmlFragment } = require('../lib/content');
 const { extractScripts, stripScripts } = require('../lib/scripts');
+const lessonAnswers = require('../public/assets/quiz.js');
 
 const { title, body } = splitHtmlFragment(
   '<meta charset="UTF-8">\n<title>Example — STEM+</title>\n<div class="page">\n  <h1>Example</h1>\n</div>\n'
@@ -36,5 +39,41 @@ assert.strictEqual(
   2,
   'sanity check: the same input still yields 2 scripts via extractScripts before stripping — confirms getStaticProps extracts scripts from `html` first, then strips them from `body` separately, rather than losing them'
 );
+
+const sentenceCases = [
+  ['The complement is an open set.', ['open'], true],
+  ['It is not open.', ['open'], false],
+  ['It could be open or closed.', ['open'], false],
+  ['the smallest possible upper bound', ['least upper bound'], true],
+  ['bounded and closed', ['closed and bounded'], true],
+  ['the sequence is convergent', ['converges'], true],
+  ['it is not rational', ['irrational'], true],
+  ['theta', ['θ'], true],
+  ['2a + 5', ['2a-5'], false],
+  ['1', ['−1'], false],
+];
+global.window = { localStorage: { getItem: () => null, setItem: () => {} } };
+global.document = { addEventListener: () => {} };
+require('../public/assets/tests.js');
+const examAnswers = global.window.STEMPlusTests;
+sentenceCases.forEach(([value, answers, expected]) => {
+  assert.strictEqual(lessonAnswers.answerMatches(value, answers), expected, `lesson answer mismatch: ${value}`);
+  assert.strictEqual(examAnswers.answerMatches(value, answers), expected, `exam answer mismatch: ${value}`);
+});
+const htmlFiles = (directory) => fs.readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
+  const target = path.join(directory, entry.name);
+  return entry.isDirectory() ? htmlFiles(target) : entry.name.endsWith('.html') ? [target] : [];
+});
+htmlFiles(path.resolve(__dirname, '../public')).forEach((file) => {
+  const html = fs.readFileSync(file, 'utf8');
+  for (const match of html.matchAll(/data-answers="([^"]*)"/g)) {
+    match[1].split('|').map((answer) => answer.trim()).filter(Boolean).forEach((answer) => {
+      assert.ok(lessonAnswers.answerMatches(answer, [answer]), `${file}: lesson key no longer matches itself: ${answer}`);
+      assert.ok(examAnswers.answerMatches(answer, [answer]), `${file}: exam key no longer matches itself: ${answer}`);
+    });
+  }
+});
+delete global.window;
+delete global.document;
 
 console.log('check-content: OK');

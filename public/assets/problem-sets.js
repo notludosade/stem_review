@@ -1,6 +1,24 @@
 (function () {
   'use strict';
 
+  const parseNumber = (raw) => {
+    const value = raw.trim().replace(/,/g, '').replace(/−/g, '-');
+    if (!value) return NaN;
+    const fraction = value.match(/^(-?\d+(?:\.\d+)?)\s*\/\s*(-?\d+(?:\.\d+)?)$/);
+    if (fraction && Number(fraction[2]) !== 0) return Number(fraction[1]) / Number(fraction[2]);
+    const percent = value.match(/^(-?\d+(?:\.\d+)?)\s*%$/);
+    if (percent) return Number(percent[1]) / 100;
+    return Number(value);
+  };
+  const answersClose = (value, answer, tolerance) => {
+    const allowed = Number.isInteger(answer) ? tolerance : Math.max(tolerance, Math.min(0.1, Math.max(0.01, Math.abs(answer) * 0.01)));
+    return Math.abs(value - answer) <= allowed;
+  };
+  if (typeof module === 'object' && module.exports) {
+    module.exports = { parseNumber, answersClose };
+    return;
+  }
+
   const bankApi = window.STEMProblemBanks;
   const slug = new URLSearchParams(window.location.search).get('course');
   const course = bankApi && bankApi.getCourse(slug);
@@ -33,13 +51,6 @@
       [copy[i], copy[j]] = [copy[j], copy[i]];
     }
     return copy;
-  };
-  const parseNumber = (raw) => {
-    const value = raw.trim().replace(/,/g, '');
-    if (!value) return NaN;
-    const fraction = value.match(/^(-?\d+(?:\.\d+)?)\s*\/\s*(-?\d+(?:\.\d+)?)$/);
-    if (fraction && Number(fraction[2]) !== 0) return Number(fraction[1]) / Number(fraction[2]);
-    return Number(value);
   };
   const formatAnswer = (answer) => typeof answer === 'number'
     ? String(Number(answer.toFixed(3)))
@@ -127,12 +138,12 @@
     if (answered) return;
     const value = parseNumber(input.value);
     if (!Number.isFinite(value)) {
-      feedback.textContent = 'Enter a number or fraction.';
+      feedback.textContent = 'Enter a number, fraction, or percent.';
       feedback.className = 'quiz-feedback is-incorrect';
       feedback.hidden = false;
       return;
     }
-    finishAnswer(Math.abs(value - current.answer) <= current.tolerance);
+    finishAnswer(answersClose(value, current.answer, current.tolerance));
   };
   const renderQuestion = () => {
     if (!deck.length) rebuildDeck();

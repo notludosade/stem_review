@@ -139,8 +139,66 @@ window.STEMPlusTests = (function () {
     }
   }
 
-  function normalize(s) {
-    return s.trim().toLowerCase();
+  function normalizeSentenceAnswer(value) {
+    return String(value)
+      .replace(/[εϵ]/g, ' epsilon ')
+      .replace(/θ/g, ' theta ')
+      .replace(/δ/g, ' delta ')
+      .replace(/β/g, ' beta ')
+      .replace(/π/g, ' pi ')
+      .replace(/λ/g, ' lambda ')
+      .replace(/∇/g, ' nabla ')
+      .replace(/∞/g, ' infinity ')
+      .replace(/#/g, ' hash ')
+      .replace(/:/g, ' colon ')
+      .replace(/ℝ/g, ' real numbers ')
+      .replace(/ℚ/g, ' rational numbers ')
+      .replace(/∅/g, ' empty set ')
+      .replace(/[−–—]/g, '-')
+      .normalize('NFKD')
+      .toLowerCase()
+      .replace(/\b(?:isn['’]?t|aren['’]?t|wasn['’]?t|weren['’]?t|doesn['’]?t|don['’]?t|cannot|can['’]?t)\b/g, ' not ')
+      .replace(/\bnot rational\b/g, ' irrational ')
+      .replace(/\bnot complete\b/g, ' incomplete ')
+      .replace(/\bnot converg(?:e|ent)\b/g, ' diverge ')
+      .replace(/['’]s\b/g, '')
+      .replace(/([a-z])-([a-z])/g, '$1 $2')
+      .replace(/[^a-z0-9+*/=<>&|!-]+/g, ' ')
+      .replace(/\s*([+*/=<>&|!-])\s*/g, '$1')
+      .replace(/\s+/g, ' ')
+      .trim();
+  }
+
+  function canonicalAnswerToken(token) {
+    var forms = {
+      smallest: 'least', minimum: 'least', min: 'least', largest: 'greatest', maximum: 'greatest', max: 'greatest',
+      finitely: 'finite', bounds: 'bound', converges: 'converge', convergent: 'converge', convergence: 'converge',
+      diverges: 'diverge', divergent: 'diverge', divergence: 'diverge', continuity: 'continuous',
+      differentiability: 'differentiable', monotonicity: 'monotone', uniformly: 'uniform',
+      completeness: 'complete', rationals: 'rational', irrationals: 'irrational',
+      sequences: 'sequence', intersections: 'intersection', unions: 'union',
+      derivatives: 'derivative', integrals: 'integral', integration: 'integral', refinements: 'refinement'
+    };
+    return forms[token] || token;
+  }
+
+  function answerMatches(value, acceptedAnswers) {
+    var input = normalizeSentenceAnswer(value);
+    if (!input) return false;
+    var stop = new Set(['a', 'an', 'the', 'is', 'are', 'was', 'were', 'it', 'this', 'that', 'of', 'to', 'for', 'as', 'answer', 'term', 'called', 'and']);
+    var tokens = function (text) { return text.split(' ').map(canonicalAnswerToken).filter(function (token) { return token && !stop.has(token); }); };
+    var inputTokens = tokens(input);
+    var negative = function (items) { return items.some(function (token) { return ['not', 'no', 'never', 'without', 'neither'].indexOf(token) !== -1; }); };
+    return acceptedAnswers.some(function (answer) {
+      var expected = normalizeSentenceAnswer(answer);
+      if (!expected) return false;
+      if (input === expected) return true;
+      if (!/[a-z]{2}/.test(expected)) return false;
+      var expectedTokens = tokens(expected);
+      if (negative(inputTokens) !== negative(expectedTokens)) return false;
+      if (inputTokens.indexOf('or') !== -1 && expectedTokens.indexOf('or') === -1) return false;
+      return expectedTokens.length > 0 && expectedTokens.every(function (token) { return inputTokens.indexOf(token) !== -1; }) && inputTokens.length <= expectedTokens.length + 10;
+    });
   }
 
   function loadResults() {
@@ -404,8 +462,8 @@ window.STEMPlusTests = (function () {
   function gradeSub(el) {
     if (el.hasAttribute('data-answers') || el.hasAttribute('data-test-fill')) {
       const input = el.querySelector('.quiz-fill-input');
-      const answers = (el.getAttribute('data-answers') || '').split('|').map(normalize).filter(Boolean);
-      return answers.includes(normalize(input ? input.value : ''));
+      const answers = (el.getAttribute('data-answers') || '').split('|').map(function (answer) { return answer.trim(); }).filter(Boolean);
+      return answerMatches(input ? input.value : '', answers);
     }
     const selected = el.querySelector('.quiz-choice.is-selected');
     return !!selected && selected.getAttribute('data-correct') === 'true';
@@ -791,6 +849,6 @@ window.STEMPlusTests = (function () {
     mountProjectGate, mountProjectStatus, mountCourseStatus, mountReflection,
     mountPathwayExamGate, mountPathwayFinalExamGate, mountRouteLock, mountDevModePage,
     isCourseExamPassed, isProjectComplete, isPathwayExamPassed, isPathwayFinalExamPassed,
-    isDevMode, setDevMode,
+    isDevMode, setDevMode, answerMatches,
   };
 })();
