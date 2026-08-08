@@ -64,7 +64,10 @@ const htmlFiles = (directory) => fs.readdirSync(directory, { withFileTypes: true
   const target = path.join(directory, entry.name);
   return entry.isDirectory() ? htmlFiles(target) : entry.name.endsWith('.html') ? [target] : [];
 });
-htmlFiles(path.resolve(__dirname, '../public')).forEach((file) => {
+[
+  ...htmlFiles(path.resolve(__dirname, '../public')),
+  ...htmlFiles(path.resolve(__dirname, '../content')),
+].forEach((file) => {
   const html = fs.readFileSync(file, 'utf8');
   for (const match of html.matchAll(/data-answers="([^"]*)"/g)) {
     match[1].split('|').map((answer) => answer.trim()).filter(Boolean).forEach((answer) => {

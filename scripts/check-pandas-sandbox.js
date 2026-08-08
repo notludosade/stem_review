@@ -37,13 +37,14 @@ assert(answer(180).score_total === 160, 'Pipeline reference failed');
 assert(answer(181)[0].retained_rate === 1, 'Expert cohort reference failed');
 assert(answer(190)[0].difference === 20, 'Expert reconciliation reference failed');
 
-const root = path.resolve(__dirname, '..');
+const root = path.resolve(__dirname, '..', 'content');
+const publicRoot = path.resolve(__dirname, '..', 'public');
 ['index.html', 'sandbox.html', 'pandas-sandbox.html'].forEach((page) => {
   const html = fs.readFileSync(path.join(root, page), 'utf8');
   for (const match of html.matchAll(/(?:href|src)="([^"]+)"/g)) {
     const target = match[1].split(/[?#]/)[0];
     if (!target || /^(?:https?:|mailto:)/.test(target)) continue;
-    assert(fs.existsSync(path.resolve(root, target)), `${page}: broken local reference ${match[1]}`);
+    assert(fs.existsSync(path.resolve(root, target)) || fs.existsSync(path.resolve(publicRoot, target)), `${page}: broken local reference ${match[1]}`);
   }
 });
 

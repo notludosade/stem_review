@@ -167,7 +167,8 @@ courses.forEach((course) => {
 
 assert(total === 1200, `Expected 1200 total questions, found ${total}`);
 
-const root = path.resolve(__dirname, '../public');
+const root = path.resolve(__dirname, '../content');
+const publicRoot = path.resolve(__dirname, '../public');
 const pages = ['problem-sets.html', 'problem-set.html', 'sandbox.html'];
 let localLinks = 0;
 pages.forEach((page) => {
@@ -175,7 +176,7 @@ pages.forEach((page) => {
   for (const match of html.matchAll(/(?:href|src)="([^"]+)"/g)) {
     const target = match[1].split(/[?#]/)[0];
     if (!target || target === 'index.html' || /^(?:https?:|mailto:)/.test(target)) continue;
-    assert(fs.existsSync(path.resolve(root, target)), `${page}: broken local reference ${match[1]}`);
+    assert(fs.existsSync(path.resolve(root, target)) || fs.existsSync(path.resolve(publicRoot, target)), `${page}: broken local reference ${match[1]}`);
     localLinks += 1;
   }
 });

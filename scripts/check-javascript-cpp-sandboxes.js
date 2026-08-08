@@ -47,13 +47,14 @@ try {
   });
 } finally { fs.rmSync(temporary, { recursive: true, force: true }); }
 
-const root = path.resolve(__dirname, '..');
+const root = path.resolve(__dirname, '..', 'content');
+const publicRoot = path.resolve(__dirname, '..', 'public');
 ['index.html', 'sandbox.html', 'javascript-sandbox.html', 'cpp-sandbox.html'].forEach((page) => {
   const html = fs.readFileSync(path.join(root, page), 'utf8');
   for (const match of html.matchAll(/(?:href|src)="([^"]+)"/g)) {
     const target = match[1].split(/[?#]/)[0];
     if (!target || /^(?:https?:|mailto:)/.test(target)) continue;
-    assert(fs.existsSync(path.resolve(root, target)), `${page}: broken local reference ${match[1]}`);
+    assert(fs.existsSync(path.resolve(root, target)) || fs.existsSync(path.resolve(publicRoot, target)), `${page}: broken local reference ${match[1]}`);
   }
 });
 

@@ -59,14 +59,15 @@ assert(expected('java-153', 3) === 3, 'Edit-distance reference check failed');
 assert(JSON.stringify(expected('java-170', 0)) === '[[3,4],[10,12]]', 'Matrix reference check failed');
 assert(expected('java-180', 1) === 4, 'CSV reference check failed');
 
-const root = path.resolve(__dirname, '..');
+const root = path.resolve(__dirname, '..', 'content');
+const publicRoot = path.resolve(__dirname, '..', 'public');
 let localReferences = 0;
 ['index.html', 'sandbox.html', 'java-sandbox.html'].forEach((page) => {
   const html = fs.readFileSync(path.join(root, page), 'utf8');
   for (const match of html.matchAll(/(?:href|src)="([^"]+)"/g)) {
     const target = match[1].split(/[?#]/)[0];
     if (!target || /^(?:https?:|mailto:)/.test(target)) continue;
-    assert(fs.existsSync(path.resolve(root, target)), `${page}: broken local reference ${match[1]}`);
+    assert(fs.existsSync(path.resolve(root, target)) || fs.existsSync(path.resolve(publicRoot, target)), `${page}: broken local reference ${match[1]}`);
     localReferences += 1;
   }
 });

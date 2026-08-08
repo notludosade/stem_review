@@ -71,17 +71,18 @@ const run = spawnSync('python3', ['-c', harness], {
 });
 assert(run.status === 0, run.stdout || run.stderr || 'Python reference validation failed');
 
-const root = path.resolve(__dirname, '..');
+const root = path.resolve(__dirname, '..', 'content');
+const publicRoot = path.resolve(__dirname, '..', 'public');
 let localReferences = 0;
 ['index.html', 'sandbox.html', 'python-sandbox.html'].forEach((page) => {
   const html = fs.readFileSync(path.join(root, page), 'utf8');
   for (const match of html.matchAll(/(?:href|src)="([^"]+)"/g)) {
     const target = match[1].split(/[?#]/)[0];
     if (!target || /^(?:https?:|mailto:)/.test(target)) continue;
-    assert(fs.existsSync(path.resolve(root, target)), `${page}: broken local reference ${match[1]}`);
+    assert(fs.existsSync(path.resolve(root, target)) || fs.existsSync(path.resolve(publicRoot, target)), `${page}: broken local reference ${match[1]}`);
     localReferences += 1;
   }
 });
-assert(fs.existsSync(path.join(root, 'public/assets/python-worker.js')), 'Missing Python worker');
+assert(fs.existsSync(path.join(publicRoot, 'assets/python-worker.js')), 'Missing Python worker');
 
 console.log(`Python sandbox audit passed: ${problems.length} problems, ${problems.reduce((sum, problem) => sum + problem.tests.length, 0)} tests, ${localReferences} local references.`);
