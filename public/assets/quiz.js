@@ -78,7 +78,12 @@ function answerMatches(value, acceptedAnswers) {
 if (typeof module === 'object' && module.exports) module.exports = { normalizeSentenceAnswer, answerMatches };
 
 if (typeof document !== 'undefined') {
+  let quizzesInitialized = false;
+
   function initQuizzes() {
+    if (quizzesInitialized) return;
+    quizzesInitialized = true;
+
     document.querySelectorAll('[data-quiz]').forEach((quiz) => {
       shuffleQuizChoices(quiz);
       const choices = Array.from(quiz.querySelectorAll('.quiz-choice'));
