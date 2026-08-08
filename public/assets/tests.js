@@ -828,7 +828,10 @@ window.STEMPlusTests = (function () {
     if (body) body.innerHTML = html;
   }
 
-  document.addEventListener('DOMContentLoaded', () => {
+  function initTests() {
+    if (window.__testsInitialized) return;
+    window.__testsInitialized = true;
+
     document.querySelectorAll('[data-test]').forEach((container) => {
       if (!container.closest('[data-exam-gate], [data-pathway-exam-gate], [data-pathway-final-exam-gate]')) mountTest(container);
     });
@@ -842,7 +845,15 @@ window.STEMPlusTests = (function () {
     document.querySelectorAll('[data-course-status]').forEach(mountCourseStatus);
     document.querySelectorAll('[data-reflection]').forEach(mountReflection);
     document.querySelectorAll('[data-devmode]').forEach(mountDevModePage);
-  });
+  }
+
+  if (typeof document !== 'undefined' && document.querySelectorAll) {
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initTests);
+    } else {
+      initTests();
+    }
+  }
 
   return {
     mountTest, mountCourseExamGate, mountProgressReport,
