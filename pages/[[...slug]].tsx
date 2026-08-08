@@ -3,7 +3,7 @@ import path from 'path';
 import type { GetStaticPaths, GetStaticProps } from 'next';
 import { Layout } from '../components/Layout';
 import { LegacyContent } from '../components/LegacyContent';
-import { splitHtmlFragment } from '../lib/content';
+import { splitHtmlFragment, listContentFiles } from '../lib/content';
 import { extractScripts, stripScripts } from '../lib/scripts';
 
 const CONTENT_DIR = path.join(process.cwd(), 'content');
@@ -28,9 +28,9 @@ export default function CatchAllPage({ title, body, scripts }: PageProps) {
 }
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  const files = fs.readdirSync(CONTENT_DIR).filter((f) => f.endsWith('.html'));
-  const paths = files.map((file) => {
-    const slug = file === 'index.html' ? [] : [file];
+  const files = listContentFiles(CONTENT_DIR);
+  const paths = files.map((relPath: string) => {
+    const slug = relPath === 'index.html' ? [] : relPath.split('/');
     return { params: { slug } };
   });
   return { paths, fallback: false };
