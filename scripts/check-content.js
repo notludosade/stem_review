@@ -76,4 +76,27 @@ htmlFiles(path.resolve(__dirname, '../public')).forEach((file) => {
 delete global.window;
 delete global.document;
 
+const os = require('os');
+const { listContentFiles } = require('../lib/content');
+
+const tmpRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'listContentFiles-'));
+fs.writeFileSync(path.join(tmpRoot, 'index.html'), 'x');
+fs.writeFileSync(path.join(tmpRoot, 'math.html'), 'x');
+fs.mkdirSync(path.join(tmpRoot, 'Course A', 'Unit 1'), { recursive: true });
+fs.writeFileSync(path.join(tmpRoot, 'Course A', 'Unit 1', '0001-lesson.html'), 'x');
+fs.writeFileSync(path.join(tmpRoot, 'Course A', 'Unit 1', 'unit-test-a.html'), 'x');
+fs.writeFileSync(path.join(tmpRoot, 'Course A', 'notes.txt'), 'not html');
+const found = listContentFiles(tmpRoot).sort();
+assert.deepStrictEqual(
+  found,
+  [
+    'Course A/Unit 1/0001-lesson.html',
+    'Course A/Unit 1/unit-test-a.html',
+    'index.html',
+    'math.html',
+  ],
+  'listContentFiles should recursively find every .html file, using / separators, and skip non-html files'
+);
+fs.rmSync(tmpRoot, { recursive: true, force: true });
+
 console.log('check-content: OK');
