@@ -333,6 +333,8 @@ window.STEMPlusTests = (function () {
   }
 
   function mountProjectGate(gate) {
+    if (gate.dataset.mounted) return;
+    gate.dataset.mounted = '1';
     const pathwayExam = gate.getAttribute('data-required-pathway-exam');
     const locked = gate.querySelector('[data-project-locked]');
     const content = gate.querySelector('[data-project-content]');
@@ -377,6 +379,8 @@ window.STEMPlusTests = (function () {
   }
 
   function mountCourseStatus(el) {
+    if (el.dataset.mounted) return;
+    el.dataset.mounted = '1';
     const course = el.getAttribute('data-course-status');
     const passed = isCourseExamPassed(course);
     el.classList.add('lock-badge');
@@ -386,6 +390,8 @@ window.STEMPlusTests = (function () {
   }
 
   function mountProjectStatus(el) {
+    if (el.dataset.mounted) return;
+    el.dataset.mounted = '1';
     const pathwayExam = el.getAttribute('data-required-pathway-exam');
     el.classList.add('lock-badge');
     el.classList.remove('is-locked', 'is-unlocked');
@@ -407,6 +413,8 @@ window.STEMPlusTests = (function () {
 
   function mountReflection(container) {
     if (!container) return;
+    if (container.dataset.mounted) return;
+    container.dataset.mounted = '1';
     const projectId = container.getAttribute('data-reflection');
     const items = Array.from(container.querySelectorAll('[data-reflection-item]'));
     const completeBox = container.querySelector('[data-reflection-complete]');
@@ -591,6 +599,8 @@ window.STEMPlusTests = (function () {
   }
 
   function mountTest(container) {
+    if (container.dataset.mounted) return;
+    container.dataset.mounted = '1';
     shuffleChoices(container);
     wireSelection(container);
     const submit = container.querySelector('[data-test-submit]');
@@ -627,6 +637,8 @@ window.STEMPlusTests = (function () {
   }
 
   function mountCourseExamGate(gate) {
+    if (gate.dataset.mounted) return;
+    gate.dataset.mounted = '1';
     const course = gate.getAttribute('data-course');
     const required = (gate.getAttribute('data-required-units') || '').split('|').filter(Boolean);
     const locked = gate.querySelector('[data-exam-locked]');
@@ -658,6 +670,8 @@ window.STEMPlusTests = (function () {
   }
 
   function mountPathwayExamGate(gate) {
+    if (gate.dataset.mounted) return;
+    gate.dataset.mounted = '1';
     const pathway = gate.getAttribute('data-pathway');
     const required = (gate.getAttribute('data-required-courses') || '').split('|').filter(Boolean);
     const locked = gate.querySelector('[data-pathway-exam-locked]');
@@ -690,6 +704,8 @@ window.STEMPlusTests = (function () {
   }
 
   function mountPathwayFinalExamGate(gate) {
+    if (gate.dataset.mounted) return;
+    gate.dataset.mounted = '1';
     const pathway = gate.getAttribute('data-pathway');
     const required = (gate.getAttribute('data-required-courses') || '').split('|').filter(Boolean);
     const locked = gate.querySelector('[data-pathway-final-exam-locked]');
@@ -722,6 +738,8 @@ window.STEMPlusTests = (function () {
   }
 
   function mountRouteLock(el) {
+    if (el.dataset.mounted) return;
+    el.dataset.mounted = '1';
     const pathway = el.getAttribute('data-pathway');
     const unlockAfter = el.getAttribute('data-unlock-after');
     const locked = el.querySelector('[data-route-locked]');
@@ -744,6 +762,8 @@ window.STEMPlusTests = (function () {
   }
 
   function mountDevModePage(el) {
+    if (el.dataset.mounted) return;
+    el.dataset.mounted = '1';
     const input = el.querySelector('[data-devmode-input]');
     const submit = el.querySelector('[data-devmode-submit]');
     const status = el.querySelector('[data-devmode-status]');
@@ -796,6 +816,8 @@ window.STEMPlusTests = (function () {
   }
 
   function mountProgressReport(report) {
+    if (report.dataset.mounted) return;
+    report.dataset.mounted = '1';
     const course = report.getAttribute('data-course');
     const required = (report.getAttribute('data-required-units') || '').split('|').filter(Boolean);
     const body = report.querySelector('[data-report-body]');
@@ -829,9 +851,6 @@ window.STEMPlusTests = (function () {
   }
 
   function initTests() {
-    if (window.__testsInitialized) return;
-    window.__testsInitialized = true;
-
     document.querySelectorAll('[data-test]').forEach((container) => {
       if (!container.closest('[data-exam-gate], [data-pathway-exam-gate], [data-pathway-final-exam-gate]')) mountTest(container);
     });
