@@ -105,6 +105,14 @@ try {
   });
 
   await fetch(`http://localhost:${port}/json/close/${tab.id}`);
+  // Chrome's localStorage backend batches writes to disk rather than flushing
+  // synchronously on setItem(). If an expression writes to localStorage (e.g.
+  // seeding test data for a later, separate invocation to read), a SIGKILL
+  // immediately after evaluate returns can kill Chrome before that write
+  // reaches the profile directory — the write succeeds in-page but silently
+  // never persists. This delay is cheap for read-only checks and is what
+  // makes seed-then-read across two separate invocations actually reliable.
+  await sleep(500);
   console.log('Result:', JSON.stringify(result));
   const pass = result && (result === true || result.ok === true);
   console.log(pass ? 'PASS' : 'FAIL');

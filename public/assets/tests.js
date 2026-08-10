@@ -168,6 +168,36 @@ window.STEMPlusTests = (function () {
     return dir.split('/').map(encodeURIComponent).join('/');
   }
 
+  // Same 8 published pathways as pathways.html/projects.html, with their
+  // exact data-required-courses lists (copied from projects.html's own
+  // data-project-status spans, the source of truth already verified there)
+  // plus each pathway's capstone project id, so JS-driven pages (the
+  // Learning Record) can compute pathway/project readiness without scanning
+  // pathways.html's markup.
+  var PATHWAYS = [
+    { name: 'Software Engineer', courses: ['Computer Programming 1', 'Computer Programming 2', 'Computer Programming Ethics', 'Software Engineering'], projectId: 'software-engineer-capstone' },
+    { name: 'AI & Data', courses: ['Computer Programming 1', 'Computer Programming 2', 'Data Handling CB', 'AI Developer'], projectId: 'ai-data-capstone' },
+    { name: 'Mathematics', courses: ['Precalculus', 'AP Calculus BC', 'Real Analysis A', 'Real Analysis B'], projectId: 'mathematics-capstone' },
+    { name: 'Engineering & Physics', courses: ['Precalculus', 'AP Physics 1', 'Engineering 1', 'AP Physics 2', 'Career Applied Engineering'], projectId: 'engineering-physics-capstone' },
+    { name: 'Competitive Programmer', courses: ['Computer Programming 1', 'Computer Programming 2', 'Computer Programming 2+', 'Advanced Algorithms'], projectId: 'competitive-programmer-capstone' },
+    { name: 'Cloud & DevOps', courses: ['Computer Programming 1', 'Cloud Computing A', 'Cloud Computing B / DevOps'], projectId: 'cloud-devops-capstone' },
+    { name: 'General Programmer', courses: ['Computer Programming 1', 'Computer Programming 2', 'Computer Programming Ethics', 'Computer Programming 2+', 'Software Engineering', 'Data Handling CB', 'Systems Programming & Architecture: CS', 'Computer Networking Fundamentals', 'Advanced Algorithms'], projectId: 'general-programmer-capstone' },
+    { name: 'AI Developer: CB/RWA', courses: ['Computer Programming 1', 'Computer Programming 2', 'Data Handling CB', 'AI Developer', 'Applied Machine/Deep Learning', 'Cloud Computing A', 'Cloud Computing B / DevOps'], projectId: 'ai-developer-cbrwa-capstone' },
+  ];
+
+  // Mastery is a continuous measure (not a pass/fail badge): the average
+  // accuracy across every topic this browser has graded data for in a
+  // course, reusing buildReport's own topic tallies — the same numbers
+  // progress-report.html's weak/strong breakdown is built from. Distinct
+  // from "completed" (isCourseExamPassed), which only checks whether the
+  // course exam was passed at all, not how well.
+  function courseMastery(course) {
+    var topics = buildReport(course).topics;
+    if (topics.length === 0) return null;
+    var sum = topics.reduce(function (s, t) { return s + t.accuracy; }, 0);
+    return Math.round((sum / topics.length) * 100);
+  }
+
   function passThresholdFor(kind) {
     return Object.prototype.hasOwnProperty.call(PASS_THRESHOLDS, kind) ? PASS_THRESHOLDS[kind] : DEFAULT_PASS_THRESHOLD;
   }
@@ -1019,11 +1049,97 @@ window.STEMPlusTests = (function () {
     reports.forEach((r) => {
       const dir = coursePath(r.course);
       const passed = r.report.courseExam.passed;
+      const mastery = courseMastery(r.course);
       html += '<a class="toc-item" href="' + (dir ? dir + '/index.html' : 'pathways.html') + '">'
-        + '<span class="toc-num">' + (passed ? 'Exam passed' : 'In progress') + '</span>'
+        + '<span class="toc-num">' + (passed ? 'Exam passed' : 'In progress') + (mastery != null ? ' · ' + mastery + '% mastery' : '') + '</span>'
         + '<p class="toc-title">' + r.course + '</p></a>';
     });
     html += '</div>';
+
+    el.innerHTML = html;
+  }
+
+  // Cross-course Learning Record: <div data-learning-record></div> — the
+  // "how much have I actually done" view, distinct from the Dashboard's
+  // "what should I do today" view. Stats + per-course mastery percentages +
+  // which capstone projects are unlocked or one course away.
+  function mountLearningRecord(el) {
+    if (el.dataset.mounted) return;
+    el.dataset.mounted = '1';
+
+    const results = loadResults();
+    const projectData = loadProjectData();
+
+    if (results.length === 0 && Object.keys(projectData).length === 0) {
+      el.innerHTML = '<p class="toc-empty">Nothing recorded in this browser yet. <a href="new.html">Choose a goal</a> to get started.</p>';
+      return;
+    }
+
+    const courseNames = [];
+    results.forEach((r) => { if (courseNames.indexOf(r.course) === -1) courseNames.push(r.course); });
+    const reports = courseNames.map((course) => ({ course, report: buildReport(course), mastery: courseMastery(course) }));
+
+    const coursesCompleted = reports.filter((r) => r.report.courseExam.passed).length;
+    const unitTestsPassed = reports.reduce((sum, r) => sum + Object.keys(r.report.units).filter((u) => r.report.units[u].cleared).length, 0);
+    const questionsAnswered = results.reduce((sum, r) => sum + (r.topicBreakdown || []).length, 0);
+    const projectsCompleted = Object.keys(projectData).filter((id) => projectData[id].complete).length;
+
+    let html = '';
+
+    html += '<div class="toc-list">';
+    [
+      ['Courses Completed', coursesCompleted],
+      ['Unit Tests Passed', unitTestsPassed],
+      ['Questions Answered', questionsAnswered],
+      ['Projects Completed', projectsCompleted],
+    ].forEach((stat) => {
+      html += '<div class="toc-item"><span class="toc-num">' + stat[1] + '</span><p class="toc-title">' + stat[0] + '</p></div>';
+    });
+    html += '</div>';
+
+    html += '<h2>Mastery by Course</h2>';
+    if (reports.length > 0) {
+      html += '<div class="toc-list">';
+      reports.forEach((r) => {
+        const dir = coursePath(r.course);
+        const href = dir ? dir + '/progress-report.html' : 'pathways.html';
+        const label = r.report.courseExam.passed ? 'Completed' : 'In progress';
+        html += '<a class="toc-item" href="' + href + '"><span class="toc-num">' + (r.mastery != null ? r.mastery + '%' : '—') + '</span>'
+          + '<p class="toc-title">' + r.course + '</p><p class="toc-sub">' + label + '</p></a>';
+      });
+      html += '</div>';
+    } else {
+      html += '<p class="toc-empty">No graded work yet.</p>';
+    }
+
+    const pathwayStatus = PATHWAYS.map((p) => {
+      const passedCount = p.courses.filter((c) => isCourseExamPassed(c)).length;
+      return { name: p.name, projectId: p.projectId, passedCount, total: p.courses.length };
+    });
+    const ready = pathwayStatus.filter((p) => p.passedCount === p.total && !isProjectComplete(p.projectId));
+    const almostReady = pathwayStatus.filter((p) => p.passedCount > 0 && p.total - p.passedCount === 1);
+
+    html += '<h2>What You’re Ready For</h2>';
+    if (ready.length > 0) {
+      html += '<div class="toc-list">';
+      ready.forEach((p) => {
+        html += '<a class="toc-item" href="Projects/' + p.projectId + '.html"><span class="toc-num">✓ Unlocked</span>'
+          + '<p class="toc-title">' + p.name + ' Capstone</p><p class="toc-sub">Every required course exam passed.</p></a>';
+      });
+      html += '</div>';
+    } else {
+      html += '<p class="toc-empty">No capstone is fully unlocked yet.</p>';
+    }
+
+    if (almostReady.length > 0) {
+      html += '<h3>Almost Ready</h3><div class="toc-list">';
+      almostReady.forEach((p) => {
+        const missing = PATHWAYS.find((x) => x.name === p.name).courses.find((c) => !isCourseExamPassed(c));
+        html += '<a class="toc-item" href="pathways.html"><span class="toc-num">○ ' + p.passedCount + '/' + p.total + '</span>'
+          + '<p class="toc-title">' + p.name + '</p><p class="toc-sub">Recommended next: ' + missing + '</p></a>';
+      });
+      html += '</div>';
+    }
 
     el.innerHTML = html;
   }
@@ -1044,6 +1160,7 @@ window.STEMPlusTests = (function () {
     document.querySelectorAll('[data-reflection]').forEach(mountReflection);
     document.querySelectorAll('[data-devmode]').forEach(mountDevModePage);
     document.querySelectorAll('[data-dashboard]').forEach(mountDashboard);
+    document.querySelectorAll('[data-learning-record]').forEach(mountLearningRecord);
   }
 
   if (typeof document !== 'undefined' && document.querySelectorAll) {
