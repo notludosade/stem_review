@@ -118,6 +118,56 @@ window.STEMPlusTests = (function () {
   var DEV_MODE_KEY = 'stemplus:devmode:v1';
   var DEV_CODE = 'stem_developer67!';
 
+  // Maps a course's exact data-course display name (the string stored in every
+  // localStorage result record) to its directory path relative to site root.
+  // Built from the real data-course attribute in every course-exam.html, not
+  // guessed — several of these (AP Calculus BC, Cloud Computing B / DevOps,
+  // the three Advanced+ courses) do not follow the "slugify the name" pattern.
+  var COURSE_PATHS = {
+    'AI Developer': 'AI Developer',
+    'AP Calculus BC': 'AP STEM+/AP_CALC',
+    'AP Physics 1': 'AP Physics 1',
+    'AP Physics 2': 'AP Physics 2',
+    'AP Physics C: Electricity and Magnetism': 'AP Physics C Electricity and Magnetism',
+    'AP Physics C: Mechanics': 'AP Physics C Mechanics',
+    'Advanced Algorithms': 'Advanced+ Courses/Advanced Algorithms',
+    'Algebra/Geometry Fundamentals Review': 'Algebra Geometry Fundamentals Review',
+    'Applied Machine/Deep Learning': 'Applied Machine Deep Learning',
+    'CAD & Prototyping': 'CAD & Prototyping',
+    'Career Applied Engineering': 'Career Applied Engineering',
+    'Cloud Computing A': 'Cloud Computing A',
+    'Cloud Computing B / DevOps': 'Cloud Computing B',
+    'Computer Networking Fundamentals': 'Computer Networking Fundamentals',
+    'Computer Programming 1': 'Computer Programming 1',
+    'Computer Programming 2': 'Computer Programming 2',
+    'Computer Programming 2+': 'Computer Programming 2+',
+    'Computer Programming Ethics': 'Computer Programming Ethics',
+    'Data Handling CB': 'Data Handling CB',
+    'Differential Equations': 'Differential Equations',
+    'Discrete Math': 'Discrete Math',
+    'Engineering 1': 'Engineering 1',
+    'Game Engine Architecture': 'Game Engine Architecture',
+    'Linear Algebra A': 'Linear Algebra A',
+    'Linear Algebra B': 'Advanced+ Courses/Linear Algebra B',
+    'Mathematical Proofs': 'Mathematical Proofs',
+    'Multivariable Calculus': 'Multivariable Calculus',
+    'Precalculus': 'Precalculus',
+    'Quantum Physics & Optics': 'Quantum Physics and Optics',
+    'Real Analysis A': 'Advanced+ Courses/Real Analysis A',
+    'Real Analysis B': 'Advanced+ Courses/Real Analysis B',
+    'Software Engineering': 'Software Engineering',
+    'Systems Programming & Architecture: CS': 'Systems Programming & Architecture',
+    'Thermodynamics': 'Thermodynamics',
+    'Topology: Fundamentals': 'Advanced+ Courses/Topology Fundamentals',
+    'Video Game Modding': 'Video Game Modding',
+  };
+
+  function coursePath(course) {
+    var dir = COURSE_PATHS[course];
+    if (!dir) return null;
+    return dir.split('/').map(encodeURIComponent).join('/');
+  }
+
   function passThresholdFor(kind) {
     return Object.prototype.hasOwnProperty.call(PASS_THRESHOLDS, kind) ? PASS_THRESHOLDS[kind] : DEFAULT_PASS_THRESHOLD;
   }
@@ -409,6 +459,30 @@ window.STEMPlusTests = (function () {
     const unlocked = passedCount === statuses.length;
     el.classList.add(unlocked ? 'is-unlocked' : 'is-locked');
     el.textContent = unlocked ? 'Unlocked' : 'Locked · ' + passedCount + '/' + statuses.length + ' courses passed';
+  }
+
+  // "You are here" badge for a Pathways card: <span data-pathway-progress
+  // data-required-courses="Course A|Course B|…"></span> — same course-exam-passed
+  // signal mountProjectStatus already uses, just phrased as pathway position
+  // instead of a lock state.
+  function mountPathwayProgress(el) {
+    if (el.dataset.mounted) return;
+    el.dataset.mounted = '1';
+    const required = (el.getAttribute('data-required-courses') || '').split('|').filter(Boolean);
+    const statuses = requiredCoursesStatus(required);
+    const passedCount = statuses.filter((s) => s.passed).length;
+    el.classList.add('lock-badge');
+    if (passedCount === 0) {
+      el.classList.add('is-locked');
+      el.textContent = 'Not started';
+    } else if (passedCount === statuses.length) {
+      el.classList.add('is-unlocked');
+      el.textContent = 'All ' + statuses.length + ' courses passed — capstone unlocked';
+    } else {
+      el.classList.add('is-locked');
+      const current = statuses.find((s) => !s.passed);
+      el.textContent = 'You are here: ' + current.course + ' (' + passedCount + '/' + statuses.length + ' passed)';
+    }
   }
 
   function mountReflection(container) {
@@ -850,6 +924,110 @@ window.STEMPlusTests = (function () {
     if (body) body.innerHTML = html;
   }
 
+  // Student dashboard: <div data-dashboard></div> — reads every result this
+  // browser has ever saved and renders Continue Learning / Review / Practice /
+  // Next Milestone / Your Path from it. No new storage, no new data model —
+  // this is purely an aggregation view over loadResults()/buildReport(),
+  // the same functions mountProgressReport already uses per-course.
+  function mountDashboard(el) {
+    if (el.dataset.mounted) return;
+    el.dataset.mounted = '1';
+
+    const results = loadResults();
+    if (results.length === 0) {
+      el.innerHTML = '<p class="toc-empty">You haven’t started anything yet in this browser. <a href="new.html">Choose a goal</a> or browse <a href="pathways.html">Pathways</a> to get going.</p>';
+      return;
+    }
+
+    const courseNames = [];
+    results.forEach((r) => { if (courseNames.indexOf(r.course) === -1) courseNames.push(r.course); });
+
+    const reports = courseNames.map((course) => {
+      let lastTakenAt = '';
+      results.forEach((r) => { if (r.course === course && r.takenAt > lastTakenAt) lastTakenAt = r.takenAt; });
+      return { course, report: buildReport(course), lastTakenAt };
+    });
+
+    const inProgress = reports.filter((r) => !r.report.courseExam.passed);
+    inProgress.sort((a, b) => (a.lastTakenAt < b.lastTakenAt ? 1 : -1));
+    const continueItem = inProgress[0] || null;
+
+    let nextUnitName = null;
+    if (continueItem) {
+      const unitEntries = Object.keys(continueItem.report.units)
+        .map((name) => ({ name, num: parseInt(name.replace(/\D/g, ''), 10) || 0, cleared: continueItem.report.units[name].cleared }))
+        .sort((a, b) => a.num - b.num);
+      const pending = unitEntries.find((u) => !u.cleared);
+      nextUnitName = pending ? pending.name : null;
+    }
+
+    let html = '';
+
+    html += '<h2>Continue Learning</h2>';
+    if (continueItem) {
+      const dir = coursePath(continueItem.course);
+      const href = dir ? dir + '/index.html' : 'pathways.html';
+      html += '<div class="toc-list"><a class="toc-item" href="' + href + '"><span class="toc-num">In progress</span>'
+        + '<p class="toc-title">' + continueItem.course + '</p>'
+        + '<p class="toc-sub">' + (nextUnitName ? 'Next up: ' + nextUnitName : 'Cleared every unit test attempted so far — open the course to see what’s next.') + '</p></a></div>';
+    } else {
+      html += '<p class="toc-empty">Every course you’ve touched is fully passed. <a href="pathways.html">Start a new one</a>.</p>';
+    }
+
+    const allWeak = [];
+    reports.forEach((r) => {
+      r.report.topics.forEach((t) => { if (t.status === 'weak') allWeak.push({ course: r.course, topic: t.topic, accuracy: t.accuracy }); });
+    });
+    allWeak.sort((a, b) => a.accuracy - b.accuracy);
+    html += '<h2>Review</h2>';
+    if (allWeak.length > 0) {
+      html += '<div class="toc-list">';
+      allWeak.slice(0, 5).forEach((t) => {
+        const dir = coursePath(t.course);
+        const href = dir ? dir + '/progress-report.html' : 'pathways.html';
+        html += '<a class="toc-item" href="' + href + '"><span class="toc-num">' + Math.round(t.accuracy * 100) + '%</span>'
+          + '<p class="toc-title">' + t.topic + '</p><p class="toc-sub">' + t.course + '</p></a>';
+      });
+      html += '</div>';
+    } else {
+      html += '<p class="toc-empty">No weak topics identified yet — take a few unit tests and this fills in automatically.</p>';
+    }
+
+    html += '<h2>Practice</h2>';
+    html += '<div class="toc-list"><a class="toc-item" href="problem-sets.html"><span class="toc-num">Practice</span>'
+      + '<p class="toc-title">Problem Sets</p><p class="toc-sub">1,200 questions across 20 courses, filterable by topic.</p></a></div>';
+
+    html += '<h2>Next Milestone</h2>';
+    if (continueItem && nextUnitName) {
+      const dir = coursePath(continueItem.course);
+      const href = dir ? dir + '/' + encodeURIComponent(nextUnitName) + '/unit-test-a.html' : 'pathways.html';
+      html += '<div class="toc-list"><a class="toc-item" href="' + href + '">'
+        + '<span class="toc-num">Milestone</span><p class="toc-title">Pass the ' + nextUnitName + ' test in ' + continueItem.course + '</p>'
+        + '<p class="toc-sub">Score 80% or higher to clear it and move on.</p></a></div>';
+    } else if (continueItem) {
+      const dir = coursePath(continueItem.course);
+      const href = dir ? dir + '/index.html' : 'pathways.html';
+      html += '<div class="toc-list"><a class="toc-item" href="' + href + '">'
+        + '<span class="toc-num">Milestone</span><p class="toc-title">Pick your next unit in ' + continueItem.course + '</p>'
+        + '<p class="toc-sub">Open the course contents to see what comes after what you’ve already cleared.</p></a></div>';
+    } else {
+      html += '<p class="toc-empty">Pick a new course from <a href="pathways.html">Pathways</a> to set your next milestone.</p>';
+    }
+
+    html += '<h2>Your Path</h2>';
+    html += '<div class="toc-list">';
+    reports.forEach((r) => {
+      const dir = coursePath(r.course);
+      const passed = r.report.courseExam.passed;
+      html += '<a class="toc-item" href="' + (dir ? dir + '/index.html' : 'pathways.html') + '">'
+        + '<span class="toc-num">' + (passed ? 'Exam passed' : 'In progress') + '</span>'
+        + '<p class="toc-title">' + r.course + '</p></a>';
+    });
+    html += '</div>';
+
+    el.innerHTML = html;
+  }
+
   function initTests() {
     document.querySelectorAll('[data-test]').forEach((container) => {
       if (!container.closest('[data-exam-gate], [data-pathway-exam-gate], [data-pathway-final-exam-gate]')) mountTest(container);
@@ -862,8 +1040,10 @@ window.STEMPlusTests = (function () {
     document.querySelectorAll('[data-project-gate]').forEach(mountProjectGate);
     document.querySelectorAll('[data-project-status]').forEach(mountProjectStatus);
     document.querySelectorAll('[data-course-status]').forEach(mountCourseStatus);
+    document.querySelectorAll('[data-pathway-progress]').forEach(mountPathwayProgress);
     document.querySelectorAll('[data-reflection]').forEach(mountReflection);
     document.querySelectorAll('[data-devmode]').forEach(mountDevModePage);
+    document.querySelectorAll('[data-dashboard]').forEach(mountDashboard);
   }
 
   if (typeof document !== 'undefined' && document.querySelectorAll) {

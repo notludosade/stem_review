@@ -15,6 +15,7 @@ interface Me {
 }
 
 const NAV_LINKS = [
+  { href: '/dashboard.html', label: 'Dashboard' },
   { href: '/math.html', label: 'Subjects' },
   { href: '/pathways.html', label: 'Tracks' },
   { href: '/problem-sets.html', label: 'Problem Sets' },
