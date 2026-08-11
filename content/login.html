@@ -30,6 +30,14 @@
     el.style.display = '';
   }
 
+  function nextUrl() {
+    const next = new URLSearchParams(location.search).get('next');
+    // Only allow a same-site relative path — a bare "//host/path" is
+    // protocol-relative and would redirect off-site, so it's rejected too.
+    if (next && next.startsWith('/') && !next.startsWith('//')) return next;
+    return '/';
+  }
+
   async function submitForm(endpoint, form) {
     const body = Object.fromEntries(new FormData(form).entries());
     const res = await fetch(endpoint, {
@@ -42,7 +50,7 @@
       showError(data.error || 'something went wrong');
       return;
     }
-    location.href = '/';
+    location.href = nextUrl();
   }
 
   document.getElementById('login-form').addEventListener('submit', (e) => {
