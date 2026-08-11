@@ -174,15 +174,19 @@ window.STEMPlusTests = (function () {
   // plus each pathway's capstone project id, so JS-driven pages (the
   // Learning Record) can compute pathway/project readiness without scanning
   // pathways.html's markup.
+  // `lessons` mirrors the per-pathway lesson totals already published in the
+  // Pathways page's own copy (content/pathways.html toc-sub text) — kept here
+  // too so Project pages can show the same vetted number without duplicating
+  // it as hand-typed prose that could drift out of sync.
   var PATHWAYS = [
-    { name: 'Software Engineer', courses: ['Computer Programming 1', 'Computer Programming 2', 'Computer Programming Ethics', 'Software Engineering'], projectId: 'software-engineer-capstone' },
-    { name: 'AI & Data', courses: ['Computer Programming 1', 'Computer Programming 2', 'Data Handling CB', 'AI Developer'], projectId: 'ai-data-capstone' },
-    { name: 'Mathematics', courses: ['Precalculus', 'AP Calculus BC', 'Real Analysis A', 'Real Analysis B'], projectId: 'mathematics-capstone' },
-    { name: 'Engineering & Physics', courses: ['Precalculus', 'AP Physics 1', 'Engineering 1', 'AP Physics 2', 'Career Applied Engineering'], projectId: 'engineering-physics-capstone' },
-    { name: 'Competitive Programmer', courses: ['Computer Programming 1', 'Computer Programming 2', 'Computer Programming 2+', 'Advanced Algorithms'], projectId: 'competitive-programmer-capstone' },
-    { name: 'Cloud & DevOps', courses: ['Computer Programming 1', 'Cloud Computing A', 'Cloud Computing B / DevOps'], projectId: 'cloud-devops-capstone' },
-    { name: 'General Programmer', courses: ['Computer Programming 1', 'Computer Programming 2', 'Computer Programming Ethics', 'Computer Programming 2+', 'Software Engineering', 'Data Handling CB', 'Systems Programming & Architecture: CS', 'Computer Networking Fundamentals', 'Advanced Algorithms'], projectId: 'general-programmer-capstone' },
-    { name: 'AI Developer: CB/RWA', courses: ['Computer Programming 1', 'Computer Programming 2', 'Data Handling CB', 'AI Developer', 'Applied Machine/Deep Learning', 'Cloud Computing A', 'Cloud Computing B / DevOps'], projectId: 'ai-developer-cbrwa-capstone' },
+    { name: 'Software Engineer', courses: ['Computer Programming 1', 'Computer Programming 2', 'Computer Programming Ethics', 'Software Engineering'], projectId: 'software-engineer-capstone', lessons: 90 },
+    { name: 'AI & Data', courses: ['Computer Programming 1', 'Computer Programming 2', 'Data Handling CB', 'AI Developer'], projectId: 'ai-data-capstone', lessons: 111 },
+    { name: 'Mathematics', courses: ['Precalculus', 'AP Calculus BC', 'Real Analysis A', 'Real Analysis B'], projectId: 'mathematics-capstone', lessons: 174 },
+    { name: 'Engineering & Physics', courses: ['Precalculus', 'AP Physics 1', 'Engineering 1', 'AP Physics 2', 'Career Applied Engineering'], projectId: 'engineering-physics-capstone', lessons: 169 },
+    { name: 'Competitive Programmer', courses: ['Computer Programming 1', 'Computer Programming 2', 'Computer Programming 2+', 'Advanced Algorithms'], projectId: 'competitive-programmer-capstone', lessons: 116 },
+    { name: 'Cloud & DevOps', courses: ['Computer Programming 1', 'Cloud Computing A', 'Cloud Computing B / DevOps'], projectId: 'cloud-devops-capstone', lessons: 64 },
+    { name: 'General Programmer', courses: ['Computer Programming 1', 'Computer Programming 2', 'Computer Programming Ethics', 'Computer Programming 2+', 'Software Engineering', 'Data Handling CB', 'Systems Programming & Architecture: CS', 'Computer Networking Fundamentals', 'Advanced Algorithms'], projectId: 'general-programmer-capstone', lessons: 241 },
+    { name: 'AI Developer: CB/RWA', courses: ['Computer Programming 1', 'Computer Programming 2', 'Data Handling CB', 'AI Developer', 'Applied Machine/Deep Learning', 'Cloud Computing A', 'Cloud Computing B / DevOps'], projectId: 'ai-developer-cbrwa-capstone', lessons: 171 },
   ];
 
   // Mastery is a continuous measure (not a pass/fail badge): the average
@@ -191,6 +195,38 @@ window.STEMPlusTests = (function () {
   // progress-report.html's weak/strong breakdown is built from. Distinct
   // from "completed" (isCourseExamPassed), which only checks whether the
   // course exam was passed at all, not how well.
+  // Maps a canonical course name (the same strings used as COURSE_PATHS keys
+  // and as data-course on that course's own tests) to its problem-sets.html
+  // ?course= slug. Only the 20 courses that currently have a problem bank
+  // appear here — copied from problem-sets.html's own links. Three titles
+  // shown on that page don't match their course's canonical name (decorative
+  // shortenings), so those three are keyed by the canonical name, not the
+  // page's prose: 'Algebra/Geometry Fundamentals Review' (page says "Algebra
+  // & Geometry..."), 'Systems Programming & Architecture: CS' (page drops
+  // the ": CS"), 'Quantum Physics & Optics' (page says "...and Optics").
+  var PROBLEM_SET_SLUGS = {
+    'Algebra/Geometry Fundamentals Review': 'algebra-geometry',
+    'Precalculus': 'precalculus',
+    'AP Calculus BC': 'ap-calculus-bc',
+    'Multivariable Calculus': 'multivariable-calculus',
+    'Linear Algebra A': 'linear-algebra-a',
+    'Differential Equations': 'differential-equations',
+    'Mathematical Proofs': 'mathematical-proofs',
+    'Discrete Math': 'discrete-math',
+    'Computer Programming 1': 'computer-programming-1',
+    'Computer Programming 2': 'computer-programming-2',
+    'Data Handling CB': 'data-handling-cb',
+    'Computer Networking Fundamentals': 'computer-networking-fundamentals',
+    'Systems Programming & Architecture: CS': 'systems-programming-architecture',
+    'AP Physics 1': 'ap-physics-1',
+    'AP Physics 2': 'ap-physics-2',
+    'AP Physics C: Mechanics': 'ap-physics-c-mechanics',
+    'Quantum Physics & Optics': 'quantum-physics-optics',
+    'Engineering 1': 'engineering-1',
+    'Real Analysis A': 'real-analysis-a',
+    'Advanced Algorithms': 'advanced-algorithms',
+  };
+
   function courseMastery(course) {
     var topics = buildReport(course).topics;
     if (topics.length === 0) return null;
@@ -513,6 +549,91 @@ window.STEMPlusTests = (function () {
       const current = statuses.find((s) => !s.passed);
       el.textContent = 'You are here: ' + current.course + ' (' + passedCount + '/' + statuses.length + ' passed)';
     }
+  }
+
+  // "Where this fits" box for a course's own index.html: <div
+  // data-course-context="Exact Course Name" data-root="../"></div> — data-root
+  // is the relative prefix back to the site root (matches the depth of the
+  // <script src> already on that page: "../" for most courses, "../../" for
+  // the ones nested under Advanced+ Courses/ or AP STEM+/). Reuses PATHWAYS,
+  // the same table the Learning Record already computes readiness from, so
+  // prerequisite/next/capstone claims can't drift from what's shown there.
+  function mountCourseContext(el) {
+    if (el.dataset.mounted) return;
+    el.dataset.mounted = '1';
+    const course = el.getAttribute('data-course-context');
+    const root = el.getAttribute('data-root') || '';
+    const memberships = PATHWAYS.filter((p) => p.courses.indexOf(course) !== -1);
+    if (memberships.length === 0) {
+      el.remove();
+      return;
+    }
+    let html = '<span class="box-label">Where this fits</span>';
+    memberships.forEach((p) => {
+      const idx = p.courses.indexOf(course);
+      const prereq = idx > 0 ? p.courses[idx - 1] : null;
+      const next = idx < p.courses.length - 1 ? p.courses[idx + 1] : null;
+      let line = 'Part of the <a href="' + root + 'pathways.html">' + p.name + '</a> pathway';
+      if (prereq) line += ' — builds on ' + prereq;
+      if (next) {
+        line += ', leads to ' + next;
+      } else {
+        line += '. Last course before the capstone — <a href="' + root + 'Projects/' + p.projectId + '.html">' + p.name + ' Capstone</a>';
+      }
+      html += '<p>' + line + '.</p>';
+    });
+    el.classList.add('box', 'why');
+    el.innerHTML = html;
+  }
+
+  // "At a Glance" box for a Project page: <div data-project-meta="Pathway
+  // Name"></div> — courses required (in order) and total lesson count, both
+  // read straight from PATHWAYS so this can't drift from the pathway page or
+  // the project's own data-project-gate list.
+  function mountProjectMeta(el) {
+    if (el.dataset.mounted) return;
+    el.dataset.mounted = '1';
+    const name = el.getAttribute('data-project-meta');
+    const pathway = PATHWAYS.find((p) => p.name === name);
+    if (!pathway) {
+      el.remove();
+      return;
+    }
+    el.classList.add('box', 'example');
+    el.innerHTML = '<span class="box-label">At a Glance</span>'
+      + '<p>Courses required: ' + pathway.courses.join(' → ') + '.</p>'
+      + '<p>' + pathway.courses.length + ' courses, ' + pathway.lessons + ' lessons total to reach this project.</p>';
+  }
+
+  // "Recommended for You" strip on problem-sets.html: <div
+  // data-recommended-practice></div> — ranks courses the user has already
+  // attempted (and that have a problem bank) by mastery %, lowest first, so
+  // practice time goes to what actually needs it instead of a flat course
+  // list. Self-removes for a first-time visitor with no attempt history.
+  function mountRecommendedPractice(el) {
+    if (el.dataset.mounted) return;
+    el.dataset.mounted = '1';
+    var results = loadResults();
+    var seen = {};
+    results.forEach(function (r) { seen[r.course] = true; });
+    var candidates = Object.keys(seen)
+      .filter(function (c) { return PROBLEM_SET_SLUGS[c]; })
+      .map(function (c) { return { course: c, mastery: courseMastery(c) }; })
+      .filter(function (c) { return c.mastery != null; })
+      .sort(function (a, b) { return a.mastery - b.mastery; });
+    if (candidates.length === 0) {
+      el.remove();
+      return;
+    }
+    var html = '<h2>Recommended for You</h2><div class="toc-list">';
+    candidates.slice(0, 3).forEach(function (c) {
+      html += '<a class="toc-item" href="problem-set.html?course=' + PROBLEM_SET_SLUGS[c.course] + '">'
+        + '<span class="toc-num">' + c.mastery + '% mastery</span>'
+        + '<p class="toc-title">' + c.course + '</p>'
+        + '<p class="toc-sub">Practice this course’s weakest topics.</p></a>';
+    });
+    html += '</div>';
+    el.innerHTML = html;
   }
 
   function mountReflection(container) {
@@ -1157,6 +1278,9 @@ window.STEMPlusTests = (function () {
     document.querySelectorAll('[data-project-status]').forEach(mountProjectStatus);
     document.querySelectorAll('[data-course-status]').forEach(mountCourseStatus);
     document.querySelectorAll('[data-pathway-progress]').forEach(mountPathwayProgress);
+    document.querySelectorAll('[data-course-context]').forEach(mountCourseContext);
+    document.querySelectorAll('[data-project-meta]').forEach(mountProjectMeta);
+    document.querySelectorAll('[data-recommended-practice]').forEach(mountRecommendedPractice);
     document.querySelectorAll('[data-reflection]').forEach(mountReflection);
     document.querySelectorAll('[data-devmode]').forEach(mountDevModePage);
     document.querySelectorAll('[data-dashboard]').forEach(mountDashboard);
