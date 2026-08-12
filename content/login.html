@@ -2,34 +2,57 @@
 <link rel="icon" href="favicon.ico?v=1" type="image/x-icon">
 <title>Sign in — STEM+</title>
 <link rel="stylesheet" href="assets/style.css">
-<div class="page">
-  <span class="kicker">STEM+</span>
+<div class="page page-auth">
+  <span class="kicker">STEM+ · Account</span>
   <h1>Sign in</h1>
-  <p class="subtitle" id="form-error" style="display:none;"></p>
+  <p class="subtitle">Your course progress lives in this browser either way — an account only unlocks the rest of the site.</p>
+  <p class="auth-context" id="auth-context" hidden></p>
 
-  <form id="login-form">
-    <p><label>Email<br><input type="email" name="email" required autocomplete="email"></label></p>
-    <p><label>Password<br><input type="password" name="password" required autocomplete="current-password"></label></p>
-    <p><button type="submit">Sign in</button></p>
-  </form>
+  <div class="auth-card">
+    <div class="auth-panel">
+      <h2 class="auth-heading">Sign in</h2>
+      <p class="auth-error" id="login-error" hidden></p>
+      <form id="login-form" class="auth-form">
+        <label class="auth-field">
+          <span>Email</span>
+          <input type="email" name="email" required autocomplete="email">
+        </label>
+        <label class="auth-field">
+          <span>Password</span>
+          <input type="password" name="password" required autocomplete="current-password">
+        </label>
+        <button type="submit" class="widget-btn auth-submit">Sign in</button>
+      </form>
+    </div>
 
-  <h2>New here?</h2>
-  <form id="signup-form">
-    <p><label>Name<br><input type="text" name="name" autocomplete="name"></label></p>
-    <p><label>Email<br><input type="email" name="email" required autocomplete="email"></label></p>
-    <p><label>Password (min 8 characters)<br><input type="password" name="password" required minlength="8" autocomplete="new-password"></label></p>
-    <p><button type="submit">Create account</button></p>
-  </form>
+    <div class="auth-divider"><span>New here?</span></div>
+
+    <div class="auth-panel">
+      <h2 class="auth-heading">Create account</h2>
+      <p class="auth-error" id="signup-error" hidden></p>
+      <form id="signup-form" class="auth-form">
+        <label class="auth-field">
+          <span>Name</span>
+          <input type="text" name="name" autocomplete="name">
+        </label>
+        <label class="auth-field">
+          <span>Email</span>
+          <input type="email" name="email" required autocomplete="email">
+        </label>
+        <label class="auth-field">
+          <span>Password</span>
+          <input type="password" name="password" required minlength="8" autocomplete="new-password">
+        </label>
+        <p class="auth-hint">Minimum 8 characters.</p>
+        <button type="submit" class="widget-btn auth-submit">Create account</button>
+      </form>
+    </div>
+  </div>
 
   <footer class="lesson-footer"><a href="index.html">Back to STEM+</a></footer>
 </div>
 <script>
-  function showError(message) {
-    const el = document.getElementById('form-error');
-    el.textContent = message;
-    el.style.display = '';
-  }
-
+(function () {
   function nextUrl() {
     const next = new URLSearchParams(location.search).get('next');
     // Only allow a same-site relative path — a bare "//host/path" is
@@ -37,8 +60,37 @@
     if (next && next.startsWith('/') && !next.startsWith('//')) return next;
     return '/';
   }
+  const target = nextUrl();
 
-  async function submitForm(endpoint, form) {
+  // The shell replaces this page's whole content subtree once, shortly
+  // after mount (a Next.js hydration/data-fetch pass) — any one-time DOM
+  // write or listener bound directly to the original nodes would silently
+  // vanish when that happens. applyContext() is idempotent and cheap, so
+  // re-running it for a couple of seconds after mount is enough to survive
+  // the swap without needing to detect it precisely. Form submission uses a
+  // document-level delegated listener instead of listeners on the form
+  // elements themselves, so it isn't affected by the swap at all.
+  function applyContext() {
+    const context = document.getElementById('auth-context');
+    if (!context || target === '/') return;
+    context.textContent = 'Sign in to continue to ' + decodeURIComponent(target) + '.';
+    context.hidden = false;
+  }
+  applyContext();
+  let resyncCount = 0;
+  const resync = setInterval(() => {
+    applyContext();
+    resyncCount += 1;
+    if (resyncCount >= 20) clearInterval(resync);
+  }, 100);
+
+  function showError(el, message) {
+    el.textContent = message;
+    el.hidden = false;
+  }
+
+  async function submitForm(endpoint, form, errorEl) {
+    errorEl.hidden = true;
     const body = Object.fromEntries(new FormData(form).entries());
     const res = await fetch(endpoint, {
       method: 'POST',
@@ -47,19 +99,22 @@
     });
     const data = await res.json();
     if (!res.ok) {
-      showError(data.error || 'something went wrong');
+      showError(errorEl, data.error || 'something went wrong');
       return;
     }
-    location.href = nextUrl();
+    location.href = target;
   }
 
-  document.getElementById('login-form').addEventListener('submit', (e) => {
-    e.preventDefault();
-    submitForm('/api/auth/login', e.target).catch(() => showError('something went wrong'));
+  document.addEventListener('submit', (e) => {
+    if (e.target && e.target.id === 'login-form') {
+      e.preventDefault();
+      const errorEl = document.getElementById('login-error');
+      submitForm('/api/auth/login', e.target, errorEl).catch(() => showError(errorEl, 'something went wrong'));
+    } else if (e.target && e.target.id === 'signup-form') {
+      e.preventDefault();
+      const errorEl = document.getElementById('signup-error');
+      submitForm('/api/auth/signup', e.target, errorEl).catch(() => showError(errorEl, 'something went wrong'));
+    }
   });
-
-  document.getElementById('signup-form').addEventListener('submit', (e) => {
-    e.preventDefault();
-    submitForm('/api/auth/signup', e.target).catch(() => showError('something went wrong'));
-  });
+})();
 </script>
