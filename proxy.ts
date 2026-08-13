@@ -20,6 +20,14 @@ const FREE_PATHS = [
   '/technology.html',
   '/engineering.html',
   '/advanced.html',
+  // Goal landing pages that only route into free math content, or that are
+  // the same "browse the catalog" framing as advanced.html above — kept
+  // free for the same reason those are. Goals/prepare-for-college.html and
+  // Goals/review-and-test.html deliberately stay OFF this list: they mirror
+  // pathways.html and problem-sets.html, both gated.
+  '/Goals/get-ahead.html',
+  '/Goals/stronger-at-math.html',
+  '/Goals/challenge-myself.html',
   '/Algebra Geometry Fundamentals Review',
   '/Precalculus',
   '/Discrete Math',
