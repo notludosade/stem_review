@@ -67,12 +67,13 @@ module.exports = async (req, res) => {
   }
 
   try {
-    const { text, sources } = await gradeWithClaude({
+    const { text, sources, stopReason } = await gradeWithClaude({
       system: buildSystemPrompt(question),
       userMessage: response,
     });
     const grade = extractGrade(text);
     if (!grade) {
+      console.error('grade-frq: no parseable json block', { stopReason, textTail: text.slice(-500) });
       res.statusCode = 502;
       return res.json({ error: 'grading came back in an unexpected format, try again' });
     }
