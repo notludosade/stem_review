@@ -118,6 +118,28 @@ window.STEMPlusTests = (function () {
   var DEV_MODE_KEY = 'stemplus:devmode:v1';
   var DEV_CODE = 'stem_developer67!';
 
+  // Server-verified developer status for the site-owner QA account —
+  // deliberately separate from isDevMode()/DEV_CODE above, which is a
+  // plain localStorage flag unlocked by a code that ships in this very
+  // file's public source. That's an acceptable weak gate for "skip past a
+  // completion gate while testing" (low stakes, already documented as not
+  // real access control), but not for "reveal answers" below: that checks
+  // window.STEMPlusDev.isDeveloper, which only ever flips true after
+  // /api/me confirms it against the signed session cookie — nothing
+  // client-side can spoof it. Exposed on window (not just this closure) so
+  // quiz.js and frq.js can reuse the same check instead of each firing
+  // their own /api/me request when this file happens to load alongside them.
+  if (typeof window !== 'undefined' && !window.STEMPlusDevReady) {
+    window.STEMPlusDev = { isDeveloper: false };
+    window.STEMPlusDevReady = fetch('/api/me')
+      .then(function (res) { return res.ok ? res.json() : null; })
+      .then(function (me) {
+        window.STEMPlusDev.isDeveloper = !!(me && me.isDeveloper);
+        return window.STEMPlusDev.isDeveloper;
+      })
+      .catch(function () { return false; });
+  }
+
   // Maps a course's exact data-course display name (the string stored in every
   // localStorage result record) to its directory path relative to site root.
   // Built from the real data-course attribute in every course-exam.html, not
@@ -823,11 +845,55 @@ window.STEMPlusTests = (function () {
     result.hidden = false;
   }
 
+  // Marks the correct choice (or fills the first accepted fill-in answer)
+  // without grading or submitting — a look, not an attempt, so it doesn't
+  // touch recordAttempt()/localStorage at all.
+  function markCorrectOnly(el) {
+    if (el.hasAttribute('data-answers') || el.hasAttribute('data-test-fill')) {
+      const input = el.querySelector('.quiz-fill-input');
+      const answers = (el.getAttribute('data-answers') || '').split('|').map(function (a) { return a.trim(); }).filter(Boolean);
+      if (input && answers.length > 0) input.value = answers[0];
+    } else {
+      el.querySelectorAll('.quiz-choice').forEach(function (choice) {
+        if (choice.getAttribute('data-correct') === 'true') choice.classList.add('is-correct');
+      });
+    }
+  }
+
+  function addDevRevealButton(container) {
+    if (container.querySelector('[data-test-devreveal]')) return;
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'widget-btn';
+    btn.setAttribute('data-test-devreveal', '');
+    btn.textContent = 'Show Answers (Developer)';
+    btn.style.marginBottom = '1rem';
+    btn.addEventListener('click', function () {
+      container.querySelectorAll('[data-test-item]').forEach(function (item) {
+        const parts = item.querySelectorAll('[data-part]');
+        if (parts.length > 0) Array.from(parts).forEach(markCorrectOnly);
+        else markCorrectOnly(item);
+      });
+    });
+    container.insertBefore(btn, container.firstChild);
+  }
+
+  function maybeAddDevReveal(container) {
+    if (window.STEMPlusDev && window.STEMPlusDev.isDeveloper) {
+      addDevRevealButton(container);
+    } else if (window.STEMPlusDevReady) {
+      window.STEMPlusDevReady.then(function (isDeveloper) {
+        if (isDeveloper) addDevRevealButton(container);
+      });
+    }
+  }
+
   function mountTest(container) {
     if (container.dataset.mounted) return;
     container.dataset.mounted = '1';
     shuffleChoices(container);
     wireSelection(container);
+    maybeAddDevReveal(container);
     const submit = container.querySelector('[data-test-submit]');
     const warning = container.querySelector('[data-test-warning]');
     if (!submit) return;
@@ -994,10 +1060,12 @@ window.STEMPlusTests = (function () {
     const status = el.querySelector('[data-devmode-status]');
     const clearBtn = el.querySelector('[data-devmode-clear]');
 
-    function refresh() {
+    function refresh(autoRecognized) {
       if (isDevMode()) {
         if (status) {
-          status.textContent = 'Developer mode is ON in this browser — every gate is unlocked.';
+          status.textContent = autoRecognized
+            ? 'Recognized this account as the developer — mode enabled automatically, no code needed.'
+            : 'Developer mode is ON in this browser — every gate is unlocked.';
           status.hidden = false;
           status.classList.add('is-correct');
           status.classList.remove('is-incorrect');
@@ -1008,6 +1076,22 @@ window.STEMPlusTests = (function () {
       }
     }
     refresh();
+
+    // The server-verified account (see the isDeveloper check near the top
+    // of this file) skips typing the code entirely — it's already proven
+    // who they are via their signed-in session, so re-typing a code that's
+    // sitting in this same file's public source would just be theater.
+    function autoUnlockIfRecognized(isDeveloper) {
+      if (isDeveloper && !isDevMode()) {
+        setDevMode(true);
+        refresh(true);
+      }
+    }
+    if (window.STEMPlusDev && window.STEMPlusDev.isDeveloper) {
+      autoUnlockIfRecognized(true);
+    } else if (window.STEMPlusDevReady) {
+      window.STEMPlusDevReady.then(autoUnlockIfRecognized);
+    }
 
     if (submit) {
       submit.addEventListener('click', () => {

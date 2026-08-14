@@ -14,6 +14,12 @@ async function main() {
       created_at timestamptz not null default now()
     )
   `;
+  // Site-owner QA flag: bypasses the login gate and every content gate
+  // (proxy.ts), and reveals answers in tests/quizzes and FRQ sample
+  // answers client-side. Baked into the session token at login time (see
+  // pages/api/auth/login.js) rather than checked per-request against the
+  // DB, so proxy.ts stays a single fast signature check.
+  await sql`alter table users add column if not exists is_developer boolean not null default false`;
   console.log('migrate: users table ready');
 }
 

@@ -37,8 +37,10 @@ module.exports = async (req, res) => {
     `;
     const userId = rows[0].id;
 
+    // New accounts are never developers — is_developer defaults to false in
+    // the DB and is only ever flipped by hand (scripts/migrate.js's history).
     const token = sign(
-      { userId, exp: Date.now() + 30 * 24 * 60 * 60 * 1000 },
+      { userId, isDeveloper: false, exp: Date.now() + 30 * 24 * 60 * 60 * 1000 },
       process.env.SESSION_SECRET
     );
 

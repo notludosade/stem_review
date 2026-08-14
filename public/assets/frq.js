@@ -4,6 +4,72 @@
 // span. questionId maps to a rubric defined server-side in
 // lib/frq-questions.js — nothing about grading criteria ships to the client.
 (function () {
+  // Server-verified developer status — see the detailed comment in
+  // assets/tests.js. Guarded so a page that also loads quiz.js/tests.js
+  // (the roller coaster page loads quiz.js before this file) only fires
+  // one /api/me request between them.
+  if (typeof window !== 'undefined' && !window.STEMPlusDevReady) {
+    window.STEMPlusDev = { isDeveloper: false };
+    window.STEMPlusDevReady = fetch('/api/me')
+      .then((res) => (res.ok ? res.json() : null))
+      .then((me) => {
+        window.STEMPlusDev.isDeveloper = !!(me && me.isDeveloper);
+        return window.STEMPlusDev.isDeveloper;
+      })
+      .catch(() => false);
+  }
+
+  function addSampleAnswerButton(container) {
+    if (container.querySelector('[data-frq-sample-btn]')) return;
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'widget-btn';
+    btn.setAttribute('data-frq-sample-btn', '');
+    btn.textContent = 'Show Sample Answer (Developer)';
+    btn.style.marginLeft = '0.6rem';
+    const actions = container.querySelector('.reflection-actions');
+    if (actions) actions.appendChild(btn);
+    else container.appendChild(btn);
+  }
+
+  async function handleShowSample(container) {
+    const questionId = container.getAttribute('data-frq');
+    const btn = container.querySelector('[data-frq-sample-btn]');
+    const status = container.querySelector('[data-frq-status]');
+    btn.disabled = true;
+    try {
+      const res = await fetch('/api/frq-sample?questionId=' + encodeURIComponent(questionId));
+      const data = await res.json();
+      if (!res.ok) {
+        if (status) status.textContent = data.error || 'Could not load sample answer.';
+        btn.disabled = false;
+        return;
+      }
+      let box = container.querySelector('[data-frq-sample-box]');
+      if (!box) {
+        box = document.createElement('div');
+        box.setAttribute('data-frq-sample-box', '');
+        box.className = 'box example';
+        container.appendChild(box);
+      }
+      box.innerHTML = '<span class="box-label">Sample Answer (Developer)</span><p>' + data.sampleAnswer + '</p>';
+      btn.disabled = false;
+    } catch (err) {
+      if (status) status.textContent = 'Network error loading sample answer.';
+      btn.disabled = false;
+    }
+  }
+
+  function maybeAddSampleAnswerButton(container) {
+    if (window.STEMPlusDev && window.STEMPlusDev.isDeveloper) {
+      addSampleAnswerButton(container);
+    } else if (window.STEMPlusDevReady) {
+      window.STEMPlusDevReady.then((isDeveloper) => {
+        if (isDeveloper) addSampleAnswerButton(container);
+      });
+    }
+  }
+
   function renderResult(container, result) {
     const scoreColor = result.score >= 70 ? 'var(--correct)' : 'var(--incorrect)';
     let html = '<div class="box">'
@@ -73,16 +139,27 @@
   // happens before the click. A document-level listener survives any
   // subtree replacement because document itself is never replaced.
   document.addEventListener('click', (e) => {
-    const btn = e.target.closest('[data-frq-submit]');
-    if (!btn) return;
-    const container = btn.closest('[data-frq]');
-    if (container) handleSubmit(container);
+    const submitBtn = e.target.closest('[data-frq-submit]');
+    if (submitBtn) {
+      const container = submitBtn.closest('[data-frq]');
+      if (container) handleSubmit(container);
+      return;
+    }
+    const sampleBtn = e.target.closest('[data-frq-sample-btn]');
+    if (sampleBtn) {
+      const container = sampleBtn.closest('[data-frq]');
+      if (container) handleShowSample(container);
+    }
   });
 
   function initFrq() {
-    // Only marks containers as seen for renderResult's benefit; actual
-    // interaction is delegated above and needs no per-element mount.
-    document.querySelectorAll('[data-frq]').forEach((el) => { el.dataset.mounted = '1'; });
+    document.querySelectorAll('[data-frq]').forEach((el) => {
+      // Only marks containers as seen for renderResult's benefit; the
+      // submit/sample-answer interactions are delegated above and need no
+      // per-element mount.
+      el.dataset.mounted = '1';
+      maybeAddSampleAnswerButton(el);
+    });
   }
 
   if (typeof document !== 'undefined') {

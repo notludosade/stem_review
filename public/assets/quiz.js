@@ -77,6 +77,42 @@ function answerMatches(value, acceptedAnswers) {
 
 if (typeof module === 'object' && module.exports) module.exports = { normalizeSentenceAnswer, answerMatches };
 
+// Server-verified developer status for the site-owner QA account — see the
+// matching, more-detailed comment in assets/tests.js. Guarded so a page
+// that loads both files (or loads this one twice) only fires one request.
+if (typeof window !== 'undefined' && !window.STEMPlusDevReady) {
+  window.STEMPlusDev = { isDeveloper: false };
+  window.STEMPlusDevReady = fetch('/api/me')
+    .then((res) => (res.ok ? res.json() : null))
+    .then((me) => {
+      window.STEMPlusDev.isDeveloper = !!(me && me.isDeveloper);
+      return window.STEMPlusDev.isDeveloper;
+    })
+    .catch(() => false);
+}
+
+function addQuizDevRevealButton(quiz, onReveal) {
+  if (quiz.querySelector('[data-quiz-devreveal]')) return;
+  const btn = document.createElement('button');
+  btn.type = 'button';
+  btn.className = 'widget-btn';
+  btn.setAttribute('data-quiz-devreveal', '');
+  btn.textContent = 'Show Answer (Developer)';
+  btn.style.marginBottom = '0.6rem';
+  btn.addEventListener('click', onReveal);
+  quiz.insertBefore(btn, quiz.firstChild);
+}
+
+function maybeAddQuizDevReveal(quiz, onReveal) {
+  if (window.STEMPlusDev && window.STEMPlusDev.isDeveloper) {
+    addQuizDevRevealButton(quiz, onReveal);
+  } else if (window.STEMPlusDevReady) {
+    window.STEMPlusDevReady.then((isDeveloper) => {
+      if (isDeveloper) addQuizDevRevealButton(quiz, onReveal);
+    });
+  }
+}
+
 function initQuizzes() {
   document.querySelectorAll('[data-quiz]').forEach((quiz) => {
     if (quiz.dataset.quizReady) return;
@@ -86,6 +122,12 @@ function initQuizzes() {
     const feedback = quiz.querySelector('.quiz-feedback');
     const explain = quiz.querySelector('.quiz-explain');
     let answered = false;
+
+    maybeAddQuizDevReveal(quiz, () => {
+      choices.forEach((c) => {
+        if (c.getAttribute('data-correct') === 'true') c.classList.add('is-correct');
+      });
+    });
 
     choices.forEach((choice) => {
       choice.addEventListener('click', () => {
@@ -119,6 +161,10 @@ function initQuizzes() {
       .split('|')
       .map((s) => s.trim())
       .filter(Boolean);
+
+    maybeAddQuizDevReveal(quiz, () => {
+      if (input && answers.length > 0) input.value = answers[0];
+    });
 
     const check = () => {
       const correct = answerMatches(input.value, answers);

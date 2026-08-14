@@ -10,7 +10,7 @@ module.exports = async (req, res) => {
     }
 
     const sql = getDb();
-    const rows = await sql`select id, email, name from users where id = ${payload.userId}`;
+    const rows = await sql`select id, email, name, is_developer as "isDeveloper" from users where id = ${payload.userId}`;
     if (rows.length === 0) {
       res.statusCode = 401;
       return res.json({ error: 'not signed in' });

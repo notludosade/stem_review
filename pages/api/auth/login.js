@@ -22,7 +22,7 @@ module.exports = async (req, res) => {
 
   try {
     const sql = getDb();
-    const rows = await sql`select id, password_hash from users where email = ${email}`;
+    const rows = await sql`select id, password_hash, is_developer from users where email = ${email}`;
     const found = rows.length > 0;
     const passwordOk = verifyPassword(password, found ? rows[0].password_hash : DECOY_HASH);
     if (!found || !passwordOk) {
@@ -31,7 +31,7 @@ module.exports = async (req, res) => {
     }
 
     const token = sign(
-      { userId: rows[0].id, exp: Date.now() + 30 * 24 * 60 * 60 * 1000 },
+      { userId: rows[0].id, isDeveloper: rows[0].is_developer === true, exp: Date.now() + 30 * 24 * 60 * 60 * 1000 },
       process.env.SESSION_SECRET
     );
 
