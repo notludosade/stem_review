@@ -4,8 +4,14 @@ const { verify } = require('./lib/session');
 // Proxy (formerly "middleware") always runs on the Node.js runtime, so
 // lib/session.js's use of Node's `crypto` (createHmac/timingSafeEqual)
 // works here without modification.
+//
+// Every /api/* route is excluded here and does its own session check
+// instead (see pages/api/me.js, pages/api/grade-frq.js): an API route
+// redirected to /login.html by this proxy would hand its client-side
+// `fetch().then(r => r.json())` caller an HTML page instead of JSON,
+// breaking cleanly on a parse error rather than surfacing "sign in".
 export const config = {
-  matcher: ['/((?!_next/|assets/|favicon\\.ico|api/auth/|api/me$).*)'],
+  matcher: ['/((?!_next/|assets/|favicon\\.ico|api/).*)'],
 };
 
 // Default-deny: only these paths (and anything under them) are reachable
