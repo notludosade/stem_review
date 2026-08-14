@@ -79,6 +79,12 @@ const htmlFiles = (directory) => fs.readdirSync(directory, { withFileTypes: true
 delete global.window;
 delete global.document;
 
+const applications = require('../public/assets/applications.js');
+assert.ok(!applications.abResult(1000).significant, '1,000-person A/B groups should not clear z=1.96');
+assert.ok(applications.abResult(10000).significant, '10,000-person A/B groups should clear z=1.96');
+assert.ok(!applications.coasterResult(18, 8).safe, '18 m start should fail an ideal 8 m-radius loop');
+assert.ok(applications.coasterResult(24, 8).safe, '24 m start should clear an ideal 8 m-radius loop');
+
 const os = require('os');
 const { listContentFiles } = require('../lib/content');
 
