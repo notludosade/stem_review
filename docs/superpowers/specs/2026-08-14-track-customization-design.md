@@ -8,7 +8,7 @@ This builds directly on `tests.js`'s existing markup-contract pattern (`data-xxx
 
 ## Goals
 
-- A "Customize Your Plan" section on all 13 track pages (8 Pathways + 5 Goals) where a student can:
+- A "Customize Your Plan" section on every track page that actually has its own course ladder — the 8 Pathways plus the 3 Goals pages with a real ladder (`get-ahead`, `challenge-myself`, `stronger-at-math`; `prepare-for-college` and `review-and-test` are pure router pages that just link out to Pathways/Problem Sets and have no `[data-course-status]` of their own, so there's nothing on them to customize) — where a student can:
   - Check off courses they already know ("skip").
   - Set a target finish date and see whether their actual pace is on track to hit it.
 - Skipping a course must count as done everywhere the site already checks course completion (capstone unlock, progress badges, mastery lists) — not just visually hide it in one place.
@@ -103,7 +103,7 @@ Status line in `[data-track-plan-status]`:
 ## Files touched
 
 - `public/assets/tests.js` — `isSkippedCourse`, skip/pace load-save helpers, `isCourseExamPassed` one-line change, new `mountTrackPlan`, wire into `initTests()`.
-- 13 content pages, each gets the `data-track-plan` block added once, above its ladder: `content/Pathways/{software-engineer,ai-data,mathematics,engineering-physics,competitive-programmer,cloud-devops,general-programmer,ai-developer-cbrwa}.html`, `content/Goals/{get-ahead,prepare-for-college,stronger-at-math,challenge-myself,review-and-test}.html`.
+- 11 content pages, each gets the `data-track-plan` block added once, above its ladder: `content/Pathways/{software-engineer,ai-data,mathematics,engineering-physics,competitive-programmer,cloud-devops,general-programmer,ai-developer-cbrwa}.html`, `content/Goals/{get-ahead,challenge-myself,stronger-at-math}.html`.
 
 ## Testing
 
