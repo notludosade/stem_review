@@ -10,6 +10,16 @@
 // invocations: Chrome's cookie store flush-to-disk interval is longer than
 // localStorage's, so a value obtained once (e.g. via a curl login) must be
 // re-supplied per invocation rather than assumed to persist in the profile.
+//
+// Run against `npm run build && npm run start`, never `npm run dev`, for any
+// check whose result depends on tests.js/quiz.js having actually finished
+// mounting. Dev mode's React Strict Mode double-invokes LegacyContent's
+// script-injection effect (mount → cleanup → mount again), which raced with
+// this script's fixed post-load settle delay ~50% of the time in practice —
+// same double-invocation class already documented and fixed once for
+// quiz.js's own idempotency guard, just resurfacing here as a test-harness
+// flake instead of a real double-init. A production server never
+// double-invokes, so this class of flake can't occur against it.
 import { spawn, execSync } from 'node:child_process';
 import { setTimeout as sleep } from 'node:timers/promises';
 
@@ -121,6 +131,21 @@ try {
     const value = cookie.slice(eq + 1);
     await send('Network.setCookie', { url, name, value, path: '/', secure: true, sameSite: 'Lax' });
     await send('Page.navigate', { url });
+    // /json/new?url (the no-cookie path below) starts navigating the instant
+    // the tab is created, so a fixed sleep has a consistent head start. This
+    // path adds two CDP round-trips (setCookie, navigate) after the tab
+    // already exists, so the same fixed sleep intermittently fires before
+    // the new document has replaced about:blank — same class of race
+    // waitForCdp() above already guards against by polling instead of
+    // guessing. Poll document.readyState the same way, rather than padding
+    // the sleep and hoping.
+    const deadline = Date.now() + 5000;
+    for (;;) {
+      const evalResult = await send('Runtime.evaluate', { expression: 'document.readyState', returnByValue: true });
+      if (evalResult.result?.value === 'complete') break;
+      if (Date.now() > deadline) throw new Error('Page did not reach readyState "complete" within 5000ms after navigation');
+      await sleep(100);
+    }
   }
 
   await sleep(1500); // let the page finish loading and hydrating
