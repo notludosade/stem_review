@@ -49,9 +49,11 @@ function isCourseExamPassed(course) {
 }
 ```
 
-This alone makes skip honored by the capstone unlock check, the course status badge, the pathway progress badge, and Dashboard/Learning Record mastery — zero changes needed to any of those functions individually.
+This alone makes skip honored by the capstone unlock check, the course status badge, the pathway progress badge, and the "What You're Ready For" pathway math in Learning Record — zero changes needed to any of those functions individually, since they already call `isCourseExamPassed(course)`.
 
-`courseMastery(course)` (used by Dashboard/Learning Record) needs one small guard: a skipped course has no attempt data, so `buildReport(course).topics` is empty and the existing `if (topics.length === 0) return null` already makes it render as "no mastery data" rather than 0% — correct as-is, confirmed by reading the function, no change needed there.
+`mountDashboard` and `mountLearningRecord` needed real changes on top of the choke-point fix, discovered in a later review round: both build their `courseNames` list purely from `loadResults()` (real attempts), so a course skipped with zero real attempts never entered the list at all — invisible to both screens. And in four places, both functions read `report.courseExam.passed` (from `buildReport`, the real-exam-only summary) directly instead of calling `isCourseExamPassed(course)`, bypassing the choke point entirely. The actual fix: union `loadSkippedCourses()` into `courseNames` right after it's built in both functions, replace all four direct `report.courseExam.passed` reads with `isCourseExamPassed(course)`, and relax each function's "nothing yet" early-return so it doesn't fire when the student has only skipped courses and no real attempts.
+
+`courseMastery(course)` (used by Dashboard/Learning Record) needs one small guard: a skipped course has no attempt data, so `buildReport(course).topics` is empty and the existing `if (topics.length === 0) return null` already makes it render as "no mastery data" rather than 0% — correct as-is, confirmed by reading the function, no change needed there. The course label next to that "no mastery data" state is set explicitly to "Skipped" (mirroring `mountCourseStatus`'s "Skipped — counts as done" wording) so a purely-skipped course reads sensibly instead of looking like an untouched course.
 
 ## UI: "Customize Your Plan" section
 

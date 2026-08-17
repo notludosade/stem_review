@@ -1304,13 +1304,15 @@ window.STEMPlusTests = (function () {
     el.dataset.mounted = '1';
 
     const results = loadResults();
-    if (results.length === 0) {
+    const skippedCourses = loadSkippedCourses();
+    if (results.length === 0 && skippedCourses.length === 0) {
       el.innerHTML = '<p class="toc-empty">You haven’t started anything yet in this browser. <a href="new.html">Choose a goal</a> or browse <a href="pathways.html">Pathways</a> to get going.</p>';
       return;
     }
 
     const courseNames = [];
     results.forEach((r) => { if (courseNames.indexOf(r.course) === -1) courseNames.push(r.course); });
+    skippedCourses.forEach((c) => { if (courseNames.indexOf(c) === -1) courseNames.push(c); });
 
     const reports = courseNames.map((course) => {
       let lastTakenAt = '';
@@ -1318,7 +1320,7 @@ window.STEMPlusTests = (function () {
       return { course, report: buildReport(course), lastTakenAt };
     });
 
-    const inProgress = reports.filter((r) => !r.report.courseExam.passed);
+    const inProgress = reports.filter((r) => !isCourseExamPassed(r.course));
     inProgress.sort((a, b) => (a.lastTakenAt < b.lastTakenAt ? 1 : -1));
     const continueItem = inProgress[0] || null;
 
@@ -1388,10 +1390,12 @@ window.STEMPlusTests = (function () {
     html += '<div class="toc-list">';
     reports.forEach((r) => {
       const dir = coursePath(r.course);
-      const passed = r.report.courseExam.passed;
+      const skipped = !isDevMode() && isSkippedCourse(r.course);
+      const passed = isCourseExamPassed(r.course);
       const mastery = courseMastery(r.course);
+      const label = skipped ? 'Skipped' : (passed ? 'Exam passed' : 'In progress');
       html += '<a class="toc-item" href="' + (dir ? dir + '/index.html' : 'pathways.html') + '">'
-        + '<span class="toc-num">' + (passed ? 'Exam passed' : 'In progress') + (mastery != null ? ' · ' + mastery + '% mastery' : '') + '</span>'
+        + '<span class="toc-num">' + label + (mastery != null ? ' · ' + mastery + '% mastery' : '') + '</span>'
         + '<p class="toc-title">' + r.course + '</p></a>';
     });
     html += '</div>';
@@ -1409,17 +1413,19 @@ window.STEMPlusTests = (function () {
 
     const results = loadResults();
     const projectData = loadProjectData();
+    const skippedCourses = loadSkippedCourses();
 
-    if (results.length === 0 && Object.keys(projectData).length === 0) {
+    if (results.length === 0 && Object.keys(projectData).length === 0 && skippedCourses.length === 0) {
       el.innerHTML = '<p class="toc-empty">Nothing recorded in this browser yet. <a href="new.html">Choose a goal</a> to get started.</p>';
       return;
     }
 
     const courseNames = [];
     results.forEach((r) => { if (courseNames.indexOf(r.course) === -1) courseNames.push(r.course); });
+    skippedCourses.forEach((c) => { if (courseNames.indexOf(c) === -1) courseNames.push(c); });
     const reports = courseNames.map((course) => ({ course, report: buildReport(course), mastery: courseMastery(course) }));
 
-    const coursesCompleted = reports.filter((r) => r.report.courseExam.passed).length;
+    const coursesCompleted = reports.filter((r) => isCourseExamPassed(r.course)).length;
     const unitTestsPassed = reports.reduce((sum, r) => sum + Object.keys(r.report.units).filter((u) => r.report.units[u].cleared).length, 0);
     const questionsAnswered = results.reduce((sum, r) => sum + (r.topicBreakdown || []).length, 0);
     const projectsCompleted = Object.keys(projectData).filter((id) => projectData[id].complete).length;
@@ -1443,7 +1449,8 @@ window.STEMPlusTests = (function () {
       reports.forEach((r) => {
         const dir = coursePath(r.course);
         const href = dir ? dir + '/progress-report.html' : 'pathways.html';
-        const label = r.report.courseExam.passed ? 'Completed' : 'In progress';
+        const skipped = !isDevMode() && isSkippedCourse(r.course);
+        const label = skipped ? 'Skipped' : (isCourseExamPassed(r.course) ? 'Completed' : 'In progress');
         html += '<a class="toc-item" href="' + href + '"><span class="toc-num">' + (r.mastery != null ? r.mastery + '%' : '—') + '</span>'
           + '<p class="toc-title">' + r.course + '</p><p class="toc-sub">' + label + '</p></a>';
       });
