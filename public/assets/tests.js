@@ -1412,5 +1412,6 @@ window.STEMPlusTests = (function () {
     mountPathwayExamGate, mountPathwayFinalExamGate, mountRouteLock, mountDevModePage,
     isCourseExamPassed, isProjectComplete, isPathwayExamPassed, isPathwayFinalExamPassed,
     isDevMode, setDevMode, answerMatches,
+    loadSkippedCourses, saveSkippedCourses, isSkippedCourse,
   };
 })();
