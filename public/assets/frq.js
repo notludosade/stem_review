@@ -4,6 +4,21 @@
 // span. questionId maps to a rubric defined server-side in
 // lib/frq-questions.js — nothing about grading criteria ships to the client.
 (function () {
+  function escapeHtml(value) {
+    return String(value == null ? '' : value).replace(/[&<>"]/g, (character) => ({
+      '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;'
+    }[character]));
+  }
+
+  function safeHttpUrl(value) {
+    try {
+      const url = new URL(String(value));
+      return url.protocol === 'http:' || url.protocol === 'https:' ? url.href : '';
+    } catch (err) {
+      return '';
+    }
+  }
+
   // Server-verified developer status — see the detailed comment in
   // assets/tests.js. Guarded so a page that also loads quiz.js/tests.js
   // (the roller coaster page loads quiz.js before this file) only fires
@@ -52,7 +67,7 @@
         box.className = 'box example';
         container.appendChild(box);
       }
-      box.innerHTML = '<span class="box-label">Sample Answer (Developer)</span><p>' + data.sampleAnswer + '</p>';
+      box.innerHTML = '<span class="box-label">Sample Answer (Developer)</span><p>' + escapeHtml(data.sampleAnswer) + '</p>';
       btn.disabled = false;
     } catch (err) {
       if (status) status.textContent = 'Network error loading sample answer.';
@@ -73,19 +88,23 @@
   function renderResult(container, result) {
     const scoreColor = result.score >= 70 ? 'var(--correct)' : 'var(--incorrect)';
     let html = '<div class="box">'
-      + '<span class="box-label" style="color:' + scoreColor + '">Score: ' + result.score + '/100 — ' + result.verdict + '</span>'
-      + '<p>' + result.feedback + '</p>';
+      + '<span class="box-label" style="color:' + scoreColor + '">Score: ' + escapeHtml(result.score) + '/100 — ' + escapeHtml(result.verdict) + '</span>'
+      + '<p>' + escapeHtml(result.feedback) + '</p>';
 
     if (result.strengths.length > 0) {
-      html += '<p><strong>What worked:</strong></p><ul>' + result.strengths.map((s) => '<li>' + s + '</li>').join('') + '</ul>';
+      html += '<p><strong>What worked:</strong></p><ul>' + result.strengths.map((s) => '<li>' + escapeHtml(s) + '</li>').join('') + '</ul>';
     }
     if (result.gaps.length > 0) {
-      html += '<p><strong>What’s missing:</strong></p><ul>' + result.gaps.map((g) => '<li>' + g + '</li>').join('') + '</ul>';
+      html += '<p><strong>What’s missing:</strong></p><ul>' + result.gaps.map((g) => '<li>' + escapeHtml(g) + '</li>').join('') + '</ul>';
     }
     if (result.sources.length > 0) {
-      html += '<p><strong>Sources checked:</strong></p><ul>' + result.sources.map((s) =>
-        '<li><a href="' + s.url + '" target="_blank" rel="noopener">' + (s.title || s.url) + '</a></li>'
-      ).join('') + '</ul>';
+      html += '<p><strong>Sources checked:</strong></p><ul>' + result.sources.map((s) => {
+        const url = safeHttpUrl(s.url);
+        const label = escapeHtml(s.title || s.url);
+        return url
+          ? '<li><a href="' + escapeHtml(url) + '" target="_blank" rel="noopener">' + label + '</a></li>'
+          : '<li>' + label + '</li>';
+      }).join('') + '</ul>';
     }
     html += '</div>';
     container.innerHTML = html;

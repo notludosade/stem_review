@@ -84,6 +84,28 @@ assert.ok(!applications.abResult(1000).significant, '1,000-person A/B groups sho
 assert.ok(applications.abResult(10000).significant, '10,000-person A/B groups should clear z=1.96');
 assert.ok(!applications.coasterResult(18, 8).safe, '18 m start should fail an ideal 8 m-radius loop');
 assert.ok(applications.coasterResult(24, 8).safe, '24 m start should clear an ideal 8 m-radius loop');
+assert.ok(Math.abs(applications.cosineSimilarity([1, 2], [2, 4]) - 1) < 1e-12, 'parallel recommendation vectors should have cosine 1');
+assert.strictEqual(applications.cosineSimilarity([1, 0], [0, 1]), 0, 'orthogonal recommendation vectors should have cosine 0');
+const sirAfterOneDay = applications.sirStep({ susceptible: 9900, infected: 100, recovered: 0, beta: 0.3, gamma: 0.1, population: 10000 });
+assert.ok(Math.abs(sirAfterOneDay.infected - 119.7) < 1e-9, 'SIR step should add 29.7 infections and remove 10 recoveries');
+const route = applications.shortestPath([['A', 'B', 4], ['A', 'C', 2], ['C', 'B', 1], ['B', 'D', 5], ['C', 'D', 8], ['D', 'E', 2]], 'A', 'E');
+assert.deepStrictEqual(route, { distance: 10, path: ['A', 'C', 'B', 'D', 'E'] }, 'Dijkstra should return the least-cost route');
+assert.ok(!applications.adverseImpact(45, 100, 60, 100).passesFourFifths, 'a 75% impact ratio should trigger the four-fifths warning');
+const lowEarthOrbit = applications.orbitResult(400);
+assert.ok(Math.abs(lowEarthOrbit.periodSeconds / 60 - 92.41) < 0.1, '400 km circular orbit should take about 92.4 minutes');
+
+const { getFrqQuestion } = require('../lib/frq-questions');
+[
+  'roller-coaster-real-example',
+  'recommendation-engine-real-example',
+  'epidemic-model-real-example',
+  'gps-routing-real-example',
+  'hiring-bias-real-example',
+  'satellite-orbit-real-example',
+].forEach((id) => {
+  const question = getFrqQuestion(id);
+  assert.ok(question && question.question && question.rubric.length >= 5 && question.sampleAnswer, `FRQ registry should contain ${id}`);
+});
 
 const os = require('os');
 const { listContentFiles } = require('../lib/content');
