@@ -115,6 +115,7 @@ window.STEMPlusTests = (function () {
   var WEAK_TOPIC_THRESHOLD = 0.7;
   var STORAGE_KEY = 'stemplus:results:v1';
   var PROJECTS_STORAGE_KEY = 'stemplus:projects:v1';
+  var SKIPPED_STORAGE_KEY = 'stemplus:skipped-courses:v1';
   var DEV_MODE_KEY = 'stemplus:devmode:v1';
   var DEV_CODE = 'stem_developer67!';
 
@@ -428,6 +429,7 @@ window.STEMPlusTests = (function () {
 
   function isCourseExamPassed(course) {
     if (isDevMode()) return true;
+    if (isSkippedCourse(course)) return true;
     return summarizeCourseExam(getResultsForCourse(course)).passed;
   }
 
@@ -468,6 +470,30 @@ window.STEMPlusTests = (function () {
   function isProjectComplete(projectId) {
     var data = loadProjectData();
     return !!(data[projectId] && data[projectId].complete);
+  }
+
+  function loadSkippedCourses() {
+    try {
+      const raw = window.localStorage.getItem(SKIPPED_STORAGE_KEY);
+      return raw ? JSON.parse(raw) : [];
+    } catch (err) {
+      console.error('Could not read skipped courses', err);
+      return [];
+    }
+  }
+
+  function saveSkippedCourses(courses) {
+    try {
+      window.localStorage.setItem(SKIPPED_STORAGE_KEY, JSON.stringify(courses));
+      return true;
+    } catch (err) {
+      console.error('Could not save skipped courses', err);
+      return false;
+    }
+  }
+
+  function isSkippedCourse(course) {
+    return loadSkippedCourses().indexOf(course) !== -1;
   }
 
   function mountProjectGate(gate) {
@@ -520,11 +546,12 @@ window.STEMPlusTests = (function () {
     if (el.dataset.mounted) return;
     el.dataset.mounted = '1';
     const course = el.getAttribute('data-course-status');
+    const skipped = !isDevMode() && isSkippedCourse(course);
     const passed = isCourseExamPassed(course);
     el.classList.add('lock-badge');
     el.classList.remove('is-locked', 'is-unlocked');
     el.classList.add(passed ? 'is-unlocked' : 'is-locked');
-    el.textContent = passed ? 'Course exam passed' : 'Course exam not yet passed';
+    el.textContent = skipped ? 'Skipped — counts as done' : (passed ? 'Course exam passed' : 'Course exam not yet passed');
   }
 
   function mountProjectStatus(el) {
