@@ -116,6 +116,7 @@ window.STEMPlusTests = (function () {
   var STORAGE_KEY = 'stemplus:results:v1';
   var PROJECTS_STORAGE_KEY = 'stemplus:projects:v1';
   var SKIPPED_STORAGE_KEY = 'stemplus:skipped-courses:v1';
+  var TRACK_PACE_STORAGE_KEY = 'stemplus:track-pace:v1';
   var DEV_MODE_KEY = 'stemplus:devmode:v1';
   var DEV_CODE = 'stem_developer67!';
 
@@ -496,6 +497,26 @@ window.STEMPlusTests = (function () {
     return loadSkippedCourses().indexOf(course) !== -1;
   }
 
+  function loadTrackPace() {
+    try {
+      const raw = window.localStorage.getItem(TRACK_PACE_STORAGE_KEY);
+      return raw ? JSON.parse(raw) : {};
+    } catch (err) {
+      console.error('Could not read track pace', err);
+      return {};
+    }
+  }
+
+  function saveTrackPace(pace) {
+    try {
+      window.localStorage.setItem(TRACK_PACE_STORAGE_KEY, JSON.stringify(pace));
+      return true;
+    } catch (err) {
+      console.error('Could not save track pace', err);
+      return false;
+    }
+  }
+
   function mountProjectGate(gate) {
     if (gate.dataset.mounted) return;
     gate.dataset.mounted = '1';
@@ -598,6 +619,93 @@ window.STEMPlusTests = (function () {
       const current = statuses.find((s) => !s.passed);
       el.textContent = 'You are here: ' + current.course + ' (' + passedCount + '/' + statuses.length + ' passed)';
     }
+  }
+
+  // Self-declared "already know this" skip + target-date pace, for any page
+  // with its own course ladder: <div data-track-plan></div>, placed above
+  // the ladder. Reads the course list straight from that ladder's own
+  // [data-course-status] spans — no separate course-list data needed.
+  function paceLine(courses, targetDate) {
+    if (!targetDate) return '';
+    const passed = courses.filter((c) => isCourseExamPassed(c)).length;
+    const remaining = courses.length - passed;
+    if (remaining === 0) return 'Every course here is done.';
+
+    const today = new Date();
+    const target = new Date(targetDate + 'T23:59:59');
+    const msLeft = target - today;
+    const dateStr = target.toLocaleDateString();
+    if (msLeft <= 0) return 'Target date passed with ' + remaining + ' course' + (remaining === 1 ? '' : 's') + ' left.';
+
+    const weeksLeft = Math.max(1, msLeft / (7 * 24 * 60 * 60 * 1000));
+    const neededPerWeek = remaining / weeksLeft;
+
+    const takenAts = [];
+    const results = loadResults();
+    courses.forEach((c) => { results.forEach((r) => { if (r.course === c) takenAts.push(r.takenAt); }); });
+    takenAts.sort();
+
+    if (takenAts.length === 0) {
+      return 'Need ~' + neededPerWeek.toFixed(1) + ' course(s)/week to finish by ' + dateStr + '.';
+    }
+
+    const weeksElapsed = Math.max(1, (today - new Date(takenAts[0])) / (7 * 24 * 60 * 60 * 1000));
+    const actualPerWeek = passed / weeksElapsed;
+    const label = actualPerWeek >= neededPerWeek ? 'On track' : 'Behind';
+    return label + ' — averaging ' + actualPerWeek.toFixed(1) + '/week, need ' + neededPerWeek.toFixed(1) + '/week to finish by ' + dateStr + '.';
+  }
+
+  function mountTrackPlan(el) {
+    if (el.dataset.mounted) return;
+    el.dataset.mounted = '1';
+
+    const courses = Array.from(document.querySelectorAll('[data-course-status]')).map((e) => e.getAttribute('data-course-status'));
+    if (courses.length === 0) { el.remove(); return; }
+
+    const skipped = loadSkippedCourses();
+    const pace = loadTrackPace();
+    const savedDate = pace[window.location.pathname] || '';
+
+    const rows = courses.map((course) => {
+      const reallyPassed = !isDevMode() && !isSkippedCourse(course) && isCourseExamPassed(course);
+      const checked = reallyPassed || skipped.indexOf(course) !== -1;
+      const disabledAttr = reallyPassed ? ' disabled' : '';
+      return '<div class="reflection-item"><label><input type="checkbox" data-track-plan-course="' + course + '"'
+        + (checked ? ' checked' : '') + disabledAttr + '> ' + course
+        + (reallyPassed ? ' (already passed)' : '') + '</label></div>';
+    }).join('');
+
+    el.innerHTML = '<h2>Customize Your Plan</h2>'
+      + '<p class="subtitle">Already know something below? Skip it — it’ll count as done. Set a target date and we’ll tell you if your actual pace will get you there.</p>'
+      + rows
+      + '<div class="reflection-actions">'
+      + '<label>Target finish date <input type="date" data-track-plan-date value="' + savedDate + '"></label>'
+      + '<button type="button" class="widget-btn" data-track-plan-save>Save My Plan</button>'
+      + '<span data-track-plan-status class="reflection-status"></span>'
+      + '</div>';
+
+    const statusEl = el.querySelector('[data-track-plan-status]');
+    const line = paceLine(courses, savedDate);
+    if (line) { statusEl.textContent = line; statusEl.classList.add('is-saved'); }
+
+    el.querySelector('[data-track-plan-save]').addEventListener('click', () => {
+      const current = loadSkippedCourses();
+      Array.from(el.querySelectorAll('[data-track-plan-course]:not(:disabled)')).forEach((box) => {
+        const course = box.getAttribute('data-track-plan-course');
+        const idx = current.indexOf(course);
+        if (box.checked && idx === -1) current.push(course);
+        if (!box.checked && idx !== -1) current.splice(idx, 1);
+      });
+      saveSkippedCourses(current);
+
+      const dateVal = el.querySelector('[data-track-plan-date]').value;
+      const allPace = loadTrackPace();
+      if (dateVal) allPace[window.location.pathname] = dateVal;
+      else delete allPace[window.location.pathname];
+      saveTrackPace(allPace);
+
+      window.location.reload();
+    });
   }
 
   // "Where this fits" box for a course's own index.html: <div
@@ -1396,6 +1504,7 @@ window.STEMPlusTests = (function () {
     document.querySelectorAll('[data-devmode]').forEach(mountDevModePage);
     document.querySelectorAll('[data-dashboard]').forEach(mountDashboard);
     document.querySelectorAll('[data-learning-record]').forEach(mountLearningRecord);
+    document.querySelectorAll('[data-track-plan]').forEach(mountTrackPlan);
   }
 
   if (typeof document !== 'undefined' && document.querySelectorAll) {
