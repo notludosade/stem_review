@@ -1,14 +1,21 @@
 #!/usr/bin/env node
 // One-off browser verification helper for Phase B migration checks.
-// Usage: node scripts/verify-page.mjs <url> <js-expression-to-evaluate>
+// Usage: node scripts/verify-page.mjs <url> <js-expression-to-evaluate> [cookie]
 // The JS expression runs in the page after load and must return a JSON-serializable
 // value; a truthy `ok` field (or a plain truthy value) is treated as pass.
+// Optional [cookie] is "name=value" — set via CDP before navigation, for pages
+// gated by proxy.ts's session check. Needed because the session cookie (unlike
+// localStorage, which this script's persistent --user-data-dir already carries
+// across separate invocations) does not reliably survive a SIGKILL between
+// invocations: Chrome's cookie store flush-to-disk interval is longer than
+// localStorage's, so a value obtained once (e.g. via a curl login) must be
+// re-supplied per invocation rather than assumed to persist in the profile.
 import { spawn, execSync } from 'node:child_process';
 import { setTimeout as sleep } from 'node:timers/promises';
 
-const [, , url, expression] = process.argv;
+const [, , url, expression, cookie] = process.argv;
 if (!url || !expression) {
-  console.error('Usage: node scripts/verify-page.mjs <url> <js-expression>');
+  console.error('Usage: node scripts/verify-page.mjs <url> <js-expression> [cookie]');
   process.exit(1);
 }
 
@@ -81,7 +88,10 @@ async function waitForCdp(timeoutMs = 5000, intervalMs = 150) {
 let exitCode = 1;
 try {
   await waitForCdp();
-  const newTabRes = await fetch(`http://localhost:${port}/json/new?${encodeURIComponent(url)}`, { method: 'PUT' });
+  // With a cookie to set, open blank first — the cookie must exist before
+  // the gated page's own navigation triggers proxy.ts's session check, so
+  // this can't use /json/new's own direct-to-url shortcut below.
+  const newTabRes = await fetch(`http://localhost:${port}/json/new?${encodeURIComponent(cookie ? 'about:blank' : url)}`, { method: 'PUT' });
   const tab = await newTabRes.json();
   const ws = new WebSocket(tab.webSocketDebuggerUrl);
   await new Promise((resolve, reject) => {
@@ -89,10 +99,34 @@ try {
     ws.addEventListener('error', reject);
   });
 
+  let nextId = 1;
+  function send(method, params) {
+    const id = nextId++;
+    return new Promise((resolve, reject) => {
+      ws.addEventListener('message', function handler(event) {
+        const msg = JSON.parse(event.data);
+        if (msg.id === id) {
+          ws.removeEventListener('message', handler);
+          if (msg.error) reject(new Error(JSON.stringify(msg.error)));
+          else resolve(msg.result);
+        }
+      });
+      ws.send(JSON.stringify({ id, method, params }));
+    });
+  }
+
+  if (cookie) {
+    const eq = cookie.indexOf('=');
+    const name = cookie.slice(0, eq);
+    const value = cookie.slice(eq + 1);
+    await send('Network.setCookie', { url, name, value, path: '/', secure: true, sameSite: 'Lax' });
+    await send('Page.navigate', { url });
+  }
+
   await sleep(1500); // let the page finish loading and hydrating
 
   const result = await new Promise((resolve, reject) => {
-    const id = 1;
+    const id = nextId++;
     ws.addEventListener('message', function handler(event) {
       const msg = JSON.parse(event.data);
       if (msg.id === id) {
