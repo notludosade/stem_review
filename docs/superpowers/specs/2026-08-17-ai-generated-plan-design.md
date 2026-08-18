@@ -16,6 +16,7 @@ This adds a 9th path: a free-text prompt, graded by Claude against STEM+'s real 
 - Because a generated course is a real course, `data-course-status` badges on `my-plan.html` show real, already-tracked global progress automatically — no new progress-tracking logic needed, only display/linking.
 - Generation requires login (matches the FRQ-grading precedent: a paid API call needs a real cost-control boundary, and an anonymous, free-to-hit endpoint is an abuse surface).
 - Generation is rate-limited to once per 24 hours per account, enforced server-side (DB-backed, not client-side — client-side is not a trust boundary once login is already required). The developer account bypasses this, matching the existing `isDeveloper` bypass pattern used elsewhere (answer reveals, dev-mode auto-unlock).
+- On top of the 24h limit: a student can't start a new plan while their current one is unfinished, even if 24h has passed. **Finished** means every course in the saved plan is exam-passed (`isCourseExamPassed`) and, if the plan included a project, that project is complete (`isProjectComplete`) — the same definition of "done" a real Pathway already uses (all courses + capstone). Enforced client-side only, same honor-system trust level as skip/pace and every other piece of progress tracking on this site — this is a pacing/completion nudge, not a cost control (the 24h limit already owns cost; see Non-goals).
 
 ## Non-goals
 
@@ -24,6 +25,7 @@ This adds a 9th path: a free-text prompt, graded by Claude against STEM+'s real 
 - Not a saved-plans history. One overwritable slot. If a student wants to keep an old plan, that's a future ask, not this one.
 - Not reconciling `lib/plan-catalog.js` (new, server-side) with `tests.js`'s existing client-side `COURSE_PATHS`/`PATHWAYS` constants into one shared source. They will duplicate some data. `tests.js` is a plain browser IIFE with no module system; a Node API route can't import from it. Unifying them is a separate, unrelated refactor.
 - Not real-time/streaming generation UI. The button shows a loading state and waits for the full response — no partial-results streaming.
+- Not server-verified plan completion. The server has no visibility into `stemplus:custom-plan:v1` or `stemplus:results:v1` (both client-only), and this design deliberately doesn't change that — sending progress state to the server for verification would be a first for this codebase and isn't warranted for a pacing nudge. A student who clears `localStorage` trivially bypasses the "finish first" gate, same as they already can with skip. The 24h limit is the real cost boundary and stays server-side regardless.
 
 ## Data model
 
@@ -70,7 +72,9 @@ New section below the 8 goal cards:
 </div>
 ```
 
-`mountGeneratePlan(el)` (new, in `tests.js`): checks `/api/me` (existing endpoint, same call `auth.js`/the developer-mode work already use). Signed out → replace the button with a "Sign in to generate a custom plan" link to `login.html`, no textarea shown. Signed in → wire the button: on click, disable it, show a loading state in the status line, `POST /api/generate-plan`. On success: save the response to `stemplus:custom-plan:v1`, navigate to `my-plan.html`. On 429: show the "try again in Xh Ym" message from the response. On other failure: show the generic retry message.
+`mountGeneratePlan(el)` (new, in `tests.js`): checks `/api/me` (existing endpoint, same call `auth.js`/the developer-mode work already use). Signed out → replace the button with a "Sign in to generate a custom plan" link to `login.html`, no textarea shown.
+
+Signed in → before wiring a working button, check `stemplus:custom-plan:v1`: if a plan is saved and it isn't finished (some course in `courses` fails `isCourseExamPassed`, or a `project` was picked and fails `isProjectComplete`), replace the button with "Finish your current plan before starting a new one" linking to `my-plan.html` — no textarea, no request ever sent. Only when there's no saved plan, or the saved one is fully finished, does the real form render: textarea + working button. On click: disable it, show a loading state in the status line, `POST /api/generate-plan`. On success: save the response to `stemplus:custom-plan:v1` (overwriting the finished one, per the single-slot design), navigate to `my-plan.html`. On 429: show the "try again in Xh Ym" message from the response. On other failure: show the generic retry message.
 
 ## New page: `content/my-plan.html`
 
@@ -82,6 +86,7 @@ Standard page skeleton (matches `dashboard.html`/`learning-record.html`), `<scri
 
 Matches this session's established discipline (`scripts/verify-page.mjs` against a production build, the real session cookie for gated pages):
 - Signed-out on `new.html` sees the sign-in link, not a working generate button; no network call fires.
+- Signed-in with an unfinished saved plan sees "Finish your current plan first," not a working generate button; no network call fires. Seeding a finished plan (all courses passed, project complete if present) restores the real form.
 - Catalog validation is unit-testable without any real API call: feed `scripts/check-content.js` a fake tool-result object containing one real course name and one invented one, confirm only the real one survives — this is the one piece of new logic worth a real regression check, since it's pure data validation with no external dependency.
 - The rate-limit check itself (real DB round trip, `last_plan_generated_at` within/outside 24h) gets a couple of direct real checks the same way the developer-mode DB check was verified (a throwaway or the existing test account, flipped in the DB, confirmed via the real endpoint).
 - The actual generation call end-to-end gets a small number of real, live verification calls against the real Anthropic API (mirrors how FRQ grading was verified) — mocking Claude's output would only test the mock, not the real integration.
