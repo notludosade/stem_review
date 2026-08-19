@@ -117,6 +117,7 @@ window.STEMPlusTests = (function () {
   var PROJECTS_STORAGE_KEY = 'stemplus:projects:v1';
   var SKIPPED_STORAGE_KEY = 'stemplus:skipped-courses:v1';
   var TRACK_PACE_STORAGE_KEY = 'stemplus:track-pace:v1';
+  var CUSTOM_PLAN_STORAGE_KEY = 'stemplus:custom-plan:v1';
   var DEV_MODE_KEY = 'stemplus:devmode:v1';
   var DEV_CODE = 'stem_developer67!';
 
@@ -497,6 +498,32 @@ window.STEMPlusTests = (function () {
     return loadSkippedCourses().indexOf(course) !== -1;
   }
 
+  function loadCustomPlan() {
+    try {
+      const raw = window.localStorage.getItem(CUSTOM_PLAN_STORAGE_KEY);
+      return raw ? JSON.parse(raw) : null;
+    } catch (err) {
+      console.error('Could not read custom plan', err);
+      return null;
+    }
+  }
+
+  function saveCustomPlan(plan) {
+    try {
+      window.localStorage.setItem(CUSTOM_PLAN_STORAGE_KEY, JSON.stringify(plan));
+      return true;
+    } catch (err) {
+      console.error('Could not save custom plan', err);
+      return false;
+    }
+  }
+
+  function isPlanFinished(plan) {
+    const coursesDone = (plan.courses || []).every((c) => isCourseExamPassed(c.name));
+    const projectDone = !plan.project || !plan.project.id || isProjectComplete(plan.project.id);
+    return coursesDone && projectDone;
+  }
+
   function loadTrackPace() {
     try {
       const raw = window.localStorage.getItem(TRACK_PACE_STORAGE_KEY);
@@ -706,6 +733,131 @@ window.STEMPlusTests = (function () {
 
       window.location.reload();
     });
+  }
+
+  // "Describe Your Own Goal" section on new.html: <div data-generate-plan>
+  // containing a [data-generate-plan-input] textarea, a
+  // [data-generate-plan-submit] button, and a [data-generate-plan-status] p.
+  function mountGeneratePlan(el) {
+    if (el.dataset.mounted) return;
+    el.dataset.mounted = '1';
+
+    fetch('/api/me')
+      .then((res) => (res.ok ? res.json() : null))
+      .catch(() => null)
+      .then((me) => {
+        if (!me) {
+          el.innerHTML = '<p><a href="login.html" class="widget-btn">Sign in to generate a custom plan</a></p>';
+          return;
+        }
+
+        const saved = loadCustomPlan();
+        if (saved && !isPlanFinished(saved)) {
+          el.innerHTML = '<p class="toc-empty">Finish your current plan before starting a new one. <a href="my-plan.html">Go to your plan →</a></p>';
+          return;
+        }
+
+        const textarea = el.querySelector('[data-generate-plan-input]');
+        const button = el.querySelector('[data-generate-plan-submit]');
+        const status = el.querySelector('[data-generate-plan-status]');
+        if (!button) return;
+
+        button.addEventListener('click', () => {
+          const prompt = textarea ? textarea.value.trim() : '';
+          if (prompt.length < 10) {
+            if (status) status.textContent = 'Describe your goal in a bit more detail.';
+            return;
+          }
+          button.disabled = true;
+          if (status) status.textContent = 'Generating your plan…';
+          fetch('/api/generate-plan', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ prompt }),
+          })
+            .then((res) => res.json().then((body) => ({ ok: res.ok, body })))
+            .then(({ ok, body }) => {
+              if (!ok) {
+                if (body.retryAfterMs) {
+                  const hours = Math.ceil(body.retryAfterMs / (60 * 60 * 1000));
+                  if (status) status.textContent = 'You can generate one plan every 24 hours — try again in about ' + hours + 'h.';
+                } else if (status) {
+                  status.textContent = body.error || 'Plan generation is temporarily unavailable, try again shortly.';
+                }
+                button.disabled = false;
+                return;
+              }
+              saveCustomPlan(body);
+              window.location.href = 'my-plan.html';
+            })
+            .catch(() => {
+              if (status) status.textContent = 'Plan generation is temporarily unavailable, try again shortly.';
+              button.disabled = false;
+            });
+        });
+      });
+  }
+
+  // content/my-plan.html: <div data-generated-plan></div>, renders the
+  // saved plan from stemplus:custom-plan:v1. A project's data-project-status
+  // required-courses list comes from PATHWAYS, not from the plan's own
+  // chosen courses — the real Projects/<id>.html page's own gate requires
+  // that pathway's real course list regardless of what this plan picked, so
+  // the badge here must match that real gate or it would mislead.
+  function mountGeneratedPlan(el) {
+    if (el.dataset.mounted) return;
+    el.dataset.mounted = '1';
+
+    const plan = loadCustomPlan();
+    if (!plan) {
+      el.innerHTML = '<p class="toc-empty">No plan generated yet. <a href="new.html">Describe your goal</a> to build one.</p>';
+      return;
+    }
+
+    let html = '<h2>Your Plan</h2><p class="subtitle">' + plan.summary + '</p>';
+
+    html += '<h2>Courses</h2><div class="toc-list">';
+    plan.courses.forEach((c) => {
+      const dir = coursePath(c.name);
+      const href = dir ? dir + '/index.html' : 'pathways.html';
+      html += '<a class="toc-item" href="' + href + '"><span class="toc-num">Course</span>'
+        + '<p class="toc-title">' + c.name + '</p><p class="toc-sub">' + c.reason + '</p>'
+        + '<span data-course-status="' + c.name + '"></span></a>';
+    });
+    html += '</div>';
+
+    if (plan.project) {
+      const pathway = PATHWAYS.find((p) => p.projectId === plan.project.id);
+      const requiredCourses = pathway ? pathway.courses.join('|') : '';
+      html += '<h2>Capstone Project</h2><div class="toc-list">';
+      html += '<a class="toc-item" href="Projects/' + plan.project.id + '.html"><span class="toc-num">Project</span>'
+        + '<p class="toc-title">' + plan.project.title + '</p><p class="toc-sub">' + plan.project.reason + '</p>'
+        + '<span data-project-status data-required-courses="' + requiredCourses + '"></span></a>';
+      html += '</div>';
+    }
+
+    if (plan.problemSets.length > 0) {
+      html += '<h2>Practice</h2><div class="toc-list">';
+      plan.problemSets.forEach((p) => {
+        html += '<a class="toc-item" href="problem-set.html?course=' + encodeURIComponent(p.slug) + '"><span class="toc-num">Problem Set</span>'
+          + '<p class="toc-title">' + p.course + '</p><p class="toc-sub">' + p.reason + '</p></a>';
+      });
+      html += '</div>';
+    }
+
+    if (plan.applications.length > 0) {
+      html += '<h2>Applications</h2><div class="toc-list">';
+      plan.applications.forEach((a) => {
+        html += '<a class="toc-item" href="Applications/' + a.id + '.html"><span class="toc-num">Application</span>'
+          + '<p class="toc-title">' + a.title + '</p><p class="toc-sub">' + a.reason + '</p></a>';
+      });
+      html += '</div>';
+    }
+
+    el.innerHTML = html;
+
+    Array.prototype.slice.call(document.querySelectorAll('[data-course-status]')).forEach(mountCourseStatus);
+    Array.prototype.slice.call(document.querySelectorAll('[data-project-status]')).forEach(mountProjectStatus);
   }
 
   // "Where this fits" box for a course's own index.html: <div
@@ -1512,6 +1664,8 @@ window.STEMPlusTests = (function () {
     document.querySelectorAll('[data-dashboard]').forEach(mountDashboard);
     document.querySelectorAll('[data-learning-record]').forEach(mountLearningRecord);
     document.querySelectorAll('[data-track-plan]').forEach(mountTrackPlan);
+    document.querySelectorAll('[data-generate-plan]').forEach(mountGeneratePlan);
+    document.querySelectorAll('[data-generated-plan]').forEach(mountGeneratedPlan);
   }
 
   if (typeof document !== 'undefined' && document.querySelectorAll) {
