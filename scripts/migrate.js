@@ -20,6 +20,10 @@ async function main() {
   // pages/api/auth/login.js) rather than checked per-request against the
   // DB, so proxy.ts stays a single fast signature check.
   await sql`alter table users add column if not exists is_developer boolean not null default false`;
+  // Server-side cost control for AI plan generation — checked fresh per
+  // request in pages/api/generate-plan.js, not embedded in the session
+  // token (a token could be stale for up to 30 days).
+  await sql`alter table users add column if not exists last_plan_generated_at timestamptz`;
   console.log('migrate: users table ready');
 }
 
