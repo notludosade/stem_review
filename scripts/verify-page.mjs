@@ -156,7 +156,15 @@ try {
       const msg = JSON.parse(event.data);
       if (msg.id === id) {
         ws.removeEventListener('message', handler);
-        if (msg.result?.exceptionDetails) reject(new Error(JSON.stringify(msg.result.exceptionDetails)));
+        // A navigation that fires mid-evaluate (e.g. a page under test calling
+        // location.href = ...) destroys the execution context: Chrome answers
+        // with a CDP-level {id, error} frame instead of {id, result}. The old
+        // code only checked msg.result?.exceptionDetails (a page-level JS
+        // exception) and fell through to msg.result.result.value on undefined,
+        // crashing the whole process outside this try/catch and skipping the
+        // finally block's Chrome cleanup. Reject like a normal FAIL instead.
+        if (msg.error) reject(new Error(JSON.stringify(msg.error)));
+        else if (msg.result?.exceptionDetails) reject(new Error(JSON.stringify(msg.result.exceptionDetails)));
         else resolve(msg.result.result.value);
       }
     });
