@@ -798,6 +798,17 @@ window.STEMPlusTests = (function () {
       });
   }
 
+  // AI-generated plan text (summary, every .reason) is untrusted model
+  // output, not something to trust by default just because it comes from
+  // our own endpoint — same reasoning as frq.js's escapeHtml on grading
+  // feedback. .name/.title/.id fields are catalog-sourced (whitelisted
+  // server-side by validatePlan in lib/plan-catalog.js) and stay unescaped.
+  function escapeHtml(value) {
+    return String(value == null ? '' : value).replace(/[&<>"]/g, (character) => ({
+      '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;'
+    }[character]));
+  }
+
   // content/my-plan.html: <div data-generated-plan></div>, renders the
   // saved plan from stemplus:custom-plan:v1. A project's data-project-status
   // required-courses list comes from PATHWAYS, not from the plan's own
@@ -814,14 +825,14 @@ window.STEMPlusTests = (function () {
       return;
     }
 
-    let html = '<h2>Your Plan</h2><p class="subtitle">' + plan.summary + '</p>';
+    let html = '<h2>Your Plan</h2><p class="subtitle">' + escapeHtml(plan.summary) + '</p>';
 
     html += '<h2>Courses</h2><div class="toc-list">';
     plan.courses.forEach((c) => {
       const dir = coursePath(c.name);
       const href = dir ? dir + '/index.html' : 'pathways.html';
       html += '<a class="toc-item" href="' + href + '"><span class="toc-num">Course</span>'
-        + '<p class="toc-title">' + c.name + '</p><p class="toc-sub">' + c.reason + '</p>'
+        + '<p class="toc-title">' + c.name + '</p><p class="toc-sub">' + escapeHtml(c.reason) + '</p>'
         + '<span data-course-status="' + c.name + '"></span></a>';
     });
     html += '</div>';
@@ -831,7 +842,7 @@ window.STEMPlusTests = (function () {
       const requiredCourses = pathway ? pathway.courses.join('|') : '';
       html += '<h2>Capstone Project</h2><div class="toc-list">';
       html += '<a class="toc-item" href="Projects/' + plan.project.id + '.html"><span class="toc-num">Project</span>'
-        + '<p class="toc-title">' + plan.project.title + '</p><p class="toc-sub">' + plan.project.reason + '</p>'
+        + '<p class="toc-title">' + plan.project.title + '</p><p class="toc-sub">' + escapeHtml(plan.project.reason) + '</p>'
         + '<span data-project-status data-required-courses="' + requiredCourses + '"></span></a>';
       html += '</div>';
     }
@@ -840,7 +851,7 @@ window.STEMPlusTests = (function () {
       html += '<h2>Practice</h2><div class="toc-list">';
       plan.problemSets.forEach((p) => {
         html += '<a class="toc-item" href="problem-set.html?course=' + encodeURIComponent(p.slug) + '"><span class="toc-num">Problem Set</span>'
-          + '<p class="toc-title">' + p.course + '</p><p class="toc-sub">' + p.reason + '</p></a>';
+          + '<p class="toc-title">' + p.course + '</p><p class="toc-sub">' + escapeHtml(p.reason) + '</p></a>';
       });
       html += '</div>';
     }
@@ -849,7 +860,7 @@ window.STEMPlusTests = (function () {
       html += '<h2>Applications</h2><div class="toc-list">';
       plan.applications.forEach((a) => {
         html += '<a class="toc-item" href="Applications/' + a.id + '.html"><span class="toc-num">Application</span>'
-          + '<p class="toc-title">' + a.title + '</p><p class="toc-sub">' + a.reason + '</p></a>';
+          + '<p class="toc-title">' + a.title + '</p><p class="toc-sub">' + escapeHtml(a.reason) + '</p></a>';
       });
       html += '</div>';
     }
