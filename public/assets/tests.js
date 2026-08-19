@@ -177,6 +177,7 @@ window.STEMPlusTests = (function () {
     'Mathematical Proofs': 'Mathematical Proofs',
     'Multivariable Calculus': 'Multivariable Calculus',
     'Precalculus': 'Precalculus',
+    'Programming with Packages': 'Programming with Packages',
     'Quantum Physics & Optics': 'Quantum Physics and Optics',
     'Real Analysis A': 'Advanced+ Courses/Real Analysis A',
     'Real Analysis B': 'Advanced+ Courses/Real Analysis B',
@@ -787,7 +788,11 @@ window.STEMPlusTests = (function () {
                 button.disabled = false;
                 return;
               }
-              saveCustomPlan(body);
+              if (!saveCustomPlan(body)) {
+                if (status) status.textContent = "Couldn't save your plan in this browser — try again or check your browser's storage settings.";
+                button.disabled = false;
+                return;
+              }
               window.location.href = 'my-plan.html';
             })
             .catch(() => {
@@ -827,23 +832,28 @@ window.STEMPlusTests = (function () {
 
     let html = '<h2>Your Plan</h2><p class="subtitle">' + escapeHtml(plan.summary) + '</p>';
 
-    html += '<h2>Courses</h2><div class="toc-list">';
-    plan.courses.forEach((c) => {
-      const dir = coursePath(c.name);
-      const href = dir ? dir + '/index.html' : 'pathways.html';
-      html += '<a class="toc-item" href="' + href + '"><span class="toc-num">Course</span>'
-        + '<p class="toc-title">' + c.name + '</p><p class="toc-sub">' + escapeHtml(c.reason) + '</p>'
-        + '<span data-course-status="' + c.name + '"></span></a>';
-    });
-    html += '</div>';
+    if ((plan.courses || []).length > 0) {
+      html += '<h2>Courses</h2><div class="toc-list">';
+      (plan.courses || []).forEach((c) => {
+        const dir = coursePath(c.name);
+        const href = dir ? dir + '/index.html' : 'pathways.html';
+        html += '<a class="toc-item" href="' + href + '"><span class="toc-num">Course</span>'
+          + '<p class="toc-title">' + c.name + '</p><p class="toc-sub">' + escapeHtml(c.reason) + '</p>'
+          + '<span data-course-status="' + c.name + '"></span></a>';
+      });
+      html += '</div>';
+    }
 
     if (plan.project) {
       const pathway = PATHWAYS.find((p) => p.projectId === plan.project.id);
       const requiredCourses = pathway ? pathway.courses.join('|') : '';
       html += '<h2>Capstone Project</h2><div class="toc-list">';
       html += '<a class="toc-item" href="Projects/' + plan.project.id + '.html"><span class="toc-num">Project</span>'
-        + '<p class="toc-title">' + plan.project.title + '</p><p class="toc-sub">' + escapeHtml(plan.project.reason) + '</p>'
-        + '<span data-project-status data-required-courses="' + requiredCourses + '"></span></a>';
+        + '<p class="toc-title">' + plan.project.title + '</p><p class="toc-sub">' + escapeHtml(plan.project.reason) + '</p>';
+      if (pathway) {
+        html += '<span data-project-status data-required-courses="' + requiredCourses + '"></span>';
+      }
+      html += '</a>';
       html += '</div>';
     }
 

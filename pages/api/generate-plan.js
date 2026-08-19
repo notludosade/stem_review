@@ -48,22 +48,33 @@ module.exports = async (req, res) => {
     return res.json({ error: 'sign in required' });
   }
 
+  let sql = null;
+  let user = null;
+  let slotClaimed = false;
+
   try {
-    const sql = getDb();
+    sql = getDb();
     const rows = await sql`select is_developer, last_plan_generated_at from users where id = ${payload.userId}`;
     if (rows.length === 0) {
       res.statusCode = 401;
       return res.json({ error: 'sign in required' });
     }
-    const user = rows[0];
+    user = rows[0];
 
-    if (!user.is_developer && user.last_plan_generated_at) {
+    // Atomically claim today's generation slot before calling the AI, so N
+    // concurrent requests can't all read "not rate limited" and all proceed.
+    const claimed = await sql`
+      update users set last_plan_generated_at = now()
+      where id = ${payload.userId}
+        and (is_developer or last_plan_generated_at is null or last_plan_generated_at < now() - interval '24 hours')
+      returning last_plan_generated_at
+    `;
+    if (claimed.length === 0) {
+      res.statusCode = 429;
       const elapsed = Date.now() - new Date(user.last_plan_generated_at).getTime();
-      if (elapsed < RATE_LIMIT_MS) {
-        res.statusCode = 429;
-        return res.json({ error: 'you can generate one plan every 24 hours', retryAfterMs: RATE_LIMIT_MS - elapsed });
-      }
+      return res.json({ error: 'you can generate one plan every 24 hours', retryAfterMs: RATE_LIMIT_MS - elapsed });
     }
+    slotClaimed = true;
 
     const { plan: rawPlan, refused } = await generatePlanWithClaude({
       system: buildSystemPrompt(CATALOG),
@@ -72,17 +83,24 @@ module.exports = async (req, res) => {
 
     if (refused || !rawPlan) {
       console.error('generate-plan: no usable plan', { refused, hasPlan: !!rawPlan });
+      await sql`update users set last_plan_generated_at = ${user.last_plan_generated_at} where id = ${payload.userId}`;
       res.statusCode = 502;
       return res.json({ error: 'plan generation is temporarily unavailable, try again shortly' });
     }
 
     const plan = validatePlan(rawPlan, CATALOG);
-    await sql`update users set last_plan_generated_at = now() where id = ${payload.userId}`;
 
     res.statusCode = 200;
     res.json(plan);
   } catch (err) {
     console.error('generate-plan failed', err);
+    if (slotClaimed && user) {
+      try {
+        await sql`update users set last_plan_generated_at = ${user.last_plan_generated_at} where id = ${payload.userId}`;
+      } catch (restoreErr) {
+        console.error('generate-plan: failed to restore rate-limit slot after error', restoreErr);
+      }
+    }
     res.statusCode = 502;
     res.json({ error: 'plan generation is temporarily unavailable, try again shortly' });
   }

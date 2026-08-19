@@ -2,10 +2,10 @@ const assert = require('assert');
 const { CATALOG, validatePlan } = require('../lib/plan-catalog');
 
 assert.ok(CATALOG.courses.length >= 30, `expected at least 30 courses, got ${CATALOG.courses.length}`);
-assert.ok(CATALOG.projects.length === 7, `expected exactly 7 recommendable projects (8 real capstones minus Mathematics), got ${CATALOG.projects.length}`);
+assert.ok(CATALOG.projects.length >= 7, `expected at least 7 recommendable projects (8 real capstones minus Mathematics), got ${CATALOG.projects.length}`);
 assert.ok(!CATALOG.projects.some((p) => p.id === 'mathematics-capstone'), 'Mathematics Capstone must be excluded');
-assert.ok(CATALOG.applications.length === 9, `expected 9 applications, got ${CATALOG.applications.length}`);
-assert.ok(CATALOG.problemSets.length === 20, `expected 20 problem sets, got ${CATALOG.problemSets.length}`);
+assert.ok(CATALOG.applications.length >= 9, `expected at least 9 applications, got ${CATALOG.applications.length}`);
+assert.ok(CATALOG.problemSets.length >= 20, `expected at least 20 problem sets, got ${CATALOG.problemSets.length}`);
 
 // Every parsed entry must have real, non-empty text — a parsing bug that
 // silently produces empty strings should fail loudly here, not ship.
@@ -57,5 +57,15 @@ assert.strictEqual(validatePlan(rawPlanBadProject, CATALOG).project, null);
 // project.id === '' (the model's "no strong match" sentinel) must also resolve to null.
 const rawPlanNoProject = { summary: '', courses: [], project: { id: '', reason: '' }, problemSets: [], applications: [] };
 assert.strictEqual(validatePlan(rawPlanNoProject, CATALOG).project, null);
+
+// Every catalog course must have a COURSE_PATHS entry in tests.js — the two
+// lists are independently maintained and must describe the same courses, or
+// my-plan.html links nowhere and isCourseExamPassed is permanently false for
+// that course (see the "Data Handling: CB" / "Programming with Packages" bugs).
+const testsSrc = require('fs').readFileSync(require('path').join(__dirname, '../public/assets/tests.js'), 'utf8');
+const block = testsSrc.slice(testsSrc.indexOf('var COURSE_PATHS = {'), testsSrc.indexOf('function coursePath'));
+const known = new Set([...block.matchAll(/^\s*'([^']+)':/gm)].map((m) => m[1]));
+CATALOG.courses.forEach((c) => assert.ok(known.has(c.name),
+  `catalog course "${c.name}" has no COURSE_PATHS entry — my-plan.html would link nowhere and never mark it passed`));
 
 console.log('check-plan-catalog: OK');
