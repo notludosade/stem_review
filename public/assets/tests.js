@@ -832,29 +832,45 @@ window.STEMPlusTests = (function () {
 
     let html = '<h2>Your Plan</h2><p class="subtitle">' + escapeHtml(plan.summary) + '</p>';
 
-    if ((plan.courses || []).length > 0) {
-      html += '<h2>Courses</h2><div class="toc-list">';
-      (plan.courses || []).forEach((c) => {
+    if ((plan.courses || []).length > 0 || plan.project) {
+      const courses = plan.courses || [];
+      const firstNotDoneIndex = courses.findIndex((c) => !isCourseExamPassed(c.name));
+      html += '<h2>Your Roadmap</h2><div class="roadmap-path">';
+
+      courses.forEach((c, i) => {
         const dir = coursePath(c.name);
         const href = dir ? dir + '/index.html' : 'pathways.html';
-        html += '<a class="toc-item" href="' + href + '"><span class="toc-num">Course</span>'
-          + '<p class="toc-title">' + c.name + '</p><p class="toc-sub">' + escapeHtml(c.reason) + '</p>'
-          + '<span data-course-status="' + c.name + '"></span></a>';
+        const done = isCourseExamPassed(c.name);
+        const current = !done && i === firstNotDoneIndex;
+        const stateClass = done ? ' is-done' : (current ? ' is-current' : '');
+        html += '<div class="roadmap-node' + stateClass + '">';
+        if (current) html += '<span class="box-label">You are here</span>';
+        html += '<p class="roadmap-node-title"><a href="' + href + '">' + (done ? '✓ ' : '') + c.name + '</a></p>';
+        if (current) html += '<p class="toc-sub">' + escapeHtml(c.reason) + '</p>';
+        html += '</div>';
       });
-      html += '</div>';
-    }
 
-    if (plan.project) {
-      const pathway = PATHWAYS.find((p) => p.projectId === plan.project.id);
-      const requiredCourses = pathway ? pathway.courses.join('|') : '';
-      html += '<h2>Capstone Project</h2><div class="toc-list">';
-      html += '<a class="toc-item" href="Projects/' + plan.project.id + '.html"><span class="toc-num">Project</span>'
-        + '<p class="toc-title">' + plan.project.title + '</p><p class="toc-sub">' + escapeHtml(plan.project.reason) + '</p>';
-      if (pathway) {
-        html += '<span data-project-status data-required-courses="' + requiredCourses + '"></span>';
+      if (plan.project) {
+        const pathway = PATHWAYS.find((p) => p.projectId === plan.project.id);
+        const requiredCourses = pathway ? pathway.courses.join('|') : '';
+        const allCoursesDone = firstNotDoneIndex === -1;
+        const projectDone = isProjectComplete(plan.project.id);
+        const projectCurrent = allCoursesDone && !projectDone;
+        const projectStateClass = projectDone ? ' is-done' : (projectCurrent ? ' is-current' : '');
+        html += '<div class="roadmap-node' + projectStateClass + '">';
+        if (projectCurrent) html += '<span class="box-label">You are here</span>';
+        html += '<p class="roadmap-node-title"><a href="Projects/' + plan.project.id + '.html">' + (projectDone ? '✓ ' : '') + plan.project.title + '</a></p>';
+        if (projectCurrent || projectDone) html += '<p class="toc-sub">' + escapeHtml(plan.project.reason) + '</p>';
+        if (pathway) html += '<span data-project-status data-required-courses="' + requiredCourses + '"></span>';
+        html += '</div>';
       }
-      html += '</a>';
+
       html += '</div>';
+
+      const projectFinished = !plan.project || isProjectComplete(plan.project.id);
+      if (firstNotDoneIndex === -1 && projectFinished) {
+        html += '<p class="toc-empty">✓ Everything in this plan is complete.</p>';
+      }
     }
 
     if (plan.problemSets.length > 0) {
@@ -877,7 +893,6 @@ window.STEMPlusTests = (function () {
 
     el.innerHTML = html;
 
-    Array.prototype.slice.call(document.querySelectorAll('[data-course-status]')).forEach(mountCourseStatus);
     Array.prototype.slice.call(document.querySelectorAll('[data-project-status]')).forEach(mountProjectStatus);
   }
 
