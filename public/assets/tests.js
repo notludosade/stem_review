@@ -897,6 +897,67 @@ window.STEMPlusTests = (function () {
     Array.prototype.slice.call(document.querySelectorAll('[data-project-status]')).forEach(mountProjectStatus);
   }
 
+  // Pathway page roadmap: <div data-pathway-roadmap="<PATHWAYS name>"></div>,
+  // placed where "The Route" + "Capstone Project" used to be. Reuses Phase
+  // 1's exact .roadmap-path/.roadmap-node CSS — no new styles. Unlike
+  // mountGeneratedPlan's roadmap (a short AI-picked course subset that can
+  // diverge from its pathway's full required-course list), this roadmap's
+  // own course list IS the pathway's full required-course list, so the
+  // capstone's "current" state can never mismatch its lock badge — no
+  // separate unlocked-check needed here.
+  //
+  // Also emits one <span data-course-status="…"> per course, never
+  // separately mounted/styled — its sole purpose is staying discoverable to
+  // mountTrackPlan's existing [data-course-status] DOM-scrape, which runs
+  // later in initTests() and needs these spans to already exist by then.
+  function mountPathwayRoadmap(el) {
+    if (el.dataset.mounted) return;
+    el.dataset.mounted = '1';
+
+    const name = el.getAttribute('data-pathway-roadmap');
+    const pathway = PATHWAYS.find((p) => p.name === name);
+    if (!pathway) { el.remove(); return; }
+
+    const firstNotDoneIndex = pathway.courses.findIndex((c) => !isCourseExamPassed(c));
+
+    let html = '<div class="roadmap-path">';
+
+    pathway.courses.forEach((course, i) => {
+      const dir = coursePath(course);
+      const href = dir ? '../' + dir + '/index.html' : '../pathways.html';
+      const done = isCourseExamPassed(course);
+      const current = !done && i === firstNotDoneIndex;
+      const stateClass = done ? ' is-done' : (current ? ' is-current' : '');
+      html += '<div class="roadmap-node' + stateClass + '">';
+      if (current) html += '<span class="box-label">You are here</span>';
+      html += '<p class="roadmap-node-title"><a href="' + href + '">' + (done ? '✓ ' : '') + course + '</a></p>';
+      html += '<span data-course-status="' + course + '"></span>';
+      html += '</div>';
+    });
+
+    const allCoursesDone = firstNotDoneIndex === -1;
+    const projectDone = isProjectComplete(pathway.projectId);
+    const projectCurrent = allCoursesDone && !projectDone;
+    const projectStateClass = projectDone ? ' is-done' : (projectCurrent ? ' is-current' : '');
+    const requiredCourses = pathway.courses.join('|');
+    html += '<div class="roadmap-node' + projectStateClass + '">';
+    if (projectCurrent) html += '<span class="box-label">You are here</span>';
+    html += '<p class="roadmap-node-title"><a href="../Projects/' + pathway.projectId + '.html">'
+      + (projectDone ? '✓ ' : '') + pathway.name + ' Capstone</a></p>';
+    html += '<span data-project-status data-required-courses="' + requiredCourses + '"></span>';
+    html += '</div>';
+
+    html += '</div>';
+
+    if (allCoursesDone && projectDone) {
+      html += '<p class="toc-empty">✓ Every course and the capstone are complete.</p>';
+    }
+
+    el.innerHTML = html;
+
+    Array.prototype.slice.call(document.querySelectorAll('[data-project-status]')).forEach(mountProjectStatus);
+  }
+
   // "Where this fits" box for a course's own index.html: <div
   // data-course-context="Exact Course Name" data-root="../"></div> — data-root
   // is the relative prefix back to the site root (matches the depth of the
@@ -1700,6 +1761,10 @@ window.STEMPlusTests = (function () {
     document.querySelectorAll('[data-devmode]').forEach(mountDevModePage);
     document.querySelectorAll('[data-dashboard]').forEach(mountDashboard);
     document.querySelectorAll('[data-learning-record]').forEach(mountLearningRecord);
+    // mountPathwayRoadmap must run before mountTrackPlan: it injects the
+    // data-course-status spans mountTrackPlan's own querySelectorAll scrape
+    // depends on finding already in the DOM. Do not reorder these two lines.
+    document.querySelectorAll('[data-pathway-roadmap]').forEach(mountPathwayRoadmap);
     document.querySelectorAll('[data-track-plan]').forEach(mountTrackPlan);
     document.querySelectorAll('[data-generate-plan]').forEach(mountGeneratePlan);
     document.querySelectorAll('[data-generated-plan]').forEach(mountGeneratedPlan);
