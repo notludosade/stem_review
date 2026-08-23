@@ -253,6 +253,23 @@ window.STEMPlusTests = (function () {
     'Advanced Algorithms': 'advanced-algorithms',
   };
 
+  // Reverse of each Application page's own "Goes deeper in" link (one
+  // course per Application, verified against content/Applications/*.html —
+  // all 9 pages, one entry each). Lets a course's own index.html show which
+  // Application, if any, was built on it — mirrors PROBLEM_SET_SLUGS' shape
+  // and lookup pattern exactly.
+  var APPLICATION_BY_COURSE = {
+    'Data Handling CB': { id: 'ab-testing-a-feature-launch', title: 'A/B Testing a Feature Launch' },
+    'Computer Programming Ethics': { id: 'bias-in-a-hiring-algorithm', title: 'Bias in a Hiring Algorithm' },
+    'AP Physics 1': { id: 'designing-a-roller-coaster-safely', title: 'Designing a Roller Coaster Safely' },
+    'Linear Algebra A': { id: 'how-recommendation-engines-work', title: 'How Recommendation Engines Work' },
+    'AP Physics C: Mechanics': { id: 'keeping-a-satellite-in-orbit', title: 'Keeping a Satellite in Orbit' },
+    'Differential Equations': { id: 'modeling-an-epidemic', title: 'Modeling an Epidemic' },
+    'Discrete Math': { id: 'route-planning-like-gps', title: 'Route Planning Like GPS' },
+    'Cloud Computing A': { id: 'scaling-a-viral-app', title: 'Scaling a Viral App Overnight' },
+    'Computer Networking Fundamentals': { id: 'why-your-video-call-freezes', title: 'Why Your Video Call Freezes' },
+  };
+
   function courseMastery(course) {
     var topics = buildReport(course).topics;
     if (topics.length === 0) return null;
@@ -965,13 +982,21 @@ window.STEMPlusTests = (function () {
   // the ones nested under Advanced+ Courses/ or AP STEM+/). Reuses PATHWAYS,
   // the same table the Learning Record already computes readiness from, so
   // prerequisite/next/capstone claims can't drift from what's shown there.
+  // Also surfaces this course's problem set (PROBLEM_SET_SLUGS) and matching
+  // Application (APPLICATION_BY_COURSE), if either exists. Self-removes only
+  // when there's truly nothing to show — no pathway, no practice, and no
+  // application — not just when there's no pathway, so electives outside
+  // every PATHWAYS entry (e.g. Linear Algebra A) still get a box when they
+  // have a problem set or an Application built on them.
   function mountCourseContext(el) {
     if (el.dataset.mounted) return;
     el.dataset.mounted = '1';
     const course = el.getAttribute('data-course-context');
     const root = el.getAttribute('data-root') || '';
     const memberships = PATHWAYS.filter((p) => p.courses.indexOf(course) !== -1);
-    if (memberships.length === 0) {
+    const problemSetSlug = PROBLEM_SET_SLUGS[course];
+    const application = APPLICATION_BY_COURSE[course];
+    if (memberships.length === 0 && !problemSetSlug && !application) {
       el.remove();
       return;
     }
@@ -989,6 +1014,12 @@ window.STEMPlusTests = (function () {
       }
       html += '<p>' + line + '.</p>';
     });
+    if (problemSetSlug) {
+      html += '<p>Practice: <a href="' + root + 'problem-set.html?course=' + problemSetSlug + '">Problem Set</a></p>';
+    }
+    if (application) {
+      html += '<p>See it in action: <a href="' + root + 'Applications/' + application.id + '.html">' + application.title + '</a></p>';
+    }
     el.classList.add('box', 'why');
     el.innerHTML = html;
   }
