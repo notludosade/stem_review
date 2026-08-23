@@ -68,4 +68,16 @@ const known = new Set([...block.matchAll(/^\s*'([^']+)':/gm)].map((m) => m[1]));
 CATALOG.courses.forEach((c) => assert.ok(known.has(c.name),
   `catalog course "${c.name}" has no COURSE_PATHS entry — my-plan.html would link nowhere and never mark it passed`));
 
+// COURSE_PATHS *values* must also resolve to real directories — the roadmap
+// visuals (my-plan.html, and the 7 Pathway pages) build hrefs from these at
+// runtime with no static <a href> for check-content-links.js to see, so a
+// renamed course directory would otherwise go undetected here.
+const fs = require('fs');
+const path = require('path');
+const contentDir = path.join(__dirname, '../content');
+[...block.matchAll(/^\s*'([^']+)':\s*'([^']+)'/gm)].forEach(([, name, dir]) => {
+  const indexPath = path.join(contentDir, dir, 'index.html');
+  assert.ok(fs.existsSync(indexPath), `COURSE_PATHS["${name}"] → content/${dir}/index.html does not exist`);
+});
+
 console.log('check-plan-catalog: OK');

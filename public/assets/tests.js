@@ -920,7 +920,7 @@ window.STEMPlusTests = (function () {
 
     const firstNotDoneIndex = pathway.courses.findIndex((c) => !isCourseExamPassed(c));
 
-    let html = '<div class="roadmap-path">';
+    let html = '<h2>Your Roadmap</h2><div class="roadmap-path">';
 
     pathway.courses.forEach((course, i) => {
       const dir = coursePath(course);
@@ -1764,6 +1764,9 @@ window.STEMPlusTests = (function () {
     // mountPathwayRoadmap must run before mountTrackPlan: it injects the
     // data-course-status spans mountTrackPlan's own querySelectorAll scrape
     // depends on finding already in the DOM. Do not reorder these two lines.
+    // It must also run after mountCourseStatus (a few lines above), which
+    // must never mount these spans — moving this call earlier would give
+    // every roadmap node a redundant status badge.
     document.querySelectorAll('[data-pathway-roadmap]').forEach(mountPathwayRoadmap);
     document.querySelectorAll('[data-track-plan]').forEach(mountTrackPlan);
     document.querySelectorAll('[data-generate-plan]').forEach(mountGeneratePlan);
