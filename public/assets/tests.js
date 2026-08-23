@@ -1296,10 +1296,10 @@ window.STEMPlusTests = (function () {
 
   function maybeAddDevReveal(container) {
     if (window.STEMPlusDev && window.STEMPlusDev.isDeveloper) {
-      addDevRevealButton(container);
+      if (isDevMode()) addDevRevealButton(container);
     } else if (window.STEMPlusDevReady) {
       window.STEMPlusDevReady.then(function (isDeveloper) {
-        if (isDeveloper) addDevRevealButton(container);
+        if (isDeveloper && isDevMode()) addDevRevealButton(container);
       });
     }
   }
@@ -1471,42 +1471,59 @@ window.STEMPlusTests = (function () {
   function mountDevModePage(el) {
     if (el.dataset.mounted) return;
     el.dataset.mounted = '1';
+    const codeRow = el.querySelector('[data-devmode-code-row]');
     const input = el.querySelector('[data-devmode-input]');
     const submit = el.querySelector('[data-devmode-submit]');
     const status = el.querySelector('[data-devmode-status]');
     const clearBtn = el.querySelector('[data-devmode-clear]');
+    const recognizedOnBtn = el.querySelector('[data-devmode-recognized-on]');
+    let recognized = false;
 
-    function refresh(autoRecognized) {
+    // The server-verified account (see the isDeveloper check near the top
+    // of this file) never has to type the code — it's already proven who
+    // they are via their signed-in session — but dev mode itself only ever
+    // turns on when they click something. It used to auto-enable itself on
+    // every visit to this page; that silently overrode "Turn Off Developer
+    // Mode" the moment they came back, so it's a plain click now instead.
+    function refresh() {
       if (isDevMode()) {
         if (status) {
-          status.textContent = autoRecognized
-            ? 'Recognized this account as the developer — mode enabled automatically, no code needed.'
+          status.textContent = recognized
+            ? 'Developer mode is ON in this browser — every gate is unlocked and quiz answers can be revealed.'
             : 'Developer mode is ON in this browser — every gate is unlocked.';
           status.hidden = false;
           status.classList.add('is-correct');
           status.classList.remove('is-incorrect');
         }
         if (clearBtn) clearBtn.hidden = false;
+        if (codeRow) codeRow.hidden = true;
+        if (recognizedOnBtn) recognizedOnBtn.hidden = true;
+      } else if (recognized) {
+        if (clearBtn) clearBtn.hidden = true;
+        if (codeRow) codeRow.hidden = true;
+        if (recognizedOnBtn) recognizedOnBtn.hidden = false;
+        if (status) {
+          status.textContent = 'Recognized this account as the developer — turn on Developer Mode whenever you need it.';
+          status.hidden = false;
+          status.classList.add('is-correct');
+          status.classList.remove('is-incorrect');
+        }
       } else {
         if (clearBtn) clearBtn.hidden = true;
+        if (codeRow) codeRow.hidden = false;
+        if (recognizedOnBtn) recognizedOnBtn.hidden = true;
       }
     }
     refresh();
 
-    // The server-verified account (see the isDeveloper check near the top
-    // of this file) skips typing the code entirely — it's already proven
-    // who they are via their signed-in session, so re-typing a code that's
-    // sitting in this same file's public source would just be theater.
-    function autoUnlockIfRecognized(isDeveloper) {
-      if (isDeveloper && !isDevMode()) {
-        setDevMode(true);
-        refresh(true);
-      }
+    function onRecognized(isDeveloper) {
+      recognized = !!isDeveloper;
+      refresh();
     }
     if (window.STEMPlusDev && window.STEMPlusDev.isDeveloper) {
-      autoUnlockIfRecognized(true);
+      onRecognized(true);
     } else if (window.STEMPlusDevReady) {
-      window.STEMPlusDevReady.then(autoUnlockIfRecognized);
+      window.STEMPlusDevReady.then(onRecognized);
     }
 
     if (submit) {
@@ -1521,6 +1538,12 @@ window.STEMPlusTests = (function () {
           status.classList.add('is-incorrect');
           status.classList.remove('is-correct');
         }
+      });
+    }
+    if (recognizedOnBtn) {
+      recognizedOnBtn.addEventListener('click', () => {
+        setDevMode(true);
+        refresh();
       });
     }
     if (clearBtn) {
