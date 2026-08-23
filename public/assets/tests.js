@@ -855,7 +855,8 @@ window.STEMPlusTests = (function () {
         const requiredCourses = pathway ? pathway.courses.join('|') : '';
         const allCoursesDone = firstNotDoneIndex === -1;
         const projectDone = isProjectComplete(plan.project.id);
-        const projectCurrent = allCoursesDone && !projectDone;
+        const projectUnlocked = !pathway || pathway.courses.every((name) => isCourseExamPassed(name));
+        const projectCurrent = allCoursesDone && projectUnlocked && !projectDone;
         const projectStateClass = projectDone ? ' is-done' : (projectCurrent ? ' is-current' : '');
         html += '<div class="roadmap-node' + projectStateClass + '">';
         if (projectCurrent) html += '<span class="box-label">You are here</span>';
