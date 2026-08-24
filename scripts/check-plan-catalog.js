@@ -1,5 +1,5 @@
 const assert = require('assert');
-const { CATALOG, validatePlan } = require('../lib/plan-catalog');
+const { CATALOG, PREREQUISITE_GRAPH, validatePlan } = require('../lib/plan-catalog');
 
 assert.ok(CATALOG.courses.length >= 30, `expected at least 30 courses, got ${CATALOG.courses.length}`);
 assert.ok(CATALOG.projects.length >= 7, `expected at least 7 recommendable projects (8 real capstones minus Mathematics), got ${CATALOG.projects.length}`);
@@ -79,5 +79,34 @@ const contentDir = path.join(__dirname, '../content');
   const indexPath = path.join(contentDir, dir, 'index.html');
   assert.ok(fs.existsSync(indexPath), `COURSE_PATHS["${name}"] → content/${dir}/index.html does not exist`);
 });
+
+// Every PREREQUISITE_GRAPH key and prerequisite value must be a real
+// catalog course name — a typo here would silently produce a dead
+// relationship (the AI prompt just wouldn't mention it, and
+// reorderByPrerequisites would just skip it — no error, just wrong data).
+const catalogCourseNames = new Set(CATALOG.courses.map((c) => c.name));
+Object.keys(PREREQUISITE_GRAPH).forEach((course) => {
+  assert.ok(catalogCourseNames.has(course), `PREREQUISITE_GRAPH key "${course}" is not a real catalog course`);
+  PREREQUISITE_GRAPH[course].forEach((prereq) => {
+    assert.ok(catalogCourseNames.has(prereq), `PREREQUISITE_GRAPH["${course}"] lists "${prereq}", which is not a real catalog course`);
+  });
+});
+
+// reorderByPrerequisites (exercised through validatePlan): a deliberately
+// scrambled course order must come back sorted so every prerequisite
+// precedes its dependent, with no course added or removed.
+const rawPlanScrambled = {
+  summary: '',
+  courses: [
+    { name: 'Linear Algebra A', reason: 'c' },
+    { name: 'Precalculus', reason: 'a' },
+    { name: 'AP Calculus BC', reason: 'b' },
+  ],
+  project: null,
+  problemSets: [],
+  applications: [],
+};
+const reordered = validatePlan(rawPlanScrambled, CATALOG).courses.map((c) => c.name);
+assert.deepStrictEqual(reordered, ['Precalculus', 'AP Calculus BC', 'Linear Algebra A']);
 
 console.log('check-plan-catalog: OK');
