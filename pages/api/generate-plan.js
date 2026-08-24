@@ -1,7 +1,7 @@
 const { getDb } = require('../../lib/db');
 const { verify } = require('../../lib/session');
 const { generatePlanWithClaude } = require('../../lib/anthropic');
-const { CATALOG, validatePlan } = require('../../lib/plan-catalog');
+const { CATALOG, PREREQUISITE_GRAPH, validatePlan } = require('../../lib/plan-catalog');
 
 const MIN_PROMPT_LENGTH = 10;
 const MAX_PROMPT_LENGTH = 500;
@@ -12,21 +12,29 @@ function buildSystemPrompt(catalog) {
   const projectLines = catalog.projects.map((p) => `- ${p.id}: ${p.title} — ${p.blurb}`).join('\n');
   const problemSetLines = catalog.problemSets.map((p) => `- ${p.course}: ${p.blurb}`).join('\n');
   const applicationLines = catalog.applications.map((a) => `- ${a.id}: ${a.title}`).join('\n');
+  const prerequisiteLines = Object.keys(PREREQUISITE_GRAPH)
+    .map((course) => `- ${course} requires: ${PREREQUISITE_GRAPH[course].join(', ')}`)
+    .join('\n');
 
   return 'You are building a custom STEM+ learning plan for a highly motivated high schooler, from their own description of what they want to pursue. ' +
     'STEM+ is a free site with courses, capstone projects, practice problem sets, and short real-world "Applications" pages.\n\n' +
     'Build the plan using ONLY the real courses, projects, problem sets, and applications listed below — never invent one, never rename one. ' +
     "A course sequence can freely mix across subjects; it is not limited to any single existing pathway.\n\n" +
     `Available courses:\n${courseLines}\n\n` +
+    'Known course prerequisites — if you include a course below, also include its listed prerequisites in the plan unless the student\'s own ' +
+    'description makes clear they already know that material. Prefer dropping a less essential course over silently skipping a genuine ' +
+    `prerequisite:\n${prerequisiteLines}\n\n` +
     `Available capstone projects (pick at most one, only if it genuinely fits the courses you chose):\n${projectLines}\n\n` +
     `Available problem sets (extra practice once a course is underway):\n${problemSetLines}\n\n` +
     `Available Applications pages (short real-world application reads):\n${applicationLines}\n\n` +
     'Call submit_plan with: a 2-3 sentence summary of the plan and why it fits the student\'s goal; an ordered array of 2-6 courses, each with a ' +
     'one-sentence reason tied to the student\'s stated goal; a project (set id to the empty string "" if none of the listed projects is a strong ' +
-    'match for the chosen courses — never force one); 0-3 problemSets; 0-3 applications.';
+    'match for the chosen courses — never force one); 0-3 problemSets; 0-3 applications. Favor thoroughness over minimalism: use as much of that ' +
+    'budget as genuinely serves the student\'s stated goal — a real prerequisite chain, relevant practice, and a fitting real-world Application ' +
+    'all make for a plan the student learns more from, not just one that technically answers their prompt.';
 }
 
-module.exports = async (req, res) => {
+async function handler(req, res) {
   if (req.method !== 'POST') {
     res.statusCode = 405;
     return res.json({ error: 'method not allowed' });
@@ -104,4 +112,7 @@ module.exports = async (req, res) => {
     res.statusCode = 502;
     res.json({ error: 'plan generation is temporarily unavailable, try again shortly' });
   }
-};
+}
+
+handler.buildSystemPrompt = buildSystemPrompt;
+module.exports = handler;
