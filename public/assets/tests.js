@@ -270,6 +270,19 @@ window.STEMPlusTests = (function () {
     'Computer Networking Fundamentals': { id: 'why-your-video-call-freezes', title: 'Why Your Video Call Freezes' },
   };
 
+  // Transcribed from content/advanced.html's own prerequisite prose (e.g.
+  // "Requires AP Calculus BC") — only the 5 shipped Advanced+ courses, not
+  // the 4 "Coming Soon" placeholders with no real index.html to attach a
+  // context box to. Every key and every listed value already exists in
+  // COURSE_PATHS, verified against the file directly.
+  var PREREQUISITES = {
+    'Real Analysis A': ['AP Calculus BC'],
+    'Real Analysis B': ['Real Analysis A'],
+    'Advanced Algorithms': ['Computer Programming 1', 'Computer Programming 2'],
+    'Linear Algebra B': ['Linear Algebra A'],
+    'Topology: Fundamentals': ['Real Analysis A'],
+  };
+
   function courseMastery(course) {
     var topics = buildReport(course).topics;
     if (topics.length === 0) return null;
@@ -982,12 +995,14 @@ window.STEMPlusTests = (function () {
   // the ones nested under Advanced+ Courses/ or AP STEM+/). Reuses PATHWAYS,
   // the same table the Learning Record already computes readiness from, so
   // prerequisite/next/capstone claims can't drift from what's shown there.
-  // Also surfaces this course's problem set (PROBLEM_SET_SLUGS) and matching
-  // Application (APPLICATION_BY_COURSE), if either exists. Self-removes only
-  // when there's truly nothing to show — no pathway, no practice, and no
-  // application — not just when there's no pathway, so electives outside
-  // every PATHWAYS entry (e.g. Linear Algebra A) still get a box when they
-  // have a problem set or an Application built on them.
+  // Also surfaces this course's problem set (PROBLEM_SET_SLUGS), matching
+  // Application (APPLICATION_BY_COURSE), and — for Advanced+ courses —
+  // its prerequisites (PREREQUISITES) with a readiness verdict computed
+  // from isCourseExamPassed. Self-removes only when there's truly nothing
+  // to show — no pathway, no practice, no application, and no
+  // prerequisites — not just when there's no pathway, so courses outside
+  // every PATHWAYS entry (e.g. Linear Algebra A, Topology: Fundamentals)
+  // still get a box when any of the other three apply.
   function mountCourseContext(el) {
     if (el.dataset.mounted) return;
     el.dataset.mounted = '1';
@@ -996,7 +1011,8 @@ window.STEMPlusTests = (function () {
     const memberships = PATHWAYS.filter((p) => p.courses.indexOf(course) !== -1);
     const problemSetSlug = PROBLEM_SET_SLUGS[course];
     const application = APPLICATION_BY_COURSE[course];
-    if (memberships.length === 0 && !problemSetSlug && !application) {
+    const prerequisites = PREREQUISITES[course] || [];
+    if (memberships.length === 0 && !problemSetSlug && !application && prerequisites.length === 0) {
       el.remove();
       return;
     }
@@ -1019,6 +1035,20 @@ window.STEMPlusTests = (function () {
     }
     if (application) {
       html += '<p>See it in action: <a href="' + root + 'Applications/' + application.id + '.html">' + application.title + '</a></p>';
+    }
+    if (prerequisites.length > 0) {
+      const prereqLinks = prerequisites.map((p) => {
+        const dir = coursePath(p);
+        const href = dir ? root + dir + '/index.html' : root + 'pathways.html';
+        return '<a href="' + href + '">' + p + '</a>';
+      }).join(', ');
+      html += '<p>Prerequisites: ' + prereqLinks + '</p>';
+      const notReady = prerequisites.filter((p) => !isCourseExamPassed(p));
+      if (notReady.length === 0) {
+        html += '<p>You can start now — every prerequisite exam is passed.</p>';
+      } else {
+        html += '<p>Review recommended — ' + notReady.join(', ') + (notReady.length === 1 ? " isn't" : " aren't") + ' passed yet.</p>';
+      }
     }
     el.classList.add('box', 'why');
     el.innerHTML = html;
