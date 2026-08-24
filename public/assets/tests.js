@@ -1047,7 +1047,7 @@ window.STEMPlusTests = (function () {
       if (notReady.length === 0) {
         html += '<p>You can start now — every prerequisite exam is passed.</p>';
       } else {
-        html += '<p>Review recommended — ' + notReady.join(', ') + (notReady.length === 1 ? " isn't" : " aren't") + ' passed yet.</p>';
+        html += '<p>Review recommended — ' + notReady.join(', ') + (notReady.length === 1 ? ' isn’t' : ' aren’t') + ' passed yet.</p>';
       }
     }
     el.classList.add('box', 'why');
