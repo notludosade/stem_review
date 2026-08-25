@@ -92,6 +92,41 @@ Object.keys(PREREQUISITE_GRAPH).forEach((course) => {
   });
 });
 
+// PREREQUISITE_GRAPH must be acyclic, or reorderByPrerequisites silently
+// falls back to unsorted order for any plan touching the cycle. Running
+// every graph node through validatePlan and asserting no prerequisite
+// lands after its dependent is a permanent, mechanical proof — much
+// cheaper than eyeballing ~35 hand-written entries after every edit.
+const allGraphNames = Object.keys(PREREQUISITE_GRAPH);
+const allNodesReordered = validatePlan(
+  { summary: '', courses: allGraphNames.map((name) => ({ name, reason: '' })), project: null, problemSets: [], applications: [] },
+  CATALOG
+).courses.map((c) => c.name);
+assert.strictEqual(allNodesReordered.length, allGraphNames.length, 'PREREQUISITE_GRAPH may contain a cycle — reorderByPrerequisites silently dropped to unsorted order');
+allGraphNames.forEach((course) => {
+  const courseIndex = allNodesReordered.indexOf(course);
+  (PREREQUISITE_GRAPH[course] || []).forEach((prereq) => {
+    const prereqIndex = allNodesReordered.indexOf(prereq);
+    if (prereqIndex === -1) return; // prereq isn't itself a PREREQUISITE_GRAPH key (e.g. Precalculus) — nothing to order against
+    assert.ok(prereqIndex < courseIndex, `"${prereq}" must sort before "${course}" but doesn't — check for a cycle in PREREQUISITE_GRAPH`);
+  });
+});
+
+// The 5 Advanced+ rows PREREQUISITE_GRAPH shares with tests.js's own
+// PREREQUISITES table (Phase 4's course-context Readiness UI) must stay
+// identical, or a student sees one prerequisite story on the course page
+// and a different one in their AI-generated plan.
+const prereqBlock = testsSrc.slice(testsSrc.indexOf('var PREREQUISITES = {'), testsSrc.indexOf('function courseMastery'));
+const testsPrerequisites = {};
+[...prereqBlock.matchAll(/^\s*'([^']+)':\s*\[([^\]]*)\]/gm)].forEach(([, name, rawArray]) => {
+  testsPrerequisites[name] = [...rawArray.matchAll(/'([^']+)'/g)].map((m) => m[1]);
+});
+Object.keys(testsPrerequisites).forEach((course) => {
+  assert.ok(PREREQUISITE_GRAPH[course], `tests.js PREREQUISITES has "${course}" but lib/plan-catalog.js's PREREQUISITE_GRAPH doesn't — the two tables have drifted`);
+  assert.deepStrictEqual(PREREQUISITE_GRAPH[course], testsPrerequisites[course],
+    `"${course}"'s prerequisites differ between tests.js PREREQUISITES and lib/plan-catalog.js PREREQUISITE_GRAPH`);
+});
+
 // reorderByPrerequisites (exercised through validatePlan): a deliberately
 // scrambled course order must come back sorted so every prerequisite
 // precedes its dependent, with no course added or removed.

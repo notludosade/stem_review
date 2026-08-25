@@ -877,6 +877,7 @@ window.STEMPlusTests = (function () {
         if (current) html += '<span class="box-label">You are here</span>';
         html += '<p class="roadmap-node-title"><a href="' + href + '">' + (done ? '✓ ' : '') + c.name + '</a></p>';
         if (current) html += '<p class="toc-sub">' + escapeHtml(c.reason) + '</p>';
+        html += '<span data-course-status="' + c.name + '"></span>';
         html += '</div>';
       });
 
@@ -1850,11 +1851,14 @@ window.STEMPlusTests = (function () {
     // depends on finding already in the DOM. Do not reorder these two lines.
     // It must also run after mountCourseStatus (a few lines above), which
     // must never mount these spans — moving this call earlier would give
-    // every roadmap node a redundant status badge.
+    // every roadmap node a redundant status badge. mountGeneratedPlan must
+    // also run before mountTrackPlan, for the same reason: it injects its
+    // own data-course-status spans (one per plan course) that mountTrackPlan
+    // needs to already exist in the DOM.
     document.querySelectorAll('[data-pathway-roadmap]').forEach(mountPathwayRoadmap);
-    document.querySelectorAll('[data-track-plan]').forEach(mountTrackPlan);
     document.querySelectorAll('[data-generate-plan]').forEach(mountGeneratePlan);
     document.querySelectorAll('[data-generated-plan]').forEach(mountGeneratedPlan);
+    document.querySelectorAll('[data-track-plan]').forEach(mountTrackPlan);
   }
 
   if (typeof document !== 'undefined' && document.querySelectorAll) {

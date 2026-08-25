@@ -7,13 +7,13 @@ const MIN_PROMPT_LENGTH = 10;
 const MAX_PROMPT_LENGTH = 500;
 const RATE_LIMIT_MS = 24 * 60 * 60 * 1000;
 
-function buildSystemPrompt(catalog) {
+function buildSystemPrompt(catalog, prerequisiteGraph) {
   const courseLines = catalog.courses.map((c) => `- ${c.name}: ${c.blurb}`).join('\n');
   const projectLines = catalog.projects.map((p) => `- ${p.id}: ${p.title} — ${p.blurb}`).join('\n');
   const problemSetLines = catalog.problemSets.map((p) => `- ${p.course}: ${p.blurb}`).join('\n');
   const applicationLines = catalog.applications.map((a) => `- ${a.id}: ${a.title}`).join('\n');
-  const prerequisiteLines = Object.keys(PREREQUISITE_GRAPH)
-    .map((course) => `- ${course} requires: ${PREREQUISITE_GRAPH[course].join(', ')}`)
+  const prerequisiteLines = Object.keys(prerequisiteGraph)
+    .map((course) => `- ${course} requires: ${prerequisiteGraph[course].join(', ')}`)
     .join('\n');
 
   return 'You are building a custom STEM+ learning plan for a highly motivated high schooler, from their own description of what they want to pursue. ' +
@@ -85,7 +85,7 @@ async function handler(req, res) {
     slotClaimed = true;
 
     const { plan: rawPlan, refused } = await generatePlanWithClaude({
-      system: buildSystemPrompt(CATALOG),
+      system: buildSystemPrompt(CATALOG, PREREQUISITE_GRAPH),
       userMessage: prompt,
     });
 

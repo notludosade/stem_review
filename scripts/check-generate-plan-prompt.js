@@ -2,7 +2,7 @@ const assert = require('assert');
 const { CATALOG, PREREQUISITE_GRAPH } = require('../lib/plan-catalog');
 const { buildSystemPrompt } = require('../pages/api/generate-plan');
 
-const prompt = buildSystemPrompt(CATALOG);
+const prompt = buildSystemPrompt(CATALOG, PREREQUISITE_GRAPH);
 
 // Every PREREQUISITE_GRAPH relationship must actually appear in the text
 // sent to Claude, or the model has no way to know about it.
