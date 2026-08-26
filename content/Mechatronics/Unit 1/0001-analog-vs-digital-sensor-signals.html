@@ -1,0 +1,101 @@
+<meta charset="UTF-8">
+<link rel="icon" href="../../favicon.ico?v=1" type="image/x-icon">
+<title>Lesson 1: Analog vs. Digital Sensor Signals — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · Mechatronics · Unit 1 · Lesson 1</span>
+  <h1>Analog vs. Digital Sensor Signals</h1>
+  <p class="subtitle">Every sensor speaks one of two languages to a microcontroller — a continuously varying voltage, or a plain on/off pulse.</p>
+  <p class="nav-links"><a href="0002-temperature-sensors-thermistors-and-thermocouples.html" class="nav-next">Lesson 2 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Every sensor's job is to turn some physical quantity — temperature, light, distance, contact — into an electrical signal a microcontroller can read. That signal always arrives in one of two forms: <strong>analog</strong> or <strong>digital</strong>. Which form a sensor uses shapes everything about how you wire it, how you read it, and how much information you actually get back.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    An <strong>analog sensor</strong> outputs a voltage that varies continuously over a range — any value between its minimum and maximum is meaningful. A <strong>digital sensor</strong> outputs only a small set of discrete states, almost always just two: HIGH (roughly the supply voltage) or LOW (roughly 0 V).
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Example</span>
+    A photoresistor's voltage climbs and falls smoothly as a room gets brighter or dimmer — every intermediate brightness gets a slightly different voltage. A limit switch has exactly two states: pressed or not pressed. There's no "half-pressed" reading worth keeping, so it outputs a clean digital HIGH or LOW instead.
+  </div>
+
+  <p>This distinction determines what kind of microcontroller pin a sensor needs. An analog sensor must connect to one of the microcontroller's dedicated <strong>ADC (analog-to-digital converter)</strong> pins, which are typically limited to a handful per chip. A digital sensor can connect to almost any general-purpose pin, of which there are usually many more.</p>
+
+  <div class="box why">
+    <span class="box-label">Why it matters</span>
+    Analog pins are a scarcer resource than digital ones on most microcontrollers. Knowing which sensors truly need continuous information (a light level, a temperature) versus which only need a yes/no state (a button, a switch) is the first design decision in any sensor layout — get it wrong and you can run out of analog pins on a board that still has digital pins to spare.
+  </div>
+
+  <h2>A wrinkle: digital signals can still carry analog information</h2>
+  <p>The analog/digital split describes the <em>voltage levels</em> a sensor uses, not necessarily how much information it carries. Some sensors are digital in voltage but analog in meaning — they encode a continuous quantity into the <em>timing</em> of a digital pulse rather than into the pulse's height. An ultrasonic distance sensor is the clearest example: its output pin only ever reads HIGH or LOW, but the <em>duration</em> of that HIGH pulse is proportional to distance. You'll see exactly this trick in Lesson 4.</p>
+
+  <p>So the precise way to think about it: analog vs. digital describes how a sensor's pin behaves electrically. It doesn't, by itself, tell you how much real-world information is packed into that behavior.</p>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What is the defining feature of an analog sensor’s output?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">It outputs only two possible states, HIGH or LOW.</button>
+      <button class="quiz-choice" data-correct="true">It outputs a voltage that can take any value across a continuous range.</button>
+      <button class="quiz-choice" data-correct="false">It only works when connected to a digital pin.</button>
+      <button class="quiz-choice" data-correct="false">It never varies once installed.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Analog sensors produce a continuously varying voltage — every intermediate value between the minimum and maximum is meaningful, unlike a digital sensor’s handful of discrete states.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why does it matter, practically, whether a sensor is analog or digital?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Digital sensors never need any wiring.</button>
+      <button class="quiz-choice" data-correct="true">Analog sensors must connect to a limited set of dedicated ADC pins, while digital sensors can use almost any general-purpose pin.</button>
+      <button class="quiz-choice" data-correct="false">Analog sensors are always more accurate than digital ones.</button>
+      <button class="quiz-choice" data-correct="false">Digital sensors cannot be used with microcontrollers.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A microcontroller has far fewer ADC-capable pins than general-purpose digital pins, so which type a sensor needs directly affects how you plan a pin layout.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. An ultrasonic distance sensor’s echo pin only ever reads HIGH or LOW. Why is it still described as carrying analog information?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">It isn’t — a digital pin can never carry meaningful continuous information.</button>
+      <button class="quiz-choice" data-correct="true">The duration the pin stays HIGH varies continuously and is proportional to distance, even though the voltage itself is only ever one of two levels.</button>
+      <button class="quiz-choice" data-correct="false">Because the sensor secretly uses an analog pin internally.</button>
+      <button class="quiz-choice" data-correct="false">Because ultrasonic sensors are not real digital sensors.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The voltage is strictly digital (HIGH/LOW), but the pulse’s timing encodes a continuous, analog quantity — distance. Electrical behavior and information content are two different things.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="adc|adc pins|analog to digital converter">
+    <p class="quiz-prompt">4. Fill in the blank: a microcontroller converts a continuously varying sensor voltage into a digital number using its ___ pins.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>ADC stands for analog-to-digital converter — the specific pins on a microcontroller capable of reading a continuous voltage.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="digital">
+    <p class="quiz-prompt">5. Fill in the blank: a limit switch, which only ever reports pressed or not pressed, is an example of a ___ sensor.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Two discrete states with nothing meaningful in between is exactly the definition of a digital signal.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: <a href="https://learn.sparkfun.com/tutorials/analog-vs-digital/all">SparkFun’s "Analog vs. Digital" tutorial</a> walks through the same distinction with more example sensors and a look at how a microcontroller’s pins are wired to handle each type.</p>
+
+  <p class="ask-teacher">Stuck on which category a sensor you own falls into? Ask your teacher — that’s what I’m here for. Next up: the first analog sensor in detail — temperature sensing with thermistors and thermocouples.</p>
+
+  <footer class="lesson-footer">STEM+ · Mechatronics · Lesson 1 of the course sequence</footer>
+</div>

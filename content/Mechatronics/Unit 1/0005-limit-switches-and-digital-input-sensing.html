@@ -1,0 +1,108 @@
+<meta charset="UTF-8">
+<link rel="icon" href="../../favicon.ico?v=1" type="image/x-icon">
+<title>Lesson 5: Limit Switches and Digital Input Sensing — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · Mechatronics · Unit 1 · Lesson 5</span>
+  <h1>Limit Switches and Digital Input Sensing</h1>
+  <p class="subtitle">The simplest sensor there is — and the one wiring detail that trips up almost everyone the first time.</p>
+  <p class="nav-links"><a href="0004-ultrasonic-distance-sensors.html" class="nav-prev">← Lesson 4</a> <a href="0006-reading-calibrating-and-interpreting-sensor-output.html" class="nav-next">Lesson 6 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>A <strong>limit switch</strong> is about as simple as a sensor gets: a mechanical switch that closes or opens when something physically presses against it, marking the end of a range of travel — a drawer fully closed, a robot arm reaching its rotation limit, a 3D-printer carriage hitting home position.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    A <strong>limit switch</strong> reports a single digital state: triggered or not triggered, based on physical contact. It has no in-between reading — unlike the analog sensors from earlier lessons, there's nothing to calibrate or scale, just a HIGH or a LOW.
+  </div>
+
+  <h2>Normally open vs. normally closed</h2>
+  <p>Limit switches come wired one of two ways. A <strong>normally open (NO)</strong> switch's circuit is broken until something presses it, at which point the circuit closes. A <strong>normally closed (NC)</strong> switch is the opposite: circuit closed by default, opened when pressed.</p>
+
+  <div class="box why">
+    <span class="box-label">Why NC is often the safer choice</span>
+    With an NC switch, a broken or disconnected wire looks identical to the switch being triggered — both result in an open circuit. That means a wiring fault fails into the "safe" or "stop" state rather than silently pretending nothing happened. This fail-safe property is exactly why NC switches are common on safety-critical limits, like an emergency stop or an over-travel cutoff, where a broken wire should trigger a stop, not hide the problem.
+  </div>
+
+  <h2>The floating pin problem</h2>
+  <p>A raw switch by itself doesn't fully define a digital input's voltage in both of its states. When a normally-open switch isn't pressed, the input pin isn't connected to anything — it's <strong>floating</strong>, and a floating digital input can read as a random, noisy mix of HIGH and LOW picked up from nearby electrical interference, not a reliable LOW.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    A <strong>pull-up resistor</strong> connects an input pin to the supply voltage through a large resistor, so the pin reads HIGH by default and only reads LOW when something (like a closed switch) actively connects it to ground. A <strong>pull-down resistor</strong> does the reverse — LOW by default, HIGH only when actively connected to the supply. Either one guarantees a defined state instead of a floating one.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Example</span>
+    Most microcontrollers include a built-in pull-up resistor that can be enabled in software for any digital input pin, which is why so much example code for buttons and switches reads "pressed" as LOW rather than HIGH — the pin idles HIGH via the internal pull-up, and pressing the switch pulls it down to ground.
+  </div>
+
+  <h2>A quick note on bounce</h2>
+  <p>Mechanical contacts don't switch cleanly — the metal contacts inside physically bounce for a few milliseconds before settling, which a microcontroller reading thousands of times per second can register as several rapid presses instead of one. This problem, called <strong>switch bounce</strong>, is usually fixed with a short software delay after the first detected change (ignoring further changes for a few milliseconds) or a small filtering circuit. You'll see this idea again once real input-reading code shows up in Unit 3.</p>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What reading does a limit switch produce?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">A continuous voltage proportional to how hard it’s pressed.</button>
+      <button class="quiz-choice" data-correct="true">A single digital state — triggered or not triggered.</button>
+      <button class="quiz-choice" data-correct="false">A calibrated distance measurement.</button>
+      <button class="quiz-choice" data-correct="false">A resistance value that must be divided by a voltage divider.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A limit switch is a purely digital sensor — contact or no contact, with no meaningful in-between reading to calibrate.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why is a normally-closed (NC) switch often preferred for a safety-critical cutoff?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">NC switches are always cheaper than NO switches.</button>
+      <button class="quiz-choice" data-correct="true">A broken wire on an NC switch produces the same open-circuit reading as the switch being triggered, so a wiring fault fails safely into the "stop" state.</button>
+      <button class="quiz-choice" data-correct="false">NC switches never wear out.</button>
+      <button class="quiz-choice" data-correct="false">NC switches don’t require any wiring at all.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>With NC wiring, both "triggered" and "wire broken" look like an open circuit — the system fails toward safety rather than silently failing to notice a broken connection.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why does an unpressed, unconnected (floating) digital input pin give unreliable readings?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because digital pins can only ever read LOW.</button>
+      <button class="quiz-choice" data-correct="true">Because a floating pin isn’t connected firmly to either supply voltage or ground, so it can pick up noise and read inconsistently.</button>
+      <button class="quiz-choice" data-correct="false">Because floating pins physically damage the microcontroller.</button>
+      <button class="quiz-choice" data-correct="false">Because all switches are normally closed by default.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Without a pull-up or pull-down resistor forcing a defined default state, a floating pin has no firm connection to either rail and can pick up stray electrical noise.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="pull-up|pullup|pull up">
+    <p class="quiz-prompt">4. Fill in the blank: a resistor that connects an input pin to the supply voltage so it reads HIGH by default, only reading LOW when actively pulled to ground, is called a ___ resistor.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A pull-up resistor guarantees a defined HIGH default state instead of leaving the pin floating.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="bounce">
+    <p class="quiz-prompt">5. Fill in the blank: the brief, rapid on/off flickering a mechanical switch produces as its contacts physically settle is called switch ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Switch bounce can register as multiple rapid presses unless it’s filtered out with a short delay or a filtering circuit.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: <a href="https://docs.arduino.cc/built-in-examples/digital/DigitalInputPullup/">Arduino’s official "Digital Input Pullup" example documentation</a> shows exactly how an internal pull-up resistor is enabled in code and why a pressed button typically reads LOW rather than HIGH.</p>
+
+  <p class="ask-teacher">Want to see a real switch-bounce trace on an oscilloscope? Ask your teacher — that’s what I’m here for. Next up: pulling this whole unit together — reading, calibrating, and interpreting what a sensor actually tells you.</p>
+
+  <footer class="lesson-footer">STEM+ · Mechatronics · Lesson 5 of the course sequence</footer>
+</div>

@@ -1,0 +1,102 @@
+<meta charset="UTF-8">
+<link rel="icon" href="../../favicon.ico?v=1" type="image/x-icon">
+<title>Lesson 39: Robotic Arms: Sensors, Actuators, and Control Together — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · Mechatronics · Unit 8 · Lesson 39</span>
+  <h1>Robotic Arms: Sensors, Actuators, and Control Together</h1>
+  <p class="subtitle">Several closed loops running independently, each holding one joint, coordinated into one purposeful motion.</p>
+  <p class="nav-links"><a href="../Unit%207/0038-debugging-and-testing-an-integrated-mechatronic-system.html" class="nav-prev">← Unit 7, Lesson 38</a> <a href="0040-drones-stabilization-as-a-multi-loop-control-problem.html" class="nav-next">Lesson 40 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>A robotic arm looks complex, but it's built from a small number of repeating pieces this course has already covered — one per joint, plus a gripper at the end.</p>
+
+  <div class="box example">
+    <span class="box-label">One joint, broken down</span>
+    Each joint is, structurally, a servo motor (Unit 2, Lesson 9) or a geared DC motor paired with its own position sensor. That position sensor is often an <strong>encoder</strong> rather than the simple potentiometer inside a hobby servo.
+  </div>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    An <strong>encoder</strong> is a position sensor that reports rotation, often as a stream of digital pulses counted by the microcontroller (an incremental encoder), or as an absolute angle read directly (an absolute encoder). Either way, it plays the same role Lesson 9's internal servo potentiometer did — measured position feeding back into a closed loop — just often with more precision than a simple potentiometer offers, which matters for an arm's larger, more heavily loaded joints.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why each joint gets its own control loop</span>
+    Each joint independently measures its own actual angle and drives its own motor toward its own commanded angle — a full closed-loop system (Unit 5) running per joint, often using PID (Unit 6) for smooth, precise positioning against the joint's own load and gravity. A six-joint arm is, in this sense, six of this course's control loops running side by side, not one big combined calculation.
+  </div>
+
+  <h2>The end-effector: its own small subsystem</h2>
+  <p>A gripper at the arm's end is frequently its own sensor-plus-actuator subsystem: an actuator (often a servo, for a simple open/close gripper) paired with its own sensor — sometimes a simple limit switch (Unit 1, Lesson 5) confirming the gripper has actually closed around an object, sometimes a more sophisticated force sensor. This is exactly Unit 7's integration pattern, nested one level down inside a larger system.</p>
+
+  <div class="box why">
+    <span class="box-label">Coordination: the part beyond this course’s scope</span>
+    Making all the joints arrive at their target angles <em>together</em>, so the gripper traces a specific path through space rather than each joint just independently reaching its own target whenever it happens to get there, requires <strong>kinematics</strong> — the mathematics relating joint angles to the gripper's actual position in space. That's genuinely its own field of study, well beyond this course, but it's worth knowing it sits on top of, not instead of, the per-joint control loops covered here.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. Structurally, what is each joint of a robotic arm most similar to, among the actuators covered in Unit 2?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">A stepper motor with no feedback of any kind.</button>
+      <button class="quiz-choice" data-correct="true">A servo motor — a motor paired with its own position sensor in a closed loop.</button>
+      <button class="quiz-choice" data-correct="false">A simple on/off relay.</button>
+      <button class="quiz-choice" data-correct="false">A photoresistor voltage divider.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Each joint is essentially a servo-like closed-loop position system, often built from a geared DC motor and its own dedicated position sensor.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. What role does an encoder play in a robotic arm’s joint?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">It supplies power to the motor.</button>
+      <button class="quiz-choice" data-correct="true">It measures the joint’s actual rotation and feeds that measurement back into the joint’s closed control loop, the same role a hobby servo’s internal potentiometer plays.</button>
+      <button class="quiz-choice" data-correct="false">It converts PWM signals into a true analog voltage.</button>
+      <button class="quiz-choice" data-correct="false">It replaces the need for a motor driver entirely.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>An encoder is a position-feedback sensor, functionally similar to the potentiometer inside a hobby servo, just often with finer precision for a joint under more load.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why does the text describe a six-joint robotic arm as "six of this course’s control loops running side by side," rather than one single combined calculation?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because robotic arms cannot use more than one motor.</button>
+      <button class="quiz-choice" data-correct="true">Because each joint independently measures its own position and drives its own motor toward its own commanded angle, as a separate closed loop.</button>
+      <button class="quiz-choice" data-correct="false">Because only one joint on a robotic arm actually has a sensor.</button>
+      <button class="quiz-choice" data-correct="false">Because PID control cannot be used more than once per system.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Each joint runs its own independent sense-decide-act loop, following exactly the same pattern as any single-joint system from Unit 7, just replicated per joint.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="encoder">
+    <p class="quiz-prompt">4. Fill in the blank: a position sensor that reports rotation, often as a stream of digital pulses or a directly readable absolute angle, is called an ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>An encoder is the standard position-feedback sensor for a robotic joint, playing the same feedback role a servo’s internal potentiometer plays at smaller scale.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="kinematics">
+    <p class="quiz-prompt">5. Fill in the blank: the mathematics relating a robotic arm’s joint angles to its gripper’s actual position in space, needed to coordinate all joints toward one purposeful motion, is called ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Kinematics is the field that sits on top of the per-joint control loops covered in this lesson, coordinating them into deliberate, path-following motion.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: <a href="https://ocw.mit.edu/courses/2-12-introduction-to-robotics-fall-2005/">MIT OpenCourseWare’s 2.12 Introduction to Robotics</a> covers joint actuation, encoders, and the kinematics layer referenced in this lesson, for anyone wanting to go beyond this course’s scope.</p>
+
+  <p class="ask-teacher">Curious what an absolute encoder looks like compared to an incremental one? Ask your teacher — that’s what I’m here for. Next up: a system where the control loop has to run far faster than anything covered so far — keeping a drone in the air.</p>
+
+  <footer class="lesson-footer">STEM+ · Mechatronics · Lesson 39 of the course sequence</footer>
+</div>

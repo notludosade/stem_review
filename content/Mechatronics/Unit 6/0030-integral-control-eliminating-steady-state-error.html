@@ -1,0 +1,104 @@
+<meta charset="UTF-8">
+<link rel="icon" href="../../favicon.ico?v=1" type="image/x-icon">
+<title>Lesson 30: Integral Control (I): Eliminating Steady-State Error — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · Mechatronics · Unit 6 · Lesson 30</span>
+  <h1>Integral Control (I): Eliminating Steady-State Error</h1>
+  <p class="subtitle">Memory for the controller — accumulating every bit of past error until it’s fully paid off.</p>
+  <p class="nav-links"><a href="0029-proportional-control.html" class="nav-prev">← Lesson 29</a> <a href="0031-derivative-control-damping-and-anticipation.html" class="nav-next">Lesson 31 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Lesson 29 ended with a real gap: pure proportional control often settles at a small, persistent offset from the setpoint. The <strong>integral</strong> term closes that gap by giving the controller a memory of how long and how much error has accumulated.</p>
+
+  <div class="expr-block">output<sub>I</sub> = K<sub>i</sub> × ∫ error dt</div>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    The <strong>integral</strong> of error over time is the running sum of every past error, accumulated continuously. As long as <em>any</em> error persists — even a tiny one — that running sum keeps growing, and so does the integral term's contribution to the output.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why this specifically fixes steady-state error</span>
+    Recall the cruise-control-on-a-hill example: pure P control settles at a speed slightly below setpoint because it needs a persistent error to keep supplying extra throttle. With an integral term added, that same small persistent error keeps accumulating in the integral sum, which keeps pushing throttle <em>higher</em> — even as the proportional term's own contribution stays fixed. The output keeps climbing until the error is finally driven to exactly zero, at which point the integral sum stops growing and simply holds its accumulated value, supplying exactly the steady extra throttle needed with no error left over at all.
+  </div>
+
+  <h2>The real downside: integral windup</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    <strong>Integral windup</strong> happens when a large error persists for a long time while the actuator is already maxed out (saturated) and can't push any harder — the integral sum keeps growing anyway, far beyond what's actually useful, since it has no way to know the actuator is stuck. Once the situation finally changes and the actuator can respond again, that hugely inflated integral term causes a large, sluggish overshoot before it winds back down.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Example</span>
+    A heater at full power (100% duty, saturated) still can't reach a very high setpoint fast enough. While it's stuck at 100%, the integral term keeps accumulating error it can't actually act on any further. Once the temperature finally starts catching up, the wound-up integral term keeps commanding extra output long after it's needed, driving a noticeable overshoot past the setpoint.
+  </div>
+
+  <p>Real PID implementations almost always include some form of <strong>anti-windup</strong> protection — commonly, simply clamping the integral sum to a maximum reasonable value so it can't inflate without bound while the actuator is saturated. The full mechanics of anti-windup are beyond this course's scope, but knowing the problem exists — and that it's a real, common failure mode, not a rare edge case — is worth carrying forward.</p>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What does the integral term in a PID controller accumulate?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">The current instantaneous error only.</button>
+      <button class="quiz-choice" data-correct="true">The running sum of error over time — every bit of past error, accumulated continuously.</button>
+      <button class="quiz-choice" data-correct="false">The rate of change of the setpoint.</button>
+      <button class="quiz-choice" data-correct="false">The actuator’s maximum possible output.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The integral term sums error continuously over time, which is exactly what gives the controller a "memory" of persistent error.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why does adding an integral term eliminate the steady-state error that pure proportional control leaves behind?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because the integral term ignores the setpoint entirely.</button>
+      <button class="quiz-choice" data-correct="true">Because any persistent nonzero error keeps accumulating in the integral sum, pushing output higher until the error is finally driven to exactly zero.</button>
+      <button class="quiz-choice" data-correct="false">Because integral control disables the proportional term automatically.</button>
+      <button class="quiz-choice" data-correct="false">Because the integral term only activates when error is exactly zero.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The integral sum keeps growing for as long as any error persists, which keeps increasing output until the error is fully eliminated — unlike proportional output, which stops growing once error stops growing.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. What causes integral windup?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Setting Ki to exactly zero.</button>
+      <button class="quiz-choice" data-correct="true">A large error persisting while the actuator is already saturated and can’t respond further, so the integral sum keeps growing unproductively.</button>
+      <button class="quiz-choice" data-correct="false">The proportional term overpowering the integral term.</button>
+      <button class="quiz-choice" data-correct="false">The sensor reading becoming disconnected.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Windup specifically happens when the integral sum keeps inflating during a saturated-actuator period, since it has no way to know the actuator is already maxed out.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="integral">
+    <p class="quiz-prompt">4. Fill in the blank: the PID term that accumulates error over time and eliminates lingering steady-state error is the ___ term.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The integral term is exactly the fix Lesson 29 identified as missing from proportional-only control.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="windup">
+    <p class="quiz-prompt">5. Fill in the blank: clamping the integral sum to a maximum reasonable value so it can’t inflate without bound during actuator saturation is a common form of anti-___ protection.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Anti-windup protection — often as simple as clamping the accumulated sum — is the standard fix for the overshoot integral windup would otherwise cause.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: <a href="https://ctms.engin.umich.edu/CTMS/index.php?example=Introduction&section=ControlPID">University of Michigan’s Control Tutorials for MATLAB and Simulink — "Introduction: PID Controller Design"</a> covers the integral term’s effect on steady-state error and includes a discussion of windup referenced in this lesson.</p>
+
+  <p class="ask-teacher">Curious what a simple integral-sum clamp looks like in code? Ask your teacher — that’s what I’m here for. Next up: the term that reacts to how fast things are changing, not just how far off they are.</p>
+
+  <footer class="lesson-footer">STEM+ · Mechatronics · Lesson 30 of the course sequence</footer>
+</div>

@@ -1,0 +1,100 @@
+<meta charset="UTF-8">
+<link rel="icon" href="../../favicon.ico?v=1" type="image/x-icon">
+<title>Lesson 7: DC Motors: How They Work — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · Mechatronics · Unit 2 · Lesson 7</span>
+  <h1>DC Motors: How They Work</h1>
+  <p class="subtitle">Sensors gather information — actuators are how a mechatronic system pushes back on the physical world, starting with the simplest motor.</p>
+  <p class="nav-links"><a href="../Unit%201/0006-reading-calibrating-and-interpreting-sensor-output.html" class="nav-prev">← Unit 1, Lesson 6</a> <a href="0008-driving-dc-motors-h-bridges-and-motor-drivers.html" class="nav-next">Lesson 8 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Unit 1 was entirely about gathering information. This unit flips the direction: an <strong>actuator</strong> is any component that converts an electrical signal into physical motion or force — the way a mechatronic system actually changes something about the world. The most common actuator by far is the <strong>DC motor</strong>.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    A <strong>DC motor</strong> converts direct-current electrical energy into continuous rotational motion. Current flows through a coil of wire (the rotor) sitting inside a magnetic field; that current-carrying coil in a magnetic field experiences a force, which produces torque and spins the shaft.
+  </div>
+
+  <p>A plain two-terminal DC motor has no sense of "position" — apply voltage, and it spins for as long as voltage is applied, in whichever direction the polarity dictates. Reverse the two wires, and it spins the other way. This simplicity is exactly what makes DC motors the default choice for anything that just needs to spin continuously, like a wheel or a fan.</p>
+
+  <h2>The specs that actually matter</h2>
+  <div class="box example">
+    <span class="box-label">Key specifications</span>
+    <strong>Rated voltage</strong> is the voltage the motor is designed to run at. <strong>No-load speed</strong> (in RPM) is how fast it spins with nothing attached to resist it. <strong>Stall torque</strong> is the maximum torque it can produce right before it stops turning entirely under too much load. Real operation always sits somewhere between those two extremes: more load means less speed, right up until stall torque is reached and the motor stops turning (while still drawing significant current — an important, often-overlooked failure case).
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why speed control isn’t just "less voltage"</span>
+    A DC motor's speed is roughly proportional to the voltage across it, so slowing it down means reducing that effective voltage. Simply wiring a variable resistor in series wastes a lot of power as heat and doesn't scale well for anything beyond small motors. The real answer — switching the motor on and off very rapidly instead of holding a lower steady voltage — is Unit 4's PWM lesson, and it's foreshadowed constantly from here on.
+  </div>
+
+  <h2>Brushed vs. brushless, briefly</h2>
+  <p>Everything above describes a <strong>brushed</strong> DC motor — physical contacts ("brushes") mechanically switch current direction inside the motor as it spins, which is what actually keeps it turning continuously rather than settling into one position. Brushless motors achieve the same current-switching electronically instead of mechanically, avoiding brush wear and running more efficiently, at the cost of needing a dedicated controller circuit to do the switching. Brushless motors show up again in Unit 8, where they're the standard choice for drones — for now, brushed motors are the simpler starting point, and everything in this unit applies to them directly.</p>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What physically causes a DC motor’s shaft to spin?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">A current-carrying coil experiencing a force while sitting in a magnetic field.</button>
+      <button class="quiz-choice" data-correct="false">The motor’s casing heating up and expanding.</button>
+      <button class="quiz-choice" data-correct="false">A built-in microcontroller calculating the correct angle.</button>
+      <button class="quiz-choice" data-correct="false">Static electricity building up on the shaft.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A coil carrying current inside a magnetic field experiences a force; that force produces torque, which spins the rotor.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. What happens to a DC motor as its mechanical load increases, up to the point of stalling?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Its speed increases and its current draw decreases.</button>
+      <button class="quiz-choice" data-correct="true">Its speed decreases while it still draws significant current, up until it stops turning entirely at stall.</button>
+      <button class="quiz-choice" data-correct="false">Nothing changes regardless of load.</button>
+      <button class="quiz-choice" data-correct="false">It automatically reverses direction.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Real motors trade speed for torque as load increases; at stall the motor has stopped turning but is still drawing current, which is why a stalled motor can overheat.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why isn’t simply adding a variable resistor in series a good way to control a DC motor’s speed?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Resistors cannot be connected to motors at all.</button>
+      <button class="quiz-choice" data-correct="true">It wastes significant power as heat and scales poorly, unlike switching the motor on and off rapidly (PWM).</button>
+      <button class="quiz-choice" data-correct="false">It causes the motor to spin in reverse.</button>
+      <button class="quiz-choice" data-correct="false">It has no effect on motor speed whatsoever.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A series resistor burns off the "unwanted" power as heat rather than actually reducing what the motor consumes — PWM, covered in Unit 4, avoids this waste.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="stall">
+    <p class="quiz-prompt">4. Fill in the blank: the maximum torque a DC motor produces right before it stops turning under too much load is called ___ torque.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Stall torque is the torque at zero speed — the motor is still trying to turn and still drawing current, just fully loaded down.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="rotation">
+    <p class="quiz-prompt">5. Fill in the blank: reversing the two wires on a simple DC motor reverses its direction of ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Swapping polarity reverses current direction through the coil, which reverses the force direction and therefore the direction of rotation.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: <a href="https://learn.sparkfun.com/tutorials/motors-and-selecting-the-right-one/dc-motors">SparkFun’s "Motors and Selecting the Right One" — DC motors section</a> covers the speed/torque trade-off and rated specifications in more depth, with real motor datasheet examples.</p>
+
+  <p class="ask-teacher">Curious how brushless motors do the switching electronically? Ask your teacher — that’s what I’m here for. Next up: how to actually control a DC motor’s direction and speed from a microcontroller pin.</p>
+
+  <footer class="lesson-footer">STEM+ · Mechatronics · Lesson 7 of the course sequence</footer>
+</div>

@@ -1,0 +1,106 @@
+<meta charset="UTF-8">
+<link rel="icon" href="../../favicon.ico?v=1" type="image/x-icon">
+<title>Lesson 33: Basic PID Tuning Intuition — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · Mechatronics · Unit 6 · Lesson 33</span>
+  <h1>Basic PID Tuning Intuition</h1>
+  <p class="subtitle">Closing out Unit 6 with the practical part textbooks often skip: how do you actually pick Kp, Ki, and Kd?</p>
+  <p class="nav-links"><a href="0032-putting-p-i-and-d-together.html" class="nav-prev">← Lesson 32</a> <a href="../Unit%207/0034-designing-a-sensor-actuator-control-subsystem.html" class="nav-next">Unit 7, Lesson 34 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Every lesson so far assumed the three gains were already chosen. In practice, choosing them — <strong>tuning</strong> — is its own skill, usually done by observing a real system's response and adjusting from there rather than computing exact values from a formula.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    <strong>PID tuning</strong> is the process of adjusting Kp, Ki, and Kd so that a system responds quickly, without excessive oscillation or overshoot, and settles precisely at the setpoint. There's no universal "correct" set of values — the right gains depend on the specific system being controlled.
+  </div>
+
+  <h2>A practical order to tune in</h2>
+  <div class="box example">
+    <span class="box-label">Step 1: Start with P alone (Ki = Kd = 0)</span>
+    Increase Kp gradually from zero until the system responds reasonably quickly, accepting that some overshoot or mild oscillation is normal at this stage — that's expected, not yet a problem to solve.
+  </div>
+  <div class="box example">
+    <span class="box-label">Step 2: Add I to eliminate steady-state error</span>
+    Increase Ki from zero, slowly, just enough to eliminate the lingering offset from Lesson 29. Too much, too fast risks the windup and overshoot problems from Lesson 30 — small, incremental increases are safer than one large jump.
+  </div>
+  <div class="box example">
+    <span class="box-label">Step 3: Add D to damp remaining oscillation</span>
+    Increase Kd from zero to reduce overshoot and settle the system more smoothly, watching for the noise-driven jitter from Lesson 31 — if the output becomes erratic rather than smoother, Kd is too high (or the sensor signal needs filtering first, per Unit 4).
+  </div>
+
+  <h2>A symptom-to-fix reference table</h2>
+  <div class="box why">
+    <span class="box-label">Reading the system’s behavior back into a tuning decision</span>
+    Responds too slowly, never quite reaching setpoint in reasonable time → increase Kp. Oscillates or overshoots significantly → decrease Kp, or increase Kd to add damping. Settles near, but not exactly at, the setpoint → increase Ki (a classic steady-state-error symptom). Output is jittery or erratic → decrease Kd, or apply sensor filtering (Unit 4) before tuning D any further.
+  </div>
+
+  <p>This is intentionally qualitative, not a precise mathematical procedure — real, rigorous tuning methods (like Ziegler-Nichols) exist and go well beyond this course's scope, but this symptom-driven intuition is exactly how most working engineers actually start, long before reaching for a more formal method.</p>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What is the recommended order for introducing PID’s three gains during tuning?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Start with D, then add I, then add P.</button>
+      <button class="quiz-choice" data-correct="true">Start with P alone, then add I to fix steady-state error, then add D to damp remaining oscillation.</button>
+      <button class="quiz-choice" data-correct="false">All three gains should always be set to the same value.</button>
+      <button class="quiz-choice" data-correct="false">Start with I alone, since it’s the most important term.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Tuning P first, then I, then D lets you observe and understand each term’s specific effect before layering on the next.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. A system consistently settles just short of its setpoint, never quite reaching it. Which gain should most directly address this?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Increase Kp only.</button>
+      <button class="quiz-choice" data-correct="true">Increase Ki.</button>
+      <button class="quiz-choice" data-correct="false">Decrease Kd.</button>
+      <button class="quiz-choice" data-correct="false">Set Kp to zero.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Settling near, but not exactly at, the setpoint is the classic steady-state-error symptom that increasing Ki is meant to fix.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. A system’s output becomes jittery and erratic after Kd is increased. What are two reasonable responses?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Increase Kp to compensate, leaving Kd unchanged.</button>
+      <button class="quiz-choice" data-correct="true">Decrease Kd, or apply sensor filtering (from Unit 4) before increasing Kd further.</button>
+      <button class="quiz-choice" data-correct="false">Increase Ki to smooth out the derivative term’s effect.</button>
+      <button class="quiz-choice" data-correct="false">There is no fix — jitter is unavoidable with any nonzero Kd.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Jittery output from a raised Kd usually means the derivative term is reacting to noise — reducing Kd or filtering the signal first (Unit 4) are the standard responses.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="tuning">
+    <p class="quiz-prompt">4. Fill in the blank: the process of adjusting Kp, Ki, and Kd so a system responds well for its specific application is called PID ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Tuning is the practical, largely empirical process of finding workable gains for a specific real system.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="kp|proportional gain">
+    <p class="quiz-prompt">5. Fill in the blank: a system that responds too slowly to reach its setpoint in reasonable time most directly suggests increasing ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A sluggish response is the classic symptom addressed by increasing the proportional gain first.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: <a href="https://ctms.engin.umich.edu/CTMS/index.php?example=Introduction&section=ControlPID">University of Michigan’s Control Tutorials for MATLAB and Simulink — "Introduction: PID Controller Design"</a> covers the effect of each gain on system response, forming the basis for the symptom-to-fix table used in this lesson.</p>
+
+  <p class="ask-teacher">Want to walk through tuning a specific simulated system step by step? Ask your teacher — that’s what I’m here for. Unit 6 is complete; Unit 7 combines everything from Units 1 through 6 into complete, working subsystems.</p>
+
+  <footer class="lesson-footer">STEM+ · Mechatronics · Lesson 33 of the course sequence</footer>
+</div>

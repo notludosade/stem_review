@@ -1,0 +1,110 @@
+<meta charset="UTF-8">
+<link rel="icon" href="../../favicon.ico?v=1" type="image/x-icon">
+<title>Lesson 3: Light Sensors: Photoresistors and Phototransistors — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · Mechatronics · Unit 1 · Lesson 3</span>
+  <h1>Light Sensors: Photoresistors and Phototransistors</h1>
+  <p class="subtitle">The same voltage-divider trick from temperature sensing, applied to light — plus a faster alternative when timing matters.</p>
+  <p class="nav-links"><a href="0002-temperature-sensors-thermistors-and-thermocouples.html" class="nav-prev">← Lesson 2</a> <a href="0004-ultrasonic-distance-sensors.html" class="nav-next">Lesson 4 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Just as a thermistor's resistance responds to heat, some components' electrical properties respond to light. The two you'll meet most often are the <strong>photoresistor</strong>, for slow ambient-light sensing, and the <strong>phototransistor</strong>, for fast, precise light detection.</p>
+
+  <h2>Photoresistors (LDRs): cheap and simple</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    A <strong>photoresistor</strong> (also called a <strong>light-dependent resistor</strong>, or LDR) is a resistor whose resistance <em>decreases</em> as light hitting it increases — more light means an easier path for current to flow.
+  </div>
+
+  <p>An LDR is read exactly the way a thermistor is: dropped into a voltage divider with a fixed resistor, with the midpoint voltage fed to an ADC pin. Swap the thermistor from Lesson 2's circuit for a photoresistor, and you have a light sensor with no other changes needed — same circuit, different sensing element.</p>
+
+  <div class="box why">
+    <span class="box-label">Why this matters</span>
+    LDRs are slow (tens to hundreds of milliseconds to respond to a light change) and their resistance-to-light relationship isn’t very precise or consistent between individual units. That's a fine trade for a night-light or a simple "is it dark yet" check, but it rules them out anywhere fast or exact light readings matter.
+  </div>
+
+  <h2>Phototransistors: faster and more precise</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    A <strong>phototransistor</strong> is a transistor whose base current is triggered by light hitting an exposed junction, causing a much larger current to flow between its other two terminals. More light means more current flows.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Example</span>
+    An optical encoder disk (a spinning disk with alternating opaque and clear segments) needs a light sensor that can register thousands of on/off transitions per second as the disk spins past it. An LDR's sluggish response would blur those transitions together; a phototransistor can keep up.
+  </div>
+
+  <p>Phototransistors also respond far more linearly and consistently to light intensity than LDRs do, which matters when you need a light reading you can actually trust across multiple units or over time — not just a rough "brighter or dimmer" signal.</p>
+
+  <div class="box example">
+    <span class="box-label">Choosing between them</span>
+    Building a simple light-triggered night light, or a basic "is a box present" light-blocking check where speed doesn't matter? An LDR is cheap and good enough. Building an optical encoder, a fast break-beam counter, or anything reading an infrared remote signal? Reach for a phototransistor (or the closely related photodiode).
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. How does a photoresistor’s (LDR’s) resistance respond to increasing light?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">It increases.</button>
+      <button class="quiz-choice" data-correct="true">It decreases.</button>
+      <button class="quiz-choice" data-correct="false">It is unaffected by light.</button>
+      <button class="quiz-choice" data-correct="false">It oscillates unpredictably.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>More light means lower resistance for a photoresistor — the same inverse relationship an NTC thermistor has with heat.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why is an LDR a poor choice for reading a fast-spinning optical encoder disk?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">LDRs cannot be wired into a voltage divider.</button>
+      <button class="quiz-choice" data-correct="true">LDRs respond too slowly to keep up with rapid on/off light transitions.</button>
+      <button class="quiz-choice" data-correct="false">LDRs only detect infrared light.</button>
+      <button class="quiz-choice" data-correct="false">LDRs require no power to operate.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>An LDR’s response time (tens to hundreds of milliseconds) is far too slow to resolve the thousands of transitions per second a spinning encoder disk produces.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. What circuit does a photoresistor need in order to produce a readable voltage for a microcontroller’s ADC pin?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">No circuit — it connects directly to any digital pin.</button>
+      <button class="quiz-choice" data-correct="true">A voltage divider, the same pattern used to read a thermistor.</button>
+      <button class="quiz-choice" data-correct="false">A dedicated microcontroller built only for light sensors.</button>
+      <button class="quiz-choice" data-correct="false">A thermocouple amplifier circuit.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Like any simple resistive sensor, an LDR’s resistance change must be converted into a voltage change via a voltage divider before an ADC can read it.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="phototransistor">
+    <p class="quiz-prompt">4. Fill in the blank: a transistor whose base current is triggered by incoming light, producing a fast and precise light-dependent current, is called a ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A phototransistor trades the photoresistor’s simplicity for much faster, more linear response — needed for anything timing-sensitive.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="resistor">
+    <p class="quiz-prompt">5. Fill in the blank: another common name for a photoresistor is a light-dependent ___, abbreviated LDR.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Light-dependent resistor is the full name behind the LDR abbreviation — describing exactly what changes: its resistance, based on light.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: <a href="https://learn.sparkfun.com/tutorials/photocell-hookup-guide">SparkFun’s "Photocell (photoresistor) Hookup Guide"</a> shows the same divider circuit wired for an LDR specifically, including example resistor values and code to read it.</p>
+
+  <p class="ask-teacher">Want to see a phototransistor spec sheet to compare response times for yourself? Ask your teacher — that’s what I’m here for. Next up: a sensor that measures distance instead of a resistive property — ultrasonic ranging.</p>
+
+  <footer class="lesson-footer">STEM+ · Mechatronics · Lesson 3 of the course sequence</footer>
+</div>

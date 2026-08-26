@@ -1,0 +1,129 @@
+<meta charset="UTF-8">
+<link rel="icon" href="../../favicon.ico?v=1" type="image/x-icon">
+<title>Lesson 23: Open-Loop vs. Closed-Loop Control — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · Mechatronics · Unit 5 · Lesson 23</span>
+  <h1>Open-Loop vs. Closed-Loop Control</h1>
+  <p class="subtitle">The single biggest design decision in any control system: does it check its own work?</p>
+  <p class="nav-links"><a href="../Unit%204/0022-moving-average-smoothing-in-practice.html" class="nav-prev">← Unit 4, Lesson 22</a> <a href="0024-feedback-the-core-idea-behind-closed-loop-systems.html" class="nav-next">Lesson 24 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Every unit so far has quietly used both kinds of control without naming them. A stepper motor (Unit 2) commanded to move 200 steps just... moves 200 steps, with no way to confirm it actually got there. A servo motor (Unit 2) commanded to an angle actively measures its own position and corrects until it matches. Those are two fundamentally different control strategies, and this lesson finally names them.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    <strong>Open-loop control</strong> issues a command based purely on a predetermined plan, with no sensor checking whether the actual result matches what was intended. <strong>Closed-loop control</strong> measures the actual result with a sensor and continuously adjusts the command based on that measurement.
+  </div>
+
+  <svg class="figure" viewBox="0 0 380 210" width="380" height="210">
+    <rect x="20" y="20" width="90" height="34" class="fig-guide" fill="none"></rect>
+    <text class="fig-label" x="28" y="41">command</text>
+    <line class="fig-axis" x1="110" y1="37" x2="150" y2="37" marker-end="url(#arrowA)"></line>
+    <rect x="150" y="20" width="90" height="34" class="fig-guide" fill="none"></rect>
+    <text class="fig-label" x="163" y="41">controller</text>
+    <line class="fig-axis" x1="240" y1="37" x2="280" y2="37" marker-end="url(#arrowA)"></line>
+    <rect x="280" y="20" width="80" height="34" class="fig-guide" fill="none"></rect>
+    <text class="fig-label" x="300" y="41">plant</text>
+    <text class="fig-label" x="20" y="10">Open-loop: no feedback path</text>
+
+    <rect x="20" y="110" width="90" height="34" class="fig-guide" fill="none"></rect>
+    <text class="fig-label" x="28" y="131">setpoint</text>
+    <line class="fig-axis" x1="110" y1="127" x2="150" y2="127" marker-end="url(#arrowB)"></line>
+    <rect x="150" y="110" width="90" height="34" class="fig-guide" fill="none"></rect>
+    <text class="fig-label" x="163" y="131">controller</text>
+    <line class="fig-axis" x1="240" y1="127" x2="280" y2="127" marker-end="url(#arrowB)"></line>
+    <rect x="280" y="110" width="80" height="34" class="fig-guide" fill="none"></rect>
+    <text class="fig-label" x="300" y="131">plant</text>
+    <line class="fig-axis" x1="320" y1="144" x2="320" y2="180"></line>
+    <line class="fig-axis" x1="320" y1="180" x2="195" y2="180"></line>
+    <line class="fig-axis" x1="195" y1="180" x2="195" y2="144" marker-end="url(#arrowB)"></line>
+    <text class="fig-label" x="200" y="196">sensor feedback</text>
+    <text class="fig-label" x="20" y="100">Closed-loop: output measured and fed back in</text>
+    <defs>
+      <marker id="arrowA" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="var(--text)"></path></marker>
+      <marker id="arrowB" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="var(--text)"></path></marker>
+    </defs>
+  </svg>
+  <figcaption>The one structural difference between the two: whether the plant's actual output ever gets measured and routed back to the controller.</figcaption>
+
+  <div class="box example">
+    <span class="box-label">Example: open-loop</span>
+    A microwave running for a fixed 90 seconds doesn't measure whether the food is actually hot — it just runs the timer and stops. A stepper motor commanded to move 200 steps just executes those steps, with no check that it didn't stall partway through (Unit 2, Lesson 10).
+  </div>
+  <div class="box example">
+    <span class="box-label">Example: closed-loop</span>
+    A servo motor (Unit 2, Lesson 9) measures its actual shaft angle with an internal potentiometer and keeps adjusting until it matches the commanded angle. A home thermostat measures the actual room temperature and switches the heater based on that measurement, not a fixed timer.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why anyone would choose open-loop at all</span>
+    Closed-loop control is generally more robust — it can correct for disturbances a fixed plan can't anticipate. But it costs more: a sensor, wiring, and more complex logic. Open-loop is simpler, cheaper, and perfectly adequate whenever the system's behavior is predictable enough that checking isn't worth the added cost — a stepper motor well within its torque limits genuinely doesn't need position feedback for most jobs.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What is the defining structural difference between open-loop and closed-loop control?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Open-loop systems use more power than closed-loop systems.</button>
+      <button class="quiz-choice" data-correct="true">Closed-loop control measures the actual result with a sensor and feeds that measurement back into the controller; open-loop control does not.</button>
+      <button class="quiz-choice" data-correct="false">Open-loop systems can only be digital, and closed-loop systems can only be analog.</button>
+      <button class="quiz-choice" data-correct="false">Closed-loop control never uses a microcontroller.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The presence (or absence) of a feedback path from sensor back to controller is the entire distinction between the two.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. A microwave runs for a fixed 90-second timer regardless of the food’s actual temperature. What kind of control is this?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Closed-loop, because a timer is a kind of sensor.</button>
+      <button class="quiz-choice" data-correct="true">Open-loop, because there’s no measurement of the actual result (temperature) feeding back into the decision.</button>
+      <button class="quiz-choice" data-correct="false">Neither — timers aren’t a form of control at all.</button>
+      <button class="quiz-choice" data-correct="false">Closed-loop, because the microwave eventually turns off.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A fixed timer executes a plan with no check on the actual outcome — exactly open-loop control, even though it does eventually stop.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why might an engineer deliberately choose open-loop control over closed-loop, even knowing closed-loop is generally more robust?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Open-loop control is always more accurate.</button>
+      <button class="quiz-choice" data-correct="true">Closed-loop control costs more (a sensor, wiring, more complex logic), and open-loop is simpler and adequate when the system’s behavior is predictable enough.</button>
+      <button class="quiz-choice" data-correct="false">Open-loop control is required by law in most applications.</button>
+      <button class="quiz-choice" data-correct="false">Closed-loop control cannot be implemented on a microcontroller.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Closed-loop’s robustness comes at a real cost — when a system behaves predictably enough, that extra cost isn’t worth paying.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="closed">
+    <p class="quiz-prompt">4. Fill in the blank: a control strategy that measures its actual output and feeds that measurement back into the controller is called ___-loop control.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Closed-loop control is defined by this feedback path — the controller checks and reacts to the real result, not just a predetermined plan.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="feedback">
+    <p class="quiz-prompt">5. Fill in the blank: a servo motor’s internal potentiometer, which measures its own shaft angle and enables it to correct toward a commanded position, is an example of a sensor providing ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Feedback is the general name for a measurement routed back into a controller — exactly what the servo’s potentiometer provides, and the subject of the next lesson.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: <a href="https://ctms.engin.umich.edu/CTMS/index.php?example=Introduction&section=ControlPID">University of Michigan’s Control Tutorials for MATLAB and Simulink — "Introduction: PID Controller Design"</a> introduces the same open-loop/closed-loop distinction from a controls-engineering reference this unit and Unit 6 both draw on.</p>
+
+  <p class="ask-teacher">Want to sort a few more real devices you own into open-loop vs. closed-loop? Ask your teacher — that’s what I’m here for. Next up: giving the closed-loop idea its own precise vocabulary — feedback and error.</p>
+
+  <footer class="lesson-footer">STEM+ · Mechatronics · Lesson 23 of the course sequence</footer>
+</div>

@@ -1,0 +1,101 @@
+<meta charset="UTF-8">
+<link rel="icon" href="../../favicon.ico?v=1" type="image/x-icon">
+<title>Lesson 41: Automotive Systems: ABS Brakes and Cruise Control — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · Mechatronics · Unit 8 · Lesson 41</span>
+  <h1>Automotive Systems: ABS Brakes and Cruise Control</h1>
+  <p class="subtitle">A bang-bang system and a PID system, both quietly running in most cars on the road today.</p>
+  <p class="nav-links"><a href="0040-drones-stabilization-as-a-multi-loop-control-problem.html" class="nav-prev">← Lesson 40</a> <a href="0042-industrial-automation-plcs-and-assembly-lines.html" class="nav-next">Lesson 42 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Two of the most common mechatronic systems most people interact with daily are riding in the family car — and they land on opposite ends of the control strategies this course has covered.</p>
+
+  <h2>ABS: bang-bang control, applied to braking</h2>
+  <div class="box example">
+    <span class="box-label">How it works</span>
+    Each wheel has its own speed sensor — essentially a digital pulse-counting sensor (echoing Unit 1's digital-input lessons), detecting each wheel's rotation rate. During hard braking, if one wheel's speed sensor shows it decelerating far faster than the vehicle's overall speed suggests it should, that wheel is about to lock up and skid. The <strong>ABS (anti-lock braking system)</strong> responds by rapidly pulsing that wheel's brake pressure on and off — releasing and reapplying it many times per second, right at the edge of locking up.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why this is genuinely bang-bang control, not proportional</span>
+    ABS doesn't compute a smooth, in-between brake pressure — it's fundamentally an on/off decision, pulsed rapidly, exactly Unit 5's bang-bang strategy (Lesson 25), applied at a speed and stakes level well beyond a home thermostat. The reason: a locked, skidding wheel has far less traction and no steering control at all, while a wheel kept just short of locking retains both — so the goal isn't a smooth pressure curve, it's staying right at that edge, pulsed on and off as needed.
+  </div>
+
+  <h2>Cruise control: a closed loop, usually PID</h2>
+  <div class="box example">
+    <span class="box-label">How it works</span>
+    A wheel-speed (or GPS-derived) sensor measures actual vehicle speed; the driver's chosen speed is the setpoint; a PID controller (Unit 6) computes a smooth, continuously variable throttle position that closes the gap — exactly Unit 6, Lesson 29's cruise-control-on-a-hill example, now a completely real, everyday system.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Adaptive cruise control: an extra sensor layered on top</span>
+    <strong>Adaptive cruise control</strong> adds a forward-facing distance sensor (radar or camera-based, conceptually similar in role to Unit 1's ultrasonic ranging, just with far greater range) and blends a following-distance control loop with the standard speed-control loop — slowing automatically to maintain distance from a slower vehicle ahead, then resuming the original set speed once the road clears. It's Unit 7's multi-sensor integration lesson, running in a real production vehicle.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. Why is ABS (anti-lock braking) described as bang-bang control rather than proportional control?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because it computes a smooth, continuously variable brake pressure.</button>
+      <button class="quiz-choice" data-correct="true">Because it makes a fundamentally on/off decision — releasing and reapplying full brake pressure rapidly — rather than computing an in-between pressure value.</button>
+      <button class="quiz-choice" data-correct="false">Because ABS does not use any sensors.</button>
+      <button class="quiz-choice" data-correct="false">Because bang-bang control cannot be applied to braking systems.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>ABS pulses brake pressure fully on and off rapidly, right at the edge of wheel lock-up — a genuinely on/off decision, matching Unit 5’s bang-bang definition exactly.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why does ABS aim to keep a wheel just short of locking up, rather than applying maximum brake pressure continuously?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Maximum continuous pressure would damage the brakes.</button>
+      <button class="quiz-choice" data-correct="true">A locked, skidding wheel has far less traction and no steering control, while a wheel kept just short of locking retains both.</button>
+      <button class="quiz-choice" data-correct="false">ABS is designed to slow the car as slowly as possible.</button>
+      <button class="quiz-choice" data-correct="false">Locked wheels always spin faster than the vehicle’s actual speed.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The whole point of ABS is preserving traction and steering control, which a fully locked, skidding wheel loses — staying at the edge of lock-up (not past it) is the goal.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. What does adaptive cruise control add on top of standard cruise control?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">A second engine for backup power.</button>
+      <button class="quiz-choice" data-correct="true">A forward-facing distance sensor, blending a following-distance control loop with the standard speed-control loop.</button>
+      <button class="quiz-choice" data-correct="false">A limit switch that disables the brakes entirely.</button>
+      <button class="quiz-choice" data-correct="false">A thermistor measuring engine temperature.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Adaptive cruise control layers a distance-sensing loop on top of the standard PID speed loop — Unit 7’s multi-sensor integration pattern in a real production system.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="pid">
+    <p class="quiz-prompt">4. Fill in the blank: standard cruise control typically uses a ___ controller to compute a smooth throttle correction from the gap between set speed and actual speed.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>PID control is the standard approach for cruise control’s smooth, continuously variable throttle correction — the same strategy detailed in Unit 6.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="pressure">
+    <p class="quiz-prompt">5. Fill in the blank: ABS responds to a wheel decelerating far faster than the vehicle’s overall speed by rapidly pulsing that wheel’s brake ___ on and off.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Rapid on/off pulsing of brake pressure — not a smooth adjustment — is exactly how ABS keeps a wheel at the edge of traction instead of fully locking.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: <a href="https://auto.howstuffworks.com/auto-parts/brakes/brake-types/anti-lock-brake.htm">HowStuffWorks’ "How Anti-Lock Brakes Work"</a> explains the wheel-speed sensing and rapid pressure-pulsing behind ABS in more depth than this lesson has room for.</p>
+
+  <p class="ask-teacher">Curious how many times per second a real ABS system actually pulses brake pressure? Ask your teacher — that’s what I’m here for. Next up: these same ideas, scaled up to an entire factory floor.</p>
+
+  <footer class="lesson-footer">STEM+ · Mechatronics · Lesson 41 of the course sequence</footer>
+</div>

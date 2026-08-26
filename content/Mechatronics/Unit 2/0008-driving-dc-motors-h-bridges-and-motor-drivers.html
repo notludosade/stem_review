@@ -1,0 +1,123 @@
+<meta charset="UTF-8">
+<link rel="icon" href="../../favicon.ico?v=1" type="image/x-icon">
+<title>Lesson 8: Driving DC Motors: H-Bridges and Motor Drivers — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · Mechatronics · Unit 2 · Lesson 8</span>
+  <h1>Driving DC Motors: H-Bridges and Motor Drivers</h1>
+  <p class="subtitle">A microcontroller pin can’t power a motor directly — here’s the circuit that stands between the two.</p>
+  <p class="nav-links"><a href="0007-dc-motors-how-they-work.html" class="nav-prev">← Lesson 7</a> <a href="0009-servo-motors-and-position-control.html" class="nav-next">Lesson 9 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>A microcontroller's GPIO pin can source only a small amount of current — typically tens of milliamps. A DC motor can easily demand many times that, especially under load. Connecting a motor directly to a GPIO pin doesn't just fail to spin it — it risks damaging the microcontroller. Driving a motor safely means putting a dedicated circuit between the two.</p>
+
+  <h2>The H-bridge</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    An <strong>H-bridge</strong> is a circuit of four switches arranged so that a motor can be driven in either direction using low-power control signals, while the motor itself draws its real operating current from a separate, higher-current power supply — not from the microcontroller pins that control it.
+  </div>
+
+  <svg class="figure" viewBox="0 0 260 200" width="260" height="200">
+    <line class="fig-axis" x1="30" y1="10" x2="230" y2="10"></line>
+    <text class="fig-label" x="100" y="8">motor supply +</text>
+    <rect x="30" y="30" width="40" height="26" class="fig-guide" fill="none"></rect>
+    <text class="fig-label" x="34" y="47">SW1</text>
+    <rect x="190" y="30" width="40" height="26" class="fig-guide" fill="none"></rect>
+    <text class="fig-label" x="194" y="47">SW2</text>
+    <line class="fig-axis" x1="50" y1="10" x2="50" y2="30"></line>
+    <line class="fig-axis" x1="210" y1="10" x2="210" y2="30"></line>
+    <line class="fig-axis" x1="50" y1="56" x2="50" y2="90"></line>
+    <line class="fig-axis" x1="210" y1="56" x2="210" y2="90"></line>
+    <rect x="90" y="80" width="80" height="30" class="fig-guide" fill="none"></rect>
+    <text class="fig-label" x="105" y="99">motor</text>
+    <line class="fig-axis" x1="50" y1="95" x2="90" y2="95"></line>
+    <line class="fig-axis" x1="170" y1="95" x2="210" y2="95"></line>
+    <rect x="30" y="120" width="40" height="26" class="fig-guide" fill="none"></rect>
+    <text class="fig-label" x="34" y="137">SW3</text>
+    <rect x="190" y="120" width="40" height="26" class="fig-guide" fill="none"></rect>
+    <text class="fig-label" x="194" y="137">SW4</text>
+    <line class="fig-axis" x1="50" y1="110" x2="50" y2="120"></line>
+    <line class="fig-axis" x1="210" y1="110" x2="210" y2="120"></line>
+    <line class="fig-axis" x1="50" y1="146" x2="50" y2="175"></line>
+    <line class="fig-axis" x1="210" y1="146" x2="210" y2="175"></line>
+    <line class="fig-axis" x1="30" y1="175" x2="230" y2="175"></line>
+    <text class="fig-label" x="105" y="192">motor supply ground</text>
+  </svg>
+  <figcaption>An H-bridge’s four switches: closing SW1 and SW4 spins the motor one way, closing SW2 and SW3 spins it the other — the "H" shape the motor sits across.</figcaption>
+
+  <p>Closing the diagonal pair SW1 and SW4 connects the motor one way around, spinning it in one direction; closing the opposite diagonal pair SW2 and SW3 reverses the connection, spinning it the other way. Closing both switches on the same side (or leaving all switches open) stops the motor — and closing both switches on the <em>same vertical side</em> at once would short the supply directly to ground, which real H-bridge circuits are built to prevent.</p>
+
+  <div class="box why">
+    <span class="box-label">Why this needs a dedicated chip, not four transistors you wire yourself</span>
+    Building a safe H-bridge from scratch means avoiding that same-side short, handling the current spikes a motor generates when it switches off (called <strong>back-EMF</strong>, referring to a real motor's tendency to briefly act like a generator when a magnetic field around it collapses), and supplying enough current capacity for the motor. Motor driver ICs — like the L298N or DRV8833 — package a complete, protected H-bridge (or two) into a single component, so this circuit almost never gets hand-built from individual transistors in practice.
+  </div>
+
+  <h2>How the microcontroller actually controls it</h2>
+  <p>A motor driver IC exposes simple digital (and often PWM) input pins that control the internal switches — the microcontroller never touches the motor's actual power path at all. A typical driver takes two direction control pins (which diagonal pair to close) plus one speed control pin, which is where Unit 4's PWM comes back in: pulsing that speed pin rapidly on and off is exactly how the effective motor voltage — and therefore its speed — gets controlled.</p>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. Why can’t a DC motor typically be connected directly to a microcontroller’s GPIO pin?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">GPIO pins can only output analog voltages.</button>
+      <button class="quiz-choice" data-correct="true">A motor can demand far more current than a GPIO pin can safely source, risking damage to the microcontroller.</button>
+      <button class="quiz-choice" data-correct="false">Motors only work with alternating current.</button>
+      <button class="quiz-choice" data-correct="false">GPIO pins cannot be configured as outputs.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>GPIO pins source only tens of milliamps; a motor under load can easily demand much more, which is why a driver circuit must sit between them.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. In the H-bridge diagram, what happens when the diagonal pair SW1 and SW4 are closed while SW2 and SW3 stay open?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">The motor spins in one direction.</button>
+      <button class="quiz-choice" data-correct="false">The power supply is shorted directly to ground.</button>
+      <button class="quiz-choice" data-correct="false">Nothing happens — no current flows.</button>
+      <button class="quiz-choice" data-correct="false">The motor spins at double its rated voltage.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Closing one diagonal pair connects the motor across the supply in one polarity; closing the opposite diagonal pair reverses that polarity and the spin direction.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why is a dedicated motor driver IC used instead of four separate transistors wired by hand?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Hand-wired transistors are always cheaper.</button>
+      <button class="quiz-choice" data-correct="true">A driver IC packages protection against same-side shorts and back-EMF spikes, along with enough current capacity, into one tested component.</button>
+      <button class="quiz-choice" data-correct="false">GPIO pins cannot connect to transistors under any circumstances.</button>
+      <button class="quiz-choice" data-correct="false">Motor driver ICs eliminate the need for any power supply at all.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A hand-built H-bridge has real failure modes (shorted supply, unprotected back-EMF spikes) that a motor driver IC is specifically engineered to handle safely.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="h-bridge|h bridge">
+    <p class="quiz-prompt">4. Fill in the blank: a circuit of four switches that lets a DC motor be driven in either direction using low-power control signals is called an ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The H-bridge is the standard circuit for controlling a DC motor’s direction from low-current control signals.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="emf">
+    <p class="quiz-prompt">5. Fill in the blank: the voltage spike a motor generates when its magnetic field collapses as it’s switched off is called back-___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Back-EMF is the reason motor driver circuits need protection built in — a spinning motor briefly acts like a small generator when power is removed.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: <a href="https://www.ti.com/lit/ds/symlink/l298.pdf">the L298N dual H-bridge motor driver datasheet</a> shows a real, production H-bridge driver’s pinout and internal protection circuitry referenced in this lesson.</p>
+
+  <p class="ask-teacher">Want to trace through what happens if both switches on one side close at once? Ask your teacher — that’s what I’m here for. Next up: a motor that doesn’t just spin — it holds a commanded angle.</p>
+
+  <footer class="lesson-footer">STEM+ · Mechatronics · Lesson 8 of the course sequence</footer>
+</div>

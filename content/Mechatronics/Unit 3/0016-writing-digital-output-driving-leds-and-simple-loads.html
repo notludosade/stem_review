@@ -1,0 +1,101 @@
+<meta charset="UTF-8">
+<link rel="icon" href="../../favicon.ico?v=1" type="image/x-icon">
+<title>Lesson 16: Writing Digital Output: Driving LEDs and Simple Loads — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · Mechatronics · Unit 3 · Lesson 16</span>
+  <h1>Writing Digital Output: Driving LEDs and Simple Loads</h1>
+  <p class="subtitle">A GPIO pin can safely light an LED on its own — but almost everything heavier needs help.</p>
+  <p class="nav-links"><a href="0015-reading-analog-input-on-a-microcontroller.html" class="nav-prev">← Lesson 15</a> <a href="0017-structuring-a-microcontroller-program.html" class="nav-next">Lesson 17 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Lesson 14 introduced digital output as setting a pin HIGH or LOW. This lesson looks at what that output pin can actually drive safely, and what it can't.</p>
+
+  <h2>The simple case: an LED</h2>
+  <p>Setting a GPIO pin HIGH can directly light an LED — as long as a <strong>current-limiting resistor</strong> is placed in series with it. An LED is essentially a one-way, low-resistance path once it turns on; without a resistor to limit current, Ohm's law (V = IR, from Engineering 1) says the current would spike far past what either the LED or the GPIO pin can safely handle.</p>
+
+  <div class="box example">
+    <span class="box-label">Example</span>
+    A 5 V output pin driving a red LED (roughly a 2 V forward drop) through a 220 Ω resistor: the resistor sees (5 − 2) = 3 V across it, giving a current of 3 / 220 ≈ 13.6 mA — comfortably within both the LED's and the GPIO pin's safe limits.
+  </div>
+
+  <h2>Everything heavier needs a driver</h2>
+  <div class="box why">
+    <span class="box-label">Why not just wire a motor or relay the same way</span>
+    A GPIO pin's current limit (tens of milliamps) is nowhere near enough for a motor, a solenoid, or most relays — exactly the same reasoning that motivated the H-bridge in Unit 2, Lesson 8. The general rule: a GPIO pin is only ever a <em>control signal</em> for anything beyond an LED-scale load, never the actual power source. A transistor, a relay, or a driver IC sits between the pin and the real load, letting a small control current switch a much larger one.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Example</span>
+    Turning a 12 V solenoid on and off from a 5 V microcontroller: the GPIO pin drives the base of a small transistor (or the control input of a relay), which then switches the solenoid's much larger current using its own separate 12 V power source — the same "small signal controls large power" pattern as the H-bridge, just for an on/off load instead of a reversible motor.
+  </div>
+
+  <h2>A quick preview: output isn’t only ever fully on or off</h2>
+  <p>Every example above treats a digital output as strictly HIGH or LOW — fully on, fully off. Many GPIO pins can also be driven with PWM, switching rapidly between HIGH and LOW to produce an effective in-between brightness or speed. That's a deliberately deep topic of its own, covered fully in Unit 4 — this lesson just flags that "digital output" doesn't mean "only two possible effects on the real world."</p>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. Why does an LED need a current-limiting resistor when driven from a GPIO pin?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">LEDs do not actually require any current to light up.</button>
+      <button class="quiz-choice" data-correct="true">Without a resistor, current would spike far past what the LED or GPIO pin can safely handle, since an LED is a low-resistance path once conducting.</button>
+      <button class="quiz-choice" data-correct="false">The resistor is only needed for blue LEDs, not red ones.</button>
+      <button class="quiz-choice" data-correct="false">GPIO pins cannot output enough voltage to light an LED without a resistor.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>An LED’s low forward resistance would otherwise let current climb dangerously high, following Ohm’s law — the resistor limits it to a safe value.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why can’t a GPIO pin directly power a 12 V solenoid the way it can directly light an LED?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Solenoids only work with alternating current.</button>
+      <button class="quiz-choice" data-correct="true">A GPIO pin cannot supply the solenoid’s required current or its higher voltage, so a transistor or relay must switch a separate power source instead.</button>
+      <button class="quiz-choice" data-correct="false">Solenoids do not require any electrical power at all.</button>
+      <button class="quiz-choice" data-correct="false">GPIO pins can only ever be configured as inputs.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Just like the motor case from Unit 2, a solenoid needs more current (and often more voltage) than a GPIO pin provides — a driver component switches its own separate power source instead.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. What general rule applies to driving any load heavier than a single LED from a GPIO pin?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">The GPIO pin should be wired directly to the load’s full power source.</button>
+      <button class="quiz-choice" data-correct="true">The GPIO pin should only ever act as a small control signal, with a transistor, relay, or driver IC actually switching the load’s power.</button>
+      <button class="quiz-choice" data-correct="false">Heavier loads should always be driven from an analog pin instead of a digital one.</button>
+      <button class="quiz-choice" data-correct="false">Only steppers and servos can be driven from a microcontroller — DC loads cannot.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The pattern repeats throughout this course: GPIO (or PWM) provides a small control signal, and dedicated hardware handles the real current for anything beyond an LED.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="current-limiting|current limiting">
+    <p class="quiz-prompt">4. Fill in the blank: a resistor placed in series with an LED to keep its current within a safe range is called a ___ resistor.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A current-limiting resistor is exactly this safety component, sized using Ohm’s law to keep current within safe bounds.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="pwm">
+    <p class="quiz-prompt">5. Fill in the blank: rapidly switching a digital output pin between HIGH and LOW to produce an effective in-between brightness or speed is called ___, covered fully in Unit 4.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>PWM (pulse-width modulation) is the technique that turns a strictly on/off digital pin into something that can approximate an in-between analog effect.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: <a href="https://docs.arduino.cc/built-in-examples/basics/Blink/">Arduino’s official "Blink" example and its accompanying LED wiring notes</a> shows the current-limiting resistor wiring for a GPIO-driven LED referenced in this lesson, directly from the official documentation.</p>
+
+  <p class="ask-teacher">Want help sizing a current-limiting resistor for a specific LED’s datasheet values? Ask your teacher — that’s what I’m here for. Next up: putting setup and loop together into one complete, working program.</p>
+
+  <footer class="lesson-footer">STEM+ · Mechatronics · Lesson 16 of the course sequence</footer>
+</div>

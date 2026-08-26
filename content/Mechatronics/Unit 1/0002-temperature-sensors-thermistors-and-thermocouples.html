@@ -1,0 +1,131 @@
+<meta charset="UTF-8">
+<link rel="icon" href="../../favicon.ico?v=1" type="image/x-icon">
+<title>Lesson 2: Temperature Sensors: Thermistors and Thermocouples — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · Mechatronics · Unit 1 · Lesson 2</span>
+  <h1>Temperature Sensors: Thermistors and Thermocouples</h1>
+  <p class="subtitle">Two very different ways to turn heat into a voltage — one cheap and simple, one built for extremes.</p>
+  <p class="nav-links"><a href="0001-analog-vs-digital-sensor-signals.html" class="nav-prev">← Lesson 1</a> <a href="0003-light-sensors-photoresistors-and-phototransistors.html" class="nav-next">Lesson 3 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Temperature is one of the most common quantities a mechatronic system measures — ovens, 3D printer hot ends, engine bays, greenhouses. Two sensor types cover the overwhelming majority of real designs: the <strong>thermistor</strong> for everyday ranges, and the <strong>thermocouple</strong> for extreme heat.</p>
+
+  <h2>Thermistors: resistance that changes with temperature</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    A <strong>thermistor</strong> is a resistor whose resistance changes predictably with temperature. The common type used in mechatronics is an <strong>NTC thermistor</strong> (negative temperature coefficient) — its resistance <em>decreases</em> as temperature rises.
+  </div>
+
+  <p>A thermistor by itself just changes resistance — it doesn't produce a voltage a microcontroller can read directly. To turn that resistance change into a readable voltage, you pair it with a fixed resistor in a <strong>voltage divider</strong>: two resistors in series between the supply voltage and ground, with the microcontroller's ADC pin reading the voltage at the midpoint.</p>
+
+  <svg class="figure" viewBox="0 0 220 250" width="220" height="250">
+    <line class="fig-axis" x1="70" y1="6" x2="150" y2="6"></line>
+    <text class="fig-label" x="155" y="10">Vcc (5V)</text>
+    <line class="fig-axis" x1="110" y1="6" x2="110" y2="30"></line>
+    <rect x="92" y="30" width="36" height="45" class="fig-guide" fill="none"></rect>
+    <text class="fig-label" x="132" y="55">R1 (fixed)</text>
+    <line class="fig-axis" x1="110" y1="75" x2="110" y2="112"></line>
+    <circle class="fig-point" cx="110" cy="112" r="4"></circle>
+    <line class="fig-axis" x1="110" y1="112" x2="175" y2="112"></line>
+    <text class="fig-label" x="132" y="130">to ADC pin</text>
+    <line class="fig-axis" x1="110" y1="112" x2="110" y2="150"></line>
+    <rect x="92" y="150" width="36" height="45" class="fig-guide" fill="none"></rect>
+    <text class="fig-label" x="132" y="175">Thermistor (RT)</text>
+    <line class="fig-axis" x1="110" y1="195" x2="110" y2="225"></line>
+    <line class="fig-axis" x1="70" y1="225" x2="150" y2="225"></line>
+    <text class="fig-label" x="90" y="242">GND</text>
+  </svg>
+  <figcaption>A thermistor voltage divider: as the thermistor’s resistance falls with rising heat, the tapped voltage rises toward Vcc.</figcaption>
+
+  <div class="box why">
+    <span class="box-label">Why this circuit shows up everywhere</span>
+    This exact divider pattern — fixed resistor plus a variable resistive sensor — is how nearly every simple resistive sensor gets read, not just thermistors. You’ll see the identical circuit again for photoresistors in the next lesson, just with a different sensor in the bottom slot.
+  </div>
+
+  <p>A thermistor's resistance-vs-temperature curve isn't a straight line, so getting an exact temperature back out requires a calibration step (covered in Lesson 6) — but over a modest working range, engineers often treat it as close enough to linear for a quick estimate.</p>
+
+  <h2>Thermocouples: voltage from a junction of two metals</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    A <strong>thermocouple</strong> is a junction of two dissimilar metal wires that generates a small voltage proportional to the temperature difference between that junction and a reference point — an effect called the <strong>Seebeck effect</strong>. No external power supply is needed to generate the signal itself.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Example</span>
+    A K-type thermocouple (nickel-chromium paired with nickel-aluminum) can measure from about −200°C up to roughly 1260°C — a range that would destroy most thermistors, which typically top out well under 300°C. This is why thermocouples show up in kilns, engine exhaust, and industrial furnaces, while thermistors handle everyday electronics and appliances.
+  </div>
+
+  <p>The trade-off: a thermocouple's raw output is tiny (microvolts to low millivolts per degree), so it needs an amplifier circuit before a microcontroller can read it usefully — more supporting hardware than a thermistor's simple voltage divider. Thermistors also tend to respond faster and cost less, which is why they dominate in consumer and hobbyist mechatronics where extreme heat isn't a factor.</p>
+
+  <div class="box example">
+    <span class="box-label">Choosing between them</span>
+    Building a 3D-printer hot-end sensor, a room-temperature monitor, or a simple thermostat? A thermistor is almost always the right, cheap choice. Measuring a furnace, an exhaust manifold, or anything glowing? That's thermocouple territory.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What happens to an NTC thermistor’s resistance as temperature rises?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">It increases.</button>
+      <button class="quiz-choice" data-correct="true">It decreases.</button>
+      <button class="quiz-choice" data-correct="false">It stays exactly constant.</button>
+      <button class="quiz-choice" data-correct="false">It becomes infinite.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>NTC stands for negative temperature coefficient — resistance moves opposite to temperature, falling as it gets hotter.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why can’t a microcontroller read a thermistor’s resistance directly?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because resistance isn’t a real physical quantity.</button>
+      <button class="quiz-choice" data-correct="true">A microcontroller’s ADC reads voltage, not resistance, so the thermistor must first be placed in a circuit (a voltage divider) that turns its resistance change into a voltage change.</button>
+      <button class="quiz-choice" data-correct="false">Because thermistors only work at room temperature.</button>
+      <button class="quiz-choice" data-correct="false">Because resistance changes too slowly to ever be useful.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>ADC pins measure voltage. A voltage divider is what converts the thermistor’s changing resistance into a changing voltage the ADC can actually sample.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why would an engineer choose a thermocouple over a thermistor for measuring a kiln’s temperature?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Thermocouples are always cheaper.</button>
+      <button class="quiz-choice" data-correct="true">Thermocouples can survive and accurately measure much higher temperatures than a thermistor can tolerate.</button>
+      <button class="quiz-choice" data-correct="false">Thermistors cannot be wired into a circuit.</button>
+      <button class="quiz-choice" data-correct="false">Thermocouples don’t require any signal conditioning at all.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A kiln’s extreme heat would damage most thermistors; thermocouples are built for exactly this range, though they do need amplification circuitry the thermistor’s simple divider doesn’t.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="divider">
+    <p class="quiz-prompt">4. Fill in the blank: pairing a thermistor with a fixed resistor between supply voltage and ground, and reading the voltage at their midpoint, is called a voltage ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A voltage divider is exactly this two-resistor arrangement, and it’s the standard way to read any simple resistive sensor.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="seebeck">
+    <p class="quiz-prompt">5. Fill in the blank: the physical effect that lets a junction of two dissimilar metals generate a temperature-proportional voltage is called the ___ effect.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The Seebeck effect is the thermoelectric phenomenon a thermocouple relies on — no external power source needed to produce the signal.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: <a href="https://learn.sparkfun.com/tutorials/thermistors">SparkFun’s "Thermistors" tutorial</a> covers the voltage-divider wiring shown above in more depth, plus the nonlinear resistance curve that Lesson 6’s calibration step accounts for.</p>
+
+  <p class="ask-teacher">Curious how a thermocouple’s tiny voltage actually gets amplified? That’s a bit beyond this course, but ask your teacher if you want pointers. Next up: light sensors, which reuse this same voltage-divider trick with a very different component.</p>
+
+  <footer class="lesson-footer">STEM+ · Mechatronics · Lesson 2 of the course sequence</footer>
+</div>

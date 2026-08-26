@@ -1,0 +1,98 @@
+<meta charset="UTF-8">
+<link rel="icon" href="../../favicon.ico?v=1" type="image/x-icon">
+<title>Lesson 12: What Is a Microcontroller? — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · Mechatronics · Unit 3 · Lesson 12</span>
+  <h1>What Is a Microcontroller?</h1>
+  <p class="subtitle">The chip that reads every sensor and drives every actuator in this course — and why it isn’t just a small computer.</p>
+  <p class="nav-links"><a href="../Unit%202/0011-choosing-the-right-actuator.html" class="nav-prev">← Unit 2, Lesson 11</a> <a href="0013-microcontroller-architecture-basics.html" class="nav-next">Lesson 13 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Every sensor from Unit 1 and every actuator from Unit 2 needs something in the middle, deciding what to read and when to act. That job belongs to a <strong>microcontroller</strong> — and despite the name, it isn't just a shrunken-down laptop.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    A <strong>microcontroller (MCU)</strong> is a single chip combining a processor, memory, and input/output circuitry, designed to run one dedicated program repeatedly, controlling physical hardware in real time. Common examples include the ATmega328P (used on many Arduino boards), the ESP32, and the RP2040 (used on the Raspberry Pi Pico).
+  </div>
+
+  <p>A <strong>general-purpose computer</strong> — a laptop, a phone, a desktop — runs an operating system that juggles many programs at once, prioritizes a responsive user interface, and is built to be as flexible as possible. A microcontroller typically runs no operating system at all (or, at most, a minimal one), executes one program in an endless loop, and is built to be as cheap, low-power, and predictable as possible.</p>
+
+  <div class="box why">
+    <span class="box-label">Why mechatronics uses microcontrollers, not laptops</span>
+    A robot's motor controller can't tolerate the operating system pausing its program for a few milliseconds to handle something unrelated — a control loop (Unit 5) needs to run on a predictable, reliable schedule. Microcontrollers are built for exactly this kind of real-time, dedicated response, and they cost a fraction of a general-purpose computer, run on batteries for a long time, and fit inside small enclosures a laptop never could.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Example</span>
+    A washing machine, a car's window control, a thermostat, and this course's temperature-controlled fan project (Unit 7) all run on a microcontroller doing one dedicated job forever — not a general-purpose computer capable of running a web browser, a spreadsheet, and this same control task all at once.
+  </div>
+
+  <p>None of this means microcontrollers are simply "worse" computers — they're a different tool, optimized for a different job. The rest of this unit looks at what's actually inside one, and how a program on it talks to the sensors and actuators from Units 1 and 2.</p>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What is the key structural difference between a microcontroller and a general-purpose computer like a laptop?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">A microcontroller has no processor at all.</button>
+      <button class="quiz-choice" data-correct="true">A microcontroller runs one dedicated program in a predictable, real-time loop, typically without a full operating system, while a general-purpose computer juggles many programs under an OS.</button>
+      <button class="quiz-choice" data-correct="false">A microcontroller can only be programmed once and never reprogrammed.</button>
+      <button class="quiz-choice" data-correct="false">General-purpose computers cannot connect to any sensors.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A microcontroller’s whole design favors predictable, dedicated, real-time control of hardware over the flexibility and multitasking a general-purpose computer’s OS provides.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why is a control loop poorly suited to running under a general-purpose operating system?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Operating systems cannot run any mathematical calculations.</button>
+      <button class="quiz-choice" data-correct="true">The OS can pause a program unpredictably to handle unrelated tasks, breaking the reliable timing a real-time control loop depends on.</button>
+      <button class="quiz-choice" data-correct="false">General-purpose computers have no way to output electrical signals.</button>
+      <button class="quiz-choice" data-correct="false">Control loops require more memory than any laptop has available.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Real-time control depends on predictable timing; an OS juggling many processes can introduce exactly the kind of unpredictable delay that breaks that reliability.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Which of these is a real example of a microcontroller?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">A gaming desktop’s graphics card.</button>
+      <button class="quiz-choice" data-correct="true">The ATmega328P chip used on many Arduino boards.</button>
+      <button class="quiz-choice" data-correct="false">A cloud data center server.</button>
+      <button class="quiz-choice" data-correct="false">A laptop’s operating system.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The ATmega328P is a real, widely used microcontroller chip — small, cheap, and built to run one dedicated program controlling hardware.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="time">
+    <p class="quiz-prompt">4. Fill in the blank: a microcontroller combines a processor, memory, and input/output circuitry on a single chip, designed to run one dedicated program controlling hardware in real ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Real-time operation — predictable, reliable timing — is the defining requirement a microcontroller is built to satisfy.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="operating">
+    <p class="quiz-prompt">5. Fill in the blank: unlike a general-purpose computer, a microcontroller typically runs with no ___ system managing multiple programs at once.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Most microcontroller programs run directly on the hardware, without a full operating system juggling other tasks.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: <a href="https://docs.arduino.cc/learn/microcontrollers/an-introduction-to-microcontrollers">Arduino’s "An Introduction to Microcontrollers"</a> covers this same microcontroller-vs-computer distinction from the official Arduino documentation, with real chip examples.</p>
+
+  <p class="ask-teacher">Curious how much RAM and flash a chip like the ATmega328P actually has? Ask your teacher — that’s what I’m here for. Next up: what’s actually inside a microcontroller, piece by piece.</p>
+
+  <footer class="lesson-footer">STEM+ · Mechatronics · Lesson 12 of the course sequence</footer>
+</div>

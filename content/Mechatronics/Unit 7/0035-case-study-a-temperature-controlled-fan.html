@@ -1,0 +1,116 @@
+<meta charset="UTF-8">
+<link rel="icon" href="../../favicon.ico?v=1" type="image/x-icon">
+<title>Lesson 35: Case Study: A Temperature-Controlled Fan — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · Mechatronics · Unit 7 · Lesson 35</span>
+  <h1>Case Study: A Temperature-Controlled Fan</h1>
+  <p class="subtitle">Every unit in this course, in one working loop — a thermistor, a PWM-driven fan, and a proportional control decision.</p>
+  <p class="nav-links"><a href="0034-designing-a-sensor-actuator-control-subsystem.html" class="nav-prev">← Lesson 34</a> <a href="0036-case-study-line-following-logic.html" class="nav-next">Lesson 36 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>This lesson walks Lesson 34's recipe through a complete, concrete system: a fan that spins faster the hotter it gets, cooling automatically without ever being told an exact speed by hand.</p>
+
+  <div class="box example">
+    <span class="box-label">Step 1–2: sensor and actuator</span>
+    Sensor: a thermistor voltage divider (Unit 1, Lessons 2 and 6), read via analogRead() (Unit 3, Lesson 15) and converted from a raw ADC count to an estimated temperature using two-point calibration. Actuator: a PWM-driven DC fan (Unit 2, Lessons 7–8; Unit 4, Lesson 20), where fan speed scales with duty cycle.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Step 3: control strategy</span>
+    Since the fan can accept a smooth, continuously variable PWM duty cycle, a proportional controller (Unit 6, Lesson 29) is a reasonable, genuinely useful choice here — simpler than full PID, while still giving smoother behavior than bang-bang: fan speed increases gradually as temperature climbs above a target, rather than snapping straight to full speed.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Step 4: filtering</span>
+    Thermistor readings drift slowly and don't need a fast-reacting derivative term at all, so a simple moving average (Unit 4, Lesson 22) on the temperature reading is enough to steady the input without meaningfully slowing the fan's response to real temperature changes.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Step 5: the full loop</span>
+<pre class="code-block"><code>setup():
+    pinMode(FAN_PWM_PIN, OUTPUT)
+
+loop():
+    raw = analogRead(THERMISTOR_PIN)
+    tempReading = calibrate(raw)              // Unit 1, Lesson 6
+    smoothedTemp = movingAverage(tempReading)  // Unit 4, Lesson 22
+
+    error = smoothedTemp - TARGET_TEMP          // positive when too hot
+    output = Kp * error
+    output = clamp(output, 0, 100)              // 0-100% duty cycle
+
+    setPwmDutyCycle(FAN_PWM_PIN, output)</code></pre>
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why error is defined the other way around here</span>
+    Earlier lessons defined error as setpoint − measured value, positive when the system needs to work <em>harder</em> to close the gap (like a cold room needing more heat). Here, error is defined as measured − target, positive when the room is <em>too hot</em> and needs <em>more</em> fan speed — the sign convention just needs to match "more error, more corrective output" for whichever direction the specific system needs to push. Getting this sign backward is a classic, very real bug — Unit 7, Lesson 38 covers exactly this failure mode.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. Why is a proportional (P) controller a reasonable choice for this fan system, rather than bang-bang control?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because thermistors can only be used with proportional control.</button>
+      <button class="quiz-choice" data-correct="true">Because the fan accepts a smooth, continuously variable PWM duty cycle, and proportional control can use that capability for gradually increasing speed instead of snapping to full power.</button>
+      <button class="quiz-choice" data-correct="false">Because bang-bang control cannot be used with any temperature sensor.</button>
+      <button class="quiz-choice" data-correct="false">Because proportional control requires no sensor at all.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Matching the control strategy to the actuator’s real capability (from Lesson 34) is exactly why proportional control fits a PWM-driven fan well.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why does this system use a simple moving average filter rather than worrying about a derivative term’s noise sensitivity?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because thermistors never produce any noise.</button>
+      <button class="quiz-choice" data-correct="true">Because this system uses proportional control only, with no derivative term, so a simple moving average is enough to steady slow-drifting temperature readings.</button>
+      <button class="quiz-choice" data-correct="false">Because moving averages cannot be used with PID controllers.</button>
+      <button class="quiz-choice" data-correct="false">Because filtering is only needed for digital sensors.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>With no derivative term in play, the stricter noise concerns from Unit 6, Lesson 31 don’t apply here — a simple moving average is sufficient smoothing for a slow-changing quantity like temperature.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. In this system’s pseudocode, why is error defined as (measured temperature − target), rather than (target − measured) as in earlier lessons?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because this system doesn’t actually use error at all.</button>
+      <button class="quiz-choice" data-correct="true">Because the sign convention needs to match "more error means more corrective output" for this specific system, where more error means the room is too hot and needs more fan speed.</button>
+      <button class="quiz-choice" data-correct="false">Because PWM signals require a reversed error definition by design.</button>
+      <button class="quiz-choice" data-correct="false">Because thermistors always report negative temperatures.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>What matters is that increasing error produces increasing corrective output in the right direction for the specific system — here, hotter-than-target should mean faster fan, so the sign convention is set up accordingly.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="clamp">
+    <p class="quiz-prompt">4. Fill in the blank: in this system’s pseudocode, the final computed output is passed through a ___ function to keep it within the fan’s valid 0-100% PWM range.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Clamping (Unit 6, Lesson 32) ensures the computed output never exceeds what the actuator can actually accept.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="38">
+    <p class="quiz-prompt">5. Fill in the blank: getting a control loop’s error sign backward, so the controller pushes the wrong direction and fights itself, is a classic real bug covered explicitly in Lesson ___ of this unit.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Lesson 38 covers this exact failure mode as one of the most common integration bugs in a combined sensor-actuator-control system.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: <a href="https://learn.adafruit.com/adafruit-arduino-lesson-14-servo-motors">Adafruit’s Arduino lesson series on sensor-driven actuator control</a> demonstrates the same read-sensor, compute-output, drive-actuator pattern used in this case study’s full control loop.</p>
+
+  <p class="ask-teacher">Want to work through what Ki or Kd would add to this specific fan system? Ask your teacher — that’s what I’m here for. Next up: a second full case study, this time steering a robot instead of spinning a fan.</p>
+
+  <footer class="lesson-footer">STEM+ · Mechatronics · Lesson 35 of the course sequence</footer>
+</div>

@@ -1,0 +1,112 @@
+<meta charset="UTF-8">
+<link rel="icon" href="../../favicon.ico?v=1" type="image/x-icon">
+<title>Lesson 36: Case Study: Line-Following Logic — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · Mechatronics · Unit 7 · Lesson 36</span>
+  <h1>Case Study: Line-Following Logic</h1>
+  <p class="subtitle">A classic beginner robotics problem — and a second, very different application of the exact same error-driven correction idea.</p>
+  <p class="nav-links"><a href="0035-case-study-a-temperature-controlled-fan.html" class="nav-prev">← Lesson 35</a> <a href="0037-handling-multiple-sensors-and-priorities.html" class="nav-next">Lesson 37 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>A <strong>line-following robot</strong> steers itself along a marked path using nothing but two simple light sensors and a differential steering correction — no camera, no map, just the same feedback idea from Unit 5 applied to steering instead of temperature.</p>
+
+  <div class="box example">
+    <span class="box-label">The sensor setup</span>
+    Two reflectance sensors (photoresistors or phototransistors from Unit 1, Lessons 1 and 3) are mounted on the front of the robot, spaced a little wider than the line is thick — one just left of center, one just right. A dark line reflects less light than the surrounding floor, so each sensor's reading indicates whether it's currently over the line or over open floor.
+  </div>
+
+  <h2>Simple decision logic — a bang-bang-like approach</h2>
+  <div class="box example">
+    <span class="box-label">Pseudocode: differential steering correction</span>
+<pre class="code-block"><code>loop():
+    leftOnLine = readLeftSensor() < THRESHOLD
+    rightOnLine = readRightSensor() < THRESHOLD
+
+    if leftOnLine AND NOT rightOnLine:
+        // line drifting left of center - steer left
+        setMotors(leftSpeed = SLOW, rightSpeed = FAST)
+    elif rightOnLine AND NOT leftOnLine:
+        // line drifting right of center - steer right
+        setMotors(leftSpeed = FAST, rightSpeed = SLOW)
+    else:
+        // both on the line, or both off it - go straight
+        setMotors(leftSpeed = FAST, rightSpeed = FAST)</code></pre>
+  </div>
+
+  <p>This is genuinely bang-bang-like control (Unit 5, Lesson 25): each sensor only ever reports on-line or off-line, and the response is one of a small handful of fixed motor-speed combinations — no smooth, proportional steering here, just discrete correction based on which sensor triggered.</p>
+
+  <h2>A more advanced version: proportional steering</h2>
+  <div class="box why">
+    <span class="box-label">The same PID ideas, applied to a different physical quantity</span>
+    A more capable version replaces the two simple on/off sensors with an array of several sensors (or one continuous-output analog sensor) that estimates <em>how far off-center</em> the line currently is — a numeric error, exactly like Unit 6's error signal, just measuring lateral position instead of temperature. A proportional (or full PID) controller then computes a steering correction proportional to that error, producing smooth, continuous steering instead of the discrete left/right/straight snapping shown above. The controller math doesn't change at all between temperature and steering — only what's being measured does.
+  </div>
+
+  <p>This is worth sitting with: PID isn't a temperature-control technique, or a motor-control technique — it's a completely general strategy for turning <em>any</em> measurable error into a corrective actuator output, whether that error is degrees off target, millimeters off a line, or miles per hour off a cruise-control setpoint (Unit 8, Lesson 41 covers exactly that last one).</p>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What information does each of the two line-following sensors provide in the basic version of this system?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">An exact numeric distance from the line, in millimeters.</button>
+      <button class="quiz-choice" data-correct="true">Whether that specific sensor is currently over the dark line or over the lighter floor.</button>
+      <button class="quiz-choice" data-correct="false">The robot’s current speed.</button>
+      <button class="quiz-choice" data-correct="false">The ambient room temperature.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The basic two-sensor version only reports a simple on-line/off-line state per sensor, based on how much light is reflected back.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why is the basic version of this line-following logic described as "bang-bang-like"?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because it uses a thermistor to detect the line.</button>
+      <button class="quiz-choice" data-correct="true">Because each sensor only reports one of two states, and the response is one of a small set of fixed motor-speed combinations, with no smooth in-between output.</button>
+      <button class="quiz-choice" data-correct="false">Because it requires a PID controller to function at all.</button>
+      <button class="quiz-choice" data-correct="false">Because line-following robots cannot use any other control strategy.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>On/off sensor readings driving a fixed handful of discrete motor-speed responses is exactly bang-bang-style control, applied to steering instead of temperature.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. What does the "more advanced version" of line-following change, compared to the basic two-sensor version?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">It removes the need for any motors.</button>
+      <button class="quiz-choice" data-correct="true">It replaces the simple on/off sensing with a numeric measure of how far off-center the line is, allowing a proportional or PID controller to produce smooth steering correction.</button>
+      <button class="quiz-choice" data-correct="false">It eliminates the need for any sensors entirely.</button>
+      <button class="quiz-choice" data-correct="false">It only works with a temperature sensor instead of light sensors.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Turning the sensing into a numeric lateral-position error is what allows the same proportional/PID machinery from Unit 6 to apply here, producing smoother output than the basic on/off version.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="pid">
+    <p class="quiz-prompt">4. Fill in the blank: the general control strategy that turns any measurable error — whether temperature, steering position, or speed — into a corrective actuator output is called ___ control.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>PID is a general-purpose strategy, not tied to any one physical quantity — the same formula applies whether the error is measured in degrees, millimeters, or miles per hour.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="less">
+    <p class="quiz-prompt">5. Fill in the blank: mounting light sensors so they detect a dark line against a lighter floor relies on the line reflecting ___ light than the surrounding floor.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A dark line reflects less light back to the sensor than the lighter floor around it, which is exactly what lets the sensor distinguish line from floor.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: <a href="https://learn.sparkfun.com/tutorials/photocell-hookup-guide">SparkFun’s "Photocell (photoresistor) Hookup Guide"</a> covers the same reflectance-sensing principle used to distinguish a line from the surrounding floor in this case study.</p>
+
+  <p class="ask-teacher">Want to sketch out a proportional steering formula for a specific sensor-array layout? Ask your teacher — that’s what I’m here for. Next up: what happens when a real system needs to watch more than one sensor at once.</p>
+
+  <footer class="lesson-footer">STEM+ · Mechatronics · Lesson 36 of the course sequence</footer>
+</div>

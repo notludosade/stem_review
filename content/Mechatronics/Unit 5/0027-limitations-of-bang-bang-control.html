@@ -1,0 +1,101 @@
+<meta charset="UTF-8">
+<link rel="icon" href="../../favicon.ico?v=1" type="image/x-icon">
+<title>Lesson 27: Limitations of Bang-Bang Control and When You Need More — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · Mechatronics · Unit 5 · Lesson 27</span>
+  <h1>Limitations of Bang-Bang Control and When You Need More</h1>
+  <p class="subtitle">Closing out Unit 5 by being honest about what on/off control can never do — setting up Unit 6’s solution.</p>
+  <p class="nav-links"><a href="0026-hysteresis-and-deadbands-in-bang-bang-control.html" class="nav-prev">← Lesson 26</a> <a href="../Unit%206/0028-introducing-pid-why-bang-bang-isnt-enough.html" class="nav-next">Unit 6, Lesson 28 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Bang-bang control, even with hysteresis, is genuinely useful — but it has real, structural limits that no amount of tuning the deadband can fix. This lesson is honest about them, because they're exactly what motivates Unit 6.</p>
+
+  <h2>It can never hold one exact value</h2>
+  <div class="box why">
+    <span class="box-label">An inherent limitation, not a bug</span>
+    Lesson 26 already showed this: bang-bang control always oscillates somewhere within its deadband — it structurally cannot settle at one precise, unchanging value the way a servo (Unit 2) holds a commanded angle. For applications like a home thermostat, that's a perfectly fine trade-off. For applications needing precise, steady control — holding an exact speed, an exact temperature — it isn't.
+  </div>
+
+  <h2>It struggles with slow-responding systems: overshoot</h2>
+  <p>Bang-bang control assumes the actuator's effect on the system is close to immediate. Many real systems have real <strong>lag</strong> — thermal mass that takes time to heat up or cool down, mechanical inertia that takes time to respond. When there's meaningful lag, switching the actuator off exactly at the setpoint isn't enough — the system keeps changing for a while even after the actuator turns off, "coasting" past the target.</p>
+
+  <div class="box example">
+    <span class="box-label">Example</span>
+    An oven's heating element switches off right when the oven reaches its target temperature — but the element itself, and the air around it, are still hot and still radiating heat into the oven cavity for a short time afterward. The oven's actual temperature keeps climbing briefly after the switch-off, <strong>overshooting</strong> the target before it starts to fall back.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why this points directly at Unit 6</span>
+    Overshoot happens because bang-bang control reacts only to where the system <em>currently</em> is, never to how fast it's <em>changing</em> — it has no way to "see the overshoot coming" and back off early. A control strategy that also accounts for the rate of change could, in principle, ease off before reaching the setpoint rather than right at it. That's exactly the job of the derivative term in Unit 6's PID controller.
+  </div>
+
+  <h2>It can’t give a smooth, proportional response</h2>
+  <p>A cruise control that only had "full throttle" and "no throttle" available would lurch uncomfortably instead of gently correcting small speed deviations. Some actuators — a PWM-driven motor, a variable-position valve — are physically capable of smooth, in-between output, and throwing that capability away in favor of strict on/off control wastes what the actuator could actually do. This gap — a continuously variable actuator deserves a continuously variable command, not just on/off — is precisely where Unit 6 begins.</p>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. Why can bang-bang control never hold a controlled variable at one exact, unchanging value, even with hysteresis added?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because sensors cannot measure exact values.</button>
+      <button class="quiz-choice" data-correct="true">Because the strategy structurally oscillates within its deadband — that’s inherent to how bang-bang control works, not a tuning flaw.</button>
+      <button class="quiz-choice" data-correct="false">Because hysteresis always increases the error to infinity.</button>
+      <button class="quiz-choice" data-correct="false">Because bang-bang control requires a stepper motor specifically.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Oscillation within the deadband is structural to bang-bang control itself — no amount of retuning the deadband removes it entirely.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why does an oven’s temperature often keep rising for a short time after its heating element switches off?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">The thermostat sensor is broken.</button>
+      <button class="quiz-choice" data-correct="true">Thermal lag — the element and surrounding air stay hot and keep radiating heat briefly after switch-off, causing the temperature to overshoot the target.</button>
+      <button class="quiz-choice" data-correct="false">The oven automatically increases its setpoint after reaching the original target.</button>
+      <button class="quiz-choice" data-correct="false">Ovens use proportional control, not bang-bang control.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Real systems with lag keep responding for a while after the actuator changes state, causing overshoot past the setpoint before settling back.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why is bang-bang control a poor fit for a cruise control system, even though a car’s throttle is physically capable of smooth, in-between positions?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Cars cannot be fitted with any speed sensor.</button>
+      <button class="quiz-choice" data-correct="true">Bang-bang control would only ever command full throttle or no throttle, wasting the throttle’s actual capability for smooth, proportional adjustment.</button>
+      <button class="quiz-choice" data-correct="false">Cruise control cannot use closed-loop control of any kind.</button>
+      <button class="quiz-choice" data-correct="false">Throttles can only be controlled with bang-bang logic.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>When an actuator can genuinely produce a smooth, continuously variable output, restricting it to strict on/off throws away real capability — motivating a proportional strategy instead.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="lag">
+    <p class="quiz-prompt">4. Fill in the blank: a system’s tendency to keep responding for a while after an actuator changes state, due to thermal mass or mechanical inertia, is called ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Lag is what causes overshoot in bang-bang-controlled systems that don’t respond instantaneously to actuator changes.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="derivative">
+    <p class="quiz-prompt">5. Fill in the blank: a controller reacting only to the current error, with no way to anticipate an approaching overshoot from how fast the error is changing, is exactly the gap Unit 6’s ___ term is designed to fill.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The derivative term reacts to the rate of change of error, giving a controller exactly the "see it coming" capability bang-bang control lacks.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: <a href="https://ctms.engin.umich.edu/CTMS/index.php?example=Introduction&section=ControlPID">University of Michigan’s Control Tutorials for MATLAB and Simulink — "Introduction: PID Controller Design"</a> introduces the overshoot and steady-state limitations of simple control strategies that motivate the PID controller covered next.</p>
+
+  <p class="ask-teacher">Want to sketch out an overshoot curve for a system with a lot of thermal lag? Ask your teacher — that’s what I’m here for. Unit 5 is complete; Unit 6 introduces the controller built specifically to fix everything this lesson flagged — PID.</p>
+
+  <footer class="lesson-footer">STEM+ · Mechatronics · Lesson 27 of the course sequence</footer>
+</div>

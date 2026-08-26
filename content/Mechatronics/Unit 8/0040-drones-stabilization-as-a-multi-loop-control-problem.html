@@ -1,0 +1,100 @@
+<meta charset="UTF-8">
+<link rel="icon" href="../../favicon.ico?v=1" type="image/x-icon">
+<title>Lesson 40: Drones: Stabilization as a Multi-Loop Control Problem — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · Mechatronics · Unit 8 · Lesson 40</span>
+  <h1>Drones: Stabilization as a Multi-Loop Control Problem</h1>
+  <p class="subtitle">A quadcopter is inherently unstable the instant it leaves the ground — staying level is a full-time, high-speed control job.</p>
+  <p class="nav-links"><a href="0039-robotic-arms.html" class="nav-prev">← Lesson 39</a> <a href="0041-automotive-systems-abs-brakes-and-cruise-control.html" class="nav-next">Lesson 41 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Left alone with no active control, a quadcopter doesn't hover — it tips over. Every moment of stable flight is the direct, continuous output of several PID control loops (Unit 6), running many times per second.</p>
+
+  <div class="box example">
+    <span class="box-label">The pieces, mapped onto this course</span>
+    Actuators: typically four brushless DC motors (Unit 2's brushed-motor concepts, in a more efficient electronically-commutated form), each driven by an <strong>ESC (electronic speed controller)</strong> — functionally a specialized motor driver (Unit 2, Lesson 8), converting a control signal into the precise current each motor needs. Sensor: an <strong>IMU (inertial measurement unit)</strong>, combining an accelerometer and a gyroscope, measuring the craft's current tilt and rotation rate.
+  </div>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    <strong>Stabilization</strong>, in this context, means continuously adjusting each motor's relative speed so the craft's measured tilt (from the IMU) matches a commanded tilt (often "level," or a small deliberate tilt the pilot commands to move in a direction) — a direct application of closed-loop control (Unit 5) to a physically unstable system.
+  </div>
+
+  <h2>Why several loops, not just one</h2>
+  <div class="box why">
+    <span class="box-label">Roll, pitch, and yaw, each with their own loop</span>
+    A quadcopter's orientation has three independent rotational axes to control — roll (tilting side to side), pitch (tilting forward/back), and yaw (rotating around the vertical axis) — and each typically gets its own PID loop, computing its own correction, all running simultaneously. The four motors' individual speeds are the shared output all three loops adjust together: increasing the speed of motors on one side while decreasing the opposite side corrects roll, for instance, with pitch and yaw corrections layered on top of the same four motor commands.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why this needs to run so fast</span>
+    A multi-rotor craft's instability isn't gentle — a small, uncorrected tilt compounds quickly into a much larger one, and then a crash, within a fraction of a second. This is Unit 5, Lesson 23's open-loop-vs-closed-loop stakes made physically real: an open-loop quadcopter (no active correction at all) is not a worse-performing drone, it's one that simply cannot fly. The PID loops here typically run hundreds of times per second, far faster than this course's slower thermal or positional examples ever needed to.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What sensor gives a drone’s flight controller its measurement of current tilt and rotation rate?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">An ultrasonic distance sensor.</button>
+      <button class="quiz-choice" data-correct="true">An IMU (inertial measurement unit), combining an accelerometer and a gyroscope.</button>
+      <button class="quiz-choice" data-correct="false">A thermistor.</button>
+      <button class="quiz-choice" data-correct="false">A limit switch.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The IMU is the drone’s core feedback sensor — measuring tilt and rotation rate, the quantities the stabilization control loops react to.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. What is an ESC (electronic speed controller), in terms of concepts from this course?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">A type of sensor that measures motor speed directly.</button>
+      <button class="quiz-choice" data-correct="true">Functionally, a specialized motor driver — converting a control signal into the precise current a brushless motor needs, the same role Unit 2’s H-bridge drivers played for brushed motors.</button>
+      <button class="quiz-choice" data-correct="false">A microcontroller that replaces the flight controller entirely.</button>
+      <button class="quiz-choice" data-correct="false">A type of limit switch used for landing gear.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>An ESC plays the driver-IC role from Unit 2, Lesson 8 — a small control signal governing a much larger current delivered to the motor.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why is an open-loop (uncorrected) quadcopter not just a "worse-performing" drone, but one that effectively cannot fly at all?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because quadcopters do not have any sensors available to them.</button>
+      <button class="quiz-choice" data-correct="true">Because a multi-rotor craft is inherently unstable, and a small uncorrected tilt compounds quickly into a crash without continuous active correction.</button>
+      <button class="quiz-choice" data-correct="false">Because open-loop control is illegal for aircraft.</button>
+      <button class="quiz-choice" data-correct="false">Because brushless motors cannot be controlled without an ESC.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>This is the real-world stakes version of Unit 5’s open-loop-vs-closed-loop distinction — for an inherently unstable system, closed-loop control isn’t an enhancement, it’s the only way the system functions at all.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="yaw">
+    <p class="quiz-prompt">4. Fill in the blank: a quadcopter’s three independent rotational axes — tilting side to side, tilting forward/back, and rotating around the vertical axis — are called roll, pitch, and ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Roll, pitch, and yaw are the three axes a drone’s stabilization system controls, each typically with its own PID loop.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="closed">
+    <p class="quiz-prompt">5. Fill in the blank: continuously adjusting motor speeds so a drone’s measured tilt matches a commanded tilt is an application of ___-loop control to a physically unstable system.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Closed-loop control (Unit 5) is exactly what stabilization is — continuous measurement and correction, applied here at high speed to an inherently unstable craft.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: <a href="https://ardupilot.org/copter/docs/tuning.html">ArduPilot’s "Tuning Process Instructions" documentation</a> documents real PID tuning for drone stabilization loops, from a widely used open-source autopilot project, directly applying Unit 6’s tuning ideas to a real quadcopter.</p>
+
+  <p class="ask-teacher">Curious how fast a typical flight controller actually runs its stabilization loops? Ask your teacher — that’s what I’m here for. Next up: two mechatronic systems riding in nearly every modern car.</p>
+
+  <footer class="lesson-footer">STEM+ · Mechatronics · Lesson 40 of the course sequence</footer>
+</div>

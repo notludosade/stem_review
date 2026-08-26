@@ -1,0 +1,110 @@
+<meta charset="UTF-8">
+<link rel="icon" href="../../favicon.ico?v=1" type="image/x-icon">
+<title>Lesson 6: Reading, Calibrating, and Interpreting Sensor Output — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · Mechatronics · Unit 1 · Lesson 6</span>
+  <h1>Reading, Calibrating, and Interpreting Sensor Output</h1>
+  <p class="subtitle">A raw ADC number is not a temperature. Getting from one to the other is its own skill — and it closes out this unit.</p>
+  <p class="nav-links"><a href="0005-limit-switches-and-digital-input-sensing.html" class="nav-prev">← Lesson 5</a> <a href="../Unit%202/0007-dc-motors-how-they-work.html" class="nav-next">Unit 2, Lesson 7 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Every analog sensor lesson so far has ended at the same place: a voltage, read by an ADC, that turns into a raw number. This lesson covers the last, easy-to-skip step — turning that raw number into a real-world measurement you can actually trust.</p>
+
+  <h2>From raw count to voltage</h2>
+  <p>An ADC doesn't report volts directly — it reports a count, scaled across its resolution. A 10-bit ADC (common on many entry-level microcontrollers) reports a value from 0 to 1023, where 0 corresponds to 0 V and 1023 corresponds to the reference voltage (often the supply voltage, e.g. 5 V).</p>
+
+  <div class="expr-block">voltage = (raw ADC count / 1023) × reference voltage</div>
+
+  <div class="box example">
+    <span class="box-label">Example</span>
+    A 10-bit ADC with a 5 V reference reads a raw count of 614 from a thermistor divider. Voltage = (614 / 1023) × 5 ≈ 3.00 V. That's the physical voltage at the divider's midpoint — still not a temperature, just the first conversion step.
+  </div>
+
+  <h2>From voltage to a real-world unit</h2>
+  <p><strong>Calibration</strong> is the process of relating a sensor's electrical output to the physical quantity it's meant to measure. The simplest useful approach is a <strong>two-point calibration</strong>: take readings at two known reference conditions, then use those two points to build a straight-line mapping between everything in between.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    A <strong>two-point calibration</strong> records the sensor's output at two known, trusted reference values (for a thermistor: ice water at 0°C and boiling water at 100°C, for example) and uses linear interpolation between those two points to convert any other reading into an estimated physical value.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Example</span>
+    A thermistor divider reads 3.30 V in an ice bath (0°C) and 2.10 V in boiling water (100°C). That's a slope of (100 − 0) / (2.10 − 3.30) ≈ −83.3°C per volt. A field reading of 2.85 V then estimates to 0 + (2.85 − 3.30) × (−83.3) ≈ 37.5°C.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why not just trust the datasheet formula?</span>
+    Manufacturing tolerances mean no two thermistors, photoresistors, or voltage dividers behave identically — a generic formula gets you in the right neighborhood, but a quick calibration against known reference points corrects for the specific resistor values and specific sensor unit actually on your breadboard.
+  </div>
+
+  <h2>One reading is rarely the truth</h2>
+  <p>A single raw ADC sample is also noisy — read the same steady sensor twice in a row and you'll often get two slightly different numbers, from electrical interference, ADC quantization, or the sensor's own jitter. Averaging several samples before trusting a reading is a cheap first defense against this noise, and it's the idea Unit 4 develops into proper filtering techniques. For now, the takeaway is simple: a sensor's raw output is a starting point, not a finished measurement — it needs converting, calibrating, and often averaging before it's something you can build a decision on.</p>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. A 10-bit ADC with a 5 V reference reads a raw count of 512. What voltage does that correspond to?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">About 5.00 V</button>
+      <button class="quiz-choice" data-correct="true">About 2.50 V</button>
+      <button class="quiz-choice" data-correct="false">About 1.02 V</button>
+      <button class="quiz-choice" data-correct="false">About 0.50 V</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>(512 / 1023) × 5 ≈ 2.50 V — roughly the midpoint of the 0–5 V range, matching the midpoint of the 0–1023 count range.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. What is the purpose of a two-point calibration?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">To permanently fix any noise in a sensor’s readings.</button>
+      <button class="quiz-choice" data-correct="true">To build a straight-line mapping between a sensor’s electrical output and a real-world unit, using two known reference readings.</button>
+      <button class="quiz-choice" data-correct="false">To convert a digital sensor into an analog one.</button>
+      <button class="quiz-choice" data-correct="false">To increase an ADC’s resolution.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Two-point calibration uses two trusted reference readings to interpolate a conversion from raw output to a physical unit like temperature — it doesn’t address noise, only the mapping itself.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why might a generic manufacturer formula for a thermistor still give a slightly wrong temperature on a specific circuit?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because thermistors have no real relationship between resistance and temperature.</button>
+      <button class="quiz-choice" data-correct="true">Because manufacturing tolerances mean individual components and circuits vary slightly from the generic formula’s assumptions.</button>
+      <button class="quiz-choice" data-correct="false">Because generic formulas only work in a laboratory.</button>
+      <button class="quiz-choice" data-correct="false">Because ADCs cannot read thermistor circuits at all.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Real components vary from unit to unit within their manufacturing tolerance, so a calibration against known reference points corrects for the specific parts actually in use.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="calibration">
+    <p class="quiz-prompt">4. Fill in the blank: converting a raw ADC count into a real-world physical unit using known reference readings is called ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Calibration is the general process of relating a sensor’s raw output to the physical quantity it’s meant to represent.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="noise">
+    <p class="quiz-prompt">5. Fill in the blank: reading a steady, unchanging sensor multiple times and combining the results to reduce random variation is a simple first defense against sensor ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Noise causes repeated readings of the same true value to vary slightly — averaging multiple samples is the simplest way to reduce its effect.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: <a href="https://docs.arduino.cc/learn/electronics/analog-input">Arduino’s "Analog Input" documentation</a> covers the raw-count-to-voltage conversion shown above directly from the official reference, with worked examples on real hardware.</p>
+
+  <p class="ask-teacher">Want to walk through calibrating a specific sensor you have on hand? Ask your teacher — that’s what I’m here for. Unit 1 is complete — next, Unit 2 turns from sensing the world to acting on it, starting with DC motors.</p>
+
+  <footer class="lesson-footer">STEM+ · Mechatronics · Lesson 6 of the course sequence</footer>
+</div>

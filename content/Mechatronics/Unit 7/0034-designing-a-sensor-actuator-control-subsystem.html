@@ -1,0 +1,97 @@
+<meta charset="UTF-8">
+<link rel="icon" href="../../favicon.ico?v=1" type="image/x-icon">
+<title>Lesson 34: Designing a Sensor + Actuator + Control Subsystem — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · Mechatronics · Unit 7 · Lesson 34</span>
+  <h1>Designing a Sensor + Actuator + Control Subsystem</h1>
+  <p class="subtitle">Six units of individual pieces. This lesson is the recipe for combining them into one working system.</p>
+  <p class="nav-links"><a href="../Unit%206/0033-basic-pid-tuning-intuition.html" class="nav-prev">← Unit 6, Lesson 33</a> <a href="0035-case-study-a-temperature-controlled-fan.html" class="nav-next">Lesson 35 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Units 1 through 6 each covered one piece: a sensor, an actuator, a microcontroller, a signal-processing technique, a control strategy. Real mechatronic systems need all of them working together. This lesson lays out the general recipe every remaining lesson in this unit follows.</p>
+
+  <div class="box example">
+    <span class="box-label">The recipe, in order</span>
+    1. Identify the physical quantity to control, and pick a sensor that measures it (Unit 1). 2. Identify the actuator that can actually affect that quantity (Unit 2). 3. Decide on a control strategy matched to the actuator's nature — bang-bang for a strictly on/off actuator, PID for a continuously variable one (Units 5–6). 4. Add filtering if the sensor is noisy enough to need it, especially before any derivative term (Unit 4). 5. Write the setup/loop program tying read → decide → write together (Unit 3), running that decision fresh every single pass through loop().
+  </div>
+
+  <h2>Matching control strategy to actuator, specifically</h2>
+  <div class="box why">
+    <span class="box-label">Why this matching step can’t be skipped</span>
+    A relay-driven heater (a strictly on/off actuator) physically cannot produce a smooth, in-between output — commanding it with a PID controller's continuously variable number doesn't make it act proportionally, since the relay only has fully on and fully off to work with. Bang-bang control is often the <em>correct</em> choice for such an actuator, not a lesser one. Conversely, a PWM-driven DC fan (a continuously variable actuator) can genuinely use PID's smooth output — restricting it to bang-bang wastes real capability, exactly the point Unit 5, Lesson 27 raised.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">A middle ground worth knowing</span>
+    Some on/off actuators can still get proportional-like behavior by combining bang-bang switching with PWM — a solid-state relay (SSR) with phase control, for instance, can approximate a variable output on an otherwise strictly on/off load. This is beyond this course's scope in detail, but it's worth knowing the on/off-vs-proportional line isn't always as hard as "relay means bang-bang, full stop."
+  </div>
+
+  <p>The next two lessons walk through this recipe on two concrete, worked systems — a temperature-controlled fan, and a line-following robot's steering logic — showing exactly how the five steps above turn into a real, working program.</p>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What is the first step in designing a sensor + actuator + control subsystem, according to this lesson’s recipe?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Choose the PID gains before anything else.</button>
+      <button class="quiz-choice" data-correct="true">Identify the physical quantity to control, and pick a sensor that measures it.</button>
+      <button class="quiz-choice" data-correct="false">Write the loop() function first, before deciding on any hardware.</button>
+      <button class="quiz-choice" data-correct="false">Pick the cheapest available actuator.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Everything else in the recipe — actuator choice, control strategy, filtering — depends on first knowing exactly what quantity is being measured and controlled.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why is bang-bang control often the correct (not just simplest) choice for a relay-driven heater?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Relays cannot be controlled by any microcontroller.</button>
+      <button class="quiz-choice" data-correct="true">A relay is a strictly on/off actuator, so a smooth PID output can’t actually make it behave proportionally — bang-bang matches its real physical capability.</button>
+      <button class="quiz-choice" data-correct="false">PID control is illegal to use with heaters.</button>
+      <button class="quiz-choice" data-correct="false">Bang-bang control is always superior to PID regardless of the actuator.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Matching control strategy to what the actuator can physically do is the point — a strictly on/off actuator gains nothing from a continuously variable command it can’t actually produce.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why would using bang-bang control on a PWM-driven DC fan be a missed opportunity?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">PWM-driven fans cannot be controlled with bang-bang logic at all.</button>
+      <button class="quiz-choice" data-correct="true">The fan is capable of smooth, continuously variable speed via PWM, and restricting it to strictly on/off wastes that real capability.</button>
+      <button class="quiz-choice" data-correct="false">Bang-bang control would damage the fan motor.</button>
+      <button class="quiz-choice" data-correct="false">PWM-driven fans require a completely different sensor.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>When an actuator can genuinely produce smooth, variable output, throwing that capability away with bang-bang control leaves real performance on the table — echoing Unit 5, Lesson 27.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="filtering">
+    <p class="quiz-prompt">4. Fill in the blank: before tuning a derivative term for a noisy sensor, this unit’s recipe recommends applying ___ (from Unit 4) to the reading first.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Filtering a noisy signal before it reaches a derivative term is what Unit 6, Lesson 31 identified as often necessary for D to be usable at all.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="loop">
+    <p class="quiz-prompt">5. Fill in the blank: the final step of the recipe — tying sensor reads, the control decision, and actuator writes together — runs inside the ___ phase from Unit 3.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Every integrated subsystem still runs inside the same repeating loop() phase introduced back in Unit 3 — nothing about the program’s overall shape changes.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: <a href="https://learn.sparkfun.com/tutorials/motors-and-selecting-the-right-one/all">SparkFun’s "Motors and Selecting the Right One" guide</a> discusses matching an actuator’s real capabilities to the control approach used to drive it, the same theme covered in this lesson.</p>
+
+  <p class="ask-teacher">Want to sketch out the recipe for a subsystem idea of your own before the next two lessons? Ask your teacher — that’s what I’m here for. Next up: the first full worked example — a temperature-controlled fan.</p>
+
+  <footer class="lesson-footer">STEM+ · Mechatronics · Lesson 34 of the course sequence</footer>
+</div>

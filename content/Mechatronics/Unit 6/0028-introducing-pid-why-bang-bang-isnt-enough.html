@@ -1,0 +1,109 @@
+<meta charset="UTF-8">
+<link rel="icon" href="../../favicon.ico?v=1" type="image/x-icon">
+<title>Lesson 28: Introducing PID: Why Bang-Bang Isn’t Enough — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · Mechatronics · Unit 6 · Lesson 28</span>
+  <h1>Introducing PID: Why Bang-Bang Isn’t Enough</h1>
+  <p class="subtitle">Three terms, three different jobs, combined into one continuously variable output — the most widely used control algorithm in the world.</p>
+  <p class="nav-links"><a href="../Unit%205/0027-limitations-of-bang-bang-control.html" class="nav-prev">← Unit 5, Lesson 27</a> <a href="0029-proportional-control.html" class="nav-next">Lesson 29 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Unit 5 ended with a clear list of complaints about bang-bang control: it can't hold an exact value, it overshoots on any system with real lag, and it wastes actuators capable of smooth, proportional output. <strong>PID control</strong> is the standard answer to all three complaints at once.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    <strong>PID control</strong> computes a continuously variable actuator output from the error signal (Unit 5, Lesson 24), combining three separate terms: <strong>P</strong>roportional (reacts to the current error), <strong>I</strong>ntegral (reacts to accumulated past error), and <strong>D</strong>erivative (reacts to how fast the error is changing).
+  </div>
+
+  <div class="expr-block">output = K<sub>p</sub>e + K<sub>i</sub>∫e dt + K<sub>d</sub>(de/dt)</div>
+
+  <p>Here, <em>e</em> is the error (setpoint − measured value), and K<sub>p</sub>, K<sub>i</sub>, and K<sub>d</sub> are tunable constants called <strong>gains</strong> that control how strongly each term contributes to the final output. Setting any gain to zero removes that term from the controller entirely — a "PD controller" is just PID with K<sub>i</sub> = 0, for instance.</p>
+
+  <h2>Each term’s job, at a glance</h2>
+  <div class="box example">
+    <span class="box-label">P — proportional</span>
+    Reacts to the error right now. Bigger error, bigger corrective push. Covered in Lesson 29.
+  </div>
+  <div class="box example">
+    <span class="box-label">I — integral</span>
+    Reacts to how long and how much error has accumulated over time. Fixes the small, lingering steady-state error that pure P control leaves behind. Covered in Lesson 30.
+  </div>
+  <div class="box example">
+    <span class="box-label">D — derivative</span>
+    Reacts to how fast the error is changing right now. Anticipates and dampens overshoot — exactly the "see it coming" capability Unit 5 identified as missing from bang-bang control. Covered in Lesson 31.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why PID is worth learning specifically</span>
+    PID isn't just one option among many equally common alternatives — it's estimated to be in use in the vast majority of industrial control loops worldwide, from factory temperature control to the drone and automotive systems Unit 8 covers. Learning it well is learning the actual default tool of the field, not a simplified teaching example.
+  </div>
+
+  <p>The next three lessons take each term in turn, building intuition for what specifically it fixes and what happens when its gain is set too high or too low. Lesson 32 then puts all three back together, and Lesson 33 covers the practical craft of choosing the three gains for a real system.</p>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What do the letters P, I, and D stand for in PID control?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Power, Input, Delay</button>
+      <button class="quiz-choice" data-correct="true">Proportional, Integral, Derivative</button>
+      <button class="quiz-choice" data-correct="false">Pulse, Interval, Duty</button>
+      <button class="quiz-choice" data-correct="false">Position, Inertia, Damping</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>PID stands for Proportional, Integral, and Derivative — the three terms combined into the controller’s output.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. In the PID formula, what role do Kp, Ki, and Kd play?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">They are sensor calibration constants, unrelated to the controller.</button>
+      <button class="quiz-choice" data-correct="true">They are tunable gains that control how strongly each of the three terms contributes to the final output.</button>
+      <button class="quiz-choice" data-correct="false">They represent the setpoint, the measured value, and the error, respectively.</button>
+      <button class="quiz-choice" data-correct="false">They are fixed physical constants that can never be changed.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Kp, Ki, and Kd are the tunable weights on the proportional, integral, and derivative terms — adjusting them is exactly what Lesson 33’s tuning process does.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. What happens to a PID controller if Ki is set to exactly zero?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">The controller stops working entirely.</button>
+      <button class="quiz-choice" data-correct="true">The integral term contributes nothing, effectively making it a PD controller.</button>
+      <button class="quiz-choice" data-correct="false">The proportional term is also disabled.</button>
+      <button class="quiz-choice" data-correct="false">The setpoint is automatically reset to zero.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Setting any gain to zero simply removes that term’s contribution from the output — PID with Ki = 0 behaves as a PD controller.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="integral">
+    <p class="quiz-prompt">4. Fill in the blank: the PID term that reacts to how much error has accumulated over time, fixing lingering steady-state error, is the ___ term.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The integral term is specifically what Lesson 30 shows fixes the small, persistent offset a pure proportional controller leaves behind.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="derivative">
+    <p class="quiz-prompt">5. Fill in the blank: the PID term that reacts to how fast the error is currently changing, helping dampen overshoot, is the ___ term.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The derivative term is what gives PID the "anticipation" capability that bang-bang control (Unit 5) structurally lacks.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: <a href="https://ctms.engin.umich.edu/CTMS/index.php?example=Introduction&section=ControlPID">University of Michigan’s Control Tutorials for MATLAB and Simulink — "Introduction: PID Controller Design"</a> introduces the same three-term PID formula and gain notation used throughout this unit, from a standard controls-engineering reference.</p>
+
+  <p class="ask-teacher">Want a preview of what a real PID gain-tuning session looks like? Ask your teacher — that’s what I’m here for. Next up: the proportional term, in full detail.</p>
+
+  <footer class="lesson-footer">STEM+ · Mechatronics · Lesson 28 of the course sequence</footer>
+</div>

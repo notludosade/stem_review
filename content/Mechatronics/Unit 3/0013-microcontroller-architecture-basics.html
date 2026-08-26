@@ -1,0 +1,99 @@
+<meta charset="UTF-8">
+<link rel="icon" href="../../favicon.ico?v=1" type="image/x-icon">
+<title>Lesson 13: Microcontroller Architecture Basics — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · Mechatronics · Unit 3 · Lesson 13</span>
+  <h1>Microcontroller Architecture Basics</h1>
+  <p class="subtitle">CPU, memory, and peripherals, all on one chip — and the two-phase program structure almost every embedded program follows.</p>
+  <p class="nav-links"><a href="0012-what-is-a-microcontroller.html" class="nav-prev">← Lesson 12</a> <a href="0014-gpio-pins-and-digital-input-output.html" class="nav-next">Lesson 14 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>A microcontroller packs several distinct pieces onto a single chip. Knowing what each piece does makes the rest of this course's code and circuits much easier to reason about.</p>
+
+  <div class="box example">
+    <span class="box-label">The core pieces</span>
+    The <strong>CPU (central processing unit)</strong> executes program instructions, one at a time, at a rate set by a <strong>clock</strong> (a crystal oscillator ticking at a fixed frequency — faster clocks execute instructions faster but draw more power). <strong>Flash memory</strong> stores the actual program code, and keeps it even with power off (non-volatile). <strong>RAM</strong> holds working data — variables, sensor readings in progress — but loses everything the instant power is removed (volatile). Some chips also include a small block of <strong>EEPROM</strong>, non-volatile memory meant for saving small amounts of data (like a calibration constant) across power cycles.
+  </div>
+
+  <p>Beyond the CPU and memory, a microcontroller includes <strong>peripherals</strong> — dedicated hardware blocks for specific jobs, so the CPU doesn't have to do everything in software. The ones this course leans on most: GPIO (general-purpose input/output pins, Lesson 14), an ADC (Unit 1 and Unit 4), and timers capable of generating PWM signals (Unit 4). Many chips also include communication peripherals like UART, I2C, or SPI for talking to other chips — useful in real projects, though outside this course's scope.</p>
+
+  <div class="box why">
+    <span class="box-label">Why dedicated peripherals matter</span>
+    Generating a PWM signal purely in software — flipping a pin on and off at exactly the right instants using nothing but CPU instructions — would tie up the processor almost completely and still struggle to keep precise timing. A dedicated timer peripheral generates that same signal in hardware, freeing the CPU to do other work (like reading a sensor) at the same time.
+  </div>
+
+  <h2>The universal program shape: setup, then loop forever</h2>
+  <p>Because a microcontroller runs one dedicated program with no operating system to return control to, embedded programs follow a distinctive two-phase shape: a <strong>setup phase</strong> that runs exactly once (configuring pins, initializing peripherals), followed by a <strong>loop phase</strong> that repeats forever for as long as the chip has power.</p>
+
+  <div class="box example">
+    <span class="box-label">Example</span>
+    In pseudocode: <code class="inline-code">setup(): configure pin modes</code>, then <code class="inline-code">loop(): read sensor, decide, write actuator, repeat</code>. This exact shape reappears, filled in with real logic, throughout the rest of this course — it's where a control loop (Unit 5) actually lives in code.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What is the key difference between a microcontroller’s flash memory and its RAM?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Flash is volatile and RAM is non-volatile.</button>
+      <button class="quiz-choice" data-correct="true">Flash stores the program non-volatily (kept without power), while RAM holds working data volatily (lost without power).</button>
+      <button class="quiz-choice" data-correct="false">They are two names for the exact same physical memory.</button>
+      <button class="quiz-choice" data-correct="false">RAM stores the program and flash holds working data.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Flash keeps the program code even with power removed; RAM holds temporary working data and loses it the instant power is cut.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why does a microcontroller include a dedicated timer peripheral for generating PWM signals, instead of just doing it in software?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Software cannot generate any repeating signal.</button>
+      <button class="quiz-choice" data-correct="true">A dedicated hardware peripheral generates precise timing without tying up the CPU, which can then do other work simultaneously.</button>
+      <button class="quiz-choice" data-correct="false">PWM signals require an internet connection to generate.</button>
+      <button class="quiz-choice" data-correct="false">Timers are only used for keeping the current date and time.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Generating precise, repeating timing purely in software would consume most of the CPU’s attention — a dedicated peripheral handles it in hardware instead.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. What runs during a microcontroller program’s "loop" phase?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Nothing — loop only runs once, like setup.</button>
+      <button class="quiz-choice" data-correct="true">Code that repeats continuously for as long as the chip has power, typically reading inputs and driving outputs.</button>
+      <button class="quiz-choice" data-correct="false">Only the initial pin configuration.</button>
+      <button class="quiz-choice" data-correct="false">Code that runs exactly ten times before stopping.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Loop is the repeating phase — it runs over and over for as long as power is applied, in contrast to setup, which runs exactly once.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="flash">
+    <p class="quiz-prompt">4. Fill in the blank: the memory that stores a microcontroller’s program code and retains it even with power removed is called ___ memory.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Flash memory is non-volatile — it holds the program between power cycles, unlike RAM.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="peripherals">
+    <p class="quiz-prompt">5. Fill in the blank: dedicated hardware blocks on a microcontroller for specific jobs like timing or analog conversion, so the CPU doesn’t have to do everything in software, are called ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Peripherals — GPIO, ADC, timers, and more — offload specific jobs from the CPU into dedicated hardware.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: <a href="https://docs.arduino.cc/learn/microcontrollers/memory-guide">Arduino’s "Memory Guide for Arduino Boards"</a> breaks down flash, RAM, and EEPROM on real Arduino chips with the exact capacities available on common boards.</p>
+
+  <p class="ask-teacher">Want to look up the exact clock speed and RAM of a specific chip? Ask your teacher — that’s what I’m here for. Next up: the pins that actually connect a microcontroller to the outside world.</p>
+
+  <footer class="lesson-footer">STEM+ · Mechatronics · Lesson 13 of the course sequence</footer>
+</div>

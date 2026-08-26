@@ -1,0 +1,108 @@
+<meta charset="UTF-8">
+<link rel="icon" href="../../favicon.ico?v=1" type="image/x-icon">
+<title>Lesson 26: Hysteresis and Deadbands in Bang-Bang Control — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · Mechatronics · Unit 5 · Lesson 26</span>
+  <h1>Hysteresis and Deadbands in Bang-Bang Control</h1>
+  <p class="subtitle">One threshold causes chattering. Two thresholds, spaced apart, fix it — at a real cost.</p>
+  <p class="nav-links"><a href="0025-bang-bang-on-off-control.html" class="nav-prev">← Lesson 25</a> <a href="0027-limitations-of-bang-bang-control.html" class="nav-next">Lesson 27 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Lesson 25 ended on chattering: a single on/off threshold, combined with ordinary sensor noise, causes rapid, wasteful switching right at the setpoint. The fix is almost embarrassingly simple once you see it — stop using just one threshold.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    <strong>Hysteresis</strong> (in this context, also called a <strong>deadband</strong>) replaces bang-bang control's single threshold with two: a lower threshold that turns the actuator ON, and a separate, higher threshold that turns it OFF. Once triggered, the actuator stays in that state until the reading crosses the <em>opposite</em> threshold — not just the original one.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Example</span>
+    A thermostat set to 70°F with a 2°F hysteresis band turns the heater ON when temperature drops to 69°F, and doesn't turn it OFF again until temperature climbs all the way to 71°F. A temperature bouncing between 69.5°F and 70.5°F due to noise no longer crosses either threshold at all — no chattering.
+  </div>
+
+  <svg class="figure" viewBox="0 0 380 190" width="380" height="190">
+    <line class="fig-axis" x1="20" y1="170" x2="360" y2="170"></line>
+    <line class="fig-guide" x1="20" y1="60" x2="360" y2="60"></line>
+    <text class="fig-label" x="280" y="55">OFF threshold (71°F)</text>
+    <line class="fig-guide" x1="20" y1="120" x2="360" y2="120"></line>
+    <text class="fig-label" x="280" y="135">ON threshold (69°F)</text>
+    <path class="fig-curve" d="M 30 90 L 70 120 L 110 60 L 150 120 L 190 60 L 230 120 L 270 60 L 310 120 L 350 90" fill="none"></path>
+    <text class="fig-label" x="20" y="20">temperature sawtooths within the deadband — heater cycles far less often</text>
+  </svg>
+  <figcaption>Hysteresis in action: the reading oscillates within the band, but only actually crosses a threshold — and switches the actuator — at the far edges.</figcaption>
+
+  <h2>The trade-off: fewer switches, looser control</h2>
+  <div class="box why">
+    <span class="box-label">Why a wider band isn’t simply better</span>
+    A wider deadband means the actuator switches far less often, extending relay and switch lifespan and reducing wear — but it also lets the measured value drift further from the setpoint before any correction kicks in, giving looser, less precise overall control. A narrower band gives tighter control at the cost of more frequent switching. Choosing the band width means picking a point on this trade-off, based on how much switching wear the actuator can tolerate versus how precisely the setpoint actually needs holding.
+  </div>
+
+  <p>Even with hysteresis, bang-bang control still never settles at one exact steady value — it always oscillates somewhere within the deadband. That's an inherent limit of the strategy itself, not a bug to be tuned away, and it's exactly what motivates the next lesson.</p>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What does adding hysteresis to a bang-bang controller change?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">It replaces the single on/off threshold with two separated thresholds — one to turn on, a different one to turn off.</button>
+      <button class="quiz-choice" data-correct="false">It makes the output proportional to the error instead of strictly on/off.</button>
+      <button class="quiz-choice" data-correct="false">It removes the need for any sensor at all.</button>
+      <button class="quiz-choice" data-correct="false">It eliminates all oscillation around the setpoint entirely.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Hysteresis uses two separated thresholds instead of one, so ordinary noise near the setpoint no longer causes rapid switching.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. A thermostat has an ON threshold of 68°F and an OFF threshold of 72°F. If the heater just turned on at 68°F, at what temperature will it turn off?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">As soon as it rises above 68°F again.</button>
+      <button class="quiz-choice" data-correct="true">Not until it reaches 72°F.</button>
+      <button class="quiz-choice" data-correct="false">Exactly at 70°F, the midpoint.</button>
+      <button class="quiz-choice" data-correct="false">It will never turn off once it starts.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Hysteresis means the heater, once triggered on, stays on until the opposite (higher) threshold is reached — not just any rise above the ON threshold.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. What is the trade-off of choosing a wider hysteresis deadband?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Wider bands always improve precision with no downside.</button>
+      <button class="quiz-choice" data-correct="true">A wider band reduces switching frequency (less wear) but allows the measured value to drift further from setpoint before correcting (looser control).</button>
+      <button class="quiz-choice" data-correct="false">A wider band eliminates the need for a sensor.</button>
+      <button class="quiz-choice" data-correct="false">A wider band makes the controller proportional instead of bang-bang.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Fewer switches versus tighter control is the fundamental trade-off — wider deadbands favor the former at the expense of the latter.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="hysteresis">
+    <p class="quiz-prompt">4. Fill in the blank: using two separated thresholds instead of one, so a controlled variable must cross the opposite threshold before switching back, is called ___ (or a deadband).</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Hysteresis is the standard fix for bang-bang chattering, trading some control precision for far less frequent switching.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="oscillates">
+    <p class="quiz-prompt">5. Fill in the blank: even with hysteresis added, bang-bang control still never settles at one exact steady value — it always ___ somewhere within the deadband.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Oscillation within the band is an inherent limit of bang-bang control itself, which is exactly what motivates looking beyond it in the next lesson.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: <a href="https://learn.sparkfun.com/tutorials/analog-vs-digital/all">SparkFun’s "Analog vs. Digital" tutorial (thermostat and hysteresis discussion)</a> discusses the same thermostat hysteresis example used here as a common real-world application of a deadband.</p>
+
+  <p class="ask-teacher">Want to work out a deadband width for a specific noise level? Ask your teacher — that’s what I’m here for. Next up: the limits of bang-bang control even with hysteresis, and where a smoother strategy becomes necessary.</p>
+
+  <footer class="lesson-footer">STEM+ · Mechatronics · Lesson 26 of the course sequence</footer>
+</div>

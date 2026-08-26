@@ -1,0 +1,105 @@
+<meta charset="UTF-8">
+<link rel="icon" href="../../favicon.ico?v=1" type="image/x-icon">
+<title>Lesson 10: Stepper Motors and Precise Rotation — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · Mechatronics · Unit 2 · Lesson 10</span>
+  <h1>Stepper Motors and Precise Rotation</h1>
+  <p class="subtitle">A motor that moves in fixed, countable increments — precise position tracking without a position sensor.</p>
+  <p class="nav-links"><a href="0009-servo-motors-and-position-control.html" class="nav-prev">← Lesson 9</a> <a href="0011-choosing-the-right-actuator.html" class="nav-next">Lesson 11 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>A <strong>stepper motor</strong> takes a different approach to precision than a servo does. Instead of measuring its own position, it moves in fixed, known increments called <strong>steps</strong>, and the controller simply counts how many steps it has commanded to know where the shaft should be.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    A <strong>stepper motor</strong> rotates in discrete, fixed-angle increments by energizing its internal coils in a specific sequence, one step at a time. A common step size is 1.8° per step, meaning 200 steps make one full revolution.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why no feedback sensor is needed — with a catch</span>
+    Because each step moves the shaft a known, fixed angle, a controller can track position purely by counting commanded steps — no potentiometer or encoder required, unlike a servo. The catch: this only works if every commanded step actually happens. If the motor is pushed past its available torque (a <strong>stall</strong>), it can miss steps silently, and the controller's step count then no longer matches the real shaft position, with no way to detect the mismatch on its own.
+  </div>
+
+  <h2>Unipolar vs. bipolar, and driving one</h2>
+  <p>Stepper motors come in two winding styles — <strong>unipolar</strong> (simpler to drive, slightly less torque-efficient) and <strong>bipolar</strong> (needs an H-bridge-style driver per winding, more torque-efficient) — driven by dedicated stepper driver ICs (like the ULN2003 for small unipolar steppers, or the A4988/DRV8825 for bipolar ones) that handle the coil-energizing sequence so the microcontroller just sends step and direction pulses.</p>
+
+  <div class="box example">
+    <span class="box-label">Microstepping, briefly</span>
+    Many modern stepper drivers support <strong>microstepping</strong> — energizing coils at intermediate current levels to divide each full step into smaller sub-steps, trading a bit of torque for smoother motion and finer resolution than the motor's native step angle alone would allow.
+  </div>
+
+  <h2>Stepper vs. servo vs. plain DC motor</h2>
+  <div class="box example">
+    <span class="box-label">Comparison</span>
+    A stepper gives precise, repeatable positioning over many steps without needing a feedback sensor, but has less holding torque at high speed and no built-in way to detect a missed step. A servo gives a similar precise-position result over a narrower angle range (often 0°–180°), with active feedback that resists being pushed off its commanded angle. A plain DC motor gives neither — it's the right choice only when continuous spinning, not a specific position, is the actual goal.
+  </div>
+
+  <p>This is why a 3D printer's axes and a CNC machine's cutting head use stepper motors — thousands of precise, countable moves building up an exact final position — while a robot arm's joint more often uses a servo, and a rover's drive wheel almost always uses a plain DC motor.</p>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. A stepper motor with a 1.8° step angle is commanded to take 50 steps. How far does the shaft rotate?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">9°</button>
+      <button class="quiz-choice" data-correct="true">90°</button>
+      <button class="quiz-choice" data-correct="false">50°</button>
+      <button class="quiz-choice" data-correct="false">360°</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>50 steps × 1.8° per step = 90° of rotation.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why is a stepper motor able to track its position without a feedback sensor, unlike a servo?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Stepper motors don’t actually move — they only vibrate in place.</button>
+      <button class="quiz-choice" data-correct="true">Each commanded step moves the shaft a known, fixed angle, so counting commanded steps tracks position — as long as no step is missed.</button>
+      <button class="quiz-choice" data-correct="false">Stepper motors have an even more precise sensor built in than servos do.</button>
+      <button class="quiz-choice" data-correct="false">Stepper motors never experience mechanical load.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Position tracking relies entirely on the assumption that every commanded step actually occurs — a stall breaks that assumption silently.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. What happens if a stepper motor stalls (is pushed past its available torque) mid-operation?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">It automatically corrects its step count.</button>
+      <button class="quiz-choice" data-correct="true">It can miss one or more steps, and the controller’s tracked position becomes wrong with no way to detect it directly.</button>
+      <button class="quiz-choice" data-correct="false">It reverses direction automatically.</button>
+      <button class="quiz-choice" data-correct="false">It switches into servo mode.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A stall can cause missed steps invisibly — the controller keeps counting as if every step succeeded, so its internal position estimate silently drifts from reality.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="microstepping">
+    <p class="quiz-prompt">4. Fill in the blank: dividing each of a stepper motor’s full steps into smaller sub-steps by energizing coils at intermediate current levels is called ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Microstepping trades some torque for smoother motion and finer resolution than the motor’s native step angle provides alone.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="position|positioning">
+    <p class="quiz-prompt">5. Fill in the blank: a stepper motor is generally the best actuator choice when a system needs precise, repeatable ___ over many discrete moves, without needing a feedback sensor.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Precise, countable positioning — the exact strength of a stepper motor — is why 3D printers and CNC machines rely on them for axis control.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: <a href="https://learn.adafruit.com/all-about-stepper-motors">Adafruit’s "All About Stepper Motors" guide</a> covers unipolar vs. bipolar winding, driver ICs, and microstepping in more depth than this lesson has room for.</p>
+
+  <p class="ask-teacher">Want to work through a torque-vs-speed curve for a real stepper datasheet? Ask your teacher — that’s what I’m here for. Next up: pulling DC motors, servos, and steppers together into one decision framework.</p>
+
+  <footer class="lesson-footer">STEM+ · Mechatronics · Lesson 10 of the course sequence</footer>
+</div>

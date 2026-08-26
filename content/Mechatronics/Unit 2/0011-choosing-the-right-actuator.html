@@ -1,0 +1,112 @@
+<meta charset="UTF-8">
+<link rel="icon" href="../../favicon.ico?v=1" type="image/x-icon">
+<title>Lesson 11: Choosing the Right Actuator — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · Mechatronics · Unit 2 · Lesson 11</span>
+  <h1>Choosing the Right Actuator</h1>
+  <p class="subtitle">Three actuators, three very different jobs — closing out the unit with the decision framework that ties them together.</p>
+  <p class="nav-links"><a href="0010-stepper-motors-and-precise-rotation.html" class="nav-prev">← Lesson 10</a> <a href="../Unit%203/0012-what-is-a-microcontroller.html" class="nav-next">Unit 3, Lesson 12 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Units so far covered three actuators one at a time. Real designs require picking the right one for a given job — and the wrong choice usually isn't subtle. A stepper motor spinning a drone propeller, or a plain DC motor trying to hold a robot arm's joint at an exact angle, would both fail in obvious ways.</p>
+
+  <h2>The comparison, side by side</h2>
+  <div class="box example">
+    <span class="box-label">DC motor</span>
+    Best for: continuous rotation where exact position doesn't matter — wheels, fans, propellers. Cheapest and simplest to drive. No native position awareness at all; needs an external sensor (like an encoder) bolted on if position ever does matter.
+  </div>
+  <div class="box example">
+    <span class="box-label">Servo motor</span>
+    Best for: holding a specific angle, usually within a limited range (often 0°–180°), with active resistance to being pushed off that angle. Built-in feedback loop, simple one-wire control signal, moderate cost. Not built for continuous full-speed rotation or heavy sustained load.
+  </div>
+  <div class="box example">
+    <span class="box-label">Stepper motor</span>
+    Best for: precise, repeatable positioning over many steps, especially multi-turn motion a servo's limited range can't cover. No feedback sensor needed under normal operation, but silently vulnerable to missed steps under stall. More complex driver hardware and software than a DC motor.
+  </div>
+
+  <h2>Working through real scenarios</h2>
+  <div class="box example">
+    <span class="box-label">Scenario 1: a wheeled rover’s drive wheels</span>
+    The wheels just need to spin, at variable speed, for extended periods, with no requirement to stop at an exact angle. A DC motor (with a driver from Lesson 8) is the natural, cheapest fit — a servo's limited rotation range rules it out entirely, and a stepper's precision is unnecessary overhead here.
+  </div>
+  <div class="box example">
+    <span class="box-label">Scenario 2: a robot arm’s elbow joint</span>
+    The joint needs to move to and firmly hold a specific angle, resisting gravity and the load in the gripper, within a limited range of motion. A servo is the natural fit — its built-in feedback loop actively holds position without any extra sensor or control logic on your end.
+  </div>
+  <div class="box example">
+    <span class="box-label">Scenario 3: a 3D printer’s X-axis carriage</span>
+    The carriage must move to precise, repeatable positions across many small moves, often far more than 180° of equivalent rotation once geared to a belt. A stepper motor is the standard choice — precise, repeatable, multi-turn motion, with no feedback sensor required as long as the motion stays within the motor's torque limits.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">The underlying question to always ask</span>
+    Does this job need continuous rotation, a held angle within a limited range, or precise multi-step positioning? That single question, asked before any other design decision, eliminates two of the three actuator types in almost every real scenario.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. A design needs a wheel to spin continuously at variable speed, with no requirement to stop at any particular angle. Which actuator fits best?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Stepper motor</button>
+      <button class="quiz-choice" data-correct="false">Servo motor</button>
+      <button class="quiz-choice" data-correct="true">DC motor</button>
+      <button class="quiz-choice" data-correct="false">None of these can spin continuously.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Continuous rotation with no position requirement is exactly a plain DC motor’s strength, and the cheapest, simplest option for the job.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. A design needs a robot gripper joint to move to and firmly hold a specific angle within a 0°–180° range, resisting being pushed. Which actuator fits best?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">DC motor</button>
+      <button class="quiz-choice" data-correct="true">Servo motor</button>
+      <button class="quiz-choice" data-correct="false">Stepper motor</button>
+      <button class="quiz-choice" data-correct="false">Any of the three work equally well.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A servo’s built-in feedback loop is designed exactly for holding a commanded angle against a resisting load, within its limited range of motion.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why would a stepper motor be a poor choice for spinning a drone’s propeller?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Stepper motors cannot be electrically powered.</button>
+      <button class="quiz-choice" data-correct="true">A propeller needs continuous, very fast rotation with no need for step-counted position — exactly what a stepper isn’t optimized for, unlike a fast-spinning DC or brushless motor.</button>
+      <button class="quiz-choice" data-correct="false">Stepper motors can only rotate a maximum of 180°.</button>
+      <button class="quiz-choice" data-correct="false">Propellers require a built-in potentiometer to function.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A propeller has no meaningful "position" to hold — it just needs to spin fast and continuously, which plays to a DC (or brushless) motor’s strength, not a stepper’s step-counted precision.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="positioning|position">
+    <p class="quiz-prompt">4. Fill in the blank: before choosing an actuator, the first question to ask is whether the job needs continuous rotation, a held angle within a limited range, or precise multi-step ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>That single question — continuous spin, held angle, or multi-step positioning — narrows the choice to one actuator type in almost every real scenario.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="stepper">
+    <p class="quiz-prompt">5. Fill in the blank: of the three actuators covered in this unit, the one that requires no external position sensor but is silently vulnerable to missed steps under stall is the ___ motor.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A stepper tracks position purely by counting commanded steps, which fails silently the moment a stall causes a missed step.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: <a href="https://learn.sparkfun.com/tutorials/motors-and-selecting-the-right-one/all">SparkFun’s "Motors and Selecting the Right One" guide</a> walks through this same DC-vs-servo-vs-stepper decision process with additional real-project examples.</p>
+
+  <p class="ask-teacher">Want to talk through an actuator choice for a project idea of your own? Ask your teacher — that’s what I’m here for. Unit 2 is complete; Unit 3 turns to the microcontroller that actually issues these sensor-reading and actuator-driving commands.</p>
+
+  <footer class="lesson-footer">STEM+ · Mechatronics · Lesson 11 of the course sequence</footer>
+</div>

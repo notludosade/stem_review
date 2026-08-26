@@ -1,0 +1,110 @@
+<meta charset="UTF-8">
+<link rel="icon" href="../../favicon.ico?v=1" type="image/x-icon">
+<title>Lesson 4: Ultrasonic Distance Sensors — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · Mechatronics · Unit 1 · Lesson 4</span>
+  <h1>Ultrasonic Distance Sensors</h1>
+  <p class="subtitle">Measuring distance by timing an echo — and why the exact answer depends on the temperature lesson two lessons back.</p>
+  <p class="nav-links"><a href="0003-light-sensors-photoresistors-and-phototransistors.html" class="nav-prev">← Lesson 3</a> <a href="0005-limit-switches-and-digital-input-sensing.html" class="nav-next">Lesson 5 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Not every sensor measures its target's electrical properties. An ultrasonic distance sensor measures distance by sending out a sound pulse and timing how long it takes to bounce back — the same principle a bat or a submarine's sonar uses.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    An <strong>ultrasonic distance sensor</strong> emits a short burst of high-frequency sound (typically around 40 kHz, well above human hearing) from a transmitter, then measures the time until an echo returns to a receiver. That round-trip time, combined with the speed of sound, gives the distance to whatever reflected the pulse.
+  </div>
+
+  <div class="expr-block">distance = (speed of sound × echo time) / 2</div>
+
+  <p>The division by 2 matters: the timed pulse travels to the object <em>and back</em>, so the one-way distance is half the round-trip distance the timing actually measures.</p>
+
+  <h2>How a real module reports the measurement</h2>
+  <p>A common module like the HC-SR04 has two pins relevant here: a <strong>trigger pin</strong> (a digital output from the microcontroller, held HIGH for about 10 microseconds to fire the ping) and an <strong>echo pin</strong> (a digital input to the microcontroller, which the sensor holds HIGH for a duration exactly equal to the round-trip travel time).</p>
+
+  <div class="box why">
+    <span class="box-label">Callback to Lesson 1</span>
+    This is precisely the "digital pin, analog meaning" case from Lesson 1. The echo pin only ever reads HIGH or LOW — strictly digital — but the <em>length of time</em> it stays HIGH is a continuous, analog quantity carrying the real measurement. Reading this sensor means timing a pulse, not just checking a voltage level.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Example</span>
+    Speed of sound in air is about 343 m/s at room temperature, which works out to roughly 0.0343 cm per microsecond. If the echo pin stays HIGH for 600 microseconds, the round-trip distance is 600 × 0.0343 ≈ 20.6 cm, so the one-way distance to the object is about 10.3 cm.
+  </div>
+
+  <h2>Why the temperature lesson matters here</h2>
+  <p>The speed of sound isn't a fixed constant — it changes with air temperature, getting faster as air warms. A calculation using a fixed 343 m/s is only exactly correct at one particular temperature; on a much hotter or colder day, that assumption introduces real measurement error. High-precision applications correct for this by reading a temperature sensor (Lesson 2) alongside the ultrasonic sensor and adjusting the speed-of-sound constant accordingly — an early example of one sensor's reading improving another's accuracy.</p>
+
+  <h2>Limitations worth knowing</h2>
+  <div class="box example">
+    <span class="box-label">Real-world caveats</span>
+    Ultrasonic sensors struggle with soft materials that absorb sound rather than reflecting it (foam, fabric), with surfaces angled away from the sensor (the echo bounces off to the side instead of back), and with a minimum detectable range (an object too close doesn't give the receiver time to separate the echo from the outgoing pulse). Multiple ultrasonic sensors operating near each other can also cross-talk, each picking up echoes meant for its neighbor.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. An ultrasonic sensor’s echo pin stays HIGH for 800 microseconds. Using 0.0343 cm/microsecond for the speed of sound, what is the one-way distance to the object?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">About 27.4 cm</button>
+      <button class="quiz-choice" data-correct="true">About 13.7 cm</button>
+      <button class="quiz-choice" data-correct="false">About 54.9 cm</button>
+      <button class="quiz-choice" data-correct="false">About 6.9 cm</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>800 × 0.0343 ≈ 27.4 cm is the round-trip distance; dividing by 2 for the one-way distance gives about 13.7 cm.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why must the round-trip travel time be divided by 2 to find the distance to an object?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because the sensor always overestimates by exactly double.</button>
+      <button class="quiz-choice" data-correct="true">Because the timed pulse travels to the object and back, covering twice the one-way distance.</button>
+      <button class="quiz-choice" data-correct="false">Because sound travels at half its normal speed underwater.</button>
+      <button class="quiz-choice" data-correct="false">It shouldn’t be — the raw time already gives one-way distance.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The measured time covers the full there-and-back trip, so the one-way distance is exactly half of what a naive speed × time calculation would give.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why does an ultrasonic sensor’s distance reading become less accurate on a much hotter or colder day than usual, if the speed-of-sound value used in the calculation is never updated?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Ultrasonic sensors physically cannot function outside room temperature.</button>
+      <button class="quiz-choice" data-correct="true">The speed of sound in air changes with temperature, so a fixed constant is only exactly correct at one particular temperature.</button>
+      <button class="quiz-choice" data-correct="false">Temperature changes the frequency of the emitted sound, making it inaudible to the receiver.</button>
+      <button class="quiz-choice" data-correct="false">Colder air reflects sound perfectly, causing the sensor to read zero.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Speed of sound rises with temperature; using a fixed value baked in at one temperature introduces error whenever the real air temperature differs from that assumption.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="trigger">
+    <p class="quiz-prompt">4. Fill in the blank: on a module like the HC-SR04, the pin the microcontroller briefly pulses HIGH to fire off the sound burst is called the ___ pin.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The trigger pin starts the measurement; the separate echo pin is what reports the result back.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="analog">
+    <p class="quiz-prompt">5. Fill in the blank: because the echo pin’s HIGH duration — not its voltage level — carries the actual distance measurement, this is an example of a digital signal carrying ___ information.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The voltage itself is strictly digital (HIGH/LOW), but its timing encodes a continuous, analog quantity — exactly the nuance introduced in Lesson 1.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: <a href="https://cdn.sparkfun.com/datasheets/Sensors/Proximity/HCSR04.pdf">the HC-SR04 ultrasonic sensor datasheet</a> gives the exact trigger/echo timing diagram and electrical specifications behind the numbers used in this lesson.</p>
+
+  <p class="ask-teacher">Want to work through the cross-talk problem with multiple sensors in more depth? Ask your teacher — that’s what I’m here for. Next up: the simplest sensor category of all — switches that report nothing but contact.</p>
+
+  <footer class="lesson-footer">STEM+ · Mechatronics · Lesson 4 of the course sequence</footer>
+</div>

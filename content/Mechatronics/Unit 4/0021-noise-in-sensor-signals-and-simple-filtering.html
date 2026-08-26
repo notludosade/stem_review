@@ -1,0 +1,104 @@
+<meta charset="UTF-8">
+<link rel="icon" href="../../favicon.ico?v=1" type="image/x-icon">
+<title>Lesson 21: Noise in Sensor Signals and Simple Filtering — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · Mechatronics · Unit 4 · Lesson 21</span>
+  <h1>Noise in Sensor Signals and Simple Filtering</h1>
+  <p class="subtitle">A perfectly still, unchanging quantity almost never produces a perfectly still reading — here’s why, and the crudest fix.</p>
+  <p class="nav-links"><a href="0020-pwm-for-motor-speed-and-led-brightness.html" class="nav-prev">← Lesson 20</a> <a href="0022-moving-average-smoothing-in-practice.html" class="nav-next">Lesson 22 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Read a sensor twice in a row, with nothing in the real world actually changing, and you'll usually get two slightly different numbers anyway. That's <strong>noise</strong> — and it's present in nearly every real measurement this course has covered.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    <strong>Noise</strong> is random, unwanted variation in a sensor's reading that doesn't reflect an actual change in the physical quantity being measured. It comes from several sources at once: electrical interference from nearby wiring, the quantization error from Lesson 18, mechanical vibration, and a sensor's own internal jitter (an ultrasonic sensor's echo-edge detection, for instance, is rarely identical between two otherwise-identical pings).
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Example</span>
+    A thermistor sitting in a perfectly stable-temperature room might report 3.01 V, then 2.98 V, then 3.02 V on three back-to-back readings — the true temperature never changed, but the reported voltage bounces around slightly every time.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why noise matters more here than it might seem</span>
+    A single noisy reading feeding directly into a decision can cause a system to react to noise as if it were a real change — flickering a threshold-based output on and off, or (as Unit 6 will show) badly confusing a control loop's derivative term, which is specifically sensitive to how fast a reading is changing.
+  </div>
+
+  <h2>The crudest fix: averaging multiple samples</h2>
+  <p>The simplest defense against noise is also the cheapest to implement: instead of trusting one reading, take several readings in quick succession and average them together before using the result.</p>
+
+  <div class="box example">
+    <span class="box-label">Example</span>
+    Three readings of 3.01 V, 2.98 V, and 3.02 V average to (3.01 + 2.98 + 3.02) / 3 ≈ 3.003 V — closer to the true, stable value than any single one of the three individual readings, because random noise on each individual sample tends to partly cancel out when combined.
+  </div>
+
+  <p>This works, but it has an obvious cost: taking N samples before producing a reading takes N times as long as taking one — a real delay that has to be weighed against how much smoothing is actually needed. The next lesson develops a more efficient, ongoing version of this same averaging idea, one that doesn't require restarting from scratch on every single reading.</p>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What is sensor noise?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">A deliberate signal added by the sensor manufacturer.</button>
+      <button class="quiz-choice" data-correct="true">Random, unwanted variation in a reading that doesn’t reflect an actual change in the physical quantity being measured.</button>
+      <button class="quiz-choice" data-correct="false">The correct, expected output of any digital sensor.</button>
+      <button class="quiz-choice" data-correct="false">An error that only affects analog-to-digital converters, never any other component.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Noise is variation that doesn’t correspond to a real physical change — it comes from electrical interference, quantization, vibration, and sensor jitter, among other sources.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why can noisy readings be especially disruptive to a control loop’s derivative term (previewed here, covered fully in Unit 6)?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Derivative terms ignore all sensor input entirely.</button>
+      <button class="quiz-choice" data-correct="true">A derivative term reacts to how fast a reading is changing, and noise can look like a large, fast change even when nothing real is happening.</button>
+      <button class="quiz-choice" data-correct="false">Derivative terms only work with digital sensors, never analog ones.</button>
+      <button class="quiz-choice" data-correct="false">Noise has no meaningful effect on any part of a control loop.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A term sensitive to rate of change is especially vulnerable to noise, since noise itself is exactly rapid, meaningless variation.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. What is the main cost of using simple multi-sample averaging to reduce noise?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">It makes the sensor permanently less accurate.</button>
+      <button class="quiz-choice" data-correct="true">Taking N samples before producing one averaged reading takes N times as long as a single reading.</button>
+      <button class="quiz-choice" data-correct="false">It requires replacing the sensor with a more expensive model.</button>
+      <button class="quiz-choice" data-correct="false">It only works on digital sensors, never analog ones.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Averaging trades speed for smoothness — more samples means a smoother result but a longer wait before that result is ready.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="noise">
+    <p class="quiz-prompt">4. Fill in the blank: random, unwanted variation in a sensor reading that doesn’t reflect a real physical change is called ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Noise is the general term for this unwanted variation, arising from several combined sources.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="averaging">
+    <p class="quiz-prompt">5. Fill in the blank: the simplest, cheapest defense against noisy readings is to take multiple samples and combine them by ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Averaging multiple samples lets random noise on individual readings partly cancel out, at the cost of extra time per reading.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: <a href="https://learn.sparkfun.com/tutorials/analog-to-digital-conversion/all">SparkFun’s "Analog to Digital Conversion" tutorial</a> discusses real-world sensor noise sources alongside the quantization error covered in Lesson 18, from the same reference used there.</p>
+
+  <p class="ask-teacher">Curious how many samples are typically enough to average for a noisy sensor like an ultrasonic ranger? Ask your teacher — that’s what I’m here for. Next up: a smarter, ongoing version of this same averaging idea.</p>
+
+  <footer class="lesson-footer">STEM+ · Mechatronics · Lesson 21 of the course sequence</footer>
+</div>

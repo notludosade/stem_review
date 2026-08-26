@@ -1,0 +1,114 @@
+<meta charset="UTF-8">
+<link rel="icon" href="../../favicon.ico?v=1" type="image/x-icon">
+<title>Lesson 17: Structuring a Microcontroller Program — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · Mechatronics · Unit 3 · Lesson 17</span>
+  <h1>Structuring a Microcontroller Program</h1>
+  <p class="subtitle">Setup once, loop forever — closing out this unit by writing the pattern every later lesson builds on.</p>
+  <p class="nav-links"><a href="0016-writing-digital-output-driving-leds-and-simple-loads.html" class="nav-prev">← Lesson 16</a> <a href="../Unit%204/0018-adc-resolution-and-quantization.html" class="nav-next">Unit 4, Lesson 18 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Every idea in this unit — GPIO configuration, digital input and output, analog input — has been leading toward one structural pattern. This lesson makes it explicit, because it's the skeleton every remaining lesson in this course fills in with more detail.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    A microcontroller program has exactly two phases: <strong>setup</strong>, which runs once when the chip powers on or resets (configuring pin modes, initializing peripherals, setting starting values), and <strong>loop</strong>, which repeats indefinitely afterward, for as long as power is applied.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why this shape, specifically</span>
+    Configuration only needs doing once — repeatedly reconfiguring a pin's mode inside a fast-repeating loop would be wasted, redundant work. But actually sensing the world and reacting to it is inherently ongoing, with no natural stopping point — so it belongs in a phase that keeps running for as long as the system is powered. Splitting the two apart cleanly is what makes embedded programs both efficient and easy to reason about.
+  </div>
+
+  <h2>A complete example, combining this unit’s pieces</h2>
+  <div class="box example">
+    <span class="box-label">Reading a switch, reading a sensor, and driving an LED together</span>
+<pre class="code-block"><code>setup():
+    pinMode(SWITCH_PIN, INPUT_PULLUP)
+    pinMode(LED_PIN, OUTPUT)
+    // ADC pin needs no pinMode() call
+
+loop():
+    switchPressed = (digitalRead(SWITCH_PIN) == LOW)
+    raw = analogRead(LIGHT_SENSOR_PIN)
+
+    if switchPressed AND raw < 400:      // dark AND switch pressed
+        digitalWrite(LED_PIN, HIGH)
+    else:
+        digitalWrite(LED_PIN, LOW)</code></pre>
+  </div>
+
+  <p>Nothing in that example is new — a digital input (Lesson 14), an analog input (Lesson 15), a digital output (Lesson 16), and a decision combining them, all running inside the loop phase. What's new is seeing them work together as one program, reading multiple inputs and producing one coordinated output every single pass through the loop.</p>
+
+  <div class="box why">
+    <span class="box-label">Where this is headed</span>
+    Right now, the decision inside <code class="inline-code">loop()</code> is a simple fixed rule — an if statement. Starting in Unit 5, that decision becomes a <strong>control loop</strong>: instead of a fixed rule, the output gets computed from how far a sensor reading is from some target value, recalculated fresh on every single pass through <code class="inline-code">loop()</code>. The setup/loop skeleton doesn't change at all — only what happens inside loop() gets more capable.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. Why does pin configuration belong in setup() rather than loop()?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because loop() cannot contain any function calls.</button>
+      <button class="quiz-choice" data-correct="true">Configuration only needs doing once, so repeating it on every pass through loop() would be wasted, redundant work.</button>
+      <button class="quiz-choice" data-correct="false">Because setup() runs faster than loop().</button>
+      <button class="quiz-choice" data-correct="false">Pin configuration is not actually necessary in any microcontroller program.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Setup runs exactly once for a reason — configuration is a one-time task, unlike sensing and reacting, which are ongoing.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. In the example program, what two conditions must both be true for the LED to turn on?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">The switch pressed and the light reading above 400.</button>
+      <button class="quiz-choice" data-correct="true">The switch pressed and the light reading below 400.</button>
+      <button class="quiz-choice" data-correct="false">The switch not pressed and the light reading below 400.</button>
+      <button class="quiz-choice" data-correct="false">Only the switch needs to be pressed — the light reading is ignored.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The AND condition requires switchPressed to be true and raw < 400 (a dark reading) — both must hold for the LED to turn on.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. What changes about the setup/loop skeleton once a fixed if-statement decision (like in this lesson’s example) becomes a full control loop in Unit 5?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">The setup/loop structure is replaced entirely with a different pattern.</button>
+      <button class="quiz-choice" data-correct="true">The skeleton itself stays the same — only what happens inside loop() becomes more capable, computing output from how far a reading is from a target.</button>
+      <button class="quiz-choice" data-correct="false">Setup starts running repeatedly instead of just once.</button>
+      <button class="quiz-choice" data-correct="false">Loop stops running continuously and instead runs only once.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The setup/loop shape is the constant throughout this entire course — control loops are just a more sophisticated version of the logic that runs inside loop(), not a different program structure.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="setup">
+    <p class="quiz-prompt">4. Fill in the blank: the phase of a microcontroller program that runs exactly once, used for pin configuration and initialization, is called ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Setup is the one-time configuration phase, distinct from the continuously repeating loop phase.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="loop">
+    <p class="quiz-prompt">5. Fill in the blank: the phase that repeats indefinitely for as long as the microcontroller has power is called ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Loop is where ongoing sensing and reacting happens — it never naturally stops on its own, only when power is removed.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: <a href="https://docs.arduino.cc/learn/programming/sketch-structure/">Arduino’s "Sketch Structure" documentation</a> documents the setup()/loop() structure directly from the source, confirming this exact two-phase pattern used throughout this course.</p>
+
+  <p class="ask-teacher">Want to trace through what this program does on a specific sequence of switch presses and light readings? Ask your teacher — that’s what I’m here for. Unit 3 is complete; Unit 4 looks more closely at the signals moving between sensors, actuators, and this loop.</p>
+
+  <footer class="lesson-footer">STEM+ · Mechatronics · Lesson 17 of the course sequence</footer>
+</div>

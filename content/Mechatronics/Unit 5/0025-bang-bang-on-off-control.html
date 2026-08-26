@@ -1,0 +1,107 @@
+<meta charset="UTF-8">
+<link rel="icon" href="../../favicon.ico?v=1" type="image/x-icon">
+<title>Lesson 25: Bang-Bang (On/Off) Control — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · Mechatronics · Unit 5 · Lesson 25</span>
+  <h1>Bang-Bang (On/Off) Control</h1>
+  <p class="subtitle">The simplest closed-loop controller that actually works — full power or nothing at all, decided by the sign of the error.</p>
+  <p class="nav-links"><a href="0024-feedback-the-core-idea-behind-closed-loop-systems.html" class="nav-prev">← Lesson 24</a> <a href="0026-hysteresis-and-deadbands-in-bang-bang-control.html" class="nav-next">Lesson 26 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>With feedback and error now defined, the simplest possible way to use them is almost embarrassingly direct: check whether the error is positive or negative, and turn the actuator fully on or fully off accordingly.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    <strong>Bang-bang control</strong> (also called <strong>on/off control</strong>) drives the actuator to one of exactly two states — fully on or fully off — based purely on whether the measured value is above or below the setpoint. There is no in-between output.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Example</span>
+    A home heater's thermostat: if the measured temperature is below the setpoint, the heater runs at full power; if at or above the setpoint, it shuts off completely. A refrigerator's compressor works the same way — full cooling or fully off, nothing in between.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Pseudocode</span>
+<pre class="code-block"><code>loop():
+    temp = readTemperature()
+    if temp < SETPOINT:
+        heaterOn()
+    else:
+        heaterOff()</code></pre>
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why this is genuinely useful, not just a toy example</span>
+    Bang-bang control needs no calibrated gains, no tuning, and almost no computation — just a comparison. For any actuator that's naturally an on/off device anyway (a heater relay, a compressor, a solenoid valve), it's often the simplest option that actually gets the job done, and it's exactly what many real household appliances use.
+  </div>
+
+  <h2>The problem lurking at the setpoint</h2>
+  <p>Picture the measured temperature sitting almost exactly at the setpoint, with a small amount of sensor noise (Unit 4, Lesson 21) causing it to bounce back and forth across that single threshold. Every tiny noise-driven crossing flips the heater fully on, then fully off, then on again — rapidly, right at the boundary. This rapid switching, called <strong>chattering</strong>, wears out relays and actuators far faster than their rated switching life expects, and the next lesson fixes it directly.</p>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What output states can a bang-bang controller produce?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Any value smoothly between fully off and fully on.</button>
+      <button class="quiz-choice" data-correct="true">Only two states: fully on or fully off.</button>
+      <button class="quiz-choice" data-correct="false">A value proportional to the size of the error.</button>
+      <button class="quiz-choice" data-correct="false">A value that depends on the rate of change of the error.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Bang-bang control is strictly two-state — no in-between output exists, unlike proportional control (Unit 6).</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. What decides whether a bang-bang-controlled heater turns on or off?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">A fixed timer, regardless of temperature.</button>
+      <button class="quiz-choice" data-correct="true">Whether the measured temperature is above or below the setpoint.</button>
+      <button class="quiz-choice" data-correct="false">The size of the error, scaled proportionally.</button>
+      <button class="quiz-choice" data-correct="false">How fast the temperature is currently changing.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Bang-bang control makes its decision purely from the sign of the error — above or below setpoint — with no regard for its size or rate of change.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why does a bang-bang controller tend to switch rapidly on and off ("chatter") when the measured value sits very close to the setpoint?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because the actuator is broken.</button>
+      <button class="quiz-choice" data-correct="true">Because small amounts of sensor noise cause the reading to cross back and forth over the single on/off threshold repeatedly.</button>
+      <button class="quiz-choice" data-correct="false">Because bang-bang controllers require recalibration every few seconds.</button>
+      <button class="quiz-choice" data-correct="false">Because the setpoint itself keeps changing on its own.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>With only one threshold to cross, even tiny noise-driven fluctuations near it trigger rapid, repeated switching — the chattering problem the next lesson addresses.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="bang-bang|bang bang|on/off|on off">
+    <p class="quiz-prompt">4. Fill in the blank: a control strategy that drives an actuator to only fully on or fully off, based on whether the measured value is above or below setpoint, is called ___ control.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Bang-bang (or on/off) control is the simplest closed-loop strategy, using only the sign of the error.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="chattering">
+    <p class="quiz-prompt">5. Fill in the blank: the rapid, repeated on/off switching a bang-bang controller produces when the reading hovers near the setpoint is called ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Chattering is the practical downside of a single sharp threshold — the next lesson introduces a fix.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: <a href="https://ctms.engin.umich.edu/CTMS/index.php?example=Introduction&section=ControlPID">University of Michigan’s Control Tutorials for MATLAB and Simulink — "Introduction: PID Controller Design"</a> situates on/off control as the simplest member of the same control-strategy family this unit and Unit 6 build up from.</p>
+
+  <p class="ask-teacher">Want to see a real thermostat’s switching behavior graphed over time? Ask your teacher — that’s what I’m here for. Next up: the simple fix that keeps bang-bang control from chattering itself to death.</p>
+
+  <footer class="lesson-footer">STEM+ · Mechatronics · Lesson 25 of the course sequence</footer>
+</div>

@@ -1,0 +1,107 @@
+<meta charset="UTF-8">
+<link rel="icon" href="../../favicon.ico?v=1" type="image/x-icon">
+<title>Lesson 38: Debugging and Testing an Integrated Mechatronic System — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · Mechatronics · Unit 7 · Lesson 38</span>
+  <h1>Debugging and Testing an Integrated Mechatronic System</h1>
+  <p class="subtitle">Closing out Unit 7 with the skill that matters most once real hardware is involved: figuring out why it isn’t working.</p>
+  <p class="nav-links"><a href="0037-handling-multiple-sensors-and-priorities.html" class="nav-prev">← Lesson 37</a> <a href="../Unit%208/0039-robotic-arms.html" class="nav-next">Unit 8, Lesson 39 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>An integrated system — sensor, actuator, and control loop combined — has more moving pieces than any single earlier lesson, which means more places for something to go wrong. This lesson is about isolating exactly where.</p>
+
+  <div class="box why">
+    <span class="box-label">The core debugging principle: test pieces separately before combining them</span>
+    Never bring up a sensor, a control loop, and an actuator all at once for the first time. Test the sensor reading alone first — print its raw values and confirm they make physical sense before trusting them. Test the actuator alone next — drive it with a fixed, hand-picked output value and confirm it responds correctly, with no control logic involved yet. Only once both pieces are independently confirmed working should they be combined into a full closed loop.
+  </div>
+
+  <h2>Common failure patterns and where they trace back to</h2>
+  <div class="box example">
+    <span class="box-label">Erratic, jumpy output despite a stable real-world condition</span>
+    Usually sensor noise reaching the control loop unfiltered — apply the moving average or EMA filtering from Unit 4 before the reading reaches the control calculation, especially if a derivative term is involved (Unit 6, Lesson 31).
+  </div>
+  <div class="box example">
+    <span class="box-label">Persistent oscillation that never settles</span>
+    Usually a tuning issue — Kp set too aggressively for the system's real lag (Unit 6, Lesson 29), or in a bang-bang system, too narrow a hysteresis deadband (Unit 5, Lesson 26).
+  </div>
+  <div class="box example">
+    <span class="box-label">Actuator not responding at all</span>
+    Check the driver and wiring first, not the control math — a motor driver's enable pin left unconfigured, a current limit tripped, or a GPIO pin trying to directly drive a load it can't supply (Unit 3, Lesson 16) are all far more common than a bug in the control formula itself.
+  </div>
+  <div class="box example">
+    <span class="box-label">The system actively fights itself, pushing the wrong direction</span>
+    A flipped error sign. If output increases when it should decrease (and vice versa), the controller isn't broken — its error calculation has the wrong sign convention for that specific system, exactly the detail flagged in Lesson 35's case study. This is one of the most common real integration bugs, and one of the easiest to overlook because the code "looks correct" at a glance.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why this order of investigation matters</span>
+    Jumping straight to retuning PID gains when the real problem is a wiring fault (or vice versa) wastes time chasing the wrong layer of the system. Isolating sensor, actuator, and control logic separately — the way this lesson opened — is exactly what makes it possible to know which layer actually has the bug before trying to fix it.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What is the recommended first step when bringing up a new integrated sensor + actuator + control system?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Combine all three pieces immediately and debug whatever goes wrong.</button>
+      <button class="quiz-choice" data-correct="true">Test the sensor and the actuator independently first, before combining them into a full closed loop.</button>
+      <button class="quiz-choice" data-correct="false">Skip testing the sensor and go straight to tuning PID gains.</button>
+      <button class="quiz-choice" data-correct="false">Only test the actuator — sensor testing is unnecessary.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Isolating each piece before combining them is the core principle of this lesson — it tells you which layer to look at first when something goes wrong.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. A control loop’s output is erratic and jumpy even though the real-world condition being measured is stable. What is the most likely cause?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">The actuator driver is not receiving power.</button>
+      <button class="quiz-choice" data-correct="true">Unfiltered sensor noise reaching the control calculation, especially if a derivative term is involved.</button>
+      <button class="quiz-choice" data-correct="false">The setpoint has been set to zero.</button>
+      <button class="quiz-choice" data-correct="false">The system is using bang-bang control instead of PID.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Jumpy output from a stable real condition is the classic signature of unfiltered noise, especially when amplified by a derivative term — the fix is filtering (Unit 4), not necessarily retuning gains.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. A control loop’s output consistently pushes in the wrong direction, making the system worse instead of better. What is the most likely bug?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">The sensor is reading in the wrong units.</button>
+      <button class="quiz-choice" data-correct="true">The error calculation has a flipped sign convention for this specific system.</button>
+      <button class="quiz-choice" data-correct="false">The actuator driver chip is defective.</button>
+      <button class="quiz-choice" data-correct="false">Ki has been set too high.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A controller actively fighting itself — pushing the wrong direction — is the signature of a flipped error sign, one of the most common and easy-to-overlook integration bugs.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="wiring">
+    <p class="quiz-prompt">4. Fill in the blank: when an actuator doesn’t respond at all, the recommended first things to check are the driver and ___ before assuming the control math is wrong.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Wiring and driver issues (a misconfigured enable pin, a current limit, an underpowered GPIO pin) are far more commonly the culprit than a bug in the control formula itself.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="layer">
+    <p class="quiz-prompt">5. Fill in the blank: retuning PID gains when the real problem is actually a wiring fault wastes time chasing the wrong ___ of the system.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Isolating which layer — sensor, actuator, or control logic — actually contains the bug is exactly what testing each piece separately is meant to reveal.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: <a href="https://learn.sparkfun.com/tutorials/analog-to-digital-conversion/all">SparkFun’s "Analog to Digital Conversion" tutorial</a> includes practical troubleshooting notes for verifying a sensor reading independently, the same isolation principle applied throughout this lesson.</p>
+
+  <p class="ask-teacher">Have a specific bug you’d like to work through together, applying this lesson’s isolation approach? Ask your teacher — that’s what I’m here for. Unit 7 is complete; Unit 8 looks at these same integrated systems at a much larger, real-world scale.</p>
+
+  <footer class="lesson-footer">STEM+ · Mechatronics · Lesson 38 of the course sequence</footer>
+</div>

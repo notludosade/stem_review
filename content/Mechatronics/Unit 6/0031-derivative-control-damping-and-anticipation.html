@@ -1,0 +1,104 @@
+<meta charset="UTF-8">
+<link rel="icon" href="../../favicon.ico?v=1" type="image/x-icon">
+<title>Lesson 31: Derivative Control (D): Damping and Anticipation — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · Mechatronics · Unit 6 · Lesson 31</span>
+  <h1>Derivative Control (D): Damping and Anticipation</h1>
+  <p class="subtitle">The only PID term that reacts to speed, not position — and the one most easily fooled by noise.</p>
+  <p class="nav-links"><a href="0030-integral-control-eliminating-steady-state-error.html" class="nav-prev">← Lesson 30</a> <a href="0032-putting-p-i-and-d-together.html" class="nav-next">Lesson 32 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>P reacts to how large the error is right now. I reacts to how much error has piled up over time. The <strong>derivative</strong> term reacts to something neither of the others considers at all: how fast the error is changing, right now.</p>
+
+  <div class="expr-block">output<sub>D</sub> = K<sub>d</sub> × (de/dt)</div>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    The derivative term computes the <strong>rate of change of the error</strong> — how quickly the error is growing or shrinking — and scales that rate by K<sub>d</sub>. A large rate of change (error closing fast) produces a large derivative output; a small or zero rate of change produces little or none.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why this is exactly the "seeing it coming" capability Unit 5 identified as missing</span>
+    Recall the oven overshoot example (Unit 5, Lesson 27): a bang-bang controller reacts only to current position, never to how fast that position is approaching the target, so it can't ease off early. A derivative term does exactly that — as the error shrinks rapidly (the system racing toward the setpoint), the derivative term produces a <em>negative</em> contribution that pulls output down in advance, damping the approach before overshoot actually happens, rather than only reacting after the fact.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Example</span>
+    A system's error is dropping quickly — from 10 to 2 units over a short time — meaning it's approaching setpoint fast. The derivative term detects that fast negative rate of change and contributes a damping (output-reducing) effect, easing off the throttle before the error would otherwise reach zero and overshoot past it, the way pure P control alone might.
+  </div>
+
+  <h2>The real downside: extreme sensitivity to noise</h2>
+  <div class="box why">
+    <span class="box-label">Why D is the riskiest term to tune aggressively</span>
+    A rate of change is computed from the difference between consecutive readings — and Unit 4, Lesson 21 already established that consecutive readings of an unchanging quantity can still differ slightly due to noise. To a derivative term, that noise-driven difference looks exactly like a real, fast rate of change, and it reacts to it just as strongly as it would to a genuine one. A large K<sub>d</sub> on a noisy, unfiltered signal can make a controller's output jumpy and erratic — reacting to noise, not to reality.
+  </div>
+
+  <p>This is precisely why Unit 4's filtering lessons weren't a detour — a moving average or EMA filter (Unit 4, Lessons 21–22), applied to the sensor reading before it ever reaches a derivative term, is often what makes a derivative term usable at all rather than a source of jitter.</p>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What does the derivative term in a PID controller react to?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">The current size of the error.</button>
+      <button class="quiz-choice" data-correct="false">The accumulated sum of past error.</button>
+      <button class="quiz-choice" data-correct="true">How fast the error is currently changing (its rate of change).</button>
+      <button class="quiz-choice" data-correct="false">The actuator’s maximum rated output.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The derivative term is specifically about rate of change — how quickly the error is growing or shrinking — unlike P (current size) or I (accumulated history).</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. How does the derivative term help reduce overshoot?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">It disables the proportional term whenever error is large.</button>
+      <button class="quiz-choice" data-correct="true">It contributes a damping effect as the error shrinks rapidly, easing off output before the setpoint is reached rather than only after overshooting it.</button>
+      <button class="quiz-choice" data-correct="false">It increases the setpoint automatically to compensate.</button>
+      <button class="quiz-choice" data-correct="false">It has no effect on overshoot whatsoever.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>By reacting to a fast-shrinking error in advance, the derivative term can pull output down before overshoot actually happens — the anticipation P and I alone can’t provide.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why is a derivative term especially vulnerable to sensor noise, more so than the proportional or integral terms?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Derivative terms only work with digital sensors.</button>
+      <button class="quiz-choice" data-correct="true">A rate of change is computed from the difference between consecutive readings, and noise-driven differences look identical to genuine fast changes.</button>
+      <button class="quiz-choice" data-correct="false">Noise only affects sensors used with derivative control, never any other term.</button>
+      <button class="quiz-choice" data-correct="false">Derivative terms require a separate, noise-immune sensor.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Because it’s built from a difference between readings, the derivative term can’t distinguish a real fast change from noise that happens to look like one — which is why filtering the signal first (Unit 4) matters so much for D specifically.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="rate of change|derivative">
+    <p class="quiz-prompt">4. Fill in the blank: the derivative term’s output is proportional to Kd multiplied by the ___ of the error.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Rate of change (de/dt) is exactly what the derivative term measures and reacts to.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="jitter">
+    <p class="quiz-prompt">5. Fill in the blank: applying a moving average or EMA filter (Unit 4) to a noisy sensor reading before it reaches a derivative term is often what makes that term usable, rather than a source of output ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Filtering the raw signal first prevents noise from being misread as a fast, genuine rate of change, avoiding jittery, erratic derivative output.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: <a href="https://ctms.engin.umich.edu/CTMS/index.php?example=Introduction&section=ControlPID">University of Michigan’s Control Tutorials for MATLAB and Simulink — "Introduction: PID Controller Design"</a> covers the derivative term’s damping effect and its well-known sensitivity to measurement noise, referenced directly in this lesson.</p>
+
+  <p class="ask-teacher">Want to see what a derivative term does to a genuinely noisy, unfiltered signal in practice? Ask your teacher — that’s what I’m here for. Next up: combining all three terms into one working controller.</p>
+
+  <footer class="lesson-footer">STEM+ · Mechatronics · Lesson 31 of the course sequence</footer>
+</div>

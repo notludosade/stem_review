@@ -1,0 +1,121 @@
+<meta charset="UTF-8">
+<link rel="icon" href="../../favicon.ico?v=1" type="image/x-icon">
+<title>Lesson 20: Pulse-Width Modulation for Motor Speed and LED Brightness — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · Mechatronics · Unit 4 · Lesson 20</span>
+  <h1>Pulse-Width Modulation for Motor Speed and LED Brightness</h1>
+  <p class="subtitle">Duty cycle is the one number that matters — here’s exactly how it maps to real, controllable output.</p>
+  <p class="nav-links"><a href="0019-dac-and-pwm-as-a-practical-substitute.html" class="nav-prev">← Lesson 19</a> <a href="0021-noise-in-sensor-signals-and-simple-filtering.html" class="nav-next">Lesson 21 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>The previous lesson introduced PWM's core idea. This lesson gives it exact vocabulary and the arithmetic behind it.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    A PWM signal repeats at a fixed <strong>frequency</strong> (how many on/off cycles occur per second). Within each cycle, the <strong>duty cycle</strong> is the percentage of that cycle's time spent HIGH rather than LOW. A 25% duty cycle spends one quarter of each cycle HIGH; a 75% duty cycle spends three quarters HIGH.
+  </div>
+
+  <div class="expr-block">average voltage ≈ duty cycle × supply voltage</div>
+
+  <svg class="figure" viewBox="0 0 380 190" width="380" height="190">
+    <line class="fig-axis" x1="30" y1="35" x2="360" y2="35"></line>
+    <path class="fig-curve" d="M 30 35 L 30 15 L 105 15 L 105 35 L 255 35 L 255 15 L 330 15 L 330 35"></path>
+    <text class="fig-label" x="335" y="28">25% duty</text>
+    <line class="fig-axis" x1="30" y1="100" x2="360" y2="100"></line>
+    <path class="fig-curve" d="M 30 100 L 30 80 L 180 80 L 180 100 L 255 100 L 255 80 L 330 80 L 330 100"></path>
+    <text class="fig-label" x="335" y="93">50% duty</text>
+    <line class="fig-axis" x1="30" y1="165" x2="360" y2="165"></line>
+    <path class="fig-curve" d="M 30 165 L 30 145 L 255 145 L 255 165 L 330 165"></path>
+    <text class="fig-label" x="335" y="158">75% duty</text>
+    <line class="fig-guide" x1="30" y1="10" x2="30" y2="170"></line>
+    <line class="fig-guide" x1="255" y1="10" x2="255" y2="170"></line>
+    <text class="fig-label" x="100" y="185">one full period T, repeating</text>
+  </svg>
+  <figcaption>Same period, three duty cycles: more time HIGH per cycle means a higher effective average voltage.</figcaption>
+
+  <div class="box example">
+    <span class="box-label">Example</span>
+    A 5 V pin driven at 60% duty cycle delivers an average voltage of 0.60 × 5 = 3.0 V to a DC motor — noticeably slower than full speed, but faster than a 50%-duty 2.5 V average would give.
+  </div>
+
+  <h2>PWM driving a motor</h2>
+  <div class="box why">
+    <span class="box-label">A real-world caveat: minimum duty deadzone</span>
+    A real DC motor has to overcome internal friction before it turns at all. Below some minimum duty cycle, the average voltage is too low to overcome that friction, and the motor simply doesn't turn — it stays at zero output even though the duty cycle isn't literally zero. The relationship between duty cycle and actual motor speed is only reliably proportional above this deadzone, not all the way down to 0%.
+  </div>
+
+  <h2>PWM driving an LED</h2>
+  <p>An LED has no comparable mechanical deadzone — its perceived brightness scales quite proportionally with duty cycle, as long as the PWM frequency is high enough (roughly above 60 Hz) that human vision perceives a steady, dimmed glow rather than a visible flicker.</p>
+
+  <div class="box example">
+    <span class="box-label">Worked example</span>
+    A PWM signal has a period of 4 ms and stays HIGH for 1 ms of each cycle. Duty cycle = 1 / 4 = 25%. Driving a 5 V LED circuit at 25% duty produces roughly one quarter of full brightness — a clearly dimmer, but steady-looking, glow.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. A PWM signal has a period of 20 ms and stays HIGH for 5 ms of each cycle. What is its duty cycle?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">5%</button>
+      <button class="quiz-choice" data-correct="false">20%</button>
+      <button class="quiz-choice" data-correct="true">25%</button>
+      <button class="quiz-choice" data-correct="false">75%</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Duty cycle = HIGH time / period = 5 / 20 = 0.25 = 25%.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. A 12 V supply drives a PWM signal at 40% duty cycle into a motor. What is the approximate average voltage delivered?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">12 V</button>
+      <button class="quiz-choice" data-correct="true">4.8 V</button>
+      <button class="quiz-choice" data-correct="false">40 V</button>
+      <button class="quiz-choice" data-correct="false">0.4 V</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Average voltage ≈ duty cycle × supply voltage = 0.40 × 12 = 4.8 V.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why might a DC motor fail to turn at all at a very low but nonzero PWM duty cycle?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">PWM cannot generate duty cycles below 50%.</button>
+      <button class="quiz-choice" data-correct="true">The resulting average voltage may be too low to overcome the motor’s internal friction, so it stays at zero output despite a nonzero duty cycle.</button>
+      <button class="quiz-choice" data-correct="false">Low duty cycles physically damage the motor’s coil.</button>
+      <button class="quiz-choice" data-correct="false">Motors can only respond to true DAC voltages, never PWM.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Real motors have a minimum-duty deadzone caused by internal friction — below it, the average voltage isn’t enough to start the motor turning.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="duty">
+    <p class="quiz-prompt">4. Fill in the blank: the percentage of each PWM cycle spent HIGH rather than LOW is called the ___ cycle.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Duty cycle is the single number that determines PWM’s effective average output — the fraction of time spent HIGH.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="60">
+    <p class="quiz-prompt">5. Fill in the blank: for an LED to appear as a steady dimmed glow rather than a visible flicker, the PWM frequency generally needs to stay above roughly ___ Hz.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Human vision generally can’t detect flicker above roughly 60 Hz, which is why PWM-dimmed LEDs look steady rather than blinking at typical PWM frequencies.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: <a href="https://docs.arduino.cc/learn/microcontrollers/analog-output">Arduino’s "PWM: Analog Output" documentation</a> documents duty cycle and analogWrite() directly, with the same average-voltage relationship used in this lesson’s examples.</p>
+
+  <p class="ask-teacher">Want to calculate the duty cycle needed for a specific target average voltage? Ask your teacher — that’s what I’m here for. Next up: what happens when the sensor readings feeding all of this get noisy.</p>
+
+  <footer class="lesson-footer">STEM+ · Mechatronics · Lesson 20 of the course sequence</footer>
+</div>

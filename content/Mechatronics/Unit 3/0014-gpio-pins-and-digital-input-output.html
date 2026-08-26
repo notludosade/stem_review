@@ -1,0 +1,110 @@
+<meta charset="UTF-8">
+<link rel="icon" href="../../favicon.ico?v=1" type="image/x-icon">
+<title>Lesson 14: GPIO Pins and Digital Input/Output — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · Mechatronics · Unit 3 · Lesson 14</span>
+  <h1>GPIO Pins and Digital Input/Output</h1>
+  <p class="subtitle">The most flexible pins on the chip — configurable in software as either an input or an output.</p>
+  <p class="nav-links"><a href="0013-microcontroller-architecture-basics.html" class="nav-prev">← Lesson 13</a> <a href="0015-reading-analog-input-on-a-microcontroller.html" class="nav-next">Lesson 15 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>A microcontroller connects to the outside world through its pins, and the most common, flexible type is <strong>GPIO</strong> — general-purpose input/output. Unlike a pin permanently wired for one job, a GPIO pin's role is set in software.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    A <strong>GPIO pin</strong> can be configured, in code, as either a digital <strong>input</strong> (reading an external HIGH/LOW voltage, as with the limit switch from Unit 1, Lesson 5) or a digital <strong>output</strong> (driving an external HIGH/LOW voltage, as with an LED or a control-line signal). Which role it plays is set once — typically during the setup phase from the previous lesson.
+  </div>
+
+  <h2>Digital output</h2>
+  <p>Setting a GPIO pin HIGH drives it to roughly the chip's supply voltage (5 V or 3.3 V depending on the board); setting it LOW drives it to roughly 0 V. This is exactly the signal used to turn an LED on and off, or to send a direction command to a motor driver's control-line inputs (Unit 2, Lesson 8).</p>
+
+  <div class="box why">
+    <span class="box-label">A limit worth remembering</span>
+    A GPIO output pin can only source a small amount of current — typically tens of milliamps. That's plenty for an LED (with a current-limiting resistor) but nowhere near enough for a motor, which is exactly why Lesson 8's H-bridge exists: the GPIO pin sends a small control signal, and the driver IC handles the real current.
+  </div>
+
+  <h2>Digital input</h2>
+  <p>Configured as an input, a GPIO pin reads whatever voltage an external circuit presents to it, reporting HIGH or LOW. This is exactly how a limit switch (Unit 1, Lesson 5) gets read — and the same floating-pin problem from that lesson applies here: an input pin with nothing firmly driving it can read unpredictably, which is why a pull-up or pull-down resistor (often built into the chip itself, enabled in software) matters.</p>
+
+  <div class="box example">
+    <span class="box-label">Pseudocode</span>
+<pre class="code-block"><code>setup():
+    pinMode(LED_PIN, OUTPUT)
+    pinMode(BUTTON_PIN, INPUT_PULLUP)
+
+loop():
+    if digitalRead(BUTTON_PIN) == LOW:   // pressed, thanks to the pull-up
+        digitalWrite(LED_PIN, HIGH)
+    else:
+        digitalWrite(LED_PIN, LOW)</code></pre>
+  </div>
+
+  <p>This tiny program is a complete read-decide-write cycle — a button (digital input) controls an LED (digital output), running inside the loop phase from the previous lesson. Every control loop later in this course is a more elaborate version of exactly this shape.</p>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What determines whether a GPIO pin acts as a digital input or a digital output?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">The color of the wire connected to it.</button>
+      <button class="quiz-choice" data-correct="true">How it’s configured in software, typically during the setup phase.</button>
+      <button class="quiz-choice" data-correct="false">It’s permanently fixed at the factory and can never change.</button>
+      <button class="quiz-choice" data-correct="false">Whether the microcontroller is powered by battery or USB.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A GPIO pin’s general-purpose flexibility comes from being configurable in code as either an input or an output, unlike a pin hard-wired for one role.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why can’t a GPIO output pin directly drive a DC motor?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">GPIO pins cannot output a HIGH voltage.</button>
+      <button class="quiz-choice" data-correct="true">A GPIO pin can only source a small amount of current, far less than a motor typically demands.</button>
+      <button class="quiz-choice" data-correct="false">Motors only run on alternating current.</button>
+      <button class="quiz-choice" data-correct="false">GPIO pins can only be configured as inputs, never outputs.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>GPIO output current is limited to roughly tens of milliamps — enough for an LED, nowhere near enough for a motor, hence the need for a driver IC.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. In the pseudocode example, why does the button read LOW when it’s actually pressed?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because pressed buttons always read as an error.</button>
+      <button class="quiz-choice" data-correct="true">Because INPUT_PULLUP keeps the pin HIGH by default, and pressing the button actively pulls it down to ground, reading LOW.</button>
+      <button class="quiz-choice" data-correct="false">Because digitalRead() always returns LOW regardless of the circuit.</button>
+      <button class="quiz-choice" data-correct="false">Because the LED is wired backward.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>With a pull-up enabled, the pin idles HIGH; the button’s job is to pull it to ground when pressed, which reads as LOW — matching Unit 1, Lesson 5’s pull-up explanation.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="gpio|general purpose input output|general-purpose input/output">
+    <p class="quiz-prompt">4. Fill in the blank: a pin whose role as input or output is set in software rather than fixed in hardware is called a ___ pin.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>GPIO — general-purpose input/output — is exactly this flexible, software-configurable pin type.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="pinmode|pin mode">
+    <p class="quiz-prompt">5. Fill in the blank: the function used in the pseudocode example to set a GPIO pin’s role before the loop runs is called ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>pinMode() is the setup-phase call that configures a GPIO pin as INPUT, OUTPUT, or INPUT_PULLUP.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: <a href="https://docs.arduino.cc/learn/microcontrollers/digital-pins/">Arduino’s "Digital Pins" documentation</a> documents pinMode(), digitalWrite(), and digitalRead() directly, matching the pseudocode pattern used throughout this lesson.</p>
+
+  <p class="ask-teacher">Want to trace through what happens if pinMode() is never called at all? Ask your teacher — that’s what I’m here for. Next up: reading the continuous, analog side of the world instead of just HIGH and LOW.</p>
+
+  <footer class="lesson-footer">STEM+ · Mechatronics · Lesson 14 of the course sequence</footer>
+</div>

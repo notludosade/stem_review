@@ -1,0 +1,105 @@
+<meta charset="UTF-8">
+<link rel="icon" href="../../favicon.ico?v=1" type="image/x-icon">
+<title>Lesson 15: Reading Analog Input on a Microcontroller — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · Mechatronics · Unit 3 · Lesson 15</span>
+  <h1>Reading Analog Input on a Microcontroller</h1>
+  <p class="subtitle">Putting Unit 1’s sensors to work — the actual function call that turns a voltage divider’s output into a number your code can use.</p>
+  <p class="nav-links"><a href="0014-gpio-pins-and-digital-input-output.html" class="nav-prev">← Lesson 14</a> <a href="0016-writing-digital-output-driving-leds-and-simple-loads.html" class="nav-next">Lesson 16 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>GPIO pins handle HIGH and LOW. Reading one of Unit 1's analog sensors — a thermistor divider, a photoresistor divider — needs a different kind of pin: one connected to the chip's <strong>ADC</strong>, introduced back in Lesson 1 of this course.</p>
+
+  <p>Not every pin on a microcontroller can do this — only a specific subset are wired to the ADC peripheral, and there are usually far fewer of them than there are GPIO pins. This is the scarce-resource trade-off Lesson 1 first raised, now made concrete: plan a sensor layout with that limited count in mind.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    Calling an analog-read function (commonly <code class="inline-code">analogRead()</code>) samples the voltage on an ADC-capable pin and returns a raw digital number representing that voltage, scaled across the ADC's resolution — for example, 0 to 1023 on a common 10-bit ADC, exactly as introduced back in Lesson 6 of Unit 1.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Example: reading Unit 1’s thermistor divider</span>
+<pre class="code-block"><code>setup():
+    // ADC pins usually need no pinMode() call — they default to analog input
+
+loop():
+    raw = analogRead(THERMISTOR_PIN)      // 0-1023 on a 10-bit ADC
+    voltage = (raw / 1023.0) * 5.0        // Lesson 6’s raw-to-voltage formula
+    // voltage still needs the two-point calibration from Lesson 6
+    // before it becomes an actual temperature</code></pre>
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why this lesson is short</span>
+    Nothing here is new physics — it's the same voltage divider from Unit 1, the same raw-count-to-voltage math from Unit 1 Lesson 6, now expressed as one function call inside a real microcontroller program. The point of this lesson is the connection: everything Unit 1 taught about sensors becomes usable the moment it's wrapped in <code class="inline-code">analogRead()</code> and dropped into the loop phase.
+  </div>
+
+  <p>One practical detail worth flagging: an analog read takes measurably longer than a digital read — the ADC hardware needs a short settling time to sample and convert. It's not slow enough to matter for most sensor-reading loops in this course, but it's worth knowing it isn't instantaneous the way <code class="inline-code">digitalRead()</code> effectively is.</p>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. Why can’t every pin on a microcontroller be used for analogRead()?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Every pin actually can be used this way.</button>
+      <button class="quiz-choice" data-correct="true">Only a specific subset of pins are wired to the chip’s ADC peripheral — there are usually far fewer of these than general-purpose digital pins.</button>
+      <button class="quiz-choice" data-correct="false">analogRead() only works when the chip is unpowered.</button>
+      <button class="quiz-choice" data-correct="false">Analog pins must be manually soldered on after purchase.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>ADC-capable pins are a limited, dedicated subset of a chip’s total pins — exactly the scarce-resource point raised back in Unit 1, Lesson 1.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. What does analogRead() return on a 10-bit ADC?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">A voltage in volts, directly.</button>
+      <button class="quiz-choice" data-correct="true">A raw count from 0 to 1023, representing the sampled voltage scaled across the ADC’s resolution.</button>
+      <button class="quiz-choice" data-correct="false">A temperature in degrees Celsius.</button>
+      <button class="quiz-choice" data-correct="false">Either HIGH or LOW, like digitalRead().</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>analogRead() gives a raw scaled count, not a finished physical unit — converting that count to volts, and then to a real-world quantity, are separate steps (Unit 1, Lesson 6).</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. In the example code, why is the "voltage" variable still not a usable temperature reading?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because analogRead() never returns a valid number.</button>
+      <button class="quiz-choice" data-correct="true">Because it still needs the two-point calibration step from Unit 1, Lesson 6 to convert voltage into an actual temperature.</button>
+      <button class="quiz-choice" data-correct="false">Because 10-bit ADCs cannot read thermistors.</button>
+      <button class="quiz-choice" data-correct="false">Because the thermistor must first be replaced with a thermocouple.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Raw voltage is only an intermediate step — turning it into degrees still requires the calibration mapping introduced in Unit 1, Lesson 6.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="analogread|analog read">
+    <p class="quiz-prompt">4. Fill in the blank: the common function name used to sample a voltage on an ADC-capable pin and return a raw digital count is ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>analogRead() is the standard call for sampling an analog-capable pin and getting back a scaled raw count.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="convert">
+    <p class="quiz-prompt">5. Fill in the blank: compared to digitalRead(), an analog read takes measurably longer because the ADC hardware needs time to sample and ___ the voltage.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Analog-to-digital conversion isn’t instantaneous — the ADC needs a short settling and conversion time, unlike a simple digital HIGH/LOW read.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: <a href="https://docs.arduino.cc/learn/electronics/analog-input">Arduino’s "Analog Input" documentation</a> documents analogRead() directly and shows the same raw-count-to-voltage conversion used in this lesson’s example.</p>
+
+  <p class="ask-teacher">Want to check how many ADC-capable pins a specific board has available? Ask your teacher — that’s what I’m here for. Next up: driving heavier loads than a single LED from a digital output pin.</p>
+
+  <footer class="lesson-footer">STEM+ · Mechatronics · Lesson 15 of the course sequence</footer>
+</div>

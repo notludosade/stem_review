@@ -1,0 +1,111 @@
+<meta charset="UTF-8">
+<link rel="icon" href="../../favicon.ico?v=1" type="image/x-icon">
+<title>Lesson 18: Analog-to-Digital Conversion: Resolution and Quantization — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · Mechatronics · Unit 4 · Lesson 18</span>
+  <h1>Analog-to-Digital Conversion: Resolution and Quantization</h1>
+  <p class="subtitle">A deeper look at the ADC used casually since Unit 1 — what "resolution" actually means, and what it costs you.</p>
+  <p class="nav-links"><a href="../Unit%203/0017-structuring-a-microcontroller-program.html" class="nav-prev">← Unit 3, Lesson 17</a> <a href="0019-dac-and-pwm-as-a-practical-substitute.html" class="nav-next">Lesson 19 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Unit 1 and Unit 3 both used the ADC without asking exactly how it turns a smooth voltage into a number. This lesson answers that directly — and gives a name to the small, unavoidable error every ADC introduces.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    An ADC's <strong>resolution</strong> is the number of bits it uses to represent a voltage reading. An <em>n</em>-bit ADC divides its input voltage range into 2<sup>n</sup> discrete levels. A common 10-bit ADC has 2<sup>10</sup> = 1024 levels (readings 0 through 1023) — exactly the range used throughout Unit 1's examples.
+  </div>
+
+  <div class="expr-block">step size = reference voltage / 2<sup>n</sup></div>
+
+  <div class="box example">
+    <span class="box-label">Example</span>
+    A 10-bit ADC with a 5 V reference has a step size of 5 / 1024 ≈ 4.88 mV. Any two input voltages closer together than that can't be told apart — they both round to the same raw count. A 12-bit ADC with the same 5 V reference has a much finer step size of 5 / 4096 ≈ 1.22 mV.
+  </div>
+
+  <h2>Quantization: the rounding you can’t avoid</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    <strong>Quantization</strong> is the rounding that happens every time a continuous analog voltage gets forced into one of the ADC's finite discrete levels. The resulting small difference between the true voltage and the reported level is <strong>quantization error</strong> — at most half a step size, but never fully eliminated at any finite resolution.
+  </div>
+
+  <svg class="figure" viewBox="0 0 340 160" width="340" height="160">
+    <line class="fig-axis" x1="20" y1="140" x2="320" y2="140"></line>
+    <line class="fig-axis" x1="20" y1="10" x2="20" y2="140"></line>
+    <path class="fig-guide" d="M 30 120 Q 170 10 310 60" fill="none"></path>
+    <path class="fig-curve" d="M 30 120 L 70 120 L 70 95 L 110 95 L 110 65 L 150 65 L 150 40 L 190 40 L 190 30 L 230 30 L 230 45 L 270 45 L 270 60 L 310 60" fill="none"></path>
+    <text class="fig-label" x="30" y="150">true (smooth) signal, dashed — ADC output, solid steps</text>
+  </svg>
+  <figcaption>Quantization: the ADC's stair-step output can only ever approximate the true, smooth input.</figcaption>
+
+  <div class="box why">
+    <span class="box-label">Why resolution isn’t "always maximize it"</span>
+    Higher resolution isn't free — more-bits ADCs are typically slower to convert each sample and more expensive, and beyond a certain point, the finer resolution is wasted resolving noise the sensor itself can't actually distinguish. Choosing resolution means matching it to what the sensor and the application genuinely need, not simply picking the largest number available.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. How many discrete levels does a 12-bit ADC have?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">12</button>
+      <button class="quiz-choice" data-correct="false">1024</button>
+      <button class="quiz-choice" data-correct="true">4096</button>
+      <button class="quiz-choice" data-correct="false">2048</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>An n-bit ADC has 2^n levels; 2^12 = 4096.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. What is quantization error?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">A permanent hardware failure in the ADC.</button>
+      <button class="quiz-choice" data-correct="true">The small, unavoidable rounding difference between the true continuous voltage and the ADC’s nearest discrete reported level.</button>
+      <button class="quiz-choice" data-correct="false">The delay between requesting a sample and receiving it.</button>
+      <button class="quiz-choice" data-correct="false">An error that only occurs when the reference voltage is wrong.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Because the ADC can only report one of a finite set of levels, some rounding is unavoidable — that rounding gap is quantization error.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why isn’t choosing the highest available ADC resolution always the right call?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Higher-resolution ADCs are always less accurate.</button>
+      <button class="quiz-choice" data-correct="true">Higher resolution often costs more, converts more slowly, and can resolve finer differences than the sensor or application actually needs.</button>
+      <button class="quiz-choice" data-correct="false">Higher-resolution ADCs cannot be used with microcontrollers.</button>
+      <button class="quiz-choice" data-correct="false">Resolution has no effect on quantization error at all.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Resolution should match real requirements — beyond a certain point, extra bits mostly resolve sensor noise rather than meaningful signal, while adding cost and conversion time.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="resolution">
+    <p class="quiz-prompt">4. Fill in the blank: the number of bits an ADC uses to represent a voltage reading is called its ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Resolution determines how many discrete levels — 2^n for n bits — the ADC can report.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="quantization">
+    <p class="quiz-prompt">5. Fill in the blank: the rounding that occurs whenever a continuous voltage is forced into one of an ADC’s finite discrete levels is called ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Quantization is the unavoidable rounding step at the heart of every analog-to-digital conversion.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: <a href="https://learn.sparkfun.com/tutorials/analog-to-digital-conversion/all">SparkFun’s "Analog to Digital Conversion" tutorial</a> covers resolution and quantization error in more depth, with additional worked examples at different bit depths.</p>
+
+  <p class="ask-teacher">Want to work through the step size for a specific ADC and reference voltage combination? Ask your teacher — that’s what I’m here for. Next up: going the other direction — turning digital values back into something analog.</p>
+
+  <footer class="lesson-footer">STEM+ · Mechatronics · Lesson 18 of the course sequence</footer>
+</div>

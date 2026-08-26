@@ -1,0 +1,117 @@
+<meta charset="UTF-8">
+<link rel="icon" href="../../favicon.ico?v=1" type="image/x-icon">
+<title>Lesson 9: Servo Motors and Position Control — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · Mechatronics · Unit 2 · Lesson 9</span>
+  <h1>Servo Motors and Position Control</h1>
+  <p class="subtitle">A DC motor, a gearbox, and a built-in feedback loop, all packaged together — this is your first real closed-loop system.</p>
+  <p class="nav-links"><a href="0008-driving-dc-motors-h-bridges-and-motor-drivers.html" class="nav-prev">← Lesson 8</a> <a href="0010-stepper-motors-and-precise-rotation.html" class="nav-next">Lesson 10 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>A plain DC motor only knows how to spin. A <strong>servo motor</strong> knows how to <em>hold a specific angle</em> — and it manages that using ideas this course won't formally name until Unit 5, packaged into one small, self-contained unit.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    A <strong>servo motor</strong> (in the hobbyist sense used throughout this course) is a small DC motor combined with a reduction gearbox, a position sensor (usually a potentiometer attached to the output shaft), and a built-in control circuit — all working together to drive the shaft to, and hold it at, a commanded angle.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why this is worth pausing on</span>
+    A servo is a complete closed-loop control system in miniature: it measures its own actual position (via the internal potentiometer), compares that to the commanded position, and drives its motor to close the gap — continuously, on its own, without any further instruction from your microcontroller beyond "go to this angle." Unit 5 gives this exact pattern a name: feedback. You're seeing a working example of it here, three units early.
+  </div>
+
+  <h2>How the microcontroller tells it where to go</h2>
+  <p>A hobby servo is commanded with a PWM signal repeated every 20 milliseconds, where the width of the HIGH pulse within that period — not its repetition rate — encodes the target angle. A pulse of about 1.0 ms commands roughly 0°, 1.5 ms commands the center (roughly 90°), and 2.0 ms commands roughly 180°, with everything in between mapped proportionally.</p>
+
+  <svg class="figure" viewBox="0 0 380 180" width="380" height="180">
+    <line class="fig-axis" x1="20" y1="30" x2="360" y2="30"></line>
+    <path class="fig-curve" d="M 20 30 L 20 12 L 60 12 L 60 30 L 360 30"></path>
+    <line class="fig-guide" x1="60" y1="6" x2="60" y2="34"></line>
+    <text class="fig-label" x="255" y="26">0° — about 1.0 ms pulse</text>
+    <line class="fig-axis" x1="20" y1="90" x2="360" y2="90"></line>
+    <path class="fig-curve" d="M 20 90 L 20 72 L 90 72 L 90 90 L 360 90"></path>
+    <line class="fig-guide" x1="90" y1="66" x2="90" y2="94"></line>
+    <text class="fig-label" x="255" y="86">90° — about 1.5 ms pulse</text>
+    <line class="fig-axis" x1="20" y1="150" x2="360" y2="150"></line>
+    <path class="fig-curve" d="M 20 150 L 20 132 L 120 132 L 120 150 L 360 150"></path>
+    <line class="fig-guide" x1="120" y1="126" x2="120" y2="154"></line>
+    <text class="fig-label" x="255" y="146">180° — about 2.0 ms pulse</text>
+    <text class="fig-label" x="20" y="170">each pulse repeats roughly every 20 ms</text>
+  </svg>
+  <figcaption>Servo control pulses: the pulse width (not the repeat rate) is what encodes the commanded angle.</figcaption>
+
+  <div class="box example">
+    <span class="box-label">Example</span>
+    A robot arm's gripper needs to open to a specific, repeatable angle every time, then hold it firmly while carrying a light load. A servo is a natural fit — send it one command, and it drives to that angle and actively resists being pushed off it, all using its own internal feedback loop.
+  </div>
+
+  <h2>A variant worth knowing: continuous rotation servos</h2>
+  <p>A modified version of the same hardware, called a <strong>continuous rotation servo</strong>, removes the internal angle limit and reinterprets the same pulse-width signal as a speed and direction command instead of a position command — 1.5 ms means stop, shorter pulses spin one way, longer pulses spin the other. It looks identical from the outside, uses the identical control signal, but behaves like a simple speed-controlled motor rather than a position-holding one — worth knowing so you don't assume every servo-shaped part holds an angle.</p>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What internal component allows a servo motor to know its own current shaft angle?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">A second, smaller servo motor.</button>
+      <button class="quiz-choice" data-correct="true">A potentiometer attached to the output shaft.</button>
+      <button class="quiz-choice" data-correct="false">An ultrasonic distance sensor.</button>
+      <button class="quiz-choice" data-correct="false">A thermistor measuring motor temperature.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The internal potentiometer turns with the output shaft, giving the servo’s control circuit a continuous reading of its actual current angle.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. A servo receives a repeating pulse close to 1.5 ms wide. Roughly what angle is being commanded?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">About 0°</button>
+      <button class="quiz-choice" data-correct="true">About 90° (center)</button>
+      <button class="quiz-choice" data-correct="false">About 180°</button>
+      <button class="quiz-choice" data-correct="false">The servo spins continuously with no fixed angle.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A roughly 1.5 ms pulse width commands the servo’s center position, close to 90°, with 1.0 ms and 2.0 ms mapping to the two extremes.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why is a standard servo motor described as a "closed-loop system in miniature"?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because it contains a loop of wire.</button>
+      <button class="quiz-choice" data-correct="true">Because it continuously compares its actual measured position to the commanded position and drives its motor to close the gap, without further instruction.</button>
+      <button class="quiz-choice" data-correct="false">Because its gearbox physically loops the motor’s shaft back on itself.</button>
+      <button class="quiz-choice" data-correct="false">Because it repeats the same motion forever once started.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The servo measures its own position via its internal potentiometer and self-corrects toward the commanded angle — exactly the feedback pattern Unit 5 formally defines.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="speed">
+    <p class="quiz-prompt">4. Fill in the blank: unlike a standard servo, a continuous rotation servo interprets its pulse-width signal as a ___ and direction command instead of a position command.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Removing the internal angle limit turns the same hardware and signal into a speed controller rather than a position controller.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="20">
+    <p class="quiz-prompt">5. Fill in the blank: a standard hobby servo’s control pulse repeats roughly every ___ milliseconds.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The 20 ms repetition period is standard across most hobby servos, even though the pulse width within that period varies with the commanded angle.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: <a href="https://learn.adafruit.com/adafruit-arduino-lesson-14-servo-motors">Adafruit’s "Arduino Lesson 14: Servo Motors" guide</a> covers the same pulse-width-to-angle mapping shown above, with real wiring and control code.</p>
+
+  <p class="ask-teacher">Curious what’s actually inside the servo’s control circuit doing the comparing? Unit 6 will name it precisely. Ask your teacher if you want a preview. Next up: a motor built for exact, repeatable steps instead of a held angle.</p>
+
+  <footer class="lesson-footer">STEM+ · Mechatronics · Lesson 9 of the course sequence</footer>
+</div>

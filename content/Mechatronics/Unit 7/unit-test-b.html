@@ -1,0 +1,131 @@
+<meta charset="UTF-8">
+<link rel="icon" href="../../favicon.ico?v=1" type="image/x-icon">
+<title>Unit 7 Test — Version B — Mechatronics — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/tests.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · Mechatronics · Unit 7 · Unit Test</span>
+  <h1>Unit 7 Test — Version B</h1>
+  <p class="subtitle">System Integration — combining sensors, actuators, and control loops into working subsystems, safety priorities, and debugging. 10 questions covering every lesson in this unit. Score 80% or higher to clear this unit.</p>
+  <p class="nav-links"><a href="../index.html" class="nav-toc">← Course Contents</a> <a href="unit-test-a.html" class="nav-toc">← Version A</a></p>
+
+  <div data-test data-course="Mechatronics" data-unit="Unit 7" data-kind="unit_test" data-version="B">
+
+    <div class="quiz" data-test-item data-topic="Integration Recipe Order">
+      <p class="quiz-prompt">1. According to the integration recipe, when should the control strategy (bang-bang vs. PID) be decided?</p>
+      <div class="quiz-choices">
+        <button class="quiz-choice" data-correct="false">Before identifying the sensor or actuator at all</button>
+        <button class="quiz-choice" data-correct="true">After identifying the sensor and actuator, matched to the actuator’s nature</button>
+        <button class="quiz-choice" data-correct="false">Control strategy is chosen randomly</button>
+        <button class="quiz-choice" data-correct="false">Only after the system is already built and tested</button>
+      </div>
+      <p class="quiz-feedback" hidden></p>
+      <p class="quiz-explain" hidden>Control strategy selection comes after sensor and actuator are identified, specifically matched to what the actuator can do.</p>
+    </div>
+
+    <div class="quiz" data-test-item data-topic="Matching Control Strategy to Actuator">
+      <p class="quiz-prompt">2. Why would using bang-bang control on a PWM-driven DC fan be a missed opportunity?</p>
+      <div class="quiz-choices">
+        <button class="quiz-choice" data-correct="false">PWM-driven fans cannot be controlled with bang-bang logic at all</button>
+        <button class="quiz-choice" data-correct="true">The fan is capable of smooth, continuously variable speed via PWM, and bang-bang wastes that capability</button>
+        <button class="quiz-choice" data-correct="false">Bang-bang control would damage the fan motor</button>
+        <button class="quiz-choice" data-correct="false">PWM-driven fans require a different sensor entirely</button>
+      </div>
+      <p class="quiz-feedback" hidden></p>
+      <p class="quiz-explain" hidden>When an actuator can genuinely produce smooth output, restricting it to strict on/off leaves real performance on the table.</p>
+    </div>
+
+    <div class="quiz" data-test-item data-test-fill data-topic="Temp-Fan Case Study Components" data-answers="moving average">
+      <p class="quiz-prompt">3. Fill in the blank: in the temperature-controlled fan case study, filtering the noisy thermistor reading before the control calculation uses a simple ___ ___ (two words) from Unit 4.</p>
+      <div class="quiz-fill-row">
+        <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      </div>
+      <p class="quiz-feedback" hidden></p>
+      <p class="quiz-explain" hidden>A simple moving average filter is sufficient smoothing for the slow-drifting thermistor signal in this case study.</p>
+    </div>
+
+    <div class="quiz" data-test-item data-topic="Error Sign Convention">
+      <p class="quiz-prompt">4. What is the consequence of getting a control loop’s error sign backward?</p>
+      <div class="quiz-choices">
+        <button class="quiz-choice" data-correct="false">The system responds slightly slower than optimal, but still works</button>
+        <button class="quiz-choice" data-correct="true">The controller pushes output in the wrong direction, actively fighting itself instead of correcting toward the setpoint</button>
+        <button class="quiz-choice" data-correct="false">Nothing — sign convention has no real effect</button>
+        <button class="quiz-choice" data-correct="false">The sensor stops producing readings entirely</button>
+      </div>
+      <p class="quiz-feedback" hidden></p>
+      <p class="quiz-explain" hidden>A flipped error sign makes the controller correct in the wrong direction, making the system actively worse rather than better.</p>
+    </div>
+
+    <div class="quiz" data-test-item data-topic="Line-Following Basic Logic">
+      <p class="quiz-prompt">5. Why is the basic two-sensor line-following logic described as "bang-bang-like"?</p>
+      <div class="quiz-choices">
+        <button class="quiz-choice" data-correct="false">Because it uses a thermistor to detect the line</button>
+        <button class="quiz-choice" data-correct="true">Each sensor only reports one of two states, and the response is one of a small set of fixed motor-speed combinations</button>
+        <button class="quiz-choice" data-correct="false">Because it requires a PID controller to function</button>
+        <button class="quiz-choice" data-correct="false">Because line-following robots cannot use any other strategy</button>
+      </div>
+      <p class="quiz-feedback" hidden></p>
+      <p class="quiz-explain" hidden>On/off sensor readings driving a fixed handful of discrete responses is exactly bang-bang-style control, applied to steering.</p>
+    </div>
+
+    <div class="quiz" data-test-item data-test-fill data-topic="Line-Following Proportional Upgrade" data-answers="error">
+      <p class="quiz-prompt">6. Fill in the blank: the more advanced line-following approach shows that PID is a completely general strategy for turning any measurable ___ into a corrective actuator output.</p>
+      <div class="quiz-fill-row">
+        <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      </div>
+      <p class="quiz-feedback" hidden></p>
+      <p class="quiz-explain" hidden>PID isn’t tied to temperature specifically — the same formula applies to any measurable error, including lateral line position.</p>
+    </div>
+
+    <div class="quiz" data-test-item data-topic="Safety Override vs Blending">
+      <p class="quiz-prompt">7. In the example pseudocode combining a temperature control loop with a safety override, what happens to the normal proportional-control calculation if the safety condition trips?</p>
+      <div class="quiz-choices">
+        <button class="quiz-choice" data-correct="false">It still runs and gets averaged with the override</button>
+        <button class="quiz-choice" data-correct="true">It never executes at all — the override branch runs instead, bypassing the normal calculation completely</button>
+        <button class="quiz-choice" data-correct="false">It runs twice, doubling the output</button>
+        <button class="quiz-choice" data-correct="false">Kp is automatically set to zero permanently</button>
+      </div>
+      <p class="quiz-feedback" hidden></p>
+      <p class="quiz-explain" hidden>The if/else structure means the safety branch and normal control branch are mutually exclusive.</p>
+    </div>
+
+    <div class="quiz" data-test-item data-topic="Sensor Fusion Definition">
+      <p class="quiz-prompt">8. What is a simple example of sensor fusion?</p>
+      <div class="quiz-choices">
+        <button class="quiz-choice" data-correct="false">Using a single sensor to control two separate actuators</button>
+        <button class="quiz-choice" data-correct="true">Averaging two redundant temperature sensors so one sensor’s failure or noise doesn’t wholly determine the reading</button>
+        <button class="quiz-choice" data-correct="false">Disabling a sensor when it reports an unexpected value</button>
+        <button class="quiz-choice" data-correct="false">Replacing an analog sensor with a digital one</button>
+      </div>
+      <p class="quiz-feedback" hidden></p>
+      <p class="quiz-explain" hidden>Combining multiple readings of the same quantity, like averaging redundant sensors, is a simple, real example of sensor fusion.</p>
+    </div>
+
+    <div class="quiz" data-test-item data-test-fill data-topic="Debugging: Isolate Before Combining" data-answers="sense">
+      <p class="quiz-prompt">9. Fill in the blank: testing a sensor reading alone, before adding any control logic, means printing its raw values and confirming they make physical ___ first.</p>
+      <div class="quiz-fill-row">
+        <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      </div>
+      <p class="quiz-feedback" hidden></p>
+      <p class="quiz-explain" hidden>Confirming raw sensor readings make physical sense is the first isolation step before trusting them in a control loop.</p>
+    </div>
+
+    <div class="quiz" data-test-item data-topic="Debugging: Common Failure Patterns">
+      <p class="quiz-prompt">10. An actuator doesn’t respond at all when commanded. What should be checked first, before assuming the control math is wrong?</p>
+      <div class="quiz-choices">
+        <button class="quiz-choice" data-correct="false">The PID gain values</button>
+        <button class="quiz-choice" data-correct="true">The driver wiring and configuration — such as an unconfigured enable pin or an underpowered GPIO pin</button>
+        <button class="quiz-choice" data-correct="false">The moving average window size</button>
+        <button class="quiz-choice" data-correct="false">The setpoint value</button>
+      </div>
+      <p class="quiz-feedback" hidden></p>
+      <p class="quiz-explain" hidden>Wiring and driver issues are far more commonly the culprit than a bug in the control formula itself.</p>
+    </div>
+
+    <p class="test-warning" data-test-warning hidden></p>
+    <button class="widget-btn" data-test-submit>Submit Test</button>
+    <div class="test-result" data-test-result hidden></div>
+  </div>
+
+  <footer class="lesson-footer">STEM+ · Mechatronics · Unit 7 Test — Version B</footer>
+</div>

@@ -1,0 +1,111 @@
+<meta charset="UTF-8">
+<link rel="icon" href="../../favicon.ico?v=1" type="image/x-icon">
+<title>Lesson 32: Putting P, I, and D Together — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · Mechatronics · Unit 6 · Lesson 32</span>
+  <h1>Putting P, I, and D Together</h1>
+  <p class="subtitle">Three separately-motivated terms, summed into one output, then handed off to the actuator that closes the loop.</p>
+  <p class="nav-links"><a href="0031-derivative-control-damping-and-anticipation.html" class="nav-prev">← Lesson 31</a> <a href="0033-basic-pid-tuning-intuition.html" class="nav-next">Lesson 33 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Lessons 29 through 31 covered each PID term in isolation, with its own motivating weakness and its own risk. This lesson puts them back together, the way a real controller actually runs.</p>
+
+  <div class="expr-block">output = K<sub>p</sub>e + K<sub>i</sub>∫e dt + K<sub>d</sub>(de/dt)</div>
+
+  <p>All three terms are computed from the same single error signal, every single control cycle, and simply added together into one final number. Nothing about combining them is more complicated than that summation — the complexity lives entirely in choosing good gains, which is Lesson 33's job.</p>
+
+  <div class="box example">
+    <span class="box-label">Worked example</span>
+    At one instant: error = 4, the running integral sum = 22, and the rate of change of error = −1.5 (error is currently shrinking). With Kp = 2, Ki = 0.5, Kd = 3: output = (2 × 4) + (0.5 × 22) + (3 × −1.5) = 8 + 11 − 4.5 = 14.5. Notice the derivative term's negative contribution here — it's actively pulling the total down because the error is already closing fast, exactly the damping effect from Lesson 31.
+  </div>
+
+  <h2>Where the number actually goes</h2>
+  <p>A raw PID output isn't automatically in a usable range for the actuator — it needs <strong>clamping</strong> (limiting) to whatever range the actuator can physically accept, most often a PWM duty cycle from 0–100% (or the corresponding 0–255-style integer range from Unit 4). A computed output of 140% or −20% is not physically meaningful and must be capped at the actuator's real limits before being sent out.</p>
+
+  <div class="box example">
+    <span class="box-label">Pseudocode: one full control cycle</span>
+<pre class="code-block"><code>loop():
+    measured = readSensor()
+    error = setpoint - measured
+    integralSum = integralSum + error * dt
+    derivative = (error - previousError) / dt
+
+    output = Kp*error + Ki*integralSum + Kd*derivative
+    output = clamp(output, 0, 100)     // stay within actuator’s real range
+
+    setActuator(output)                // e.g. write a PWM duty cycle
+    previousError = error</code></pre>
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why this is still the exact setup/loop pattern from Unit 3</span>
+    Everything here — read a sensor, compute a decision, write an actuator — is the same read-decide-write shape from Unit 3, Lesson 17. A PID controller is not a different kind of program; it's a more sophisticated version of the "decide" step, running inside the same loop() that a simple if-statement occupied back in Unit 3.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. At a given instant, error = 6, integral sum = 10, rate of change of error = 2, with Kp = 3, Ki = 1, Kd = 2. What is the total PID output?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">32</button>
+      <button class="quiz-choice" data-correct="false">18</button>
+      <button class="quiz-choice" data-correct="false">36</button>
+      <button class="quiz-choice" data-correct="false">28</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>(3 × 6) + (1 × 10) + (2 × 2) = 18 + 10 + 4 = 32.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why must a raw PID output typically be clamped before being sent to the actuator?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Clamping is optional and never actually necessary.</button>
+      <button class="quiz-choice" data-correct="true">The raw computed value can exceed the actuator’s physically valid range (like a PWM duty cycle above 100% or below 0%), which isn’t meaningful.</button>
+      <button class="quiz-choice" data-correct="false">Clamping converts the output from digital to analog.</button>
+      <button class="quiz-choice" data-correct="false">PID output is always already within a valid 0-100% range automatically.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A PID formula has no built-in awareness of the actuator’s real limits — clamping enforces those limits after the fact, before the value is actually used.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. How does a full PID control cycle relate to the setup/loop program structure from Unit 3?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">PID control requires an entirely different program structure with no loop() at all.</button>
+      <button class="quiz-choice" data-correct="true">A PID controller is a more sophisticated version of the decision logic running inside the same loop() phase, following the same read-decide-write pattern.</button>
+      <button class="quiz-choice" data-correct="false">PID control only runs once, during setup().</button>
+      <button class="quiz-choice" data-correct="false">PID controllers cannot be implemented on microcontrollers at all.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>PID is still read sensor → decide (now via the PID formula) → write actuator, every pass through loop() — the same shape introduced in Unit 3, just with a richer decision step.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="clamping|clamp">
+    <p class="quiz-prompt">4. Fill in the blank: limiting a computed PID output to the actuator’s physically valid range before sending it out is called ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Clamping ensures an out-of-range computed value (like 140% duty cycle) never actually reaches hardware that can’t accept it.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="previouserror|previous error">
+    <p class="quiz-prompt">5. Fill in the blank: in the pseudocode example, the variable that must be updated at the end of every cycle so the next cycle’s derivative calculation works correctly is ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>previousError must be updated every cycle so the next derivative calculation (error − previousError) reflects the most recent change, not a stale one.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: <a href="https://ctms.engin.umich.edu/CTMS/index.php?example=Introduction&section=ControlPID">University of Michigan’s Control Tutorials for MATLAB and Simulink — "Introduction: PID Controller Design"</a> shows the combined PID formula and a similar discretized control-loop implementation to the pseudocode used in this lesson.</p>
+
+  <p class="ask-teacher">Want to trace through a few more cycles of the worked example by hand? Ask your teacher — that’s what I’m here for. Next up: the practical craft of actually choosing Kp, Ki, and Kd for a real system.</p>
+
+  <footer class="lesson-footer">STEM+ · Mechatronics · Lesson 32 of the course sequence</footer>
+</div>

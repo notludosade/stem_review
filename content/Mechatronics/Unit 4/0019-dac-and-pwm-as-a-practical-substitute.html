@@ -1,0 +1,99 @@
+<meta charset="UTF-8">
+<link rel="icon" href="../../favicon.ico?v=1" type="image/x-icon">
+<title>Lesson 19: Digital-to-Analog Conversion (DAC) and PWM as a Practical Substitute — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · Mechatronics · Unit 4 · Lesson 19</span>
+  <h1>Digital-to-Analog Conversion (DAC) and PWM as a Practical Substitute</h1>
+  <p class="subtitle">Most cheap microcontrollers can’t output a true analog voltage — here’s the clever workaround nearly every one uses instead.</p>
+  <p class="nav-links"><a href="0018-adc-resolution-and-quantization.html" class="nav-prev">← Lesson 18</a> <a href="0020-pwm-for-motor-speed-and-led-brightness.html" class="nav-next">Lesson 20 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Lesson 18 covered turning an analog voltage into a digital number. The reverse operation — <strong>digital-to-analog conversion</strong> — turns a digital number back into an analog voltage.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    A <strong>DAC (digital-to-analog converter)</strong> is hardware that converts a digital number directly into a corresponding continuous analog voltage. Unlike ADC pins, which are common on nearly every microcontroller, a true DAC output is much less common — many popular boards (a standard Arduino Uno, for instance) have no dedicated DAC pin at all.
+  </div>
+
+  <h2>The workaround: PWM instead of a true DAC</h2>
+  <p>Rather than requiring dedicated DAC hardware, most microcontrollers fake an analog-ish output using <strong>PWM</strong> — rapidly switching a digital pin fully HIGH and fully LOW, so quickly that whatever is connected to it responds to the <em>average</em> voltage over time rather than the instantaneous on/off switching.</p>
+
+  <div class="box why">
+    <span class="box-label">Why this actually works</span>
+    A DC motor's shaft has real physical inertia — it can't meaningfully react to individual on/off pulses hundreds or thousands of times per second, so it responds to the pulses' time-averaged effect instead, spinning as if it received a steady, lower voltage. The same is true of an LED combined with a human eye's limited flicker perception at high enough switching rates. PWM doesn't literally produce an in-between voltage — it produces a rapidly switching full-voltage signal that behaves like one, to anything too slow to notice the switching itself.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Example</span>
+    A 5 V pin PWM'd at 50% duty cycle (detailed fully in the next lesson) delivers an average voltage of 2.5 V to a motor — close enough to true 2.5 V analog output that the motor spins at roughly the same speed either way, even though the pin itself is never actually sitting at a steady 2.5 V.
+  </div>
+
+  <p>For an application that truly needs a smooth, literal analog voltage — not just an "acts like one" average — PWM can be passed through a simple low-pass filter circuit (a resistor and capacitor) that smooths the rapid switching into an actual steady voltage. But for the overwhelming majority of mechatronics uses in this course — motor speed, LED brightness — the raw PWM signal itself, without any extra filtering, is exactly what's used.</p>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. Why do many popular microcontroller boards lack a true DAC output pin?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">DAC hardware is illegal to include on consumer electronics.</button>
+      <button class="quiz-choice" data-correct="true">True DAC hardware is less common than ADC hardware on cheap microcontrollers, so PWM is used instead to approximate the same effect.</button>
+      <button class="quiz-choice" data-correct="false">Microcontrollers cannot output any voltage other than 0 V.</button>
+      <button class="quiz-choice" data-correct="false">DAC hardware only works with digital sensors.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>ADC input is far more common than DAC output on inexpensive microcontrollers — PWM fills the gap for most practical purposes.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why does a DC motor respond to a PWM signal as if it were receiving a steady, lower analog voltage?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because PWM signals are secretly converted to true analog voltage inside the wire.</button>
+      <button class="quiz-choice" data-correct="true">Because the motor’s physical inertia is too slow to react to individual pulses, so it responds to their time-averaged effect instead.</button>
+      <button class="quiz-choice" data-correct="false">Because PWM only works on motors, never on LEDs.</button>
+      <button class="quiz-choice" data-correct="false">Because the motor contains its own internal DAC.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The motor can’t meaningfully respond to each fast on/off transition individually, so it effectively "sees" only the average voltage over many cycles.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. What circuit would you add to a PWM output if an application genuinely needed a smooth, literal steady analog voltage rather than just an "acts like one" average?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">A second microcontroller.</button>
+      <button class="quiz-choice" data-correct="true">A simple resistor-capacitor low-pass filter.</button>
+      <button class="quiz-choice" data-correct="false">An H-bridge.</button>
+      <button class="quiz-choice" data-correct="false">A pull-up resistor.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A resistor-capacitor low-pass filter smooths PWM’s rapid switching into an actual steady voltage — needed only when a true analog signal, not just an equivalent average effect, is required.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="dac">
+    <p class="quiz-prompt">4. Fill in the blank: hardware that converts a digital number directly into a corresponding continuous analog voltage is called a ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>DAC — digital-to-analog converter — is the direct-conversion hardware that PWM substitutes for on most cheap microcontrollers.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="pwm">
+    <p class="quiz-prompt">5. Fill in the blank: rapidly switching a digital pin fully on and off so that a connected device responds to its time-averaged effect is called ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>PWM (pulse-width modulation) is the workaround technique — the full topic of the next lesson.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: <a href="https://docs.arduino.cc/learn/microcontrollers/analog-output">Arduino’s "PWM: Analog Output" documentation</a> explains directly from the source why PWM is used as an analog-output substitute on boards without a true DAC pin.</p>
+
+  <p class="ask-teacher">Curious what a PWM signal looks like on an oscilloscope compared to a true DAC output? Ask your teacher — that’s what I’m here for. Next up: PWM in full detail — duty cycle, frequency, and controlling real motors and LEDs with it.</p>
+
+  <footer class="lesson-footer">STEM+ · Mechatronics · Lesson 19 of the course sequence</footer>
+</div>

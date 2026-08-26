@@ -1,0 +1,111 @@
+<meta charset="UTF-8">
+<link rel="icon" href="../../favicon.ico?v=1" type="image/x-icon">
+<title>Lesson 22: Moving-Average Smoothing in Practice — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · Mechatronics · Unit 4 · Lesson 22</span>
+  <h1>Moving-Average Smoothing in Practice</h1>
+  <p class="subtitle">Averaging without starting over every time — and the trade-off between smoothness and responsiveness that never fully goes away.</p>
+  <p class="nav-links"><a href="0021-noise-in-sensor-signals-and-simple-filtering.html" class="nav-prev">← Lesson 21</a> <a href="../Unit%205/0023-open-loop-vs-closed-loop-control.html" class="nav-next">Unit 5, Lesson 23 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>The previous lesson's fix — average N fresh samples, every time — works, but wastes time restarting from scratch on every reading. A <strong>moving average</strong> filter smooths a signal continuously instead, using a small rolling window of recent readings.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    A <strong>moving average filter</strong> keeps a buffer of the last <em>N</em> readings. Each time a new reading comes in, it's added to the buffer (and the oldest reading drops out), and the filter's output is the average of whatever's currently in that buffer.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">The unavoidable trade-off: smoothness vs. responsiveness</span>
+    A larger window (bigger N) averages over more readings, producing a smoother output that resists noise well — but it also lags further behind a genuine, real change in the underlying quantity, since old readings linger in the average longer. A smaller window responds faster to real changes but filters out less noise. There's no window size that's simply "better" in both directions at once — choosing N means picking a point on that trade-off, matched to how fast the real quantity actually changes and how much noise needs suppressing.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Example</span>
+    Smoothing a fast-changing signal (like a joystick's raw position) with a large window would make it feel sluggish and delayed. Smoothing a slow-changing signal (like room temperature) with a large window costs almost nothing, since the true value barely moves within the time the window spans anyway.
+  </div>
+
+  <h2>A lighter alternative: the exponential moving average</h2>
+  <p>Keeping an entire buffer of N past readings costs memory and a bit of bookkeeping. A simpler technique, the <strong>exponential moving average (EMA)</strong>, achieves a similar smoothing effect using just one stored number, updated each time a new reading arrives.</p>
+
+  <div class="expr-block">filtered = filtered + α × (newReading − filtered)</div>
+
+  <div class="box example">
+    <span class="box-label">Pseudocode</span>
+<pre class="code-block"><code>filtered = analogRead(SENSOR_PIN)   // seed with the first reading
+
+loop():
+    raw = analogRead(SENSOR_PIN)
+    filtered = filtered + ALPHA * (raw - filtered)   // ALPHA between 0 and 1
+    // use "filtered" instead of "raw" from here on</code></pre>
+  </div>
+
+  <p>The constant α (alpha) plays the same role as window size did for a moving average: a small α (close to 0) smooths heavily but responds slowly; a large α (close to 1) responds quickly but smooths less. Unlike a moving average, the EMA needs no stored history at all — just one running number — which is exactly why it shows up constantly in resource-limited microcontroller code.</p>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What does a moving average filter’s window size (N) control?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">The ADC’s resolution.</button>
+      <button class="quiz-choice" data-correct="true">The trade-off between how smooth the output is and how quickly it responds to a genuine real-world change.</button>
+      <button class="quiz-choice" data-correct="false">Whether the sensor is analog or digital.</button>
+      <button class="quiz-choice" data-correct="false">The supply voltage used by the sensor.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A larger window smooths more but lags further behind real changes; a smaller window responds faster but filters less noise — a direct trade-off controlled by N.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why might a large moving-average window be a poor choice for smoothing a fast-changing joystick position signal?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Large windows always increase noise instead of reducing it.</button>
+      <button class="quiz-choice" data-correct="true">A large window would lag noticeably behind the joystick’s real, fast movements, making it feel sluggish and delayed.</button>
+      <button class="quiz-choice" data-correct="false">Joystick signals cannot be filtered at all.</button>
+      <button class="quiz-choice" data-correct="false">Large windows only work with digital sensors.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Since old readings linger longer in a large window’s average, it responds more slowly to genuine fast changes — a real cost for something like a joystick that needs quick response.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. What is the main advantage of an exponential moving average (EMA) over a standard moving average filter?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">It requires storing an entire buffer of past readings.</button>
+      <button class="quiz-choice" data-correct="true">It achieves similar smoothing using just one stored running value, with no buffer of past readings needed.</button>
+      <button class="quiz-choice" data-correct="false">It eliminates noise completely with no trade-offs.</button>
+      <button class="quiz-choice" data-correct="false">It only works on digital signals, never analog ones.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>An EMA needs just one running number updated each cycle, unlike a moving average’s buffer of N past readings — a real memory savings on a resource-limited microcontroller.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="moving">
+    <p class="quiz-prompt">4. Fill in the blank: a filter that keeps a rolling buffer of the last N readings and outputs their average is called a ___ average filter.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Moving average is the standard name for this rolling-window smoothing technique.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="slower">
+    <p class="quiz-prompt">5. Fill in the blank: in the exponential moving average formula, a small value of alpha produces heavier smoothing but a ___ response to real changes.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A small alpha weights new readings lightly, smoothing heavily but responding more slowly to a genuine change — the same trade-off a large window size produces for a standard moving average.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: <a href="https://docs.arduino.cc/built-in-examples/analog/Smoothing/">Arduino’s official "Smoothing" example</a> implements the same moving-average buffer technique shown in this lesson, directly on real analog sensor readings.</p>
+
+  <p class="ask-teacher">Want to compare a moving average and an EMA on the same noisy reading side by side? Ask your teacher — that’s what I’m here for. Unit 4 is complete; Unit 5 finally puts a name to the self-correcting behavior servos previewed back in Unit 2 — control loops.</p>
+
+  <footer class="lesson-footer">STEM+ · Mechatronics · Lesson 22 of the course sequence</footer>
+</div>

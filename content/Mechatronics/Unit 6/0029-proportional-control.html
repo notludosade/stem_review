@@ -1,0 +1,102 @@
+<meta charset="UTF-8">
+<link rel="icon" href="../../favicon.ico?v=1" type="image/x-icon">
+<title>Lesson 29: Proportional Control (P) — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · Mechatronics · Unit 6 · Lesson 29</span>
+  <h1>Proportional Control (P)</h1>
+  <p class="subtitle">Bigger error, bigger push — the simplest of the three PID terms, and the one that reveals PID’s first real weakness.</p>
+  <p class="nav-links"><a href="0028-introducing-pid-why-bang-bang-isnt-enough.html" class="nav-prev">← Lesson 28</a> <a href="0030-integral-control-eliminating-steady-state-error.html" class="nav-next">Lesson 30 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>The <strong>proportional</strong> term is PID's simplest piece: the corrective output scales directly with how large the current error is.</p>
+
+  <div class="expr-block">output<sub>P</sub> = K<sub>p</sub> × error</div>
+
+  <div class="box example">
+    <span class="box-label">Example</span>
+    A proportional-controlled heater with K<sub>p</sub> = 10 (output in % PWM duty per °F of error): at 5°F below setpoint, output = 10 × 5 = 50% duty. At 1°F below setpoint, output = 10 × 1 = 10% duty. As the temperature closes in on the setpoint, the heater eases off smoothly instead of staying pinned at full power until it hits a bang-bang threshold.
+  </div>
+
+  <h2>Choosing Kp: too small, too large, and in between</h2>
+  <div class="box why">
+    <span class="box-label">The Kp trade-off</span>
+    Too small a K<sub>p</sub> produces a sluggish response — the system barely pushes back even with a sizable error, taking a long time to approach the setpoint. Too large a K<sub>p</sub> produces an aggressive, overreacting response — combined with any real system lag (Unit 5, Lesson 27), a large correction can overshoot the setpoint, then overcorrect back the other way, oscillating rather than settling. Finding a reasonable middle ground is the first step of the tuning process in Lesson 33.
+  </div>
+
+  <h2>The weakness pure P control never fixes on its own</h2>
+  <p>Consider cruise control climbing a hill with only proportional control. As the car slows below the setpoint speed, error grows, and P control increases throttle proportionally — good. But the moment the car's speed stabilizes at some value <em>slightly below</em> the setpoint (with just enough error to keep supplying the extra throttle needed to fight gravity on the incline), the system settles there and stays there. It needs <em>some</em> nonzero, persistent error to justify a persistent throttle correction against the hill's constant pull — so it accepts a small permanent gap instead of ever fully closing it.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    <strong>Steady-state error</strong> is the small, persistent gap between setpoint and actual value that remains even after a system has settled and stopped changing. Pure proportional control very often leaves one behind, because it needs a nonzero error to produce any nonzero corrective output at all.
+  </div>
+
+  <p>This isn't a tuning mistake — it's a structural limitation of proportional control by itself, on any system that needs a sustained corrective push just to hold steady (like fighting gravity on a hill, or fighting ongoing heat loss to a cold room). Fixing it is exactly the integral term's job, next.</p>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. A proportional controller has Kp = 4. At an error of 6 units, what is the proportional output?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">10</button>
+      <button class="quiz-choice" data-correct="true">24</button>
+      <button class="quiz-choice" data-correct="false">1.5</button>
+      <button class="quiz-choice" data-correct="false">4</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>output_P = Kp × error = 4 × 6 = 24.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. What typically happens when Kp is set too large for a system with real lag?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">The system responds too slowly to ever reach the setpoint.</button>
+      <button class="quiz-choice" data-correct="true">The system tends to overshoot the setpoint and oscillate, overcorrecting back and forth.</button>
+      <button class="quiz-choice" data-correct="false">The system ignores the setpoint entirely.</button>
+      <button class="quiz-choice" data-correct="false">Nothing changes regardless of Kp’s size.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>An overly aggressive Kp combined with real lag tends to produce overshoot and oscillation rather than a smooth, quick settle.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why does a cruise control system using only proportional control often settle at a speed slightly below the setpoint on an uphill climb?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because proportional control cannot be used for speed control.</button>
+      <button class="quiz-choice" data-correct="true">Because holding extra throttle against the hill’s pull requires a persistent nonzero error, which is the only thing that keeps producing nonzero proportional output.</button>
+      <button class="quiz-choice" data-correct="false">Because Kp is always set to zero on hills.</button>
+      <button class="quiz-choice" data-correct="false">Because cruise control only works on flat roads.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Sustaining a corrective output against a constant disturbance (gravity) requires a persistent error under pure P control — exactly the steady-state error problem.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="steady-state|steady state">
+    <p class="quiz-prompt">4. Fill in the blank: the small, persistent gap between setpoint and actual value that remains after a system has settled, common under pure proportional control, is called ___ error.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Steady-state error is the structural weakness of proportional-only control that the integral term (next lesson) is designed to eliminate.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="error">
+    <p class="quiz-prompt">5. Fill in the blank: in the proportional control formula, output equals Kp multiplied by the ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Proportional output is simply the gain Kp scaled by the current error — nothing more.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: <a href="https://ctms.engin.umich.edu/CTMS/index.php?example=Introduction&section=ControlPID">University of Michigan’s Control Tutorials for MATLAB and Simulink — "Introduction: PID Controller Design"</a> covers proportional control and steady-state error with the same cruise-control-style example used in this lesson.</p>
+
+  <p class="ask-teacher">Want to work through a Kp value that would leave a specific steady-state gap? Ask your teacher — that’s what I’m here for. Next up: the term that closes that lingering gap for good.</p>
+
+  <footer class="lesson-footer">STEM+ · Mechatronics · Lesson 29 of the course sequence</footer>
+</div>

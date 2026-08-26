@@ -1,0 +1,109 @@
+<meta charset="UTF-8">
+<link rel="icon" href="../../favicon.ico?v=1" type="image/x-icon">
+<title>Lesson 37: Handling Multiple Sensors and Priorities — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · Mechatronics · Unit 7 · Lesson 37</span>
+  <h1>Handling Multiple Sensors and Priorities</h1>
+  <p class="subtitle">Real systems rarely have just one input — and not every input deserves an equal vote.</p>
+  <p class="nav-links"><a href="0036-case-study-line-following-logic.html" class="nav-prev">← Lesson 36</a> <a href="0038-debugging-and-testing-an-integrated-mechatronic-system.html" class="nav-next">Lesson 38 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Both case studies so far used sensors feeding into one single control decision. Real systems often need to watch several sensors at once, and — critically — not all of them should be treated equally.</p>
+
+  <div class="box why">
+    <span class="box-label">The key idea: some conditions override, they don’t just contribute</span>
+    A normal control loop blends its inputs into one smooth decision (Units 5–6). A <strong>safety condition</strong> — a limit switch tripped, a temperature reading past a safe maximum, an over-current detection — shouldn't be blended in as "one more input to average." It should <em>override</em> the normal control output entirely, the moment it's detected.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Example: the temperature-controlled fan, with a safety override added</span>
+<pre class="code-block"><code>loop():
+    smoothedTemp = readAndFilterTemp()
+    overTempLimit = (smoothedTemp > MAX_SAFE_TEMP)
+    switchTripped = (digitalRead(LIMIT_SWITCH_PIN) == LOW)
+
+    if overTempLimit OR switchTripped:
+        setPwmDutyCycle(FAN_PWM_PIN, 100)   // full speed, no negotiation
+    else:
+        error = smoothedTemp - TARGET_TEMP
+        output = clamp(Kp * error, 0, 100)
+        setPwmDutyCycle(FAN_PWM_PIN, output)</code></pre>
+  </div>
+
+  <p>Notice the structure: the safety check runs <em>first</em>, and if it trips, the normal proportional-control math (Lesson 35) never even executes — the override completely bypasses it, rather than being folded into the same calculation. This if/else priority structure, not a weighted blend, is the standard pattern for safety-critical conditions throughout real mechatronic systems.</p>
+
+  <h2>A lighter idea: combining multiple readings of the same quantity</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    <strong>Sensor fusion</strong> is combining readings from multiple sensors (or multiple sensor types) measuring the same or related quantities, to produce a single, more reliable estimate than any one sensor alone would give. A simple example: averaging two redundant temperature sensors so a single sensor's failure or noise doesn't wholly determine the reading.
+  </div>
+
+  <p>Sensor fusion can get mathematically sophisticated (weighting sensors by how much each is trusted, for instance) — well beyond this course's scope — but the core idea is worth carrying forward: multiple sensors watching the same thing, combined thoughtfully, beat relying on just one.</p>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. Why shouldn’t a safety condition (like an over-temperature limit or a tripped limit switch) be blended into a control loop’s normal weighted calculation?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Safety conditions cannot be detected by any sensor.</button>
+      <button class="quiz-choice" data-correct="true">A safety condition needs to fully override the normal output the instant it’s detected, not just nudge a blended average.</button>
+      <button class="quiz-choice" data-correct="false">Safety conditions should always be ignored in favor of the primary control loop.</button>
+      <button class="quiz-choice" data-correct="false">Blending is only possible with exactly one sensor.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A tripped safety condition demands an immediate, full override — treating it as just one more weighted input would let the normal control math dilute a response that needs to be immediate and complete.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. In the example pseudocode, what happens to the normal proportional-control calculation if overTempLimit or switchTripped is true?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">It still runs and gets averaged with the override.</button>
+      <button class="quiz-choice" data-correct="true">It never executes at all — the override branch runs instead, bypassing the normal calculation completely.</button>
+      <button class="quiz-choice" data-correct="false">It runs twice, doubling the output.</button>
+      <button class="quiz-choice" data-correct="false">It runs, but Kp is automatically set to zero.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The if/else structure means the safety branch and the normal control branch are mutually exclusive — the safety override completely bypasses the normal math when triggered.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. What is sensor fusion?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Physically soldering two sensors into one component.</button>
+      <button class="quiz-choice" data-correct="true">Combining readings from multiple sensors measuring the same or related quantities into a single, more reliable estimate.</button>
+      <button class="quiz-choice" data-correct="false">A technique that only works with digital sensors, never analog ones.</button>
+      <button class="quiz-choice" data-correct="false">A safety override mechanism identical to a limit switch.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Sensor fusion combines multiple sensors’ information into a single, more trustworthy estimate — distinct from a safety override, which is about priority, not combining readings.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="override">
+    <p class="quiz-prompt">4. Fill in the blank: structuring code so a safety condition is checked first, and completely bypasses the normal control calculation if triggered, is called a priority ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>An override, structured as an if/else priority check, is the standard pattern for handling safety-critical conditions.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="fusion">
+    <p class="quiz-prompt">5. Fill in the blank: combining readings from multiple sensors into a single, more reliable estimate of the same quantity is called sensor ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Sensor fusion is the general name for this combining technique — from simple averaging up to more sophisticated trust-weighted methods.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: <a href="https://ctms.engin.umich.edu/CTMS/index.php?example=Introduction&section=ControlPID">University of Michigan’s Control Tutorials for MATLAB and Simulink — "Introduction: PID Controller Design"</a> situates safety interlocks and override logic within the broader context of real control system design covered across this unit.</p>
+
+  <p class="ask-teacher">Want to add a second safety condition to the example pseudocode together? Ask your teacher — that’s what I’m here for. Next up: what to do when an integrated system like this doesn’t work the first time.</p>
+
+  <footer class="lesson-footer">STEM+ · Mechatronics · Lesson 37 of the course sequence</footer>
+</div>
