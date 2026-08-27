@@ -1,0 +1,104 @@
+<meta charset="UTF-8">
+<link rel="icon" href="../../favicon.ico?v=1" type="image/x-icon">
+<title>Lesson 1: What Makes a Robot a Robot? — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · Advanced Robotics · Unit 1 · Lesson 1</span>
+  <h1>What Makes a Robot a Robot?</h1>
+  <p class="subtitle">Every robot is a machine, but not every machine is a robot — the difference is a loop that closes over what it senses.</p>
+  <p class="nav-links"><a href="0002-degrees-of-freedom.html" class="nav-next">Lesson 2 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Engineering 1 gave you the design process, and Computer Programming 1 gave you loops, conditionals, and functions. This course puts both to work on one specific kind of system: a robot. Before building anything, it's worth being precise about what that word actually commits you to — because "robot" gets used loosely enough in everyday speech that the engineering definition is easy to miss.</p>
+
+  <h2>A body, a way to move it, a way to sense, and a way to decide</h2>
+  <div class="box">
+    <span class="box-label">Definition</span>
+    A <strong>robot</strong> is a physical system built from four parts working together: a body made of rigid <strong>links</strong> connected by movable <strong>joints</strong>, <strong>actuators</strong> that supply the force or torque to move those joints, <strong>sensors</strong> that measure the robot's own state and its surroundings, and a <strong>controller</strong> that repeatedly decides what to do next based on what the sensors report.
+  </div>
+
+  <p>That last part is the one people skip past. A wind-up toy car has a body and an actuator (the spring), but no sensors and no decision loop — it does the same thing every time regardless of what's in front of it. A robot, by contrast, is defined by that closed loop: sense, decide, act, and sense again. Everything this course covers — kinematics, perception, localization, planning, control, autonomy, manipulation — is really just filling in different pieces of that one loop in more and more detail.</p>
+
+  <div class="box why">
+    <span class="box-label">Why the loop matters more than the hardware</span>
+    A CNC milling machine and a six-jointed robot arm can be built from nearly identical hardware — the same kinds of links, joints, and motors. What makes one a "robot" in the fuller sense and the other closer to automated machinery is what happens when the world doesn't match expectations. A CNC machine follows its pre-programmed toolpath blindly; if the workpiece has shifted, it cuts in the wrong place. A robot arm with force or vision feedback can notice the mismatch and correct for it. The hardware is similar; the loop is what changes the behavior.
+  </div>
+
+  <p>This is also why Advanced Robotics builds directly on a prerequisite you already have: sensors, actuators, and control loops are Mechatronics-level fundamentals, and a robot is what you get when you compose many of those loops — one per joint, plus higher-level loops for navigation and decision-making — into a single integrated system that has to work as a whole, not as isolated parts.</p>
+
+  <h2>Links and joints: the kinematic chain</h2>
+  <p>The physical body of almost every robot — a manipulator arm, a mobile rover, a legged robot — is a series of rigid links connected by joints, called a <strong>kinematic chain</strong>. A joint is either <strong>revolute</strong> (it rotates, like an elbow) or <strong>prismatic</strong> (it slides along a line, like a piston). Chaining several of these together, base to tip, is what lets a small number of motors produce a rich range of positions and orientations at the far end of the chain — the part of the robot that actually does the work, called the <strong>end-effector</strong>.</p>
+
+  <div class="box example">
+    <span class="box-label">Example</span>
+    A warehouse picking arm bolted to the floor is a kinematic chain: a fixed base, several revolute joints, rigid links between them, and a gripper (the end-effector) at the tip. A conveyor belt sorting the same packages is not a kinematic chain in this sense — it has one degree of motion (the belt), no joints connecting separate rigid bodies, and — critically — no sensing loop deciding where to place anything. It moves; it doesn't decide.
+  </div>
+
+  <p>The next lesson gives this idea a number: exactly how much a kinematic chain can move is captured by its <strong>degrees of freedom</strong>, and that number turns out to drive almost every other design decision about a robot's body.</p>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What distinguishes a robot from a simple automated machine like a wind-up toy?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Robots are always more expensive to build.</button>
+      <button class="quiz-choice" data-correct="true">A robot repeatedly senses, decides, and acts in a closed loop; the toy does not.</button>
+      <button class="quiz-choice" data-correct="false">Robots never use motors, only springs.</button>
+      <button class="quiz-choice" data-correct="false">A robot has no physical body, only software.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The defining feature is the closed sense-decide-act loop. A wind-up toy has an actuator (the spring) but no sensing or decision-making, so it can't respond to a changed environment.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. A CNC milling machine and a six-jointed robot arm can share nearly identical hardware. What most separates them, in the sense this lesson uses?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">The CNC machine is always larger.</button>
+      <button class="quiz-choice" data-correct="false">The robot arm uses hydraulics and the CNC machine never does.</button>
+      <button class="quiz-choice" data-correct="true">Whether feedback from sensing lets the system correct for a mismatch between expectation and reality.</button>
+      <button class="quiz-choice" data-correct="false">Robot arms never have rigid links.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Hardware alone doesn't decide the label — a CNC machine that blindly follows a preset path versus an arm that senses and corrects is a difference in the control loop, not the mechanism.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. In the kinematic-chain vocabulary of this lesson, what is a prismatic joint?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">A joint that rotates about an axis, like an elbow.</button>
+      <button class="quiz-choice" data-correct="true">A joint that slides along a line, like a piston.</button>
+      <button class="quiz-choice" data-correct="false">The part of the robot that does the actual work, like a gripper.</button>
+      <button class="quiz-choice" data-correct="false">A sensor that measures joint angle.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Prismatic joints slide linearly; revolute joints rotate. Both connect rigid links into a kinematic chain.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="end-effector|end effector">
+    <p class="quiz-prompt">4. Fill in the blank: the part of a robot's kinematic chain that actually does the work — a gripper, a welding torch, a paint nozzle — is called the ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The end-effector is the working tip of the kinematic chain, at the far end from the fixed base.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="chain">
+    <p class="quiz-prompt">5. Fill in the blank: a series of rigid links connected by movable joints, from a robot's base to its end-effector, is called a kinematic ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Kinematic chain is the standard term for this base-to-tip series of links and joints.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: Kevin M. Lynch and Frank C. Park, <a href="https://modernrobotics.northwestern.edu/chapters/chapter1/">Chapter 1, "Preview,"</a> from <em>Modern Robotics: Mechanics, Planning, and Control</em> (Cambridge University Press, 2017), free online at modernrobotics.northwestern.edu, lays out the same body/actuator/sensor/controller picture this lesson builds from.</p>
+
+  <p class="ask-teacher">Stuck on why the control loop matters more than the specific hardware, or want another real-vs-not-a-robot example? Ask your teacher — that's what I'm here for. Next up: giving the kinematic chain's freedom of movement an actual number.</p>
+
+  <footer class="lesson-footer">STEM+ · Advanced Robotics · Lesson 1 of the course sequence</footer>
+</div>

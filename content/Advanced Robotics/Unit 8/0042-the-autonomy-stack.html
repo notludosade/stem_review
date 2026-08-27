@@ -1,0 +1,114 @@
+<meta charset="UTF-8">
+<link rel="icon" href="../../favicon.ico?v=1" type="image/x-icon">
+<title>Lesson 42: The Autonomy Stack — How the Pieces Fit Together — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · Advanced Robotics · Unit 8 · Lesson 42</span>
+  <h1>The Autonomy Stack — How the Pieces Fit Together</h1>
+  <p class="subtitle">Seven units built seven separate capabilities. This lesson draws the map showing how they actually connect into one running system.</p>
+  <p class="nav-links"><a href="../Unit%207/0041-manipulation-pipelines.html" class="nav-prev">← Unit 7, Lesson 41</a> <a href="0043-case-study-warehouse-robots.html" class="nav-next">Lesson 43 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Every unit of this course built one piece of a robot's overall capability: kinematics, sensing, localization, planning, motion control, decision-making, manipulation. Real robots don't run these as separate, disconnected programs — they form a layered <strong>autonomy stack</strong>, each layer consuming the output of the layers below it and feeding the layers above.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    An <strong>autonomy stack</strong> is the full software architecture connecting a robot's perception, state estimation, planning, and control into one running system — the concrete answer to "how does all of this actually fit together," as opposed to any single algorithm in isolation.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Tracing one data path through the whole stack</span>
+    A single LIDAR scan (Unit 2) feeds into localization and mapping (Unit 3), producing a pose estimate and an updated occupancy grid. That grid and pose feed into global path planning (Unit 4), producing a route. That route feeds into trajectory generation and tracking control (Unit 5), producing motor commands — but only once decision-making (Unit 6) has confirmed navigating is actually the current priority, and only for a route to a location a manipulation task (Unit 7) needs to reach. Every arrow in that chain is a real dependency: a fault in an early stage (bad localization, Unit 3) doesn't stay contained — it propagates through planning, control, and ultimately into what the robot's manipulator physically attempts to do.
+  </div>
+
+  <svg class="figure" viewBox="0 0 320 220" width="320" height="220">
+    <rect x="20" y="10" width="280" height="30" fill="none" stroke="var(--text)" rx="4"></rect>
+    <text class="fig-label" x="35" y="30">Perception (Unit 2)</text>
+    <line x1="160" y1="40" x2="160" y2="55" stroke="var(--border)"></line>
+    <rect x="20" y="55" width="280" height="30" fill="none" stroke="var(--text)" rx="4"></rect>
+    <text class="fig-label" x="35" y="75">Localization &amp; Mapping (Unit 3)</text>
+    <line x1="160" y1="85" x2="160" y2="100" stroke="var(--border)"></line>
+    <rect x="20" y="100" width="280" height="30" fill="none" stroke="var(--text)" rx="4"></rect>
+    <text class="fig-label" x="35" y="120">Path Planning (Unit 4)</text>
+    <line x1="160" y1="130" x2="160" y2="145" stroke="var(--border)"></line>
+    <rect x="20" y="145" width="280" height="30" fill="none" stroke="var(--text)" rx="4"></rect>
+    <text class="fig-label" x="35" y="165">Motion Control (Unit 5)</text>
+    <line x1="160" y1="175" x2="160" y2="190" stroke="var(--border)"></line>
+    <rect x="20" y="190" width="280" height="25" fill="none" stroke="var(--accent)" rx="4"></rect>
+    <text class="fig-label" x="35" y="207">Decision-Making (Unit 6) coordinates every layer</text>
+  </svg>
+  <figcaption>Each layer consumes the layer below it — and Unit 6's decision-making coordinates across all of them, not just one.</figcaption>
+
+  <div class="box example">
+    <span class="box-label">Example</span>
+    Real navigation frameworks are built exactly this way. The Nav2 project, a widely used open-source robot navigation system, structures its behavior as a behavior tree (Unit 6) coordinating a planner (Unit 4's A*-style global planning), a controller (Unit 5's trajectory-tracking), and recovery behaviors — all consuming localization (Unit 3) built from sensor data (Unit 2) — the same layered structure this lesson just diagrammed, running on real deployed robots rather than as a course diagram.
+  </div>
+
+  <p>This lesson gave the map. The rest of this unit grounds it in real systems: three case studies of full autonomy stacks doing real work in the world, then a lesson on how these integrated systems actually fail, and finally a capstone that asks you to design one yourself.</p>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What is an autonomy stack?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">A single sensor mounted on top of a robot.</button>
+      <button class="quiz-choice" data-correct="true">The full software architecture connecting perception, state estimation, planning, and control into one running system.</button>
+      <button class="quiz-choice" data-correct="false">A synonym for a robot's kinematic chain.</button>
+      <button class="quiz-choice" data-correct="false">A type of gripper.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The autonomy stack is the layered software connecting every capability this course covered into one running system, not any single algorithm alone.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. In the traced data path (LIDAR → localization → planning → control), what happens if localization (Unit 3) produces a faulty pose estimate?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">The fault stays contained within localization and affects nothing else.</button>
+      <button class="quiz-choice" data-correct="true">The fault propagates through planning and control, ultimately affecting what the robot physically attempts to do.</button>
+      <button class="quiz-choice" data-correct="false">Planning automatically corrects any localization fault.</button>
+      <button class="quiz-choice" data-correct="false">Motion control ignores localization entirely.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Each layer depends on the layers below it, so an early-stage fault like bad localization propagates downstream through the whole stack rather than staying isolated.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. How does the Nav2 example illustrate the layered autonomy stack idea?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Nav2 uses no planning or control at all.</button>
+      <button class="quiz-choice" data-correct="true">Nav2 structures a behavior tree coordinating a planner, a controller, and recovery behaviors, all consuming localization built from sensor data.</button>
+      <button class="quiz-choice" data-correct="false">Nav2 is unrelated to any of this course's units.</button>
+      <button class="quiz-choice" data-correct="false">Nav2 only handles manipulation, not navigation.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Nav2 is a real, deployed example of exactly this layered structure: perception feeding localization feeding planning feeding control, coordinated by a behavior tree.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="stack">
+    <p class="quiz-prompt">4. Fill in the blank: the full software architecture connecting a robot's perception, localization, planning, and control into one running system is called the autonomy ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Autonomy stack is the standard term for this layered architecture.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="coordinates">
+    <p class="quiz-prompt">5. Fill in the blank: in the layered stack, Unit 6's decision-making layer ___ across every other layer, not just one.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Decision-making (FSMs and behavior trees) sits above the other layers, coordinating which capability is active rather than replacing any of them.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: the Nav2 project's <a href="https://docs.nav2.org/behavior_trees/index.html">"Nav2 Behavior Trees"</a> documentation describes a complete, real autonomy stack — perception, localization, planning, control, and recovery, coordinated by a behavior tree — matching this lesson's diagram on an actual deployed system.</p>
+
+  <p class="ask-teacher">Stuck on tracing a different data path through the stack, or want to sketch where manipulation (Unit 7) fits into the diagram? Ask your teacher — that's what I'm here for. Next up: a real integrated autonomy stack doing real work — warehouse robots.</p>
+
+  <footer class="lesson-footer">STEM+ · Advanced Robotics · Lesson 42 of the course sequence</footer>
+</div>

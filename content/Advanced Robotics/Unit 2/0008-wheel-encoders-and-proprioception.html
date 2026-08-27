@@ -1,0 +1,100 @@
+<meta charset="UTF-8">
+<link rel="icon" href="../../favicon.ico?v=1" type="image/x-icon">
+<title>Lesson 8: Wheel Encoders and Proprioception — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · Advanced Robotics · Unit 2 · Lesson 8</span>
+  <h1>Wheel Encoders and Proprioception</h1>
+  <p class="subtitle">Counting wheel rotations sounds like it should give exact distance traveled. It doesn't — and the gap matters more than it looks.</p>
+  <p class="nav-links"><a href="0007-how-robots-sense-the-world.html" class="nav-prev">← Lesson 7</a> <a href="0009-lidar-and-range-sensing.html" class="nav-next">Lesson 9 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>A wheel encoder is the most common way a mobile robot measures its own motion, and it's a good first example of proprioception because its failure mode is so easy to picture directly.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    A <strong>wheel encoder</strong> is a sensor attached to a wheel's axle that counts discrete <strong>ticks</strong> as the wheel rotates, with a fixed number of ticks corresponding to one full revolution (its <strong>resolution</strong>). Counting ticks over time gives an estimate of how far, and how fast, the wheel has turned.
+  </div>
+
+  <div class="expr-block">distance traveled ≈ (ticks counted / ticks per revolution) × wheel circumference</div>
+
+  <div class="box example">
+    <span class="box-label">Worked example</span>
+    A wheel with a 0.3 m circumference is attached to an encoder with a resolution of 360 ticks per revolution. The encoder counts 900 ticks. Revolutions turned = 900 / 360 = 2.5. Distance traveled ≈ 2.5 × 0.3 m = 0.75 m. A finer-resolution encoder (say, 1440 ticks per revolution) gives a more precise estimate of partial revolutions, but does not fix the deeper problem below.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why this estimate quietly assumes something false</span>
+    The formula above assumes that every bit of wheel rotation converts directly into forward motion — that the wheel rolls without slipping. On a wet floor, loose gravel, or carpet, a wheel can spin without the robot actually covering that much ground, or vice versa if it's briefly dragged. Tire deformation, uneven ground, and manufacturing tolerances in the wheel's actual diameter add further small errors. None of these show up in the raw tick count — the sensor faithfully reports how much the wheel turned, which is subtly not the same thing as how far the robot moved.
+  </div>
+
+  <p>Individually, each of these errors is small. The problem — covered properly in the next unit — is that they don't cancel out over time; they accumulate. A wheel encoder is a good proprioceptive sensor for short-term, high-frequency estimates of motion, and a systematically unreliable one for knowing exactly where a robot is after a long drive.</p>
+
+  <p>This lesson deliberately previewed a problem it doesn't solve: encoders are the raw input to <strong>odometry</strong>, the running estimate of a robot's position built from exactly this kind of wheel-rotation counting — and Unit 3 is dedicated to what happens to that estimate over time.</p>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What does a wheel encoder directly measure?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">The robot's exact position in the world frame.</button>
+      <button class="quiz-choice" data-correct="true">Discrete ticks as the wheel rotates.</button>
+      <button class="quiz-choice" data-correct="false">The distance to the nearest obstacle.</button>
+      <button class="quiz-choice" data-correct="false">The robot's battery voltage.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>An encoder counts ticks per rotation; distance traveled is only an estimate computed from that tick count and the wheel's circumference.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why doesn't wheel-slip on a wet floor show up directly in an encoder's raw tick count?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because encoders are designed to detect slip automatically.</button>
+      <button class="quiz-choice" data-correct="true">Because the encoder faithfully reports how much the wheel turned, not how far the robot actually moved.</button>
+      <button class="quiz-choice" data-correct="false">Because wet floors disable encoders entirely.</button>
+      <button class="quiz-choice" data-correct="false">Because slip only happens at very high speeds.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The encoder measures wheel rotation, not ground truth motion — if the wheel spins without traction, ticks accumulate with no matching distance covered.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why is a wheel encoder described as a good sensor for short-term motion estimates but unreliable for knowing exact position after a long drive?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because encoders wear out and stop working after an hour.</button>
+      <button class="quiz-choice" data-correct="true">Because small per-step errors (slip, tire deformation) don't cancel out — they accumulate over time.</button>
+      <button class="quiz-choice" data-correct="false">Because encoders can only count up to a fixed maximum number of ticks.</button>
+      <button class="quiz-choice" data-correct="false">Because long drives always occur on wet floors.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Individually small errors compound over a long drive rather than averaging out, which is exactly the dead-reckoning drift problem Unit 3 covers in depth.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="resolution">
+    <p class="quiz-prompt">4. Fill in the blank: the number of encoder ticks corresponding to one full wheel revolution is called the encoder's ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Resolution describes how finely the encoder can distinguish partial rotations — more ticks per revolution means finer precision.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="0.2">
+    <p class="quiz-prompt">5. For a wheel with 0.4 m circumference and an encoder with 200 ticks per revolution, if the encoder counts 100 ticks, fill in the blank: the estimated distance traveled is ___ m.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Revolutions = 100/200 = 0.5. Distance = 0.5 × 0.4 m = 0.2 m.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: ROS REP 105, <a href="https://www.ros.org/reps/rep-0105.html">"Coordinate Frames for Mobile Platforms,"</a> describes the odom frame built directly from wheel-rotation sources like encoders — including the exact drift behavior this lesson previewed.</p>
+
+  <p class="ask-teacher">Stuck on the tick-to-distance formula, or want to work through a slip scenario numerically? Ask your teacher — that's what I'm here for. Next up: a sensor that measures the world directly instead of inferring motion — LIDAR.</p>
+
+  <footer class="lesson-footer">STEM+ · Advanced Robotics · Lesson 8 of the course sequence</footer>
+</div>

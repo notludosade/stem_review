@@ -1,0 +1,124 @@
+<meta charset="UTF-8">
+<link rel="icon" href="../../favicon.ico?v=1" type="image/x-icon">
+<title>Lesson 3: Coordinate Frames and Robot Pose — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · Advanced Robotics · Unit 1 · Lesson 3</span>
+  <h1>Coordinate Frames and Robot Pose</h1>
+  <p class="subtitle">Position by itself is not enough to describe a robot part — you also need to know which way it's facing, and relative to what.</p>
+  <p class="nav-links"><a href="0002-degrees-of-freedom.html" class="nav-prev">← Lesson 2</a> <a href="0004-forward-kinematics.html" class="nav-next">Lesson 4 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>You already know how to describe a point with coordinates (x, y) or (x, y, z), and you're comfortable with the idea of an angle. This lesson combines those familiar pieces into the two ideas every later unit leans on: <strong>pose</strong>, and the <strong>coordinate frame</strong> it's measured against.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    A rigid body's <strong>pose</strong> is its position (where it is) together with its orientation (which way it's rotated). Neither half is optional: knowing a robot gripper is "at (2, 0, 1) meters" doesn't tell you whether it's facing forward or backward, and knowing it's "rotated 90°" doesn't tell you where it is. A <strong>coordinate frame</strong> is the reference — an origin point plus a set of axis directions — that position and orientation are measured against.
+  </div>
+
+  <p>"Position" and "orientation" are only meaningful once you fix a frame, exactly the way Lesson 1 of AP Physics 1 makes the same point about a bare position on a number line. A robot typically uses several frames at once, not just one:</p>
+
+  <div class="box why">
+    <span class="box-label">Why more than one frame</span>
+    A <strong>world frame</strong> is fixed to the environment (the corner of a room, a spot on a warehouse floor) and doesn't move. A <strong>body frame</strong> is attached to the robot itself (or to one specific link of it) and moves as the robot moves. Sensor readings, joint angles, and planned motions are each naturally expressed in whichever frame makes them simplest — a LIDAR return is easiest to describe relative to the sensor, a destination is easiest to describe relative to the world — so robots constantly convert between frames rather than picking just one and forcing everything into it.
+  </div>
+
+  <p>Lesson 1's kinematic chain gives a natural way to organize this: attach one frame to the fixed base, one frame to each link, and one to the end-effector. Frame {1} is fixed relative to frame {0} the moment you know joint 1's angle; frame {2} is fixed relative to frame {1} the moment you know joint 2's angle; and so on down the chain. Each frame's position and orientation relative to the <em>previous</em> frame in the chain is simple to write down — the complexity is in combining all of them at once, which is exactly the next lesson's job.</p>
+
+  <svg class="figure" viewBox="0 0 380 200" width="380" height="200">
+    <defs>
+      <marker id="frame-arrow" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+        <path d="M0,0 L6,3 L0,6 Z" fill="var(--text)"></path>
+      </marker>
+    </defs>
+    <line class="fig-axis" x1="20" y1="180" x2="360" y2="180"></line>
+    <line x1="50" y1="160" x2="170" y2="80" stroke="var(--accent)" stroke-width="3"></line>
+    <line x1="170" y1="80" x2="300" y2="140" stroke="var(--accent)" stroke-width="3"></line>
+    <circle class="fig-point" cx="50" cy="160" r="4"></circle>
+    <circle class="fig-point" cx="170" cy="80" r="4"></circle>
+    <circle class="fig-point" cx="300" cy="140" r="4"></circle>
+    <line x1="50" y1="160" x2="80" y2="160" stroke="var(--text)" stroke-width="1.5" marker-end="url(#frame-arrow)"></line>
+    <line x1="50" y1="160" x2="50" y2="130" stroke="var(--muted)" stroke-width="1.5" marker-end="url(#frame-arrow)"></line>
+    <text class="fig-label" x="20" y="178">{0} world</text>
+    <line x1="170" y1="80" x2="200" y2="80" stroke="var(--text)" stroke-width="1.5" marker-end="url(#frame-arrow)"></line>
+    <line x1="170" y1="80" x2="170" y2="50" stroke="var(--muted)" stroke-width="1.5" marker-end="url(#frame-arrow)"></line>
+    <text class="fig-label" x="176" y="46">{1}</text>
+    <line x1="300" y1="140" x2="330" y2="140" stroke="var(--text)" stroke-width="1.5" marker-end="url(#frame-arrow)"></line>
+    <line x1="300" y1="140" x2="300" y2="110" stroke="var(--muted)" stroke-width="1.5" marker-end="url(#frame-arrow)"></line>
+    <text class="fig-label" x="300" y="165">{2} end-effector</text>
+  </svg>
+  <figcaption>A frame at the base, one at each joint, and one at the end-effector — each one simple relative to its neighbor.</figcaption>
+
+  <div class="box example">
+    <span class="box-label">Example</span>
+    A LIDAR sensor bolted to the front of a mobile robot reports "obstacle at 2 m, straight ahead" — that reading is in the sensor's own body frame. To decide whether that obstacle blocks the path to a destination given in world coordinates, the robot has to convert the sensor's reading into the world frame first, combining the sensor's reading with the robot's own current pose in the world. Every unit from here on — perception, localization, planning — depends on this kind of frame conversion happening correctly and constantly.
+  </div>
+
+  <p>Note what this lesson deliberately did not do: derive the rotation matrices and matrix multiplications that formally combine frames. That machinery exists and is standard (any robotics text will have it), but the intuition — frames chain together, each one simple relative to its neighbor, and converting between them is bookkeeping — is what you need to follow forward and inverse kinematics, which is where that chaining gets used directly.</p>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. Why is 'the gripper is at (2, 0, 1) meters' an incomplete description of the gripper's pose?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">It's not incomplete — position alone is the same thing as pose.</button>
+      <button class="quiz-choice" data-correct="false">It's missing units.</button>
+      <button class="quiz-choice" data-correct="true">It gives position but not orientation, and pose requires both.</button>
+      <button class="quiz-choice" data-correct="false">Coordinates should never be written with parentheses.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Pose is position AND orientation together. Knowing where something is says nothing about which way it's facing.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why do robots typically work with several coordinate frames (world, body, sensor) instead of just one?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because using only one frame is technically illegal in robotics.</button>
+      <button class="quiz-choice" data-correct="true">Because each frame makes a particular quantity simplest to express, and robots convert between them as needed.</button>
+      <button class="quiz-choice" data-correct="false">Because sensors physically cannot report data in any frame but their own.</button>
+      <button class="quiz-choice" data-correct="false">Because using multiple frames is required to increase a robot's degrees of freedom.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A sensor reading is simplest in the sensor's own frame; a destination is simplest in the world frame. Robots convert between frames rather than forcing every quantity into one.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Along a kinematic chain with a frame at the base and one at each joint, how is each frame's pose most naturally described?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Independently, with no relationship to any other frame.</button>
+      <button class="quiz-choice" data-correct="false">Only relative to the world frame, ignoring the chain structure entirely.</button>
+      <button class="quiz-choice" data-correct="true">Simply, relative to the previous frame in the chain — the complexity is in combining them.</button>
+      <button class="quiz-choice" data-correct="false">Frames cannot be chained; only one frame may exist per robot.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Each frame is simple relative to its immediate neighbor in the chain; forward kinematics (next lesson) is exactly the process of combining all those simple relationships into one overall answer.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="pose">
+    <p class="quiz-prompt">4. Fill in the blank: a rigid body's position together with its orientation is called its ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Pose is the standard term combining both position and orientation.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="world">
+    <p class="quiz-prompt">5. Fill in the blank: a coordinate frame that is fixed to the environment and does not move as the robot moves is called the ___ frame.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The world frame is the fixed environmental reference, as opposed to a body frame that moves with the robot.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: Kevin M. Lynch and Frank C. Park, <a href="https://modernrobotics.northwestern.edu/chapters/chapter3/">Chapter 3, "Rigid-Body Motions,"</a> from <em>Modern Robotics</em> (free at modernrobotics.northwestern.edu), covers the formal rotation and translation machinery this lesson intentionally kept at an intuitive level.</p>
+
+  <p class="ask-teacher">Stuck on why a sensor reading needs converting before it's useful for navigation, or want to walk through another frame-chaining example? Ask your teacher — that's what I'm here for. Next up: actually combining these chained frames to compute where the end-effector ends up.</p>
+
+  <footer class="lesson-footer">STEM+ · Advanced Robotics · Lesson 3 of the course sequence</footer>
+</div>

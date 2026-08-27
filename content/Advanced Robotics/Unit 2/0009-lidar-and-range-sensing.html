@@ -1,0 +1,112 @@
+<meta charset="UTF-8">
+<link rel="icon" href="../../favicon.ico?v=1" type="image/x-icon">
+<title>Lesson 9: LIDAR and Range Sensing — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · Advanced Robotics · Unit 2 · Lesson 9</span>
+  <h1>LIDAR and Range Sensing</h1>
+  <p class="subtitle">Firing thousands of laser pulses a second and timing their return turns out to be one of the most direct ways a robot can measure its surroundings.</p>
+  <p class="nav-links"><a href="0008-wheel-encoders-and-proprioception.html" class="nav-prev">← Lesson 8</a> <a href="0010-cameras-and-visual-perception.html" class="nav-next">Lesson 10 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Where a wheel encoder infers motion indirectly, <strong>LIDAR</strong> (Light Detection and Ranging) measures the environment directly, by timing how long light takes to bounce back.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    <strong>LIDAR</strong> works by emitting a laser pulse and measuring the time it takes to return after reflecting off a surface — <strong>time-of-flight</strong> — then converting that time into a distance using the speed of light. A single LIDAR unit repeats this at many angles, sweeping (mechanically or electronically) to build a <strong>scan</strong>: a set of (angle, distance) pairs describing everything within range around the sensor.
+  </div>
+
+  <p>A single 2D scan is essentially a slice of the world at one height — a list of distances, one per angle increment, out to whatever the sensor's maximum range is. Sweep that slice through a third dimension (multiple stacked beams, or a spinning unit) and you get a 3D <strong>point cloud</strong>: a set of individual (x, y, z) points, one per laser return, describing the surrounding surfaces in space.</p>
+
+  <svg class="figure" viewBox="0 0 320 200" width="320" height="200">
+    <circle class="fig-point" cx="160" cy="160" r="5"></circle>
+    <text class="fig-label" x="140" y="185">LIDAR</text>
+    <line x1="160" y1="160" x2="60" y2="60" stroke="var(--accent)" stroke-width="1.5"></line>
+    <line x1="160" y1="160" x2="110" y2="40" stroke="var(--accent)" stroke-width="1.5"></line>
+    <line x1="160" y1="160" x2="160" y2="30" stroke="var(--accent)" stroke-width="1.5"></line>
+    <line x1="160" y1="160" x2="210" y2="40" stroke="var(--accent)" stroke-width="1.5"></line>
+    <line x1="160" y1="160" x2="260" y2="60" stroke="var(--accent)" stroke-width="1.5"></line>
+    <line x1="160" y1="160" x2="280" y2="120" stroke="var(--accent)" stroke-width="1.5"></line>
+    <path d="M 40 20 L 280 20 L 280 120" fill="none" stroke="var(--text)" stroke-width="2"></path>
+    <text class="fig-label" x="30" y="14">wall / obstacle surface</text>
+  </svg>
+  <figcaption>Each ray's return time becomes one (angle, distance) pair — a full sweep is a scan of the surrounding surfaces.</figcaption>
+
+  <div class="box why">
+    <span class="box-label">Why LIDAR is popular for both localization and obstacle detection</span>
+    LIDAR returns are direct, metric distance measurements — no separate calculation is needed to turn a return into "there's a surface 2.3 m away at this angle," unlike a camera image, which requires substantial processing before distance is recoverable at all. This directness is why LIDAR is a workhorse for both building maps (Unit 3) and detecting nearby obstacles to avoid (Unit 4).
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Example</span>
+    A LIDAR scan returns a very short distance in one specific direction, unlike its neighbors. This is most likely a genuine nearby obstacle — but it could also be a reflective surface (glass, polished metal) bouncing the beam somewhere unexpected, a transparent surface the laser passed straight through with no return at all, or airborne rain or fog scattering the pulse early. LIDAR is accurate when it gets a clean return, but "clean return" isn't guaranteed by every material or every weather condition.
+  </div>
+
+  <p>LIDAR's weaknesses are the flip side of its strength: it says almost nothing about what an object <em>is</em> — no color, no texture, no identity — and it can be expensive and mechanically complex for a spinning unit. The next lesson covers a sensor with almost the opposite trade-off.</p>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. How does LIDAR measure the distance to a surface?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">By measuring the temperature of the reflected light.</button>
+      <button class="quiz-choice" data-correct="true">By timing how long a laser pulse takes to reflect back (time-of-flight).</button>
+      <button class="quiz-choice" data-correct="false">By comparing two camera images.</button>
+      <button class="quiz-choice" data-correct="false">By listening for an echo, like sonar.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>LIDAR uses time-of-flight: the time for an emitted laser pulse to return is converted into a distance using the speed of light.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. What is a LIDAR point cloud?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">A single distance reading in one direction.</button>
+      <button class="quiz-choice" data-correct="true">A set of individual (x, y, z) points built from many laser returns, describing surrounding surfaces in 3D.</button>
+      <button class="quiz-choice" data-correct="false">A 2D color image.</button>
+      <button class="quiz-choice" data-correct="false">A prediction of future obstacle positions.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Stacking or sweeping many time-of-flight returns through a third dimension builds a point cloud — a 3D description of nearby surfaces.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why might a LIDAR scan fail to return a clean distance reading for a glass window?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">LIDAR cannot operate near any transparent material under any circumstances.</button>
+      <button class="quiz-choice" data-correct="true">Glass can reflect or pass the laser beam unpredictably, producing no clean return or a misleading one.</button>
+      <button class="quiz-choice" data-correct="false">Glass surfaces always report exactly zero distance.</button>
+      <button class="quiz-choice" data-correct="false">LIDAR only works on matte black surfaces.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Reflective and transparent materials are a known LIDAR weakness — the beam can bounce elsewhere or pass through with no clean return.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="time">
+    <p class="quiz-prompt">4. Fill in the blank: LIDAR measures distance using ___-of-flight — timing how long a laser pulse takes to return.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Time-of-flight is the standard term for converting a pulse's round-trip travel time into a distance.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="scan">
+    <p class="quiz-prompt">5. Fill in the blank: a single sweep of (angle, distance) pairs from a LIDAR unit is called a ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A scan is the set of range readings collected across one sweep of angles.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: the ROS <a href="https://docs.ros.org/en/iron/p/sensor_msgs/interfaces/msg/LaserScan.html">sensor_msgs/LaserScan message documentation</a> shows exactly what fields a real LIDAR scan reports — angle range, per-angle distances, and the minimum/maximum range the sensor trusts.</p>
+
+  <p class="ask-teacher">Stuck on why a reflective surface confuses LIDAR, or want to sketch a scan for a different room shape? Ask your teacher — that's what I'm here for. Next up: a sensor that trades LIDAR's precision for far richer information — the camera.</p>
+
+  <footer class="lesson-footer">STEM+ · Advanced Robotics · Lesson 9 of the course sequence</footer>
+</div>

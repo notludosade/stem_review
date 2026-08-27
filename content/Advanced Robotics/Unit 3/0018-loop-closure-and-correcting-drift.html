@@ -1,0 +1,98 @@
+<meta charset="UTF-8">
+<link rel="icon" href="../../favicon.ico?v=1" type="image/x-icon">
+<title>Lesson 18: Loop Closure and Correcting Drift — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · Advanced Robotics · Unit 3 · Lesson 18</span>
+  <h1>Loop Closure and Correcting Drift</h1>
+  <p class="subtitle">Recognizing 'I have been exactly here before' is a small-sounding event that unlocks a correction across an entire path already driven.</p>
+  <p class="nav-links"><a href="0017-slam-the-conceptual-idea.html" class="nav-prev">← Lesson 17</a> <a href="../Unit%204/0019-from-the-world-to-a-graph.html" class="nav-next">Unit 4, Lesson 19 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>The last lesson named loop closure as the mechanism that makes SLAM practically useful, not just conceptually elegant. This lesson looks at what a loop closure actually requires, and what happens to the map and pose estimate once one is found.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    A <strong>loop closure</strong> is a detected match between the robot's current sensor reading and a previously recorded observation from an earlier point in its path, indicating the robot has returned to (or near) a place it has already mapped. Detecting one requires <strong>place recognition</strong>: comparing current LIDAR shapes, visual features, or other sensor signatures against a library of previously recorded ones, well enough to recognize a genuine revisit despite the drifted position estimate suggesting the robot is somewhere else.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why loop closure corrects the whole path, not just the current position</span>
+    Once a loop closure is confirmed, the robot knows two things should be true simultaneously: its current estimated pose, and the pose it had the first time it saw this same place — and these two, after a long loop, typically disagree because of accumulated drift. SLAM doesn't just snap the current position to match; it distributes that correction backward across every pose estimate recorded since the loop began, adjusting the whole chain so it's internally consistent again. This is why closing one loop can visibly straighten an entire previously-crooked map, not just fix the newest data point.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Example</span>
+    Picture a hallway loop mapped with accumulated drift: by the time the robot returns to its starting doorway, dead reckoning places it 1.5 m away from where the doorway actually is on the map, even though the robot is standing right in the doorway again. Recognizing the doorway (place recognition) tells SLAM these two pose estimates — "here, now" and "here, when I first passed through" — represent the same real location. Redistributing that 1.5 m discrepancy across the whole loop's chain of poses turns a map with a visible seam into one where the hallway forms a single consistent loop.
+  </div>
+
+  <p>Loop closure is also where SLAM can fail in an interesting way: a <strong>false loop closure</strong> — matching two different places that happen to look similar — can corrupt a map by forcing two genuinely different locations to be treated as one. Real SLAM systems have to weigh candidate matches carefully rather than accepting every apparent match, but the details of that safeguard are beyond this course's scope.</p>
+
+  <p>This closes Unit 3. A robot can now build a map, track its position within that map, and correct for the drift dead reckoning alone can't avoid. Unit 4 assumes exactly this: given a map and a known position on it, how does a robot decide <em>where to go</em>?</p>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What is a loop closure, in SLAM terms?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Any moment the robot stops moving.</button>
+      <button class="quiz-choice" data-correct="true">A detected match between a current sensor reading and a previously recorded observation, indicating a revisited location.</button>
+      <button class="quiz-choice" data-correct="false">The final step of building an occupancy grid.</button>
+      <button class="quiz-choice" data-correct="false">A failure mode where the robot's map becomes corrupted.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Loop closure is specifically the recognition that the robot has returned to a previously mapped location, based on matching sensor signatures.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. When a loop closure is confirmed, why does SLAM adjust the entire chain of poses recorded since the loop began, not just the current position?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Because adjusting only the current position would leave the rest of the map internally inconsistent with the newly confirmed match.</button>
+      <button class="quiz-choice" data-correct="false">Because SLAM always discards all data older than the most recent reading.</button>
+      <button class="quiz-choice" data-correct="false">Because loop closures only ever affect the very first pose recorded.</button>
+      <button class="quiz-choice" data-correct="false">Because the current position is never actually corrected.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Distributing the correction across the whole loop keeps the map internally consistent, which is why closing one loop can visibly straighten an entire previously drifted map section.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. What is a false loop closure, and why is it a genuine risk?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">A loop closure that takes too long to compute.</button>
+      <button class="quiz-choice" data-correct="true">Matching two different real locations that happen to look similar, which can corrupt the map by merging them incorrectly.</button>
+      <button class="quiz-choice" data-correct="false">A loop closure detected using LIDAR instead of a camera.</button>
+      <button class="quiz-choice" data-correct="false">Any loop closure that occurs more than once.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>If two genuinely different places look similar enough to be mistaken for a match, SLAM can incorrectly merge them, corrupting the map — real systems must weigh candidate matches carefully.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="recognition">
+    <p class="quiz-prompt">4. Fill in the blank: comparing current sensor signatures against a library of previously recorded ones to recognize a revisited location is called place ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Place recognition is the mechanism that detects candidate loop closures.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="false">
+    <p class="quiz-prompt">5. Fill in the blank: a loop closure that incorrectly matches two different real locations, potentially corrupting the map, is called a ___ loop closure.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A false loop closure is a real risk in SLAM systems, which is why candidate matches must be weighed carefully rather than accepted automatically.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: Cesar Cadena, Luca Carlone, Henry Carrillo, Yasir Latif, Davide Scaramuzza, Jose Neira, Ian Reid, and John J. Leonard, <a href="https://arxiv.org/abs/1606.05830">"Past, Present, and Future of Simultaneous Localization And Mapping: Towards the Robust-Perception Age,"</a> covers loop closure and place recognition — including the false-loop-closure failure mode — in much greater depth than this lesson could.</p>
+
+  <p class="ask-teacher">Stuck on why correcting one loop closure straightens the whole map, or want to talk through how a false loop closure could be caught? Ask your teacher — that's what I'm here for. This closes Unit 3 — up next, Unit 4 asks how a robot with a map and a known position decides where to actually go.</p>
+
+  <footer class="lesson-footer">STEM+ · Advanced Robotics · Lesson 18 of the course sequence</footer>
+</div>

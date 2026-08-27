@@ -1,0 +1,96 @@
+<meta charset="UTF-8">
+<link rel="icon" href="../../favicon.ico?v=1" type="image/x-icon">
+<title>Lesson 31: Finite State Machines for Robot Behavior — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · Advanced Robotics · Unit 6 · Lesson 31</span>
+  <h1>Finite State Machines for Robot Behavior</h1>
+  <p class="subtitle">A robot's high-level behavior can often be described as a small number of named modes, and clear rules for switching between them.</p>
+  <p class="nav-links"><a href="0030-reactive-vs-deliberative-control.html" class="nav-prev">← Lesson 30</a> <a href="0032-designing-a-robot-fsm-a-worked-example.html" class="nav-next">Lesson 32 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>The CP1-level idea of a finite state machine — a fixed set of named states, with rules for transitioning between them based on conditions — turns out to be a natural way to structure the reactive-plus-deliberative decision logic Lesson 30 was building toward.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    A <strong>finite state machine</strong> (FSM) for robot behavior consists of a fixed set of <strong>states</strong> (named behavioral modes, like "searching," "approaching," "docked"), and <strong>transitions</strong> between them triggered by specific conditions (a sensor threshold, a timer, a completed sub-task). At any moment, the robot is in exactly one state, and its behavior is entirely determined by which state that is — plus whatever brought about the most recent transition.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Example</span>
+    A simple robot vacuum's high-level behavior can be modeled with three states: <strong>Cleaning</strong> (the default — driving a coverage pattern), <strong>Returning</strong> (heading back to its charging dock), and <strong>Charging</strong> (docked, topping up battery). The transition Cleaning → Returning fires when battery level drops below a threshold; Returning → Charging fires when the dock connection is detected; Charging → Cleaning fires once battery reaches full and some resume condition is met. Each state has simple, largely reactive behavior within it; the transitions are where the more deliberate "what should I be doing now" decisions live.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why FSMs make behavior easier to reason about — and where that breaks down</span>
+    Because the robot is always in exactly one clearly named state, an FSM makes it straightforward to answer "what is the robot doing right now, and why" — a real advantage over an unstructured pile of conditional logic. The cost shows up as behaviors grow more complex: covering every situation with a manageable number of states, and every valid transition between them, gets unwieldy fast. Real robot behavior often needs many context-dependent variations within what conceptually feels like "one mode," which either explodes the state count or forces awkward workarounds — the exact problem Lesson 33's behavior trees are built to solve differently.
+  </div>
+
+  <p>FSMs are a genuinely good fit for behavior that really does decompose into a small number of clearly distinct modes with clean transition conditions, and this lesson's vacuum example is a fair one. The next lesson works through a slightly richer worked example to make the diagramming and transition-writing concrete, before Lesson 33 introduces the alternative that scales better as behavior grows more complex.</p>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. In a finite state machine for robot behavior, what determines the robot's current behavior?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">A random number generator.</button>
+      <button class="quiz-choice" data-correct="true">Which single state the robot is currently in, plus whatever brought about the most recent transition.</button>
+      <button class="quiz-choice" data-correct="false">The robot's total distance traveled since power-on.</button>
+      <button class="quiz-choice" data-correct="false">An external human operator's live input at all times.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>An FSM's robot is always in exactly one named state at a time, and that state fully determines its current behavior.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. In the robot vacuum FSM example, what triggers the transition from Cleaning to Returning?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Reaching the exact center of the room.</button>
+      <button class="quiz-choice" data-correct="true">Battery level dropping below a threshold.</button>
+      <button class="quiz-choice" data-correct="false">The dock connection being detected.</button>
+      <button class="quiz-choice" data-correct="false">A fixed timer of exactly one hour.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The example specifies battery level dropping below a threshold as the Cleaning → Returning transition condition.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. What is the main drawback of finite state machines as robot behavior grows more complex?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">FSMs cannot be implemented in software at all.</button>
+      <button class="quiz-choice" data-correct="true">Covering many context-dependent variations tends to explode the number of states and transitions needed, or force awkward workarounds.</button>
+      <button class="quiz-choice" data-correct="false">FSMs require the robot to have zero sensors.</button>
+      <button class="quiz-choice" data-correct="false">FSMs can only be used for robot arms, never mobile robots.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>As behavior complexity grows, FSMs tend to need an unwieldy number of states and transitions to capture every variation cleanly — the problem behavior trees are designed to address differently.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="state">
+    <p class="quiz-prompt">4. Fill in the blank: in a finite state machine, a named behavioral mode like 'searching' or 'docked' is called a ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>States are the fixed set of named modes an FSM can be in; the robot is always in exactly one at a time.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="transition">
+    <p class="quiz-prompt">5. Fill in the blank: the rule that moves an FSM from one state to another, triggered by a specific condition, is called a ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Transitions are triggered by conditions like sensor thresholds, timers, or completed sub-tasks.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: the ROS <a href="https://docs.ros.org/en/iron/p/smach/">smach package documentation</a> describes a real, widely used task-level state machine library for structuring exactly this kind of robot behavior, including hierarchical states for more complex cases.</p>
+
+  <p class="ask-teacher">Stuck on identifying the states and transitions for a different robot task, or want to sketch the vacuum FSM as a diagram? Ask your teacher — that's what I'm here for. Next up: designing a complete FSM for a slightly richer robot task, start to finish.</p>
+
+  <footer class="lesson-footer">STEM+ · Advanced Robotics · Lesson 31 of the course sequence</footer>
+</div>

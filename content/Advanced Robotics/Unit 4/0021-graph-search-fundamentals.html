@@ -1,0 +1,98 @@
+<meta charset="UTF-8">
+<link rel="icon" href="../../favicon.ico?v=1" type="image/x-icon">
+<title>Lesson 21: Graph Search Fundamentals — BFS, Dijkstra, and Heuristics — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · Advanced Robotics · Unit 4 · Lesson 21</span>
+  <h1>Graph Search Fundamentals — BFS, Dijkstra, and Heuristics</h1>
+  <p class="subtitle">Three ideas, each building on the last, lead directly to the algorithm every modern path planner is built around.</p>
+  <p class="nav-links"><a href="0020-configuration-space.html" class="nav-prev">← Lesson 20</a> <a href="0022-a-star-search-for-robot-path-planning.html" class="nav-next">Lesson 22 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>With a graph in hand (Lesson 19) and obstacles correctly inflated (Lesson 20), the remaining question is purely algorithmic: given a start node and a goal node, how does a computer actually find a path? This lesson builds up the ideas in order, ending exactly where the next lesson picks up.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    <strong>Breadth-first search</strong> (BFS) explores a graph outward from the start node one "ring" of distance at a time — visiting all nodes one edge away, then all nodes two edges away, and so on — guaranteeing the shortest path <em>in number of edges</em> is found first. It assumes every edge has equal cost, which real planning graphs (edges of different lengths) usually violate.
+  </div>
+
+  <p>BFS's equal-cost assumption is the problem <strong>Dijkstra's algorithm</strong> fixes: instead of exploring in strict rings, it always expands whichever unvisited node currently has the lowest known total cost from the start, correctly handling edges of different lengths or difficulty. This guarantees the true lowest-cost path is found — a real improvement over BFS for realistic graphs, but Dijkstra still has a specific inefficiency worth noticing.</p>
+
+  <div class="box why">
+    <span class="box-label">Why Dijkstra searches in every direction, even away from the goal</span>
+    Dijkstra has no idea where the goal is relative to any given node — it only knows cost-from-start, so it explores equally in every direction, including directly away from the goal, until it happens to reach it. For a goal far across a large map, this means exploring a large, mostly wasted circular region before the search ever gets close. What's missing is a way to prefer expanding nodes that seem to be heading toward the goal.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Example</span>
+    Picture a large open warehouse floor with the goal in the far corner. Dijkstra, run from the start, expands outward roughly like ripples on a pond — checking nodes to the left, right, and behind the start just as eagerly as nodes toward the goal, because nothing in its rule tells it any direction is more promising. A huge fraction of the nodes it checks turn out to be irrelevant to the eventual path, simply because they were checked before the search "knew" which direction actually mattered.
+  </div>
+
+  <p>A <strong>heuristic</strong> is exactly the missing piece: an estimate of remaining distance (or cost) from any given node to the goal, computed cheaply (often just straight-line distance, ignoring obstacles). A search that uses a heuristic to prioritize nodes that seem closer to the goal, on top of Dijkstra's honest cost-from-start, no longer wastes effort exploring in obviously wrong directions. Combining both pieces — real cost-so-far, plus an estimate of cost-still-to-go — is precisely A*, the subject of the next lesson.</p>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What guarantee does breadth-first search (BFS) provide, and what assumption does that guarantee depend on?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">It finds the lowest-cost path; it assumes all edges have different costs.</button>
+      <button class="quiz-choice" data-correct="true">It finds the shortest path in number of edges; it assumes every edge has equal cost.</button>
+      <button class="quiz-choice" data-correct="false">It finds a path instantly regardless of graph size.</button>
+      <button class="quiz-choice" data-correct="false">It guarantees the safest path, ignoring distance entirely.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>BFS explores ring by ring, guaranteeing fewest edges — but only matches 'shortest distance' when every edge costs the same, which real planning graphs often violate.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. How does Dijkstra's algorithm improve on BFS for graphs with edges of different costs?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">It ignores edge costs entirely, just like BFS.</button>
+      <button class="quiz-choice" data-correct="true">It always expands the unvisited node with the lowest known total cost from the start, correctly handling varied edge costs.</button>
+      <button class="quiz-choice" data-correct="false">It only works on graphs with exactly one path to the goal.</button>
+      <button class="quiz-choice" data-correct="false">It requires a heuristic to function at all.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Dijkstra expands by true accumulated cost rather than by ring distance, correctly finding the lowest-cost path even with unequal edge costs.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. What specific inefficiency does Dijkstra have that a heuristic is meant to fix?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Dijkstra cannot handle graphs with more than 100 nodes.</button>
+      <button class="quiz-choice" data-correct="true">Dijkstra explores equally in every direction from the start, including away from the goal, since it has no sense of which direction is promising.</button>
+      <button class="quiz-choice" data-correct="false">Dijkstra always returns an incorrect path.</button>
+      <button class="quiz-choice" data-correct="false">Dijkstra requires the goal location to be unknown.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Without any estimate of remaining distance to the goal, Dijkstra wastes effort exploring nodes that are clearly not on the way there — exactly what a heuristic addresses.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="heuristic">
+    <p class="quiz-prompt">4. Fill in the blank: an estimate of remaining cost from a node to the goal, computed cheaply (often straight-line distance), is called a ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A heuristic is the estimate that lets a search prioritize nodes likely to be closer to the goal.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="dijkstra">
+    <p class="quiz-prompt">5. Fill in the blank: the search algorithm that always expands the node with the lowest known total cost from the start, correctly handling unequal edge costs, is called ___'s algorithm.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Dijkstra's algorithm generalizes BFS's ring-by-ring exploration to handle graphs with varied edge costs.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: Red Blob Games, <a href="https://www.redblobgames.com/pathfinding/a-star/introduction.html">"Introduction to A*,"</a> walks through breadth-first search, Dijkstra's algorithm, and heuristics in exactly this progression, with interactive visualizations of each step.</p>
+
+  <p class="ask-teacher">Stuck on why Dijkstra wastes effort without a heuristic, or want to trace through the warehouse example by hand? Ask your teacher — that's what I'm here for. Next up: combining cost-so-far and a heuristic into the algorithm robotics actually uses — A*.</p>
+
+  <footer class="lesson-footer">STEM+ · Advanced Robotics · Lesson 21 of the course sequence</footer>
+</div>

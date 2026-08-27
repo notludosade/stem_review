@@ -1,0 +1,96 @@
+<meta charset="UTF-8">
+<link rel="icon" href="../../favicon.ico?v=1" type="image/x-icon">
+<title>Lesson 28: Feedback Control for Path Tracking — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · Advanced Robotics · Unit 5 · Lesson 28</span>
+  <h1>Feedback Control for Path Tracking</h1>
+  <p class="subtitle">Steering toward a lookahead point gets a robot roughly on track. Feedback control is what keeps measuring and correcting so 'roughly' becomes 'reliably.'</p>
+  <p class="nav-links"><a href="0027-waypoint-following-and-steering-control.html" class="nav-prev">← Lesson 27</a> <a href="0029-trajectory-smoothing.html" class="nav-next">Lesson 29 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>This course's prerequisites already gave you the core idea of feedback control: measure the current state, compare it to the desired state, and command a correction proportional to the difference — the same idea behind a PID controller regulating a single joint or a single motor's speed. This lesson applies that same idea to the specific job of keeping a whole robot on its planned trajectory.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    <strong>Path-tracking feedback control</strong> continuously measures the difference between the robot's actual pose (from localization, Unit 3) and its intended pose on the trajectory at that same instant (from Lesson 26), then commands a correction sized to close that gap. This is Unit 3 and Unit 5 meeting directly: tracking a trajectory well is impossible without a trustworthy sense of where the robot currently actually is.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why pure pursuit alone isn't the whole answer</span>
+    Lesson 27's pure pursuit steers based on the path's geometry — it doesn't explicitly measure "how far off-track am I right now" and correct proportionally to that specific error the way a PID-style feedback loop does. In practice, real systems often combine both: a geometric strategy like pure pursuit to decide roughly which way to steer, layered with feedback correction that responds specifically to measured tracking error — wheel slip, an imperfect lookahead choice, or accumulated small disturbances the geometric strategy alone wouldn't directly notice or correct for.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Example</span>
+    A robot's trajectory says it should be at (2.0, 1.0) m, 3 s into its run. Localization reports its actual position as (2.0, 1.15) m — 0.15 m off to one side, likely from a small amount of wheel slip on a turn. A feedback controller sees this 0.15 m cross-track error and commands a proportional steering correction back toward the trajectory, continuously, rather than letting that error persist or compound the way an uncorrected dead-reckoning estimate would (Lesson 15).
+  </div>
+
+  <p>The result of combining timed trajectory generation, waypoint-following steering, and feedback correction is a robot that reliably executes the path Unit 4 planned — not perfectly, but self-correcting, in the same spirit as every control loop this course's prerequisites already introduced. One piece is still missing: making the underlying path itself easier to follow in the first place, which is where this unit closes.</p>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What does path-tracking feedback control continuously measure and act on?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">The difference between the robot's actual pose and its intended pose on the trajectory at that instant.</button>
+      <button class="quiz-choice" data-correct="false">Only the robot's battery level.</button>
+      <button class="quiz-choice" data-correct="false">The total distance to the final goal, ignoring the trajectory's timing.</button>
+      <button class="quiz-choice" data-correct="false">The color of nearby obstacles.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Feedback control compares actual pose (from localization) to the trajectory's intended pose at that same moment, then commands a correction sized to the gap.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why does path-tracking feedback control depend directly on Unit 3's localization?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">It doesn't — feedback control works without any position estimate.</button>
+      <button class="quiz-choice" data-correct="true">Because correcting tracking error requires a trustworthy estimate of where the robot actually currently is.</button>
+      <button class="quiz-choice" data-correct="false">Because localization and feedback control are the same algorithm.</button>
+      <button class="quiz-choice" data-correct="false">Because feedback control only uses wheel encoder data, never localization.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Without a trustworthy pose estimate from localization, there's no way to measure the tracking error that feedback control is meant to correct.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why do real systems often combine a geometric strategy like pure pursuit with explicit feedback correction, rather than relying on pure pursuit alone?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because pure pursuit is illegal to use by itself.</button>
+      <button class="quiz-choice" data-correct="true">Because pure pursuit steers based on path geometry alone and doesn't explicitly measure and correct for specific tracking error like wheel slip.</button>
+      <button class="quiz-choice" data-correct="false">Because feedback control replaces the need for any trajectory at all.</button>
+      <button class="quiz-choice" data-correct="false">Because combining the two always doubles the robot's speed.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Pure pursuit's geometric steering doesn't directly respond to measured deviation the way proportional feedback correction does — combining both covers more failure modes.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="cross">
+    <p class="quiz-prompt">4. Fill in the blank: the difference between a robot's actual position and its intended position on the trajectory, measured perpendicular to the path, is often called ___-track error.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Cross-track error is the standard term for this perpendicular deviation from the intended path.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="proportional">
+    <p class="quiz-prompt">5. Fill in the blank: a feedback controller commands a correction ___ to the size of the measured tracking error.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Proportional correction — sizing the response to the size of the error — is the core feedback-control idea this lesson applied to path tracking.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: the Nav2 project's <a href="https://docs.nav2.org/configuration/packages/configuring-regulated-pp.html">"Regulated Pure Pursuit"</a> controller documentation also covers exactly this kind of combined geometric-plus-corrective tracking used on real deployed robots.</p>
+
+  <p class="ask-teacher">Stuck on why cross-track error needs correcting even when pure pursuit is already steering reasonably, or want to work through the worked example with different numbers? Ask your teacher — that's what I'm here for. Next up: smoothing the path itself so there's less for feedback control to fight against in the first place.</p>
+
+  <footer class="lesson-footer">STEM+ · Advanced Robotics · Lesson 28 of the course sequence</footer>
+</div>

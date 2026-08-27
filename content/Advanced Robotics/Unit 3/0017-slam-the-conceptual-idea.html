@@ -1,0 +1,98 @@
+<meta charset="UTF-8">
+<link rel="icon" href="../../favicon.ico?v=1" type="image/x-icon">
+<title>Lesson 17: SLAM — The Conceptual Idea — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · Advanced Robotics · Unit 3 · Lesson 17</span>
+  <h1>SLAM — The Conceptual Idea</h1>
+  <p class="subtitle">To build a good map you need to know where you are. To know where you are, you need a good map. SLAM is the trick that breaks this circle.</p>
+  <p class="nav-links"><a href="0016-representing-the-environment-maps-and-occupancy-grids.html" class="nav-prev">← Lesson 16</a> <a href="0018-loop-closure-and-correcting-drift.html" class="nav-next">Lesson 18 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Lesson 13 raised a chicken-and-egg problem in passing: localizing against a map requires a map, but building an accurate map requires knowing where you were standing for every measurement that went into it. <strong>SLAM</strong> — simultaneous localization and mapping — is the name for solving both problems together, from the same stream of sensor data, at the same time.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    <strong>SLAM</strong> (Simultaneous Localization and Mapping) is the problem of building a map of an unknown environment while simultaneously tracking the robot's own pose within that same map, using only onboard sensors — with neither the map nor the robot's trajectory known in advance.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why "simultaneous" is the whole idea, not just a scheduling detail</span>
+    If a robot trusted its dead reckoning completely while mapping, drift (Lesson 15) would smear the map — the same wall, sensed at two different times from two drifted position estimates, would get recorded as two different walls slightly apart. SLAM avoids this by treating position estimate and map as two things that continuously correct each other: better map data sharpens the position estimate, and a sharper position estimate lets new sensor readings be added to the map more accurately. Neither one is solved first and then handed off — they're solved together, each iteration improving both.
+  </div>
+
+  <p>The key mechanism that makes this work is recognizing a place the robot has been before. If a robot driving through a building recognizes — from LIDAR shapes, from visual features, or otherwise — that it has returned to a location it mapped earlier, that recognition provides exactly the independent, fixed reference Lesson 15 said dead reckoning is missing. The robot can then correct its drifted position estimate <em>and</em> retroactively straighten out the map, back through the whole loop it just closed.</p>
+
+  <div class="box example">
+    <span class="box-label">Example</span>
+    A warehouse robot starts mapping from scratch, driving down aisle 1, across the back of the warehouse, and up aisle 2, dead-reckoning drift growing the whole way. When it reaches the far end of aisle 2 and recognizes shelving it first saw at the start of aisle 1 — the same physical location, now approached from a different direction — SLAM uses that recognized match to correct the accumulated drift across the entire loop just completed, snapping both the position estimate and the map for that whole path back toward consistency.
+  </div>
+
+  <p>That specific recognition-and-correction event has a name of its own — <strong>loop closure</strong> — and it's important enough to be the next lesson's entire focus. Without it, SLAM degrades back toward plain dead reckoning with extra bookkeeping; with it, SLAM is what actually makes long-term autonomous mapping practical.</p>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What problem does SLAM solve that plain dead reckoning plus a pre-built map cannot?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">SLAM requires no sensors at all.</button>
+      <button class="quiz-choice" data-correct="true">SLAM builds the map and localizes within it simultaneously, when neither is known in advance.</button>
+      <button class="quiz-choice" data-correct="false">SLAM only works in previously mapped environments.</button>
+      <button class="quiz-choice" data-correct="false">SLAM eliminates the need for any localization estimate.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>SLAM specifically addresses the chicken-and-egg problem: no map yet exists, and no trustworthy position estimate exists either, so both must be built together.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why does SLAM treat the position estimate and the map as continuously correcting each other, rather than solving one first and then the other?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because computers cannot solve two problems in sequence.</button>
+      <button class="quiz-choice" data-correct="true">Because if drift were trusted while mapping, the same real feature could get recorded as two different features from two drifted viewpoints.</button>
+      <button class="quiz-choice" data-correct="false">Because maps never need to be corrected once built.</button>
+      <button class="quiz-choice" data-correct="false">Because localization is always solved before any sensor data is collected.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Uncorrected drift would smear the map (recording one real wall as two slightly different ones); solving both together lets better map data sharpen localization and vice versa.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. What event provides SLAM with an independent, fixed reference to correct accumulated drift?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Recognizing a previously visited location — a loop closure.</button>
+      <button class="quiz-choice" data-correct="false">Increasing the robot's driving speed.</button>
+      <button class="quiz-choice" data-correct="false">Switching from LIDAR to a camera mid-mission.</button>
+      <button class="quiz-choice" data-correct="false">Restarting the robot's dead-reckoning estimate to zero.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Recognizing a place the robot has been before gives SLAM something outside the accumulating drift chain to correct against — the loop closure event the next lesson covers in depth.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="slam|simultaneous localization and mapping">
+    <p class="quiz-prompt">4. Fill in the blank: the problem of building a map while simultaneously tracking the robot's own pose within it, using only onboard sensors, is called ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>SLAM (Simultaneous Localization and Mapping) is the standard name for this joint problem.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="closure">
+    <p class="quiz-prompt">5. Fill in the blank: recognizing that a robot has returned to a previously visited location, letting SLAM correct accumulated drift, is called loop ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Loop closure is the event that gives SLAM its correction opportunity — the subject of the next lesson.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: Cesar Cadena, Luca Carlone, Henry Carrillo, Yasir Latif, Davide Scaramuzza, Jose Neira, Ian Reid, and John J. Leonard, <a href="https://arxiv.org/abs/1606.05830">"Past, Present, and Future of Simultaneous Localization And Mapping: Towards the Robust-Perception Age,"</a> a widely cited survey covering the SLAM problem this lesson introduced conceptually.</p>
+
+  <p class="ask-teacher">Stuck on why solving mapping and localization together beats solving them in sequence, or want to trace the warehouse loop example step by step? Ask your teacher — that's what I'm here for. Next up: loop closure, in detail — the mechanism that makes SLAM actually work in practice.</p>
+
+  <footer class="lesson-footer">STEM+ · Advanced Robotics · Lesson 17 of the course sequence</footer>
+</div>

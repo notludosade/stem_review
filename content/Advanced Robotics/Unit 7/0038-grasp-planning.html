@@ -1,0 +1,98 @@
+<meta charset="UTF-8">
+<link rel="icon" href="../../favicon.ico?v=1" type="image/x-icon">
+<title>Lesson 38: Grasp Planning — Choosing a Grasp — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · Advanced Robotics · Unit 7 · Lesson 38</span>
+  <h1>Grasp Planning — Choosing a Grasp</h1>
+  <p class="subtitle">A gripper that closes in the wrong place fails no matter how well-built it is. Deciding where and how to grasp is its own planning problem.</p>
+  <p class="nav-links"><a href="0037-grippers-and-end-effectors.html" class="nav-prev">← Lesson 37</a> <a href="0039-force-friction-and-grasp-stability.html" class="nav-next">Lesson 39 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Lesson 37 covered the hardware that closes around an object. This lesson covers the decision that has to happen first: given an object's shape (and often its estimated weight and material), where exactly should the gripper make contact, and in what orientation?</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    <strong>Grasp planning</strong> is the problem of selecting a <strong>grasp</strong> — a specific contact configuration (where the gripper's fingers touch the object, and the gripper's approach pose) that is expected to hold the object securely and allow it to be lifted, moved, and placed as intended. A good grasp candidate must be both physically reachable (Unit 1's inverse kinematics has to have a solution for the arm to get there) and mechanically sound (the actual subject of this lesson).
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why "grasp the middle" isn't a general strategy</span>
+    An object's center is a reasonable default for a symmetric, uniformly weighted item, but real objects break that assumption constantly: an off-center weight distribution (a mug, handle-heavy or full of liquid on one side) means the true center of mass isn't the geometric center, and grasping the wrong point lets the object rotate or tip out of the grip under gravity once lifted. A good grasp plan reasons about the object's actual mass distribution, not just its outline — which is part of why grasp planning is genuinely hard for irregular or unfamiliar objects, and an active area of robotics research beyond this course's scope.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Example</span>
+    A robot picking a coffee mug by its rim, opposite the handle, might have a geometrically sensible-looking grasp — two contact points a reasonable distance apart, well within the gripper's opening range — that nonetheless fails once lifted, because the handle's extra mass pulls the mug's true center of gravity off to one side, rotating it out of an otherwise secure-looking grip. Grasping across the mug's body, straddling its actual center of mass, is far more likely to hold securely through the lift.
+  </div>
+
+  <p>Real grasp-planning systems typically generate several candidate grasps for an object (from its perceived shape — Unit 2's cameras and depth sensors doing exactly the perception job they were built for), score each candidate on criteria like reachability, expected stability, and clearance from surrounding objects or surfaces, and select the highest-scoring one to execute. This connects manipulation directly back to perception: a grasp plan is only as good as the shape and pose estimate it was computed from, the same "garbage in, garbage out" dependency Unit 2 and Unit 3 already established for sensing and localization.</p>
+
+  <p>A selected grasp still has to actually hold once contact is made and force is applied — which brings this unit to the physics underneath "secure," the next lesson's subject.</p>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What must a good candidate grasp satisfy, according to this lesson?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">It only needs to look geometrically centered on the object.</button>
+      <button class="quiz-choice" data-correct="true">It must be both physically reachable (a valid inverse kinematics solution exists) and mechanically sound.</button>
+      <button class="quiz-choice" data-correct="false">It must always use the maximum possible grip force.</button>
+      <button class="quiz-choice" data-correct="false">It must avoid using any sensor data.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A grasp candidate needs both a reachable arm configuration and sound mechanics — satisfying only one isn't enough.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why can 'grasp the geometric center' fail for an object like a mug with a handle?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because mugs cannot be grasped by any robot.</button>
+      <button class="quiz-choice" data-correct="true">Because an off-center weight distribution means the true center of mass isn't the geometric center, letting the object rotate out of the grip.</button>
+      <button class="quiz-choice" data-correct="false">Because geometric centers are always outside the gripper's reach.</button>
+      <button class="quiz-choice" data-correct="false">Because handles always break gripper fingers.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Real objects often have mass distributed unevenly, so grasp planning must reason about actual center of mass, not just outline shape, to avoid the object rotating out of the grip.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. How does grasp planning connect directly back to Unit 2's perception lessons?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">It doesn't — grasp planning uses no sensor data at all.</button>
+      <button class="quiz-choice" data-correct="true">A grasp plan is only as good as the shape and pose estimate it was computed from, which comes from cameras and depth sensors.</button>
+      <button class="quiz-choice" data-correct="false">Perception is only used for localization, never for manipulation.</button>
+      <button class="quiz-choice" data-correct="false">Grasp planning replaces the need for any perception.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Candidate grasps are generated from a perceived shape estimate — the same 'garbage in, garbage out' dependency on sensing quality that localization and mapping already established.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="grasp">
+    <p class="quiz-prompt">4. Fill in the blank: a specific contact configuration and approach pose expected to hold an object securely is called a ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A grasp is the specific plan grasp planning selects and evaluates from among several candidates.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="score">
+    <p class="quiz-prompt">5. Fill in the blank: real grasp-planning systems typically generate several candidate grasps and ___ each one on criteria like reachability and expected stability before selecting the best.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Scoring candidate grasps lets a system pick the most promising option rather than committing to the first geometrically plausible one.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: Jeannette Bohg, Antonio Morales, Tamim Asfour, and Danica Kragic, <a href="https://arxiv.org/abs/1309.2660">"Data-Driven Grasp Synthesis — A Survey"</a> (IEEE Transactions on Robotics, 2014), surveys exactly this problem of generating and selecting grasp candidates from an object's perceived shape.</p>
+
+  <p class="ask-teacher">Stuck on why the mug example's geometric-center grasp fails, or want to think through a good grasp for a different everyday object? Ask your teacher — that's what I'm here for. Next up: the actual physics of why a grasp holds or slips.</p>
+
+  <footer class="lesson-footer">STEM+ · Advanced Robotics · Lesson 38 of the course sequence</footer>
+</div>

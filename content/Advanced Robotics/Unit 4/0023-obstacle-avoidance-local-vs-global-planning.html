@@ -1,0 +1,98 @@
+<meta charset="UTF-8">
+<link rel="icon" href="../../favicon.ico?v=1" type="image/x-icon">
+<title>Lesson 23: Obstacle Avoidance — Local vs. Global Planning — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · Advanced Robotics · Unit 4 · Lesson 23</span>
+  <h1>Obstacle Avoidance — Local vs. Global Planning</h1>
+  <p class="subtitle">A* finds a path through the map the robot had. Obstacle avoidance is about the obstacles the map didn't have — the ones the robot only discovers by driving.</p>
+  <p class="nav-links"><a href="0022-a-star-search-for-robot-path-planning.html" class="nav-prev">← Lesson 22</a> <a href="0024-replanning-and-dynamic-obstacles.html" class="nav-next">Lesson 24 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>A* (Lesson 22) is a <strong>global planner</strong>: given the whole map, it finds a complete route from start to goal before the robot moves at all. That route is only as good as the map it was computed from — and Unit 3 already established that maps are built from noisy sensors and can be incomplete, especially in previously unmapped or changed areas. <strong>Local planning</strong>, this lesson's subject, handles what the global plan couldn't have known about.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    <strong>Global planning</strong> computes a full path using the complete (already-known) map, typically before the robot starts moving. <strong>Local planning</strong> (or local obstacle avoidance) continuously adjusts the robot's immediate motion using only current, nearby sensor data — reacting to obstacles the global map didn't include, whether because they weren't there when the map was built or because that area was never mapped at all.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why both layers are necessary, not redundant</span>
+    Global planning alone is blind to anything not already in the map — a person walking into the aisle, a dropped box, a door that's now closed. Local planning alone, with no global plan at all, can make locally sensible decisions that add up to a bad overall route, or get stuck in a dead end a global view would have avoided entirely. Running both together — global planning sets the intended route, local planning keeps execution safe and responsive along the way — is standard practice, not a matter of picking one.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Example</span>
+    A warehouse robot's global A* plan routes it straight down aisle 3 toward the goal. Partway down, its LIDAR detects a pallet left in the aisle since the map was last built — invisible to the global plan, real to the robot's current sensors. Local obstacle avoidance steers the robot around the pallet using only this immediate LIDAR data, without re-running full A* search over the entire warehouse — and once clear, the robot resumes following the original global route.
+  </div>
+
+  <p>A common, simple local-avoidance idea is treating obstacles as generating a "push" and the goal as generating a "pull" — the robot's immediate motion follows the combined effect, moving toward the goal while steering away from anything sensed nearby. This kind of approach is fast to compute (essential, since it has to run continuously while driving) but genuinely local: it reasons about immediate surroundings only, with no memory of the map's overall structure, which is exactly why it needs a global plan alongside it rather than instead of it.</p>
+
+  <p>Local avoidance handles obstacles the map missed. It doesn't yet handle obstacles that are actively moving, or a mismatch serious enough that the whole global route needs reconsidering — both the subject of this unit's final lesson.</p>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What is the key limitation of a global planner like A* that local obstacle avoidance addresses?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Global planners cannot compute any path at all.</button>
+      <button class="quiz-choice" data-correct="true">A global plan is only as good as the map it was computed from, and can't react to obstacles the map didn't include.</button>
+      <button class="quiz-choice" data-correct="false">Global planners require the robot to already be at the goal.</button>
+      <button class="quiz-choice" data-correct="false">Local planning replaces the need for any map whatsoever.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A global plan is fixed to the map's knowledge at planning time; local planning uses fresh sensor data to react to whatever the map missed.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why is running both global and local planning together standard practice, rather than choosing just one?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Global planning alone is blind to unmapped obstacles; local planning alone can lack overall route sense and get stuck.</button>
+      <button class="quiz-choice" data-correct="false">Running both is purely a performance optimization with no functional benefit.</button>
+      <button class="quiz-choice" data-correct="false">Local planning is always strictly better, so global planning is optional.</button>
+      <button class="quiz-choice" data-correct="false">Global and local planning solve completely unrelated problems.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Global planning sets an informed overall route; local planning keeps execution safe against what the map didn't capture — each covers the other's blind spot.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. In the warehouse pallet example, what does local obstacle avoidance do once the robot has steered around the newly detected pallet?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">The robot stops permanently, since its plan is now invalid.</button>
+      <button class="quiz-choice" data-correct="true">The robot resumes following the original global route.</button>
+      <button class="quiz-choice" data-correct="false">The robot re-runs a full global A* search over the entire warehouse before moving again.</button>
+      <button class="quiz-choice" data-correct="false">The robot deletes its map entirely.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Local avoidance handles the immediate obstacle without discarding the global plan — once clear, the robot simply continues along its original intended route.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="global">
+    <p class="quiz-prompt">4. Fill in the blank: computing a full path using the complete, already-known map, typically before the robot starts moving, is called ___ planning.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Global planning (like A*) uses the whole map at once, ahead of execution.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="local">
+    <p class="quiz-prompt">5. Fill in the blank: continuously adjusting a robot's immediate motion using only current, nearby sensor data is called ___ planning (or obstacle avoidance).</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Local planning reacts to what's immediately sensed, handling what the global map couldn't have known about.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: Steven M. LaValle, <a href="https://lavalle.pl/planning/book.pdf">Planning Algorithms</a> (free online text), covers both global path planning and local, sensor-based obstacle avoidance as complementary layers, exactly as this lesson framed them.</p>
+
+  <p class="ask-teacher">Stuck on why relying on local avoidance alone can lead to dead ends, or want another example of global-plus-local planning working together? Ask your teacher — that's what I'm here for. Next up: what happens when the mismatch between plan and reality is big enough that the whole route needs rethinking.</p>
+
+  <footer class="lesson-footer">STEM+ · Advanced Robotics · Lesson 23 of the course sequence</footer>
+</div>

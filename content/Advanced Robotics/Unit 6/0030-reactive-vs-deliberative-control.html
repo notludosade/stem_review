@@ -1,0 +1,96 @@
+<meta charset="UTF-8">
+<link rel="icon" href="../../favicon.ico?v=1" type="image/x-icon">
+<title>Lesson 30: Reactive vs. Deliberative Control — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · Advanced Robotics · Unit 6 · Lesson 30</span>
+  <h1>Reactive vs. Deliberative Control</h1>
+  <p class="subtitle">Should a robot think before it acts, or act before it thinks? Real robots need both — the trick is knowing which situations call for which.</p>
+  <p class="nav-links"><a href="../Unit%205/0029-trajectory-smoothing.html" class="nav-prev">← Unit 5, Lesson 29</a> <a href="0031-finite-state-machines-for-robot-behavior.html" class="nav-next">Lesson 31 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Everything so far in this course assumed the robot already knew what it wanted to do: reach this pose (Unit 1), track this trajectory (Unit 5). This unit asks a different question — how does a robot decide what to do in the first place, and how is that decision-making actually structured in software? This lesson starts with the most basic split in how that decision-making can work.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    <strong>Reactive control</strong> maps sensed conditions directly to actions, with little or no internal state or lookahead — "if an obstacle is close on the left, turn right," evaluated fresh every instant. <strong>Deliberative control</strong> builds and reasons over a model of the situation before acting — planning a full route (Unit 4's A*) before taking a single step, weighing options against a goal rather than reacting to the immediate instant alone.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why neither one alone is good enough</span>
+    Purely deliberative control is too slow for anything requiring an immediate response — a robot that has to fully replan before dodging a sudden obstacle will collide first. Purely reactive control has no memory or goal-directedness — a set of "if this, then that" rules can get a robot stuck oscillating between two obstacles, or wandering indefinitely with no sense that it's supposed to be heading somewhere specific. Real robots need fast, reflexive responses <em>and</em> goal-directed reasoning, layered together — which is exactly what this course has already been building toward without naming it directly.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Example</span>
+    This course has already covered one clean instance of each. Unit 4's global A* planning is deliberative: it reasons over the whole known map before committing to a route. Unit 4's local obstacle avoidance is reactive: it responds immediately to whatever the sensors detect right now, with no lookahead beyond the robot's current surroundings. The two were already designed to work together — global planning setting an informed route, local avoidance reacting fast to what the plan couldn't have known — which is precisely the reactive-plus-deliberative pattern this lesson is now naming explicitly.
+  </div>
+
+  <p>This unit's remaining lessons give this split concrete software structure. Finite state machines and behavior trees — the next four lessons — are both ways of organizing a robot's decision logic that can mix reactive rules and deliberative planning within the same coherent structure, rather than leaving the split as an unstructured pile of separate code.</p>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What is the defining feature of reactive control?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">It builds and reasons over a full model of the situation before acting.</button>
+      <button class="quiz-choice" data-correct="true">It maps sensed conditions directly to actions, with little or no internal state or lookahead.</button>
+      <button class="quiz-choice" data-correct="false">It always takes longer to compute than deliberative control.</button>
+      <button class="quiz-choice" data-correct="false">It requires no sensors at all.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Reactive control responds immediately to current sensed conditions, without building or reasoning over a broader model of the situation.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why is purely deliberative control, by itself, insufficient for handling a sudden obstacle?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Deliberative control never uses any sensors.</button>
+      <button class="quiz-choice" data-correct="true">It requires reasoning over a model before acting, which can be too slow for an immediate response.</button>
+      <button class="quiz-choice" data-correct="false">Deliberative control can only be used for robot arms, never mobile robots.</button>
+      <button class="quiz-choice" data-correct="false">Deliberative control is illegal to combine with reactive control.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Building and reasoning over a plan takes time — too much time to respond to something requiring an immediate reflexive reaction.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. How did this course already demonstrate the reactive-plus-deliberative pattern before this lesson named it?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Unit 1's forward and inverse kinematics.</button>
+      <button class="quiz-choice" data-correct="true">Unit 4's global A* planning (deliberative) combined with local obstacle avoidance (reactive).</button>
+      <button class="quiz-choice" data-correct="false">Unit 2's wheel encoders and LIDAR.</button>
+      <button class="quiz-choice" data-correct="false">Unit 3's occupancy grids alone.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Global A* planning reasons over the whole map ahead of time (deliberative); local avoidance reacts immediately to current sensor data (reactive) — exactly the combination this lesson describes.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="reactive">
+    <p class="quiz-prompt">4. Fill in the blank: control that maps sensed conditions directly to actions, with little or no internal state, is called ___ control.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Reactive control is fast and reflexive but has no memory or lookahead.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="deliberative">
+    <p class="quiz-prompt">5. Fill in the blank: control that builds and reasons over a model of the situation before acting, such as full route planning, is called ___ control.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Deliberative control is goal-directed and reasons ahead, at the cost of being slower than a pure reflex.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: Michele Colledanchise and Petter Ögren, <a href="https://arxiv.org/abs/1709.00084">"Behavior Trees in Robotics and AI: An Introduction,"</a> opens by framing exactly this reactive-versus-deliberative trade-off as the core design problem behavior trees (Lesson 33) are built to address.</p>
+
+  <p class="ask-teacher">Stuck on why a robot needs both reactive and deliberative layers rather than picking one, or want another example from earlier units? Ask your teacher — that's what I'm here for. Next up: the first concrete way to structure this decision logic in software — finite state machines.</p>
+
+  <footer class="lesson-footer">STEM+ · Advanced Robotics · Lesson 30 of the course sequence</footer>
+</div>

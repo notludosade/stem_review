@@ -1,0 +1,98 @@
+<meta charset="UTF-8">
+<link rel="icon" href="../../favicon.ico?v=1" type="image/x-icon">
+<title>Lesson 13: The Localization Problem — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · Advanced Robotics · Unit 3 · Lesson 13</span>
+  <h1>The Localization Problem</h1>
+  <p class="subtitle">Every plan, every map, every sensor conversion in this course assumes the robot knows where it is. This unit is about how shaky that assumption really is.</p>
+  <p class="nav-links"><a href="../Unit%202/0012-sensor-fusion.html" class="nav-prev">← Unit 2, Lesson 12</a> <a href="0014-odometry-and-dead-reckoning.html" class="nav-next">Lesson 14 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Unit 1 built forward and inverse kinematics on top of a robot's own joint sensors, which are trustworthy over short timescales. Unit 2 built up to sensor fusion for combining imperfect readings. Both units quietly assumed something bigger: that the robot has a reliable answer to "where am I, in the world?" This unit is about how that answer is actually obtained — and how fragile it is.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    <strong>Localization</strong> is the problem of estimating a robot's own pose (position and orientation, from Lesson 3) within a known or partially known environment, using noisy sensor data. It is a genuinely different problem from forward kinematics: forward kinematics tells you where your end-effector is <em>relative to your own base</em>, using joint sensors you fully trust; localization asks where your whole robot is <em>relative to the world</em>, using sensors that are only approximately trustworthy.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why localization can't just be "read a GPS"</span>
+    Outdoors, GPS gives an approximate world-frame position — but its accuracy (often several meters) is too coarse for tasks like navigating a narrow warehouse aisle, and it doesn't work indoors or in dense urban canyons at all. Most robots have to build their own position estimate from the sensors covered in Unit 2 — wheel encoders, LIDAR, cameras — none of which report position directly. Localization is the process of turning those indirect readings into a trustworthy pose estimate.
+  </div>
+
+  <p>There are two dominant strategies, and the rest of this unit is organized around them. The first, <strong>dead reckoning</strong>, builds a position estimate purely from the robot's own motion (Lesson 14) — simple, but it drifts, as Lesson 15 will show concretely. The second requires the robot to also recognize features of its surroundings and match them against a map, which is powerful but raises an obvious chicken-and-egg problem if no map exists yet — the problem Lesson 17's SLAM addresses directly.</p>
+
+  <div class="box example">
+    <span class="box-label">Example</span>
+    A warehouse robot that only trusts its wheel encoders can estimate "I've driven 40 m forward and turned left twice" — but after enough turns and distance, small per-step errors compound into a real, uncorrected mismatch between where the robot thinks it is and where it actually is. The same robot, if it can also recognize a specific shelving unit it has seen before and knows that unit's true position on a stored map, can snap its estimate back toward the truth — correcting the accumulated error, not just accepting it.
+  </div>
+
+  <p>This lesson set the stage without solving anything yet. The next lesson makes dead reckoning concrete — exactly how a running position estimate gets built from wheel motion alone.</p>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. How does localization differ from the forward kinematics covered in Unit 1?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">They are the same problem with different names.</button>
+      <button class="quiz-choice" data-correct="true">Forward kinematics finds end-effector pose relative to the robot's own base using trusted joint sensors; localization finds the robot's pose relative to the world using approximate sensors.</button>
+      <button class="quiz-choice" data-correct="false">Localization only applies to robot arms, never to mobile robots.</button>
+      <button class="quiz-choice" data-correct="false">Forward kinematics requires GPS; localization does not.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Forward kinematics is a direct, trusted computation relative to the robot's own base. Localization estimates the robot's pose in the world using inherently noisy, indirect sensor data.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why isn't GPS alone a complete solution to robot localization?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">GPS is always perfectly accurate, making localization trivial.</button>
+      <button class="quiz-choice" data-correct="true">GPS accuracy (often several meters) is too coarse for many tasks, and it doesn't work indoors or in dense urban areas.</button>
+      <button class="quiz-choice" data-correct="false">GPS can only be used by robots with wheels.</button>
+      <button class="quiz-choice" data-correct="false">GPS requires a wired internet connection.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>GPS's meter-scale accuracy and indoor/urban-canyon unavailability mean most robots must build their own pose estimate from onboard sensors.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. What is the fundamental trade-off between the two localization strategies this lesson previews?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Dead reckoning is always more accurate than map-based correction.</button>
+      <button class="quiz-choice" data-correct="true">Dead reckoning is simple but drifts over time; map-based correction fixes drift but requires recognizing known features against a map.</button>
+      <button class="quiz-choice" data-correct="false">Both strategies require GPS to function.</button>
+      <button class="quiz-choice" data-correct="false">Map-based correction never requires any sensors at all.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Dead reckoning alone accumulates uncorrected error; recognizing mapped features lets a robot snap its estimate back toward the truth, at the cost of needing a map (or building one, which SLAM addresses).</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="localization">
+    <p class="quiz-prompt">4. Fill in the blank: the problem of estimating a robot's own pose within an environment using noisy sensor data is called ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Localization is the standard term for this pose-estimation problem.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="reckoning">
+    <p class="quiz-prompt">5. Fill in the blank: building a position estimate purely from a robot's own measured motion, without reference to external landmarks, is called dead ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Dead reckoning estimates position from motion alone — the subject of the next lesson.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: Sebastian Thrun, Wolfram Burgard, and Dieter Fox, <a href="https://mitpress.mit.edu/9780262201629/probabilistic-robotics/">Probabilistic Robotics</a> (MIT Press, 2005) devotes its entire Part III to the mobile robot localization problem this lesson introduced.</p>
+
+  <p class="ask-teacher">Stuck on why localization is a harder problem than forward kinematics, or want another example of accumulated drift? Ask your teacher — that's what I'm here for. Next up: making dead reckoning concrete, from wheel motion to a running position estimate.</p>
+
+  <footer class="lesson-footer">STEM+ · Advanced Robotics · Lesson 13 of the course sequence</footer>
+</div>

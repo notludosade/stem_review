@@ -1,0 +1,98 @@
+<meta charset="UTF-8">
+<link rel="icon" href="../../favicon.ico?v=1" type="image/x-icon">
+<title>Lesson 10: Cameras and Visual Perception — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · Advanced Robotics · Unit 2 · Lesson 10</span>
+  <h1>Cameras and Visual Perception</h1>
+  <p class="subtitle">A camera hands a robot enormous amounts of information and almost none of it for free — depth, in particular, has to be earned back through computation.</p>
+  <p class="nav-links"><a href="0009-lidar-and-range-sensing.html" class="nav-prev">← Lesson 9</a> <a href="0011-noise-uncertainty-and-sensor-limitations.html" class="nav-next">Lesson 11 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>A camera captures a two-dimensional grid of pixels, each recording the color and brightness of light arriving from one direction. That single sentence hides the whole reason vision is treated as hard in robotics: a 2D image is a <em>projection</em> of a 3D scene, and that projection throws depth information away by construction.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    A camera image is a grid of <strong>pixels</strong>, each storing a color or intensity value sampled from the light hitting that point on the sensor. Unlike a LIDAR return, a single pixel carries no direct distance information — the same pixel color could come from a nearby dim surface or a bright distant one.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why vision is a genuinely harder inverse problem</span>
+    LIDAR asks a direct question (how long did this pulse take to return?) and gets a direct answer (a distance). A camera asks an indirect question (what pattern of light arrived?) and has to work backward — inferring edges, shapes, objects, and eventually distances from pixel patterns alone. That backward inference is exactly the kind of "recover the cause from the effect" problem this course's inverse kinematics lesson introduced in miniature, except vision has to do it from millions of pixels instead of a handful of joint angles, using computer vision or machine learning methods well beyond this course's scope.
+  </div>
+
+  <p>Two specific challenges make this worse than it might first sound. <strong>Lighting</strong> changes what a pixel reports even when nothing in the scene has moved — the same surface looks different at noon than at dusk. <strong>Occlusion</strong> means an object can be partly or fully hidden behind another, so "not visible in this frame" doesn't mean "not there." Both are facts about the physical world a camera has no way to see past.</p>
+
+  <div class="box example">
+    <span class="box-label">Example</span>
+    A single ordinary camera (a "monocular" camera) genuinely cannot tell, from one image alone, whether it's looking at a real 30 cm box 2 m away or a 15 cm toy box 1 m away — both project to the identical size and shape on the sensor. A <strong>stereo camera</strong> (two cameras a known distance apart, like human eyes) resolves this by comparing the same point's position in both images; the shift between them (the <strong>disparity</strong>) is larger for close objects and smaller for far ones, which recovers actual depth through geometry rather than a single ambiguous image.
+  </div>
+
+  <p>Despite all of this, cameras remain indispensable specifically because of what LIDAR can't do at all: recognizing what something is, reading text or signs, distinguishing a person from a shopping cart. The trade-off running through this whole unit — precise-but-narrow versus rich-but-ambiguous — is exactly why the next two lessons exist: first the honest cost of that ambiguity (noise and uncertainty in general), then the fix (combining sensors).</p>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. Why does a single camera pixel carry no direct distance information, unlike a single LIDAR return?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because cameras are always lower resolution than LIDAR.</button>
+      <button class="quiz-choice" data-correct="true">Because a pixel only records color/intensity of arriving light, which a 2D image projection strips of depth by construction.</button>
+      <button class="quiz-choice" data-correct="false">Because cameras cannot be pointed at distant objects.</button>
+      <button class="quiz-choice" data-correct="false">Because pixels only work in black and white.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A camera image is a 2D projection of a 3D scene — depth is thrown away by the projection itself, unlike LIDAR's direct time-of-flight distance.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why can a monocular (single) camera not distinguish a large distant box from a small nearby box of proportional size, from one image alone?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Because both project to the identical size and shape on the sensor, with no depth cue available.</button>
+      <button class="quiz-choice" data-correct="false">Because cameras cannot focus on box-shaped objects.</button>
+      <button class="quiz-choice" data-correct="false">Because monocular cameras have no color sensitivity.</button>
+      <button class="quiz-choice" data-correct="false">Because this ambiguity only occurs with LIDAR, not cameras.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Without a second viewpoint or another depth cue, a single image is genuinely ambiguous about absolute scale and distance — larger-and-farther looks identical to smaller-and-nearer.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. How does a stereo camera recover depth that a single (monocular) camera cannot?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">By emitting a laser pulse like LIDAR.</button>
+      <button class="quiz-choice" data-correct="true">By comparing the same point's position across two images from cameras a known distance apart; the shift (disparity) reveals distance.</button>
+      <button class="quiz-choice" data-correct="false">By using a higher resolution sensor.</button>
+      <button class="quiz-choice" data-correct="false">Stereo cameras cannot recover depth either.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Disparity — how much a point's apparent position shifts between the two camera views — is larger for close objects and smaller for far ones, recovering depth through geometry.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="occlusion">
+    <p class="quiz-prompt">4. Fill in the blank: an object partly or fully hidden behind another object in a camera's view is a case of ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Occlusion means 'not visible in this frame' does not mean 'not present in the scene.'</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="disparity">
+    <p class="quiz-prompt">5. Fill in the blank: in a stereo camera, the shift in a point's apparent position between the two images is called the ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Disparity is larger for nearby objects and smaller for distant ones, which is how stereo vision recovers depth geometrically.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: the OpenCV <a href="https://docs.opencv.org/4.13.0/d9/db7/tutorial_py_table_of_contents_calib3d.html">"Camera Calibration and 3D Reconstruction"</a> tutorial series covers exactly how real systems recover depth from stereo image pairs — the practical version of the disparity idea in this lesson.</p>
+
+  <p class="ask-teacher">Stuck on why a single image is ambiguous about scale, or want to see the disparity idea worked through with real numbers? Ask your teacher — that's what I'm here for. Next up: being honest about how much error every sensor reading carries, not just cameras.</p>
+
+  <footer class="lesson-footer">STEM+ · Advanced Robotics · Lesson 10 of the course sequence</footer>
+</div>

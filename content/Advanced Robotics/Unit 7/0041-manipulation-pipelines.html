@@ -1,0 +1,96 @@
+<meta charset="UTF-8">
+<link rel="icon" href="../../favicon.ico?v=1" type="image/x-icon">
+<title>Lesson 41: Manipulation Pipelines — Perceive, Plan, Grasp, Place — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · Advanced Robotics · Unit 7 · Lesson 41</span>
+  <h1>Manipulation Pipelines — Perceive, Plan, Grasp, Place</h1>
+  <p class="subtitle">Every piece from this unit, and several from earlier ones, chained into the one sequence a robot actually runs to pick something up and put it down correctly.</p>
+  <p class="nav-links"><a href="0040-specialized-end-effectors.html" class="nav-prev">← Lesson 40</a> <a href="../Unit%208/0042-the-autonomy-stack.html" class="nav-next">Unit 8, Lesson 42 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>This unit built up the pieces of manipulation one at a time: end-effector hardware, grasp selection, the physics of a secure grip, specialized tools for hard cases. This closing lesson chains them into the sequence a real manipulation task actually executes, start to finish.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    A <strong>manipulation pipeline</strong> is the ordered sequence of steps a robot runs to complete a pick-and-place task: <strong>Perceive</strong> (sense and identify the object and its pose — Unit 2's cameras and depth sensors), <strong>Plan</strong> (select a grasp — Lesson 38 — and a reachable approach path — Unit 1's inverse kinematics and Unit 4's planning), <strong>Grasp</strong> (execute the approach and close the gripper with appropriate force — Lesson 39), and <strong>Place</strong> (move the held object to its destination and release it in the intended pose).
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why each stage depends on the ones before it succeeding correctly</span>
+    An error in Perceive (a misjudged object pose from Unit 2's sensor noise) feeds a wrong target into Plan, which can select a grasp that looks sound on faulty information but fails against the real object. An error in Plan (an unreachable or unstable grasp choice) causes Grasp to fail even with perfect execution. This is the same "garbage in, garbage out" chain Unit 3 established for localization feeding into planning, now running through one more stage: perception errors propagate through grasp planning into execution, which is exactly why real systems check for success at each stage — verifying a grasp actually succeeded (Lesson 39's grip-force and contact reasoning) before committing to Place, rather than assuming every step worked.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Example, tying nearly the whole course together</span>
+    A warehouse robot's full pick task: <strong>Perceive</strong> — a camera and depth sensor identify a specific box's shape and pose on the shelf (Unit 2). <strong>Plan</strong> — grasp planning selects a suction-cup grasp on the box's flat top face (Lesson 38, Lesson 40), and inverse kinematics finds a reachable arm configuration to approach it (Unit 1), with the overall arm-and-base motion sequenced by this course's motion-control machinery (Unit 5). <strong>Grasp</strong> — the arm executes the approach, engages suction, and a pressure sensor confirms a secure hold (Lesson 39's grip-security idea, applied to suction rather than friction). <strong>Place</strong> — the arm moves the box to a drop-off location and releases it, completing the task Lesson 32's finite state machine (or Lesson 34's behavior tree) was coordinating at the decision-making level the whole time.
+  </div>
+
+  <p>This closes Unit 7. A robot can now not just move itself through the world, but deliberately act on objects within it — perceiving, planning, grasping, and placing, with each stage depending on the reliability of the ones before it. Unit 8, this course's last, is about integration: bringing kinematics, perception, localization, planning, control, decision-making, and manipulation together into one coherent autonomous system, with real-world case studies grounding the whole course.</p>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What are the four stages of a manipulation pipeline, in order?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Plan, Perceive, Place, Grasp.</button>
+      <button class="quiz-choice" data-correct="true">Perceive, Plan, Grasp, Place.</button>
+      <button class="quiz-choice" data-correct="false">Grasp, Place, Perceive, Plan.</button>
+      <button class="quiz-choice" data-correct="false">Place, Grasp, Plan, Perceive.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The pipeline runs in this order: perceive the object, plan a grasp and approach, execute the grasp, then place the object at its destination.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why does a perception error early in the pipeline (a misjudged object pose) tend to cause downstream failures?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Perception errors have no effect on later stages.</button>
+      <button class="quiz-choice" data-correct="true">A wrong perceived pose feeds a wrong target into grasp planning, which can select a grasp that looks sound but fails against the real object.</button>
+      <button class="quiz-choice" data-correct="false">Perception is always perfectly accurate, so this never happens.</button>
+      <button class="quiz-choice" data-correct="false">Grasp planning ignores perception data entirely.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Errors propagate downstream through the pipeline: bad perception data leads to a grasp plan based on incorrect information, which can then fail in execution.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why do real manipulation systems check for success at each pipeline stage, rather than only assuming everything worked and proceeding straight to Place?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Checking wastes time and provides no benefit.</button>
+      <button class="quiz-choice" data-correct="true">Because an error at any earlier stage (perception, planning, or grasping) can cause the task to fail, so verifying success avoids compounding an undetected failure.</button>
+      <button class="quiz-choice" data-correct="false">Because Place is the only stage that can ever fail.</button>
+      <button class="quiz-choice" data-correct="false">Because checking is only relevant for suction grippers.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Since errors can occur and propagate at any stage, verifying success (like confirming a secure grasp) before committing to the next stage catches failures before they compound.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="pipeline">
+    <p class="quiz-prompt">4. Fill in the blank: the ordered sequence Perceive, Plan, Grasp, and Place that a robot runs to complete a pick-and-place task is called a manipulation ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Manipulation pipeline is the standard term for this end-to-end sequence, chaining together perception, planning, and execution.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="perceive|perception">
+    <p class="quiz-prompt">5. Fill in the blank: the manipulation pipeline stage that involves sensing and identifying an object's shape and pose, relying on Unit 2's cameras and depth sensors, is called ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Perceive is the first pipeline stage, and every later stage depends on getting this one right.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: Kevin M. Lynch and Frank C. Park, <a href="https://modernrobotics.northwestern.edu/chapters/chapter12/">Chapter 12, "Grasping and Manipulation,"</a> from <em>Modern Robotics</em> (free at modernrobotics.northwestern.edu), closes with exactly this kind of end-to-end manipulation task framing this lesson used to tie the unit together.</p>
+
+  <p class="ask-teacher">Stuck on tracing how an error at one pipeline stage would propagate to the next, or want to design a full pipeline for a different pick-and-place task? Ask your teacher — that's what I'm here for. This closes Unit 7 — up next, Unit 8 brings every unit of this course together into one coherent autonomous system.</p>
+
+  <footer class="lesson-footer">STEM+ · Advanced Robotics · Lesson 41 of the course sequence</footer>
+</div>

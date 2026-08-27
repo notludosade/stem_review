@@ -1,0 +1,96 @@
+<meta charset="UTF-8">
+<link rel="icon" href="../../favicon.ico?v=1" type="image/x-icon">
+<title>Lesson 43: Case Study — Warehouse Robots — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · Advanced Robotics · Unit 8 · Lesson 43</span>
+  <h1>Case Study — Warehouse Robots</h1>
+  <p class="subtitle">Thousands of robots sharing one warehouse floor, coordinating in real time — a real, large-scale test of nearly everything this course covered.</p>
+  <p class="nav-links"><a href="0042-the-autonomy-stack.html" class="nav-prev">← Lesson 42</a> <a href="0044-case-study-autonomous-vacuum-cleaners.html" class="nav-next">Lesson 44 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Warehouse fulfillment robots — the kind popularized by systems like Kiva (now Amazon Robotics) — are one of the clearest large-scale, commercially successful applications of this entire course's material. This lesson traces how the units connect in this specific real system.</p>
+
+  <div class="box">
+    <span class="box-label">The system, unit by unit</span>
+    Each robot localizes on the warehouse floor (Unit 3), often using fiducial markers on the floor as reliable, low-drift landmarks rather than relying on SLAM alone — a practical simplification real deployed systems make when the environment can be engineered to help. Path planning (Unit 4) routes each robot to a target shelving pod, avoiding both fixed shelving and other moving robots. Motion control (Unit 5) executes that route on simple, wheeled bases. A robot picks up an entire shelving pod (a specialized manipulation task, Unit 7) and carries it to a human picker, rather than picking individual items itself.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why coordination across many robots is the genuinely new problem this case study adds</span>
+    Every earlier unit implicitly assumed a single robot solving its own planning and control problem. A warehouse fleet has hundreds of robots simultaneously planning routes through the same shared floor space — Unit 4's obstacle avoidance now has to treat other robots as obstacles that are themselves planning and moving, and a naive "every robot plans independently" approach risks deadlocks, where two robots' individually reasonable plans block each other with neither able to proceed. Real systems add coordination on top of individual planning — reserving path segments, sequencing who moves first through contested space — precisely because Unit 4's single-robot machinery doesn't automatically prevent this on its own.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Example</span>
+    Two robots approach the same narrow aisle from opposite ends at the same time. Each one's individual A* plan (Unit 4) is entirely correct in isolation — it's the shortest path to its own goal. Without coordination, both robots could commit to entering the aisle simultaneously, becoming a real deadlock exactly as Unit 4's replanning lesson described for a fully blocked route, except now caused by another robot's independently-reasonable decision rather than a static obstacle. Fleet coordination software resolves this by having one robot's plan take priority, holding the other back until the aisle clears — a layer of decision-making (in the spirit of Unit 6's FSMs and behavior trees) operating above any single robot's own planning.
+  </div>
+
+  <p>This case study grounds nearly every unit of this course in one real, commercially deployed system, and adds a genuinely new lesson of its own: coordination among many autonomous agents raises problems that don't exist for a single robot operating alone — a theme worth carrying forward even though this course's scope stayed at the single-robot level throughout.</p>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. How do many real warehouse robot systems localize reliably, as a practical simplification beyond relying on SLAM alone?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">By having a human manually drive every robot at all times.</button>
+      <button class="quiz-choice" data-correct="true">By using fiducial markers on the floor as reliable, low-drift landmarks.</button>
+      <button class="quiz-choice" data-correct="false">By disabling localization entirely and driving blind.</button>
+      <button class="quiz-choice" data-correct="false">By only operating one robot at a time in the entire warehouse.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Engineering the environment with fiducial floor markers gives a practical, low-drift localization reference — a real-world simplification on top of this course's general SLAM machinery.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. What genuinely new problem does coordinating a fleet of many warehouse robots introduce, beyond what single-robot path planning (Unit 4) already handles?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">No new problem — single-robot planning already handles fleets automatically.</button>
+      <button class="quiz-choice" data-correct="true">Multiple robots' individually reasonable plans can conflict, risking deadlocks that require coordination above individual planning to resolve.</button>
+      <button class="quiz-choice" data-correct="false">Fleets of robots never need any path planning at all.</button>
+      <button class="quiz-choice" data-correct="false">Warehouse robots never share the same physical space.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Single-robot planning doesn't automatically prevent two independently-reasonable plans from creating a deadlock — fleet coordination adds a layer to resolve exactly this.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. In the two-robots-approaching-one-aisle example, why does a deadlock occur even though each robot's individual plan is correct?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because A* never produces correct plans.</button>
+      <button class="quiz-choice" data-correct="true">Because each robot's independently correct plan doesn't account for the other robot also moving into the same contested space at the same time.</button>
+      <button class="quiz-choice" data-correct="false">Because the aisle was permanently blocked by a static obstacle.</button>
+      <button class="quiz-choice" data-correct="false">Because warehouse robots cannot detect other robots at all.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Each individual plan is locally correct, but without coordination across robots, two correct individual plans can still conflict — the deadlock comes from the interaction, not either single plan being wrong.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="deadlock">
+    <p class="quiz-prompt">4. Fill in the blank: a situation where two or more robots' individually reasonable plans block each other, with neither able to proceed, is called a ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Deadlock is the standard term for this mutual-blocking failure mode in multi-robot coordination.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="pod">
+    <p class="quiz-prompt">5. Fill in the blank: rather than picking individual items, many warehouse robots instead carry an entire shelving ___ to a human picker.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Carrying whole shelving pods to pickers, rather than individually manipulating items, is a common design choice in real warehouse fulfillment systems.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: Peter R. Wurman, Raffaello D'Andrea, and Mick Mountz, <a href="https://ojs.aaai.org/aimagazine/index.php/aimagazine/article/view/2082">"Coordinating Hundreds of Cooperative, Autonomous Vehicles in Warehouses"</a> (AI Magazine, 2008), describes the real Kiva Systems warehouse robot fleet this case study is based on.</p>
+
+  <p class="ask-teacher">Stuck on why individually correct plans can still deadlock, or want to think through a different fleet-coordination scenario? Ask your teacher — that's what I'm here for. Next up: a very different real system built on much of the same underlying material — the autonomous vacuum cleaner.</p>
+
+  <footer class="lesson-footer">STEM+ · Advanced Robotics · Lesson 43 of the course sequence</footer>
+</div>

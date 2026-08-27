@@ -1,0 +1,98 @@
+<meta charset="UTF-8">
+<link rel="icon" href="../../favicon.ico?v=1" type="image/x-icon">
+<title>Lesson 12: Sensor Fusion — Combining Imperfect Information — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · Advanced Robotics · Unit 2 · Lesson 12</span>
+  <h1>Sensor Fusion — Combining Imperfect Information</h1>
+  <p class="subtitle">Two mediocre sensors, combined the right way, can beat one excellent sensor — because their weaknesses rarely overlap.</p>
+  <p class="nav-links"><a href="0011-noise-uncertainty-and-sensor-limitations.html" class="nav-prev">← Lesson 11</a> <a href="../Unit%203/0013-the-localization-problem.html" class="nav-next">Unit 3, Lesson 13 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Every sensor this unit has covered is good at something specific and blind to something else. <strong>Sensor fusion</strong> is the idea of combining readings from multiple sensors to get a better estimate than any single sensor could provide alone — not by picking the "best" one, but by leaning on each sensor exactly where it's strong.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    <strong>Sensor fusion</strong> is the process of combining measurements from two or more sensors into a single, more reliable estimate of some quantity — typically because the sensors have <strong>complementary</strong> strengths and weaknesses (each is strong where the other is weak) or <strong>redundant</strong> coverage (both measure the same thing, catching each other's outright errors).
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why complementary sensors are the more powerful combination</span>
+    Redundant sensors (two of the same kind) help catch outright failures, but don't fix a shared blind spot — two cameras still can't measure distance well head-on. Complementary sensors are more powerful because their errors don't line up: an encoder's motion estimate updates fast but drifts (Lesson 8), while a LIDAR-based position fix updates slower but doesn't drift the same way. Fused together, the combination can track fast motion moment-to-moment using the encoder while periodically correcting accumulated drift using the LIDAR fix — better than either alone, for exactly the reason neither one's weakness is shared by the other.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Example</span>
+    A robot vacuum's wheel encoders (Lesson 8) update at high frequency and give a smooth, responsive estimate of how the robot has moved in the last instant — but they drift as slip errors accumulate. A camera-based position fix (something Unit 3's SLAM lessons will explain properly) is slower to compute and less frequent, but doesn't accumulate the same kind of drift over time. Fusing the two — trusting the encoder for fast, moment-to-moment motion and periodically pulling the running estimate back toward the camera's steadier fix — gives smoother <em>and</em> more accurate tracking than either sensor running alone.
+  </div>
+
+  <p>This lesson deliberately stopped short of the actual mathematics of fusion — the standard tool, called a <strong>Kalman filter</strong> (and its variants), formally weighs each sensor's contribution by how much to trust it at that instant, using the noise characteristics from Lesson 11. That machinery is beyond this course's scope; the idea to carry forward is simpler and more durable: no single sensor has to be trusted completely, because its weaknesses can be covered by a different sensor's strengths.</p>
+
+  <p>This closes Unit 2. Robots now have a way to sense their own motion and their surroundings, imperfectly, and a way to combine those imperfect readings into something more trustworthy. Unit 3 puts that combination to its first real job: figuring out where the robot actually is.</p>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What is sensor fusion?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Using only the single most expensive sensor available.</button>
+      <button class="quiz-choice" data-correct="true">Combining measurements from multiple sensors into one more reliable estimate.</button>
+      <button class="quiz-choice" data-correct="false">Replacing all sensors with a camera.</button>
+      <button class="quiz-choice" data-correct="false">A method for physically merging two sensors into one device.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Sensor fusion combines readings from multiple sensors — often with complementary strengths and weaknesses — into a single better estimate.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why are complementary sensors generally more powerful to combine than two redundant sensors of the same kind?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Complementary sensors are always cheaper.</button>
+      <button class="quiz-choice" data-correct="true">Their errors and blind spots don't overlap, so one can cover exactly where the other is weak.</button>
+      <button class="quiz-choice" data-correct="false">Redundant sensors are illegal to use together.</button>
+      <button class="quiz-choice" data-correct="false">Complementary sensors never have any error at all.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Two sensors with different, non-overlapping weaknesses (like a fast-but-drifting encoder and a slow-but-stable position fix) compensate for each other; two identical sensors share the same blind spot.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. In the robot vacuum fusion example, what role does the wheel encoder play compared to the camera-based position fix?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">The encoder is ignored entirely once the camera is available.</button>
+      <button class="quiz-choice" data-correct="true">The encoder provides fast, smooth moment-to-moment motion estimates, while the camera periodically corrects accumulated drift.</button>
+      <button class="quiz-choice" data-correct="false">The camera is only used for taking photographs, not for position estimation.</button>
+      <button class="quiz-choice" data-correct="false">Both sensors provide identical information, so fusing them adds nothing.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The encoder is fast but drifts over time; the camera-based fix is slower but doesn't share that drift, so combining them gives both responsiveness and long-term accuracy.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="complementary">
+    <p class="quiz-prompt">4. Fill in the blank: sensors with strengths and weaknesses that don't overlap — each strong where the other is weak — are described as ___ to each other.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Complementary sensors cover each other's blind spots, which is why fusing them tends to outperform either sensor alone.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="kalman">
+    <p class="quiz-prompt">5. Fill in the blank: the standard mathematical tool for formally weighing each sensor's contribution to a fused estimate, based on how much to trust it, is called a ___ filter.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The Kalman filter (and its variants) is the standard formal tool for sensor fusion, though this course kept its mathematics out of scope.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: Sebastian Thrun, Wolfram Burgard, and Dieter Fox, <a href="https://mitpress.mit.edu/9780262201629/probabilistic-robotics/">Probabilistic Robotics</a> (MIT Press, 2005), Chapter 2, "Recursive State Estimation," introduces the Bayes-filter framework that formalizes exactly this idea of combining uncertain measurements over time.</p>
+
+  <p class="ask-teacher">Stuck on why redundant sensors help less than complementary ones, or want another real fusion example? Ask your teacher — that's what I'm here for. This closes Unit 2 — up next, Unit 3 asks the question all this sensing was building toward: where actually is the robot?</p>
+
+  <footer class="lesson-footer">STEM+ · Advanced Robotics · Lesson 12 of the course sequence</footer>
+</div>

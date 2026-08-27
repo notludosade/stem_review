@@ -1,0 +1,96 @@
+<meta charset="UTF-8">
+<link rel="icon" href="../../favicon.ico?v=1" type="image/x-icon">
+<title>Lesson 44: Case Study — Autonomous Vacuum Cleaners — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · Advanced Robotics · Unit 8 · Lesson 44</span>
+  <h1>Case Study — Autonomous Vacuum Cleaners</h1>
+  <p class="subtitle">A tiny budget, a cluttered, ever-changing home, and no fleet to coordinate with — a genuinely different set of constraints from the warehouse case study.</p>
+  <p class="nav-links"><a href="0043-case-study-warehouse-robots.html" class="nav-prev">← Lesson 43</a> <a href="0045-case-study-self-driving-perception-stacks.html" class="nav-next">Lesson 45 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>A robot vacuum runs the same broad autonomy stack as a warehouse robot — sensing, localization, planning, control — but under dramatically different constraints: a consumer price point, a small onboard computer, and an environment that changes constantly (furniture moves, doors open and close, pets and people walk through) rather than a warehouse's comparatively controlled, engineered floor.</p>
+
+  <div class="box">
+    <span class="box-label">The system, unit by unit</span>
+    Early robot vacuums relied almost entirely on simple reactive behavior (Unit 6) — bump into something, turn a random angle, continue — with no mapping at all. Modern models perform real SLAM (Unit 3), commonly using a camera for visual feature tracking (vSLAM) combined with wheel odometry (Unit 2's sensor fusion, applied directly), building a genuine occupancy-grid-style map (Unit 3) of the home across cleaning sessions. That map enables actual path planning (Unit 4) — systematic room-by-room coverage instead of random wandering — and persistent maps let a user designate rooms or no-go zones between cleaning sessions.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why cost and compute constraints reshape the same problems this course covered</span>
+    A warehouse robot can carry a spinning LIDAR unit and a capable onboard computer because the cost is spread across a large commercial deployment. A consumer vacuum's entire budget is a small fraction of that, which is exactly why vSLAM (camera-based, cheaper hardware) is common in this category even though LIDAR-equipped models exist too — Unit 2's sensor trade-offs (LIDAR's precision versus a camera's cost and richness) get resolved differently here than in a warehouse, driven by cost rather than by which sensor is objectively "better." The core algorithms (SLAM, A*-style coverage planning) are the same ideas this course covered; what changes is the hardware budget they have to run on.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Example</span>
+    A robot vacuum using vSLAM builds a map of an apartment by tracking visual features across camera frames while fusing in wheel odometry (Unit 2, Unit 3) — the same fusion idea Unit 2's sensor-fusion lesson introduced in the abstract, now doing real work on a $300 consumer device with a fraction of a warehouse robot's compute budget. When it later recognizes a previously-seen room (a loop closure, Unit 3), it corrects accumulated drift exactly as Unit 3 described — the same algorithm, deployed at consumer scale, on hardware costing a tiny fraction of an industrial system's.
+  </div>
+
+  <p>Where the warehouse case study's new lesson was multi-robot coordination, this case study's new lesson is resource-constrained engineering: the same algorithms this course covered, made to work within a small computer's processing budget and a consumer product's price point — a real, everyday example of engineering trade-offs Unit 1's opening lessons on constraints already prepared you to recognize.</p>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What sensing approach do many modern robot vacuums use for SLAM, and why is it common in this category specifically?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Spinning LIDAR units, because they are the cheapest option available.</button>
+      <button class="quiz-choice" data-correct="true">Camera-based visual SLAM (vSLAM) combined with wheel odometry, largely because it fits a consumer product's cost constraints.</button>
+      <button class="quiz-choice" data-correct="false">No sensing at all — robot vacuums never build maps.</button>
+      <button class="quiz-choice" data-correct="false">Sonar exclusively, since cameras cannot be used indoors.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>vSLAM's cheaper hardware fits a consumer price point better than a full LIDAR unit, even though LIDAR-equipped vacuum models also exist.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why does this case study describe the same core algorithms (SLAM, coverage planning) as this course covered, despite very different hardware from a warehouse robot?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because the algorithms are completely different for consumer devices.</button>
+      <button class="quiz-choice" data-correct="true">Because what changes between the two systems is mainly the hardware budget the same underlying algorithms run on, not the algorithms themselves.</button>
+      <button class="quiz-choice" data-correct="false">Because robot vacuums do not perform any localization.</button>
+      <button class="quiz-choice" data-correct="false">Because warehouse robots and vacuums share identical price points.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The same SLAM and planning ideas apply in both systems; a consumer vacuum's tighter cost and compute budget is what drives different specific hardware choices.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. What happens when a robot vacuum using vSLAM recognizes a previously-seen room?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Nothing — recognition has no effect on the map.</button>
+      <button class="quiz-choice" data-correct="true">A loop closure occurs, correcting accumulated drift in the map, exactly as described in Unit 3.</button>
+      <button class="quiz-choice" data-correct="false">The vacuum immediately stops functioning.</button>
+      <button class="quiz-choice" data-correct="false">The map is deleted and rebuilt from scratch.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Recognizing a previously mapped location triggers loop closure, correcting drift the same way Unit 3 described for any SLAM system, regardless of price point.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="v|vslam">
+    <p class="quiz-prompt">4. Fill in the blank: camera-based SLAM, commonly used in consumer robot vacuums instead of LIDAR-based SLAM, is often abbreviated ___SLAM.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>vSLAM (visual SLAM) is the standard term for camera-based simultaneous localization and mapping.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="dynamic|changing">
+    <p class="quiz-prompt">5. Fill in the blank: unlike a warehouse's comparatively controlled floor, a home environment changes constantly as furniture, doors, and people move — making mapping genuinely harder due to this ___ environment.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A constantly changing environment is a real challenge distinct from a warehouse's more engineered, controlled floor space.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: IEEE Spectrum, <a href="https://spectrum.ieee.org/irobot-brings-visual-mapping-and-navigation-to-the-roomba-980">"iRobot Brings Visual Mapping and Navigation to the Roomba 980,"</a> covers exactly the vSLAM-based mapping and coverage planning this case study described, in a real consumer product.</p>
+
+  <p class="ask-teacher">Stuck on why cost constraints push toward different sensor choices than a warehouse robot would make, or want to compare this case study to the warehouse one directly? Ask your teacher — that's what I'm here for. Next up: a case study operating at a very different scale of stakes and complexity — self-driving vehicle perception.</p>
+
+  <footer class="lesson-footer">STEM+ · Advanced Robotics · Lesson 44 of the course sequence</footer>
+</div>

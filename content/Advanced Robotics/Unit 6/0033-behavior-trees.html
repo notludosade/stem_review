@@ -1,0 +1,98 @@
+<meta charset="UTF-8">
+<link rel="icon" href="../../favicon.ico?v=1" type="image/x-icon">
+<title>Lesson 33: Behavior Trees — A Scalable Alternative to FSMs — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · Advanced Robotics · Unit 6 · Lesson 33</span>
+  <h1>Behavior Trees — A Scalable Alternative to FSMs</h1>
+  <p class="subtitle">Instead of naming every possible mode and every transition between them, describe behavior as a tree of smaller, reusable pieces.</p>
+  <p class="nav-links"><a href="0032-designing-a-robot-fsm-a-worked-example.html" class="nav-prev">← Lesson 32</a> <a href="0034-building-and-reading-a-behavior-tree.html" class="nav-next">Lesson 34 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Lesson 32's worked example showed states and transitions multiplying fast once real failure handling was included. <strong>Behavior trees</strong> (BTs) are an alternative way to structure robot decision logic, designed specifically to scale better as behaviors grow more complex.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    A <strong>behavior tree</strong> is a tree of nodes, evaluated top-down, repeatedly, where each node returns <strong>Success</strong>, <strong>Failure</strong>, or <strong>Running</strong>. <strong>Leaf nodes</strong> are actions ("navigate to shelf") or conditions ("is battery above 20%?"). <strong>Composite nodes</strong> combine children according to a rule: a <strong>Sequence</strong> runs its children in order, succeeding only if all succeed (failing and stopping immediately if any child fails); a <strong>Selector</strong> (or Fallback) tries its children in order, succeeding as soon as any one succeeds (only failing if all of them do).
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why trees scale where flat state machines don't</span>
+    An FSM's transitions form a flat, sprawling web — Lesson 32's retry loop and failure-escalation path were each separate, manually wired transitions, and every new failure case meant more wiring. A behavior tree expresses the same logic structurally: "try this, and if it fails, try that instead" is just a Selector node; "do these steps in order, bailing out if any fails" is just a Sequence node. Complex behavior is built by composing small, independently understandable subtrees — including reusing the same subtree (like a generic "retry up to N times" pattern) in multiple places — rather than hand-wiring an ever-growing web of named states and transitions.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Example</span>
+    Lesson 32's picking logic becomes a small subtree: a Selector containing [a Sequence of "attempt grasp" then "verify grasp succeeded," repeated up to 3 times] followed by ["report picking failure"]. Read left to right: keep trying the grasp-and-verify sequence; if it never succeeds after enough attempts, fall through to the failure report. This is the same retry-then-escalate logic Lesson 32 built as several explicitly wired FSM states and transitions, expressed here as a compact, reusable structural pattern instead.
+  </div>
+
+  <p>The <strong>Running</strong> status is what makes behavior trees naturally reactive as well as structured: a long-running action (like "navigate to shelf," which takes many control cycles) returns Running on every tick until it finishes, and the tree re-evaluates from the top each cycle — meaning higher-priority branches (like "battery critically low, abort and return to dock") can interrupt a Running action if conditions change, without any separate mechanism bolted on.</p>
+
+  <p>This lesson covered the vocabulary and the "why." The next lesson gets hands-on: reading and building an actual behavior tree, node by node, for a complete robot task.</p>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What are the three possible return statuses of a behavior tree node?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">True, False, and Null.</button>
+      <button class="quiz-choice" data-correct="true">Success, Failure, and Running.</button>
+      <button class="quiz-choice" data-correct="false">Start, Stop, and Pause.</button>
+      <button class="quiz-choice" data-correct="false">High, Medium, and Low priority.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Every behavior tree node returns exactly one of Success, Failure, or Running on each evaluation.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. What is the difference between a Sequence node and a Selector (Fallback) node?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">They behave identically.</button>
+      <button class="quiz-choice" data-correct="true">A Sequence succeeds only if all children succeed, failing immediately on any failure; a Selector succeeds as soon as any child succeeds.</button>
+      <button class="quiz-choice" data-correct="false">A Sequence can only have one child; a Selector can have unlimited children.</button>
+      <button class="quiz-choice" data-correct="false">A Selector always runs every child regardless of outcome.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Sequence is an 'all must succeed, in order' composite; Selector is a 'try until one succeeds' composite — the two core building blocks of behavior tree logic.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why does the 'Running' status help behavior trees be naturally reactive?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Running status has no effect on tree evaluation.</button>
+      <button class="quiz-choice" data-correct="true">A long-running action returns Running each cycle while the tree re-evaluates from the top, letting higher-priority branches interrupt if conditions change.</button>
+      <button class="quiz-choice" data-correct="false">Running status permanently locks the tree into one branch forever.</button>
+      <button class="quiz-choice" data-correct="false">Running status is only used for leaf nodes that never take any time.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Because the tree re-evaluates from the root every cycle, a Running action can be preempted by a higher-priority branch (like a critical battery check) without any separate interrupt mechanism.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="sequence">
+    <p class="quiz-prompt">4. Fill in the blank: a behavior tree node that runs its children in order, succeeding only if all of them succeed, is called a ___ node.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Sequence nodes model 'do these steps in order, stopping on first failure.'</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="selector">
+    <p class="quiz-prompt">5. Fill in the blank: a behavior tree node that tries its children in order, succeeding as soon as any one succeeds, is called a ___ (or Fallback) node.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Selector nodes model 'try this, and if it fails, try the next option instead.'</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: Michele Colledanchise and Petter Ögren, <a href="https://arxiv.org/abs/1709.00084">"Behavior Trees in Robotics and AI: An Introduction,"</a> is the foundational reference for the Sequence/Selector/Success/Failure/Running vocabulary this lesson introduced.</p>
+
+  <p class="ask-teacher">Stuck on tracing through the picking-retry example step by step, or want to see how a different FSM would translate into a behavior tree? Ask your teacher — that's what I'm here for. Next up: hands-on practice reading and building a complete behavior tree.</p>
+
+  <footer class="lesson-footer">STEM+ · Advanced Robotics · Lesson 33 of the course sequence</footer>
+</div>

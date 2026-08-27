@@ -1,0 +1,109 @@
+<meta charset="UTF-8">
+<link rel="icon" href="../../favicon.ico?v=1" type="image/x-icon">
+<title>Lesson 34: Building and Reading a Behavior Tree — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · Advanced Robotics · Unit 6 · Lesson 34</span>
+  <h1>Building and Reading a Behavior Tree</h1>
+  <p class="subtitle">With the vocabulary in place, the remaining skill is purely practical: tracing execution through a tree, and building one for a task from scratch.</p>
+  <p class="nav-links"><a href="0033-behavior-trees.html" class="nav-prev">← Lesson 33</a> <a href="0035-combining-reactive-and-deliberative-layers.html" class="nav-next">Lesson 35 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Lesson 33 introduced the pieces. This lesson is about fluency — reading a tree diagram and correctly tracing what a robot running it would actually do, then building one for the full warehouse-fetch task from Lesson 32.</p>
+
+  <svg class="figure" viewBox="0 0 340 220" width="340" height="220">
+    <rect x="130" y="10" width="80" height="30" fill="none" stroke="var(--text)" rx="4"></rect>
+    <text class="fig-label" x="145" y="30">Selector</text>
+    <line x1="170" y1="40" x2="80" y2="70" stroke="var(--border)"></line>
+    <line x1="170" y1="40" x2="260" y2="70" stroke="var(--border)"></line>
+    <rect x="30" y="70" width="100" height="30" fill="none" stroke="var(--text)" rx="4"></rect>
+    <text class="fig-label" x="45" y="90">Sequence</text>
+    <rect x="210" y="70" width="100" height="30" fill="none" stroke="var(--accent)" rx="4"></rect>
+    <text class="fig-label" x="215" y="90">Report Failure</text>
+    <line x1="80" y1="100" x2="50" y2="140" stroke="var(--border)"></line>
+    <line x1="80" y1="100" x2="130" y2="140" stroke="var(--border)"></line>
+    <rect x="10" y="140" width="90" height="30" fill="none" stroke="var(--accent)" rx="4"></rect>
+    <text class="fig-label" x="18" y="160">Attempt Grasp</text>
+    <rect x="105" y="140" width="90" height="30" fill="none" stroke="var(--accent)" rx="4"></rect>
+    <text class="fig-label" x="112" y="160">Verify Grasp</text>
+  </svg>
+  <figcaption>Selector: try the Sequence (grasp, then verify); fall through to Report Failure only if that whole sequence fails.</figcaption>
+
+  <div class="box why">
+    <span class="box-label">How to trace execution correctly</span>
+    Start at the root every tick, and evaluate top to bottom, left to right, exactly following each node's rule. For the tree above: the Selector tries its first child (the Sequence) first. The Sequence tries Attempt Grasp; if that fails, the Sequence immediately fails (without trying Verify Grasp), and the Selector then falls through to its second child, Report Failure. If Attempt Grasp succeeds, the Sequence proceeds to Verify Grasp; if that also succeeds, the whole Sequence succeeds, and the Selector — having gotten a success from its first child — never even looks at Report Failure at all.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Building the full warehouse-fetch tree</span>
+    Lesson 32's whole task becomes a top-level Sequence: [Navigate to Shelf] → [Picking subtree, as diagrammed above] → [Navigate to Dropoff] → [Release Item]. The ItemMissing handling from Lesson 32 slots in as its own Selector around the Navigate to Shelf step: try navigating and confirming the item is present; if that combination fails, fall through to a Report Issue leaf instead of proceeding to Picking. Every FSM state and transition from Lesson 32 has a direct structural counterpart here — the tree is not a different design, it's the same decisions, organized so that adding one more failure case means adding one more branch, not rewiring the whole machine.
+  </div>
+
+  <p>Notice what didn't need a special mechanism: a critical-battery check can be added as a high-priority Selector branch checked before Navigate to Shelf even begins, and because the whole tree re-evaluates from the root every cycle (Lesson 33's Running status), that check keeps getting reconsidered throughout execution — reactive behavior, built directly into the same structure as the deliberate task sequence, exactly the reactive-plus-deliberative combination Lesson 30 said real robots need.</p>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. In the diagrammed tree (Selector over [Sequence of Attempt Grasp, Verify Grasp] and Report Failure), if Attempt Grasp fails, what happens next?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Verify Grasp still runs anyway.</button>
+      <button class="quiz-choice" data-correct="true">The Sequence fails immediately, and the Selector falls through to Report Failure.</button>
+      <button class="quiz-choice" data-correct="false">The entire tree stops evaluating forever.</button>
+      <button class="quiz-choice" data-correct="false">Report Failure runs first, then Attempt Grasp is retried.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A Sequence fails immediately when any child fails, without running the remaining children — the Selector then tries its next option, Report Failure.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. If both Attempt Grasp and Verify Grasp succeed, does the Selector ever evaluate Report Failure?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Yes, it always evaluates every child regardless of outcome.</button>
+      <button class="quiz-choice" data-correct="true">No — once the Sequence (its first child) succeeds, the Selector succeeds too and never looks at Report Failure.</button>
+      <button class="quiz-choice" data-correct="false">Only if the battery is low.</button>
+      <button class="quiz-choice" data-correct="false">Report Failure always runs last regardless of success.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A Selector stops as soon as one child succeeds — since the Sequence succeeded, the Selector never needs to try Report Failure.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. How does adding a critical-battery check as a high-priority Selector branch achieve reactive behavior without a separate mechanism?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">It doesn't — a completely separate interrupt system is still required.</button>
+      <button class="quiz-choice" data-correct="true">Because the whole tree re-evaluates from the root every cycle, that check is reconsidered continuously throughout execution.</button>
+      <button class="quiz-choice" data-correct="false">Because battery checks are hard-coded outside the tree entirely.</button>
+      <button class="quiz-choice" data-correct="false">Because Selector nodes only run once, at startup.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Re-evaluating from the root every tick means a high-priority branch is checked repeatedly, letting it interrupt a Running lower-priority action without any bolted-on interrupt logic.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="left">
+    <p class="quiz-prompt">4. Fill in the blank: correctly tracing a behavior tree's execution means evaluating from the root, top to bottom, ___ to right, following each node's rule.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Standard behavior tree convention evaluates children left to right within each composite node.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="branch">
+    <p class="quiz-prompt">5. Fill in the blank: in the warehouse-fetch tree, adding one more failure case to a behavior tree generally means adding one more ___, not rewiring the whole structure.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Behavior trees let new failure handling be added as an additional branch, unlike an FSM's need to wire new states and transitions throughout.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: the Nav2 project's <a href="https://docs.nav2.org/configuration/packages/configuring-bt-xml.html">"Behavior Tree XML Nodes"</a> documentation shows the real node types (Sequence, Fallback/Selector, and many robotics-specific actions and conditions) available in a production robot navigation behavior tree.</p>
+
+  <p class="ask-teacher">Stuck on tracing execution through the full warehouse-fetch tree, or want to add another branch to it yourself? Ask your teacher — that's what I'm here for. Next up: pulling reactive and deliberative layers together explicitly, closing this unit.</p>
+
+  <footer class="lesson-footer">STEM+ · Advanced Robotics · Lesson 34 of the course sequence</footer>
+</div>

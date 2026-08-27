@@ -1,0 +1,98 @@
+<meta charset="UTF-8">
+<link rel="icon" href="../../favicon.ico?v=1" type="image/x-icon">
+<title>Lesson 24: Replanning and Dynamic Obstacles — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · Advanced Robotics · Unit 4 · Lesson 24</span>
+  <h1>Replanning and Dynamic Obstacles</h1>
+  <p class="subtitle">Sometimes steering around an obstacle isn't enough — the whole plan has to be thrown out and recomputed, on the fly, without stopping the robot's mission.</p>
+  <p class="nav-links"><a href="0023-obstacle-avoidance-local-vs-global-planning.html" class="nav-prev">← Lesson 23</a> <a href="../Unit%205/0025-from-path-to-motion-commands.html" class="nav-next">Unit 5, Lesson 25 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Local avoidance (Lesson 23) handles small, local mismatches between plan and reality. Some mismatches are too big for that: a corridor the global plan relied on is now completely blocked, or an obstacle is moving in a way that makes "steer slightly around it" insufficient. This lesson covers <strong>replanning</strong> — recomputing all or part of the route mid-mission.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    <strong>Replanning</strong> is recomputing a new global path (or a significant portion of one) after detecting that the current plan is no longer valid or safe to continue, typically triggered by a newly discovered obstacle that fully blocks the planned route, or by a moving obstacle whose future position can't be handled through local avoidance alone.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why moving obstacles are a genuinely different problem</span>
+    Lesson 22's A* assumed a static map — every obstacle stays put while the algorithm searches. A person walking through a warehouse aisle violates that assumption directly: by the time the robot reaches where the person was sensed, they may no longer be there — or may now be exactly where the robot was about to go. Handling this well means reasoning not just about where an obstacle currently is, but roughly where it's likely to be by the time the robot would reach that point — treating time, not just space, as part of the planning problem.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Example</span>
+    A robot's global plan routes it through a specific doorway. On approach, its sensors detect the doorway is now fully blocked by a stack of pallets — not a small nudge-around-it obstacle, but a complete route failure. Local avoidance alone can't solve this; there's no way through that doorway at all. The robot triggers a full replan: A* runs again on an updated map (this new obstacle now marked, as in Unit 3's occupancy grid), most likely finding a route through a different aisle instead.
+  </div>
+
+  <p>Real systems make replanning practical by not always starting from scratch: incremental variants of A*-style search can reuse most of a previous search's work when only a small part of the map has changed, rather than recomputing the entire graph from nothing every time. The details of those incremental algorithms are beyond this course's scope, but the goal they serve is exactly what a real deployed robot needs — global planning, local avoidance, <em>and</em> the ability to fully rethink the route, all working together, fast enough to run continuously.</p>
+
+  <p>This closes Unit 4. A robot can now be given a map and a goal and compute a safe route to it, adapting as reality departs from what the map predicted. Unit 5 picks up exactly where this leaves off: turning a planned path — a sequence of graph nodes — into actual motor commands.</p>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What typically triggers replanning, as distinct from ordinary local obstacle avoidance?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Any obstacle detected by any sensor, no matter how small.</button>
+      <button class="quiz-choice" data-correct="true">A newly discovered obstacle that fully blocks the planned route, or a moving obstacle that local avoidance can't safely handle.</button>
+      <button class="quiz-choice" data-correct="false">The robot completing its route successfully.</button>
+      <button class="quiz-choice" data-correct="false">The robot's battery reaching a low level.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Replanning is reserved for mismatches serious enough that steering around them locally isn't sufficient — a fully blocked route or an obstacle whose motion needs to be anticipated.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why does a moving obstacle violate a core assumption behind Lesson 22's A* search?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">A* assumed a static map, but a moving obstacle's position at the time the robot arrives may differ from when it was sensed.</button>
+      <button class="quiz-choice" data-correct="false">A* cannot represent obstacles at all, static or moving.</button>
+      <button class="quiz-choice" data-correct="false">Moving obstacles always have zero cost in A*'s graph.</button>
+      <button class="quiz-choice" data-correct="false">A* only works for robots with wheels, not for any planning involving people.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A* searches a static graph; a moving obstacle changes position over time, so planning around it well requires reasoning about where it's likely to be by the time the robot would reach that point, not just where it is now.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why do real systems often use incremental replanning algorithms rather than always rerunning A* completely from scratch?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Incremental algorithms are required by law for safety-critical robots.</button>
+      <button class="quiz-choice" data-correct="true">They can reuse most of a previous search's work when only a small part of the map has changed, which is faster.</button>
+      <button class="quiz-choice" data-correct="false">Full A* search cannot be run more than once per robot.</button>
+      <button class="quiz-choice" data-correct="false">Incremental algorithms eliminate the need for any map updates.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Reusing prior search work when the map has only changed slightly avoids the cost of recomputing the entire graph from nothing, which matters for running replanning fast enough in real time.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="replanning">
+    <p class="quiz-prompt">4. Fill in the blank: recomputing a new global path after detecting the current one is no longer valid or safe is called ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Replanning is triggered by route-invalidating discoveries, distinct from the smaller local corrections of ordinary obstacle avoidance.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="time">
+    <p class="quiz-prompt">5. Fill in the blank: planning around a moving obstacle well requires reasoning about ___ as well as space — where the obstacle is likely to be by the time the robot arrives.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Moving obstacles turn planning into a problem that includes time, not just a static spatial map.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: the Nav2 project's <a href="https://docs.nav2.org/behavior_trees/overview/detailed_behavior_tree_walkthrough.html">"Detailed Behavior Tree Walkthrough"</a> documents a real, widely used robot navigation system's default behavior tree, built explicitly around replanning and recovery when the original plan fails.</p>
+
+  <p class="ask-teacher">Stuck on why moving obstacles need special handling beyond local avoidance, or want to trace through the blocked-doorway example differently? Ask your teacher — that's what I'm here for. This closes Unit 4 — up next, Unit 5 turns a planned path into the actual motor commands that drive it.</p>
+
+  <footer class="lesson-footer">STEM+ · Advanced Robotics · Lesson 24 of the course sequence</footer>
+</div>

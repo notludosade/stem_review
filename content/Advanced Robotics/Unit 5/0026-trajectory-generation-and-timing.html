@@ -1,0 +1,108 @@
+<meta charset="UTF-8">
+<link rel="icon" href="../../favicon.ico?v=1" type="image/x-icon">
+<title>Lesson 26: Trajectory Generation and Timing — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · Advanced Robotics · Unit 5 · Lesson 26</span>
+  <h1>Trajectory Generation and Timing</h1>
+  <p class="subtitle">A path says where. A trajectory says where, and exactly when — and that second piece is what a motion controller actually needs.</p>
+  <p class="nav-links"><a href="0025-from-path-to-motion-commands.html" class="nav-prev">← Lesson 25</a> <a href="0027-waypoint-following-and-steering-control.html" class="nav-next">Lesson 27 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Lesson 25 pointed out that a path alone has no timing. <strong>Trajectory generation</strong> is the process of adding that timing back in — turning a path into a specific function of time the robot can be commanded to follow.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    A <strong>trajectory</strong> is a path together with a specified timing — a function that gives the robot's intended position (and often velocity) at every instant in time, not just a sequence of points with no schedule attached. <strong>Trajectory generation</strong> is the process of computing this timing, typically respecting limits on the robot's maximum velocity and maximum acceleration.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why acceleration limits matter as much as velocity limits</span>
+    A trajectory that commands a robot to jump instantly from standstill to top speed isn't physically achievable — real motors and wheels take time to change speed, and commanding an impossible instantaneous change just means the robot falls behind the commanded trajectory immediately. A well-generated trajectory ramps up smoothly (bounded by maximum acceleration), holds a cruising speed (bounded by maximum velocity), and ramps back down before reaching a stopping point — often called a <strong>trapezoidal velocity profile</strong>, from the shape it traces when velocity is plotted against time.
+  </div>
+
+  <svg class="figure" viewBox="0 0 300 150" width="300" height="150">
+    <line class="fig-axis" x1="20" y1="120" x2="280" y2="120"></line>
+    <line class="fig-axis" x1="20" y1="20" x2="20" y2="120"></line>
+    <path d="M 20 120 L 90 40 L 190 40 L 260 120" fill="none" stroke="var(--accent)" stroke-width="2"></path>
+    <text class="fig-label" x="230" y="135">time</text>
+    <text class="fig-label" x="8" y="20">velocity</text>
+    <text class="fig-label" x="35" y="115">ramp up</text>
+    <text class="fig-label" x="110" y="35">cruise</text>
+    <text class="fig-label" x="195" y="115">ramp down</text>
+  </svg>
+  <figcaption>A trapezoidal velocity profile: bounded acceleration up, a cruising speed, bounded deceleration down.</figcaption>
+
+  <div class="box example">
+    <span class="box-label">Worked example</span>
+    A robot needs to travel 3 m along a straight path leg, with a maximum velocity of 1 m/s and maximum acceleration of 0.5 m/s². Ramping from 0 to 1 m/s at 0.5 m/s² takes 2 s and covers 0.5·0.5·2² = 1 m. By symmetry, ramping back down from 1 m/s to 0 takes another 2 s and covers another 1 m. That leaves 3 − 1 − 1 = 1 m to cover at the 1 m/s cruise speed, taking 1 s. Total trip time: 2 + 1 + 2 = 5 s — a complete timing schedule the robot can actually execute, respecting both limits throughout.
+  </div>
+
+  <p>Trajectory generation gives the robot a target position (and velocity) for every instant — the "where should I be right now" the next lesson's controller needs in order to know whether the robot is actually keeping up with that schedule, and if not, how to correct.</p>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What distinguishes a trajectory from a plain path?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">A trajectory only exists in simulation, never on real hardware.</button>
+      <button class="quiz-choice" data-correct="true">A trajectory adds specific timing — a function of position and velocity over time — that a path alone doesn't have.</button>
+      <button class="quiz-choice" data-correct="false">A trajectory ignores velocity entirely.</button>
+      <button class="quiz-choice" data-correct="false">There is no difference between the two terms.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A path is just a sequence of positions; a trajectory specifies exactly when the robot should be at each one, respecting velocity and acceleration limits.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why can't a trajectory command a robot to jump instantly from standstill to top speed?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Because real motors and wheels take time to change speed, bounded by a maximum acceleration.</button>
+      <button class="quiz-choice" data-correct="false">Because robots are not allowed to exceed 1 m/s under any regulation.</button>
+      <button class="quiz-choice" data-correct="false">Because instantaneous speed changes would violate the robot's degrees of freedom.</button>
+      <button class="quiz-choice" data-correct="false">Because top speed is always zero for wheeled robots.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Physical acceleration limits mean speed changes take real time — commanding an instantaneous jump is simply not achievable, so a good trajectory ramps up smoothly instead.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. In a trapezoidal velocity profile, what do the three segments represent?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Three different obstacles being avoided.</button>
+      <button class="quiz-choice" data-correct="true">A bounded-acceleration ramp up, a constant cruising speed, and a bounded-deceleration ramp down.</button>
+      <button class="quiz-choice" data-correct="false">Three separate robots cooperating on one path.</button>
+      <button class="quiz-choice" data-correct="false">Three unrelated random velocity spikes.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The trapezoid shape (velocity vs. time) comes from accelerating up to a cruise speed, holding it, then decelerating back down — all within the robot's physical limits.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="trajectory">
+    <p class="quiz-prompt">4. Fill in the blank: a path together with specified timing — position (and often velocity) as a function of time — is called a ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Trajectory is the timed version of a path, which is what a motion controller actually needs to follow.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="trapezoidal">
+    <p class="quiz-prompt">5. Fill in the blank: the velocity-vs-time shape produced by ramping up, cruising, and ramping down is often called a ___ velocity profile.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Trapezoidal velocity profiles are a standard, simple way to respect both velocity and acceleration limits.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: Kevin M. Lynch and Frank C. Park, <a href="https://modernrobotics.northwestern.edu/chapters/chapter13/">Chapter 13, "Wheeled Mobile Robots,"</a> from <em>Modern Robotics</em> (free at modernrobotics.northwestern.edu), works through velocity and acceleration limits for real wheeled platforms, extending this lesson's trapezoidal-profile example.</p>
+
+  <p class="ask-teacher">Stuck on the ramp-up/cruise/ramp-down worked example, or want to try the same calculation with different acceleration limits? Ask your teacher — that's what I'm here for. Next up: actually steering the robot to follow this timed trajectory.</p>
+
+  <footer class="lesson-footer">STEM+ · Advanced Robotics · Lesson 26 of the course sequence</footer>
+</div>

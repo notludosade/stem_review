@@ -1,0 +1,103 @@
+<meta charset="UTF-8">
+<link rel="icon" href="../../favicon.ico?v=1" type="image/x-icon">
+<title>Lesson 6: Inverse Kinematics — An Intuitive Introduction — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · Advanced Robotics · Unit 1 · Lesson 6</span>
+  <h1>Inverse Kinematics — An Intuitive Introduction</h1>
+  <p class="subtitle">Forward kinematics has exactly one answer. Its reverse can have many, one, or none — and that difference is the whole difficulty.</p>
+  <p class="nav-links"><a href="0005-kinematic-chains-and-workspace.html" class="nav-prev">← Lesson 5</a> <a href="../Unit%202/0007-how-robots-sense-the-world.html" class="nav-next">Unit 2, Lesson 7 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Every lesson so far has gone from joint values to end-effector pose. In practice, a task usually hands you the goal backward: "put the end-effector at this specific position," full stop, with no joint values given at all. Finding the joint values that achieve a target end-effector pose is <strong>inverse kinematics</strong> (IK), and it is a fundamentally harder problem than forward kinematics.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    <strong>Inverse kinematics</strong> is the problem of finding joint values that place the end-effector at a specified target pose. Unlike forward kinematics, a target pose can have <strong>zero</strong> solutions (the target is outside the workspace from Lesson 5), <strong>exactly one</strong> solution, or <strong>many</strong> solutions (multiple joint configurations reach the identical pose).
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why the reverse direction is harder</span>
+    Forward kinematics is a straightforward plug-in-and-compute formula, because you're moving in the natural direction the chain equations were written for. Running that same relationship backward means solving a system of nonlinear equations (the sines and cosines from Lesson 4's formula don't invert cleanly), and nonlinear systems don't come with a guarantee of exactly one clean answer the way linear ones often do. This many-to-one-or-none-or-many mismatch is the entire reason IK gets treated as a separate, harder problem rather than "just run forward kinematics in reverse."
+  </div>
+
+  <h2>A worked example: 2-link IK by geometry</h2>
+  <p>For the 2-link planar arm, there's a clean geometric route to IK that avoids inverting the trig equations directly. Given a target point (x, y) and link lengths L<sub>1</sub>, L<sub>2</sub>, the triangle formed by the base, the elbow, and the target has known side lengths L<sub>1</sub>, L<sub>2</sub>, and r = √(x² + y²) (the straight-line distance from base to target). The law of cosines gives the elbow angle θ<sub>2</sub> directly:</p>
+
+  <div class="expr-block">cos(θ<sub>2</sub>) = (r² − L<sub>1</sub>² − L<sub>2</sub>²) / (2·L<sub>1</sub>·L<sub>2</sub>)</div>
+
+  <div class="box example">
+    <span class="box-label">Worked example</span>
+    Let L<sub>1</sub> = 0.5 m, L<sub>2</sub> = 0.3 m, and the target be (x, y) = (0.6, 0.2) m. Then r² = 0.6² + 0.2² = 0.36 + 0.04 = 0.40. cos(θ<sub>2</sub>) = (0.40 − 0.25 − 0.09) / (2 · 0.5 · 0.3) = 0.06 / 0.3 = 0.2, so θ<sub>2</sub> = cos<sup>−1</sup>(0.2) ≈ 78.5°. From there, a short bit of geometry (not shown) recovers θ<sub>1</sub> too. Notice the ± ambiguity already visible: cos<sup>−1</sup>(0.2) is satisfied by both +78.5° and −78.5°, corresponding to the elbow bending "up" or "down" — two different, equally valid joint configurations that place the end-effector at the exact same target.
+  </div>
+
+  <p>That "elbow up or elbow down" ambiguity is the multiple-solutions case from the definition above, made concrete. If r had come out larger than L<sub>1</sub> + L<sub>2</sub>, the target would be outside the workspace entirely — the zero-solutions case, and the formula would have no valid answer (cos(θ<sub>2</sub>) computing to something outside [−1, 1] is exactly how that shows up numerically).</p>
+
+  <p>For a 6-DOF arm in 3D, this kind of closed-form geometric approach usually isn't available — instead, IK is often solved numerically, by an iterative algorithm that starts from a guess and repeatedly adjusts the joint values to reduce the error between the current and target end-effector pose, converging toward a solution (or, if the target is unreachable, failing to converge at all). The details of those iterative solvers are beyond this course's scope, but the shape of the problem — search, don't just compute — is the key takeaway distinguishing IK from forward kinematics for the rest of this course.</p>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. Why can inverse kinematics have zero, one, or many solutions, while forward kinematics always has exactly one?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because inverse kinematics is not a real mathematical problem.</button>
+      <button class="quiz-choice" data-correct="true">Because forward kinematics goes in the chain's natural direction (a direct computation), while inverse kinematics requires solving nonlinear equations backward.</button>
+      <button class="quiz-choice" data-correct="false">Because inverse kinematics only applies to arms with more than 10 joints.</button>
+      <button class="quiz-choice" data-correct="false">Because forward kinematics ignores joint limits entirely.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Forward kinematics is a direct plug-in computation. Running it backward means solving nonlinear trigonometric equations, which don't guarantee a single clean solution.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. In the 2-link IK worked example, what does the ± ambiguity in θ2 = cos⁻¹(0.2) correspond to physically?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">A calculation error that should be discarded.</button>
+      <button class="quiz-choice" data-correct="true">Two different joint configurations — 'elbow up' and 'elbow down' — that both reach the identical target point.</button>
+      <button class="quiz-choice" data-correct="false">The target point being unreachable.</button>
+      <button class="quiz-choice" data-correct="false">The arm needing a third link to resolve the ambiguity.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Both +78.5° and −78.5° are mathematically valid elbow angles, corresponding to the arm bending its elbow in two different but equally valid directions to reach the same point.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. If a target point's distance r from the base exceeds L1 + L2, what does this mean for inverse kinematics?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">The IK problem has infinitely many solutions.</button>
+      <button class="quiz-choice" data-correct="true">The target is outside the arm's workspace, so no valid joint solution exists.</button>
+      <button class="quiz-choice" data-correct="false">The elbow angle will always come out negative.</button>
+      <button class="quiz-choice" data-correct="false">Forward kinematics must be run twice to compensate.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>r > L1 + L2 places the target beyond the arm's maximum reach (the outer radius of its workspace from Lesson 5) — geometrically unreachable, so IK has zero solutions.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="inverse">
+    <p class="quiz-prompt">4. Fill in the blank: the problem of finding joint values that place the end-effector at a specified target pose is called ___ kinematics.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Inverse kinematics runs the forward-kinematics relationship in reverse: pose to joint values, instead of joint values to pose.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="1|one">
+    <p class="quiz-prompt">5. Fill in the blank: unlike inverse kinematics, forward kinematics always has exactly ___ solution(s) for a given set of joint values.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Forward kinematics is a direct computation with no ambiguity — one set of joint values always produces exactly one end-effector pose.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: Kevin M. Lynch and Frank C. Park, <a href="https://modernrobotics.northwestern.edu/chapters/chapter6/">Chapter 6, "Inverse Kinematics,"</a> from <em>Modern Robotics</em> (free at modernrobotics.northwestern.edu), covers both the closed-form geometric approach and the iterative numerical methods this lesson only previewed.</p>
+
+  <p class="ask-teacher">Stuck on the law-of-cosines worked example, or want to see why cos(θ2) outside [−1, 1] means no solution exists? Ask your teacher — that's what I'm here for. This closes Unit 1 — up next, Unit 2 turns to how a robot actually senses the world it's trying to move through.</p>
+
+  <footer class="lesson-footer">STEM+ · Advanced Robotics · Lesson 6 of the course sequence</footer>
+</div>

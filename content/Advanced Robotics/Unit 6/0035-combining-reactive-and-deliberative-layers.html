@@ -1,0 +1,96 @@
+<meta charset="UTF-8">
+<link rel="icon" href="../../favicon.ico?v=1" type="image/x-icon">
+<title>Lesson 35: Combining Reactive and Deliberative Layers — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · Advanced Robotics · Unit 6 · Lesson 35</span>
+  <h1>Combining Reactive and Deliberative Layers</h1>
+  <p class="subtitle">This unit's whole arc, made explicit: a robot's decision-making works best as reflexes and reasoning layered together, not one chosen over the other.</p>
+  <p class="nav-links"><a href="0034-building-and-reading-a-behavior-tree.html" class="nav-prev">← Lesson 34</a> <a href="../Unit%207/0036-manipulation-vs-locomotion.html" class="nav-next">Unit 7, Lesson 36 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Lesson 30 opened this unit by arguing reactive and deliberative control each solve problems the other can't. FSMs and behavior trees, the four lessons since, are ways to structure that combination in software. This closing lesson makes the layering explicit and names the architectural pattern behind it.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    A <strong>layered</strong> (or hybrid) control architecture organizes a robot's decision-making into multiple levels running at different speeds and different degrees of lookahead: a fast, reactive layer handling immediate safety and reflexes; a slower, deliberative layer handling planning and goal selection; often with a coordination layer between them. Higher layers set goals and priorities; lower layers execute quickly and can override higher-layer output when immediate conditions demand it.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why layering, not choosing one architecture, is the actual answer</span>
+    A purely deliberative robot is slow to react and brittle when reality doesn't match its model. A purely reactive robot has no way to pursue a distant goal coherently. Neither flaw is fixed by getting better at the one architecture chosen — it's fixed by combining both, with an explicit way for the fast layer to interrupt the slow one. Lesson 34's behavior tree already demonstrated this concretely: a high-priority battery-check branch (fast, reactive) sits structurally able to interrupt a long-running navigation action (slow, deliberative) at any point, without either layer needing to know the internal details of the other.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Example: the whole course's control layers, named explicitly</span>
+    Unit 4's global A* is deliberative planning. Unit 4's local obstacle avoidance and Unit 5's feedback path-tracking are reactive layers running underneath it, correcting for what the plan couldn't foresee. Unit 6's behavior trees are the coordination layer, deciding <em>which</em> high-level task (navigate, pick, report failure, return to charge) is currently active — itself capable of being interrupted by a reactive condition like critical battery level. Every piece from every previous unit fits into exactly this layered picture: fast reactive layers protecting against the immediate and unexpected, slower deliberative layers pursuing the actual goal, and a coordination structure — FSM or behavior tree — deciding which layer's output currently governs.
+  </div>
+
+  <p>This closes Unit 6. A robot can now not just execute a single planned task (Units 1 through 5), but decide which task to be doing, structure that decision cleanly, and stay responsive to conditions that demand immediate reaction. Unit 7 shifts focus to a specific class of task this unit's machinery would coordinate: manipulation — actually grasping and moving objects, a problem meaningfully different from the locomotion this course has covered so far.</p>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What is the core idea of a layered (hybrid) control architecture?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Choosing either a purely reactive or purely deliberative architecture, whichever is faster.</button>
+      <button class="quiz-choice" data-correct="true">Organizing decision-making into multiple levels at different speeds, with fast reactive layers able to override slower deliberative ones when needed.</button>
+      <button class="quiz-choice" data-correct="false">Running only deliberative planning, with no reactive component at all.</button>
+      <button class="quiz-choice" data-correct="false">Requiring every layer to run at exactly the same speed.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Layered architectures combine fast reactive layers and slower deliberative layers, with the fast layer able to interrupt or override when immediate conditions demand it.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. How did Lesson 34's behavior tree already demonstrate a layered architecture concretely?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">It did not — behavior trees are unrelated to layered architectures.</button>
+      <button class="quiz-choice" data-correct="true">A high-priority battery-check branch (reactive) could interrupt a long-running navigation action (deliberative) because the tree re-evaluates from the root every cycle.</button>
+      <button class="quiz-choice" data-correct="false">The behavior tree only ever executed one leaf node, ever.</button>
+      <button class="quiz-choice" data-correct="false">The behavior tree required a completely separate reactive system bolted on afterward.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The tree's own re-evaluation structure let a fast, high-priority branch interrupt a slower, longer-running one — layering built directly into the same structure, not a separate bolted-on system.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. According to this lesson, why is neither a purely reactive nor a purely deliberative architecture a good final answer, even if improved?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because both architectures are equally good in every situation.</button>
+      <button class="quiz-choice" data-correct="true">Because each has a flaw the other doesn't share — slow/brittle deliberation versus goalless reaction — that isn't fixed by improving within just one architecture.</button>
+      <button class="quiz-choice" data-correct="false">Because reactive control is illegal in commercial robots.</button>
+      <button class="quiz-choice" data-correct="false">Because deliberative control cannot use any sensors.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The flaws of each architecture are complementary, not fixable by refining just one choice — which is why combining both, with an explicit interruption mechanism, is the actual solution.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="layered">
+    <p class="quiz-prompt">4. Fill in the blank: a control architecture that organizes decision-making into multiple levels running at different speeds, combining reactive and deliberative control, is called a ___ (or hybrid) architecture.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Layered architectures are the standard term for combining fast reactive layers with slower deliberative ones.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="reactive">
+    <p class="quiz-prompt">5. Fill in the blank: in a layered architecture, ___ layers handle immediate safety and reflexes, while deliberative layers handle planning and goal selection.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Reactive layers provide the fast, reflexive response that deliberative planning alone is too slow to offer.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: Michele Colledanchise and Petter Ögren, <a href="https://arxiv.org/abs/1709.00084">"Behavior Trees in Robotics and AI: An Introduction,"</a> discusses how behavior trees unify reactive and deliberative behavior within a single structure, the theme this closing lesson made explicit across the whole unit.</p>
+
+  <p class="ask-teacher">Stuck on identifying the reactive versus deliberative layer for a specific example, or want to design a layered architecture for a different robot task? Ask your teacher — that's what I'm here for. This closes Unit 6 — up next, Unit 7 turns to manipulation: actually grasping and moving objects.</p>
+
+  <footer class="lesson-footer">STEM+ · Advanced Robotics · Lesson 35 of the course sequence</footer>
+</div>

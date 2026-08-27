@@ -1,0 +1,98 @@
+<meta charset="UTF-8">
+<link rel="icon" href="../../favicon.ico?v=1" type="image/x-icon">
+<title>Lesson 7: How Robots Sense the World — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · Advanced Robotics · Unit 2 · Lesson 7</span>
+  <h1>How Robots Sense the World</h1>
+  <p class="subtitle">A robot never has direct access to the truth about itself or its surroundings — only measurements, and measurements are never perfect.</p>
+  <p class="nav-links"><a href="../Unit%201/0006-inverse-kinematics-an-intuitive-introduction.html" class="nav-prev">← Unit 1, Lesson 6</a> <a href="0008-wheel-encoders-and-proprioception.html" class="nav-next">Lesson 8 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Unit 1 assumed a robot always knows its own joint angles exactly. In reality, every one of those values comes from a sensor, and every sensor reading is an imperfect stand-in for the true quantity it's measuring. This unit is about that gap — what robots can sense, and why the raw numbers coming back are never quite the whole truth.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    <strong>Proprioceptive</strong> sensors measure the robot's own internal state — joint angles, wheel rotation, battery voltage. <strong>Exteroceptive</strong> sensors measure the external world — distance to obstacles, camera images, ambient light. A robot needs both: proprioception to know what it's doing, exteroception to know what's around it.
+  </div>
+
+  <p>This unit covers three exteroceptive-leaning sensors in turn — wheel encoders (technically proprioceptive, but the foundation for a lot of what follows), LIDAR, and cameras — chosen because together they cover the three dominant ways robots perceive: measuring their own motion, measuring distance directly, and measuring rich visual detail indirectly.</p>
+
+  <div class="box why">
+    <span class="box-label">Why "just read the sensor" isn't the whole job</span>
+    Every physical sensor has limited range, limited resolution, some delay before a reading is available, and some amount of random error on top of the true value. None of this is a defect to be engineered away entirely — it's a permanent fact about measuring a physical quantity with a physical device. A robot's software has to be built assuming its sensor data is noisy and incomplete, not assuming it's ground truth.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Example</span>
+    A wheel encoder reports how far a wheel has turned — but not whether the wheel slipped on a wet floor without the robot actually moving that far. A camera reports rich color and texture — but nothing directly about how far away anything is. A LIDAR reports precise distances — but nothing about color, or what an object <em>is</em>. Every sensor answers a narrow question well and says nothing at all about everything else.
+  </div>
+
+  <p>That narrowness is exactly why real robots carry multiple sensors rather than one "best" one, and why Lesson 12 of this unit is dedicated entirely to combining them. First, though: three lessons on what each sensor actually measures, and specifically how each one fails.</p>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What is the difference between a proprioceptive sensor and an exteroceptive sensor?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Proprioceptive sensors are always more accurate.</button>
+      <button class="quiz-choice" data-correct="true">Proprioceptive sensors measure the robot's own internal state; exteroceptive sensors measure the external world.</button>
+      <button class="quiz-choice" data-correct="false">Exteroceptive sensors only work outdoors.</button>
+      <button class="quiz-choice" data-correct="false">There is no meaningful difference between the two.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Proprioception is about the robot's own state (joint angles, wheel rotation); exteroception is about the environment around it.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why does this lesson insist that sensor noise and incompleteness are not simply defects to be engineered away?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because sensors are too expensive to improve.</button>
+      <button class="quiz-choice" data-correct="true">Because limited range, resolution, delay, and random error are permanent facts about measuring a physical quantity with a physical device.</button>
+      <button class="quiz-choice" data-correct="false">Because all sensors are equally accurate regardless of design.</button>
+      <button class="quiz-choice" data-correct="false">Because software cannot be designed to handle imperfect data.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>No physical sensor is perfect — software has to be built assuming imperfect data is the normal case, not an occasional failure.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why do real robots typically carry multiple different kinds of sensors instead of one 'best' sensor?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because regulations require redundant hardware.</button>
+      <button class="quiz-choice" data-correct="true">Because each sensor answers a narrow question well and says little about everything else.</button>
+      <button class="quiz-choice" data-correct="false">Because a single sensor is always heavier than several.</button>
+      <button class="quiz-choice" data-correct="false">Because multiple sensors are always cheaper than one good one.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A camera doesn't measure distance well; a LIDAR doesn't measure color or identity. Combining sensors covers more of what a robot needs to know.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="proprioceptive">
+    <p class="quiz-prompt">4. Fill in the blank: sensors that measure the robot's own internal state, like joint angles or wheel rotation, are called ___ sensors.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Proprioceptive sensors report on the robot's own body and motion, as opposed to the external environment.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="exteroceptive">
+    <p class="quiz-prompt">5. Fill in the blank: sensors that measure the external world, like distance to obstacles or camera images, are called ___ sensors.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Exteroceptive sensors report on the environment surrounding the robot, as opposed to the robot's own internal state.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: the ROS <a href="https://docs.ros.org/en/iron/p/sensor_msgs/">sensor_msgs package documentation</a> catalogs the standard message types robots use to report raw data from every sensor family this unit covers — a useful map of what "sensing" looks like in a real robot's software.</p>
+
+  <p class="ask-teacher">Stuck on the proprioceptive/exteroceptive distinction, or want more examples of what a given sensor can't tell you? Ask your teacher — that's what I'm here for. Next up: the sensor a robot uses to measure its own motion — wheel encoders.</p>
+
+  <footer class="lesson-footer">STEM+ · Advanced Robotics · Lesson 7 of the course sequence</footer>
+</div>

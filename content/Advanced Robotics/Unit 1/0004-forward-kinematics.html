@@ -1,0 +1,105 @@
+<meta charset="UTF-8">
+<link rel="icon" href="../../favicon.ico?v=1" type="image/x-icon">
+<title>Lesson 4: Forward Kinematics — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · Advanced Robotics · Unit 1 · Lesson 4</span>
+  <h1>Forward Kinematics</h1>
+  <p class="subtitle">Given every joint angle, computing exactly where the end-effector ends up — a straightforward calculation, once you see it as chaining frames.</p>
+  <p class="nav-links"><a href="0003-coordinate-frames-and-robot-pose.html" class="nav-prev">← Lesson 3</a> <a href="0005-kinematic-chains-and-workspace.html" class="nav-next">Lesson 5 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Every joint on a robot arm has a sensor (an encoder — Unit 2 covers these properly) that reports its current angle or extension. <strong>Forward kinematics</strong> is the calculation that turns that whole list of joint values into a single answer: the pose of the end-effector.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    <strong>Forward kinematics</strong> is the function that maps a robot's joint values (angles for revolute joints, extensions for prismatic joints) to the position and orientation of its end-effector, expressed in the world frame. It is called "forward" because it goes in the natural direction of the chain: from the base, where you control the joints, out to the tip, where you care about the result.
+  </div>
+
+  <p>The last lesson's frame-chaining idea is exactly the mechanism: knowing joint 1's angle fixes frame {1} relative to frame {0}; knowing joint 2's angle then fixes frame {2} relative to frame {1}; and so on. Forward kinematics is nothing more than combining all of these link-by-link relationships into one overall answer. The genuinely good news about forward kinematics, compared to almost everything else in this unit, is that it is always well-defined and computationally simple: plug in the joint values, and there is exactly one answer, computed directly with no searching or guessing required.</p>
+
+  <h2>A worked example: the 2-link planar arm</h2>
+  <p>The simplest non-trivial case is a robot arm confined to a flat plane, with two revolute joints and two links of length L<sub>1</sub> and L<sub>2</sub>. Joint 1 (at the fixed base) has angle θ<sub>1</sub>, measured from the x-axis. Joint 2 has angle θ<sub>2</sub>, measured relative to link 1's own direction. The end-effector's (x, y) position works out to:</p>
+
+  <div class="expr-block">x = L<sub>1</sub>cos(θ<sub>1</sub>) + L<sub>2</sub>cos(θ<sub>1</sub> + θ<sub>2</sub>)&emsp;&emsp;y = L<sub>1</sub>sin(θ<sub>1</sub>) + L<sub>2</sub>sin(θ<sub>1</sub> + θ<sub>2</sub>)</div>
+
+  <p>Each term is just "how far this link reaches in x (or y), given the total angle it's rotated to by the time you reach it." Link 1 reaches L<sub>1</sub> at angle θ<sub>1</sub>; link 2 reaches L<sub>2</sub> further, but at the <em>combined</em> angle θ<sub>1</sub> + θ<sub>2</sub>, because link 2's own rotation is measured relative to link 1, which is itself already rotated by θ<sub>1</sub>. This is frame-chaining in formula form.</p>
+
+  <div class="box example">
+    <span class="box-label">Worked example</span>
+    Let L<sub>1</sub> = 0.5 m, L<sub>2</sub> = 0.3 m, θ<sub>1</sub> = 30°, θ<sub>2</sub> = 45°. Then θ<sub>1</sub> + θ<sub>2</sub> = 75°. x = 0.5 cos(30°) + 0.3 cos(75°) = 0.5(0.866) + 0.3(0.259) ≈ 0.433 + 0.078 = 0.511 m. y = 0.5 sin(30°) + 0.3 sin(75°) = 0.5(0.5) + 0.3(0.966) ≈ 0.250 + 0.290 = 0.540 m. Given those two joint angles, the end-effector is at (0.511, 0.540) m — one answer, computed directly, no ambiguity.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why this scales to real arms</span>
+    A 6-DOF arm in 3D uses the exact same idea — chain a frame transformation through each joint — just with rotation in three dimensions instead of a single plane angle, handled with the rotation-matrix machinery Lesson 3 deliberately set aside. The formula gets more involved, but the computation is still direct: plug in six joint values, get exactly one end-effector pose out. This is also precisely the calculation a robot's controller runs, continuously, just to know where its own end-effector currently is.
+  </div>
+
+  <p>Forward kinematics answers "given these joint values, where does the arm end up?" The next lesson asks what range of end-effector positions are even reachable in the first place — before flipping the question around entirely in Lesson 6.</p>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What does forward kinematics compute?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">The joint angles needed to reach a target end-effector pose.</button>
+      <button class="quiz-choice" data-correct="true">The end-effector's pose, given the robot's joint values.</button>
+      <button class="quiz-choice" data-correct="false">The forces required to move each joint.</button>
+      <button class="quiz-choice" data-correct="false">The shortest path between two end-effector poses.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Forward kinematics goes from joint values (known, controllable) to end-effector pose (the result) — the 'forward' direction along the chain.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. For a 2-link planar arm, why does link 2's contribution use the angle (θ1 + θ2) rather than θ2 alone?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">It's a typo in the standard formula — θ2 alone is correct.</button>
+      <button class="quiz-choice" data-correct="true">Because θ2 is measured relative to link 1, which is itself already rotated by θ1.</button>
+      <button class="quiz-choice" data-correct="false">Because link 2 is always twice as long as link 1.</button>
+      <button class="quiz-choice" data-correct="false">Because forward kinematics only works for angles greater than 90°.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>θ2 is defined relative to link 1's own direction, so link 2's true angle in the world frame is the sum θ1 + θ2 — exactly the frame-chaining idea from the previous lesson.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why is forward kinematics described as 'always well-defined,' unlike inverse kinematics (next lesson)?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because it has no practical use in real robots.</button>
+      <button class="quiz-choice" data-correct="true">Because plugging in a set of joint values always produces exactly one end-effector pose, with no searching required.</button>
+      <button class="quiz-choice" data-correct="false">Because it only applies to arms with fewer than 3 joints.</button>
+      <button class="quiz-choice" data-correct="false">Because it ignores link lengths.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Given specific joint values, there is exactly one resulting end-effector pose — a direct calculation, not a search. Inverse kinematics, run the other direction, does not share this guarantee.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="forward">
+    <p class="quiz-prompt">4. Fill in the blank: the calculation that maps a robot's joint values to its end-effector's pose is called ___ kinematics.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Forward kinematics runs in the natural base-to-tip direction of the chain.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="0.4">
+    <p class="quiz-prompt">5. For L1 = 0.4 m, L2 = 0.4 m, θ1 = 0°, θ2 = 90°, fill in the blank: the end-effector's y-coordinate is ___ m. (Round to 1 decimal place.)</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>y = L1 sin(θ1) + L2 sin(θ1+θ2) = 0.4 sin(0°) + 0.4 sin(90°) = 0 + 0.4(1) = 0.4 m.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: Kevin M. Lynch and Frank C. Park, <a href="https://modernrobotics.northwestern.edu/chapters/chapter4/">Chapter 4, "Forward Kinematics,"</a> from <em>Modern Robotics</em> (free at modernrobotics.northwestern.edu), works through the general open-chain formula this lesson's 2-link example is a specific case of.</p>
+
+  <p class="ask-teacher">Stuck on the worked example's arithmetic, or want to try the formula with different joint angles? Ask your teacher — that's what I'm here for. Next up: what range of positions a chain like this can even reach.</p>
+
+  <footer class="lesson-footer">STEM+ · Advanced Robotics · Lesson 4 of the course sequence</footer>
+</div>

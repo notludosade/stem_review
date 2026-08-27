@@ -1,0 +1,98 @@
+<meta charset="UTF-8">
+<link rel="icon" href="../../favicon.ico?v=1" type="image/x-icon">
+<title>Lesson 32: Designing a Robot FSM — A Worked Example — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · Advanced Robotics · Unit 6 · Lesson 32</span>
+  <h1>Designing a Robot FSM — A Worked Example</h1>
+  <p class="subtitle">Turning a task description into states and transitions is a specific skill — worth walking through completely once, on a task with real edge cases.</p>
+  <p class="nav-links"><a href="0031-finite-state-machines-for-robot-behavior.html" class="nav-prev">← Lesson 31</a> <a href="0033-behavior-trees.html" class="nav-next">Lesson 33 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Lesson 31 introduced FSMs with a clean three-state example. This lesson works through a slightly messier, more realistic task end to end — a warehouse robot fetching a specific item — to make the actual design process concrete, edge cases included.</p>
+
+  <div class="box">
+    <span class="box-label">The task</span>
+    A robot receives an order for a specific shelf item. It must: navigate to the shelf (Unit 4's planning and Unit 5's motion control), pick the item (Unit 7 will cover manipulation directly, but for now, treat "pick" as a single sub-task), navigate to a drop-off station, and release the item — while handling the possibility that the item isn't actually where expected once the robot arrives.
+  </div>
+
+  <p>A first pass at states: <strong>NavigatingToShelf</strong>, <strong>Picking</strong>, <strong>NavigatingToDropoff</strong>, <strong>Releasing</strong>, and <strong>Done</strong>. The straight-line transitions are the easy part: each state transitions to the next once its sub-task completes successfully. The design work that actually matters is in the conditions that don't go according to plan.</p>
+
+  <div class="box why">
+    <span class="box-label">Why the failure transitions are the real design work</span>
+    A clean FSM design isn't the one that handles the expected path — that part is close to trivial. It's the one that has an explicit state and transition for every plausible way a sub-task can fail. What happens if the item isn't on the shelf? What happens if the pick attempt fails (Unit 7 will cover why grasps can fail)? A state machine with no transition defined for a real failure case doesn't handle it gracefully — it either crashes, hangs, or silently does the wrong thing, none of which is acceptable for hardware operating in a shared space.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Worked example</span>
+    Add an <strong>ItemMissing</strong> state, reached from NavigatingToShelf if the expected item isn't detected on arrival — transitioning onward to a ReportingIssue state rather than getting stuck. Add a retry path from Picking back to Picking itself (up to some attempt limit) if a single grasp attempt fails, since Unit 7 will establish that grasp failure is a normal, expected occurrence, not an emergency — with a transition to ReportingIssue only after repeated failures. Neither of these is exotic; both are exactly the kind of case a real warehouse robot encounters routinely, and both are things the clean three-state vacuum example from Lesson 31 never had to consider.
+  </div>
+
+  <p>Notice how quickly the state count grew once real failure handling was added — five "happy path" states became seven or more once ItemMissing, ReportingIssue, and a retry loop were included, and this is still a comparatively simple task. That growth is exactly the scaling problem Lesson 31 flagged, and it's about to motivate the alternative the next two lessons introduce.</p>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. In designing a robot FSM for a real task, what does this lesson identify as the actual design work, as opposed to the easy part?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Naming the states, which is the hardest part.</button>
+      <button class="quiz-choice" data-correct="true">Defining explicit transitions for the ways a sub-task can plausibly fail, not just the expected happy path.</button>
+      <button class="quiz-choice" data-correct="false">Choosing which programming language to use.</button>
+      <button class="quiz-choice" data-correct="false">Deciding how many motors the robot should have.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The straight-line 'everything works' transitions are close to trivial; handling plausible failure cases explicitly is where real design effort goes.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. What happens to a state machine that has no transition defined for a real failure case it actually encounters?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">It automatically generates a new state to handle it.</button>
+      <button class="quiz-choice" data-correct="true">It either crashes, hangs, or silently does the wrong thing.</button>
+      <button class="quiz-choice" data-correct="false">It always defaults safely to the Done state.</button>
+      <button class="quiz-choice" data-correct="false">Nothing — undefined transitions are harmless by design.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>An FSM with a missing transition for a real situation has no defined behavior for it, which is unacceptable for hardware operating in a shared space.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. What happened to the state count in the worked example once real failure handling (ItemMissing, retries, ReportingIssue) was added?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">It stayed exactly the same as the simple happy-path version.</button>
+      <button class="quiz-choice" data-correct="true">It grew noticeably, even for a still-comparatively-simple task.</button>
+      <button class="quiz-choice" data-correct="false">It shrank, since failure handling simplifies FSMs.</button>
+      <button class="quiz-choice" data-correct="false">States became unnecessary once failure handling was added.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Adding realistic failure handling grew the state count from five to seven or more — exactly the scaling problem that motivates looking at an alternative structure.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="itemmissing|item missing">
+    <p class="quiz-prompt">4. Fill in the blank: in the worked example, if the expected item isn't detected on the shelf, the FSM transitions to an ___ state rather than getting stuck.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The ItemMissing state explicitly handles this real failure case instead of leaving it undefined.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="retry">
+    <p class="quiz-prompt">5. Fill in the blank: a transition from a state back to itself, used to allow a limited number of retry attempts before escalating, is called a ___ path.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A retry path lets a sub-task like picking be attempted more than once before escalating to a failure-handling state.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: the ROS <a href="https://docs.ros.org/en/iron/p/smach/">smach package documentation</a>'s tutorials on building hierarchical state machines show real code for exactly this kind of multi-state, failure-aware robot task structure.</p>
+
+  <p class="ask-teacher">Stuck on identifying other failure cases this worked example might have missed, or want to design an FSM for a different task? Ask your teacher — that's what I'm here for. Next up: an alternative structure built specifically to scale better as behaviors and failure cases multiply.</p>
+
+  <footer class="lesson-footer">STEM+ · Advanced Robotics · Lesson 32 of the course sequence</footer>
+</div>

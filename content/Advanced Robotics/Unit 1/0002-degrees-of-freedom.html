@@ -1,0 +1,103 @@
+<meta charset="UTF-8">
+<link rel="icon" href="../../favicon.ico?v=1" type="image/x-icon">
+<title>Lesson 2: Degrees of Freedom — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · Advanced Robotics · Unit 1 · Lesson 2</span>
+  <h1>Degrees of Freedom</h1>
+  <p class="subtitle">One number that answers a surprisingly deep question: how many independent ways can this thing move?</p>
+  <p class="nav-links"><a href="0001-what-makes-a-robot-a-robot.html" class="nav-prev">← Lesson 1</a> <a href="0003-coordinate-frames-and-robot-pose.html" class="nav-next">Lesson 3 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>The last lesson said a kinematic chain of links and joints is what gives a robot its freedom of movement. This lesson turns "freedom of movement" into a precise, countable quantity — one that shapes almost every downstream decision about what a robot's body can and can't do.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    A system's <strong>degrees of freedom</strong> (DOF) is the minimum number of independent numbers needed to fully specify its configuration — the position and orientation of every part of it, all at once. A single number can't be reduced to fewer numbers and still pin down the configuration completely; that minimality is what makes DOF a precise count, not just a loose sense of "how movable" something is.
+  </div>
+
+  <p>A free rigid body drifting in three-dimensional space (a satellite, a drone in the air) has 6 DOF: 3 numbers for position (x, y, z) and 3 more for orientation (which way it's rotated around each of three axes). A rigid body confined to a flat plane has only 3 DOF: 2 for position (x, y) and 1 for orientation (a single angle θ). Every additional independent way something can move — or fail to move — changes this count.</p>
+
+  <h2>DOF for a kinematic chain</h2>
+  <p>For a serial kinematic chain — the base-to-tip arm structure from the last lesson — there's a shortcut: each revolute or prismatic joint contributes exactly 1 DOF, assuming the joints are independently actuated (each one driven by its own motor, not linked mechanically to another). A robot arm with 6 independently actuated joints has 6 DOF. This is why you'll hear robot arms described directly by their joint count — "a 6-DOF arm," "a 7-DOF arm" — the two numbers are the same thing.</p>
+
+  <div class="box why">
+    <span class="box-label">Why 6 is a meaningful threshold</span>
+    A rigid end-effector's full pose in 3D space — its position and its orientation — has 6 DOF, as noted above. To place that end-effector at <em>any</em> arbitrary position and orientation in its workspace, an arm generally needs at least 6 independently actuated joints. Fewer than 6, and there are poses the arm simply cannot reach no matter how the joints are set — not a control problem, a geometry problem. This is why industrial arms doing general-purpose manipulation are so often built with exactly 6 joints: it's the minimum that guarantees full pose coverage, with no wasted actuators.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Example</span>
+    A human arm, shoulder to wrist, has roughly 7 DOF (3 in the shoulder, 1 at the elbow, 3 at the wrist) — one more than the 6 needed for full pose control. That extra joint is <strong>redundant</strong>: for a given hand position and orientation, there's a whole family of elbow positions that still work, which is exactly why you can touch your shoulder with your elbow held high or low without moving your hand at all. Redundant DOF trade a harder control problem for extra flexibility, like avoiding obstacles or keeping the elbow in a comfortable range.
+  </div>
+
+  <p>A mobile robot has its own version of this question. A wheeled robot driving on a flat floor has a 3-DOF pose (x, y, θ) — but a simple differential-drive base (two independently driven wheels) can only directly control 2 of those numbers at any instant: forward/backward speed and turning rate. It can still reach any (x, y, θ) eventually, just not by moving directly and independently along all three — a distinction that will matter again once this course gets to motion control.</p>
+
+  <p>DOF tells you how many joint values you need to fully describe an arm's configuration. The next lesson asks the reverse-feeling but actually more basic question: given a common reference for describing positions, how do you even talk precisely about where a robot's parts are?</p>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. A rigid body free to move anywhere in 3D space (position and orientation both unconstrained) has how many degrees of freedom?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">3</button>
+      <button class="quiz-choice" data-correct="true">6</button>
+      <button class="quiz-choice" data-correct="false">7</button>
+      <button class="quiz-choice" data-correct="false">Infinite</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>3 for position (x, y, z) plus 3 for orientation (rotation about each axis) gives 6 total — the standard count for a free rigid body in 3D.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. A serial robot arm has 5 independently actuated revolute joints. How many DOF does it have, and can it reach any arbitrary position and orientation in 3D?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">6 DOF; yes, it can reach any pose.</button>
+      <button class="quiz-choice" data-correct="true">5 DOF; no, some poses are geometrically unreachable regardless of control.</button>
+      <button class="quiz-choice" data-correct="false">5 DOF; yes, because any arm can reach any pose given enough time.</button>
+      <button class="quiz-choice" data-correct="false">10 DOF, since each joint contributes 2.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Each independently actuated joint contributes exactly 1 DOF, so 5 joints give 5 DOF — one short of the 6 needed to guarantee arbitrary position and orientation.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. A human arm has roughly 7 DOF, one more than the 6 needed for full pose control at the hand. What does this 'extra' DOF provide?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">It makes the arm slower.</button>
+      <button class="quiz-choice" data-correct="false">Nothing — it is functionally useless.</button>
+      <button class="quiz-choice" data-correct="true">Redundancy: multiple joint configurations can achieve the same hand pose, adding flexibility.</button>
+      <button class="quiz-choice" data-correct="false">It reduces the arm's total workspace.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A redundant DOF means many different joint configurations reach the same end-effector pose, which is exactly what lets you move your elbow while keeping your hand still.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="freedom">
+    <p class="quiz-prompt">4. Fill in the blank: the minimum number of independent numbers needed to fully specify a system's configuration is called its degrees of ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Degrees of freedom (DOF) is the standard term for this minimal count.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="1|one">
+    <p class="quiz-prompt">5. Fill in the blank: for a serial kinematic chain, each independently actuated revolute or prismatic joint contributes exactly ___ degree(s) of freedom.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Each independent joint — revolute or prismatic — adds exactly one DOF to the chain's total.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: Kevin M. Lynch and Frank C. Park, <a href="https://modernrobotics.northwestern.edu/chapters/chapter2/">Chapter 2, "Configuration Space,"</a> from <em>Modern Robotics</em> (free at modernrobotics.northwestern.edu), gives the fuller, more formal treatment of degrees of freedom this lesson kept intuitive.</p>
+
+  <p class="ask-teacher">Stuck on why 6 DOF is the magic number for full pose control, or want to work through the human-arm redundancy example differently? Ask your teacher — that's what I'm here for. Next up: the coordinate frames that let us actually describe where all these joints and links are.</p>
+
+  <footer class="lesson-footer">STEM+ · Advanced Robotics · Lesson 2 of the course sequence</footer>
+</div>

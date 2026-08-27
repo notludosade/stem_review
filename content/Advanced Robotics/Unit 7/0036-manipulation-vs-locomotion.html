@@ -1,0 +1,96 @@
+<meta charset="UTF-8">
+<link rel="icon" href="../../favicon.ico?v=1" type="image/x-icon">
+<title>Lesson 36: Manipulation Is a Different Problem Than Locomotion — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · Advanced Robotics · Unit 7 · Lesson 36</span>
+  <h1>Manipulation Is a Different Problem Than Locomotion</h1>
+  <p class="subtitle">Every unit so far was about moving the robot. This unit is about the robot moving something else — a genuinely different problem, not a smaller version of the same one.</p>
+  <p class="nav-links"><a href="../Unit%206/0035-combining-reactive-and-deliberative-layers.html" class="nav-prev">← Unit 6, Lesson 35</a> <a href="0037-grippers-and-end-effectors.html" class="nav-next">Lesson 37 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Units 1 through 6 built up everything needed to move a robot itself through the world: kinematics, sensing, localization, planning, motion control, and decision-making. This unit's subject, <strong>manipulation</strong>, reuses much of that machinery but points it at a new goal — deliberately changing the state of something in the environment, not just the robot's own pose.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    <strong>Manipulation</strong> is the deliberate use of a robot's end-effector to change the position, orientation, or state of an object in the environment — picking it up, moving it, placing it, assembling it with another part. <strong>Locomotion</strong> is moving the robot's own body through the world. Both rely on the same kinematics and control foundations from earlier units, but they optimize for different things and fail in different ways.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why manipulation adds a genuinely new kind of problem, not just a new task</span>
+    A mobile robot navigating (Units 3-5) interacts with its environment mostly by avoiding it — the whole point of obstacle avoidance is to <em>not</em> touch anything unplanned. A manipulating arm's entire purpose is deliberate, controlled contact — the moment of grasping is a moment where success specifically requires touching the object correctly, not avoiding it. Contact introduces forces and friction (Lesson 39) that pure locomotion never had to reason about, and manipulation's goal isn't just "the end-effector reached a target pose" (Unit 1's forward/inverse kinematics) but "the object ended up where intended, in the orientation intended" — a target defined in terms of something the robot doesn't have direct sensor access to the way it has access to its own joint angles.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Example</span>
+    A warehouse robot navigating to a shelf (locomotion) succeeds the moment its localized pose matches the target — a problem fully solved by Units 3 through 5's machinery. The same robot then picking an item off that shelf (manipulation) has to additionally reason about the item's shape, where to make contact, how hard to grip it (too loose and it slips, too hard and it could be damaged or the gripper could stall), and whether the grasp actually succeeded — none of which locomotion's pose-matching goal captures at all, even though the exact same kinematic chain, forward kinematics, and even some of the same sensors are doing the work.
+  </div>
+
+  <p>Because manipulation builds on Unit 1's kinematics directly — an arm's end-effector still needs forward and inverse kinematics to reach a target pose near the object — this unit will move quickly past ideas already covered and focus on what's actually new: the physical hardware that makes contact (Lesson 37), choosing where and how to grasp (Lesson 38), the physics of why a grasp holds or fails (Lesson 39), and specialized hardware for cases a simple gripper doesn't handle well (Lesson 40).</p>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. How does this lesson define manipulation, as distinct from locomotion?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Manipulation is any motion faster than 1 m/s.</button>
+      <button class="quiz-choice" data-correct="true">Manipulation is the deliberate use of an end-effector to change an object's position, orientation, or state; locomotion is moving the robot's own body.</button>
+      <button class="quiz-choice" data-correct="false">Manipulation and locomotion are the same problem with different names.</button>
+      <button class="quiz-choice" data-correct="false">Manipulation never uses forward or inverse kinematics.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Manipulation targets a change in something external to the robot (an object); locomotion targets the robot's own pose.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why does manipulation require reasoning about forces and friction in a way pure locomotion generally doesn't?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because manipulation never involves any contact with objects.</button>
+      <button class="quiz-choice" data-correct="true">Because manipulation's whole purpose is deliberate, controlled contact, while locomotion's obstacle avoidance is specifically about avoiding unplanned contact.</button>
+      <button class="quiz-choice" data-correct="false">Because locomotion always happens on frictionless surfaces.</button>
+      <button class="quiz-choice" data-correct="false">Because forces only exist in manipulation tasks, never in driving.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Grasping requires making and controlling contact, which introduces force and friction reasoning that pure navigation's avoid-everything goal doesn't need.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why is 'the end-effector reached a target pose' (Unit 1's forward/inverse kinematics goal) not the same as manipulation success?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">It's exactly the same thing — manipulation success is defined identically to reaching a pose.</button>
+      <button class="quiz-choice" data-correct="true">Manipulation success is defined by the object ending up where intended, which the robot doesn't directly sense the way it senses its own joint angles.</button>
+      <button class="quiz-choice" data-correct="false">Manipulation never involves an end-effector at all.</button>
+      <button class="quiz-choice" data-correct="false">Kinematics has no role in manipulation whatsoever.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Reaching a target end-effector pose is necessary but not sufficient — manipulation's real goal is about the object's resulting state, which requires additional reasoning beyond kinematics alone.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="manipulation">
+    <p class="quiz-prompt">4. Fill in the blank: the deliberate use of a robot's end-effector to change an object's position, orientation, or state is called ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Manipulation is this unit's central subject, distinct from locomotion (moving the robot's own body).</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="locomotion">
+    <p class="quiz-prompt">5. Fill in the blank: moving the robot's own body through the world, as opposed to manipulating an external object, is called ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Locomotion was this course's focus through Unit 6; manipulation is a genuinely different problem this unit introduces.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: Kevin M. Lynch and Frank C. Park, <a href="https://modernrobotics.northwestern.edu/chapters/chapter12/">Chapter 12, "Grasping and Manipulation,"</a> from <em>Modern Robotics</em> (free at modernrobotics.northwestern.edu), opens exactly this unit's subject with the same locomotion-versus-manipulation framing.</p>
+
+  <p class="ask-teacher">Stuck on why manipulation success is defined differently than reaching a pose, or want another example contrasting locomotion and manipulation? Ask your teacher — that's what I'm here for. Next up: the actual hardware that makes contact with objects.</p>
+
+  <footer class="lesson-footer">STEM+ · Advanced Robotics · Lesson 36 of the course sequence</footer>
+</div>

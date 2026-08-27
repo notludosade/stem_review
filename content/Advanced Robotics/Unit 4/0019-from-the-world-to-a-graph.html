@@ -1,0 +1,123 @@
+<meta charset="UTF-8">
+<link rel="icon" href="../../favicon.ico?v=1" type="image/x-icon">
+<title>Lesson 19: From the World to a Graph — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · Advanced Robotics · Unit 4 · Lesson 19</span>
+  <h1>From the World to a Graph</h1>
+  <p class="subtitle">Before any search algorithm can find a path, the continuous, messy real world has to be turned into something a computer can actually search.</p>
+  <p class="nav-links"><a href="../Unit%203/0018-loop-closure-and-correcting-drift.html" class="nav-prev">← Unit 3, Lesson 18</a> <a href="0020-configuration-space.html" class="nav-next">Lesson 20 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Unit 3 gave a robot a map — an occupancy grid, free cells and occupied cells and unknown ones. Knowing the map and knowing your position on it (Unit 3, done) is not the same as knowing how to get somewhere. This unit is about that next step: <strong>path planning</strong>, deciding a route from here to a goal. The first job, and this lesson's whole focus, is turning the map into a structure a search algorithm can actually work with — a graph.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    A <strong>graph</strong> (in this planning sense, not a chart) is a set of <strong>nodes</strong> representing discrete locations or states, connected by <strong>edges</strong> representing valid, direct transitions between them, often labeled with a <strong>cost</strong> (distance, time, or difficulty of that transition). Path planning becomes the problem of finding a sequence of edges from a start node to a goal node — a well-studied problem with well-understood algorithms, once the graph exists.
+  </div>
+
+  <p>An occupancy grid from Unit 3 converts into a graph almost directly: each free cell becomes a node, and edges connect each cell to its neighboring free cells (often the four or eight adjacent cells), each edge costing roughly the distance between cell centers. Occupied and unknown cells simply don't get nodes, or get nodes explicitly excluded from search — the graph only contains places the robot could actually be.</p>
+
+  <svg class="figure" viewBox="0 0 300 180" width="300" height="180">
+    <rect x="20" y="20" width="40" height="40" fill="var(--border)"></rect>
+    <rect x="20" y="60" width="40" height="40" fill="none" stroke="var(--border)"></rect>
+    <rect x="60" y="60" width="40" height="40" fill="none" stroke="var(--border)"></rect>
+    <rect x="100" y="60" width="40" height="40" fill="var(--border)"></rect>
+    <rect x="20" y="100" width="40" height="40" fill="none" stroke="var(--border)"></rect>
+    <rect x="60" y="100" width="40" height="40" fill="none" stroke="var(--border)"></rect>
+    <rect x="100" y="100" width="40" height="40" fill="none" stroke="var(--border)"></rect>
+    <circle class="fig-point" cx="40" cy="80" r="4"></circle>
+    <circle class="fig-point" cx="80" cy="80" r="4"></circle>
+    <circle class="fig-point" cx="40" cy="120" r="4"></circle>
+    <circle class="fig-point" cx="80" cy="120" r="4"></circle>
+    <circle class="fig-point" cx="120" cy="120" r="4"></circle>
+    <line x1="40" y1="80" x2="80" y2="80" stroke="var(--accent)" stroke-width="1.5"></line>
+    <line x1="40" y1="80" x2="40" y2="120" stroke="var(--accent)" stroke-width="1.5"></line>
+    <line x1="80" y1="80" x2="80" y2="120" stroke="var(--accent)" stroke-width="1.5"></line>
+    <line x1="40" y1="120" x2="80" y2="120" stroke="var(--accent)" stroke-width="1.5"></line>
+    <line x1="80" y1="120" x2="120" y2="120" stroke="var(--accent)" stroke-width="1.5"></line>
+    <text class="fig-label" x="160" y="45">shaded cells = occupied</text>
+    <text class="fig-label" x="160" y="65">(no node placed here)</text>
+    <text class="fig-label" x="160" y="105">open cells = free</text>
+    <text class="fig-label" x="160" y="125">(nodes, connected by edges)</text>
+  </svg>
+  <figcaption>Free cells become graph nodes; edges connect neighbors; occupied cells simply have no node at all.</figcaption>
+
+  <div class="box why">
+    <span class="box-label">Why the grid resolution is itself a design decision</span>
+    A coarse grid (large cells) makes the graph small and fast to search, but can miss real gaps a robot could actually fit through, or falsely block paths near obstacle edges. A fine grid captures the map more faithfully but produces a much larger graph, more expensive to search. This is the same trade-off Unit 1's workspace lesson raised about link lengths — a design decision made deliberately, not a detail to ignore.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Example</span>
+    A warehouse floor plan, gridded at 0.2 m resolution, might produce a graph with tens of thousands of nodes for a modest-sized building — plenty for a computer to search quickly with the right algorithm. Gridded at 0.02 m resolution "for extra safety," the same floor plan could produce a graph a hundred times larger, dramatically slowing every planning query for a precision gain the robot's own size doesn't actually need.
+  </div>
+
+  <p>Grid-based graphs are the simplest version of this idea, and this course sticks with them — but the same "discrete nodes connected by valid transitions" idea generalizes to non-grid representations too. The next lesson covers one specific refinement that matters a great deal in practice: making sure the graph reflects not just where the map is free, but where the robot's own physical size can actually fit.</p>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. In path planning, what is a graph's edge?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">A single discrete location or state.</button>
+      <button class="quiz-choice" data-correct="true">A valid, direct transition between two nodes, often labeled with a cost.</button>
+      <button class="quiz-choice" data-correct="false">A region of unknown occupancy.</button>
+      <button class="quiz-choice" data-correct="false">The robot's current sensor reading.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Nodes represent locations/states; edges represent the valid transitions between them, typically weighted by cost such as distance.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. How does an occupancy grid typically convert into a planning graph?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Every cell, occupied or free, becomes a node.</button>
+      <button class="quiz-choice" data-correct="true">Each free cell becomes a node, connected by edges to neighboring free cells; occupied cells get no node.</button>
+      <button class="quiz-choice" data-correct="false">Only the start and goal cells become nodes.</button>
+      <button class="quiz-choice" data-correct="false">The grid must first be converted into a camera image.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Free cells become searchable nodes with edges to their free neighbors; occupied (and often unknown) cells are excluded entirely from the graph.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. What is the trade-off in choosing a grid's cell resolution for path planning?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">There is no trade-off — finer is always strictly better.</button>
+      <button class="quiz-choice" data-correct="true">Coarser grids search faster but may miss real gaps; finer grids are more faithful but produce much larger, slower-to-search graphs.</button>
+      <button class="quiz-choice" data-correct="false">Grid resolution only affects LIDAR accuracy, not planning.</button>
+      <button class="quiz-choice" data-correct="false">Coarser grids always produce more nodes than finer grids.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Cell size trades graph fidelity against graph size and search speed — a deliberate design decision, similar to the workspace/link-length trade-offs from Unit 1.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="node">
+    <p class="quiz-prompt">4. Fill in the blank: in a planning graph, a discrete location or state is represented by a ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Nodes are the discrete points a search algorithm can be at; edges connect them.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="planning">
+    <p class="quiz-prompt">5. Fill in the blank: the overall problem of finding a route from a start location to a goal is called path ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Path planning is the umbrella term for this unit's whole subject — finding a route once the map is turned into a searchable graph.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: Steven M. LaValle, <a href="https://lavalle.pl/planning/book.pdf">Planning Algorithms</a> (free online text), opens with exactly this progression from a continuous environment to a discrete, searchable representation.</p>
+
+  <p class="ask-teacher">Stuck on why a coarser grid might miss a real gap, or want to sketch the graph for a different room layout? Ask your teacher — that's what I'm here for. Next up: making sure the graph accounts for the robot's own physical size, not just a single point.</p>
+
+  <footer class="lesson-footer">STEM+ · Advanced Robotics · Lesson 19 of the course sequence</footer>
+</div>

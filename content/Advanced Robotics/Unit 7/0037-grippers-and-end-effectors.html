@@ -1,0 +1,98 @@
+<meta charset="UTF-8">
+<link rel="icon" href="../../favicon.ico?v=1" type="image/x-icon">
+<title>Lesson 37: Grippers and End-Effectors — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · Advanced Robotics · Unit 7 · Lesson 37</span>
+  <h1>Grippers and End-Effectors</h1>
+  <p class="subtitle">The end-effector was a name so far — this lesson gives it real hardware, and a first sense of why 'just close the fingers' hides real design decisions.</p>
+  <p class="nav-links"><a href="0036-manipulation-vs-locomotion.html" class="nav-prev">← Lesson 36</a> <a href="0038-grasp-planning.html" class="nav-next">Lesson 38 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Unit 1 introduced the <strong>end-effector</strong> as the working tip of a kinematic chain, without saying much about what it actually is. This lesson covers the most common category: <strong>grippers</strong>, mechanical hands built specifically to grasp objects.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    A <strong>gripper</strong> is an end-effector with movable parts — <strong>fingers</strong> or <strong>jaws</strong> — that close around an object to hold it through friction and enclosure. A <strong>two-finger (parallel-jaw) gripper</strong> is the simplest and most common design: two fingers that move directly toward or away from each other, gripping an object between them.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why finger count and shape are real design trade-offs, not arbitrary choices</span>
+    A two-finger parallel gripper is simple, fast, and cheap, but limited: it grasps well along one consistent direction and struggles with oddly shaped or very small/large objects relative to its opening range. A three-finger gripper (arranged around an object rather than opposite each other) can conform to a wider range of shapes and grasp more securely against rotation, at the cost of more actuators, more complexity, and slower operation. Neither is "the correct gripper" — the choice depends entirely on what the robot needs to pick up, exactly the way Unit 1's arm design depended on the target workspace.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Example</span>
+    A warehouse robot handling uniform rectangular boxes is well served by a simple two-finger parallel gripper — boxes are a predictable shape, and the gripper's one consistent grasping direction covers the whole task. The same gripper would struggle with a warehouse that also ships loose produce, irregular parts, or fragile items of wildly varying size — tasks that call for a fundamentally different end-effector design, which Lesson 40 covers directly.
+  </div>
+
+  <p>Grip force matters as much as finger shape. A gripper needs enough force to prevent the object from slipping under gravity or acceleration, but not so much that it damages a fragile object or stalls the gripper's own motor — a balance Lesson 39's discussion of friction and grasp stability makes precise. Some grippers include simple contact or force sensors specifically to help strike that balance, closing the loop (in exactly the sense Unit 1's opening lesson defined) between commanded grip force and actual contact conditions.</p>
+
+  <p>Before deciding how hard to grip, though, there's a prior question this lesson hasn't addressed: given an object's shape, where on it should the gripper even close? That's the next lesson's entire subject.</p>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What is a two-finger (parallel-jaw) gripper?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">A gripper with fingers arranged around an object in a circle.</button>
+      <button class="quiz-choice" data-correct="true">A gripper with two fingers that move directly toward or away from each other.</button>
+      <button class="quiz-choice" data-correct="false">A gripper that uses only suction, with no moving parts.</button>
+      <button class="quiz-choice" data-correct="false">A sensor for measuring joint angles.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Parallel-jaw grippers are the simplest and most common design: two fingers closing along a single direction.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. What is the main trade-off between a two-finger gripper and a three-finger gripper?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">There is no trade-off — three fingers are strictly better in every case.</button>
+      <button class="quiz-choice" data-correct="true">Three fingers can conform to more shapes and resist rotation better, at the cost of more actuators and complexity.</button>
+      <button class="quiz-choice" data-correct="false">Two-finger grippers cannot grasp any object at all.</button>
+      <button class="quiz-choice" data-correct="false">Finger count has no effect on what shapes can be grasped.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>More fingers generally means more grasping versatility and stability against rotation, but at real hardware and complexity cost — a genuine design trade-off.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why does grip force need to be carefully balanced rather than simply maximized?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because maximum grip force is always the safest choice.</button>
+      <button class="quiz-choice" data-correct="true">Because too little force lets the object slip, while too much can damage the object or stall the gripper's motor.</button>
+      <button class="quiz-choice" data-correct="false">Because grip force has no effect on whether an object slips.</button>
+      <button class="quiz-choice" data-correct="false">Because objects are never fragile in real manipulation tasks.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Grip force sits on a balance between preventing slip and avoiding damage or motor stall — too little or too much are both failures.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="gripper">
+    <p class="quiz-prompt">4. Fill in the blank: an end-effector with movable fingers or jaws that close around an object to hold it is called a ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Grippers are the most common category of end-effector for grasping tasks.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="parallel">
+    <p class="quiz-prompt">5. Fill in the blank: the simplest and most common gripper design, with two fingers moving directly toward or away from each other, is called a two-finger or ___-jaw gripper.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Parallel-jaw is the standard term for this common, simple gripper design.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: Kevin M. Lynch and Frank C. Park, <a href="https://modernrobotics.northwestern.edu/chapters/chapter12/">Chapter 12, "Grasping and Manipulation,"</a> from <em>Modern Robotics</em> (free at modernrobotics.northwestern.edu), covers gripper hardware and the mechanics of grasping this lesson introduced.</p>
+
+  <p class="ask-teacher">Stuck on comparing two-finger and three-finger grippers for a specific task, or want to think through grip force for a fragile object? Ask your teacher — that's what I'm here for. Next up: choosing where on an object to actually grasp.</p>
+
+  <footer class="lesson-footer">STEM+ · Advanced Robotics · Lesson 37 of the course sequence</footer>
+</div>

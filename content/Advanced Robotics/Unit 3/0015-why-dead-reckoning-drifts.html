@@ -1,0 +1,96 @@
+<meta charset="UTF-8">
+<link rel="icon" href="../../favicon.ico?v=1" type="image/x-icon">
+<title>Lesson 15: Why Dead Reckoning Drifts — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · Advanced Robotics · Unit 3 · Lesson 15</span>
+  <h1>Why Dead Reckoning Drifts</h1>
+  <p class="subtitle">Small, honest measurement errors don't cancel out when you're adding them up in sequence — they compound, and the longer you drive, the worse it gets.</p>
+  <p class="nav-links"><a href="0014-odometry-and-dead-reckoning.html" class="nav-prev">← Lesson 14</a> <a href="0016-representing-the-environment-maps-and-occupancy-grids.html" class="nav-next">Lesson 16 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Lesson 11 distinguished bias from noise in a single sensor reading. Dead reckoning's core weakness is what happens when you take a long sequence of readings, each with a little of both, and add them all together.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    <strong>Drift</strong> is the growth of position error in a dead-reckoning estimate over time, caused by small per-step errors accumulating rather than canceling out. Because each new position estimate is built by adding an increment onto the <em>previous</em> (already slightly wrong) estimate, dead reckoning has no mechanism to notice that it has gone wrong — every step's error becomes part of the foundation the next step builds on.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why errors compound instead of averaging out</span>
+    Lesson 11's noise-averaging argument relied on repeated measurements of the <em>same</em> fixed quantity — errors scattered around one true value cancel when averaged. Dead reckoning is different: each step measures a <em>different</em> quantity (this step's motion, not last step's), and each estimate is built directly on the last one. There's no fixed reference to average back toward — a wrong turn-angle estimate early on doesn't just add position error, it also points every subsequent "forward" motion in a slightly wrong direction, so the error compounds geometrically rather than statistically canceling.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Example</span>
+    Suppose a robot's heading estimate is off by just 1° due to a small per-step turning error. Over a straight 10 m drive, that 1° heading error alone produces a sideways position error of roughly 10 m × sin(1°) ≈ 0.17 m — noticeable, but perhaps tolerable. Over 100 m, the same 1° error produces roughly 1.7 m of sideways drift — and that's from a single small heading error alone, before accounting for the additional errors accumulating in every other step along the way. Position drift in dead reckoning generally grows roughly in proportion to distance traveled, not to time elapsed.
+  </div>
+
+  <p>This is not a flaw specific to bad hardware — it is a structural property of any sensing scheme that only ever measures change from the last known state and never checks itself against an independent, fixed reference. Better encoders (Lesson 8's higher resolution) slow the drift; they cannot eliminate it. Something outside the accumulating chain is required to correct it — which is exactly what maps and SLAM, the rest of this unit, provide.</p>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. Why does dead-reckoning error grow over time instead of averaging out the way repeated measurements of the same fixed quantity do?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because wheel encoders wear out after long drives.</button>
+      <button class="quiz-choice" data-correct="true">Because each new estimate is built on the previous (already slightly wrong) estimate, so there is no fixed reference to average back toward.</button>
+      <button class="quiz-choice" data-correct="false">Because dead reckoning does not use any sensors at all.</button>
+      <button class="quiz-choice" data-correct="false">Because drift only happens when the robot turns, never when driving straight.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Unlike repeated measurements of one fixed quantity, each dead-reckoning step measures a different increment and builds directly on the prior (already imperfect) estimate — errors compound rather than cancel.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. A small constant heading error compounds into what kind of position error over a long, straight drive?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">No error at all, since heading doesn't affect position.</button>
+      <button class="quiz-choice" data-correct="true">A sideways position error that grows roughly with distance traveled.</button>
+      <button class="quiz-choice" data-correct="false">An error that only appears at the exact midpoint of the drive.</button>
+      <button class="quiz-choice" data-correct="false">An error that automatically corrects itself after 100 m.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A constant heading error points every increment of forward motion slightly off-course, producing a sideways drift that grows roughly in proportion to total distance traveled.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. What can reduce dead-reckoning drift without eliminating it entirely?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Using a higher-resolution wheel encoder.</button>
+      <button class="quiz-choice" data-correct="false">Turning off all sensors.</button>
+      <button class="quiz-choice" data-correct="false">Only driving in a perfectly straight line, which removes drift completely.</button>
+      <button class="quiz-choice" data-correct="false">Increasing the robot's top speed.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Better encoders reduce the size of each per-step error, slowing the rate of drift — but they don't provide the independent, fixed reference needed to eliminate accumulated error entirely.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="drift">
+    <p class="quiz-prompt">4. Fill in the blank: the growth of dead-reckoning position error over time, caused by small per-step errors accumulating, is called ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Drift is the standard term for this unbounded, accumulating position error.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="traveled|driven">
+    <p class="quiz-prompt">5. Fill in the blank: dead-reckoning position drift generally grows roughly in proportion to distance ___, not to time elapsed alone.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Since each increment of motion carries its own small error, more distance covered means more accumulated error, roughly independent of how quickly that distance was covered.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: Kevin M. Lynch and Frank C. Park, <a href="https://modernrobotics.northwestern.edu/chapters/chapter13/">Chapter 13, "Wheeled Mobile Robots,"</a> from <em>Modern Robotics</em> (free at modernrobotics.northwestern.edu), covers the odometry error models this lesson described qualitatively, for both differential-drive and other wheel configurations.</p>
+
+  <p class="ask-teacher">Stuck on the heading-error worked example, or want to see the sideways-drift arithmetic for a different distance? Ask your teacher — that's what I'm here for. Next up: giving the robot something outside its own accumulating estimate to check itself against — a map.</p>
+
+  <footer class="lesson-footer">STEM+ · Advanced Robotics · Lesson 15 of the course sequence</footer>
+</div>

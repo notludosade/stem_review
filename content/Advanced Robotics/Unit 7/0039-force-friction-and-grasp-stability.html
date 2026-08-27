@@ -1,0 +1,100 @@
+<meta charset="UTF-8">
+<link rel="icon" href="../../favicon.ico?v=1" type="image/x-icon">
+<title>Lesson 39: Force, Friction, and Grasp Stability — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · Advanced Robotics · Unit 7 · Lesson 39</span>
+  <h1>Force, Friction, and Grasp Stability</h1>
+  <p class="subtitle">A grasp isn't secure because it looks secure — it's secure because friction and applied force genuinely add up to hold the object against gravity and motion.</p>
+  <p class="nav-links"><a href="0038-grasp-planning.html" class="nav-prev">← Lesson 38</a> <a href="0040-specialized-end-effectors.html" class="nav-next">Lesson 40 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Lesson 38 talked about choosing a good contact configuration in general, physical terms — center of mass, reachability. This lesson makes "secure" mathematically concrete, with the minimum physics needed to reason about whether a grasp actually holds.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    <strong>Friction</strong> between a gripper's fingers and an object resists sliding between the two surfaces, up to a limit. For two dry, non-slippery surfaces pressed together with a <strong>normal force</strong> (the grip force squeezing perpendicular to the surface), the maximum friction force available before slipping begins is approximately proportional to that normal force — a higher grip force allows a higher amount of resisted sliding force before the object slips.
+  </div>
+
+  <div class="expr-block">maximum friction force ≈ μ × normal force</div>
+
+  <p>The proportionality constant μ (the <strong>coefficient of friction</strong>) depends on the two materials in contact — rubber on cardboard has a much higher μ than polished metal on polished metal, which is exactly why gripper fingers are often coated in a high-friction material like rubber rather than left as bare metal.</p>
+
+  <div class="box why">
+    <span class="box-label">Why grip force has to overcome gravity through friction, not direct support</span>
+    When a gripper lifts an object by squeezing its sides (rather than supporting it from underneath), the object's weight is held up entirely by friction at the two contact points — there's no other force in that direction holding it up. If the object's weight exceeds the maximum available friction force, it slips downward out of the grip, no matter how "correctly centered" the grasp looked geometrically. This is precisely why grip force calculations matter, not just grasp geometry: a perfectly centered grasp with insufficient grip force still fails.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Worked example</span>
+    A 0.5 kg object (weight ≈ 0.5 × 9.8 ≈ 4.9 N) is held by a two-finger gripper with rubberized fingers, μ ≈ 0.8, gripping from two sides. Each finger's friction has to help support the object's weight, so total available friction force must exceed roughly 4.9 N. Using maximum friction ≈ μ × normal force, the required normal (grip) force is at least 4.9 / 0.8 ≈ 6.1 N per side (accounting for both fingers contributing). A gripper commanding less grip force than this will not hold the object securely against gravity, regardless of how well-centered the contact points are.
+  </div>
+
+  <p>Real grasp analysis (beyond this course's scope) also accounts for the object being accelerated, not just held still — an object gripped just barely tightly enough to resist gravity can still slip if the arm accelerates suddenly, since acceleration adds to the force friction has to resist. The practical takeaway carrying forward is this: a secure grasp needs both good geometry (Lesson 38) <em>and</em> sufficient grip force relative to the object's weight and the friction available — neither one alone is sufficient.</p>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What does the coefficient of friction, μ, represent?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">The exact weight of the object being grasped.</button>
+      <button class="quiz-choice" data-correct="true">A material-dependent constant relating normal (grip) force to the maximum friction force available before slipping.</button>
+      <button class="quiz-choice" data-correct="false">The number of fingers a gripper has.</button>
+      <button class="quiz-choice" data-correct="false">The robot's total degrees of freedom.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>μ depends on the two materials in contact and scales how much friction force a given normal force can provide.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. When a gripper lifts an object by squeezing its sides, what force holds the object's weight up?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Direct support from underneath the object.</button>
+      <button class="quiz-choice" data-correct="true">Friction at the contact points, resisting the object sliding downward.</button>
+      <button class="quiz-choice" data-correct="false">The object's own momentum.</button>
+      <button class="quiz-choice" data-correct="false">Nothing — side-gripping cannot hold an object's weight.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>With no direct support from below, friction at the grip contact points is the only force resisting the object's weight — if it's insufficient, the object slips.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why can a grasp with perfectly centered geometry still fail to hold an object?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Perfectly centered grasps never fail under any circumstances.</button>
+      <button class="quiz-choice" data-correct="true">If the grip force is insufficient relative to the object's weight and available friction, the object slips regardless of geometry.</button>
+      <button class="quiz-choice" data-correct="false">Centered grasps always use too much force.</button>
+      <button class="quiz-choice" data-correct="false">Geometry has no relationship to whether a grasp holds.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Good geometry and sufficient grip force are both necessary — good contact placement alone doesn't guarantee enough friction force to resist the object's weight.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="normal">
+    <p class="quiz-prompt">4. Fill in the blank: the force squeezing perpendicular to a gripper's contact surface, which determines how much friction is available, is called the ___ force.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Normal force is the grip-squeezing force; maximum friction is approximately proportional to it.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="10">
+    <p class="quiz-prompt">5. For an object weighing 6 N gripped with μ = 0.6 from two sides, fill in the blank: the minimum total normal (grip) force needed to support it is approximately ___ N.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Required normal force ≈ weight / μ = 6 / 0.6 = 10 N.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: Kevin M. Lynch and Frank C. Park, <a href="https://modernrobotics.northwestern.edu/chapters/chapter12/">Chapter 12, "Grasping and Manipulation,"</a> from <em>Modern Robotics</em> (free at modernrobotics.northwestern.edu), covers friction cones and force-closure grasp analysis in full rigor, well beyond this lesson's simplified worked example.</p>
+
+  <p class="ask-teacher">Stuck on the friction worked example's arithmetic, or want to redo it for a heavier or lighter object? Ask your teacher — that's what I'm here for. Next up: end-effector designs built for objects a standard gripper handles poorly.</p>
+
+  <footer class="lesson-footer">STEM+ · Advanced Robotics · Lesson 39 of the course sequence</footer>
+</div>

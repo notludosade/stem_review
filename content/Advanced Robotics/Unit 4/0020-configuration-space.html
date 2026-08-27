@@ -1,0 +1,98 @@
+<meta charset="UTF-8">
+<link rel="icon" href="../../favicon.ico?v=1" type="image/x-icon">
+<title>Lesson 20: Configuration Space — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · Advanced Robotics · Unit 4 · Lesson 20</span>
+  <h1>Configuration Space</h1>
+  <p class="subtitle">A robot isn't a point — but planning gets dramatically simpler once you shrink it into one, by growing the obstacles instead.</p>
+  <p class="nav-links"><a href="0019-from-the-world-to-a-graph.html" class="nav-prev">← Lesson 19</a> <a href="0021-graph-search-fundamentals.html" class="nav-next">Lesson 21 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>The last lesson quietly treated the robot as a single point moving between graph nodes. Real robots have actual physical size and shape, and a path that looks clear for a point can be genuinely blocked for the robot's real body. <strong>Configuration space</strong> is the trick that resolves this without complicating every downstream calculation.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    A robot's <strong>configuration</strong> is a complete description of its state relevant to planning — for a simple mobile robot, its (x, y, θ) pose; for the arms in Unit 1, its joint values. <strong>Configuration space</strong> (or <strong>C-space</strong>) is the space of all possible configurations. Crucially, an obstacle in the real, physical world corresponds to a <em>larger</em>, "inflated" forbidden region in configuration space — not just the physical obstacle itself, but every configuration that would cause the robot's real body to collide with it.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why inflating obstacles turns the robot back into a point</span>
+    If a circular mobile robot has radius r, "the robot's body doesn't hit this wall" is exactly equivalent to "the robot's center point stays at least r away from the wall." Growing every obstacle outward by r, then planning for the robot's center point alone against these grown obstacles, gives exactly the same valid paths as reasoning about the robot's true physical extent directly — at a fraction of the computational cost, because Lesson 19's graph-search machinery, built for point-like nodes, now applies without modification.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Example</span>
+    A circular robot with a 0.3 m radius approaches a doorway 0.7 m wide. In the real, physical world, the robot's body fits with 0.2 m to spare on each side. In configuration space, the doorway's two door-frame obstacles have each grown by 0.3 m, narrowing the gap between them to 0.7 − 2(0.3) = 0.1 m — still open, correctly reflecting that the robot's center can pass through with 0.05 m of margin on either side of that narrowed gap, matching the real-world clearance exactly.
+  </div>
+
+  <p>For a non-circular robot, or a robot arm with several joints, configuration space gets more elaborate — a robot arm's C-space has as many dimensions as its degrees of freedom (Lesson 2), and "growing" an obstacle isn't as simple as a uniform radius. The core idea survives unchanged, though: however complex the robot's real shape and motion constraints are, they get absorbed once, up front, into how obstacles are represented in C-space — and every planning algorithm downstream gets to treat the robot as a simple point again.</p>
+
+  <p>With the graph built and the robot's real size accounted for, the next lesson covers the actual searching: the family of algorithms — starting simple, then building to A* — that find a route through this graph.</p>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What is a robot's configuration space?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">The physical space the robot's motors occupy.</button>
+      <button class="quiz-choice" data-correct="true">The space of all possible configurations (states) the robot could be in.</button>
+      <button class="quiz-choice" data-correct="false">A synonym for the occupancy grid.</button>
+      <button class="quiz-choice" data-correct="false">The set of all sensors mounted on the robot.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Configuration space is the space of all possible robot states — poses for a mobile robot, joint values for an arm — not a physical location.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why does an obstacle in configuration space typically appear larger than the same obstacle in the physical world?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because sensors always overestimate obstacle size.</button>
+      <button class="quiz-choice" data-correct="true">Because the forbidden region includes every configuration where the robot's real body would collide, not just the obstacle's own footprint.</button>
+      <button class="quiz-choice" data-correct="false">Because configuration space obstacles are drawn at twice scale for visibility.</button>
+      <button class="quiz-choice" data-correct="false">Obstacles are never larger in configuration space.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Inflating the obstacle by the robot's own size lets planning treat the robot as a single point while still correctly accounting for its real physical extent.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. What is the main benefit of planning in configuration space rather than reasoning about the robot's true physical extent directly?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">It eliminates the need for any map at all.</button>
+      <button class="quiz-choice" data-correct="true">It lets the robot be treated as a simple point during search, reusing the point-based graph-search machinery.</button>
+      <button class="quiz-choice" data-correct="false">It makes the robot physically smaller.</button>
+      <button class="quiz-choice" data-correct="false">It removes the need for a start and goal configuration.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>By inflating obstacles once up front, downstream planning algorithms can treat the robot as a point, avoiding repeated shape-collision checks during search.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="configuration">
+    <p class="quiz-prompt">4. Fill in the blank: a complete description of a robot's state relevant to planning — pose for a mobile robot, joint values for an arm — is called its ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Configuration is the state description; configuration space is the space of all such states.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="0.5">
+    <p class="quiz-prompt">5. For a circular robot with radius 0.25 m approaching a gap between two obstacles 1.0 m apart, fill in the blank: in configuration space, the effective gap between the inflated obstacles is ___ m.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Each obstacle grows by the robot's radius (0.25 m) on the side facing the gap, narrowing it by 2 × 0.25 m = 0.5 m: 1.0 − 0.5 = 0.5 m.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: Steven M. LaValle, <a href="https://lavalle.pl/planning/book.pdf">Planning Algorithms</a> (free online text), covers configuration space and obstacle inflation in full generality, well beyond the circular-robot case this lesson used to build intuition.</p>
+
+  <p class="ask-teacher">Stuck on the doorway example's arithmetic, or want to see how configuration space works for a non-circular robot shape? Ask your teacher — that's what I'm here for. Next up: the actual algorithms that search a graph for a path.</p>
+
+  <footer class="lesson-footer">STEM+ · Advanced Robotics · Lesson 20 of the course sequence</footer>
+</div>

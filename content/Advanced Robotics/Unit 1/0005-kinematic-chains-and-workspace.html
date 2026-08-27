@@ -1,0 +1,111 @@
+<meta charset="UTF-8">
+<link rel="icon" href="../../favicon.ico?v=1" type="image/x-icon">
+<title>Lesson 5: Kinematic Chains and Workspace — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · Advanced Robotics · Unit 1 · Lesson 5</span>
+  <h1>Kinematic Chains and Workspace</h1>
+  <p class="subtitle">Link lengths and joint limits carve out a fixed region the end-effector can ever reach — and everything outside it is off the table, permanently.</p>
+  <p class="nav-links"><a href="0004-forward-kinematics.html" class="nav-prev">← Lesson 4</a> <a href="0006-inverse-kinematics-an-intuitive-introduction.html" class="nav-next">Lesson 6 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Forward kinematics answers "where does the end-effector go for these particular joint values?" Sweep every joint through every value it's allowed to take, and the set of all reachable end-effector positions is the arm's <strong>workspace</strong> — a single, fixed property of the arm's geometry, decided the moment its link lengths and joint limits are chosen, long before any control software runs.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    A robot arm's <strong>workspace</strong> is the complete set of end-effector positions reachable by some combination of valid joint values. The <strong>dexterous workspace</strong> is the (usually smaller) subset reachable at <em>every</em> orientation, not just some orientation — a stricter, often more practically relevant standard for tasks like inserting a part that must arrive facing a specific way.
+  </div>
+
+  <p>For the 2-link planar arm from the last lesson, the workspace has a clean geometric shape. With no joint limits, the reachable region is an annulus (a ring) centered on the base: the outer radius is L<sub>1</sub> + L<sub>2</sub> (arm fully extended), and the inner radius is |L<sub>1</sub> − L<sub>2</sub>| (arm folded as tightly as geometry allows). Nothing closer than the inner radius or farther than the outer radius is reachable — not a limitation of the control software, a hard fact about the geometry.</p>
+
+  <svg class="figure" viewBox="0 0 300 220" width="300" height="220">
+    <circle cx="150" cy="110" r="90" fill="none" stroke="var(--accent)" stroke-width="2"></circle>
+    <circle cx="150" cy="110" r="20" fill="none" stroke="var(--accent)" stroke-width="2" stroke-dasharray="4 3"></circle>
+    <circle class="fig-point" cx="150" cy="110" r="4"></circle>
+    <text class="fig-label" x="120" y="14">outer radius = L1 + L2</text>
+    <text class="fig-label" x="156" y="104">inner radius</text>
+    <text class="fig-label" x="156" y="120">= |L1 − L2|</text>
+    <text class="fig-label" x="110" y="205">reachable region: the shaded ring between the two circles</text>
+  </svg>
+  <figcaption>The 2-link arm's workspace is a ring: too close or too far, and no joint combination reaches it.</figcaption>
+
+  <div class="box why">
+    <span class="box-label">Why this is a design decision, not a software problem</span>
+    If a warehouse arm needs to reach into a bin 1.2 m away, no amount of clever control code fixes an arm whose L<sub>1</sub> + L<sub>2</sub> only totals 1.0 m — the workspace physically doesn't extend that far. Link lengths, joint types, and joint limits have to be chosen at design time with the target workspace already in mind, the same way Engineering 1 treated constraints as the substance of a problem rather than an afterthought to route around later.
+  </div>
+
+  <p>Joint limits shrink the workspace further and can break its clean shape entirely — real joints rarely rotate a full 360°, and a limit at, say, ±150° instead of ±180° carves a wedge out of the full annulus. Redundant arms (recall Lesson 2's 7-DOF human arm) don't expand the workspace's outer boundary, but they do let the arm reach many points in more than one way, which becomes directly useful once obstacles are in the picture (Unit 4).</p>
+
+  <div class="box example">
+    <span class="box-label">Example</span>
+    Two arms with the same total reach (L<sub>1</sub> + L<sub>2</sub> = 0.8 m) but different individual link lengths have different-shaped workspaces. An arm with L<sub>1</sub> = 0.4 m, L<sub>2</sub> = 0.4 m has an inner radius of |0.4 − 0.4| = 0 m — it can fold all the way back to its own base and reach every point in a full disk out to 0.8 m. An arm with L<sub>1</sub> = 0.7 m, L<sub>2</sub> = 0.1 m has an inner radius of |0.7 − 0.1| = 0.6 m — a much larger unreachable "hole" near the base, even though both arms have identical total reach.
+  </div>
+
+  <p>The next lesson flips the question this whole unit has been building toward: instead of "where does the end-effector go for these joint values," it asks "what joint values put the end-effector exactly where I want it" — a much harder question, and the reason inverse kinematics gets its own lesson.</p>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What is a robot arm's workspace?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">The physical floor area the robot's base occupies.</button>
+      <button class="quiz-choice" data-correct="true">The complete set of end-effector positions reachable by some combination of valid joint values.</button>
+      <button class="quiz-choice" data-correct="false">The set of all possible joint angle combinations, regardless of position reached.</button>
+      <button class="quiz-choice" data-correct="false">The maximum speed the end-effector can move.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Workspace is defined in terms of reachable end-effector positions, not joint angles or robot footprint.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Two 2-link planar arms have the same total reach (L1 + L2), but different individual link lengths. Do they necessarily have the same workspace shape?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Yes — total reach alone always determines the workspace shape.</button>
+      <button class="quiz-choice" data-correct="true">No — the inner radius |L1 − L2| depends on the individual link lengths, not just their sum.</button>
+      <button class="quiz-choice" data-correct="false">Yes, because workspace only depends on the number of joints.</button>
+      <button class="quiz-choice" data-correct="false">No, because workspace has nothing to do with link length.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The outer radius depends only on the sum, but the inner radius depends on the difference |L1 − L2| — equal links give a fully reachable disk, very unequal links leave a large unreachable hole near the base.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. A warehouse arm needs to reach 1.2 m from its base, but its two links only sum to 1.0 m of total length. What fixes this?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">A better control algorithm, since software can compensate for any link length.</button>
+      <button class="quiz-choice" data-correct="true">Nothing in software — the arm's geometry must change (longer links, an added joint, or repositioning the base).</button>
+      <button class="quiz-choice" data-correct="false">Increasing the joint's maximum rotation speed.</button>
+      <button class="quiz-choice" data-correct="false">Adding more sensors to the end-effector.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Workspace boundaries are set by link lengths and joint limits at design time — a geometric fact no control software can override.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="dexterous">
+    <p class="quiz-prompt">4. Fill in the blank: the subset of a workspace reachable at every orientation, not just some orientation, is called the ___ workspace.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Dexterous workspace is the stricter standard: reachable with full orientation freedom, not just reachable at all.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="0.4">
+    <p class="quiz-prompt">5. For a 2-link planar arm with L1 = 0.6 m and L2 = 0.2 m, fill in the blank: the workspace's inner radius is ___ m.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Inner radius = |L1 − L2| = |0.6 − 0.2| = 0.4 m.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: Kevin M. Lynch and Frank C. Park, <a href="https://modernrobotics.northwestern.edu/chapters/chapter2/">Chapter 2, "Configuration Space,"</a> from <em>Modern Robotics</em> (free at modernrobotics.northwestern.edu), formalizes how joint limits and link geometry together shape the reachable region this lesson described visually.</p>
+
+  <p class="ask-teacher">Stuck on why unequal link lengths change the inner radius, or want to sketch the workspace for your own choice of link lengths? Ask your teacher — that's what I'm here for. Next up: flipping the kinematics question around — finding the joint angles for a target position.</p>
+
+  <footer class="lesson-footer">STEM+ · Advanced Robotics · Lesson 5 of the course sequence</footer>
+</div>

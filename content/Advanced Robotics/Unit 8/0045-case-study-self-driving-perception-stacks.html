@@ -1,0 +1,96 @@
+<meta charset="UTF-8">
+<link rel="icon" href="../../favicon.ico?v=1" type="image/x-icon">
+<title>Lesson 45: Case Study — Self-Driving Vehicle Perception Stacks — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · Advanced Robotics · Unit 8 · Lesson 45</span>
+  <h1>Case Study — Self-Driving Vehicle Perception Stacks</h1>
+  <p class="subtitle">Higher speed, higher stakes, and a far richer sensing problem — the same fundamentals, pushed to a level of demand this course's other case studies didn't require.</p>
+  <p class="nav-links"><a href="0044-case-study-autonomous-vacuum-cleaners.html" class="nav-prev">← Lesson 44</a> <a href="0046-failure-modes-in-integrated-systems.html" class="nav-next">Lesson 46 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Self-driving vehicles are, at a conceptual level, mobile robots — the same sense-localize-plan-control-decide loop this whole course has built, applied to a road environment. This lesson stays deliberately conceptual (the full engineering detail is well beyond this course's scope), focusing on what makes the perception layer specifically so much more demanding here than in the previous two case studies.</p>
+
+  <div class="box">
+    <span class="box-label">Why perception is the hard part here specifically</span>
+    A warehouse floor and a home interior are comparatively slow-moving, low-stakes environments — a robot vacuum bumping a chair leg is a non-event. A vehicle moving at highway speed sharing the road with pedestrians, cyclists, and other vehicles has to perceive far more, far faster, with far less tolerance for error. This is Unit 2's sensor trade-offs (Lesson 9-10's LIDAR versus camera discussion) pushed to their highest-stakes version: a real self-driving perception stack typically fuses LIDAR (precise distance, works in the dark), cameras (rich detail — reading traffic signs, distinguishing a pedestrian from a mailbox), and radar (works well in poor weather, directly measures relative velocity) — precisely because Unit 2's lesson on sensor fusion argued no single sensor's weaknesses are acceptable when the cost of a missed detection is this high.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why "the map" means something richer here than an occupancy grid</span>
+    Unit 3's occupancy grid — free, occupied, unknown — is a reasonable representation for a warehouse or a home. A road environment needs something richer: not just "is this space occupied," but <strong>object detection and tracking</strong> — identifying that a specific region is a pedestrian, a cyclist, or another vehicle, and tracking how it's moving, because a road-legal system has to predict where a moving pedestrian is likely to be next (directly extending Unit 4's dynamic-obstacle replanning lesson) rather than only reacting to where they currently are.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Example</span>
+    A pedestrian steps toward a crosswalk. A self-driving perception stack doesn't just need Unit 3's answer ("that cell is occupied") — it needs to classify the object as a pedestrian specifically (different predicted behavior than a parked car), track their motion over recent frames, and feed a predicted future position into planning (Unit 4's dynamic obstacle handling) well before the vehicle would otherwise need to react — because at highway or even city-street speed, reacting only once a collision is imminent is already too late, unlike a warehouse robot that can safely stop almost instantly relative to its own low speed.
+  </div>
+
+  <p>This case study is deliberately the most conceptual of the three — full self-driving perception involves machine learning, sensor calibration, and safety-engineering well beyond this course's prerequisites. The point to carry forward is the pattern: the same fundamentals (sensing, fusion, mapping, prediction, planning) scale up in demand, not in kind, as the stakes and speed of the environment increase.</p>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. Why do self-driving perception stacks typically fuse LIDAR, cameras, and radar together, rather than relying on one sensor type?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because using multiple sensors is required by international law in every country.</button>
+      <button class="quiz-choice" data-correct="true">Because no single sensor's weaknesses are acceptable when the cost of a missed detection is this high, and each sensor covers different failure modes.</button>
+      <button class="quiz-choice" data-correct="false">Because LIDAR, cameras, and radar are identical in what they measure.</button>
+      <button class="quiz-choice" data-correct="false">Because fusing sensors makes each individual sensor cheaper to manufacture.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>This is Unit 2's sensor-fusion argument pushed to its highest-stakes case: complementary sensors cover each other's specific weaknesses, which matters enormously when missed detections are costly.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why does a road environment need something richer than Unit 3's plain occupancy grid (free/occupied/unknown)?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">It doesn't — occupancy grids are entirely sufficient for road environments.</button>
+      <button class="quiz-choice" data-correct="true">It needs object detection and tracking — classifying and predicting the motion of specific objects like pedestrians, not just marking occupancy.</button>
+      <button class="quiz-choice" data-correct="false">Occupancy grids cannot represent any road surface at all.</button>
+      <button class="quiz-choice" data-correct="false">Roads never contain any moving objects.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Predicting where a pedestrian or cyclist is likely to move next requires classifying and tracking specific objects, extending beyond a simple occupied/free/unknown representation.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why must a self-driving system predict a pedestrian's future position well before reacting, rather than only responding once a collision is imminent?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because pedestrians never actually move.</button>
+      <button class="quiz-choice" data-correct="true">Because at highway or city-street speed, reacting only once a collision is imminent is already too late.</button>
+      <button class="quiz-choice" data-correct="false">Because prediction is easier to compute than direct reaction.</button>
+      <button class="quiz-choice" data-correct="false">Because occupancy grids automatically predict future motion.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Higher speed sharply reduces the time available to react, so effective planning requires anticipating likely future positions well in advance, directly extending Unit 4's dynamic-obstacle handling.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="detection">
+    <p class="quiz-prompt">4. Fill in the blank: identifying that a sensed region is a specific type of object, like a pedestrian or a cyclist, is called object ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Object detection classifies what a sensed region actually is, going beyond a plain occupancy grid's free/occupied distinction.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="tracking">
+    <p class="quiz-prompt">5. Fill in the blank: following a detected object's motion over time to predict where it's likely to go next is called object ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Object tracking, combined with detection, lets a self-driving system anticipate future positions rather than only reacting to current ones.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: Ekim Yurtsever, Jacob Lambert, Alexander Carballo, and Kazuya Takeda, <a href="https://arxiv.org/abs/1906.05113">"A Survey of Autonomous Driving: Common Practices and Emerging Technologies,"</a> surveys real self-driving perception, localization, planning, and control architectures at the conceptual level this lesson stayed within.</p>
+
+  <p class="ask-teacher">Stuck on why prediction matters more here than in the warehouse or vacuum case studies, or want to trace a different road scenario through the perception stack? Ask your teacher — that's what I'm here for. Next up: how integrated systems like these three actually fail, and what that teaches about building them well.</p>
+
+  <footer class="lesson-footer">STEM+ · Advanced Robotics · Lesson 45 of the course sequence</footer>
+</div>

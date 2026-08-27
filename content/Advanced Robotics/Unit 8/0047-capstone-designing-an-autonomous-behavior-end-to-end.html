@@ -1,0 +1,123 @@
+<meta charset="UTF-8">
+<link rel="icon" href="../../favicon.ico?v=1" type="image/x-icon">
+<title>Lesson 47: Capstone — Designing an Autonomous Behavior End to End — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · Advanced Robotics · Unit 8 · Lesson 47</span>
+  <h1>Capstone — Designing an Autonomous Behavior End to End</h1>
+  <p class="subtitle">One realistic task, carried through every unit of this course — kinematics to manipulation — the way a real engineer would actually have to think about it.</p>
+  <p class="nav-links"><a href="0046-failure-modes-in-integrated-systems.html" class="nav-prev">← Lesson 46</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>This is the last lesson of Advanced Robotics. Instead of new material, it walks one complete, realistic task through every unit of this course, in the order an engineer would actually have to reason about it — the same capstone structure Engineering 1 used to close that course, applied here to a full autonomy stack.</p>
+
+  <div class="box">
+    <span class="box-label">The brief</span>
+    Design the autonomous behavior for a mobile manipulator robot tasked with retrieving a specific labeled box from a warehouse shelf and delivering it to a packing station, in a warehouse shared with other moving robots and occasional human workers, without a pre-existing map of that day's shelf layout.
+  </div>
+
+  <h2>Stage 1 — Body and reach (Unit 1)</h2>
+  <div class="box example">
+    <span class="box-label">Applying Unit 1: kinematics</span>
+    The robot's arm needs enough degrees of freedom (Lesson 2) to reach boxes at varying shelf heights and orientations, with a workspace (Lesson 5) sized to the shelving it will encounter. Given a target box's estimated pose, inverse kinematics (Lesson 6) finds joint angles to reach it — understanding upfront that some poses may have multiple valid solutions (elbow up or down) or none at all if the shelf geometry blocks every approach angle.
+  </div>
+
+  <h2>Stage 2 — Sensing and building a map (Units 2-3)</h2>
+  <div class="box example">
+    <span class="box-label">Applying Units 2-3: perception, localization, mapping</span>
+    Without a pre-existing map, the robot needs SLAM (Unit 3, Lesson 17) — LIDAR and wheel odometry (Unit 2) fused together, building an occupancy grid (Lesson 16) as it navigates the warehouse for the first time that day, correcting accumulated drift via loop closure (Lesson 18) whenever it recognizes a previously-mapped aisle.
+  </div>
+
+  <h2>Stage 3 — Getting there (Units 4-5)</h2>
+  <div class="box example">
+    <span class="box-label">Applying Units 4-5: planning and motion control</span>
+    Configuration space (Lesson 20) accounts for the robot's own footprint against shelving and other robots. A* (Lesson 22) finds a route to the shelf; local obstacle avoidance and replanning (Lessons 23-24) handle other robots and workers the map didn't anticipate — directly echoing the warehouse case study's deadlock risk from Lesson 43. Trajectory generation and pure-pursuit tracking (Unit 5) execute that route smoothly.
+  </div>
+
+  <h2>Stage 4 — Deciding what to do (Unit 6)</h2>
+  <div class="box why">
+    <span class="box-label">Applying Unit 6: autonomy and decision-making</span>
+    A behavior tree (Lesson 33-34) coordinates the whole task: Navigate to Shelf → Verify Item Present (falling through to Report Issue if missing, echoing Lesson 32's ItemMissing state) → Pick → Navigate to Packing Station → Place — with a high-priority reactive branch for battery level or emergency stop able to interrupt any of these steps at any point, exactly as Lesson 35 described.
+  </div>
+
+  <h2>Stage 5 — Actually picking the box (Unit 7)</h2>
+  <div class="box example">
+    <span class="box-label">Applying Unit 7: manipulation</span>
+    Perception identifies the box's actual pose on the shelf (which may differ from the map's stale estimate). Grasp planning (Lesson 38) selects a grasp accounting for the box's likely center of mass, checked against friction and grip-force requirements (Lesson 39) before committing. The full Perceive-Plan-Grasp-Place pipeline (Lesson 41) executes, verifying grasp success before proceeding to Place rather than assuming it worked.
+  </div>
+
+  <h2>Stage 6 — Watching for the seams (Unit 8)</h2>
+  <div class="box why">
+    <span class="box-label">Applying Unit 8: integration and seam failures</span>
+    Does the motion controller assume instantaneous localization updates, the way Lesson 46's example warned against? Does the behavior tree's navigation branch and picking branch ever assume simultaneous exclusive control of the arm? These questions don't have automatic answers — they're exactly the discipline Lesson 46 argued has to be applied deliberately, because no single unit's testing catches a seam failure between two units.
+  </div>
+
+  <h2>What this capstone was really teaching</h2>
+  <p>No single lesson in this course could have prepared you for this brief alone. A real autonomous robot task pulls in kinematics, perception, localization, mapping, planning, control, decision-making, and manipulation all at once, in whatever order the actual problem demands — plus a deliberate check for failures that only appear once every piece is connected. That integration, not any single algorithm, is what this course was building toward from Lesson 1 onward.</p>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. Why does the capstone's robot need SLAM (Unit 3) rather than simple localization against a fixed map?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because SLAM is always faster to compute than localization alone.</button>
+      <button class="quiz-choice" data-correct="true">Because the warehouse has no pre-existing map of that day's shelf layout, so the map must be built while localizing.</button>
+      <button class="quiz-choice" data-correct="false">Because wheel odometry alone is illegal to use in warehouses.</button>
+      <button class="quiz-choice" data-correct="false">Because SLAM eliminates the need for any path planning afterward.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Without a pre-existing map, localization alone has nothing to localize against — SLAM builds the map and tracks position simultaneously, exactly the problem Unit 3 introduced.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why does the capstone's behavior tree include a high-priority reactive branch for battery level or emergency stop, able to interrupt any other step?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because reactive branches are only decorative and have no functional effect.</button>
+      <button class="quiz-choice" data-correct="true">Because the tree re-evaluates from the root every cycle, letting a fast, high-priority condition preempt a slower, ongoing deliberative action.</button>
+      <button class="quiz-choice" data-correct="false">Because battery checks must always run before the robot is manufactured.</button>
+      <button class="quiz-choice" data-correct="false">Because behavior trees cannot contain more than one branch.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>This is Lesson 35's reactive-plus-deliberative layering, made concrete: a high-priority branch can interrupt a Running lower-priority action because the whole tree is re-checked from the root every cycle.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why can't any single unit's testing catch a seam failure between the motion controller and localization, as raised in Stage 6?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because motion controllers and localization are actually the same component.</button>
+      <button class="quiz-choice" data-correct="true">Because each component can pass its own isolated test while still making an incompatible assumption about the other, visible only once they're connected.</button>
+      <button class="quiz-choice" data-correct="false">Because seam failures never actually occur in real systems.</button>
+      <button class="quiz-choice" data-correct="false">Because localization is always instantaneous with zero delay in practice.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>This is Lesson 46's seam-failure idea directly: both components can be individually correct and individually well-tested, with the incompatibility only surfacing once they're integrated and run together.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="integration">
+    <p class="quiz-prompt">4. Fill in the blank: this capstone's real lesson is that solving a genuine autonomous robot task requires ___ across every unit of this course at once, not mastery of any single algorithm in isolation.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Kinematics, perception, localization, planning, control, decision-making, and manipulation all had to work together — integration, not any single algorithm, was the real skill this course built toward.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="seam|seam failure">
+    <p class="quiz-prompt">5. Fill in the blank: a failure arising from incompatible assumptions between two individually correct, individually well-tested components is called a ___ failure.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Seam failures occur at the boundary between components rather than within either one, which is why Lesson 46 argued they require deliberately testing the integrated system, not just its parts.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this to keep going: Kevin M. Lynch and Frank C. Park, <a href="https://modernrobotics.northwestern.edu/chapters/chapter1/">Chapter 1, "Preview,"</a> from <em>Modern Robotics</em> (free at modernrobotics.northwestern.edu) — the same opening chapter Lesson 1 pointed to — is worth rereading now that every idea it previews has been covered in full.</p>
+
+  <p class="ask-teacher">Stuck on any stage of this capstone, or want to work through your own robot task the same way? Ask your teacher — that's what I'm here for. This closes Advanced Robotics — congratulations on completing the course.</p>
+
+  <footer class="lesson-footer">STEM+ · Advanced Robotics · Lesson 47 of the course sequence</footer>
+</div>

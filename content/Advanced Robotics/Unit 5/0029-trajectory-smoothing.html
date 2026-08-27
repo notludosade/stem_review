@@ -1,0 +1,100 @@
+<meta charset="UTF-8">
+<link rel="icon" href="../../favicon.ico?v=1" type="image/x-icon">
+<title>Lesson 29: Trajectory Smoothing — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · Advanced Robotics · Unit 5 · Lesson 29</span>
+  <h1>Trajectory Smoothing</h1>
+  <p class="subtitle">The best correction is the one you never had to make — smoothing a path's sharp corners before execution reduces the whole burden on everything downstream.</p>
+  <p class="nav-links"><a href="0028-feedback-control-for-path-tracking.html" class="nav-prev">← Lesson 28</a> <a href="../Unit%206/0030-reactive-vs-deliberative-control.html" class="nav-next">Unit 6, Lesson 30 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Lessons 26 through 28 built a full pipeline for executing a path: time it, steer along it, correct for drift from it. This closing lesson covers a complementary idea — improving the path itself, before execution ever starts, so there's simply less for that pipeline to fight against.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    <strong>Trajectory smoothing</strong> is the process of modifying a planned path to reduce sharp corners and abrupt direction changes, producing a path with gentler curvature the robot can follow at higher speed with less aggressive steering — while still respecting the obstacles the original path was planned around.
+  </div>
+
+  <p>A* (Unit 4) returns paths built from the discrete grid it searched — often exactly the sharp 90° turns and blocky corners Lesson 25 used as its motivating example, because those are the only moves the underlying graph offered. Nothing about A*'s search process favors smooth motion; it only favors low-cost paths through the graph as built. Smoothing is a separate step, run after search, that reshapes the returned path into something closer to what a real robot can execute gracefully.</p>
+
+  <div class="box why">
+    <span class="box-label">Why smoothing pays off at every downstream stage</span>
+    A smoother path lets Lesson 26's trajectory generation produce a schedule with less deceleration-and-reacceleration around corners, lets Lesson 27's steering track more gently, and reduces how hard Lesson 28's feedback controller has to work to correct tracking error — because there's less abrupt geometry for any of those stages to struggle against in the first place. Smoothing is not a cosmetic nicety; it reduces real, physical demand on the whole downstream pipeline.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Example</span>
+    The blocky path (0,0) → (2,0) → (2,3) from Lesson 25's sharp-corner example can be replaced with a smooth curve that starts bending before reaching (2,0) and finishes bending shortly after, passing near — but not exactly through — the original corner point, while staying clear of the same obstacles the original path avoided. The robot never has to fully stop and pivot; it flows through the turn at reduced but nonzero speed instead.
+  </div>
+
+  <p>Smoothing has to be checked against the same obstacles the original path respected — a smoothed curve that cuts a corner too aggressively could reenter an obstacle the blocky path correctly avoided, which is exactly why smoothing is a refinement layered on top of a validated path, not a replacement for the planning and configuration-space reasoning (Unit 4) that made the original path safe.</p>
+
+  <p>This closes Unit 5. A planned path can now be timed, followed, corrected, and smoothed into an actual, physically executable motion. Everything so far has assumed the robot already knows what it wants to do — drive to this goal, follow this path. Unit 6 turns to a different question: how does a robot decide what to do in the first place?</p>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What is the goal of trajectory smoothing?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">To make the path longer for safety margin.</button>
+      <button class="quiz-choice" data-correct="true">To reduce sharp corners and abrupt direction changes, while still respecting the original obstacles.</button>
+      <button class="quiz-choice" data-correct="false">To remove the need for feedback control entirely.</button>
+      <button class="quiz-choice" data-correct="false">To recompute the path from a completely different start point.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Smoothing reshapes a path's geometry for gentler, more executable motion, without abandoning the obstacle clearance the original path already established.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why do A*-generated paths often contain sharp corners in the first place?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because A* is designed specifically to produce sharp corners for safety.</button>
+      <button class="quiz-choice" data-correct="true">Because A* searches a discrete grid graph, and sharp turns are simply the moves that graph offers — nothing in the search favors smooth motion.</button>
+      <button class="quiz-choice" data-correct="false">Because sharp corners are always the shortest possible path.</button>
+      <button class="quiz-choice" data-correct="false">Because obstacles always force 90-degree turns.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A*'s output reflects the discrete graph structure it searched; smoothness was never part of what the search algorithm was optimizing for, only path cost.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why must a smoothed path still be checked against the original obstacles, rather than trusted automatically?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because smoothing never changes a path's shape at all.</button>
+      <button class="quiz-choice" data-correct="true">Because a smoothed curve that cuts a corner too aggressively could reenter an obstacle the original blocky path correctly avoided.</button>
+      <button class="quiz-choice" data-correct="false">Because obstacles move every time a path is smoothed.</button>
+      <button class="quiz-choice" data-correct="false">Because smoothing is only cosmetic and has no effect on safety.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Smoothing reshapes geometry near corners, which risks cutting into an obstacle if not explicitly re-checked — it's a refinement on a validated path, not an independent guarantee of safety.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="smoothing">
+    <p class="quiz-prompt">4. Fill in the blank: modifying a planned path to reduce sharp corners while still respecting obstacles is called trajectory ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Trajectory smoothing is the process of reshaping a path for gentler, more executable motion.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="geometry|curvature">
+    <p class="quiz-prompt">5. Fill in the blank: a smoother path reduces demand on trajectory generation, steering, and feedback correction because there is less abrupt ___ for any of those stages to fight against.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Smoother geometry means less deceleration, gentler steering, and smaller tracking corrections needed throughout the downstream execution pipeline.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: Kevin M. Lynch and Frank C. Park, <a href="https://modernrobotics.northwestern.edu/chapters/chapter9/">Chapter 9, "Trajectory Generation,"</a> from <em>Modern Robotics</em> (free at modernrobotics.northwestern.edu), covers time-scaling and smoothing techniques that turn a raw geometric path into an executable, gently curved trajectory.</p>
+
+  <p class="ask-teacher">Stuck on why a smoothed path still needs an obstacle check, or want to sketch a smoothed version of a different blocky path? Ask your teacher — that's what I'm here for. This closes Unit 5 — up next, Unit 6 asks how a robot decides what to do in the first place, not just how to execute a decision already made.</p>
+
+  <footer class="lesson-footer">STEM+ · Advanced Robotics · Lesson 29 of the course sequence</footer>
+</div>

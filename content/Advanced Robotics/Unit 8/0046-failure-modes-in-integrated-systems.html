@@ -1,0 +1,98 @@
+<meta charset="UTF-8">
+<link rel="icon" href="../../favicon.ico?v=1" type="image/x-icon">
+<title>Lesson 46: Failure Modes in Integrated Systems — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · Advanced Robotics · Unit 8 · Lesson 46</span>
+  <h1>Failure Modes in Integrated Systems</h1>
+  <p class="subtitle">Every unit of this course studied one capability's failure modes in isolation. Integrated systems fail differently — often at the seams between capabilities, not within any one of them.</p>
+  <p class="nav-links"><a href="0045-case-study-self-driving-perception-stacks.html" class="nav-prev">← Lesson 45</a> <a href="0047-capstone-designing-an-autonomous-behavior-end-to-end.html" class="nav-next">Lesson 47 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Nearly every unit of this course covered a specific failure mode: sensor noise (Unit 2), dead-reckoning drift (Unit 3), an unreachable path (Unit 4), tracking error (Unit 5), an undefined FSM transition (Unit 6), a slipping grasp (Unit 7). This closing lesson before the capstone is about a different category: failures that only show up once these pieces are integrated, at the boundaries between them.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    A <strong>seam failure</strong> is a failure that occurs not because any single component malfunctioned, but because two correctly-functioning components made incompatible assumptions about each other — each one working exactly as designed, in isolation, while the combination produces a wrong or unsafe outcome.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why seam failures are harder to catch than single-component failures</span>
+    Unit-testing each capability in isolation — verifying localization accuracy, verifying planning correctness, verifying grasp success rate — is necessary but not sufficient, precisely because a seam failure can occur even when every individual component passes its own tests perfectly. Catching seam failures requires testing the integrated system, under realistic timing and realistic sensor conditions, not just its parts — which is exactly why this course's case studies (Lessons 43-45) emphasized real, deployed, fully integrated systems rather than isolated algorithm demonstrations.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Example</span>
+    A robot's localization (Unit 3) reports its pose with a small delay — perfectly reasonable and correctly documented behavior for that component alone. A robot's motion controller (Unit 5) was built assuming pose estimates arrive instantly, with no delay accounted for. Individually, both components pass their own tests: localization accurately reports where the robot <em>was</em> a moment ago, and the controller correctly steers toward wherever the pose estimate it receives claims the robot to be. Combined, at high speed, this small mismatched assumption about timing can cause the controller to steer based on stale position data — an error that shows up only once the two correctly-functioning pieces are actually connected together and run at realistic speed.
+  </div>
+
+  <p>Another common seam failure, connecting directly back to Unit 6: a behavior tree's navigation branch and its manipulation branch (Unit 7) might each independently assume they have exclusive control of the robot's arm, if the tree wasn't designed carefully — a state achievable by each branch's individually correct logic, that neither branch's own testing would ever catch alone.</p>
+
+  <p>The lesson to carry into the capstone is not "integration is scary" but "integration is a real, distinct engineering task" — verifying that components' assumptions about each other actually hold, not just that each component works correctly on its own. This closes the case-study-and-failure portion of Unit 8. The final lesson asks you to design a complete integrated system yourself, with exactly this seam-checking discipline in mind.</p>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What is a seam failure?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Any failure caused by a single malfunctioning sensor.</button>
+      <button class="quiz-choice" data-correct="true">A failure occurring because two correctly-functioning components made incompatible assumptions about each other.</button>
+      <button class="quiz-choice" data-correct="false">A failure that only happens during a robot's first power-on.</button>
+      <button class="quiz-choice" data-correct="false">A synonym for dead-reckoning drift.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A seam failure occurs at the boundary between components, each working exactly as designed individually, while their combination produces a wrong outcome.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why is testing each capability in isolation (localization accuracy, planning correctness, grasp success rate) necessary but not sufficient?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because isolated testing is always wrong and should never be done.</button>
+      <button class="quiz-choice" data-correct="true">Because a seam failure can occur even when every individual component passes its own tests perfectly.</button>
+      <button class="quiz-choice" data-correct="false">Because isolated components never actually work correctly.</button>
+      <button class="quiz-choice" data-correct="false">Because integrated systems never fail once individual components pass.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Seam failures arise from mismatched assumptions between components, which isolated per-component testing cannot catch — only testing the integrated system can.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. In the localization-delay-versus-controller example, why does the mismatch only show up once the components are connected and run at realistic speed?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because neither component actually works, even alone.</button>
+      <button class="quiz-choice" data-correct="true">Because each component passes its own isolated test, but their combined, timing-dependent interaction only manifests once they're actually running together.</button>
+      <button class="quiz-choice" data-correct="false">Because localization and motion control are actually the same component.</button>
+      <button class="quiz-choice" data-correct="false">Because the mismatch is visible in either component's code without running anything.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Both components behave correctly and pass their own tests individually — the mismatch is purely about how their outputs interact once connected under realistic timing.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="seam">
+    <p class="quiz-prompt">4. Fill in the blank: a failure caused by incompatible assumptions between two individually correct components, rather than by either one malfunctioning, is called a ___ failure.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Seam failure describes exactly this category — occurring at the boundary between components rather than within either one.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="integrated">
+    <p class="quiz-prompt">5. Fill in the blank: catching seam failures requires testing the ___ system under realistic conditions, not just its individual parts in isolation.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Only running the full, connected system under realistic timing and sensor conditions can reveal seam failures that per-component testing misses.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the capstone: Cesar Cadena, Luca Carlone, Henry Carrillo, Yasir Latif, Davide Scaramuzza, Jose Neira, Ian Reid, and John J. Leonard, <a href="https://arxiv.org/abs/1606.05830">"Past, Present, and Future of Simultaneous Localization And Mapping: Towards the Robust-Perception Age,"</a> devotes substantial attention to exactly this kind of integration-level robustness challenge, beyond any single algorithm's correctness.</p>
+
+  <p class="ask-teacher">Stuck on identifying a seam failure in a different pair of components from this course, or want to think through how you'd test for one? Ask your teacher — that's what I'm here for. Next up: this course's capstone — designing a complete autonomous behavior yourself.</p>
+
+  <footer class="lesson-footer">STEM+ · Advanced Robotics · Lesson 46 of the course sequence</footer>
+</div>

@@ -1,0 +1,100 @@
+<meta charset="UTF-8">
+<link rel="icon" href="../../favicon.ico?v=1" type="image/x-icon">
+<title>Lesson 22: A* Search for Robot Path Planning — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · Advanced Robotics · Unit 4 · Lesson 22</span>
+  <h1>A* Search for Robot Path Planning</h1>
+  <p class="subtitle">Real cost so far, plus an honest estimate of cost still to go — combining the two is what makes A* the workhorse of robot path planning.</p>
+  <p class="nav-links"><a href="0021-graph-search-fundamentals.html" class="nav-prev">← Lesson 21</a> <a href="0023-obstacle-avoidance-local-vs-global-planning.html" class="nav-next">Lesson 23 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>The last lesson built up to exactly this point: Dijkstra's algorithm searches correctly but wastefully; a heuristic estimates which direction is promising. <strong>A* search</strong> (pronounced "A-star") combines both into a single score for every node under consideration.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    For each node n, A* computes f(n) = g(n) + h(n), where <strong>g(n)</strong> is the actual known cost from the start to n (exactly what Dijkstra tracks), and <strong>h(n)</strong> is the heuristic estimate of remaining cost from n to the goal (Lesson 21's addition). A* always expands the unvisited node with the lowest f(n) — the best combination of "cheapest to reach so far" and "looks closest to the goal."
+  </div>
+
+  <div class="expr-block">f(n) = g(n) + h(n)</div>
+
+  <div class="box why">
+    <span class="box-label">Why the heuristic must never overestimate</span>
+    A* is guaranteed to find the true lowest-cost path only if h(n) never overestimates the actual remaining cost — a property called <strong>admissibility</strong>. Straight-line distance is a standard admissible heuristic for grid-based planning, because the true path (which must go around obstacles) can never be shorter than a straight line, so h(n) never claims a node is closer than it truly is. An overestimating heuristic can cause A* to expand a worse path first and settle for it, believing (wrongly) that the truly optimal path looked more expensive than it actually was.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Example</span>
+    A robot planning across a grid uses straight-line distance as h(n). At a node 3 steps of true cost from the start (g = 3), with a straight-line distance to the goal of 5 (h = 5), f = 3 + 5 = 8. A neighboring node with g = 4 but a straight-line distance to the goal of only 2 (h = 2) has f = 4 + 2 = 6 — lower, so A* expands the second node next, even though it cost more to reach, because the combined estimate suggests it's more promising overall. This is exactly the balance BFS and plain Dijkstra couldn't strike on their own.
+  </div>
+
+  <p>Pseudocode-level, A* maintains a priority queue of nodes ordered by f(n), repeatedly pulling the lowest-f node, checking whether it's the goal, and otherwise expanding its neighbors (updating their g values if a cheaper route to them was just found) — a direct extension of the CP1-level priority-queue and graph-traversal ideas you already have, with the heuristic bolted onto the ordering rule.</p>
+
+  <p>A* answers "what is the best sequence of graph nodes from start to goal." It does not, by itself, guarantee the resulting path avoids getting uncomfortably close to obstacle edges, or handles obstacles that weren't in the map when the graph was built. The next lesson covers both.</p>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What does A* compute for each node it considers?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Only the straight-line distance to the goal.</button>
+      <button class="quiz-choice" data-correct="true">f(n) = g(n) + h(n): actual cost-so-far plus a heuristic estimate of remaining cost.</button>
+      <button class="quiz-choice" data-correct="false">Only the actual cost from the start, ignoring the goal entirely.</button>
+      <button class="quiz-choice" data-correct="false">A random priority value.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A* combines Dijkstra's real cost-so-far g(n) with the heuristic's estimate of remaining cost h(n) into a single priority f(n).</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. What does it mean for a heuristic to be 'admissible,' and why does A* require it for a correctness guarantee?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Admissible means the heuristic is always exactly correct; A* requires perfect estimates.</button>
+      <button class="quiz-choice" data-correct="true">Admissible means the heuristic never overestimates true remaining cost; without this, A* can settle for a worse path.</button>
+      <button class="quiz-choice" data-correct="false">Admissible means the heuristic ignores all obstacles.</button>
+      <button class="quiz-choice" data-correct="false">Admissibility has no effect on A*'s correctness.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>An admissible heuristic never claims a node is farther from optimal than it truly is, which is what guarantees A* finds the true lowest-cost path.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why is straight-line distance a standard admissible heuristic for grid-based robot path planning?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because it is always exactly equal to the true path cost.</button>
+      <button class="quiz-choice" data-correct="true">Because the true path (which must go around obstacles) can never be shorter than a straight line, so it never overestimates.</button>
+      <button class="quiz-choice" data-correct="false">Because straight-line distance ignores the goal location.</button>
+      <button class="quiz-choice" data-correct="false">Because it is the most expensive heuristic to compute.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A straight line is the shortest possible route between two points, so any real obstacle-avoiding path must be at least that long — the heuristic never overestimates.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="h">
+    <p class="quiz-prompt">4. Fill in the blank: in A*, the actual known cost from the start to a node n is written g(n); the heuristic estimate of remaining cost to the goal is written ___(n).</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>h(n) is the heuristic estimate; f(n) = g(n) + h(n) combines both into A*'s priority score.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="10">
+    <p class="quiz-prompt">5. A node has g(n) = 6 and h(n) = 4. Fill in the blank: its A* priority score f(n) is ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>f(n) = g(n) + h(n) = 6 + 4 = 10.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: Kevin M. Lynch and Frank C. Park, <a href="https://modernrobotics.northwestern.edu/chapters/chapter10/">Chapter 10, "Motion Planning,"</a> from <em>Modern Robotics</em> (free at modernrobotics.northwestern.edu), places A* and graph-search planning in the broader context of robot motion planning this unit is building toward.</p>
+
+  <p class="ask-teacher">Stuck on computing f(n) for a few nodes by hand, or want to see why an inadmissible heuristic can lead A* astray? Ask your teacher — that's what I'm here for. Next up: making sure the planned path actually keeps the robot safely clear of obstacles.</p>
+
+  <footer class="lesson-footer">STEM+ · Advanced Robotics · Lesson 22 of the course sequence</footer>
+</div>

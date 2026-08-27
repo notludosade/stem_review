@@ -1,0 +1,98 @@
+<meta charset="UTF-8">
+<link rel="icon" href="../../favicon.ico?v=1" type="image/x-icon">
+<title>Lesson 11: Noise, Uncertainty, and Sensor Limitations — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · Advanced Robotics · Unit 2 · Lesson 11</span>
+  <h1>Noise, Uncertainty, and Sensor Limitations</h1>
+  <p class="subtitle">No sensor reports the true value of anything — every reading is the truth plus some error, and not all error behaves the same way.</p>
+  <p class="nav-links"><a href="0010-cameras-and-visual-perception.html" class="nav-prev">← Lesson 10</a> <a href="0012-sensor-fusion.html" class="nav-next">Lesson 12 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>The last three lessons each ended with a version of the same warning: encoders assume no slip, LIDAR assumes a clean return, cameras are ambiguous about depth. This lesson generalizes that pattern into two distinct kinds of error every sensor has, because the fix for one is not the fix for the other.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    <strong>Bias</strong> (or systematic error) is a consistent offset between what a sensor reports and the true value — the same direction and roughly the same size every time, often from miscalibration. <strong>Noise</strong> (or random error) varies unpredictably from one reading to the next, scattered around the true value rather than consistently off to one side.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Example</span>
+    An ultrasonic distance sensor pointed at a wall exactly 2.00 m away reports, across five readings: 2.05, 1.97, 2.06, 1.94, 2.03 m. The average of these is close to 2.01 m — the small scatter around that average is <strong>noise</strong>. If the same sensor consistently read 2.15 m no matter how many times you averaged, that steady 0.15 m offset would be <strong>bias</strong> — a miscalibration, not random scatter.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why the distinction matters practically</span>
+    Averaging repeated readings reduces the effect of random noise — scatter above and below the true value partly cancels out. Averaging does <em>nothing</em> for bias, because a consistent offset stays the same offset no matter how many readings you average together. This is why "just take more measurements" is a real fix for noisy sensors but a false fix for miscalibrated ones — bias has to be corrected by calibration against a known reference, not by collecting more data.
+  </div>
+
+  <p>Every sensor in this unit carries both kinds of error, in different proportions. A wheel encoder's tick-counting is quite precise (low noise) but can be systematically biased if the wheel's true diameter differs slightly from its assumed value. A LIDAR return's occasional bad reading off a reflective surface is closer to an outright error than ordinary noise. A camera's depth ambiguity from Lesson 10 isn't noise or bias in this technical sense at all — it's missing information, a different failure mode entirely.</p>
+
+  <p>The honest conclusion this unit has been building toward is that "get a better sensor" only ever narrows the gap between measurement and truth — it never closes it. Every robot has to be built assuming its sensor data is an estimate with some uncertainty attached, not a fact. The next lesson is the first real answer to what to do about that: instead of trusting one imperfect sensor, combine several.</p>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What is the key difference between bias and noise in a sensor reading?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Bias is random and unpredictable; noise is a consistent offset.</button>
+      <button class="quiz-choice" data-correct="true">Bias is a consistent offset in one direction; noise varies unpredictably around the true value.</button>
+      <button class="quiz-choice" data-correct="false">There is no meaningful difference between the two.</button>
+      <button class="quiz-choice" data-correct="false">Bias only occurs in cameras; noise only occurs in LIDAR.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Bias is systematic (same direction, roughly consistent size); noise is random scatter around the true value.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why does averaging many repeated readings reduce the effect of noise but not bias?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Averaging fixes both equally.</button>
+      <button class="quiz-choice" data-correct="true">Random scatter above and below the true value partly cancels out on average, but a consistent offset stays the same no matter how many readings are averaged.</button>
+      <button class="quiz-choice" data-correct="false">Averaging only works for LIDAR sensors.</button>
+      <button class="quiz-choice" data-correct="false">Bias only appears after averaging, so it gets worse.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Noise cancels out somewhat when averaged; bias is a systematic offset that averaging cannot remove — only calibration against a known reference can.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. What is the correct fix for a sensor with significant bias (systematic miscalibration)?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Take many more readings and average them.</button>
+      <button class="quiz-choice" data-correct="true">Calibrate the sensor against a known reference value.</button>
+      <button class="quiz-choice" data-correct="false">Ignore the sensor entirely, since bias cannot be corrected.</button>
+      <button class="quiz-choice" data-correct="false">Increase the sensor's sampling rate.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Bias is a consistent offset that averaging cannot fix — it requires calibration against something known to be accurate.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="bias">
+    <p class="quiz-prompt">4. Fill in the blank: a consistent, repeatable offset between a sensor's reading and the true value is called ___ (or systematic error).</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Bias is the standard term for a consistent, one-directional measurement offset.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="noise">
+    <p class="quiz-prompt">5. Fill in the blank: unpredictable, scattered variation in a sensor's readings around the true value is called ___ (or random error).</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Noise is the standard term for random, unpredictable measurement variation.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: Sebastian Thrun, Wolfram Burgard, and Dieter Fox, <a href="https://mitpress.mit.edu/9780262201629/probabilistic-robotics/">Probabilistic Robotics</a> (MIT Press, 2005) devotes its measurement-model chapters to exactly this bias-versus-noise distinction, formalized as a full probability distribution over what a sensor reports given the true state.</p>
+
+  <p class="ask-teacher">Stuck on distinguishing bias from noise in a real example, or want to work through why averaging doesn't fix a miscalibrated sensor? Ask your teacher — that's what I'm here for. Next up: combining multiple imperfect sensors to do better than any one alone.</p>
+
+  <footer class="lesson-footer">STEM+ · Advanced Robotics · Lesson 11 of the course sequence</footer>
+</div>

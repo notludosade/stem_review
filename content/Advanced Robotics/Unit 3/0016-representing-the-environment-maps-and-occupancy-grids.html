@@ -1,0 +1,100 @@
+<meta charset="UTF-8">
+<link rel="icon" href="../../favicon.ico?v=1" type="image/x-icon">
+<title>Lesson 16: Representing the Environment — Maps and Occupancy Grids — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · Advanced Robotics · Unit 3 · Lesson 16</span>
+  <h1>Representing the Environment — Maps and Occupancy Grids</h1>
+  <p class="subtitle">Before a robot can check its position against a map, something has to decide what a 'map' even looks like as data a computer can use.</p>
+  <p class="nav-links"><a href="0015-why-dead-reckoning-drifts.html" class="nav-prev">← Lesson 15</a> <a href="0017-slam-the-conceptual-idea.html" class="nav-next">Lesson 17 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Lesson 15 ended on a fix for drift: check the accumulating estimate against something independent. That "something" is a map — but a map has to be represented as actual data before any of that checking can happen in software. This lesson covers the most common representation.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    An <strong>occupancy grid</strong> represents the environment as a grid of small, fixed-size cells, each holding a value estimating the probability that the cell is occupied by an obstacle. A cell near certainty of being occupied (a wall) is marked accordingly; a cell near certainty of being empty (open floor) is marked the other way; a cell the robot has never sensed is marked <strong>unknown</strong> — a genuinely distinct third state, not just "assumed empty."
+  </div>
+
+  <p>LIDAR scans (Lesson 9) are a natural fit for building an occupancy grid: each ray that returns a distance marks the cells along its path as likely free (nothing blocked the beam that far) and the cell at the return point as likely occupied. Sweep enough scans from enough positions, and the grid fills in.</p>
+
+  <div class="box why">
+    <span class="box-label">Why "unknown" has to be a real third option</span>
+    A robot that treats unexplored space as "assumed empty" will happily plan a path straight through a room it has never actually seen — a dangerous assumption. Marking unsensed cells as explicitly unknown lets later planning (Unit 4) treat "go check that unexplored area" differently from "drive confidently through known-open floor," which matters enormously for both safety and for deciding where to explore next.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Example</span>
+    A robot vacuum's 2D occupancy grid of an apartment starts entirely unknown. After its first few passes through the living room, that region's cells settle toward "free" (open floor) except for a thin band of "occupied" cells tracing the walls and furniture legs it detected. The kitchen, not yet visited, remains entirely unknown — not marked as free, and not marked as occupied, simply not yet informed by any sensor reading.
+  </div>
+
+  <p>For 3D environments, the same idea extends to volumetric occupancy grids, often organized as an <strong>octree</strong> — a data structure that subdivides only the regions that need fine detail, keeping large empty or large solid regions cheap to store instead of representing every tiny cube individually.</p>
+
+  <p>A map by itself doesn't build itself, and dead reckoning by itself can't correct itself. The next lesson is about the genuinely clever part: doing both of these jobs — mapping the environment and localizing within it — <em>at the same time</em>, from the same stream of sensor data, each one helping the other.</p>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. In an occupancy grid, what does a cell marked 'unknown' represent?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">A cell that is definitely free of obstacles.</button>
+      <button class="quiz-choice" data-correct="true">A cell the robot has never actually sensed, distinct from both 'occupied' and 'free.'</button>
+      <button class="quiz-choice" data-correct="false">A cell that is definitely occupied by an obstacle.</button>
+      <button class="quiz-choice" data-correct="false">A cell outside the map's boundaries.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Unknown is a genuine third state — the robot has no sensor evidence about that cell at all, which is different from evidence that it's empty.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why is treating unexplored space as 'assumed empty' (rather than explicitly 'unknown') a dangerous design choice?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">It uses more memory than marking cells unknown.</button>
+      <button class="quiz-choice" data-correct="true">A robot could plan a path straight through a region it has never actually sensed, based on a false assumption of safety.</button>
+      <button class="quiz-choice" data-correct="false">It makes LIDAR scans less accurate.</button>
+      <button class="quiz-choice" data-correct="false">Assumed-empty cells cannot be updated later.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Treating unsensed space as safe-by-default risks planning through areas that could actually contain unseen obstacles — 'unknown' must be distinguished from 'confirmed free.'</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. How does a single LIDAR scan typically update an occupancy grid?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">It marks the entire grid as occupied.</button>
+      <button class="quiz-choice" data-correct="true">Cells along each ray's path are marked likely free, and the cell at each ray's return point is marked likely occupied.</button>
+      <button class="quiz-choice" data-correct="false">It has no effect on the occupancy grid.</button>
+      <button class="quiz-choice" data-correct="false">It only updates cells directly beneath the robot.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A LIDAR ray that travels some distance before returning implies the cells it passed through were unobstructed (likely free), while the cell where it stopped is likely occupied.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="grid">
+    <p class="quiz-prompt">4. Fill in the blank: a representation of the environment as a grid of cells, each estimating the probability of being occupied by an obstacle, is called an occupancy ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Occupancy grid is the standard term for this cell-based environment representation.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="octree">
+    <p class="quiz-prompt">5. Fill in the blank: a tree-based data structure that subdivides only the regions needing fine detail, commonly used for 3D occupancy mapping, is called an ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Octrees keep large empty or solid regions cheap to store while still allowing fine detail where it's needed.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: Armin Hornung, Kai M. Wurm, Maren Bennewitz, Cyrill Stachniss, and Wolfram Burgard, <a href="https://octomap.github.io/">"OctoMap: An Efficient Probabilistic 3D Mapping Framework Based on Octrees"</a> (Autonomous Robots, 2013), the paper and open-source project behind the octree-based occupancy mapping this lesson previewed.</p>
+
+  <p class="ask-teacher">Stuck on why 'unknown' needs to be its own category, or want to trace through how a few LIDAR rays would update a small grid? Ask your teacher — that's what I'm here for. Next up: building the map and localizing within it at the same time.</p>
+
+  <footer class="lesson-footer">STEM+ · Advanced Robotics · Lesson 16 of the course sequence</footer>
+</div>

@@ -1,0 +1,98 @@
+<meta charset="UTF-8">
+<link rel="icon" href="../../favicon.ico?v=1" type="image/x-icon">
+<title>Lesson 14: Odometry and Dead Reckoning — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · Advanced Robotics · Unit 3 · Lesson 14</span>
+  <h1>Odometry and Dead Reckoning</h1>
+  <p class="subtitle">Add up every small motion since the start, and you get an estimate of where you are now — no landmarks required, and no correction either.</p>
+  <p class="nav-links"><a href="0013-the-localization-problem.html" class="nav-prev">← Lesson 13</a> <a href="0015-why-dead-reckoning-drifts.html" class="nav-next">Lesson 15 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>The simplest way to estimate a robot's current position is to never look outward at all: just keep a running total of every small motion made since a known starting point. This is <strong>dead reckoning</strong>, and its robotic implementation, built from the wheel encoders in Lesson 8, is called <strong>odometry</strong>.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    <strong>Dead reckoning</strong> is estimating current position by accumulating a sequence of small, measured motions from a known starting pose, without reference to external landmarks. <strong>Odometry</strong> is dead reckoning specifically built from a wheeled robot's own encoder readings — converting wheel rotation into an estimate of how far and which way the robot has moved.
+  </div>
+
+  <p>At each short time step, the robot estimates a small change in position and orientation (Δx, Δy, Δθ) from its wheel encoders, then adds that increment onto its running pose estimate. Repeat this thousands of times a second, and the robot maintains a continuously updated best guess of its own (x, y, θ) — all without ever needing to recognize anything in its surroundings.</p>
+
+  <div class="box why">
+    <span class="box-label">Why odometry lives in its own coordinate frame</span>
+    Because odometry is built purely from accumulated motion, it defines its own local reference — often literally called the <strong>odom frame</strong> — anchored wherever the robot started, not tied to any fixed external landmark. This frame is smooth (no sudden jumps between updates) and updates fast, which is genuinely useful for short-term motion control (Unit 5 depends on exactly this). What it is not is accurate over the long run, for the reason the next lesson makes precise.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Example</span>
+    A robot starts at (0, 0, 0°). Over one time step it estimates it moved 0.1 m forward with no turn: new pose ≈ (0.1, 0, 0°). Over the next step, it estimates 0.1 m forward while turning 5°: new pose ≈ (0.1 + 0.1·cos(5°), 0 + 0.1·sin(5°), 5°) ≈ (0.200, 0.009, 5°). Each step is a small, mechanical update — position ≈ old position + Δposition, angle ≈ old angle + Δangle — repeated continuously as the robot drives.
+  </div>
+
+  <p>Odometry's genuine strength is that it requires nothing beyond the robot's own sensors — no map, no recognizable landmarks, no external infrastructure. Its genuine weakness, covered next, is that every one of those small per-step estimates has some error, and dead reckoning has no built-in way to notice or correct for it.</p>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What is dead reckoning?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Estimating position by recognizing landmarks on a map.</button>
+      <button class="quiz-choice" data-correct="true">Estimating current position by accumulating a sequence of small measured motions from a known starting pose.</button>
+      <button class="quiz-choice" data-correct="false">A method for calibrating a camera's depth accuracy.</button>
+      <button class="quiz-choice" data-correct="false">A way to detect wheel slip directly.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Dead reckoning builds a position estimate purely from accumulated motion, without reference to external landmarks.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. What is odometry, specifically?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">A synonym for GPS localization.</button>
+      <button class="quiz-choice" data-correct="true">Dead reckoning built from a wheeled robot's own encoder readings.</button>
+      <button class="quiz-choice" data-correct="false">A method for detecting obstacles with LIDAR.</button>
+      <button class="quiz-choice" data-correct="false">A camera-based mapping technique.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Odometry is the wheel-encoder-based implementation of dead reckoning: converting wheel rotation into an incremental position and orientation estimate.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why is odometry's reference frame described as anchored wherever the robot started, rather than tied to a fixed external landmark?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because odometry uses GPS coordinates exclusively.</button>
+      <button class="quiz-choice" data-correct="true">Because odometry is built purely from accumulated motion since the start, with no reference to the outside world.</button>
+      <button class="quiz-choice" data-correct="false">Because odometry frames reset to zero every second.</button>
+      <button class="quiz-choice" data-correct="false">Because odometry requires a pre-built map to function at all.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Since odometry only accumulates the robot's own measured motion, its frame is naturally anchored to wherever tracking began, not to any external reference point.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="odometry">
+    <p class="quiz-prompt">4. Fill in the blank: dead reckoning built specifically from a wheeled robot's encoder readings is called ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Odometry is the standard term for wheel-encoder-based dead reckoning.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="0.2">
+    <p class="quiz-prompt">5. A robot at (0, 0, 0°) estimates one time step of 0.2 m forward motion with no turn. Fill in the blank: its new estimated x-position is ___ m.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>With no turn, the full 0.2 m of forward motion adds directly to the x-coordinate: 0 + 0.2 = 0.2 m.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: ROS REP 105, <a href="https://www.ros.org/reps/rep-0105.html">"Coordinate Frames for Mobile Platforms,"</a> defines the odom frame exactly as this lesson describes it — a continuous, locally-accurate frame built from odometry sources, explicitly documented as drifting without bound over time.</p>
+
+  <p class="ask-teacher">Stuck on the accumulated-pose worked example, or want to try a few more time steps by hand? Ask your teacher — that's what I'm here for. Next up: making precise exactly why and how fast that drift grows.</p>
+
+  <footer class="lesson-footer">STEM+ · Advanced Robotics · Lesson 14 of the course sequence</footer>
+</div>

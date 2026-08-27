@@ -1,0 +1,107 @@
+<meta charset="UTF-8">
+<link rel="icon" href="../../favicon.ico?v=1" type="image/x-icon">
+<title>Lesson 27: Waypoint Following and Steering Control — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · Advanced Robotics · Unit 5 · Lesson 27</span>
+  <h1>Waypoint Following and Steering Control</h1>
+  <p class="subtitle">Knowing where you're supposed to be is only half the job — the other half is deciding, moment to moment, how hard to steer to actually get there.</p>
+  <p class="nav-links"><a href="0026-trajectory-generation-and-timing.html" class="nav-prev">← Lesson 26</a> <a href="0028-feedback-control-for-path-tracking.html" class="nav-next">Lesson 28 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Lesson 26 produced a timed trajectory: a target position for every instant. This lesson covers the steering side — the ongoing decision of how to turn the robot's wheels (or joints) so it actually tracks that moving target, not just aims at a fixed point once and hopes.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    <strong>Waypoint following</strong> is the general task of steering a robot through a sequence of intended positions in order. A common concrete strategy, <strong>pure pursuit</strong>, has the robot continuously aim toward a point on the path a fixed <strong>lookahead distance</strong> ahead of its current position — not the very next waypoint, and not the final goal, but a point that "chases" along the path as the robot advances.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why aiming at a moving lookahead point beats aiming at the next fixed waypoint</span>
+    Steering directly at the next waypoint produces a path that cuts corners sharply and can oscillate — small position errors cause abrupt steering corrections, which cause more error, in an unstable back-and-forth. A lookahead point that moves smoothly along the path as the robot progresses produces gentler, more stable steering commands, and the size of the lookahead distance directly trades off responsiveness against smoothness: a short lookahead tracks the path tightly but can be twitchy; a long lookahead is smoother but cuts corners more.
+  </div>
+
+  <svg class="figure" viewBox="0 0 300 140" width="300" height="140">
+    <path d="M 30 110 Q 120 20 270 60" fill="none" stroke="var(--border)" stroke-width="2" stroke-dasharray="4 3"></path>
+    <circle class="fig-point" cx="70" cy="90" r="5"></circle>
+    <text class="fig-label" x="50" y="125">robot</text>
+    <circle class="fig-point" cx="150" cy="45" r="4"></circle>
+    <text class="fig-label" x="140" y="30">lookahead point</text>
+    <line x1="70" y1="90" x2="150" y2="45" stroke="var(--accent)" stroke-width="1.5"></line>
+    <text class="fig-label" x="200" y="70">planned path</text>
+  </svg>
+  <figcaption>Pure pursuit steers toward a point a fixed distance ahead on the path, not the path's very next waypoint.</figcaption>
+
+  <div class="box example">
+    <span class="box-label">Example</span>
+    A robot following a curving path with a 0.5 m lookahead distance continuously finds the point on the path 0.5 m ahead of its current position and steers toward it. As the robot moves, that target point advances along the curve too, always staying 0.5 m ahead — the robot is perpetually chasing a moving target rather than a sequence of fixed ones, which is exactly why the resulting steering commands are smooth rather than jerky.
+  </div>
+
+  <p>Waypoint following gets the robot moving in roughly the right direction, continuously. What it doesn't do on its own is guarantee the robot stays precisely on the intended trajectory from Lesson 26 — small errors from wheel slip, timing mismatches, or an imperfect lookahead choice still accumulate. Closing that gap with real feedback is the next lesson's job.</p>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What does the pure pursuit strategy have the robot steer toward?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">The very next waypoint in the path, always.</button>
+      <button class="quiz-choice" data-correct="true">A point on the path a fixed lookahead distance ahead of the robot's current position.</button>
+      <button class="quiz-choice" data-correct="false">The final goal position, regardless of the current path shape.</button>
+      <button class="quiz-choice" data-correct="false">A randomly selected point on the map.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Pure pursuit continuously aims at a point that advances along the path as the robot progresses, a fixed distance ahead — not a single fixed waypoint.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why does steering directly at the next fixed waypoint tend to produce jerky or oscillating motion?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because fixed waypoints move unpredictably.</button>
+      <button class="quiz-choice" data-correct="true">Because small position errors cause abrupt steering corrections, which can cause further error in an unstable back-and-forth.</button>
+      <button class="quiz-choice" data-correct="false">Because waypoints are always placed too far apart to reach.</button>
+      <button class="quiz-choice" data-correct="false">Because pure pursuit is mathematically impossible to compute.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Aiming at a fixed point rather than a smoothly advancing target makes steering commands abrupt and prone to oscillation as the robot approaches and passes each waypoint.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. What is the trade-off in choosing a pure pursuit controller's lookahead distance?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">There is no trade-off — longer lookahead is always better.</button>
+      <button class="quiz-choice" data-correct="true">A short lookahead tracks the path tightly but can be twitchy; a long lookahead is smoother but cuts corners more.</button>
+      <button class="quiz-choice" data-correct="false">Lookahead distance only affects the robot's top speed.</button>
+      <button class="quiz-choice" data-correct="false">A longer lookahead always causes the robot to leave the planned path entirely.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Lookahead distance directly trades path-tracking tightness against steering smoothness — a core tuning parameter for pure pursuit.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="waypoint">
+    <p class="quiz-prompt">4. Fill in the blank: the general task of steering a robot through a sequence of intended positions in order is called ___ following.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Waypoint following is the broad task; pure pursuit is one common concrete strategy for accomplishing it.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="lookahead">
+    <p class="quiz-prompt">5. Fill in the blank: in pure pursuit, the fixed distance ahead of the robot used to select the target point on the path is called the ___ distance.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Lookahead distance is the key tuning parameter of the pure pursuit steering strategy.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: the Nav2 project's <a href="https://docs.nav2.org/configuration/packages/configuring-regulated-pp.html">"Regulated Pure Pursuit"</a> controller documentation shows a real, production robot navigation system's implementation of exactly the lookahead-based steering this lesson introduced.</p>
+
+  <p class="ask-teacher">Stuck on why a moving lookahead point produces smoother motion than a fixed waypoint, or want to trace through the curving-path example differently? Ask your teacher — that's what I'm here for. Next up: closing the loop with real feedback to correct for tracking errors.</p>
+
+  <footer class="lesson-footer">STEM+ · Advanced Robotics · Lesson 27 of the course sequence</footer>
+</div>

@@ -1,0 +1,96 @@
+<meta charset="UTF-8">
+<link rel="icon" href="../../favicon.ico?v=1" type="image/x-icon">
+<title>Lesson 25: From Path to Motion Commands — STEM+</title>
+<link rel="stylesheet" href="../../assets/style.css">
+<script src="../../assets/quiz.js" defer></script>
+<div class="page" data-tier="intro">
+  <span class="kicker">STEM+ · Advanced Robotics · Unit 5 · Lesson 25</span>
+  <h1>From Path to Motion Commands</h1>
+  <p class="subtitle">A* hands back a list of waypoints. Motors need voltages and velocities. Something has to bridge that gap, continuously, in real time.</p>
+  <p class="nav-links"><a href="../Unit%204/0024-replanning-and-dynamic-obstacles.html" class="nav-prev">← Unit 4, Lesson 24</a> <a href="0026-trajectory-generation-and-timing.html" class="nav-next">Lesson 26 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Unit 4 ended with a robot able to compute a safe route: a sequence of graph nodes from start to goal, adjusted on the fly when reality disagreed with the map. That sequence of nodes is not, by itself, something a motor can act on. This unit is about <strong>motion control</strong> — turning a planned path into the specific, continuous commands that actually drive the robot along it.</p>
+
+  <div class="box">
+    <span class="box-label">Definition</span>
+    <strong>Motion control</strong> is the layer that converts a planned path (a sequence of positions, or waypoints, from Unit 4) into the low-level commands — wheel velocities, joint torques, motor voltages — that physically move the robot along that path. It sits between planning (deciding where to go) and the control-loop fundamentals this course's prerequisites already gave you (turning a commanded velocity into an actual motor signal).
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why "just drive toward the next waypoint" isn't quite enough</span>
+    A path from A* is a set of discrete points with no timing or smoothness attached — it says <em>where</em>, not <em>how fast</em> or <em>how gently</em>. Driving straight at each waypoint in turn, stopping and re-aiming at each one, would work but ride roughly and waste time. A robot needs a plan for <em>when</em> it should be at each point along the path (Lesson 26), a way to correct for the small errors that build up while executing that plan (Lesson 28), and — since real motors and wheels can't change speed or direction instantly — some smoothing of sharp corners into paths the robot can physically follow (Lesson 29).
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Example</span>
+    A* returns the waypoints (0, 0) → (2, 0) → (2, 3) — a path with a sharp 90° corner. A robot literally trying to hit (2, 0) exactly before turning toward (2, 3) would have to stop dead, pivot in place, and accelerate again — slow, jerky, and hard on the hardware. Motion control's job is producing a smoother, still-safe motion that gets the robot from one leg of the path to the next without that abrupt stop, while still respecting the obstacles the path was planned around.
+  </div>
+
+  <p>This unit assumes you already know, from Mechatronics-level prerequisites, that a control loop compares a desired value against a measured one and produces a correcting command. What's new here is what gets fed into that loop: not a single fixed setpoint, but a moving target — a point on the path that itself advances as the robot progresses. The next four lessons build that up in order: first timing the path, then following it, then correcting drift from it, then smoothing its rough edges.</p>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What is the role of motion control in the pipeline this course has been building?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Deciding which route to take through the environment.</button>
+      <button class="quiz-choice" data-correct="true">Converting a planned path into the low-level commands that physically move the robot along it.</button>
+      <button class="quiz-choice" data-correct="false">Building the occupancy grid map.</button>
+      <button class="quiz-choice" data-correct="false">Detecting obstacles with LIDAR.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Motion control sits after planning (Unit 4) and turns its output — a sequence of waypoints — into actual motor commands.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why is a raw list of waypoints from A* not sufficient by itself to drive a robot smoothly?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because A* never returns a valid path.</button>
+      <button class="quiz-choice" data-correct="true">Because the waypoints carry no timing or smoothness information — just positions.</button>
+      <button class="quiz-choice" data-correct="false">Because waypoints are always outside the robot's workspace.</button>
+      <button class="quiz-choice" data-correct="false">Because motors cannot process any digital data.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A* answers 'where' but not 'how fast' or 'how gently' — motion control has to add timing and smoothness the raw path doesn't specify.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. What problem does driving straight at each waypoint in turn, stopping and re-aiming at each one, create?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">It is the smoothest, most efficient way to follow a path.</button>
+      <button class="quiz-choice" data-correct="true">It requires abrupt stops and pivots at sharp corners, which is slow and hard on the hardware.</button>
+      <button class="quiz-choice" data-correct="false">It is impossible for any robot to execute.</button>
+      <button class="quiz-choice" data-correct="false">It causes the robot to ignore the planned path entirely.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Stopping to pivot at each waypoint corner produces slow, jerky motion — motivating the trajectory generation and smoothing this unit covers.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="control">
+    <p class="quiz-prompt">4. Fill in the blank: the layer that converts a planned path into low-level commands like wheel velocities or motor voltages is called motion ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Motion control bridges planning (deciding where to go) and the underlying control-loop hardware that actually moves the robot.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="waypoint">
+    <p class="quiz-prompt">5. Fill in the blank: a single point along a planned path, such as one of A*'s returned positions, is called a ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Waypoints are the discrete points a path passes through; motion control is what turns them into continuous motion.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read this before the next lesson: Kevin M. Lynch and Frank C. Park, <a href="https://modernrobotics.northwestern.edu/chapters/chapter9/">Chapter 9, "Trajectory Generation,"</a> from <em>Modern Robotics</em> (free at modernrobotics.northwestern.edu), opens with exactly this gap between a planned path and the timed motion needed to execute it.</p>
+
+  <p class="ask-teacher">Stuck on why a sharp-cornered path is hard to execute directly, or want to sketch a smoother alternative for the example path? Ask your teacher — that's what I'm here for. Next up: giving a path an actual sense of timing.</p>
+
+  <footer class="lesson-footer">STEM+ · Advanced Robotics · Lesson 25 of the course sequence</footer>
+</div>
