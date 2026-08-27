@@ -1,0 +1,109 @@
+<meta charset="UTF-8">
+<link rel="icon" href="../../../favicon.ico?v=1" type="image/x-icon">
+<title>Lesson 5: Global Phase vs. Relative Phase — STEM+</title>
+<link rel="stylesheet" href="../../../assets/style.css">
+<script src="../../../assets/quiz.js" defer></script>
+<div class="page" data-tier="advanced">
+  <span class="kicker">STEM+ · Quantum Computing · Unit 1 · Lesson 5</span>
+  <h1>Global Phase vs. Relative Phase</h1>
+  <p class="subtitle">Two different-looking state vectors can be the exact same physical state — and the distinction between the phase that never matters and the phase that always matters closes out this unit's dimension count.</p>
+  <p class="nav-links"><a href="0004-the-bloch-sphere.html" class="nav-prev">← Lesson 4</a> <a href="../Unit%202/0006-quantum-gates-as-unitary-matrices.html" class="nav-next">Unit 2, Lesson 6 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Lesson 3 counted the valid qubit states as a 3-dimensional surface inside ℂ² ≅ ℝ⁴ (one real normalization constraint cutting a 4-real-dimensional space down by one dimension). Lesson 4's Bloch sphere, however, is only 2-dimensional — a sphere's surface takes just two angles, θ and φ, to specify a point. Something ate one more dimension between Lesson 3 and Lesson 4. This lesson names exactly what.</p>
+
+  <h2>1. Global phase</h2>
+  <div class="box">
+    <span class="box-label">Definition — Global Phase</span>
+    Two states |ψ⟩ and e<sup>iγ</sup>|ψ⟩, for any real number γ, are said to differ by a <strong>global phase</strong>. e<sup>iγ</sup> is a complex number of magnitude 1 multiplying the <em>entire</em> state vector, not just one component.
+  </div>
+  <div class="box">
+    <span class="box-label">Fact — Global Phase Is Physically Unobservable</span>
+    |ψ⟩ and e<sup>iγ</sup>|ψ⟩ represent the exact same physical state — no measurement, in any basis, can ever tell them apart.
+  </div>
+  <p>Here's why. The Born rule (Lesson 11 states this fully; for now, take it as given) says the probability of any measurement outcome associated with basis state |e⟩ is |⟨e|ψ⟩|². Replacing |ψ⟩ with e<sup>iγ</sup>|ψ⟩ gives ⟨e|(e<sup>iγ</sup>|ψ⟩) = e<sup>iγ</sup>⟨e|ψ⟩, and then</p>
+  <div class="expr-block">|e<sup>iγ</sup>⟨e|ψ⟩|² = |e<sup>iγ</sup>|² |⟨e|ψ⟩|² = 1 · |⟨e|ψ⟩|² = |⟨e|ψ⟩|²</div>
+  <p>— exactly the same probability, for <em>every</em> basis you could choose to measure in, since |e<sup>iγ</sup>| = 1 always. Global phase is, in a precise sense, information the mathematics carries around that no experiment can ever extract. This is the missing dimension: the 3-dimensional surface of Lesson 3 minus one more dimension for the physically-irrelevant global phase leaves exactly the 2-dimensional Bloch sphere of Lesson 4.</p>
+
+  <h2>2. Relative phase</h2>
+  <p>Contrast this with the φ that appears inside the Bloch parametrization itself, cos(θ/2)|0⟩ + e<sup>iφ</sup>sin(θ/2)|1⟩. This e<sup>iφ</sup> multiplies only the |1⟩ component, not the whole vector — it's a <strong>relative phase</strong> between the two amplitudes, and Lesson 3 already showed it matters:</p>
+  <div class="box">
+    <span class="box-label">Fact — Relative Phase Is Physically Meaningful</span>
+    |+⟩ = (|0⟩ + |1⟩)/√2 and |−⟩ = (|0⟩ − |1⟩)/√2 give identical measurement probabilities in the computational (Z) basis — both split 50/50 between outcomes 0 and 1. But they are physically different states: Lesson 13 shows that measuring in a <em>different</em> basis (the X basis, built from |+⟩ and |−⟩ themselves) tells them apart with certainty. A relative phase, unlike a global one, is not swept away by taking |·|² — it survives, and shows up the moment you measure in the right basis or apply the right gate.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why this distinction is the whole reason interference is possible</span>
+    Global phase drops out of every probability calculation because it multiplies an entire ket uniformly — there's nothing for it to interfere with, since every term picks up the identical factor. Relative phase survives specifically because it multiplies different basis components by different amounts, so when a later gate recombines those components (Unit 2 onward), the relative phases can make terms add constructively or cancel destructively. Every interference effect this course studies — including Unit 6's speedup for Deutsch-Jozsa and Unit 7's Grover's algorithm — is built entirely out of relative phase, never global phase. This is worth remembering as a rule of thumb going forward: if a calculation changes only a global phase, nothing physical happened.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Example</span>
+    |0⟩ and i|0⟩ = e<sup>iπ/2</sup>|0⟩ are the same physical state (i is a global phase factor here, since it multiplies the state's only nonzero term). But (|0⟩ + i|1⟩)/√2 and (|0⟩ + |1⟩)/√2 are different physical states — the i multiplies only the |1⟩ term, making it a relative phase between the two components, not a global one.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. Are |1⟩ and −|1⟩ the same physical state?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Yes — −1 = e^(iπ) is a global phase factor multiplying the entire (one-term) state.</button>
+      <button class="quiz-choice" data-correct="false">No — a minus sign always changes the physical state.</button>
+      <button class="quiz-choice" data-correct="false">Cannot be determined without knowing which basis is used.</button>
+      <button class="quiz-choice" data-correct="false">No — −|1⟩ isn't normalized.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>−1 has magnitude 1 (it's e^(iπ)), and it multiplies the entire state uniformly, so it's a global phase — physically unobservable. −|1⟩ is still normalized: |−1|² = 1.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why can no measurement ever distinguish |ψ⟩ from e^(iγ)|ψ⟩?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because e^(iγ) always equals 1.</button>
+      <button class="quiz-choice" data-correct="true">Because every Born-rule probability involves |⟨e|ψ⟩|², and multiplying by e^(iγ) (magnitude 1) leaves every such magnitude-squared value unchanged.</button>
+      <button class="quiz-choice" data-correct="false">Because measurement devices are only sensitive to real amplitudes, never complex ones.</button>
+      <button class="quiz-choice" data-correct="false">Because γ is always exactly 0 in practice.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Since |e^(iγ)| = 1 for any real γ, multiplying an amplitude by e^(iγ) before squaring its magnitude changes nothing — this holds for every basis, so no measurement in any basis can detect a pure global phase.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Which of these is an example of a physically meaningful <em>relative</em> phase, not an unobservable global one?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Multiplying |0⟩ by −1.</button>
+      <button class="quiz-choice" data-correct="true">The sign difference between |+⟩ = (|0⟩ + |1⟩)/√2 and |−⟩ = (|0⟩ − |1⟩)/√2.</button>
+      <button class="quiz-choice" data-correct="false">Multiplying the entire state (|0⟩ + |1⟩)/√2 by i.</button>
+      <button class="quiz-choice" data-correct="false">Multiplying |1⟩ by −1.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Only the |+⟩-versus-|−⟩ sign flips the phase of one component (|1⟩) relative to the other (|0⟩) — a relative phase, which changes the physical state. The other options each multiply every term in their state by the same overall factor, which is a global phase and physically invisible.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="global phase|global">
+    <p class="quiz-prompt">4. Fill in the blank: an overall factor e^(iγ) multiplying an entire qubit state is called a ___, and it is never physically observable.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Global phase is unobservable precisely because it multiplies every amplitude by the same magnitude-1 factor, which cancels out of every Born-rule probability.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="2">
+    <p class="quiz-prompt">5. Fill in the blank: Lesson 3's 3-dimensional surface of valid states, minus one further dimension for the physically irrelevant global phase, leaves the Bloch sphere's ___-dimensional surface.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Removing the global-phase freedom takes the 3-dimensional normalized-state surface down to the Bloch sphere's 2-dimensional surface, parametrized by θ and φ alone.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read before the next lesson: IBM Quantum Learning's <a href="https://learning.quantum.ibm.com/course/basics-of-quantum-information">Basics of Quantum Information</a> course, "Single systems" chapter, discusses global phase equivalence and derives the Bloch sphere's dimension count the same way, from normalization plus global-phase freedom.</p>
+
+  <p class="ask-teacher">If the "e^(iγ) drops out of |·|²" argument feels too quick, ask your teacher to walk through it with actual numbers for γ — plugging in γ = π/4 or so makes the cancellation concrete. This closes Unit 1: you can now write down, normalize, and picture any single-qubit state. Next up, Unit 2: the operations — gates — that transform one qubit state into another.</p>
+
+  <footer class="lesson-footer">STEM+ · Quantum Computing · Lesson 5 of the course sequence</footer>
+</div>

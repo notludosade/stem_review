@@ -1,0 +1,103 @@
+<meta charset="UTF-8">
+<link rel="icon" href="../../../favicon.ico?v=1" type="image/x-icon">
+<title>Lesson 14: Expectation Values — STEM+</title>
+<link rel="stylesheet" href="../../../assets/style.css">
+<script src="../../../assets/quiz.js" defer></script>
+<div class="page" data-tier="advanced">
+  <span class="kicker">STEM+ · Quantum Computing · Unit 3 · Lesson 14</span>
+  <h1>Expectation Values</h1>
+  <p class="subtitle">One real number that summarizes an entire measurement's statistics at once — computed directly from the state vector, with no explicit probability list required.</p>
+  <p class="nav-links"><a href="0013-measuring-in-different-bases.html" class="nav-prev">← Lesson 13</a> <a href="0015-the-no-cloning-theorem.html" class="nav-next">Lesson 15 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>An <strong>observable</strong> is a physical quantity that can be measured — for a qubit, the Pauli matrices X, Y, and Z are the standard observables, each corresponding to measurement in its own basis (Z in the computational basis, X in Lesson 13's X basis, Y in a similar Y basis). Every observable in quantum mechanics is represented by a <strong>Hermitian</strong> operator, and its <strong>expectation value</strong> packages an entire probability distribution into a single number.</p>
+
+  <h2>1. Hermitian operators and eigenvalues as outcomes</h2>
+  <div class="box">
+    <span class="box-label">Definition — Hermitian Operator</span>
+    A matrix A is <strong>Hermitian</strong> if A† = A — it equals its own conjugate transpose. You can check directly that X, Y, and Z are all Hermitian (each is real and symmetric, or in Y's case, conjugating and transposing return the original matrix).
+  </div>
+  <p>Hermitian operators have a special property from Linear Algebra B worth recalling here: their eigenvalues are always real numbers, and eigenvectors for distinct eigenvalues are orthogonal. For Z, the eigenvectors are exactly |0⟩ (eigenvalue +1: Z|0⟩ = |0⟩) and |1⟩ (eigenvalue −1: Z|1⟩ = −|1⟩). The measurement postulates generalize cleanly: measuring the observable Z returns one of its eigenvalues (+1 or −1) with the Born-rule probability for the corresponding eigenvector — this is just outcomes 0 and 1 relabeled as +1 and −1.</p>
+
+  <h2>2. The expectation value formula</h2>
+  <div class="box">
+    <span class="box-label">Definition — Expectation Value</span>
+    For an observable A and a state |ψ⟩, the <strong>expectation value</strong> is ⟨A⟩ = ⟨ψ|A|ψ⟩ — the average outcome you'd get, weighted by probability, over many repeated measurements on identically prepared copies of |ψ⟩.
+  </div>
+  <p>For Z specifically, writing out ⟨ψ|Z|ψ⟩ for |ψ⟩ = α|0⟩ + β|1⟩ = (α, β)ᵀ: Z|ψ⟩ = (α, −β)ᵀ, so ⟨ψ|Z|ψ⟩ = α*α + β*(−β) = |α|² − |β|². This is exactly P(0)·(+1) + P(1)·(−1), the probability-weighted average of the two eigenvalues — confirming ⟨A⟩ = ⟨ψ|A|ψ⟩ computes precisely the weighted-average outcome, directly from the state vector, with no need to list P(0) and P(1) separately first.</p>
+
+  <div class="box example">
+    <span class="box-label">Example</span>
+    |ψ⟩ = (4/5)|0⟩ + (3/5)|1⟩ (both amplitudes real for simplicity). ⟨Z⟩ = |4/5|² − |3/5|² = 16/25 − 9/25 = 7/25 = 0.28. Interpretation: measuring Z on many copies of this state, you'd see +1 (outcome 0) more often than −1 (outcome 1), and the long-run average would settle near 0.28 — closer to +1 than to −1, matching the fact that P(0) = 16/25 > P(1) = 9/25.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why ⟨Z⟩ = 0 doesn't necessarily mean "50/50 in every basis"</span>
+    ⟨Z⟩ = 0 exactly when |α|² = |β|² — a 50/50 split for Z-measurement. But this says nothing at all about X or Y measurement statistics for that same state. |+⟩ has ⟨Z⟩ = 0 (a coin flip in the Z basis) but ⟨X⟩ = 1 (completely deterministic in the X basis, by Lesson 13). A single expectation value only ever summarizes statistics for its own observable — never confuse "this observable's expectation is 0 (or extreme)" with "the state is maximally uncertain (or certain) about everything."
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What is ⟨Z⟩ for the state |0⟩?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">+1</button>
+      <button class="quiz-choice" data-correct="false">−1</button>
+      <button class="quiz-choice" data-correct="false">0</button>
+      <button class="quiz-choice" data-correct="false">1/2</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>|0⟩ gives outcome 0 (eigenvalue +1) with certainty, so ⟨Z⟩ = 1·(+1) + 0·(−1) = +1.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. What is ⟨Z⟩ for the state |+⟩?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">0</button>
+      <button class="quiz-choice" data-correct="false">+1</button>
+      <button class="quiz-choice" data-correct="false">−1</button>
+      <button class="quiz-choice" data-correct="false">1/2</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>|+⟩ splits 50/50 between Z-basis outcomes, so ⟨Z⟩ = (1/2)(+1) + (1/2)(−1) = 0 — the two contributions cancel exactly.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. For |ψ⟩ = (√3/2)|0⟩ + (1/2)|1⟩ (real amplitudes), what is ⟨Z⟩?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">1/2</button>
+      <button class="quiz-choice" data-correct="false">√3/2</button>
+      <button class="quiz-choice" data-correct="false">1</button>
+      <button class="quiz-choice" data-correct="false">−1/2</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>⟨Z⟩ = |√3/2|² − |1/2|² = 3/4 − 1/4 = 1/2.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="-1|−1">
+    <p class="quiz-prompt">4. Fill in the blank: the eigenvalues of Z are +1 (for eigenvector |0⟩) and ___ (for eigenvector |1⟩).</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Z|1⟩ = −|1⟩, so −1 is the eigenvalue paired with the |1⟩ eigenvector — matching measurement outcome 1.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="Hermitian">
+    <p class="quiz-prompt">5. Fill in the blank: every observable in quantum mechanics is represented by a ___ operator, satisfying A† = A.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Hermitian operators guarantee real eigenvalues, which is exactly what's needed for eigenvalues to represent physically measurable outcomes.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read before the next lesson: IBM Quantum Learning's <a href="https://learning.quantum.ibm.com/course/basics-of-quantum-information">Basics of Quantum Information</a> course, "Single systems" chapter, defines expectation values the same way and connects Hermitian operators to measurement outcomes as eigenvalues.</p>
+
+  <p class="ask-teacher">Ask your teacher to walk through ⟨X⟩ and ⟨Y⟩ for a couple of practice states if the pattern of "eigenvalue times probability, summed" isn't yet automatic — it's the exact same computation with a different matrix. Next up: a theorem with real teeth — proof that you cannot get around measurement's destructiveness by simply copying a qubit first.</p>
+
+  <footer class="lesson-footer">STEM+ · Quantum Computing · Lesson 14 of the course sequence</footer>
+</div>

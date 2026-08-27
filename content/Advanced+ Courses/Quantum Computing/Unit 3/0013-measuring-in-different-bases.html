@@ -1,0 +1,103 @@
+<meta charset="UTF-8">
+<link rel="icon" href="../../../favicon.ico?v=1" type="image/x-icon">
+<title>Lesson 13: Measuring in Different Bases — STEM+</title>
+<link rel="stylesheet" href="../../../assets/style.css">
+<script src="../../../assets/quiz.js" defer></script>
+<div class="page" data-tier="advanced">
+  <span class="kicker">STEM+ · Quantum Computing · Unit 3 · Lesson 13</span>
+  <h1>Measuring in Different Bases</h1>
+  <p class="subtitle">The same physical qubit gives completely different-looking statistics depending on which orthonormal basis you choose to measure it in — and there's a one-gate trick for doing it.</p>
+  <p class="nav-links"><a href="0012-measurement-collapse-and-why-measurement-is-destructive.html" class="nav-prev">← Lesson 12</a> <a href="0014-expectation-values.html" class="nav-next">Lesson 14 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Every measurement so far has used the computational basis, {|0⟩, |1⟩}. That was a choice, not a requirement. Lesson 11's general Born rule, P(i) = |⟨eᵢ|ψ⟩|², works for any orthonormal basis {|e₀⟩, |e₁⟩} — and switching bases is exactly how Lesson 1.5's invisible relative phase finally becomes visible.</p>
+
+  <h2>1. The X basis</h2>
+  <div class="box">
+    <span class="box-label">Definition — The X Basis</span>
+    The <strong>X basis</strong> (also called the Hadamard basis) is {|+⟩, |−⟩} — Unit 1's two named equal-weight superposition states. It's a perfectly valid orthonormal basis for ℂ² in its own right: ⟨+|+⟩ = ⟨−|−⟩ = 1 and ⟨+|−⟩ = 0, exactly as required.
+  </div>
+  <p>"Measuring in the X basis" means treating |+⟩ and |−⟩ as the two possible outcomes, the same way |0⟩ and |1⟩ were the two outcomes for the computational (Z) basis.</p>
+
+  <h2>2. The measurement-basis trick</h2>
+  <div class="box">
+    <span class="box-label">Fact — Measuring in the X Basis via H</span>
+    Since H|+⟩ = |0⟩ and H|−⟩ = |1⟩ (Lesson 8's self-inverse property applied to |+⟩ = H|0⟩ and |−⟩ = H|1⟩), measuring |ψ⟩ in the X basis is exactly equivalent to first applying H, then measuring in the computational basis: the "+" outcome corresponds to the computational-basis 0 outcome after H, and "−" corresponds to 1.
+  </div>
+  <p>This is how X-basis measurement is actually implemented on real hardware, which almost always only measures directly in one fixed basis (usually the computational one) — apply H first, then do the ordinary measurement.</p>
+
+  <div class="box example">
+    <span class="box-label">Example — Same State, Different Bases</span>
+    Take |ψ⟩ = |+⟩. <strong>Z-basis measurement:</strong> P(0) = |⟨0|+⟩|² = |1/√2|² = 1/2, P(1) = 1/2 — a coin flip. <strong>X-basis measurement:</strong> P(+) = |⟨+|+⟩|² = |1|² = 1, P(−) = |⟨−|+⟩|² = 0 — completely deterministic. The exact same physical state looks like maximal uncertainty in one basis and perfect certainty in another. Now take |ψ⟩ = |0⟩ instead: Z-basis gives P(0) = 1 (certain), while X-basis gives P(+) = |⟨+|0⟩|² = |1/√2|² = 1/2 — the situation is exactly reversed.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why this finally makes relative phase visible</span>
+    Lesson 11's computational-basis Born rule couldn't distinguish |+⟩ from |−⟩ — both gave a 50/50 split. But X-basis measurement tells them apart instantly: |+⟩ gives P(+) = 1, while |−⟩ gives P(−) = 1 (by the same computation with a sign flip). The relative phase that was invisible in one basis becomes maximally informative in another — this basis-dependence is precisely the mechanism every interference-based quantum algorithm in Units 6 and 7 exploits: steer information into relative phase using gates, then choose a measurement basis (via a final Hadamard, typically) that turns that phase into a biased, informative measurement outcome.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What circuit operation, applied before an ordinary computational-basis measurement, is equivalent to directly measuring in the X basis?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Apply H.</button>
+      <button class="quiz-choice" data-correct="false">Apply Z.</button>
+      <button class="quiz-choice" data-correct="false">Apply X.</button>
+      <button class="quiz-choice" data-correct="false">No operation is needed — the computational basis already measures in the X basis.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Since H|+⟩ = |0⟩ and H|−⟩ = |1⟩, applying H before a standard computational-basis measurement exactly reproduces X-basis measurement statistics.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. A qubit in state |+⟩ is measured in the X basis. What is the outcome?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">"+" with certainty (probability 1).</button>
+      <button class="quiz-choice" data-correct="false">"+" or "−", each with 50% probability.</button>
+      <button class="quiz-choice" data-correct="false">"−" with certainty.</button>
+      <button class="quiz-choice" data-correct="false">The measurement is undefined for this state.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>P(+) = |⟨+|+⟩|² = 1 — measuring |+⟩ in its own basis is completely deterministic, exactly parallel to measuring |0⟩ in the computational basis.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. A qubit in state |0⟩ is measured in the X basis. What is P(+), the probability of outcome "+"?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">1/2</button>
+      <button class="quiz-choice" data-correct="false">1</button>
+      <button class="quiz-choice" data-correct="false">0</button>
+      <button class="quiz-choice" data-correct="false">1/4</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>P(+) = |⟨+|0⟩|² = |1/√2|² = 1/2 — a state that's perfectly certain in the Z basis becomes a coin flip in the X basis, the mirror image of measuring |+⟩ in the Z basis.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="X">
+    <p class="quiz-prompt">4. Fill in the blank: applying H before a computational-basis measurement is equivalent to measuring directly in the ___ basis.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The X basis is exactly {|+⟩, |−⟩}, and H maps these to |0⟩ and |1⟩ respectively, which is why prepending H reproduces X-basis measurement.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="1/2|0.5|50%">
+    <p class="quiz-prompt">5. Fill in the blank: |⟨−|0⟩|² = ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>⟨−|0⟩ = 1/√2 (the |0⟩-coefficient of |−⟩'s bra), so |⟨−|0⟩|² = 1/2 — |0⟩ splits evenly in the X basis, just like |+⟩ splits evenly in the Z basis.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read before the next lesson: IBM Quantum Learning's <a href="https://learning.quantum.ibm.com/course/basics-of-quantum-information">Basics of Quantum Information</a> course, "Single systems" chapter, covers measurement in a general orthonormal basis and works through the same |0⟩-versus-|+⟩ basis-swap example.</p>
+
+  <p class="ask-teacher">Ask your teacher to show you the Y basis, {|+i⟩, |−i⟩} from Unit 1, as a third example — it follows the exact same pattern with a different single-qubit gate standing in for H. Next up: a single number that summarizes a whole measurement's statistics at once, without listing every individual probability.</p>
+
+  <footer class="lesson-footer">STEM+ · Quantum Computing · Lesson 13 of the course sequence</footer>
+</div>

@@ -1,0 +1,118 @@
+<meta charset="UTF-8">
+<link rel="icon" href="../../../favicon.ico?v=1" type="image/x-icon">
+<title>Lesson 2: The Qubit State Vector and Ket Notation — STEM+</title>
+<link rel="stylesheet" href="../../../assets/style.css">
+<script src="../../../assets/quiz.js" defer></script>
+<div class="page" data-tier="advanced">
+  <span class="kicker">STEM+ · Quantum Computing · Unit 1 · Lesson 2</span>
+  <h1>The Qubit State Vector and Ket Notation</h1>
+  <p class="subtitle">Physicists write vectors with a strange-looking bracket, |·⟩, instead of the bold v or arrow-v from Linear Algebra A. It's still just a column vector — the notation is doing real work, and this lesson explains exactly what.</p>
+  <p class="nav-links"><a href="0001-classical-bits-vs-qubits.html" class="nav-prev">← Lesson 1</a> <a href="0003-superposition-and-normalization.html" class="nav-next">Lesson 3 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Linear Algebra A wrote a vector as v = (v₁, v₂). Quantum computing almost never uses that notation — instead it uses <strong>Dirac notation</strong> (also called <strong>bra-ket notation</strong>), introduced by physicist Paul Dirac. It looks unfamiliar at first, but every symbol translates directly to something you already know: a column vector, a row vector, and an inner product.</p>
+
+  <h2>1. Kets: the basis states</h2>
+  <div class="box">
+    <span class="box-label">Definition — Computational Basis Kets</span>
+    A single qubit's state lives in the 2-dimensional complex vector space ℂ². The two <strong>ket</strong> vectors |0⟩ and |1⟩ — read "ket-zero" and "ket-one" — are defined as the standard basis:
+  </div>
+  <div class="expr-block">|0⟩ = (1, 0)ᵀ&emsp;&emsp;|1⟩ = (0, 1)ᵀ</div>
+  <p>These are exactly the standard basis vectors e₁ and e₂ from Linear Algebra A, just written with a ket instead of a bold letter. |0⟩ corresponds to the classical bit value 0, and |1⟩ to the classical bit value 1 — but as you'll see in Lesson 3, they are only two of infinitely many valid qubit states, not the only two.</p>
+
+  <h2>2. General kets and complex amplitudes</h2>
+  <div class="box">
+    <span class="box-label">Definition — Qubit State (Ket Form)</span>
+    A general single-qubit state is written |ψ⟩ = α|0⟩ + β|1⟩, where α, β ∈ ℂ are called <strong>probability amplitudes</strong>. As a column vector, |ψ⟩ = (α, β)ᵀ. The Greek letter ψ ("psi") is a conventional placeholder name for "some state," exactly the way linear algebra uses v for "some vector."
+  </div>
+  <p>Notice that the amplitudes are allowed to be <em>complex</em> numbers, not just real ones — this is new territory that Linear Algebra B's treatment of complex eigenvalues was quietly preparing you for. Complex amplitudes are what make interference (Lesson 1's teaser) possible: two complex numbers can partially or fully cancel each other out in ways two nonnegative real probabilities never could.</p>
+
+  <h2>3. Bras: the dual vectors</h2>
+  <div class="box">
+    <span class="box-label">Definition — Bra</span>
+    The <strong>bra</strong> ⟨ψ| corresponding to a ket |ψ⟩ = (α, β)ᵀ is its <strong>conjugate transpose</strong> (Hermitian adjoint): ⟨ψ| = (α*, β*), a row vector, where α* and β* are the complex conjugates of α and β. In particular ⟨0| = (1, 0) and ⟨1| = (0, 1) — real numbers are their own conjugates, so for the basis kets, "bra" just means "transpose."
+  </div>
+  <div class="box why">
+    <span class="box-label">Why the conjugate, not just the transpose</span>
+    For a complex vector space, the transpose alone doesn't give a well-behaved notion of length: if you compute vᵀv for a complex vector v, the result isn't generally real, let alone nonnegative — so it can't be a "squared length." Conjugating before transposing fixes this. For v = (α, β)ᵀ, v†v = |α|² + |β|², always a nonnegative real number, exactly the generalization of the dot product you need. This is the same conjugate-transpose construction Linear Algebra B used for Hermitian and unitary matrices — a qubit's bra-ket machinery is that construction applied to individual vectors.
+  </div>
+
+  <h2>4. Bra-ket products: the inner product</h2>
+  <div class="box">
+    <span class="box-label">Definition — Inner Product</span>
+    Writing a bra next to a ket, ⟨φ|ψ⟩, computes their inner product: for |φ⟩ = (γ, δ)ᵀ and |ψ⟩ = (α, β)ᵀ, ⟨φ|ψ⟩ = γ*α + δ*β. This is exactly the complex-vector generalization of the dot product from Linear Algebra A.
+  </div>
+  <p>The computational basis is <strong>orthonormal</strong> under this inner product, just as e₁ and e₂ were in ℝ²:</p>
+  <div class="expr-block">⟨0|0⟩ = 1&emsp;⟨1|1⟩ = 1&emsp;⟨0|1⟩ = 0&emsp;⟨1|0⟩ = 0</div>
+  <p>This orthonormality is what lets you read amplitudes straight off a state: for |ψ⟩ = α|0⟩ + β|1⟩, computing ⟨0|ψ⟩ = α⟨0|0⟩ + β⟨0|1⟩ = α picks out exactly the coefficient of |0⟩, the same "dot with a basis vector to extract a coordinate" trick from Linear Algebra A, now written in bra-ket form.</p>
+
+  <div class="box example">
+    <span class="box-label">Example</span>
+    Let |ψ⟩ = (3/5)|0⟩ + (4i/5)|1⟩. As a column vector, |ψ⟩ = (3/5, 4i/5)ᵀ. Its bra is ⟨ψ| = (3/5, −4i/5), conjugating 4i/5 to −4i/5. Then ⟨ψ|ψ⟩ = (3/5)(3/5) + (−4i/5)(4i/5) = 9/25 − 16i²/25 = 9/25 + 16/25 = 1 — this state is properly normalized, the requirement Lesson 3 states precisely.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. As a column vector, what is |1⟩?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">(0, 1)ᵀ</button>
+      <button class="quiz-choice" data-correct="false">(1, 0)ᵀ</button>
+      <button class="quiz-choice" data-correct="false">(1, 1)ᵀ</button>
+      <button class="quiz-choice" data-correct="false">(1, −1)ᵀ</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>|1⟩ is defined as the second standard basis vector of ℂ², (0, 1)ᵀ — |0⟩ is the first, (1, 0)ᵀ.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. For |ψ⟩ = (α, β)ᵀ, what operation produces the bra ⟨ψ|?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Transpose only, giving the row vector (α, β).</button>
+      <button class="quiz-choice" data-correct="true">Conjugate transpose, giving the row vector (α*, β*).</button>
+      <button class="quiz-choice" data-correct="false">Complex conjugate only, keeping it a column vector.</button>
+      <button class="quiz-choice" data-correct="false">Multiply every entry by −1.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The bra is the Hermitian adjoint of the ket — transpose it into a row vector, and conjugate every entry — which is exactly what makes ⟨ψ|ψ⟩ come out real and nonnegative.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. For |φ⟩ = |0⟩ + i|1⟩ and |ψ⟩ = i|0⟩ − |1⟩, what is ⟨φ|ψ⟩?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">2i</button>
+      <button class="quiz-choice" data-correct="false">−2i</button>
+      <button class="quiz-choice" data-correct="false">0</button>
+      <button class="quiz-choice" data-correct="false">2</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>|φ⟩ = (1, i)ᵀ, so ⟨φ| = (1, −i) (conjugating i to −i). |ψ⟩ = (i, −1)ᵀ. Then ⟨φ|ψ⟩ = (1)(i) + (−i)(−1) = i + i = 2i.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="conjugate transpose|hermitian adjoint|adjoint">
+    <p class="quiz-prompt">4. Fill in the blank: the bra ⟨ψ| is defined as the ___ of the ket |ψ⟩.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Conjugate transpose (equivalently, Hermitian adjoint) turns a column ket into a row bra while conjugating every entry — the construction that makes ⟨ψ|ψ⟩ always real and nonnegative.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="0">
+    <p class="quiz-prompt">5. Fill in the blank: for the computational basis, ⟨0|1⟩ = ___, expressing that |0⟩ and |1⟩ are orthogonal.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>⟨0|1⟩ = (1)(0) + (0)(1) = 0 — the computational basis kets are orthonormal, exactly like the standard basis in ℝⁿ.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read before the next lesson: IBM Quantum Learning's <a href="https://learning.quantum.ibm.com/course/basics-of-quantum-information">Basics of Quantum Information</a> course, "Single systems" chapter, introduces Dirac notation the same way — kets as column vectors, bras as their conjugate transposes — with several more worked inner-product examples.</p>
+
+  <p class="ask-teacher">If conjugating before transposing still feels like an arbitrary extra step, ask your teacher to show you what ⟨ψ|ψ⟩ looks like <em>without</em> the conjugate for a state with a complex amplitude — seeing it fail to be a real number makes the reason click fast. Next up: pinning down exactly which vectors in ℂ² are allowed to represent a physical qubit state.</p>
+
+  <footer class="lesson-footer">STEM+ · Quantum Computing · Lesson 2 of the course sequence</footer>
+</div>

@@ -1,0 +1,111 @@
+<meta charset="UTF-8">
+<link rel="icon" href="../../../favicon.ico?v=1" type="image/x-icon">
+<title>Lesson 16: Tensor Products: Combining Qubit States — STEM+</title>
+<link rel="stylesheet" href="../../../assets/style.css">
+<script src="../../../assets/quiz.js" defer></script>
+<div class="page" data-tier="advanced">
+  <span class="kicker">STEM+ · Quantum Computing · Unit 4 · Lesson 16</span>
+  <h1>Tensor Products: Combining Qubit States</h1>
+  <p class="subtitle">Two qubits don't just sit side by side — their combined state lives in a single, larger vector space, built by an operation Lesson 15 already borrowed a piece of. This lesson makes it precise.</p>
+  <p class="nav-links"><a href="../Unit%203/0015-the-no-cloning-theorem.html" class="nav-prev">← Lesson 15</a> <a href="0017-basis-states-and-superposition-for-multiple-qubits.html" class="nav-next">Lesson 17 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Every lesson so far has lived in ℂ², the state space of one qubit. Real quantum computers use many qubits together, and their combined state is not simply "qubit 1's state, and separately, qubit 2's state" — it's one single vector in a larger space. The operation that builds that larger space is the <strong>tensor product</strong>.</p>
+
+  <h2>1. The tensor product of two vectors</h2>
+  <div class="box">
+    <span class="box-label">Definition — Tensor Product (⊗)</span>
+    For |ψ⟩ = (α, β)ᵀ and |φ⟩ = (γ, δ)ᵀ, their tensor product is the 4-dimensional vector: |ψ⟩ ⊗ |φ⟩ = (αγ, αδ, βγ, βδ)ᵀ — multiply |φ⟩'s components by each of |ψ⟩'s components in turn, stacking the results.
+  </div>
+  <p>This is exactly Lesson 15's preview fact confirmed in full: the joint state of two independently prepared qubits, one in |ψ⟩ and one in |φ⟩, is |ψ⟩ ⊗ |φ⟩, living in ℂ² ⊗ ℂ² ≅ ℂ⁴.</p>
+
+  <h2>2. The two-qubit computational basis</h2>
+  <div class="box">
+    <span class="box-label">Definition — Two-Qubit Basis States</span>
+    Applying the tensor product to pairs of single-qubit basis states gives four basis vectors for ℂ⁴, written with the shorthand |ab⟩ = |a⟩ ⊗ |b⟩:
+  </div>
+  <div class="expr-block">|00⟩ = (1,0,0,0)ᵀ&emsp;|01⟩ = (0,1,0,0)ᵀ&emsp;|10⟩ = (0,0,1,0)ᵀ&emsp;|11⟩ = (0,0,0,1)ᵀ</div>
+  <p>Check one directly: |1⟩ ⊗ |0⟩ = (0,1)ᵀ ⊗ (1,0)ᵀ = (0·1, 0·0, 1·1, 1·0)ᵀ = (0,0,1,0)ᵀ = |10⟩, matching the table. These four vectors are orthonormal (you can verify ⟨ab|cd⟩ = 0 unless a=c and b=d), exactly the standard basis of ℂ⁴.</p>
+
+  <h2>3. Inner products distribute over the tensor product</h2>
+  <div class="box">
+    <span class="box-label">Fact</span>
+    ⟨ψ ⊗ φ|χ ⊗ ω⟩ = ⟨ψ|χ⟩⟨φ|ω⟩ — the inner product of two tensor-product states factors into the product of the individual inner products. This is exactly the tool Lesson 15's no-cloning proof relied on.
+  </div>
+
+  <h2>4. Scaling up to n qubits</h2>
+  <div class="box why">
+    <span class="box-label">Why n qubits give 2ⁿ dimensions</span>
+    Each additional qubit multiplies the state space's dimension by 2: one qubit lives in ℂ² (dimension 2), two qubits in ℂ² ⊗ ℂ² (dimension 4), three qubits in ℂ² ⊗ ℂ² ⊗ ℂ² (dimension 8), and n qubits in a 2ⁿ-dimensional space — Lesson 1.1's claim, now built on solid footing. This exponential growth is exactly the resource every quantum algorithm in Units 6 and 7 is built to exploit, and exactly the reason simulating a modest-sized quantum system on a classical computer becomes intractable so quickly: 50 qubits alone already means over 10¹⁵ complex amplitudes to track.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Example — A Product State</span>
+    Apply H to two separate qubits, each starting at |0⟩: (H|0⟩) ⊗ (H|0⟩) = |+⟩ ⊗ |+⟩ = [(|0⟩+|1⟩)/√2] ⊗ [(|0⟩+|1⟩)/√2]. Expanding using the tensor product's formula: (1/2)(|00⟩ + |01⟩ + |10⟩ + |11⟩) — an equal superposition of all four two-qubit basis states, each with amplitude 1/2. This particular state is called a <strong>product state</strong>, since it factors cleanly as (one single-qubit state) ⊗ (another single-qubit state). Lesson 18 constructs a state that provably cannot be factored this way at all.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What is |0⟩ ⊗ |1⟩ as a column vector?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">(0, 1, 0, 0)ᵀ</button>
+      <button class="quiz-choice" data-correct="false">(1, 0, 0, 0)ᵀ</button>
+      <button class="quiz-choice" data-correct="false">(0, 0, 1, 0)ᵀ</button>
+      <button class="quiz-choice" data-correct="false">(0, 0, 0, 1)ᵀ</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>(1,0)ᵀ ⊗ (0,1)ᵀ = (1·0, 1·1, 0·0, 0·1)ᵀ = (0,1,0,0)ᵀ = |01⟩.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. For |ψ⟩ = (α, β)ᵀ and |φ⟩ = (γ, δ)ᵀ, what is |ψ⟩ ⊗ |φ⟩?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">(αγ, αδ, βγ, βδ)ᵀ</button>
+      <button class="quiz-choice" data-correct="false">(α+γ, β+δ)ᵀ</button>
+      <button class="quiz-choice" data-correct="false">(αγ, βδ)ᵀ</button>
+      <button class="quiz-choice" data-correct="false">(α, β, γ, δ)ᵀ</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Multiply |φ⟩'s two components by each of |ψ⟩'s components in turn: α·(γ,δ) stacked on top of β·(γ,δ), giving (αγ, αδ, βγ, βδ)ᵀ.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. How many dimensions does the state space of 4 qubits have?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">16 (= 2⁴)</button>
+      <button class="quiz-choice" data-correct="false">8 (= 2³)</button>
+      <button class="quiz-choice" data-correct="false">4 (one dimension per qubit)</button>
+      <button class="quiz-choice" data-correct="false">2 (the dimension never changes).</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Each additional qubit doubles the dimension: 2¹, 2², 2³, 2⁴ = 16 for four qubits.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="8">
+    <p class="quiz-prompt">4. Fill in the blank: 3 qubits live in a ___-dimensional vector space.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>2³ = 8 — each qubit contributes a factor of 2 to the total dimension.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="normalized">
+    <p class="quiz-prompt">5. Fill in the blank: the tensor product of two normalized single-qubit states is automatically ___ as a 4-dimensional vector, since ⟨ψ⊗φ|ψ⊗φ⟩ = ⟨ψ|ψ⟩⟨φ|φ⟩ = 1·1 = 1.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Because inner products of tensor products factor, combining two already-normalized states always produces an already-normalized joint state — no extra rescaling needed.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read before the next lesson: IBM Quantum Learning's <a href="https://learning.quantum.ibm.com/course/basics-of-quantum-information">Basics of Quantum Information</a> course, "Multiple systems" chapter, introduces the tensor product for combining quantum systems with the same formula and basis-vector convention used here.</p>
+
+  <p class="ask-teacher">If the "multiply each entry of the first vector by the whole second vector" rule feels mechanical without intuition, ask your teacher to connect it to combining independent probability distributions — the analogy (multiplying probabilities of independent events) carries over almost exactly, just with amplitudes instead. Next up: what it means for a many-qubit state to be a genuine superposition, not just a single product state like this lesson's example.</p>
+
+  <footer class="lesson-footer">STEM+ · Quantum Computing · Lesson 16 of the course sequence</footer>
+</div>

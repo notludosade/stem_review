@@ -1,0 +1,104 @@
+<meta charset="UTF-8">
+<link rel="icon" href="../../../favicon.ico?v=1" type="image/x-icon">
+<title>Lesson 39: Metrics That Matter: Coherence, Fidelity, and Quantum Volume — STEM+</title>
+<link rel="stylesheet" href="../../../assets/style.css">
+<script src="../../../assets/quiz.js" defer></script>
+<div class="page" data-tier="advanced">
+  <span class="kicker">STEM+ · Quantum Computing · Unit 8 · Lesson 39</span>
+  <h1>Metrics That Matter: Coherence Time, Fidelity, and Quantum Volume</h1>
+  <p class="subtitle">"How many qubits does it have?" is the question the headlines ask. It's also, on its own, close to a meaningless one — this lesson explains what actually needs to be measured, and names the era the field currently sits in.</p>
+  <p class="nav-links"><a href="0038-physical-qubit-platforms.html" class="nav-prev">← Lesson 38</a> <a href="0040-the-state-of-quantum-computing-today.html" class="nav-next">Lesson 40 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Lesson 38 surveyed hardware platforms without comparing them numerically, on purpose — this lesson supplies the actual vocabulary for a fair comparison, and the reason "qubit count" alone is exactly the wrong number to lead with.</p>
+
+  <h2>1. Gate fidelity</h2>
+  <div class="box">
+    <span class="box-label">Definition — Gate Fidelity</span>
+    <strong>Gate fidelity</strong> measures how close a real, physically implemented gate is to its intended ideal unitary matrix, typically reported as a percentage (99%, 99.9%, and so on). Two-qubit gates (like CNOT) are generally harder to implement with high fidelity than single-qubit gates, and are usually the dominant source of error in a real circuit.
+  </div>
+  <p>Fidelity connects directly to Lesson 36's discussion of accumulating errors: a circuit's overall reliability depends on the product of every individual gate's fidelity, compounded across the whole circuit — which is why even gates that sound impressively accurate (99.9%) can still produce unreliable results in circuits hundreds or thousands of gates deep.</p>
+
+  <h2>2. Why raw qubit count is a misleading headline number</h2>
+  <div class="box why">
+    <span class="box-label">Why "more qubits" doesn't automatically mean "more capable"</span>
+    A processor with 1,000 noisy, poorly connected qubits with low gate fidelity can be less useful than one with 50 well-connected, high-fidelity qubits — qubit count says nothing about coherence time, gate fidelity, or <strong>connectivity</strong> (which pairs of qubits can directly interact via a two-qubit gate; many real architectures only connect neighboring qubits, forcing extra SWAP gates from Lesson 23 to route information between distant qubits, each one adding more error). Comparing hardware on qubit count alone, without these other factors, is a bit like comparing cars by top speed alone while ignoring braking distance and reliability — a real number, but a misleading one taken in isolation.
+  </div>
+
+  <h2>3. Composite benchmarks</h2>
+  <div class="box">
+    <span class="box-label">Composite Metrics</span>
+    Recognizing this, several benchmarks try to combine qubit count, connectivity, and error rates into a single, more meaningful number. IBM's <strong>Quantum Volume</strong> is one widely cited example: it measures the largest random circuit (in both qubit count and depth) a given processor can run and verify correctly, in a way that inherently penalizes poor connectivity and low fidelity alongside rewarding raw qubit count. <strong>Randomized benchmarking</strong> is a related, more targeted technique for isolating average gate error rates specifically, independent of the particular circuit being run. No single number tells the whole story, but composite benchmarks are a meaningfully better comparison point than qubit count alone.
+  </div>
+
+  <h2>4. NISQ: naming the current era</h2>
+  <div class="box example">
+    <span class="box-label">Definition — NISQ</span>
+    Physicist John Preskill coined the term <strong>NISQ</strong> (Noisy Intermediate-Scale Quantum) to describe the current era of quantum hardware: devices with a meaningful but not enormous number of qubits (tens to low hundreds, as of this course's writing), too noisy and error-prone to run large fault-tolerant algorithms like Shor's algorithm on cryptographically relevant sizes, but large enough to support active research, experimentation, and some specialized near-term applications. Unit 8 as a whole — decoherence, error correction's overhead, hardware platforms still maturing, the honest metrics in this lesson — is, collectively, a description of exactly why the field is currently in the NISQ era rather than the fault-tolerant era Lesson 37's threshold theorem describes as eventually reachable.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What does gate fidelity measure?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">How close a real, physically implemented gate is to its intended ideal unitary matrix.</button>
+      <button class="quiz-choice" data-correct="false">The total number of qubits a processor has.</button>
+      <button class="quiz-choice" data-correct="false">The physical temperature the hardware operates at.</button>
+      <button class="quiz-choice" data-correct="false">The speed of light inside the quantum processor.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Fidelity is specifically a measure of gate accuracy — how well the real, imperfect operation matches its ideal target unitary.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why is raw qubit count alone a misleading way to compare quantum processors?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">It ignores coherence time, gate fidelity, and connectivity — all of which strongly affect how much useful computation a processor can actually perform.</button>
+      <button class="quiz-choice" data-correct="false">Qubit count is actually the only factor that matters.</button>
+      <button class="quiz-choice" data-correct="false">Qubit count cannot be measured accurately on any platform.</button>
+      <button class="quiz-choice" data-correct="false">More qubits always means a worse processor.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A processor with more qubits but poor connectivity, low fidelity, or short coherence can be less capable overall than one with fewer, better-behaved qubits.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. What does IBM's Quantum Volume benchmark attempt to capture?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">The largest random circuit (in both qubit count and depth) a processor can run and verify correctly, combining qubit count, connectivity, and error rates into one number.</button>
+      <button class="quiz-choice" data-correct="false">The exact physical volume, in cubic centimeters, of the quantum processor.</button>
+      <button class="quiz-choice" data-correct="false">The number of logical qubits available, ignoring physical qubit count entirely.</button>
+      <button class="quiz-choice" data-correct="false">The dollar cost of building the processor.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Quantum Volume is a composite benchmark specifically designed to reward genuine capability across qubit count, connectivity, and fidelity together, rather than any single factor alone.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="Noisy Intermediate-Scale Quantum">
+    <p class="quiz-prompt">4. Fill in the blank: NISQ stands for ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Noisy Intermediate-Scale Quantum describes hardware with a meaningful but modest qubit count, still too error-prone for large-scale fault-tolerant algorithms.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="Preskill">
+    <p class="quiz-prompt">5. Fill in the blank: the physicist who coined the term NISQ is John ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>John Preskill introduced the NISQ terminology, now the standard way to describe the current era of quantum hardware.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read before the final lesson: John Preskill's <a href="https://arxiv.org/abs/1801.00862">Quantum Computing in the NISQ Era and Beyond</a> is the original source for the NISQ terminology and discusses these exact metrics — fidelity, connectivity, composite benchmarks — in full.</p>
+
+  <p class="ask-teacher">Ask your teacher whether Quantum Volume or a newer benchmark is currently considered the field's best composite metric — it's an area that keeps evolving as hardware and measurement techniques improve. Next up, the final lesson of this course: a grounded, honest snapshot of where quantum computing actually stands today.</p>
+
+  <footer class="lesson-footer">STEM+ · Quantum Computing · Lesson 39 of the course sequence</footer>
+</div>

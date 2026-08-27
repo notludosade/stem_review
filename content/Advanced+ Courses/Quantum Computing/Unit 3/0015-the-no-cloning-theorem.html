@@ -1,0 +1,106 @@
+<meta charset="UTF-8">
+<link rel="icon" href="../../../favicon.ico?v=1" type="image/x-icon">
+<title>Lesson 15: The No-Cloning Theorem — STEM+</title>
+<link rel="stylesheet" href="../../../assets/style.css">
+<script src="../../../assets/quiz.js" defer></script>
+<div class="page" data-tier="advanced">
+  <span class="kicker">STEM+ · Quantum Computing · Unit 3 · Lesson 15</span>
+  <h1>The No-Cloning Theorem</h1>
+  <p class="subtitle">Lesson 12 showed measurement destroys a state. This lesson closes off the obvious workaround — "just copy the qubit first" — with a short, clean proof straight from unitarity.</p>
+  <p class="nav-links"><a href="0014-expectation-values.html" class="nav-prev">← Lesson 14</a> <a href="../Unit%204/0016-tensor-products-combining-qubit-states.html" class="nav-next">Unit 4, Lesson 16 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>If a single measurement destroys a qubit's superposition, the natural fix seems obvious: make several identical copies of the unknown state first, then measure each one to statistically reconstruct α and β, as Lesson 12's example did. That fix has a fatal flaw — you can't make those copies in the first place, for an unknown state. This is the <strong>no-cloning theorem</strong>, and unlike the Born rule and collapse, it isn't a postulate — it's a theorem, provable directly from unitarity.</p>
+
+  <h2>1. One tool borrowed early from Unit 4</h2>
+  <div class="box">
+    <span class="box-label">Preview — Joint States of Two Qubits</span>
+    Unit 4 develops this fully, but this proof needs one fact now: the joint state of two independent qubits, one in state |ψ⟩ and one in state |φ⟩, is written |ψ⟩⊗|φ⟩ (or |ψφ⟩ for short). Inner products of joint states multiply piece by piece: ⟨ψ⊗φ|χ⊗ω⟩ = ⟨ψ|χ⟩⟨φ|ω⟩. That's the only tensor-product fact this lesson relies on.
+  </div>
+
+  <h2>2. The theorem</h2>
+  <div class="box">
+    <span class="box-label">Theorem — No-Cloning</span>
+    There is no unitary operation U on two qubits such that U(|ψ⟩⊗|0⟩) = |ψ⟩⊗|ψ⟩ for <em>every</em> single-qubit state |ψ⟩. In words: no fixed quantum machine can take an arbitrary unknown state and a blank qubit, and output two copies of that state, for every possible input state.
+  </div>
+
+  <div class="box">
+    <span class="box-label">Proof</span>
+    Suppose, toward contradiction, that such a U exists, and suppose it successfully clones two particular states |ψ⟩ and |φ⟩: U(|ψ⟩⊗|0⟩) = |ψ⟩⊗|ψ⟩ and U(|φ⟩⊗|0⟩) = |φ⟩⊗|φ⟩. Because U is unitary, it preserves inner products (Lesson 6 established this same fact for a single qubit; it holds identically here). So:
+    <div class="expr-block">⟨ψ⊗0|φ⊗0⟩ = ⟨U(ψ⊗0)|U(φ⊗0)⟩ = ⟨ψ⊗ψ|φ⊗φ⟩</div>
+    The left side is ⟨ψ|φ⟩⟨0|0⟩ = ⟨ψ|φ⟩. The right side is ⟨ψ|φ⟩⟨ψ|φ⟩ = ⟨ψ|φ⟩². So ⟨ψ|φ⟩ = ⟨ψ|φ⟩², which means ⟨ψ|φ⟩(1 − ⟨ψ|φ⟩) = 0, forcing ⟨ψ|φ⟩ to be either 0 or 1. Since both states are normalized, ⟨ψ|φ⟩ = 1 only when |φ⟩ equals |ψ⟩ up to global phase (the same physical state), and ⟨ψ|φ⟩ = 0 means the states are orthogonal. So a single fixed U can only clone states that are either identical or orthogonal to each other — never a generic pair of distinct, non-orthogonal states. Since |ψ⟩ was required to be <em>arbitrary</em>, no single U works for every possible input. ∎
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why classical bit-copying doesn't contradict this</span>
+    Notice the proof's loophole precisely: orthogonal states (⟨ψ|φ⟩ = 0) can be cloned together by a single fixed device. |0⟩ and |1⟩ are orthogonal — and indeed, a CNOT-based circuit (Unit 5, Lesson 22 previews this exact construction) can clone |0⟩ and |1⟩ specifically. This is exactly why classical bit-copying (which only ever needs to handle the two orthogonal values 0 and 1) never runs into a no-cloning obstruction — the theorem only bites once superposition, and the possibility of non-orthogonal unknown states, enters the picture.
+  </div>
+
+  <h2>3. Why this matters going forward</h2>
+  <p>No-cloning closes off Lesson 12's obvious workaround for good: given a single copy of an unknown quantum state, there is no way to duplicate it first and then measure the copies. It also has real practical teeth beyond this course's proofs — it's the reason an eavesdropper cannot silently copy a qubit in transit to inspect later without disturbing it, which is exactly the security guarantee underlying quantum key distribution protocols like BB84. And it will resurface directly in Unit 8: any scheme for protecting quantum information from noise (quantum error correction) has to work around the fact that it cannot simply make backup copies the way a classical repetition code does.</p>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What does the no-cloning theorem state?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">No single unitary operation can copy an arbitrary, unknown quantum state onto a blank qubit for every possible input state.</button>
+      <button class="quiz-choice" data-correct="false">Quantum states can never be measured more than once.</button>
+      <button class="quiz-choice" data-correct="false">No quantum gate can ever be applied to more than one qubit.</button>
+      <button class="quiz-choice" data-correct="false">Classical bits cannot be copied either.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>No-cloning is specifically about copying an unknown state for every possible input — it says nothing about measurement counts or multi-qubit gates in general, and classical bits are copyable (they're a special, orthogonal-states-only case).</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Which property of unitary operations is the key step the no-cloning proof relies on?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Unitary operations preserve inner products.</button>
+      <button class="quiz-choice" data-correct="false">Unitary operations always have determinant 1.</button>
+      <button class="quiz-choice" data-correct="false">Unitary operations are always real-valued matrices.</button>
+      <button class="quiz-choice" data-correct="false">Unitary operations always increase a state's norm.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Preserving ⟨ψ⊗0|φ⊗0⟩ = ⟨U(ψ⊗0)|U(φ⊗0)⟩ is exactly what forces ⟨ψ|φ⟩ = ⟨ψ|φ⟩², the equation the whole contradiction is built on.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Which pair of states CAN, in principle, be cloned by the same fixed device, according to the proof's own conclusion?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">A pair of orthogonal states, like |0⟩ and |1⟩.</button>
+      <button class="quiz-choice" data-correct="false">Any two distinct, non-orthogonal states.</button>
+      <button class="quiz-choice" data-correct="false">|+⟩ and |0⟩.</button>
+      <button class="quiz-choice" data-correct="false">No pair of states can ever be cloned, without exception.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The proof shows ⟨ψ|φ⟩ must be 0 or 1 for cloning to be consistent — orthogonal states (⟨ψ|φ⟩ = 0), like |0⟩ and |1⟩, pass this test, which is exactly why classical bit-copying is possible.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="no-cloning|no cloning|cloning">
+    <p class="quiz-prompt">4. Fill in the blank: the theorem proving that no unitary can copy an arbitrary unknown quantum state is called the ___ theorem.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The no-cloning theorem is the standard name for exactly this result.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="key">
+    <p class="quiz-prompt">5. Fill in the blank: because an eavesdropper cannot make a perfect undetected copy of an unknown qubit, no-cloning underlies the security of quantum ___ distribution protocols like BB84.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Quantum key distribution's security guarantee rests directly on no-cloning — an eavesdropper intercepting qubits in transit cannot copy them without a detectable disturbance.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read to close out this unit: IBM Quantum Learning's <a href="https://learning.quantum.ibm.com/course/basics-of-quantum-information">Basics of Quantum Information</a> course, "Multiple systems" chapter, states and proves the no-cloning theorem the same way, using the same inner-product-preservation argument.</p>
+
+  <p class="ask-teacher">If the proof's final step — "⟨ψ|φ⟩ must be 0 or 1, so it's identical or orthogonal" — moved fast, ask your teacher to plug in two specific non-orthogonal states and watch the contradiction play out numerically. This closes Unit 3: you now know exactly what measurement can and can't tell you, and why it can't be worked around by copying. Next up, Unit 4: what happens when two or more qubits interact — starting with how their states combine in the first place.</p>
+
+  <footer class="lesson-footer">STEM+ · Quantum Computing · Lesson 15 of the course sequence</footer>
+</div>

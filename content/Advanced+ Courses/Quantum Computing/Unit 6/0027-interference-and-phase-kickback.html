@@ -1,0 +1,101 @@
+<meta charset="UTF-8">
+<link rel="icon" href="../../../favicon.ico?v=1" type="image/x-icon">
+<title>Lesson 27: Interference and Phase Kickback — STEM+</title>
+<link rel="stylesheet" href="../../../assets/style.css">
+<script src="../../../assets/quiz.js" defer></script>
+<div class="page" data-tier="advanced">
+  <span class="kicker">STEM+ · Quantum Computing · Unit 6 · Lesson 27</span>
+  <h1>Interference and Phase Kickback</h1>
+  <p class="subtitle">One trick, applied to Lesson 26's oracle, turns "f's value" into a relative phase instead of a measured bit — and a relative phase, unlike a measured bit, can be steered by later gates into a genuinely useful interference pattern.</p>
+  <p class="nav-links"><a href="0026-quantum-parallelism.html" class="nav-prev">← Lesson 26</a> <a href="0028-the-deutsch-algorithm.html" class="nav-next">Lesson 28 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Lesson 26 left off with a problem: quantum parallelism computes every value of f at once, but a careless measurement throws almost all of it away. <strong>Phase kickback</strong> is the fix — a specific choice of target-register state that redirects f's output from a place measurement destroys into a place later gates can still work with.</p>
+
+  <h2>1. Preparing the target in |−⟩</h2>
+  <div class="box">
+    <span class="box-label">Fact — Phase Kickback</span>
+    If the target register of the oracle U<sub>f</sub> is prepared in the state |−⟩ = (|0⟩ − |1⟩)/√2, then: U<sub>f</sub>|x⟩|−⟩ = (−1)<sup>f(x)</sup>|x⟩|−⟩.
+  </div>
+  <div class="box">
+    <span class="box-label">Derivation</span>
+    U<sub>f</sub>|x⟩|−⟩ = U<sub>f</sub>|x⟩(|0⟩−|1⟩)/√2 = [|x⟩|f(x)⟩ − |x⟩|1⊕f(x)⟩]/√2, applying the oracle's definition to each term. If f(x) = 0: this is |x⟩(|0⟩−|1⟩)/√2 = |x⟩|−⟩ — unchanged, a factor of (−1)⁰ = +1. If f(x) = 1: this is |x⟩(|1⟩−|0⟩)/√2 = −|x⟩(|0⟩−|1⟩)/√2 = −|x⟩|−⟩ — a factor of (−1)¹ = −1. Both cases match (−1)<sup>f(x)</sup>|x⟩|−⟩ exactly.
+  </div>
+  <p>Notice what happened: the target register |−⟩ comes out completely unchanged (up to that overall sign) — the "output" of f didn't get written into the target at all. Instead, f(x) "kicked back" onto the control register as a phase factor multiplying |x⟩. This is exactly why the technique is called phase kickback.</p>
+
+  <h2>2. Kicking back onto a superposition</h2>
+  <div class="box example">
+    <span class="box-label">Example — Phase Kickback on |+⟩</span>
+    Apply U<sub>f</sub> to |+⟩ ⊗ |−⟩ = [(|0⟩+|1⟩)/√2] ⊗ |−⟩: linearity gives [U<sub>f</sub>|0⟩|−⟩ + U<sub>f</sub>|1⟩|−⟩]/√2 = [(−1)<sup>f(0)</sup>|0⟩|−⟩ + (−1)<sup>f(1)</sup>|1⟩|−⟩]/√2. The |−⟩ factors out entirely: [(−1)<sup>f(0)</sup>|0⟩ + (−1)<sup>f(1)</sup>|1⟩]/√2 ⊗ |−⟩. The target register can now be set aside completely — every bit of information about f that survives is sitting entirely in the relative phase between the |0⟩ and |1⟩ terms of the control register.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why this is the missing ingredient from Lesson 26</span>
+    Compare the two versions directly. Without phase kickback: (|0⟩|f(0)⟩ + |1⟩|f(1)⟩)/√2 — f's value sits in the target register's <em>amplitude location</em>, and measuring collapses to one term, destroying the other, exactly Lesson 26's problem. With phase kickback: [(−1)<sup>f(0)</sup>|0⟩ + (−1)<sup>f(1)</sup>|1⟩]/√2 — f's value sits entirely in <em>relative phase</em> on a single register. Relative phase, unlike a value hidden in a soon-to-collapse second register, is exactly the kind of information a later Hadamard gate can convert into a measurably biased outcome — Lesson 13's basis-change trick and Lesson 1.5's "relative phase is physically detectable" fact, both now doing real algorithmic work. Lesson 28 runs this exact construction through one more Hadamard and shows the interference pattern it produces.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What is U<sub>f</sub>|x⟩|−⟩?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">(−1)<sup>f(x)</sup>|x⟩|−⟩</button>
+      <button class="quiz-choice" data-correct="false">|x⟩|f(x)⟩</button>
+      <button class="quiz-choice" data-correct="false">f(x)|x⟩|−⟩</button>
+      <button class="quiz-choice" data-correct="false">|x⟩|−⟩, always unchanged regardless of f(x).</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Phase kickback produces a sign flip exactly when f(x) = 1, and leaves the state unchanged when f(x) = 0 — captured compactly as the (−1)^f(x) factor.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. If f(x) = 1, what phase factor does U<sub>f</sub>|x⟩|−⟩ pick up?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">−1</button>
+      <button class="quiz-choice" data-correct="false">+1</button>
+      <button class="quiz-choice" data-correct="false">i</button>
+      <button class="quiz-choice" data-correct="false">−i</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>(−1)^f(x) with f(x) = 1 gives (−1)¹ = −1, matching the direct derivation: |1⟩ − |0⟩ = −(|0⟩ − |1⟩).</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why is this technique called "phase kickback"?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Because f(x)'s value ends up as a phase factor on the control register instead of being written into the target register.</button>
+      <button class="quiz-choice" data-correct="false">Because it reverses the direction of time in the circuit.</button>
+      <button class="quiz-choice" data-correct="false">Because it always produces a negative overall phase.</button>
+      <button class="quiz-choice" data-correct="false">Because it "kicks" the target qubit into the |0⟩ state.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The name reflects exactly what happens: f(x)'s information "kicks back" from the target register onto the control register, appearing there as a relative phase.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="phase">
+    <p class="quiz-prompt">4. Fill in the blank: after phase kickback, information about f is encoded entirely in relative ___ on the control register, not in the target register's value.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Relative phase is exactly what phase kickback produces — the quantity a later Hadamard can turn into a biased, informative measurement outcome.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="ignored|discarded|dropped">
+    <p class="quiz-prompt">5. Fill in the blank: after phase kickback, the target register factors out completely and can be safely ___ for the rest of the algorithm.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Since |−⟩ multiplies through unchanged, the target register no longer holds any information relevant to the rest of the computation and can be set aside.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read before the next lesson: IBM Quantum Learning's <a href="https://learning.quantum.ibm.com/course/fundamentals-of-quantum-algorithms">Fundamentals of Quantum Algorithms</a> course derives phase kickback the same way and uses it as the standard opening move for every oracle-based algorithm it covers.</p>
+
+  <p class="ask-teacher">Ask your teacher to have you redo the phase-kickback derivation for a specific f, like f(x) = x itself, plugging in both x = 0 and x = 1 by hand — it's short, and doing it once yourself locks the pattern in. Next up: putting phase kickback together with a second Hadamard, in the smallest possible algorithm that beats every classical approach.</p>
+
+  <footer class="lesson-footer">STEM+ · Quantum Computing · Lesson 27 of the course sequence</footer>
+</div>

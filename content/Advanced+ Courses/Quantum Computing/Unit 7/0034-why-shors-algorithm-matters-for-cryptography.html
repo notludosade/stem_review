@@ -1,0 +1,107 @@
+<meta charset="UTF-8">
+<link rel="icon" href="../../../favicon.ico?v=1" type="image/x-icon">
+<title>Lesson 34: Why Shor's Algorithm Matters for Cryptography — STEM+</title>
+<link rel="stylesheet" href="../../../assets/style.css">
+<script src="../../../assets/quiz.js" defer></script>
+<div class="page" data-tier="advanced">
+  <span class="kicker">STEM+ · Quantum Computing · Unit 7 · Lesson 34</span>
+  <h1>Why Shor's Algorithm Matters for Cryptography</h1>
+  <p class="subtitle">One of the internet's most widely used security guarantees rests entirely on classical factoring being hard — which is precisely the assumption Lesson 33's algorithm undermines, if the hardware ever catches up.</p>
+  <p class="nav-links"><a href="0033-shors-algorithm-a-conceptual-introduction.html" class="nav-prev">← Lesson 33</a> <a href="0035-quantum-speedups-what-they-do-and-dont-promise.html" class="nav-next">Lesson 35 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Shor's algorithm isn't just a mathematical curiosity — it targets the exact assumption an enormous share of today's digital security is built on.</p>
+
+  <h2>1. RSA and the factoring assumption</h2>
+  <div class="box">
+    <span class="box-label">Background — RSA</span>
+    RSA is a widely used public-key cryptosystem: it publishes a large composite number N = p·q (p and q both large primes, kept secret) as part of a public key, and its security rests entirely on the assumption that factoring N back into p and q is computationally infeasible for anyone without the secret primes. RSA underlies a large share of secure web traffic, digital signatures, and encrypted communications in use today.
+  </div>
+  <div class="box why">
+    <span class="box-label">Why Shor's algorithm is a direct threat to this assumption</span>
+    RSA's security isn't proven to be unbreakable — it's secure only as long as factoring stays classically hard, exactly the assumption Lesson 33 discussed. A sufficiently large, sufficiently reliable quantum computer running Shor's algorithm could factor N efficiently, recovering p and q directly and breaking RSA completely — not weakening it, breaking it outright. A closely related quantum algorithm (also due to Shor, using the same period-finding and Quantum Fourier Transform machinery) efficiently solves the discrete logarithm problem, which similarly undermines Diffie-Hellman key exchange and elliptic-curve cryptography — meaning essentially all of today's standard public-key cryptography, not just RSA specifically, is vulnerable in principle.
+  </div>
+
+  <h2>2. The practical gap: hardware, not mathematics</h2>
+  <div class="box">
+    <span class="box-label">Caveat — This Threat Is Not Yet Realized</span>
+    Running Shor's algorithm on cryptographically relevant key sizes (2048 bits or larger) requires thousands of stable, error-corrected <strong>logical qubits</strong> — not the noisy physical qubits current hardware provides, but qubits protected by the kind of error correction Unit 8 covers, at a scale far beyond anything built today. This is a hardware and engineering gap, not a mathematical one: the algorithm is proven correct and efficient in principle, but no existing quantum computer is anywhere near large or reliable enough to run it on numbers of real cryptographic size.
+  </div>
+
+  <h2>3. Preparing anyway: post-quantum cryptography</h2>
+  <div class="box">
+    <span class="box-label">Definition — Post-Quantum Cryptography (PQC)</span>
+    <strong>Post-quantum cryptography</strong> refers to cryptographic schemes designed to remain secure even against an attacker with a large-scale quantum computer — typically built on mathematical problems (like certain lattice problems) with no known efficient quantum attack, unlike factoring or discrete log.
+  </div>
+  <p>Because encrypted data intercepted and stored today could potentially be decrypted once large-scale quantum computers exist years from now (a risk sometimes called "harvest now, decrypt later"), transitioning to post-quantum-secure algorithms is already underway, well ahead of any working large-scale quantum computer. The U.S. National Institute of Standards and Technology (NIST) ran a multi-year public competition to select and standardize post-quantum cryptographic algorithms, publishing its first finalized standards in 2024 — real, deployed infrastructure work motivated directly by the algorithm this unit just derived.</p>
+
+  <div class="box example">
+    <span class="box-label">The Bigger Picture</span>
+    Shor's algorithm is the clearest example in this entire course of quantum computing's stakes reaching outside the classroom: a purely theoretical result about period-finding and interference, proven decades before hardware existed that could plausibly run it at scale, has already reshaped a major area of applied cryptography and standards-setting — in anticipation of hardware that, per Unit 8, still doesn't exist yet at the necessary scale.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What assumption does RSA's security rest on?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">That factoring a large composite number N = p·q is classically infeasible without knowing p and q.</button>
+      <button class="quiz-choice" data-correct="false">That unstructured search takes at least N queries.</button>
+      <button class="quiz-choice" data-correct="false">That every function is either constant or balanced.</button>
+      <button class="quiz-choice" data-correct="false">That quantum computers cannot exist.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>RSA's public key includes N = p·q, and its security depends entirely on factoring N being computationally infeasible for anyone without the secret primes p and q.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Besides RSA, what other widely used cryptographic approach is threatened by a related Shor's-algorithm technique?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Diffie-Hellman key exchange and elliptic-curve cryptography, via efficient quantum discrete-logarithm solving.</button>
+      <button class="quiz-choice" data-correct="false">One-time pad encryption.</button>
+      <button class="quiz-choice" data-correct="false">Classical hash functions used for password storage.</button>
+      <button class="quiz-choice" data-correct="false">None — RSA is the only cryptographic system Shor's algorithm affects.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A related quantum algorithm using the same period-finding and QFT machinery efficiently solves the discrete logarithm problem, undermining Diffie-Hellman and elliptic-curve cryptography as well.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. What is currently stopping Shor's algorithm from breaking real-world RSA keys today?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">No existing quantum computer has anywhere near enough stable, error-corrected logical qubits to run the algorithm at cryptographically relevant key sizes.</button>
+      <button class="quiz-choice" data-correct="false">The algorithm has been mathematically proven incorrect.</button>
+      <button class="quiz-choice" data-correct="false">RSA has already been fully replaced by post-quantum algorithms everywhere.</button>
+      <button class="quiz-choice" data-correct="false">Shor's algorithm only works on numbers smaller than 100.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The gap is a hardware and engineering one — the algorithm is proven correct, but current hardware falls far short of the scale and reliability needed to run it on real cryptographic key sizes.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="post-quantum">
+    <p class="quiz-prompt">4. Fill in the blank: cryptographic schemes designed to remain secure even against large-scale quantum computers are called ___ cryptography.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Post-quantum cryptography relies on mathematical problems with no known efficient quantum attack, unlike factoring or discrete log.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="NIST">
+    <p class="quiz-prompt">5. Fill in the blank: the U.S. agency that ran the multi-year competition to select and standardize post-quantum cryptographic algorithms is ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>NIST (the National Institute of Standards and Technology) led the public post-quantum cryptography standardization process, publishing its first finalized standards in 2024.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read before the next lesson: NIST's <a href="https://csrc.nist.gov/projects/post-quantum-cryptography">Post-Quantum Cryptography</a> project page documents the standardization effort motivated directly by Shor's algorithm, including the finalized standards and the reasoning behind them.</p>
+
+  <p class="ask-teacher">Ask your teacher about "harvest now, decrypt later" if the idea of preparing for a threat that isn't practically realized yet feels strange — it's a genuinely important part of why this transition is happening years ahead of large-scale quantum hardware. Next up: a step back to take stock of exactly what quantum speedups do and don't promise, closing out this unit's two algorithms.</p>
+
+  <footer class="lesson-footer">STEM+ · Quantum Computing · Lesson 34 of the course sequence</footer>
+</div>

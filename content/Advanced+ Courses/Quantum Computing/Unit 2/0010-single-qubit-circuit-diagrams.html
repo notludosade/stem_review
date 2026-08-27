@@ -1,0 +1,111 @@
+<meta charset="UTF-8">
+<link rel="icon" href="../../../favicon.ico?v=1" type="image/x-icon">
+<title>Lesson 10: Single-Qubit Circuit Diagrams — STEM+</title>
+<link rel="stylesheet" href="../../../assets/style.css">
+<script src="../../../assets/quiz.js" defer></script>
+<div class="page" data-tier="advanced">
+  <span class="kicker">STEM+ · Quantum Computing · Unit 2 · Lesson 10</span>
+  <h1>Single-Qubit Circuit Diagrams</h1>
+  <p class="subtitle">A quantum circuit reads left to right like a sentence, but computes right to left like a matrix product — mixing up that order is the single most common bug in reading a diagram correctly.</p>
+  <p class="nav-links"><a href="0009-phase-gates-s-and-t.html" class="nav-prev">← Lesson 9</a> <a href="../Unit%203/0011-the-born-rule.html" class="nav-next">Unit 3, Lesson 11 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Units 5 through 7 will draw and reason about circuits constantly. This closing lesson of Unit 2 gets the notation and the one crucial reading rule in place, using only the single-qubit gates already in hand.</p>
+
+  <h2>1. Reading a circuit diagram</h2>
+  <svg class="figure" viewBox="0 0 340 90" width="340" height="90">
+    <text class="fig-label" x="10" y="30">|0⟩</text>
+    <line class="fig-axis" x1="45" y1="26" x2="320" y2="26"></line>
+    <rect x="90" y="8" width="36" height="36" fill="none" stroke="var(--accent)" stroke-width="2"></rect>
+    <text x="108" y="31" text-anchor="middle" font-size="15" fill="var(--accent)">H</text>
+    <rect x="190" y="8" width="36" height="36" fill="none" stroke="var(--accent)" stroke-width="2"></rect>
+    <text x="208" y="31" text-anchor="middle" font-size="15" fill="var(--accent)">S</text>
+    <circle class="fig-point" cx="290" cy="26" r="4"></circle>
+    <text class="fig-label" x="270" y="65">measure</text>
+  </svg>
+  <figcaption>A single-qubit circuit: one horizontal wire (the qubit, over time, left to right), with gates as boxes and a final measurement. This one applies H, then S, then measures.</figcaption>
+
+  <div class="box">
+    <span class="box-label">Convention — Circuit Diagrams</span>
+    A horizontal line is a <strong>wire</strong>, representing one qubit as time moves left to right. A labeled box on the wire is a gate, applied to the qubit's current state at that point in time. Time flows strictly left to right — a gate drawn earlier on the wire is applied before one drawn later.
+  </div>
+
+  <h2>2. The order-reversal rule</h2>
+  <div class="box why">
+    <span class="box-label">Why circuit order and matrix order run opposite directions</span>
+    If a circuit applies gate A, then gate B, then gate C, reading left to right, the resulting state is C(B(A|ψ⟩)) — which, written as a single matrix product, is <strong>CBA</strong>|ψ⟩, not ABC|ψ⟩. The gate applied <em>first</em> (leftmost in the diagram) ends up <em>rightmost</em> in the matrix product, right next to |ψ⟩, because matrix-vector multiplication is evaluated by acting on the vector first with the matrix closest to it. This reversal trips up almost everyone the first few times — it's worth deliberately double-checking on every new circuit until reading it becomes automatic.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Example — Tracing the Circuit Above</span>
+    The circuit shown applies H first, then S, to |0⟩. Step by step: H|0⟩ = |+⟩ = (1/√2)(|0⟩ + |1⟩). Then S|+⟩ = (1/√2)(S|0⟩ + S|1⟩) = (1/√2)(|0⟩ + i|1⟩) = |+i⟩, Unit 1's fourth named Bloch-sphere landmark. As a single matrix expression, this whole circuit computes S·H·|0⟩ — S written first (leftmost) even though H is applied first (drawn leftmost in the diagram), exactly the reversal the box above describes.
+  </div>
+
+  <h2>3. A second worked trace</h2>
+  <p>Circuit: |0⟩ → X → H → measure. Trace it gate by gate, left to right, exactly as time flows: X|0⟩ = |1⟩ (Lesson 7's bit flip). Then H|1⟩ = |−⟩ (Lesson 8). The final state is |−⟩ — measuring it in the computational basis gives 0 or 1 with equal probability, same as measuring |+⟩ would, but Lesson 13 will show these two states are still distinguishable with the right choice of measurement basis.</p>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. A circuit applies gate A, then gate B, then gate C, in that left-to-right order. What single matrix expression gives the final state?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">CBA|ψ⟩</button>
+      <button class="quiz-choice" data-correct="false">ABC|ψ⟩</button>
+      <button class="quiz-choice" data-correct="false">(A+B+C)|ψ⟩</button>
+      <button class="quiz-choice" data-correct="false">ACB|ψ⟩</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The gate applied first ends up closest to |ψ⟩ in the matrix product, so left-to-right circuit order becomes right-to-left matrix order: CBA|ψ⟩.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. What is the final state of the circuit |0⟩ → X → H → measure?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">|−⟩</button>
+      <button class="quiz-choice" data-correct="false">|+⟩</button>
+      <button class="quiz-choice" data-correct="false">|1⟩</button>
+      <button class="quiz-choice" data-correct="false">|0⟩</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>X|0⟩ = |1⟩ first, then H|1⟩ = |−⟩ — trace the gates in the order they're applied (left to right in the diagram), not in matrix-product order.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. What is the final state of the circuit |0⟩ → H → S → measure?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">|+i⟩ = (|0⟩ + i|1⟩)/√2</button>
+      <button class="quiz-choice" data-correct="false">|−i⟩ = (|0⟩ − i|1⟩)/√2</button>
+      <button class="quiz-choice" data-correct="false">|1⟩</button>
+      <button class="quiz-choice" data-correct="false">|−⟩</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>H|0⟩ = |+⟩, then S|+⟩ = (1/√2)(|0⟩ + i|1⟩) = |+i⟩ — the worked example traced through this exact circuit.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="left to right|left-to-right">
+    <p class="quiz-prompt">4. Fill in the blank: time flows ___ across a circuit diagram, even though the matrix product representing the whole circuit is written in the opposite order.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Circuit diagrams are always read left to right for time order — it's only the corresponding matrix product that reverses this order.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="1/2|0.5|50%">
+    <p class="quiz-prompt">5. Fill in the blank: after applying H then S to |0⟩, the probability of measuring outcome 1 is ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The resulting state is |+i⟩ = (|0⟩ + i|1⟩)/√2, and |i/√2|² = 1/2 — S only changes phase, never the measurement probabilities set by H.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read to close out this unit: IBM Quantum Learning's <a href="https://learning.quantum.ibm.com/course/basics-of-quantum-information">Basics of Quantum Information</a> course covers circuit-diagram conventions and this same left-to-right-versus-matrix-order reversal in its early chapters, with several more traced examples.</p>
+
+  <p class="ask-teacher">If tracing a three- or four-gate circuit still feels slow, ask your teacher for extra practice circuits to trace by hand — speed here pays off directly once Unit 5's circuits add a second qubit. This closes Unit 2: you now have a full single-qubit gate toolkit and can read any circuit built from it. Next up, Unit 3: what actually happens when you measure a qubit, and the rule — the Born rule — that turns amplitudes into probabilities.</p>
+
+  <footer class="lesson-footer">STEM+ · Quantum Computing · Lesson 10 of the course sequence</footer>
+</div>

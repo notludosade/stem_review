@@ -1,0 +1,113 @@
+<meta charset="UTF-8">
+<link rel="icon" href="../../../favicon.ico?v=1" type="image/x-icon">
+<title>Lesson 22: Building Bell States with H and CNOT — STEM+</title>
+<link rel="stylesheet" href="../../../assets/style.css">
+<script src="../../../assets/quiz.js" defer></script>
+<div class="page" data-tier="advanced">
+  <span class="kicker">STEM+ · Quantum Computing · Unit 5 · Lesson 22</span>
+  <h1>Building Bell States with H and CNOT</h1>
+  <p class="subtitle">Two gates, applied to an ordinary two-bit input, produce all four Bell states on demand — the standard circuit every entanglement-based protocol in quantum computing starts with.</p>
+  <p class="nav-links"><a href="0021-the-cnot-gate.html" class="nav-prev">← Lesson 21</a> <a href="0023-other-multi-qubit-gates-cz-swap-and-toffoli.html" class="nav-next">Lesson 23 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Lesson 21 showed CNOT entangles a superposed control with its target. Combine that with H, which creates the superposition in the first place, and you get the standard two-gate recipe for manufacturing any of Unit 4's four Bell states from an ordinary classical-looking input.</p>
+
+  <h2>1. The main case: |00⟩ → |Φ⁺⟩</h2>
+  <svg class="figure" viewBox="0 0 320 110" width="320" height="110">
+    <text class="fig-label" x="8" y="30">|0⟩</text>
+    <line class="fig-axis" x1="45" y1="26" x2="290" y2="26"></line>
+    <rect x="90" y="8" width="36" height="36" fill="none" stroke="var(--accent)" stroke-width="2"></rect>
+    <text x="108" y="31" text-anchor="middle" font-size="15" fill="var(--accent)">H</text>
+    <circle cx="220" cy="26" r="6" fill="var(--accent)"></circle>
+    <text class="fig-label" x="8" y="90">|0⟩</text>
+    <line class="fig-axis" x1="45" y1="86" x2="290" y2="86"></line>
+    <circle cx="220" cy="86" r="12" fill="none" stroke="var(--accent)" stroke-width="2"></circle>
+    <line x1="220" y1="80" x2="220" y2="92" stroke="var(--accent)" stroke-width="2"></line>
+    <line x1="214" y1="86" x2="226" y2="86" stroke="var(--accent)" stroke-width="2"></line>
+    <line x1="220" y1="32" x2="220" y2="74" stroke="var(--accent)" stroke-width="1.5"></line>
+  </svg>
+  <figcaption>The Bell-state preparation circuit: H on qubit 1 (the control), then CNOT with qubit 1 as control and qubit 2 (⊕ symbol) as target.</figcaption>
+
+  <div class="box">
+    <span class="box-label">Trace — |00⟩ Through the Circuit</span>
+    Start: |00⟩. Apply H to qubit 1: (H|0⟩) ⊗ |0⟩ = |+⟩ ⊗ |0⟩ = (|00⟩ + |10⟩)/√2. Apply CNOT (qubit 1 control, qubit 2 target): CNOT|00⟩ = |00⟩ stays, CNOT|10⟩ = |11⟩. Result: (|00⟩ + |11⟩)/√2 = |Φ⁺⟩.
+  </div>
+
+  <h2>2. The other three: flip the input bits</h2>
+  <p>The same two-gate circuit, fed a different two-bit classical input, produces a different Bell state. Trace |10⟩: H on qubit 1 gives H|1⟩ ⊗ |0⟩ = |−⟩ ⊗ |0⟩ = (|00⟩ − |10⟩)/√2; CNOT then gives (|00⟩ − |11⟩)/√2 = |Φ⁻⟩. Trace |01⟩: H|0⟩ ⊗ |1⟩ = |+⟩ ⊗ |1⟩ = (|01⟩ + |11⟩)/√2; CNOT swaps the second term's target bit, giving (|01⟩ + |10⟩)/√2 = |Ψ⁺⟩. Trace |11⟩: H|1⟩ ⊗ |1⟩ = |−⟩ ⊗ |1⟩ = (|01⟩ − |11⟩)/√2; CNOT gives (|01⟩ − |10⟩)/√2 = |Ψ⁻⟩.</p>
+
+  <div class="box">
+    <span class="box-label">Summary Table</span>
+    Input |00⟩ → |Φ⁺⟩. Input |10⟩ → |Φ⁻⟩. Input |01⟩ → |Ψ⁺⟩. Input |11⟩ → |Ψ⁻⟩. This is a clean one-to-one correspondence: this exact circuit maps each of the four computational basis states to a distinct Bell state.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why this circuit is worth memorizing outright</span>
+    This two-gate pattern — H on the qubit that will act as control, then CNOT into the target — is the standard building block behind quantum teleportation, superdense coding, and quantum key distribution protocols built on entanglement, none of which this course derives in full, but all of which start from exactly this circuit. Recognizing "H then CNOT on two fresh qubits" as "we're about to build a Bell pair" is a genuinely useful pattern-matching skill going forward, including in Unit 6 and Unit 7's algorithms, which reuse the same H-then-entangle logic in a more elaborate form.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. Tracing |00⟩ through H (on qubit 1) then CNOT, what state results?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">|Φ⁺⟩</button>
+      <button class="quiz-choice" data-correct="false">|Φ⁻⟩</button>
+      <button class="quiz-choice" data-correct="false">|Ψ⁺⟩</button>
+      <button class="quiz-choice" data-correct="false">|Ψ⁻⟩</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>H|0⟩⊗|0⟩ = (|00⟩+|10⟩)/√2, then CNOT gives (|00⟩+|11⟩)/√2 = |Φ⁺⟩.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Tracing |01⟩ through H (on qubit 1) then CNOT, what state results?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">|Ψ⁺⟩</button>
+      <button class="quiz-choice" data-correct="false">|Φ⁺⟩</button>
+      <button class="quiz-choice" data-correct="false">|Φ⁻⟩</button>
+      <button class="quiz-choice" data-correct="false">|Ψ⁻⟩</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>H|0⟩⊗|1⟩ = (|01⟩+|11⟩)/√2, then CNOT flips the second term's target: (|01⟩+|10⟩)/√2 = |Ψ⁺⟩.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Which classical two-bit input produces |Φ⁻⟩ through this circuit?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">|10⟩</button>
+      <button class="quiz-choice" data-correct="false">|00⟩</button>
+      <button class="quiz-choice" data-correct="false">|01⟩</button>
+      <button class="quiz-choice" data-correct="false">|11⟩</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>H|1⟩⊗|0⟩ = (|00⟩−|10⟩)/√2, then CNOT gives (|00⟩−|11⟩)/√2 = |Φ⁻⟩.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="4|four">
+    <p class="quiz-prompt">4. Fill in the blank: this circuit maps each of the ___ computational basis inputs to a distinct Bell state, a one-to-one correspondence.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>|00⟩, |01⟩, |10⟩, |11⟩ map respectively to |Φ⁺⟩, |Ψ⁺⟩, |Φ⁻⟩, |Ψ⁻⟩ — four inputs, four distinct outputs.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="H|Hadamard">
+    <p class="quiz-prompt">5. Fill in the blank: the Bell-state preparation circuit applies ___ to the control qubit first, before applying CNOT.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>H creates the superposition on the control qubit that CNOT then spreads onto the target, producing entanglement.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read before the next lesson: IBM Quantum Learning's <a href="https://learning.quantum.ibm.com/course/basics-of-quantum-information">Basics of Quantum Information</a> course, "Multiple systems" chapter, presents this exact H-then-CNOT circuit as the standard way to prepare each of the four Bell states.</p>
+
+  <p class="ask-teacher">Ask your teacher to sketch the quantum teleportation circuit at a glance — you won't derive it in full, but you'll recognize this lesson's exact circuit sitting inside it as the first step. Next up: two more multi-qubit gates worth knowing by name, plus the gate that swaps two qubits' states outright.</p>
+
+  <footer class="lesson-footer">STEM+ · Quantum Computing · Lesson 22 of the course sequence</footer>
+</div>

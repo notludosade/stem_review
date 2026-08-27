@@ -1,0 +1,108 @@
+<meta charset="UTF-8">
+<link rel="icon" href="../../../favicon.ico?v=1" type="image/x-icon">
+<title>Lesson 36: Decoherence and Noise — STEM+</title>
+<link rel="stylesheet" href="../../../assets/style.css">
+<script src="../../../assets/quiz.js" defer></script>
+<div class="page" data-tier="advanced">
+  <span class="kicker">STEM+ · Quantum Computing · Unit 8 · Lesson 36</span>
+  <h1>Decoherence and Noise</h1>
+  <p class="subtitle">Every lesson through Unit 7 assumed perfect qubits and perfect gates. Real hardware has neither — this unit takes that assumption away and looks at what's actually true.</p>
+  <p class="nav-links"><a href="../Unit%207/0035-quantum-speedups-what-they-do-and-dont-promise.html" class="nav-prev">← Lesson 35</a> <a href="0037-the-basic-idea-of-quantum-error-correction.html" class="nav-next">Lesson 37 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Units 1 through 7 treated qubit states as isolated mathematical objects, evolving under exact unitary gates. Real qubits are physical systems, sitting in a lab, unavoidably in contact with their surroundings — and that contact is the entire subject of this lesson.</p>
+
+  <h2>1. Decoherence</h2>
+  <div class="box">
+    <span class="box-label">Definition — Decoherence</span>
+    <strong>Decoherence</strong> is the loss of a qubit's quantum superposition and phase information due to unwanted interaction with its environment — stray electromagnetic fields, thermal vibrations, imperfect shielding, or any other uncontrolled physical coupling the qubit wasn't supposed to have. Left alone long enough, a qubit initially in a clean pure state (Unit 1's Bloch sphere surface) drifts toward the mixed-state interior Lesson 4 mentioned — its coherent superposition degrading into something closer to a classical statistical mixture.
+  </div>
+  <p>Decoherence isn't a single well-defined process — it's a catch-all for however the environment happens to leak information out of (or noise into) the qubit. What matters practically is how fast it happens, measured by two standard timescales.</p>
+
+  <h2>2. T1 and T2</h2>
+  <div class="box">
+    <span class="box-label">Definition — T1 (Relaxation Time)</span>
+    <strong>T1</strong> is the characteristic time for a qubit prepared in |1⟩ to decay toward |0⟩ (the lower-energy state) due to unwanted energy loss to the environment. It measures how long a qubit's basic energy-level information survives.
+  </div>
+  <div class="box">
+    <span class="box-label">Definition — T2 (Dephasing Time)</span>
+    <strong>T2</strong> is the characteristic time for a qubit's <em>relative phase</em> — Lesson 1.5's crucial quantity, the one interference algorithms in Units 6 and 7 depend on entirely — to randomize due to environmental interaction. T2 is always less than or equal to 2×T1, and in practice is often the more restrictive limit, since relative phase is a more fragile quantity than which basis state a qubit is closer to.
+  </div>
+  <p>Both are measured in real physical time — typically microseconds to a few milliseconds on today's leading hardware platforms, though exact values vary substantially by platform and continue to improve with better engineering (Lesson 38 surveys the platforms).</p>
+
+  <h2>3. Gate errors</h2>
+  <div class="box why">
+    <span class="box-label">Why "just run a longer circuit" doesn't scale naively</span>
+    Beyond decoherence during idle time, every physical gate applied to a real qubit is an imperfect approximation of its ideal unitary matrix — a control pulse might be very slightly mistimed or mistuned, introducing a small unintended rotation alongside the intended one. These small errors don't cancel out; they compound. A circuit with 100 gates, each individually correct 99.9% of the time, has a much worse than 99.9% chance of being entirely correct overall — errors accumulate roughly with circuit depth (the number of sequential gate layers) and qubit count together. This is exactly why Unit 7's algorithms, entirely correct on paper, are not simply "ready to run" on today's hardware for large, cryptographically relevant problem sizes: Shor's algorithm on a 2048-bit number needs a circuit far too deep for current error rates to survive without correction.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Putting the Numbers Together</span>
+    Suppose a qubit has T2 = 100 microseconds, and each gate takes 50 nanoseconds. In principle, roughly 2,000 gates could run within one coherence time before phase information is largely lost — a real, meaningful constraint on how deep an uncorrected circuit can be before the answer becomes unreliable. Lesson 37 introduces the standard strategy for pushing past this limit: quantum error correction.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What is decoherence?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">The loss of a qubit's superposition and phase information due to unwanted interaction with its environment.</button>
+      <button class="quiz-choice" data-correct="false">The intentional measurement of a qubit at the end of a circuit.</button>
+      <button class="quiz-choice" data-correct="false">A gate that deliberately randomizes a qubit's state.</button>
+      <button class="quiz-choice" data-correct="false">The process of entangling two qubits together.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Decoherence is specifically about unwanted environmental interaction degrading a qubit's quantum information over time — not an intentional operation.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. What does T1 measure?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">The characteristic time for a qubit to lose energy and decay from |1⟩ toward |0⟩.</button>
+      <button class="quiz-choice" data-correct="false">The exact number of gates a circuit contains.</button>
+      <button class="quiz-choice" data-correct="false">The time it takes to measure a qubit.</button>
+      <button class="quiz-choice" data-correct="false">The total runtime of an entire algorithm.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>T1 (relaxation time) tracks energy loss specifically — a qubit's tendency to decay toward its lower-energy state over time.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why does relative phase (measured by T2) tend to be more fragile than basic energy-level information (measured by T1)?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Relative phase is a more delicate quantum property, and T2 is always at most 2×T1 — dephasing is typically the more restrictive limit in practice.</button>
+      <button class="quiz-choice" data-correct="false">T2 has no relationship to T1 at all.</button>
+      <button class="quiz-choice" data-correct="false">T2 is always much larger than T1, so phase is more robust.</button>
+      <button class="quiz-choice" data-correct="false">Relative phase cannot be affected by decoherence at all.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>T2 ≤ 2×T1, and phase information — the exact quantity every interference-based algorithm in Units 6 and 7 depends on — is generally the first thing lost to environmental noise.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="depth">
+    <p class="quiz-prompt">4. Fill in the blank: gate errors accumulate as circuit ___ (the number of sequential gate layers) increases, making very long circuits unreliable on noisy hardware.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Circuit depth is the standard term for how many sequential layers of gates a circuit contains — errors compound as this grows.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="noise">
+    <p class="quiz-prompt">5. Fill in the blank: unwanted interaction between a qubit and its environment, or imperfections in gate control, is broadly referred to as ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Noise is the general term covering both decoherence and gate-level imperfections — the umbrella problem this whole unit addresses.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read before the next lesson: John Preskill's <a href="https://arxiv.org/abs/1801.00862">Quantum Computing in the NISQ Era and Beyond</a> discusses decoherence, gate errors, and their practical impact on real hardware in the same terms used here.</p>
+
+  <p class="ask-teacher">Ask your teacher for real T1/T2 numbers from a couple of specific quantum computing platforms if you want a concrete sense of scale — they vary by roughly an order of magnitude or more between technologies, which Lesson 38 explores directly. Next up: the strategy for fighting back against exactly this noise — quantum error correction.</p>
+
+  <footer class="lesson-footer">STEM+ · Quantum Computing · Lesson 36 of the course sequence</footer>
+</div>

@@ -1,0 +1,109 @@
+<meta charset="UTF-8">
+<link rel="icon" href="../../../favicon.ico?v=1" type="image/x-icon">
+<title>Lesson 29: The Deutsch-Jozsa Algorithm — STEM+</title>
+<link rel="stylesheet" href="../../../assets/style.css">
+<script src="../../../assets/quiz.js" defer></script>
+<div class="page" data-tier="advanced">
+  <span class="kicker">STEM+ · Quantum Computing · Unit 6 · Lesson 29</span>
+  <h1>The Deutsch-Jozsa Algorithm</h1>
+  <p class="subtitle">Lesson 28's exact circuit, scaled up to n input bits — and the "2 versus 1" query gap turns into "exponential versus 1."</p>
+  <p class="nav-links"><a href="0028-the-deutsch-algorithm.html" class="nav-prev">← Lesson 28</a> <a href="0030-query-complexity-and-real-speedups.html" class="nav-next">Lesson 30 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>The <strong>Deutsch-Jozsa algorithm</strong>, developed by David Deutsch and Richard Jozsa, generalizes Lesson 28's circuit to any number of input bits, with essentially no new ideas — the same H, oracle, H structure, just wider.</p>
+
+  <h2>1. The generalized problem</h2>
+  <div class="box">
+    <span class="box-label">Problem — Deutsch-Jozsa</span>
+    Given oracle access to f: {0,1}ⁿ → {0,1}, <strong>promised</strong> to be either constant (same output on all 2ⁿ inputs) or balanced (output 0 on exactly half the inputs, output 1 on the other half), determine which.
+  </div>
+  <p>Classically, in the worst case, a deterministic algorithm needs to query more than half the inputs — 2ⁿ⁻¹ + 1 queries — to be certain: after seeing 2ⁿ⁻¹ identical outputs, the function could still turn out either constant (if the rest match too) or balanced (if the rest are all the other value), so one more query is unavoidable.</p>
+
+  <h2>2. The circuit, generalized</h2>
+  <div class="box">
+    <span class="box-label">Circuit</span>
+    Start with |0⟩<sup>⊗n</sup> ⊗ |1⟩. Apply H to every qubit (H<sup>⊗n</sup> on the first register, H on the second). Apply U<sub>f</sub>. Apply H<sup>⊗n</sup> to the first register again. Measure the first register.
+  </div>
+  <p>After H<sup>⊗n</sup> and U<sub>f</sub>, phase kickback (Lesson 27, applied term by term across the whole superposition) gives (1/√2ⁿ) Σ<sub>x</sub> (−1)<sup>f(x)</sup>|x⟩ ⊗ |−⟩, dropping the now-irrelevant |−⟩. The key fact needed for the final H<sup>⊗n</sup> is that it transforms |x⟩ into (1/√2ⁿ) Σ<sub>z</sub> (−1)<sup>x·z</sup>|z⟩, where x·z is the bitwise dot product of x and z mod 2 — the direct n-qubit generalization of single-qubit H's action.</p>
+
+  <h2>3. The amplitude on the all-zero string</h2>
+  <div class="box">
+    <span class="box-label">Fact — What Determines the Outcome</span>
+    After the final H<sup>⊗n</sup>, the amplitude on the all-zero string |00...0⟩ works out to (1/2ⁿ) Σ<sub>x</sub> (−1)<sup>f(x)</sup> (since x·0 = 0 for every x). If f is constant (value c on every input): this sum is (1/2ⁿ)(2ⁿ)(−1)<sup>c</sup> = (−1)<sup>c</sup>, magnitude 1 — the all-zero string is measured with <strong>certainty</strong>. If f is balanced: exactly half the terms contribute +1 and half contribute −1, so the sum is (1/2ⁿ)[2ⁿ⁻¹ − 2ⁿ⁻¹] = 0 — the all-zero string is measured with <strong>probability exactly 0</strong>.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Result</span>
+    Measure all n qubits of the first register after the circuit. All-zero result: f is constant, with certainty. Any other result (any nonzero string): f is balanced, with certainty. Either way, one query to U<sub>f</sub> — regardless of how large n is — settles the question completely.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why this is an exponential, not just constant, speedup</span>
+    The classical worst case, 2ⁿ⁻¹ + 1 queries, grows exponentially with n. The quantum algorithm's query count — exactly 1 — never grows at all. For n = 20 input bits, a classical deterministic algorithm might need over half a million queries in the worst case; Deutsch-Jozsa still needs exactly one. This is a genuinely exponential separation between quantum and classical query complexity, not merely the "cut in half" flavor of Lesson 28's n = 1 warm-up — the gap widens without bound as the problem grows.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What does measuring the all-zero string at the end of the Deutsch-Jozsa circuit indicate?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">f is constant.</button>
+      <button class="quiz-choice" data-correct="false">f is balanced.</button>
+      <button class="quiz-choice" data-correct="false">f(0) = 0.</button>
+      <button class="quiz-choice" data-correct="false">The algorithm failed and must be rerun.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Measuring all zeros occurs with certainty exactly when f is constant — the amplitude on that outcome is 0 whenever f is balanced.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. What does measuring any nonzero string at the end of the circuit indicate?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">f is balanced.</button>
+      <button class="quiz-choice" data-correct="false">f is constant.</button>
+      <button class="quiz-choice" data-correct="false">The oracle was applied incorrectly.</button>
+      <button class="quiz-choice" data-correct="false">f(x) = 1 for every input x.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Since the all-zero outcome has probability exactly 1 when f is constant, seeing any other outcome guarantees f must be balanced instead.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why does the classical worst-case query count grow exponentially with n, while the quantum count stays at 1?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">A deterministic classical algorithm must check more than half of the 2ⁿ inputs (2ⁿ⁻¹ + 1) to rule out both possibilities with certainty, while the quantum circuit extracts the same certainty from a single query via interference.</button>
+      <button class="quiz-choice" data-correct="false">Classical computers cannot compute f at all for large n.</button>
+      <button class="quiz-choice" data-correct="false">The quantum algorithm only works for small values of n.</button>
+      <button class="quiz-choice" data-correct="false">Both actually require the same number of queries; there's no real speedup.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The classical lower bound genuinely scales as 2ⁿ⁻¹ + 1, while the quantum circuit's single query and interference-based measurement give a certain answer regardless of n — a real, provable exponential gap.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="1">
+    <p class="quiz-prompt">4. Fill in the blank: regardless of how large n is, the Deutsch-Jozsa algorithm always needs exactly ___ oracle query.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>One query to U_f, combined with the surrounding Hadamard layers, is always sufficient, no matter how many input bits f takes.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="0">
+    <p class="quiz-prompt">5. Fill in the blank: when f is balanced, the probability of measuring the all-zero string is exactly ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The +1 and −1 contributions from a balanced f's inputs cancel exactly, leaving zero amplitude — and hence zero probability — on the all-zero outcome.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read before the next lesson: IBM Quantum Learning's <a href="https://learning.quantum.ibm.com/course/fundamentals-of-quantum-algorithms">Fundamentals of Quantum Algorithms</a> course derives the Deutsch-Jozsa algorithm in full generality with the same H<sup>⊗n</sup>-oracle-H<sup>⊗n</sup> structure and the same all-zero-amplitude argument.</p>
+
+  <p class="ask-teacher">Ask your teacher to walk through the H<sup>⊗n</sup>|x⟩ = (1/√2ⁿ)Σ_z(−1)^(x·z)|z⟩ formula for n = 2 explicitly if it wasn't obvious how it generalizes from single-qubit H — writing out all 4 terms makes the pattern concrete. Next up: stepping back to formally define what "query complexity" means and why this speedup counts as provably real, not just a curiosity.</p>
+
+  <footer class="lesson-footer">STEM+ · Quantum Computing · Lesson 29 of the course sequence</footer>
+</div>

@@ -1,0 +1,100 @@
+<meta charset="UTF-8">
+<link rel="icon" href="../../../favicon.ico?v=1" type="image/x-icon">
+<title>Lesson 21: The CNOT Gate — STEM+</title>
+<link rel="stylesheet" href="../../../assets/style.css">
+<script src="../../../assets/quiz.js" defer></script>
+<div class="page" data-tier="advanced">
+  <span class="kicker">STEM+ · Quantum Computing · Unit 5 · Lesson 21</span>
+  <h1>The CNOT Gate</h1>
+  <p class="subtitle">Every gate in Unit 2 acted on one qubit alone. This one acts on two — and it's the single gate that turns superposition into entanglement.</p>
+  <p class="nav-links"><a href="../Unit%204/0020-measuring-entangled-qubits.html" class="nav-prev">← Lesson 20</a> <a href="0022-building-bell-states-with-h-and-cnot.html" class="nav-next">Lesson 22 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Unit 4 built and measured entangled states, but never showed how to produce one starting from an ordinary, unentangled |00⟩. The <strong>CNOT</strong> (controlled-NOT) gate is the standard tool for exactly that — the first genuinely two-qubit gate in this course.</p>
+
+  <h2>1. Definition</h2>
+  <div class="box">
+    <span class="box-label">Definition — CNOT Gate</span>
+    CNOT acts on two qubits, a <strong>control</strong> and a <strong>target</strong>: it flips the target qubit (applies X to it) if and only if the control qubit is |1⟩, and does nothing if the control is |0⟩. On basis states: CNOT|00⟩ = |00⟩, CNOT|01⟩ = |01⟩, CNOT|10⟩ = |11⟩, CNOT|11⟩ = |10⟩.
+  </div>
+  <p>As a 4×4 matrix, using basis order |00⟩, |01⟩, |10⟩, |11⟩ (each column giving the image of that basis vector):</p>
+  <div class="expr-block">CNOT = [[1,0,0,0], [0,1,0,0], [0,0,0,1], [0,0,1,0]]</div>
+  <p>This is a <strong>permutation matrix</strong> — every row and column has a single 1 and the rest 0s — which makes unitarity obvious: permutation matrices are automatically unitary (they just relabel basis vectors, preserving all lengths and angles). CNOT is also its own inverse: applying it twice returns any input to itself, since swapping |10⟩ ↔ |11⟩ twice is the identity.</p>
+
+  <h2>2. CNOT with a superposed control: the entangling move</h2>
+  <div class="box">
+    <span class="box-label">Fact — CNOT Creates Entanglement</span>
+    Apply CNOT to (α|0⟩ + β|1⟩) ⊗ |0⟩ (a superposed control, target starting at |0⟩): CNOT[(α|0⟩+β|1⟩) ⊗ |0⟩] = α·CNOT|00⟩ + β·CNOT|10⟩ = α|00⟩ + β|11⟩.
+  </div>
+  <p>Unless α or β is exactly 0, α|00⟩ + β|11⟩ is entangled — Lesson 18's coefficient-matching proof applies here verbatim (with 1/√2 replaced by α and β). This is the mechanism: CNOT alone doesn't create superposition (Unit 2's H does that), but applied to an already-superposed control, it correlates the target with the control in a way that cannot be undone by looking at either qubit alone. Lesson 22 puts this to immediate, concrete use.</p>
+
+  <div class="box why">
+    <span class="box-label">Why the control/target labels matter</span>
+    CNOT is not symmetric between its two qubits — flipping which qubit is "control" and which is "target" gives a genuinely different gate (the roles of the second and third basis states in the matrix swap). Always be explicit about which qubit is the control in a circuit diagram; conventionally, the control is drawn with a solid dot on the wire, and the target with a ⊕ symbol, connected by a vertical line.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What is CNOT|10⟩ (control = 1, target = 0)?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">|11⟩ — the target flips, since the control is |1⟩.</button>
+      <button class="quiz-choice" data-correct="false">|10⟩ — unchanged.</button>
+      <button class="quiz-choice" data-correct="false">|01⟩ — the control flips instead.</button>
+      <button class="quiz-choice" data-correct="false">|00⟩ — both flip.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>With control = 1, CNOT flips the target from 0 to 1, giving |11⟩. The control qubit itself never changes.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. What is CNOT|01⟩ (control = 0, target = 1)?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">|01⟩ — unchanged, since the control is |0⟩.</button>
+      <button class="quiz-choice" data-correct="false">|00⟩ — the target flips.</button>
+      <button class="quiz-choice" data-correct="false">|11⟩ — the control flips.</button>
+      <button class="quiz-choice" data-correct="false">|10⟩ — both flip.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>With control = 0, CNOT does nothing at all — the target only flips when the control is |1⟩.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. What is CNOT applied to (α|0⟩ + β|1⟩) ⊗ |0⟩, with both α and β nonzero?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">α|00⟩ + β|11⟩ — an entangled state.</button>
+      <button class="quiz-choice" data-correct="false">(α|0⟩ + β|1⟩) ⊗ |0⟩, unchanged.</button>
+      <button class="quiz-choice" data-correct="false">α|01⟩ + β|10⟩.</button>
+      <button class="quiz-choice" data-correct="false">|00⟩, regardless of α and β.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The target flips exactly on the |1⟩ branch of the control's superposition, producing α|00⟩ + β|11⟩ — entangled whenever both α and β are nonzero, by the same proof style as Lesson 18's Bell-state argument.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="1">
+    <p class="quiz-prompt">4. Fill in the blank: CNOT flips the target qubit if and only if the control qubit is ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The target flips exactly when the control is |1⟩, and is left alone when the control is |0⟩.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="permutation">
+    <p class="quiz-prompt">5. Fill in the blank: the CNOT matrix is a ___ matrix, which is automatically unitary since it only relabels basis vectors.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A permutation matrix has exactly one 1 in each row and column — CNOT simply swaps |10⟩ and |11⟩ and leaves the others fixed.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read before the next lesson: IBM Quantum Learning's <a href="https://learning.quantum.ibm.com/course/basics-of-quantum-information">Basics of Quantum Information</a> course, "Multiple systems" chapter, introduces CNOT with the same matrix and control/target convention, and previews its role in building entangled states.</p>
+
+  <p class="ask-teacher">Ask your teacher to have you verify CNOT² = I by direct matrix multiplication if the "its own inverse" claim doesn't feel obvious yet — it's a short, satisfying calculation. Next up: putting CNOT together with H to build every Bell state on demand, starting from |00⟩.</p>
+
+  <footer class="lesson-footer">STEM+ · Quantum Computing · Lesson 21 of the course sequence</footer>
+</div>

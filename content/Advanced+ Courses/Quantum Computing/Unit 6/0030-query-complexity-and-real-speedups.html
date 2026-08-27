@@ -1,0 +1,103 @@
+<meta charset="UTF-8">
+<link rel="icon" href="../../../favicon.ico?v=1" type="image/x-icon">
+<title>Lesson 30: Query Complexity: Why Deutsch-Jozsa Is a Real Speedup — STEM+</title>
+<link rel="stylesheet" href="../../../assets/style.css">
+<script src="../../../assets/quiz.js" defer></script>
+<div class="page" data-tier="advanced">
+  <span class="kicker">STEM+ · Quantum Computing · Unit 6 · Lesson 30</span>
+  <h1>Query Complexity: Why Deutsch-Jozsa Is a Real Speedup</h1>
+  <p class="subtitle">This closing lesson names the precise sense in which "quantum beats classical" was just proven — and is honest about exactly how far that proof does, and doesn't, reach.</p>
+  <p class="nav-links"><a href="0029-the-deutsch-jozsa-algorithm.html" class="nav-prev">← Lesson 29</a> <a href="../Unit%207/0031-grovers-algorithm-the-problem-and-the-oracle.html" class="nav-next">Unit 7, Lesson 31 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>It's worth being precise about what Lesson 29 actually proved, and equally precise about its limits, before Unit 7 raises the stakes with algorithms that matter far beyond this course.</p>
+
+  <h2>1. Query complexity, precisely</h2>
+  <div class="box">
+    <span class="box-label">Definition — Query Complexity</span>
+    In the <strong>oracle model</strong> (Lesson 26), the <strong>query complexity</strong> of an algorithm is the number of times it calls the oracle U<sub>f</sub>, counted independently of how much other, non-oracle computation the algorithm performs. It's a clean, restricted way to compare algorithms: instead of arguing about total running time (which depends on implementation details), you compare how many times each approach needs to "ask f a question."
+  </div>
+  <p>Lesson 29's result, stated in this language: Deutsch-Jozsa has quantum query complexity 1, while its classical deterministic query complexity is 2ⁿ⁻¹ + 1 — an exponential gap, in the query-complexity sense specifically.</p>
+
+  <h2>2. Why "proven," not "conjectured," matters</h2>
+  <div class="box why">
+    <span class="box-label">Why this separation is unusually solid, as far as complexity results go</span>
+    Many of the most famous claims in computer science — P ≠ NP being the most famous — remain unproven conjectures, believed true but not established with certainty. The Deutsch-Jozsa query complexity separation is not like that: both bounds (quantum query complexity exactly 1, classical deterministic query complexity exactly 2ⁿ⁻¹ + 1) are fully proven, with no open questions or unverified assumptions involved. In the oracle model specifically, this is about as solid as a "quantum wins" claim can get — a genuine mathematical theorem, not a plausible-sounding belief.
+  </div>
+
+  <h2>3. The honest caveat</h2>
+  <div class="box">
+    <span class="box-label">Caveat — The Oracle Model's Limits</span>
+    The proof lives entirely inside the oracle model: it assumes f is handed to you as a black-box unitary gate, with no cost charged for "how f is actually computed" beyond counting queries. Real-world computational problems are rarely handed to you this way — usually you have to compute f yourself, from some explicit description, and that computation might dominate the total cost regardless of how few oracle-style queries an algorithm needs. The constant-versus-balanced promise problem itself is also somewhat artificial — it was constructed specifically to have this clean separation, not because anyone independently needed to solve it. Deutsch-Jozsa's importance is not "here's a practically useful algorithm you'll deploy" — it's "here's rigorous proof that quantum interference can provably beat every classical strategy on some well-defined task," a foundational proof of concept.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">What comes next</span>
+    Unit 7 builds on exactly this proof-of-concept with two algorithms whose importance goes well beyond a constructed promise problem: <strong>Grover's algorithm</strong>, a quadratic speedup for the broadly useful problem of unstructured search, and <strong>Shor's algorithm</strong>, an exponential speedup for integer factoring — a problem whose classical hardness is the security foundation of widely deployed cryptography today. Both reuse this unit's core toolkit (superposition, oracles, phase kickback, interference) in more elaborate forms.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What does "query complexity" measure?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">The number of times an algorithm calls the oracle, independent of other computation.</button>
+      <button class="quiz-choice" data-correct="false">The total number of qubits an algorithm uses.</button>
+      <button class="quiz-choice" data-correct="false">The number of gates in the circuit's single-qubit portion only.</button>
+      <button class="quiz-choice" data-correct="false">The amount of classical memory required.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Query complexity counts oracle calls specifically, giving a clean, implementation-independent basis for comparing classical and quantum algorithms in the oracle model.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. How does Deutsch-Jozsa's query-complexity separation compare to a claim like P ≠ NP?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Deutsch-Jozsa's separation is a fully proven theorem, whereas P ≠ NP remains an unproven, widely believed conjecture.</button>
+      <button class="quiz-choice" data-correct="false">Both are unproven conjectures, believed true but not established.</button>
+      <button class="quiz-choice" data-correct="false">Both are fully proven theorems with no open questions.</button>
+      <button class="quiz-choice" data-correct="false">Deutsch-Jozsa's separation has since been disproven.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Unlike P vs NP, both the quantum and classical query-complexity bounds for Deutsch-Jozsa are rigorously proven, with no unverified assumptions.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. What is the main limitation of Deutsch-Jozsa's speedup, honestly stated?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">It lives entirely in the oracle model and solves a somewhat artificial promise problem — it's a proof of concept, not a directly useful real-world algorithm.</button>
+      <button class="quiz-choice" data-correct="false">The algorithm doesn't actually work as described.</button>
+      <button class="quiz-choice" data-correct="false">It only works for very small values of n.</button>
+      <button class="quiz-choice" data-correct="false">Classical computers can actually match its query count in practice.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The oracle model assumption and the artificially constructed promise problem are exactly why Deutsch-Jozsa matters as a proof of concept rather than a practical tool — real speedups with broader importance come in Unit 7.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="exponentially|exponential">
+    <p class="quiz-prompt">4. Fill in the blank: the classical worst-case query count for constant-versus-balanced grows ___ with n, while the quantum query count stays fixed at 1.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>2ⁿ⁻¹ + 1 grows exponentially in n, while the quantum algorithm's single query never grows at all — the defining feature of this separation.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="Shor">
+    <p class="quiz-prompt">5. Fill in the blank: Unit 7 introduces Grover's algorithm and ___'s algorithm, two quantum algorithms with real, practically important applications beyond this unit's proof-of-concept.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Shor's algorithm, for integer factoring, is the second of Unit 7's two headline algorithms — directly relevant to the security of widely used cryptography.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read to close out this unit: IBM Quantum Learning's <a href="https://learning.quantum.ibm.com/course/fundamentals-of-quantum-algorithms">Fundamentals of Quantum Algorithms</a> course discusses query complexity as the standard framework for comparing classical and quantum algorithms, with the same honest caveat about the oracle model's limits.</p>
+
+  <p class="ask-teacher">Ask your teacher which other query-complexity separations are known to be exponential versus which remain open research questions, if you'd like a sense of where this fits in the broader landscape. This closes Unit 6: you've now seen, start to finish, a fully proven quantum speedup. Next up, Unit 7: two algorithms whose importance reaches well outside a textbook — starting with search.</p>
+
+  <footer class="lesson-footer">STEM+ · Quantum Computing · Lesson 30 of the course sequence</footer>
+</div>

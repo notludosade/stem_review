@@ -1,0 +1,109 @@
+<meta charset="UTF-8">
+<link rel="icon" href="../../../favicon.ico?v=1" type="image/x-icon">
+<title>Lesson 6: Quantum Gates as Unitary Matrices — STEM+</title>
+<link rel="stylesheet" href="../../../assets/style.css">
+<script src="../../../assets/quiz.js" defer></script>
+<div class="page" data-tier="advanced">
+  <span class="kicker">STEM+ · Quantum Computing · Unit 2 · Lesson 6</span>
+  <h1>Quantum Gates as Unitary Matrices</h1>
+  <p class="subtitle">A quantum gate is just a matrix-vector product — but not every matrix is allowed to be one, and the restriction that qualifies a matrix is exactly the property Linear Algebra B called unitary.</p>
+  <p class="nav-links"><a href="../Unit%201/0005-global-phase-vs-relative-phase.html" class="nav-prev">← Lesson 5</a> <a href="0007-the-pauli-gates-x-y-and-z.html" class="nav-next">Lesson 7 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Unit 1 built up the space of single-qubit states. This unit starts moving through that space: a <strong>quantum gate</strong> transforms one qubit state into another. Unlike classical logic gates, which are built from truth tables, a quantum gate is defined the same way any linear map was defined in Linear Algebra A — as a matrix acting on a vector.</p>
+
+  <h2>1. Gates as matrices</h2>
+  <div class="box">
+    <span class="box-label">Definition — Single-Qubit Gate</span>
+    A single-qubit <strong>gate</strong> is a 2 × 2 matrix U acting on a state vector by left multiplication: |ψ'⟩ = U|ψ⟩. Applying a gate to a state produces a new state.
+  </div>
+  <p>Not every 2 × 2 matrix is allowed to be a gate, though. Whatever U is, it has to send every valid (normalized) input state to another valid (normalized) output state — a gate can't be allowed to produce a state that violates Lesson 1.3's normalization condition. That single requirement turns out to force a very specific structure on U.</p>
+
+  <h2>2. The unitary requirement</h2>
+  <div class="box">
+    <span class="box-label">Definition — Unitary Matrix</span>
+    A matrix U is <strong>unitary</strong> if U†U = I, where U† is the conjugate transpose (Lesson 1.2's bra construction, applied to a whole matrix instead of a vector) and I is the identity matrix. Equivalently, U's inverse exists and equals its conjugate transpose: U⁻¹ = U†.
+  </div>
+  <div class="box">
+    <span class="box-label">Fact — Every Quantum Gate Is Unitary</span>
+    U preserves normalization for every input state if and only if U is unitary. Proof: for any normalized |ψ⟩, the output |ψ'⟩ = U|ψ⟩ is normalized exactly when ⟨ψ'|ψ'⟩ = 1. Compute ⟨ψ'|ψ'⟩ = (U|ψ⟩)†(U|ψ⟩) = ⟨ψ|U†U|ψ⟩. If U†U = I, this is ⟨ψ|ψ⟩ = 1, as required. (The converse — that this working for every |ψ⟩ forces U†U = I exactly — is a short additional argument this course won't belabor, but it's the reason "unitary" is exactly the right condition, not just a sufficient one.)
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Example — Checking Unitarity</span>
+    Is U = [[0, 1], [1, 0]] unitary? Since U is real, U† is just its transpose, which is U itself here (it's symmetric). Compute U†U = U·U = [[0,1],[1,0]]·[[0,1],[1,0]] = [[1,0],[0,1]] = I. Yes, unitary — this particular matrix will get its own name next lesson.
+  </div>
+
+  <h2>3. Reversibility: the payoff of unitarity</h2>
+  <div class="box why">
+    <span class="box-label">Why quantum gates are always reversible, unlike classical logic gates</span>
+    Because U⁻¹ = U† always exists for a unitary U, every quantum gate can be undone — apply U†, and you're back exactly where you started, with no information lost. Compare this to a classical AND gate: knowing the output bit 0 doesn't tell you whether the inputs were (0,0), (0,1), or (1,0) — information was destroyed, and AND has no inverse function. A classical gate that <em>is</em> reversible, like NOT (flip the bit, and flipping again undoes it), has a natural quantum analogue — Lesson 7's X gate is exactly the quantum NOT. But a gate like AND, which loses information, cannot be directly realized as a single-qubit (or even simple multi-qubit) unitary gate at all — building reversible versions of classical logic takes real work, which Unit 5's Toffoli gate addresses.
+  </div>
+
+  <p>The identity gate I = [[1, 0], [0, 1]] is the trivial case: I|ψ⟩ = |ψ⟩, doing nothing at all. It's unitary (I†I = I·I = I) and it's its own inverse — the "do nothing" gate every circuit implicitly starts from.</p>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What property must a 2 × 2 matrix U have to be a valid single-qubit quantum gate?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">U must be unitary: U†U = I.</button>
+      <button class="quiz-choice" data-correct="false">U must have all real, nonnegative entries.</button>
+      <button class="quiz-choice" data-correct="false">U must be symmetric.</button>
+      <button class="quiz-choice" data-correct="false">U must have determinant 0.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Unitarity, U†U = I, is exactly the condition that guarantees U sends every normalized input state to a normalized output state.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why does every quantum gate have to be reversible?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">By convention only — reversibility isn't actually required by the mathematics.</button>
+      <button class="quiz-choice" data-correct="true">Because unitarity guarantees U⁻¹ = U† always exists, so the transformation can always be undone by applying U† afterward.</button>
+      <button class="quiz-choice" data-correct="false">Because all quantum gates are equal to the identity matrix.</button>
+      <button class="quiz-choice" data-correct="false">Because qubits can only ever be in the state |0⟩ or |1⟩.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Unitarity directly supplies an inverse, U† — applying it after U restores the original state exactly, with no information lost along the way.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Is U = [[1, 1], [0, 1]] unitary?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Yes — every real matrix with 1s and 0s is automatically unitary.</button>
+      <button class="quiz-choice" data-correct="true">No — U†U = [[1,0],[1,1]]·[[1,1],[0,1]] = [[1,1],[1,2]] ≠ I.</button>
+      <button class="quiz-choice" data-correct="false">Yes — its determinant is 1, which is sufficient for unitarity.</button>
+      <button class="quiz-choice" data-correct="false">Cannot be determined without knowing the input state.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>U's transpose (it's real, so U† = Uᵀ) is [[1,0],[1,1]]. Multiplying U†U gives [[1,1],[1,2]], which is not the identity matrix — U is not unitary, and could not be a valid quantum gate (it would fail to preserve normalization on some input state).</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="I|identity">
+    <p class="quiz-prompt">4. Fill in the blank: a matrix U is unitary exactly when U†U = ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Unitarity is defined by U†U equaling the identity matrix I — equivalently, U's inverse is its own conjugate transpose.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="U dagger|U†|the conjugate transpose of U|conjugate transpose">
+    <p class="quiz-prompt">5. Fill in the blank: for a unitary matrix U, the inverse U⁻¹ is always equal to ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>U⁻¹ = U† is exactly what unitarity guarantees — the inverse is always just the conjugate transpose, with no separate computation needed.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read before the next lesson: IBM Quantum Learning's <a href="https://learning.quantum.ibm.com/course/basics-of-quantum-information">Basics of Quantum Information</a> course, "Single systems" chapter, introduces unitary operations on qubit states with the same U†U = I definition and the same normalization-preservation argument.</p>
+
+  <p class="ask-teacher">If the "why is unitary exactly right, not just sufficient" parenthetical bugs you, ask your teacher — it's a nice short proof by considering what happens to ⟨φ|ψ⟩ for two different states, not just ⟨ψ|ψ⟩ for one. Next up: the specific gates you'll use constantly for the rest of this course, starting with the three Pauli gates.</p>
+
+  <footer class="lesson-footer">STEM+ · Quantum Computing · Lesson 6 of the course sequence</footer>
+</div>

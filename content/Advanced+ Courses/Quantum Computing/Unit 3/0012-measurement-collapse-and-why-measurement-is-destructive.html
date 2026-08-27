@@ -1,0 +1,103 @@
+<meta charset="UTF-8">
+<link rel="icon" href="../../../favicon.ico?v=1" type="image/x-icon">
+<title>Lesson 12: Measurement Collapse and Why Measurement Is Destructive — STEM+</title>
+<link rel="stylesheet" href="../../../assets/style.css">
+<script src="../../../assets/quiz.js" defer></script>
+<div class="page" data-tier="advanced">
+  <span class="kicker">STEM+ · Quantum Computing · Unit 3 · Lesson 12</span>
+  <h1>Measurement Collapse and Why Measurement Is Destructive</h1>
+  <p class="subtitle">Lesson 11 said what probability you get. This lesson says what happens to the qubit the instant afterward — and it's the single biggest constraint every quantum algorithm in this course has to work around.</p>
+  <p class="nav-links"><a href="0011-the-born-rule.html" class="nav-prev">← Lesson 11</a> <a href="0013-measuring-in-different-bases.html" class="nav-next">Lesson 13 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>The Born rule tells you the odds. It doesn't tell you what the qubit is doing a moment after you measure it. That's a second, separate postulate — and it's the reason a qubit's rich, continuous superposition is so hard to actually use for anything.</p>
+
+  <h2>1. Collapse</h2>
+  <div class="box">
+    <span class="box-label">Postulate — Measurement Collapse</span>
+    If a measurement of |ψ⟩ = α|0⟩ + β|1⟩ in the computational basis returns outcome i, the qubit's state immediately <strong>becomes</strong> |i⟩ — exactly the corresponding basis state, with probability 1 of returning that same outcome i if measured again right away. All information about the other amplitude is gone.
+  </div>
+  <p>This is not a statement about your knowledge changing — it's a claim that the physical state itself changes, discontinuously, at the moment of measurement. Before measuring |ψ⟩ = (3/5)|0⟩ + (4/5)|1⟩, the qubit genuinely carries both amplitudes. The instant a measurement returns outcome 0, the qubit is now, physically, in state |0⟩ — the 4/5 amplitude on |1⟩ isn't hiding somewhere; it's simply gone.</p>
+
+  <h2>2. Why a single measurement can't tell you α and β</h2>
+  <div class="box why">
+    <span class="box-label">Why "just look at the superposition" doesn't work</span>
+    A single measurement of a single qubit returns exactly one classical bit of information — which outcome occurred — and then destroys the state that produced it. You cannot re-measure the same qubit to get a second, independent look at α and β: after the first measurement, it's already collapsed to |0⟩ or |1⟩, and every subsequent measurement (in the same basis) just returns that same fixed outcome again. There is no way to extract the full continuous information α and β carried, from one qubit, with one measurement. This is precisely why the exponential state space Lesson 1.1 got excited about doesn't hand you an exponential amount of usable information for free — Lesson 26 returns to this exact tension when introducing quantum parallelism.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Example — Recovering Probabilities Statistically</span>
+    Suppose you have access to many independently prepared qubits, all in the identical unknown state |ψ⟩ = α|0⟩ + β|1⟩ (not the <em>same</em> physical qubit measured repeatedly — a fresh copy each time). Measuring 1,000 of them and finding roughly 640 give outcome 0 and 360 give outcome 1 lets you estimate |α|² ≈ 0.64, so |α| ≈ 0.8. This recovers the <em>magnitudes</em> of the amplitudes through repeated statistics on identical copies — but it still says nothing about the relative phase between α and β, which the computational-basis Born rule never sees at all (Lesson 11's worked example already showed this). Lesson 15 will show there's an even deeper obstacle to this whole approach: you cannot even manufacture those "many identical copies" from a single unknown qubit in the first place.
+  </div>
+
+  <h2>3. One measurement, one shot</h2>
+  <div class="box">
+    <span class="box-label">Fact — Measurement Is Destructive</span>
+    Measuring a qubit is a one-shot, irreversible operation on that specific qubit: the superposition it carried before measurement cannot be recovered afterward, and a second measurement (of the now-collapsed qubit) gives no new information. Contrast this sharply with the gates of Unit 2 — every gate is unitary and reversible; measurement is the one operation in this entire course that is neither.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. A qubit in state (3/5)|0⟩ + (4/5)|1⟩ is measured and the outcome is 0. What is the qubit's state immediately afterward?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">|0⟩ — collapsed exactly to the basis state matching the outcome.</button>
+      <button class="quiz-choice" data-correct="false">Still (3/5)|0⟩ + (4/5)|1⟩, unchanged.</button>
+      <button class="quiz-choice" data-correct="false">(4/5)|0⟩ + (3/5)|1⟩, with the amplitudes swapped.</button>
+      <button class="quiz-choice" data-correct="false">A random new superposition state.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Measurement collapse sends the state exactly to |0⟩ once outcome 0 is observed — all information about the original 4/5 amplitude on |1⟩ is gone.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. If you measure a qubit, get outcome 1, and immediately measure the same qubit again (same basis), what will the second measurement return?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">1, with certainty — the qubit already collapsed to |1⟩ after the first measurement.</button>
+      <button class="quiz-choice" data-correct="false">0, with certainty.</button>
+      <button class="quiz-choice" data-correct="false">1 or 0, each with 50% probability, same as before the first measurement.</button>
+      <button class="quiz-choice" data-correct="false">It's undefined — a qubit cannot be measured twice.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>After collapsing to |1⟩, the qubit is now exactly in that basis state, so measuring again (same basis) returns 1 with probability 1 — no new information, since the original superposition is already gone.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why can't a single measurement of a single unknown qubit ever tell you both α and β exactly?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because measurement devices are not sensitive enough with current technology.</button>
+      <button class="quiz-choice" data-correct="true">Because one measurement yields only one classical bit of information (which outcome occurred) and then collapses the state, destroying everything else it carried.</button>
+      <button class="quiz-choice" data-correct="false">Because α and β are always equal to each other.</button>
+      <button class="quiz-choice" data-correct="false">Because qubits do not actually have well-defined amplitudes.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Measurement returns exactly one outcome and then irreversibly collapses the state — there's no way to extract more than that one bit of information from a single measurement of a single qubit.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="collapse">
+    <p class="quiz-prompt">4. Fill in the blank: the instantaneous change of a qubit's state to a basis state upon measurement is called ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Collapse is the name for this discontinuous change — the state genuinely becomes the measured basis state, not merely "appears to."</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="copies">
+    <p class="quiz-prompt">5. Fill in the blank: to statistically estimate |α|² and |β|² for an unknown state, you need many independently prepared, identical ___ of that state — not repeated measurements of the same one qubit.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Fresh, independently prepared copies are required, since a single qubit only ever yields one measurement before collapsing — Lesson 15 shows this workaround has its own fundamental limit.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read before the next lesson: IBM Quantum Learning's <a href="https://learning.quantum.ibm.com/course/basics-of-quantum-information">Basics of Quantum Information</a> course, "Single systems" chapter, states the collapse postulate alongside the Born rule and discusses exactly this one-shot limitation on measurement.</p>
+
+  <p class="ask-teacher">If the "physical state actually changes, not just your knowledge of it" claim feels philosophically strange, that's a completely normal reaction — ask your teacher about the broader debate around interpreting collapse, just know this course takes the standard operational postulate as given rather than wading into that debate. Next up: measuring in a basis other than the computational one, and how that recovers information collapse alone seemed to hide.</p>
+
+  <footer class="lesson-footer">STEM+ · Quantum Computing · Lesson 12 of the course sequence</footer>
+</div>

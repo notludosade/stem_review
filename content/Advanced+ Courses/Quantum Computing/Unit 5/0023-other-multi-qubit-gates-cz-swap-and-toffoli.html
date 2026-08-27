@@ -1,0 +1,107 @@
+<meta charset="UTF-8">
+<link rel="icon" href="../../../favicon.ico?v=1" type="image/x-icon">
+<title>Lesson 23: Other Multi-Qubit Gates: CZ, SWAP, and Toffoli — STEM+</title>
+<link rel="stylesheet" href="../../../assets/style.css">
+<script src="../../../assets/quiz.js" defer></script>
+<div class="page" data-tier="advanced">
+  <span class="kicker">STEM+ · Quantum Computing · Unit 5 · Lesson 23</span>
+  <h1>Other Multi-Qubit Gates: CZ, SWAP, and Toffoli</h1>
+  <p class="subtitle">CNOT isn't the only multi-qubit gate worth knowing by name — one of these three finally answers Lesson 6's open question about whether classical AND has any quantum equivalent at all.</p>
+  <p class="nav-links"><a href="0022-building-bell-states-with-h-and-cnot.html" class="nav-prev">← Lesson 22</a> <a href="0024-reading-and-building-quantum-circuits.html" class="nav-next">Lesson 24 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <h2>1. CZ — controlled-Z</h2>
+  <div class="box">
+    <span class="box-label">Definition — CZ Gate</span>
+    CZ applies a Z gate to the target qubit if and only if the control qubit is |1⟩. As a matrix: CZ = diag(1, 1, 1, −1) — every basis state is left alone except |11⟩, which picks up a −1.
+  </div>
+  <div class="box why">
+    <span class="box-label">Why CZ doesn't actually need a "control" and "target" label</span>
+    Because CZ's matrix is diagonal and only touches |11⟩, it doesn't matter which qubit you call the control and which the target — the gate is exactly symmetric between the two qubits (relabeling qubit 1 and qubit 2 leaves the matrix unchanged). This is unlike CNOT, where swapping control and target genuinely changes the gate. CZ is a pure relative-phase gate on the two-qubit level, exactly analogous to Unit 2's single-qubit Z gate.
+  </div>
+
+  <h2>2. SWAP</h2>
+  <div class="box">
+    <span class="box-label">Definition — SWAP Gate</span>
+    SWAP exchanges the two qubits' states entirely: SWAP|00⟩ = |00⟩, SWAP|01⟩ = |10⟩, SWAP|10⟩ = |01⟩, SWAP|11⟩ = |11⟩. Like CNOT, it's a permutation matrix, so unitarity is automatic.
+  </div>
+  <div class="box example">
+    <span class="box-label">Fact — SWAP from Three CNOTs</span>
+    SWAP can be built entirely from three CNOT gates, alternating which qubit is the control: CNOT(1→2), then CNOT(2→1), then CNOT(1→2) again, reproduces SWAP exactly. Trace |10⟩ through it: CNOT(1→2) gives |11⟩ (control qubit 1 = 1, flip target); CNOT(2→1) gives |01⟩ (control qubit 2 = 1, flip qubit 1); CNOT(1→2) gives |01⟩ (control qubit 1 = 0 now, no change) — matching SWAP|10⟩ = |01⟩ exactly.
+  </div>
+
+  <h2>3. Toffoli — the reversible AND</h2>
+  <div class="box">
+    <span class="box-label">Definition — Toffoli Gate (CCNOT)</span>
+    The Toffoli gate acts on three qubits: two controls and one target. It flips the target if and only if <em>both</em> controls are |1⟩: Toffoli|c₁, c₂, t⟩ = |c₁, c₂, t ⊕ (c₁ AND c₂)⟩.
+  </div>
+  <div class="box why">
+    <span class="box-label">Why Toffoli finally answers Lesson 6's open question</span>
+    Lesson 6 pointed out that classical AND destroys information and has no direct single-qubit or simple two-qubit unitary equivalent. Toffoli is the resolution: initialize the target qubit to |0⟩, and Toffoli|c₁, c₂, 0⟩ = |c₁, c₂, c₁ AND c₂⟩ — the target now holds exactly the AND of the two control bits, and the whole operation is perfectly reversible (Toffoli is its own inverse, since flipping the same target twice under the same controls undoes itself). This is the standard trick for embedding any classical, even logically irreversible, computation into a reversible quantum circuit: keep every input bit around unchanged, and write outputs to freshly initialized ancilla qubits instead of overwriting inputs. In fact, {Toffoli, X} together (or even Toffoli alone, in the right configuration) is universal for classical reversible computation — any classical circuit can be built from Toffoli gates plus ancilla qubits, without ever losing information the way ordinary AND does.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What does CZ do to the state |11⟩?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Multiplies it by −1, giving −|11⟩.</button>
+      <button class="quiz-choice" data-correct="false">Leaves it completely unchanged.</button>
+      <button class="quiz-choice" data-correct="false">Flips it to |00⟩.</button>
+      <button class="quiz-choice" data-correct="false">Flips it to |10⟩.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>CZ = diag(1,1,1,−1) leaves every basis state alone except |11⟩, which gets multiplied by −1.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why doesn't it matter which qubit is labeled "control" for CZ, unlike for CNOT?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">CZ's matrix is symmetric between the two qubits — it only ever affects |11⟩, regardless of which qubit is called control or target.</button>
+      <button class="quiz-choice" data-correct="false">CZ doesn't actually act on two qubits at all.</button>
+      <button class="quiz-choice" data-correct="false">CZ is not a unitary gate, so labeling doesn't matter.</button>
+      <button class="quiz-choice" data-correct="false">It does matter — CZ behaves exactly like CNOT in this respect.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Because CZ's matrix is diagonal and touches only |11⟩ (the one basis state where both qubits agree), swapping which qubit is called "control" changes nothing about the matrix.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. What is SWAP|01⟩?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">|10⟩</button>
+      <button class="quiz-choice" data-correct="false">|01⟩</button>
+      <button class="quiz-choice" data-correct="false">|00⟩</button>
+      <button class="quiz-choice" data-correct="false">|11⟩</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>SWAP exchanges the two qubits' values entirely: 0 and 1 trade places, turning |01⟩ into |10⟩.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="CNOT|cnot">
+    <p class="quiz-prompt">4. Fill in the blank: SWAP can be built from three ___ gates in a row, alternating which qubit serves as the control each time.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Three alternating CNOTs — CNOT(1→2), then CNOT(2→1), then CNOT(1→2) — exactly reproduce SWAP.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="1">
+    <p class="quiz-prompt">5. Fill in the blank: the Toffoli gate flips its target qubit if and only if both control qubits are ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Toffoli flips the target exactly when both controls are 1 — implementing a reversible version of classical AND when the target starts at |0⟩.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read before the next lesson: IBM Quantum Learning's <a href="https://learning.quantum.ibm.com/course/basics-of-quantum-information">Basics of Quantum Information</a> course, "Multiple systems" chapter, defines CZ and SWAP the same way and discusses building SWAP from CNOTs.</p>
+
+  <p class="ask-teacher">Ask your teacher to walk through why Toffoli embedding AND requires a fresh ancilla qubit rather than overwriting an existing one — it's a small point but a genuinely important one for why quantum circuits tend to use more qubits than the "obvious" classical circuit would need. Next up: putting all of this unit's gates together into real, multi-step circuit diagrams.</p>
+
+  <footer class="lesson-footer">STEM+ · Quantum Computing · Lesson 23 of the course sequence</footer>
+</div>

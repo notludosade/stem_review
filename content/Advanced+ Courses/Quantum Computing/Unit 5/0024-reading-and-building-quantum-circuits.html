@@ -1,0 +1,118 @@
+<meta charset="UTF-8">
+<link rel="icon" href="../../../favicon.ico?v=1" type="image/x-icon">
+<title>Lesson 24: Reading and Building Quantum Circuits — STEM+</title>
+<link rel="stylesheet" href="../../../assets/style.css">
+<script src="../../../assets/quiz.js" defer></script>
+<div class="page" data-tier="advanced">
+  <span class="kicker">STEM+ · Quantum Computing · Unit 5 · Lesson 24</span>
+  <h1>Reading and Building Quantum Circuits</h1>
+  <p class="subtitle">One longer circuit, mixing single- and multi-qubit gates, traced completely from |00⟩ to a final measurement — everything this unit has built, in one worked example.</p>
+  <p class="nav-links"><a href="0023-other-multi-qubit-gates-cz-swap-and-toffoli.html" class="nav-prev">← Lesson 23</a> <a href="0025-universal-gate-sets.html" class="nav-next">Lesson 25 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Lesson 2.10 established the order-reversal rule for single-qubit circuits. Multi-qubit circuits follow the exact same rule, just with more wires to track at once — and two more notational pieces worth having names for: the measurement symbol, and the classical wire.</p>
+
+  <h2>1. Two new notation pieces</h2>
+  <div class="box">
+    <span class="box-label">Convention — Measurement and Classical Wires</span>
+    A <strong>meter</strong> symbol on a wire marks a measurement at that point in the circuit. After a measurement, the classical outcome is sometimes carried forward on a <strong>classical wire</strong>, conventionally drawn as a double line, to control a later gate (applying it only if the classical bit equals 1, for instance) — this pattern is exactly how quantum teleportation, which Lesson 22 gestured at, uses a measurement result to decide a correction gate.
+  </div>
+
+  <h2>2. A full worked trace</h2>
+  <svg class="figure" viewBox="0 0 380 110" width="380" height="110">
+    <text class="fig-label" x="8" y="30">|0⟩</text>
+    <line class="fig-axis" x1="45" y1="26" x2="350" y2="26"></line>
+    <rect x="80" y="8" width="34" height="36" fill="none" stroke="var(--accent)" stroke-width="2"></rect>
+    <text x="97" y="31" text-anchor="middle" font-size="14" fill="var(--accent)">H</text>
+    <circle cx="180" cy="26" r="6" fill="var(--accent)"></circle>
+    <rect x="260" y="8" width="34" height="36" fill="none" stroke="var(--accent)" stroke-width="2"></rect>
+    <text x="277" y="31" text-anchor="middle" font-size="14" fill="var(--accent)">Z</text>
+    <text class="fig-label" x="8" y="90">|0⟩</text>
+    <line class="fig-axis" x1="45" y1="86" x2="350" y2="86"></line>
+    <rect x="80" y="68" width="34" height="36" fill="none" stroke="var(--accent)" stroke-width="2"></rect>
+    <text x="97" y="91" text-anchor="middle" font-size="14" fill="var(--accent)">X</text>
+    <circle cx="180" cy="86" r="12" fill="none" stroke="var(--accent)" stroke-width="2"></circle>
+    <line x1="180" y1="80" x2="180" y2="92" stroke="var(--accent)" stroke-width="2"></line>
+    <line x1="174" y1="86" x2="186" y2="86" stroke="var(--accent)" stroke-width="2"></line>
+    <line x1="180" y1="32" x2="180" y2="74" stroke="var(--accent)" stroke-width="1.5"></line>
+    <text class="fig-label" x="325" y="20">M</text>
+    <text class="fig-label" x="325" y="80">M</text>
+  </svg>
+  <figcaption>Qubit 1: H, then (as control) CNOT, then Z, then measure. Qubit 2: X, then (as target) CNOT, then measure.</figcaption>
+
+  <div class="box">
+    <span class="box-label">Trace — Step by Step</span>
+    Start: |00⟩. Apply X to qubit 2: |0⟩ ⊗ X|0⟩ = |01⟩. Apply H to qubit 1: (H|0⟩) ⊗ |1⟩ = |+⟩ ⊗ |1⟩ = (|01⟩ + |11⟩)/√2. Apply CNOT (qubit 1 control, qubit 2 target): CNOT|01⟩ = |01⟩ (control 0, unchanged), CNOT|11⟩ = |10⟩ (control 1, target flips) — giving (|01⟩ + |10⟩)/√2 = |Ψ⁺⟩. Apply Z to qubit 1: Z leaves the |0⟩ term of |01⟩ untouched, but multiplies the |1⟩ term of |10⟩ by −1 — giving (|01⟩ − |10⟩)/√2 = |Ψ⁻⟩. The final state, right before measurement, is the Bell state |Ψ⁻⟩.
+  </div>
+  <p>Measuring both qubits now gives perfectly anti-correlated, individually random outcomes — exactly Lesson 19's entanglement signature, arrived at here through a circuit mixing single-qubit gates (X, H, Z) with the two-qubit CNOT, traced using the same left-to-right, then-reversed-into-a-matrix-product rule as any single-qubit circuit.</p>
+
+  <div class="box why">
+    <span class="box-label">Why tracing basis-state-by-basis-state beats writing out the full matrix</span>
+    A two-qubit circuit corresponds to an 4×4 matrix product, and a five-qubit circuit to a 32×32 one — multiplying these out directly gets unwieldy fast. Tracing a superposition term by term through each gate, as this example did, scales far better by hand: apply each gate to each basis term currently present, using the single- or two-qubit rule directly, and only worry about the handful of terms that are actually there rather than a full matrix. This is the practical skill worth building fluency in before Unit 6's circuits add even more gates.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. In the traced circuit, what is the state after applying X to qubit 2 and then H to qubit 1 (before CNOT)?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">(|01⟩ + |11⟩)/√2</button>
+      <button class="quiz-choice" data-correct="false">(|00⟩ + |10⟩)/√2</button>
+      <button class="quiz-choice" data-correct="false">|01⟩, unchanged by H.</button>
+      <button class="quiz-choice" data-correct="false">(|01⟩ + |10⟩)/√2</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>X on qubit 2 first gives |01⟩; H on qubit 1 then gives |+⟩ ⊗ |1⟩ = (|01⟩+|11⟩)/√2.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Continuing the trace, what is the state right after CNOT (before the final Z)?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">|Ψ⁺⟩ = (|01⟩ + |10⟩)/√2</button>
+      <button class="quiz-choice" data-correct="false">|Φ⁺⟩ = (|00⟩ + |11⟩)/√2</button>
+      <button class="quiz-choice" data-correct="false">(|01⟩ + |11⟩)/√2, unchanged by CNOT.</button>
+      <button class="quiz-choice" data-correct="false">|Ψ⁻⟩ = (|01⟩ − |10⟩)/√2</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>CNOT leaves |01⟩ alone (control 0) and flips |11⟩'s target to give |10⟩ (control 1), producing (|01⟩+|10⟩)/√2 = |Ψ⁺⟩.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. What is the final state of the full circuit, after the closing Z gate on qubit 1?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">|Ψ⁻⟩ = (|01⟩ − |10⟩)/√2</button>
+      <button class="quiz-choice" data-correct="false">|Ψ⁺⟩ = (|01⟩ + |10⟩)/√2, unchanged by Z.</button>
+      <button class="quiz-choice" data-correct="false">|Φ⁻⟩ = (|00⟩ − |11⟩)/√2</button>
+      <button class="quiz-choice" data-correct="false">|01⟩, no longer entangled.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Z leaves |01⟩'s qubit-1-is-0 term alone but multiplies |10⟩'s qubit-1-is-1 term by −1, giving (|01⟩−|10⟩)/√2 = |Ψ⁻⟩.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="meter">
+    <p class="quiz-prompt">4. Fill in the blank: the symbol marking a measurement at a specific point in a circuit diagram is called a ___ symbol.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A meter symbol marks where in the circuit a qubit is measured, converting a quantum wire's contents into a classical outcome.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="classical">
+    <p class="quiz-prompt">5. Fill in the blank: a double line in a circuit diagram represents a ___ wire, carrying a measurement outcome forward to possibly control a later gate.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A classical wire (double line) is the standard way to show a measured, classical bit feeding forward into the rest of the circuit — exactly the mechanism quantum teleportation relies on.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read before the next lesson: IBM Quantum Learning's <a href="https://learning.quantum.ibm.com/course/basics-of-quantum-information">Basics of Quantum Information</a> course, "Quantum circuits" chapter, covers circuit notation including measurement symbols and classical wires, with several multi-gate traced examples of its own.</p>
+
+  <p class="ask-teacher">Ask your teacher for one more multi-gate circuit to trace independently, then check your answer together — repetition here is what makes Unit 6's longer algorithm circuits feel manageable instead of overwhelming. Next up: the smallest set of gates that can build any quantum circuit at all, closing out this unit.</p>
+
+  <footer class="lesson-footer">STEM+ · Quantum Computing · Lesson 24 of the course sequence</footer>
+</div>

@@ -1,0 +1,103 @@
+<meta charset="UTF-8">
+<link rel="icon" href="../../../favicon.ico?v=1" type="image/x-icon">
+<title>Lesson 31: Grover's Search Algorithm: The Problem and the Oracle — STEM+</title>
+<link rel="stylesheet" href="../../../assets/style.css">
+<script src="../../../assets/quiz.js" defer></script>
+<div class="page" data-tier="advanced">
+  <span class="kicker">STEM+ · Quantum Computing · Unit 7 · Lesson 31</span>
+  <h1>Grover's Search Algorithm: The Problem and the Oracle</h1>
+  <p class="subtitle">Unit 6 solved an artificial problem exponentially faster. This unit opens with a problem that shows up everywhere — unstructured search — solved by a quantum algorithm with real, broad applicability.</p>
+  <p class="nav-links"><a href="../Unit%206/0030-query-complexity-and-real-speedups.html" class="nav-prev">← Lesson 30</a> <a href="0032-the-diffusion-operator-and-quadratic-speedup.html" class="nav-next">Lesson 32 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p><strong>Grover's algorithm</strong>, developed by Lov Grover, solves unstructured search — a problem so generic it underlies database lookups, satisfiability checking, cracking symmetric-key ciphers by brute force, and more — faster than any classical algorithm can, without needing any special structure in the search space.</p>
+
+  <h2>1. The problem</h2>
+  <div class="box">
+    <span class="box-label">Problem — Unstructured Search</span>
+    Given oracle access to f: {0, ..., N−1} → {0,1} (N = 2ⁿ possible items), where exactly one item x₀ satisfies f(x₀) = 1 (the "marked" item) and every other item gives f(x) = 0, find x₀.
+  </div>
+  <p>"Unstructured" means exactly what it sounds like: nothing about how the items are arranged tells you anything about where x₀ is likely to be. There's no sorting, no ordering, no hint — the only way to learn anything is to query f at a specific item and see whether it's marked.</p>
+
+  <div class="box why">
+    <span class="box-label">Why this needs Θ(N) queries classically</span>
+    With no structure to exploit, a classical algorithm has no better strategy than checking items one at a time (in any order, since no order is favored) until it finds the marked one. In the worst case, this takes N queries (the marked item is checked last); on average, it takes about N/2. Either way, the query count scales linearly with N — doubling the search space roughly doubles the work required, with no way around it classically.
+  </div>
+
+  <h2>2. The Grover oracle as a phase flip</h2>
+  <div class="box">
+    <span class="box-label">Definition — Grover Oracle</span>
+    Grover's algorithm uses the oracle in phase-flip form (Lesson 27's phase kickback, packaged as its own operator): O<sub>f</sub>|x⟩ = (−1)<sup>f(x)</sup>|x⟩. Since f(x) = 1 only for x = x₀: O<sub>f</sub>|x₀⟩ = −|x₀⟩, and O<sub>f</sub>|x⟩ = |x⟩ for every other x.
+  </div>
+  <p>This is exactly Lesson 27's phase kickback in action — pair the search register with an ancilla qubit prepared in |−⟩, apply the ordinary y-flipping oracle, and the |−⟩ factors out, leaving precisely this phase-flip behavior on the search register alone. O<sub>f</sub> marks the target item with a lone minus sign, hidden among N−1 unchanged terms, amid a uniform superposition.</p>
+
+  <div class="box example">
+    <span class="box-label">Example — What O<sub>f</sub> Does to the Uniform Superposition</span>
+    Start with the uniform superposition |s⟩ = H<sup>⊗n</sup>|0⟩<sup>⊗n</sup> = (1/√N) Σₓ |x⟩, every item weighted equally. Applying O<sub>f</sub> gives (1/√N)[Σ<sub>x≠x₀</sub> |x⟩ − |x₀⟩] — every amplitude is still 1/√N in magnitude, so a measurement right now would still find x₀ with only 1/N probability, no better than blind luck. The oracle alone hasn't helped yet; it's only flagged x₀ with an invisible sign flip. Lesson 32 introduces the second operator — diffusion — that turns this hidden sign flip into an actually detectable boost in x₀'s measurement probability.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What makes unstructured search "unstructured"?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Nothing about the arrangement of items gives any hint about where the marked item is — only directly querying an item reveals whether it's marked.</button>
+      <button class="quiz-choice" data-correct="false">The items are stored in a random order that changes on every query.</button>
+      <button class="quiz-choice" data-correct="false">There is no marked item to find.</button>
+      <button class="quiz-choice" data-correct="false">The oracle is not a valid unitary operation.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>"Unstructured" means the search space provides no exploitable ordering or hint — direct queries are the only source of information.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. How does the classical query count for finding the marked item scale with N (the number of items)?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Linearly — roughly N/2 on average, up to N in the worst case.</button>
+      <button class="quiz-choice" data-correct="false">Logarithmically — about log₂N queries.</button>
+      <button class="quiz-choice" data-correct="false">Constant — a fixed small number of queries, regardless of N.</button>
+      <button class="quiz-choice" data-correct="false">It's impossible classically, regardless of N.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>With no exploitable structure, checking items one at a time is optimal classically, giving query counts that scale linearly with N.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. What does the Grover oracle O<sub>f</sub> do to the marked item |x₀⟩?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Flips its sign: O_f|x₀⟩ = −|x₀⟩.</button>
+      <button class="quiz-choice" data-correct="false">Leaves it completely unchanged.</button>
+      <button class="quiz-choice" data-correct="false">Sets its amplitude to exactly 1.</button>
+      <button class="quiz-choice" data-correct="false">Measures it immediately and returns a classical value.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>O_f|x⟩ = (−1)^f(x)|x⟩, and since f(x₀) = 1, the marked item's sign is flipped while every other item is left alone.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="unchanged">
+    <p class="quiz-prompt">4. Fill in the blank: the Grover oracle leaves every non-marked item ___, applying a sign flip only to the marked item.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Only x₀ picks up the −1 factor; every other basis state's amplitude is untouched by O_f.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="1024">
+    <p class="quiz-prompt">5. Fill in the blank: for a search space built from n = 10 qubits, N = 2ⁿ = ___ items.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>2¹⁰ = 1024 — the search space size grows exponentially with the number of qubits, as always.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read before the next lesson: IBM Quantum Learning's <a href="https://learning.quantum.ibm.com/course/fundamentals-of-quantum-algorithms">Fundamentals of Quantum Algorithms</a> course introduces Grover's algorithm with the same phase-flip oracle convention, connecting it back to phase kickback.</p>
+
+  <p class="ask-teacher">Ask your teacher for a few real examples of unstructured search showing up in other fields (brute-force key search in cryptography is the most cited one) if you want a sense of why this specific problem was worth building a whole algorithm around. Next up: the second operator, diffusion, that actually makes the marked item's sign flip pay off.</p>
+
+  <footer class="lesson-footer">STEM+ · Quantum Computing · Lesson 31 of the course sequence</footer>
+</div>

@@ -1,0 +1,106 @@
+<meta charset="UTF-8">
+<link rel="icon" href="../../../favicon.ico?v=1" type="image/x-icon">
+<title>Lesson 8: The Hadamard Gate — STEM+</title>
+<link rel="stylesheet" href="../../../assets/style.css">
+<script src="../../../assets/quiz.js" defer></script>
+<div class="page" data-tier="advanced">
+  <span class="kicker">STEM+ · Quantum Computing · Unit 2 · Lesson 8</span>
+  <h1>The Hadamard Gate</h1>
+  <p class="subtitle">One matrix turns a definite classical-looking bit into a perfect 50/50 superposition — and nearly every quantum algorithm in Units 6 and 7 opens by applying it.</p>
+  <p class="nav-links"><a href="0007-the-pauli-gates-x-y-and-z.html" class="nav-prev">← Lesson 7</a> <a href="0009-phase-gates-s-and-t.html" class="nav-next">Lesson 9 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>The Pauli gates all send basis states to basis states (up to a phase) — they never create a genuine superposition out of |0⟩ or |1⟩ on their own. The <strong>Hadamard gate</strong>, named for mathematician Jacques Hadamard, does exactly the opposite: it's the standard way to turn a definite state into an equal superposition, and it's the single most-used gate in this course from here on.</p>
+
+  <h2>1. The Hadamard matrix</h2>
+  <div class="box">
+    <span class="box-label">Definition — Hadamard Gate</span>
+    H = (1/√2)[[1, 1], [1, −1]].
+  </div>
+  <p>Applying it to the basis states:</p>
+  <div class="expr-block">H|0⟩ = (1/√2)(|0⟩ + |1⟩) = |+⟩&emsp;&emsp;H|1⟩ = (1/√2)(|0⟩ − |1⟩) = |−⟩</div>
+  <p>These are exactly Lesson 3's named states. H is the standard tool for producing them: apply it to |0⟩ or |1⟩ (states with no superposition at all) and out comes a perfectly balanced 50/50 combination.</p>
+
+  <h2>2. H is self-inverse</h2>
+  <div class="box">
+    <span class="box-label">Fact — H² = I</span>
+    Applying H twice in a row returns the original state. Check: H² = (1/√2)[[1,1],[1,−1]] · (1/√2)[[1,1],[1,−1]] = (1/2)[[1+1, 1−1],[1−1, 1+1]] = (1/2)[[2,0],[0,2]] = [[1,0],[0,1]] = I.
+  </div>
+  <p>Since H is real and symmetric, H† = H, so H†H = H² = I confirms H is unitary via Lesson 6's definition, with the pleasant bonus that H is its own inverse — applying it a second time exactly undoes the first application.</p>
+
+  <div class="box example">
+    <span class="box-label">Example — H Applied Twice</span>
+    H(H|0⟩) = H|+⟩ = H · (1/√2)(|0⟩ + |1⟩) = (1/√2)(H|0⟩ + H|1⟩) = (1/√2)(|+⟩ + |−⟩). Now substitute the definitions: (1/√2)[(1/√2)(|0⟩+|1⟩) + (1/√2)(|0⟩−|1⟩)] = (1/2)[(|0⟩+|1⟩) + (|0⟩−|1⟩)] = (1/2)(2|0⟩) = |0⟩. As guaranteed by H² = I, the state returns exactly to |0⟩.
+  </div>
+
+  <h2>3. Why this gate matters so much</h2>
+  <div class="box why">
+    <span class="box-label">Why H is the standard "create superposition" gate</span>
+    Most quantum algorithms need to start by exploring many possible inputs simultaneously — Unit 6's quantum parallelism depends on it. Applying H to each of n qubits initialized at |0⟩ produces an equal superposition of all 2ⁿ basis states at once (Lesson 5.17 makes this precise for multiple qubits), the standard starting point for Deutsch-Jozsa, Grover's algorithm, and Shor's algorithm alike. H is doing exactly the same geometric thing every time: a 180° Bloch-sphere rotation about the axis exactly halfway between the x-axis and the z-axis, which is why applying it to a pole (|0⟩ or |1⟩, on the z-axis) lands you precisely on the equator (an equal-weight superposition).
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What is H|0⟩?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">|+⟩ = (|0⟩ + |1⟩)/√2</button>
+      <button class="quiz-choice" data-correct="false">|−⟩ = (|0⟩ − |1⟩)/√2</button>
+      <button class="quiz-choice" data-correct="false">|1⟩</button>
+      <button class="quiz-choice" data-correct="false">|0⟩, unchanged.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>H(1,0)ᵀ = (1/√2)(1,1)ᵀ = |+⟩ — H sends the first basis state to the equal-weight superposition with a plus sign.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. What is H|1⟩?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">|−⟩ = (|0⟩ − |1⟩)/√2</button>
+      <button class="quiz-choice" data-correct="false">|+⟩ = (|0⟩ + |1⟩)/√2</button>
+      <button class="quiz-choice" data-correct="false">|0⟩</button>
+      <button class="quiz-choice" data-correct="false">−|1⟩</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>H(0,1)ᵀ = (1/√2)(1,−1)ᵀ = |−⟩ — H sends the second basis state to the equal-weight superposition with a minus sign.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. What is H|−⟩?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">|1⟩</button>
+      <button class="quiz-choice" data-correct="false">|0⟩</button>
+      <button class="quiz-choice" data-correct="false">|+⟩</button>
+      <button class="quiz-choice" data-correct="false">|−⟩, unchanged.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Since H is its own inverse and H|1⟩ = |−⟩, applying H again must send |−⟩ back to |1⟩ — H|−⟩ = |1⟩.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="I|identity">
+    <p class="quiz-prompt">4. Fill in the blank: because the Hadamard gate is its own inverse, H² = ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Applying H twice undoes itself completely, so H² is the identity matrix — H reverses itself exactly.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="superposition">
+    <p class="quiz-prompt">5. Fill in the blank: applying H to a basis state |0⟩ or |1⟩ produces an equal-weight ___, the standard starting point for most quantum algorithms.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Superposition is exactly what H produces from a definite basis state — the resource Units 6 and 7's algorithms are built to exploit.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read before the next lesson: IBM Quantum Learning's <a href="https://learning.quantum.ibm.com/course/basics-of-quantum-information">Basics of Quantum Information</a> course, "Single systems" chapter, defines the Hadamard gate the same way and shows its action on both basis states explicitly.</p>
+
+  <p class="ask-teacher">If you want to see the Bloch-sphere-rotation picture drawn out — the axis halfway between x and z — ask your teacher for a sketch; it makes H² = I visually obvious in a way the matrix algebra alone doesn't. Next up: two more single-qubit gates that add relative phase without touching the |0⟩ amplitude at all.</p>
+
+  <footer class="lesson-footer">STEM+ · Quantum Computing · Lesson 8 of the course sequence</footer>
+</div>

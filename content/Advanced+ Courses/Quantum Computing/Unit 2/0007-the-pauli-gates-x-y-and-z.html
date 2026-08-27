@@ -1,0 +1,116 @@
+<meta charset="UTF-8">
+<link rel="icon" href="../../../favicon.ico?v=1" type="image/x-icon">
+<title>Lesson 7: The Pauli Gates: X, Y, and Z — STEM+</title>
+<link rel="stylesheet" href="../../../assets/style.css">
+<script src="../../../assets/quiz.js" defer></script>
+<div class="page" data-tier="advanced">
+  <span class="kicker">STEM+ · Quantum Computing · Unit 2 · Lesson 7</span>
+  <h1>The Pauli Gates: X, Y, and Z</h1>
+  <p class="subtitle">Three matrices, one for each Bloch-sphere axis — the quantum NOT, the quantum phase flip, and the gate that does a bit of both.</p>
+  <p class="nav-links"><a href="0006-quantum-gates-as-unitary-matrices.html" class="nav-prev">← Lesson 6</a> <a href="0008-the-hadamard-gate.html" class="nav-next">Lesson 8 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>The three <strong>Pauli gates</strong>, named for physicist Wolfgang Pauli, are the single most important trio of matrices in this course. They're small enough to memorize, unitary (you can check each one against Lesson 6's definition), and every one of them is its own inverse — applying any Pauli gate twice in a row does nothing at all.</p>
+
+  <h2>1. The X gate — bit flip</h2>
+  <div class="box">
+    <span class="box-label">Definition — Pauli X</span>
+    X = [[0, 1], [1, 0]]. Acting on the basis states: X|0⟩ = |1⟩, and X|1⟩ = |0⟩.
+  </div>
+  <p>X swaps the two basis states — it's exactly the quantum version of the classical NOT gate, and it's often just called the <strong>bit-flip gate</strong> for that reason. On a general state, X(α|0⟩ + β|1⟩) = α|1⟩ + β|0⟩ — the amplitudes swap places.</p>
+
+  <h2>2. The Z gate — phase flip</h2>
+  <div class="box">
+    <span class="box-label">Definition — Pauli Z</span>
+    Z = [[1, 0], [0, −1]]. Acting on the basis states: Z|0⟩ = |0⟩, and Z|1⟩ = −|1⟩.
+  </div>
+  <p>Z leaves |0⟩ completely alone and multiplies |1⟩'s amplitude by −1. On a general state, Z(α|0⟩ + β|1⟩) = α|0⟩ − β|1⟩. Notice this does <em>not</em> change the Born-rule probabilities in the computational basis — |α|² and |−β|² = |β|² are the same as before. Z is invisible if you only ever measure in the Z (computational) basis; it's a pure <strong>relative-phase</strong> operation, in exactly Lesson 1.5's sense, which Lesson 13 will show becomes very visible once you measure in a different basis.</p>
+
+  <h2>3. The Y gate — both at once</h2>
+  <div class="box">
+    <span class="box-label">Definition — Pauli Y</span>
+    Y = [[0, −i], [i, 0]]. Acting on the basis states: Y|0⟩ = i|1⟩, and Y|1⟩ = −i|0⟩.
+  </div>
+  <p>Y swaps the basis states like X does, but also multiplies by ±i along the way — it combines a bit flip and a phase-like factor in one gate. (Up to an overall phase, Y = iXZ; you can verify this by direct matrix multiplication if you'd like the algebra to confirm it.)</p>
+
+  <div class="box example">
+    <span class="box-label">Example — Checking Y Is Unitary</span>
+    Y† = conjugate transpose of [[0,−i],[i,0]] is [[0,−i],[i,0]] itself here (conjugating flips the sign of each i, and transposing swaps the off-diagonal positions, which for this particular matrix returns the same matrix). So Y†Y = Y·Y. Direct computation: Y² = [[(0)(0)+(−i)(i), (0)(−i)+(−i)(0)], [(i)(0)+(0)(i), (i)(−i)+(0)(0)]] = [[1, 0], [0, 1]] = I. Y is unitary, and it's its own inverse.
+  </div>
+
+  <h2>4. All three are self-inverse</h2>
+  <div class="box">
+    <span class="box-label">Fact</span>
+    X² = Y² = Z² = I. Every Pauli gate undoes itself: apply any one of them twice, and you're back where you started.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why these are called "rotations" of the Bloch sphere</span>
+    Geometrically, X, Y, and Z each act as a 180° (π) rotation of the Bloch sphere about their own axis — X about the x-axis, Y about the y-axis, Z about the z-axis, using the sphere's natural (x,y,z) coordinates (with |0⟩ and |1⟩ sitting at the north and south poles along z). This is why applying any one twice returns you to your starting point: two 180° turns about the same axis is a full 360° turn, which is the identity. The full derivation uses a rotation-generator formalism beyond this course's scope, but the picture — three perpendicular 180° flips — is worth carrying forward, since Unit 2's circuits are really just sequences of small rotations of a point on this same sphere.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What does the X gate do to a general state α|0⟩ + β|1⟩?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Swaps the amplitudes: produces β|0⟩ + α|1⟩.</button>
+      <button class="quiz-choice" data-correct="false">Multiplies the |1⟩ amplitude by −1: produces α|0⟩ − β|1⟩.</button>
+      <button class="quiz-choice" data-correct="false">Leaves the state completely unchanged.</button>
+      <button class="quiz-choice" data-correct="false">Sets both amplitudes to zero.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>X = [[0,1],[1,0]] swaps the two components of the state vector, exactly matching the classical NOT gate's role of flipping a bit.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why is the Z gate invisible if you only ever measure in the computational (Z) basis?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because Z is the identity matrix.</button>
+      <button class="quiz-choice" data-correct="true">Because Z only introduces a relative phase (a sign flip on |1⟩'s amplitude), and |−β|² = |β|² leaves the measurement probabilities unchanged.</button>
+      <button class="quiz-choice" data-correct="false">Because Z is not a unitary matrix.</button>
+      <button class="quiz-choice" data-correct="false">Because Z always sends every state to |0⟩.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Z multiplies only the |1⟩ amplitude by −1 — a relative phase change that leaves both squared magnitudes, and hence both computational-basis probabilities, exactly as they were.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. What is Y|1⟩?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">−i|0⟩</button>
+      <button class="quiz-choice" data-correct="false">i|0⟩</button>
+      <button class="quiz-choice" data-correct="false">i|1⟩</button>
+      <button class="quiz-choice" data-correct="false">|0⟩</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Y = [[0,−i],[i,0]] applied to (0,1)ᵀ gives (−i·1, 0·1)ᵀ = (−i, 0)ᵀ = −i|0⟩.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="NOT|not|quantum not">
+    <p class="quiz-prompt">4. Fill in the blank: because it swaps |0⟩ and |1⟩, the X gate is often called the quantum ___ gate.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>X is the direct quantum analogue of the classical NOT gate — both flip a bit's value.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="I|identity">
+    <p class="quiz-prompt">5. Fill in the blank: for every Pauli gate, applying it twice in a row gives the ___ matrix — X² = Y² = Z² = ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Every Pauli gate is its own inverse, so squaring any of them returns the identity — geometrically, two 180° Bloch-sphere rotations about the same axis make a full turn.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read before the next lesson: IBM Quantum Learning's <a href="https://learning.quantum.ibm.com/course/basics-of-quantum-information">Basics of Quantum Information</a> course, "Single systems" chapter, defines all three Pauli operations with the same matrices and works through their action on the computational basis states.</p>
+
+  <p class="ask-teacher">Ask your teacher to show you the direct matrix computation confirming Y = iXZ if you want to double-check that relationship yourself. Next up: the single most important gate in the entire course — the one that turns a basis state into an equal superposition.</p>
+
+  <footer class="lesson-footer">STEM+ · Quantum Computing · Lesson 7 of the course sequence</footer>
+</div>

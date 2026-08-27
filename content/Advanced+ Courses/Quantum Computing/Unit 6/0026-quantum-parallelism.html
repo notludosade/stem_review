@@ -1,0 +1,105 @@
+<meta charset="UTF-8">
+<link rel="icon" href="../../../favicon.ico?v=1" type="image/x-icon">
+<title>Lesson 26: Quantum Parallelism — STEM+</title>
+<link rel="stylesheet" href="../../../assets/style.css">
+<script src="../../../assets/quiz.js" defer></script>
+<div class="page" data-tier="advanced">
+  <span class="kicker">STEM+ · Quantum Computing · Unit 6 · Lesson 26</span>
+  <h1>Quantum Parallelism</h1>
+  <p class="subtitle">One quantum query can evaluate a function on every input at once — a genuinely remarkable fact that, on its own, buys you nothing at all. This lesson shows exactly why, setting up the trick that actually fixes it.</p>
+  <p class="nav-links"><a href="../Unit%205/0025-universal-gate-sets.html" class="nav-prev">← Lesson 25</a> <a href="0027-interference-and-phase-kickback.html" class="nav-next">Lesson 27 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Every quantum algorithm this course studies is built around a function f whose values are computed by a black-box unitary gate, called an <strong>oracle</strong>. This lesson introduces the oracle model and the first, most basic trick every quantum algorithm exploits — and immediately shows why that trick alone isn't enough to be useful.</p>
+
+  <h2>1. The oracle model</h2>
+  <div class="box">
+    <span class="box-label">Definition — Oracle</span>
+    For a function f: {0,1} → {0,1}, its <strong>oracle</strong> is a unitary gate U<sub>f</sub> acting on two qubits: U<sub>f</sub>|x⟩|y⟩ = |x⟩|y ⊕ f(x)⟩, where ⊕ is addition mod 2 (XOR). The input register |x⟩ is left unchanged; the output register |y⟩ is flipped exactly when f(x) = 1.
+  </div>
+  <p>U<sub>f</sub> is unitary (in fact a permutation matrix on the relevant basis states) precisely because XOR-ing with a fixed value is always invertible — applying U<sub>f</sub> twice with the same x returns y to its original value. This oracle framing treats f as a resource you can query, without caring how f is actually computed internally — exactly the right abstraction for comparing classical and quantum query counts, which Lesson 30 makes precise.</p>
+
+  <h2>2. Evaluating f on a superposition</h2>
+  <div class="box">
+    <span class="box-label">Fact — Quantum Parallelism</span>
+    Apply U<sub>f</sub> to H|0⟩ ⊗ |0⟩ = |+⟩ ⊗ |0⟩ = (|0⟩|0⟩ + |1⟩|0⟩)/√2:
+  </div>
+  <div class="expr-block">U<sub>f</sub>[(|0⟩|0⟩ + |1⟩|0⟩)/√2] = (|0⟩|f(0)⟩ + |1⟩|f(1)⟩)/√2</div>
+  <p>A single application of U<sub>f</sub> — one query — has produced a state that encodes both f(0) and f(1) simultaneously, in superposition. Classically, computing both f(0) and f(1) requires two separate calls to f. This is <strong>quantum parallelism</strong>: superposition lets one oracle query touch every input at once.</p>
+
+  <h2>3. Why this alone is not yet a speedup</h2>
+  <div class="box why">
+    <span class="box-label">Why measuring this state right away wastes the parallelism entirely</span>
+    Measure (|0⟩|f(0)⟩ + |1⟩|f(1)⟩)/√2 immediately, and Lesson 12's collapse takes over: you get x = 0 together with f(0), or x = 1 together with f(1), each with 50% probability — never both. You learn the value of f at exactly one input, chosen at random, exactly as if you had classically picked one input at random and evaluated f there directly. The "both values at once" promise of quantum parallelism evaporates the instant you measure carelessly — it is not, by itself, a free lunch. Getting an actual advantage out of this state requires processing it further, <em>before</em> measuring, in a way that combines information from both branches into something a single measurement can usefully reveal. That processing is <strong>interference</strong>, and it's the entire subject of Lesson 27.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Example — Scaling to n Input Bits</span>
+    For f: {0,1}ⁿ → {0,1}, the same idea scales up directly: apply H to n input qubits, all starting at |0⟩, to get an equal superposition of all 2ⁿ inputs, then apply U<sub>f</sub>. The result is (1/√2ⁿ) Σₓ |x⟩|f(x)⟩, summed over all 2ⁿ possible n-bit strings x — every value of f, computed with a single oracle query, sitting in one superposition. Lessons 29 and 31 both build directly on exactly this construction.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What does the oracle U<sub>f</sub> do to |x⟩|y⟩?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Produces |x⟩|y ⊕ f(x)⟩ — the input register is untouched, the output register is flipped exactly when f(x) = 1.</button>
+      <button class="quiz-choice" data-correct="false">Produces |f(x)⟩|f(x)⟩, overwriting both registers.</button>
+      <button class="quiz-choice" data-correct="false">Measures x and returns a classical value.</button>
+      <button class="quiz-choice" data-correct="false">Produces |x⟩|y⟩, unchanged, unless x = y.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The oracle's defining action is exactly U_f|x⟩|y⟩ = |x⟩|y⊕f(x)⟩ — a reversible way to compute f into the output register without disturbing the input.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. What is the result of applying U<sub>f</sub> to |+⟩ ⊗ |0⟩?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">(|0⟩|f(0)⟩ + |1⟩|f(1)⟩)/√2</button>
+      <button class="quiz-choice" data-correct="false">|f(0)⟩ ⊗ |f(1)⟩</button>
+      <button class="quiz-choice" data-correct="false">|+⟩ ⊗ |0⟩, unchanged.</button>
+      <button class="quiz-choice" data-correct="false">A classical bit equal to f(0) AND f(1).</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>One query to U_f, applied to a superposed input, evaluates f at both 0 and 1 simultaneously, encoded in a single two-qubit state.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. What happens if you immediately measure the state (|0⟩|f(0)⟩ + |1⟩|f(1)⟩)/√2?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">You learn f at exactly one randomly chosen input, exactly as if you'd picked one input classically and evaluated f there.</button>
+      <button class="quiz-choice" data-correct="false">You learn both f(0) and f(1) simultaneously, for free.</button>
+      <button class="quiz-choice" data-correct="false">The measurement always returns 0, regardless of f.</button>
+      <button class="quiz-choice" data-correct="false">The state cannot be measured at all.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Immediate measurement collapses to one branch, revealing only one of the two function values — quantum parallelism alone provides no advantage without further processing before measuring.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="oracle">
+    <p class="quiz-prompt">4. Fill in the blank: a black-box unitary gate representing a function f, queried without regard to how f is internally computed, is called an ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The oracle model is the standard framework for comparing classical and quantum query counts, treating f purely as a resource to be queried.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="interference">
+    <p class="quiz-prompt">5. Fill in the blank: turning quantum parallelism into an actual speedup requires combining the superposition's branches, before measuring, through ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Interference is the missing ingredient — Lesson 27's subject — that turns "many values computed in parallel" into "one useful measurement outcome."</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read before the next lesson: IBM Quantum Learning's <a href="https://learning.quantum.ibm.com/course/fundamentals-of-quantum-algorithms">Fundamentals of Quantum Algorithms</a> course introduces the oracle model and quantum parallelism the same way, with the same caveat about measurement discarding the parallel computation if used carelessly.</p>
+
+  <p class="ask-teacher">Ask your teacher to run through the n = 2 case (a 2-bit input) of the parallelism construction by hand if the jump from 1 qubit to n qubits felt too quick — writing out all 4 terms explicitly makes the pattern completely concrete. Next up: the actual trick — phase kickback and interference — that makes quantum parallelism worth having.</p>
+
+  <footer class="lesson-footer">STEM+ · Quantum Computing · Lesson 26 of the course sequence</footer>
+</div>

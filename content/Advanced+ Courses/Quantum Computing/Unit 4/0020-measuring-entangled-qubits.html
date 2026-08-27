@@ -1,0 +1,103 @@
+<meta charset="UTF-8">
+<link rel="icon" href="../../../favicon.ico?v=1" type="image/x-icon">
+<title>Lesson 20: Measuring Entangled Qubits — STEM+</title>
+<link rel="stylesheet" href="../../../assets/style.css">
+<script src="../../../assets/quiz.js" defer></script>
+<div class="page" data-tier="advanced">
+  <span class="kicker">STEM+ · Quantum Computing · Unit 4 · Lesson 20</span>
+  <h1>Measuring Entangled Qubits</h1>
+  <p class="subtitle">The precise mechanics of measuring just one qubit out of a multi-qubit state — and a side-by-side computation showing exactly what entanglement adds that a product state never has.</p>
+  <p class="nav-links"><a href="0019-what-entanglement-actually-means.html" class="nav-prev">← Lesson 19</a> <a href="../Unit%205/0021-the-cnot-gate.html" class="nav-next">Unit 5, Lesson 21 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Lesson 19 used partial measurement informally. This closing lesson of Unit 4 states the rule precisely, for any two-qubit state, and then runs the exact same rule on a product state and an entangled state side by side — making the difference impossible to miss.</p>
+
+  <h2>1. The partial-measurement rule</h2>
+  <div class="box">
+    <span class="box-label">Rule — Measuring One Qubit of a Two-Qubit State</span>
+    For |Ψ⟩ = c₀₀|00⟩ + c₀₁|01⟩ + c₁₀|10⟩ + c₁₁|11⟩, measuring only the first qubit gives outcome 0 with probability P(0) = |c₀₀|² + |c₀₁|², and outcome 1 with probability P(1) = |c₁₀|² + |c₁₁|² (Lesson 11's Born rule, summed over the second qubit's two possibilities). If the outcome is 0, the post-measurement state is the surviving terms, renormalized: (c₀₀|00⟩ + c₀₁|01⟩) / √(|c₀₀|² + |c₀₁|²). If the outcome is 1: (c₁₀|10⟩ + c₁₁|11⟩) / √(|c₁₀|² + |c₁₁|²).
+  </div>
+  <p>In words: measuring one qubit discards every term inconsistent with the outcome observed, then rescales what's left so the remaining state is properly normalized again — the multi-qubit generalization of Lesson 12's collapse.</p>
+
+  <h2>2. Case 1: measuring one qubit of a product state</h2>
+  <div class="box example">
+    <span class="box-label">Example — Product State</span>
+    |Ψ⟩ = |+⟩ ⊗ |0⟩ = (|00⟩ + |10⟩)/√2, so c₀₀ = 1/√2, c₀₁ = 0, c₁₀ = 1/√2, c₁₁ = 0. Measure qubit 1: P(0) = |1/√2|² + 0 = 1/2. If outcome 0: post-state = (1/√2)|00⟩ / (1/√2) = |00⟩ — qubit 2 is |0⟩. If outcome 1: P(1) = |1/√2|² + 0 = 1/2, post-state = (1/√2)|10⟩ / (1/√2) = |10⟩ — qubit 2 is <em>still</em> |0⟩. Either way, qubit 2 ends up in exactly the same state, |0⟩, completely unaffected by which outcome qubit 1 gave.
+  </div>
+
+  <h2>3. Case 2: measuring one qubit of an entangled state</h2>
+  <div class="box example">
+    <span class="box-label">Example — Entangled State</span>
+    |Ψ⟩ = |Φ⁺⟩ = (|00⟩ + |11⟩)/√2, so c₀₀ = 1/√2, c₀₁ = 0, c₁₀ = 0, c₁₁ = 1/√2. Measure qubit 1: P(0) = 1/2, and if outcome 0: post-state = (1/√2)|00⟩ / (1/√2) = |00⟩ — qubit 2 collapses to |0⟩. P(1) = 1/2, and if outcome 1: post-state = (1/√2)|11⟩ / (1/√2) = |11⟩ — qubit 2 collapses to |1⟩ this time. Now qubit 2's resulting state genuinely <em>depends</em> on which outcome qubit 1 gave — 0 forces qubit 2 to |0⟩, 1 forces it to |1⟩.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why this comparison is the cleanest definition of entanglement in practice</span>
+    That dependence is precisely what "entangled" buys you and a product state never does: for a product state, measuring one qubit never changes what the other qubit's own state is (Lesson 19's no-signaling theorem, seen concretely at the level of a single-shot calculation rather than as an abstract statistical statement). For an entangled state, measuring one qubit instantly determines what state the other collapses to — even though (as Lesson 19 already proved) this can never be exploited to send Bob a signal, since from Bob's side alone, without knowing Alice's result, his own qubit still just looks maximally random.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. When measuring one qubit of a two-qubit state and obtaining a specific outcome, what happens to the terms inconsistent with that outcome?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">They are discarded, and the remaining terms are renormalized.</button>
+      <button class="quiz-choice" data-correct="false">They are kept exactly as they were, unchanged.</button>
+      <button class="quiz-choice" data-correct="false">They are converted into a new global phase.</button>
+      <button class="quiz-choice" data-correct="false">They double in amplitude to compensate.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Partial measurement discards every basis term inconsistent with the observed outcome, then rescales the surviving terms so the resulting state is properly normalized.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. For |Ψ⁺⟩ = (|01⟩ + |10⟩)/√2, if qubit 1 is measured and gives outcome 0, what is qubit 2's resulting state?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">|1⟩</button>
+      <button class="quiz-choice" data-correct="false">|0⟩</button>
+      <button class="quiz-choice" data-correct="false">|+⟩</button>
+      <button class="quiz-choice" data-correct="false">Still an equal superposition of |0⟩ and |1⟩.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Only the |01⟩ term survives outcome 0, so the post-measurement state is |01⟩ = |0⟩ ⊗ |1⟩ — qubit 2 collapses to |1⟩.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. For a product state |ψ⟩ ⊗ |φ⟩, what happens to qubit 2's state when qubit 1 is measured?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Nothing — qubit 2 remains exactly |φ⟩, regardless of qubit 1's outcome.</button>
+      <button class="quiz-choice" data-correct="false">Qubit 2 collapses to a different state depending on qubit 1's outcome.</button>
+      <button class="quiz-choice" data-correct="false">Qubit 2 becomes entangled with qubit 1 as a result.</button>
+      <button class="quiz-choice" data-correct="false">Qubit 2 is destroyed and can no longer be measured.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>For a product state, the two qubits were never entangled to begin with, so measuring one has zero effect on the other's state — this is exactly the contrast with the entangled-state example above.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="renormalized|normalized">
+    <p class="quiz-prompt">4. Fill in the blank: after discarding the terms inconsistent with a measurement outcome, the surviving terms must be ___ so the resulting state is a valid, normalized state again.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Renormalizing (dividing by the square root of the surviving probability) restores the normalization condition, since simply discarding terms leaves less than unit total probability.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="depends">
+    <p class="quiz-prompt">5. Fill in the blank: for an entangled state, the resulting state of the unmeasured qubit ___ on which outcome was observed for the measured qubit — unlike for a product state, where it never does.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>This outcome-dependence of the other qubit's resulting state is the sharpest concrete signature of entanglement, contrasted directly against the product-state case in this lesson.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read to close out this unit: IBM Quantum Learning's <a href="https://learning.quantum.ibm.com/course/basics-of-quantum-information">Basics of Quantum Information</a> course, "Multiple systems" chapter, states the same partial-measurement rule and works through comparable product-versus-entangled comparisons.</p>
+
+  <p class="ask-teacher">Ask your teacher to have you work out the |Φ⁻⟩ case yourself, tracking the extra minus sign through the partial-measurement rule — it's good practice and the sign turns out not to change any probability. This closes Unit 4: you can now build, recognize, and partially measure multi-qubit states. Next up, Unit 5: the two-qubit gates — starting with CNOT — that actually build entangled states like these from scratch.</p>
+
+  <footer class="lesson-footer">STEM+ · Quantum Computing · Lesson 20 of the course sequence</footer>
+</div>

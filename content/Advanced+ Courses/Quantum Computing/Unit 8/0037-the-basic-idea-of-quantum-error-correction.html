@@ -1,0 +1,108 @@
+<meta charset="UTF-8">
+<link rel="icon" href="../../../favicon.ico?v=1" type="image/x-icon">
+<title>Lesson 37: The Basic Idea of Quantum Error Correction — STEM+</title>
+<link rel="stylesheet" href="../../../assets/style.css">
+<script src="../../../assets/quiz.js" defer></script>
+<div class="page" data-tier="advanced">
+  <span class="kicker">STEM+ · Quantum Computing · Unit 8 · Lesson 37</span>
+  <h1>The Basic Idea of Quantum Error Correction</h1>
+  <p class="subtitle">Classical error correction copies a bit and takes a majority vote. Lesson 15's no-cloning theorem forbids the quantum version of that trick outright — and yet quantum error correction exists, and works. This lesson shows how.</p>
+  <p class="nav-links"><a href="0036-decoherence-and-noise.html" class="nav-prev">← Lesson 36</a> <a href="0038-physical-qubit-platforms.html" class="nav-next">Lesson 38 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>A classical repetition code protects 1 bit by storing 3 copies and taking a majority vote if noise flips one of them. Two facts from earlier in this course seem to rule out the direct quantum analogue: Lesson 15's no-cloning theorem (you can't copy an unknown state), and Lesson 12's collapse (measuring a qubit to "check" it destroys its superposition). Quantum error correction works around both, and the way it does is worth understanding precisely.</p>
+
+  <h2>1. The 3-qubit bit-flip code</h2>
+  <div class="box">
+    <span class="box-label">Encoding</span>
+    Encode a single logical qubit α|0⟩ + β|1⟩ into 3 physical qubits: |0⟩<sub>L</sub> = |000⟩, |1⟩<sub>L</sub> = |111⟩, so α|0⟩ + β|1⟩ becomes α|000⟩ + β|111⟩. This is built with two CNOT gates (Lesson 21) from the original qubit as control, copying its <em>classical basis label</em> — not the unknown amplitudes α, β themselves — onto two fresh |0⟩ qubits. No-cloning is not violated: the state α|000⟩+β|111⟩ is entangled across three qubits, not three independent copies of α|0⟩+β|1⟩.
+  </div>
+
+  <h2>2. Detecting an error without learning α or β</h2>
+  <div class="box">
+    <span class="box-label">Fact — Syndrome Measurement</span>
+    Suppose noise flips exactly one physical qubit (say qubit 2), turning α|000⟩+β|111⟩ into α|010⟩+β|101⟩. Using two extra ancilla qubits, measure only the <strong>parities</strong> q₁⊕q₂ and q₂⊕q₃ (via CNOTs from the data qubits into the ancillas, then measuring only the ancillas) — never measuring q₁, q₂, or q₃ directly.
+  </div>
+  <div class="box example">
+    <span class="box-label">Why This Doesn't Collapse α or β</span>
+    Check both branches of the superposition against the parity q₁⊕q₂: for |010⟩, it's 0⊕1 = 1; for |101⟩, it's 1⊕0 = 1. Both branches give the <em>same</em> parity value, regardless of α and β. The same holds for q₂⊕q₃: 1⊕0 = 1 for |010⟩, and 0⊕1 = 1 for |101⟩ — again identical across both branches. Because every branch of the logical superposition agrees on the syndrome, measuring it reveals only <em>which qubit flipped</em> (here: syndrome (1,1) means qubit 2), with zero effect on the relative amplitudes α and β. The encoded information survives completely untouched.
+  </div>
+  <p>Once the syndrome identifies qubit 2 as the flipped one, applying X to qubit 2 restores α|000⟩+β|111⟩ exactly — the original logical state, fully recovered, with α and β never once revealed or disturbed. The full syndrome table for this code: (0,0) means no error, (1,0) means qubit 1 flipped, (1,1) means qubit 2 flipped, (0,1) means qubit 3 flipped — each single-qubit flip produces its own unique, unambiguous syndrome.</p>
+
+  <h2>3. Scaling up: real codes</h2>
+  <div class="box">
+    <span class="box-label">Vocabulary — Logical vs. Physical Qubits</span>
+    A <strong>physical qubit</strong> is an actual hardware qubit, subject to Lesson 36's noise. A <strong>logical qubit</strong> is the error-protected qubit encoded across several physical qubits, behaving (as long as errors stay below the code's correction capacity) like an ideal, noiseless qubit for the purposes of running an algorithm.
+  </div>
+  <p>The 3-qubit code above only protects against bit-flip (X) errors, not phase-flip (Z) errors. Peter Shor's 9-qubit code nests the bit-flip code together with an analogous phase-flip code to protect against both simultaneously — the first quantum error-correcting code ever discovered. Modern hardware mostly uses <strong>surface codes</strong> instead: a 2D grid arrangement of physical qubits whose connectivity requirements match real chip layouts far better than the abstract 9-qubit construction, currently the leading practical approach for large-scale error correction.</p>
+
+  <div class="box why">
+    <span class="box-label">Why error correction can, in principle, make arbitrarily long computation possible</span>
+    The <strong>fault-tolerance threshold theorem</strong> states, roughly: if the physical error rate per gate is below some fixed threshold, then encoding a computation with enough error-correction overhead (larger codes, more physical qubits per logical qubit) can suppress the logical error rate as low as desired, making arbitrarily long, reliable quantum computation possible in principle. This is the theoretical basis for believing Shor's algorithm at real cryptographic scale is eventually achievable — not a hope, but a proven result, conditional on physical error rates being pushed below the threshold. Lesson 39 looks at how close today's hardware actually is to that threshold.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. Why can't quantum error correction simply make several independent copies of a qubit, the way a classical repetition code does?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">The no-cloning theorem forbids copying an unknown quantum state.</button>
+      <button class="quiz-choice" data-correct="false">Qubits cannot be entangled with each other.</button>
+      <button class="quiz-choice" data-correct="false">Classical repetition codes don't actually work either.</button>
+      <button class="quiz-choice" data-correct="false">There is no such restriction — quantum states can be freely copied.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Lesson 15's no-cloning theorem directly rules out producing independent copies of an unknown state — the encoding above works around this by entangling, not copying.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Why can't quantum error correction just directly measure each physical qubit to check for errors?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Directly measuring the data qubits would collapse the encoded superposition, destroying the logical qubit's information (Lesson 12).</button>
+      <button class="quiz-choice" data-correct="false">Measurement is impossible on any encoded qubit.</button>
+      <button class="quiz-choice" data-correct="false">Direct measurement would always report the wrong error.</button>
+      <button class="quiz-choice" data-correct="false">There's no actual problem with measuring the data qubits directly.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Directly measuring q₁, q₂, or q₃ would collapse them to definite values, destroying the superposition that encodes α and β — syndrome measurement via ancillas avoids exactly this.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. In the 3-qubit bit-flip code, a syndrome measurement returns (1, 0). Which physical qubit needs correcting?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Qubit 1.</button>
+      <button class="quiz-choice" data-correct="false">Qubit 2.</button>
+      <button class="quiz-choice" data-correct="false">Qubit 3.</button>
+      <button class="quiz-choice" data-correct="false">No qubit — (1,0) means no error occurred.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The syndrome table gives (0,0) for no error, (1,0) for qubit 1, (1,1) for qubit 2, and (0,1) for qubit 3 — (1,0) uniquely identifies qubit 1 as the flipped one.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="logical">
+    <p class="quiz-prompt">4. Fill in the blank: a single error-protected qubit, encoded across several physical qubits, is called a ___ qubit.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A logical qubit behaves like an ideal, noiseless qubit as long as errors stay within the code's correction capacity, built from multiple underlying physical qubits.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="surface codes|surface code">
+    <p class="quiz-prompt">5. Fill in the blank: the modern, hardware-practical family of quantum error-correcting codes currently leading real large-scale efforts (used by IBM, Google, and others) is called ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Surface codes arrange physical qubits in a 2D grid whose connectivity matches real chip layouts far better than earlier, more abstract constructions like the 9-qubit code.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read before the next lesson: Devitt, Munro, and Nemoto's <a href="https://arxiv.org/abs/0905.2794">Quantum Error Correction for Beginners</a> walks through the 3-qubit bit-flip code and syndrome measurement with the same worked-example approach used here, before building up to more advanced codes.</p>
+
+  <p class="ask-teacher">Ask your teacher to have you work out the syndrome for a qubit-3 flip yourself, confirming it gives (0,1) as claimed — it's good practice with the parity bookkeeping. Next up: where these ideas are actually implemented — a survey of the physical hardware platforms racing to build real, working qubits.</p>
+
+  <footer class="lesson-footer">STEM+ · Quantum Computing · Lesson 37 of the course sequence</footer>
+</div>

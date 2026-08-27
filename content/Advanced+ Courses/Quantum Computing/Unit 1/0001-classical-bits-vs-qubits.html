@@ -1,0 +1,106 @@
+<meta charset="UTF-8">
+<link rel="icon" href="../../../favicon.ico?v=1" type="image/x-icon">
+<title>Lesson 1: Classical Bits vs. Qubits — STEM+</title>
+<link rel="stylesheet" href="../../../assets/style.css">
+<script src="../../../assets/quiz.js" defer></script>
+<div class="page" data-tier="advanced">
+  <span class="kicker">STEM+ · Quantum Computing · Unit 1 · Lesson 1</span>
+  <h1>Classical Bits vs. Qubits</h1>
+  <p class="subtitle">A classical bit is a switch that is definitely on or definitely off. A qubit is a vector — and that single change is the whole reason quantum computing needs Linear Algebra A and B as prerequisites.</p>
+  <p class="nav-links"><a href="0002-the-qubit-state-vector-and-ket-notation.html" class="nav-next">Lesson 2 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Every course you've taken up to this point has been about describing the world with real numbers, functions, and — most recently, in Linear Algebra A and B — vectors and linear maps. Quantum computing asks a strange-sounding question: what if the <em>state</em> of a bit of information were itself a vector, in a complex vector space, instead of a single number 0 or 1? That question turns out to have a precise, checkable answer, and this course builds it from the ground up. This first lesson just gets the vocabulary and the contrast in place.</p>
+
+  <h2>1. The classical bit</h2>
+  <div class="box">
+    <span class="box-label">Definition — Classical Bit</span>
+    A <strong>classical bit</strong> is a system with exactly two possible states, labeled 0 and 1. At every instant it is in exactly one of them. A classical computer's entire state — its memory, its registers, everything — is, underneath, just a very long string of definite 0s and 1s.
+  </div>
+  <p>A <em>probabilistic</em> bit — one you don't know the value of, but which is "really" a 0 or a 1 with some probability of each — is still a classical bit in the sense that matters here: it has one definite value at any given time, you simply haven't looked yet. Uncertainty is a fact about the observer, not a fact about the bit.</p>
+
+  <h2>2. The qubit</h2>
+  <div class="box">
+    <span class="box-label">Definition — Qubit (Informal)</span>
+    A <strong>qubit</strong> (quantum bit) is a two-level quantum system. Its state is not simply 0 or 1 — it is a vector in a two-dimensional complex vector space, and that vector can be a genuine combination of "the 0 state" and "the 1 state" simultaneously, called a <strong>superposition</strong>. Lesson 2 makes this precise with ket notation; Lesson 3 pins down exactly what "combination" is allowed to mean.
+  </div>
+  <p>Physically, a qubit can be built from many different two-level systems: the spin of an electron (up or down), the polarization of a photon (horizontal or vertical), two energy levels of a trapped ion, or the two lowest states of a superconducting circuit. This course will not depend on any one physical realization — everything through Unit 7 is pure linear algebra, and Unit 8 comes back to survey the real hardware.</p>
+
+  <div class="box why">
+    <span class="box-label">Why "a qubit is a weighted coin" is the wrong picture</span>
+    It's tempting to think of a qubit in superposition as a coin spinning in the air — "really" heads or tails, just not settled yet, the same as a probabilistic classical bit. That picture is wrong in a way that matters: a spinning coin's uncertainty is <em>epistemic</em> (you just don't know the outcome yet, but a definite outcome already exists). A qubit's superposition is not hidden information about a pre-existing 0-or-1 value — there is no fact of the matter about which one it "really" is until it's measured. The clearest evidence this isn't just classical ignorance is <strong>interference</strong>: two different superposition states can be recombined by a gate so that certain outcomes become impossible, a phenomenon with no classical-probability analogue at all. You'll see this concretely once Unit 2 introduces gates and Unit 6 puts interference to work in an actual algorithm.
+  </div>
+
+  <h2>3. Why this changes what "state" can hold</h2>
+  <p>A single classical bit stores one of 2 states. Two classical bits store one of 2² = 4 states — but a physical register of two classical bits is only ever in exactly one of those four at a time. A pair of qubits, by contrast, has a state space that is 2² = 4-dimensional as a <em>vector space</em>, and the qubit pair's actual state can carry a nonzero component along every one of those four basis directions simultaneously. Scale this up: n qubits span a 2ⁿ-dimensional space. This exponential scaling of the description is the resource every quantum algorithm in Units 6 and 7 is trying to exploit — and, as Lesson 12 will make painfully clear, also the reason you can't just "read off" all that information for free.</p>
+
+  <div class="box example">
+    <span class="box-label">Example — Counting States</span>
+    3 classical bits: exactly one of 2³ = 8 configurations is realized at any instant (say, 101). 3 qubits: the state lives in an 8-dimensional complex vector space, and a valid state can have a nonzero amplitude on all 8 basis directions |000⟩, |001⟩, …, |111⟩ at once. Unit 4 makes this rigorous with tensor products; for now, just notice the qualitative difference — "one of 8" versus "potentially a combination of all 8."
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What is the key difference between a qubit in superposition and a classical bit whose value you simply don't know yet (a "probabilistic bit")?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">There is no real difference — both are just descriptions of uncertainty.</button>
+      <button class="quiz-choice" data-correct="true">A probabilistic bit already has one definite hidden value; a qubit in superposition has no pre-existing definite value, and it can show genuinely non-classical interference effects.</button>
+      <button class="quiz-choice" data-correct="false">A qubit can only be 0 or 1, never both, so there's no meaningful contrast to draw.</button>
+      <button class="quiz-choice" data-correct="false">A probabilistic bit can hold more information than a qubit.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The probabilistic bit's uncertainty is purely about the observer's knowledge — a definite value already exists. A qubit's superposition has no such pre-existing value, and superposition states can interfere with each other in ways no classical probability distribution can reproduce.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. How many possible definite configurations does a register of 5 classical bits have, and how is that different from what a system of 5 qubits can do?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">2⁵ = 32 configurations; the 5 classical bits are always in exactly one, while 5 qubits live in a 32-dimensional vector space and can have a nonzero amplitude along many basis directions at once.</button>
+      <button class="quiz-choice" data-correct="false">2⁵ = 32 configurations; qubits are limited to the same single configuration at a time as classical bits.</button>
+      <button class="quiz-choice" data-correct="false">5 × 2 = 10 configurations, the same for both bits and qubits.</button>
+      <button class="quiz-choice" data-correct="false">2⁵ = 32 configurations, but qubits can only ever occupy 5 of them.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>n classical bits have 2ⁿ possible configurations but occupy exactly one at a time; n qubits span a 2ⁿ-dimensional vector space in which the actual state can have nonzero components along many of the 2ⁿ basis directions simultaneously.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Which of these is a valid physical realization of a qubit, according to this lesson?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Only a superconducting circuit — no other physical system can act as a qubit.</button>
+      <button class="quiz-choice" data-correct="true">Any two-level quantum system — electron spin, photon polarization, trapped-ion energy levels, and superconducting circuit levels are all examples.</button>
+      <button class="quiz-choice" data-correct="false">A classical transistor switched very quickly between 0 and 1.</button>
+      <button class="quiz-choice" data-correct="false">Only photons — qubits are defined as a property of light.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A qubit is defined mathematically as a two-level quantum system, so any physical system with two relevant quantum levels can host one — this course works with the shared mathematics rather than any single hardware platform (Unit 8 surveys the real options).</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="superposition">
+    <p class="quiz-prompt">4. Fill in the blank: a qubit's state can be a genuine combination of "0" and "1" at once, a phenomenon called ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Superposition is the name for exactly this combination — it's the central new idea a qubit adds on top of a classical bit.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="interference">
+    <p class="quiz-prompt">5. Fill in the blank: the clearest evidence that a qubit's superposition isn't just classical ignorance about a hidden definite value is the phenomenon of ___, which has no classical-probability analogue.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Interference — amplitudes combining so certain outcomes become impossible — is the signature effect that separates true superposition from classical probabilistic uncertainty.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read before the next lesson: IBM Quantum Learning's <a href="https://learning.quantum.ibm.com/course/basics-of-quantum-information">Basics of Quantum Information</a> course opens its "Single systems" chapter with exactly this classical-bit-versus-qubit framing, before introducing the vector notation Lesson 2 covers next.</p>
+
+  <p class="ask-teacher">If the coin-flip analogy still feels like it should be "close enough," ask your teacher to walk through a simple interference example on the whiteboard — it's worth seeing why the analogy actually breaks before Unit 2 puts interference to real use. Next up: writing a qubit's state down precisely, as a vector, using ket notation.</p>
+
+  <footer class="lesson-footer">STEM+ · Quantum Computing · Lesson 1 of the course sequence</footer>
+</div>

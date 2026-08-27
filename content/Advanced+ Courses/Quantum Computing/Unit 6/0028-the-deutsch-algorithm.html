@@ -1,0 +1,113 @@
+<meta charset="UTF-8">
+<link rel="icon" href="../../../favicon.ico?v=1" type="image/x-icon">
+<title>Lesson 28: The Deutsch Algorithm: A One-Qubit Warm-Up — STEM+</title>
+<link rel="stylesheet" href="../../../assets/style.css">
+<script src="../../../assets/quiz.js" defer></script>
+<div class="page" data-tier="advanced">
+  <span class="kicker">STEM+ · Quantum Computing · Unit 6 · Lesson 28</span>
+  <h1>The Deutsch Algorithm: A One-Qubit Warm-Up</h1>
+  <p class="subtitle">The smallest possible quantum algorithm that provably beats every classical approach — three gates, one query, and a guaranteed correct answer every single time.</p>
+  <p class="nav-links"><a href="0027-interference-and-phase-kickback.html" class="nav-prev">← Lesson 27</a> <a href="0029-the-deutsch-jozsa-algorithm.html" class="nav-next">Lesson 29 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Lesson 26 built the state; Lesson 27 gave it phase kickback. This lesson closes the loop with one more Hadamard, producing <strong>Deutsch's algorithm</strong> — historically the first quantum algorithm ever shown to provably outperform any classical algorithm, on a task simple enough to trace completely by hand.</p>
+
+  <h2>1. The problem</h2>
+  <div class="box">
+    <span class="box-label">Problem — Constant or Balanced?</span>
+    Given oracle access to f: {0,1} → {0,1}, determine whether f is <strong>constant</strong> (f(0) = f(1)) or <strong>balanced</strong> (f(0) ≠ f(1)).
+  </div>
+  <div class="box why">
+    <span class="box-label">Why this needs 2 queries classically</span>
+    Knowing only f(0) tells you nothing about whether f is constant or balanced — f(1) could still be either value. The same goes for knowing only f(1). Any classical algorithm that always gives the correct answer, no matter what f turns out to be, must query both f(0) and f(1): 2 queries, no way around it.
+  </div>
+
+  <h2>2. The circuit</h2>
+  <div class="box">
+    <span class="box-label">Circuit — Deutsch's Algorithm</span>
+    Start with |0⟩ ⊗ |1⟩. Apply H to both qubits. Apply U<sub>f</sub> (phase kickback, since the second qubit is now |−⟩). Apply H to the first qubit. Measure the first qubit.
+  </div>
+
+  <h2>3. The full trace</h2>
+  <div class="box">
+    <span class="box-label">Trace</span>
+    Start: |0⟩|1⟩. After H⊗H: |+⟩|−⟩. After U<sub>f</sub> (Lesson 27's result): [(−1)<sup>f(0)</sup>|0⟩ + (−1)<sup>f(1)</sup>|1⟩]/√2 ⊗ |−⟩. Now split into cases for the first qubit's state (dropping the |−⟩, which plays no further role):
+  </div>
+  <p><strong>If f is constant</strong> (f(0) = f(1) = c): the first qubit's state is (−1)<sup>c</sup>[|0⟩+|1⟩]/√2 = (−1)<sup>c</sup>|+⟩. Applying H: (−1)<sup>c</sup>H|+⟩ = (−1)<sup>c</sup>|0⟩ — physically just |0⟩ (a global phase). <strong>Measuring gives 0, with certainty.</strong></p>
+  <p><strong>If f is balanced</strong> (f(0) ≠ f(1)): the first qubit's state is ±[|0⟩−|1⟩]/√2 = ±|−⟩ (the sign depends on which of f(0), f(1) is 0). Applying H: ±H|−⟩ = ±|1⟩ — physically just |1⟩. <strong>Measuring gives 1, with certainty.</strong></p>
+
+  <div class="box example">
+    <span class="box-label">Result</span>
+    Measuring outcome 0 means f is constant. Measuring outcome 1 means f is balanced. The answer is <em>certain</em>, not probabilistic — and it took exactly one query to U<sub>f</sub>, half of the two queries any classical algorithm needs.
+  </div>
+
+  <div class="box why">
+    <span class="box-label">Why this small example matters more than its size suggests</span>
+    The speedup here — 2 classical queries down to 1 quantum query — looks modest. Its real significance is that it's a clean, fully worked, provable example that quantum interference (not randomness, not luck) can extract a global property of a function using strictly fewer oracle queries than any classical strategy ever could, guaranteed. Lesson 29 generalizes this exact circuit — same three ingredients, H then oracle then H — to n input bits, where the classical-versus-quantum query gap becomes exponential instead of just "2 versus 1."
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What does Deutsch's algorithm determine about f?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Whether f is constant or balanced.</button>
+      <button class="quiz-choice" data-correct="false">The exact value of f(0).</button>
+      <button class="quiz-choice" data-correct="false">Whether f is unitary.</button>
+      <button class="quiz-choice" data-correct="false">The exact value of f(1).</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The algorithm answers a global question about f — constant versus balanced — without ever revealing the individual values f(0) or f(1) themselves.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. How many oracle queries does any classical algorithm need to determine constant-versus-balanced with certainty?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">2 — both f(0) and f(1) must be checked.</button>
+      <button class="quiz-choice" data-correct="false">1 — either value alone is always enough.</button>
+      <button class="quiz-choice" data-correct="false">0 — the answer can be deduced without querying f at all.</button>
+      <button class="quiz-choice" data-correct="false">Infinitely many, since f could be any function.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Knowing only one of f(0) or f(1) leaves the other value — and hence constant-versus-balanced — completely undetermined, so both must be checked classically.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. How many oracle queries does Deutsch's algorithm need?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">1</button>
+      <button class="quiz-choice" data-correct="false">2</button>
+      <button class="quiz-choice" data-correct="false">0</button>
+      <button class="quiz-choice" data-correct="false">It varies randomly depending on f.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>A single application of U_f, combined with the surrounding Hadamard gates, is enough to determine constant-versus-balanced with certainty.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="constant">
+    <p class="quiz-prompt">4. Fill in the blank: measuring the first qubit and getting outcome 0 at the end of Deutsch's circuit means f is ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Outcome 0 corresponds to (−1)^c|0⟩ in the trace — occurring exactly when f is constant.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="balanced">
+    <p class="quiz-prompt">5. Fill in the blank: measuring the first qubit and getting outcome 1 at the end of Deutsch's circuit means f is ___.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Outcome 1 corresponds to ±|1⟩ in the trace — occurring exactly when f is balanced.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read before the next lesson: IBM Quantum Learning's <a href="https://learning.quantum.ibm.com/course/fundamentals-of-quantum-algorithms">Fundamentals of Quantum Algorithms</a> course walks through Deutsch's algorithm with this same three-gate circuit before generalizing it to n qubits.</p>
+
+  <p class="ask-teacher">Ask your teacher to have you verify the balanced case's other sub-case (f(0) = 1, f(1) = 0) yourself — it's a two-line calculation and confirms the overall sign never affects the measured outcome. Next up: the full n-qubit generalization, and the exponential (not just 2-versus-1) gap it produces.</p>
+
+  <footer class="lesson-footer">STEM+ · Quantum Computing · Lesson 28 of the course sequence</footer>
+</div>

@@ -1,0 +1,107 @@
+<meta charset="UTF-8">
+<link rel="icon" href="../../../favicon.ico?v=1" type="image/x-icon">
+<title>Lesson 9: Phase Gates: S and T — STEM+</title>
+<link rel="stylesheet" href="../../../assets/style.css">
+<script src="../../../assets/quiz.js" defer></script>
+<div class="page" data-tier="advanced">
+  <span class="kicker">STEM+ · Quantum Computing · Unit 2 · Lesson 9</span>
+  <h1>Phase Gates: S and T</h1>
+  <p class="subtitle">A whole family of gates that never touch |0⟩ at all — they only ever dial in a relative phase on |1⟩, and one of them turns out to be the missing ingredient for a universal gate set.</p>
+  <p class="nav-links"><a href="0008-the-hadamard-gate.html" class="nav-prev">← Lesson 8</a> <a href="0010-single-qubit-circuit-diagrams.html" class="nav-next">Lesson 10 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p>Lesson 7's Z gate multiplies |1⟩'s amplitude by exactly −1, leaving |0⟩ untouched. That's one specific case of a much larger family: gates that leave |0⟩ alone and multiply |1⟩'s amplitude by some complex number of magnitude 1. Two members of that family, S and T, come up often enough to deserve their own names.</p>
+
+  <h2>1. The general phase gate</h2>
+  <div class="box">
+    <span class="box-label">Definition — Phase Gate R<sub>φ</sub></span>
+    For any real angle φ, R<sub>φ</sub> = [[1, 0], [0, e<sup>iφ</sup>]]. It acts as R<sub>φ</sub>|0⟩ = |0⟩ and R<sub>φ</sub>|1⟩ = e<sup>iφ</sup>|1⟩ — |0⟩'s amplitude is untouched, and |1⟩'s amplitude picks up a relative phase of e<sup>iφ</sup>.
+  </div>
+  <p>Every R<sub>φ</sub> is unitary: R<sub>φ</sub>† = [[1,0],[0,e<sup>−iφ</sup>]], and R<sub>φ</sub>†R<sub>φ</sub> = [[1,0],[0,e<sup>−iφ</sup>e<sup>iφ</sup>]] = [[1,0],[0,1]] = I, since e<sup>−iφ</sup>e<sup>iφ</sup> = e<sup>0</sup> = 1 for any real φ.</p>
+
+  <h2>2. S and T: two specific angles</h2>
+  <div class="box">
+    <span class="box-label">Definition — S Gate</span>
+    S = R<sub>π/2</sub> = [[1, 0], [0, i]]. Sometimes called the "phase gate" without further qualification.
+  </div>
+  <div class="box">
+    <span class="box-label">Definition — T Gate</span>
+    T = R<sub>π/4</sub> = [[1, 0], [0, e<sup>iπ/4</sup>]]. Also called the "π/8 gate" (a historical naming quirk — the angle in the exponent is π/4, but an older convention wrote the gate's effect on the Bloch sphere as a π/4 rotation measured differently, giving it the "π/8" name that stuck).
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Example — Composing Phase Gates</span>
+    Applying S twice: S² = [[1,0],[0,i]]·[[1,0],[0,i]] = [[1,0],[0,i²]] = [[1,0],[0,−1]] = Z. Two S gates in a row give exactly the Z gate — consistent with R<sub>π/2</sub> composed with itself giving R<sub>π</sub> = Z (adding the angles π/2 + π/2 = π). Similarly, T² = R<sub>π/4</sub> composed with itself gives R<sub>π/2</sub> = S. This "adding angles" pattern is general: R<sub>φ₁</sub>R<sub>φ₂</sub> = R<sub>φ₁+φ₂</sub>, since e<sup>iφ₁</sup>e<sup>iφ₂</sup> = e<sup>i(φ₁+φ₂)</sup>.
+  </div>
+
+  <h2>3. Why S and T don't show up in Z-basis measurement statistics alone</h2>
+  <div class="box why">
+    <span class="box-label">Why these gates are "silent" until you change basis or interfere</span>
+    Exactly like Z, every R<sub>φ</sub> only ever changes a relative phase — it never changes |α|² or |β|², so measuring in the computational basis right after applying S or T shows nothing different happened at all. This can make S and T feel pointless in isolation. They aren't: Lesson 13 shows that measuring in a different basis (built using H, from Lesson 8) makes relative phase directly visible, and Units 6 and 7's algorithms are built almost entirely out of steering relative phases with gates like these so that a later Hadamard turns invisible phase differences into visible, biased measurement probabilities. T in particular will reappear in Unit 5's universal gate set — {H, T, CNOT} together can approximate any quantum circuit at all, a fact that would be false if T were dropped from the toolkit.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What does the S gate do to the state |1⟩?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Multiplies its amplitude by i, giving i|1⟩.</button>
+      <button class="quiz-choice" data-correct="false">Leaves it completely unchanged.</button>
+      <button class="quiz-choice" data-correct="false">Multiplies its amplitude by −1.</button>
+      <button class="quiz-choice" data-correct="false">Swaps it with |0⟩.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>S = R_(π/2) multiplies |1⟩'s amplitude by e^(iπ/2) = i, while leaving |0⟩'s amplitude untouched.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. What is S², the S gate applied twice?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Z</button>
+      <button class="quiz-choice" data-correct="false">I</button>
+      <button class="quiz-choice" data-correct="false">X</button>
+      <button class="quiz-choice" data-correct="false">T</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>S = R_(π/2), so S² = R_(π/2+π/2) = R_π = Z — two quarter-turns of relative phase add up to Z's half-turn.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. Why is measuring in the computational basis unable to detect whether an S or T gate was just applied?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="false">Because S and T are not unitary, so they don't actually change the state.</button>
+      <button class="quiz-choice" data-correct="true">Because S and T only introduce a relative phase (multiplying |1⟩'s amplitude by a magnitude-1 number), which leaves |α|² and |β|² — and therefore computational-basis probabilities — unchanged.</button>
+      <button class="quiz-choice" data-correct="false">Because S and T always return the state to |0⟩.</button>
+      <button class="quiz-choice" data-correct="false">Because measurement devices cannot detect any gate at all.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Like Z, both S and T are pure relative-phase gates — they multiply |1⟩'s amplitude by a magnitude-1 complex number, which never changes any squared magnitude, and hence never changes computational-basis measurement probabilities.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="S">
+    <p class="quiz-prompt">4. Fill in the blank: T² (the T gate applied twice) equals the ___ gate.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>T = R_(π/4), so T² = R_(π/4+π/4) = R_(π/2) = S — the phase angles add.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="relative">
+    <p class="quiz-prompt">5. Fill in the blank: like Z, both S and T are pure ___-phase gates — they never change a computational-basis measurement probability by themselves.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Relative phase is exactly what these gates manipulate — invisible in the computational basis alone, but essential once combined with other gates or a change of measurement basis.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read before the next lesson: IBM Quantum Learning's <a href="https://learning.quantum.ibm.com/course/basics-of-quantum-information">Basics of Quantum Information</a> course, "Single systems" chapter, defines the S and T gates as specific phase rotations and previews their role in circuits built from a small universal gate set.</p>
+
+  <p class="ask-teacher">Ask your teacher why T, specifically, and not just S, is needed for the universal gate set in Unit 5 — the short answer involves angles that can't be reached by repeatedly doubling π/2, but it's worth hearing the fuller version. Next up: reading and building actual circuit diagrams out of every single-qubit gate from this unit.</p>
+
+  <footer class="lesson-footer">STEM+ · Quantum Computing · Lesson 9 of the course sequence</footer>
+</div>

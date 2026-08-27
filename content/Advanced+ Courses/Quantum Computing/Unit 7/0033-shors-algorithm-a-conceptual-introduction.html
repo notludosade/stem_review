@@ -1,0 +1,104 @@
+<meta charset="UTF-8">
+<link rel="icon" href="../../../favicon.ico?v=1" type="image/x-icon">
+<title>Lesson 33: Shor's Algorithm: A Conceptual Introduction — STEM+</title>
+<link rel="stylesheet" href="../../../assets/style.css">
+<script src="../../../assets/quiz.js" defer></script>
+<div class="page" data-tier="advanced">
+  <span class="kicker">STEM+ · Quantum Computing · Unit 7 · Lesson 33</span>
+  <h1>Shor's Algorithm: A Conceptual Introduction</h1>
+  <p class="subtitle">Factoring a large integer, reduced to a single hard sub-problem — and a quantum trick, built from the same interference toolkit as Units 6 and 7, that solves that sub-problem efficiently.</p>
+  <p class="nav-links"><a href="0032-the-diffusion-operator-and-quadratic-speedup.html" class="nav-prev">← Lesson 32</a> <a href="0034-why-shors-algorithm-matters-for-cryptography.html" class="nav-next">Lesson 34 →</a> <a href="../index.html" class="nav-toc">Contents</a> <a href="../reference/glossary.html" class="nav-glossary">Glossary →</a></p>
+
+  <p><strong>Shor's algorithm</strong>, developed by Peter Shor, factors large integers exponentially faster than any known classical algorithm. This lesson explains what it does and the shape of why it works, without deriving the full number theory involved — that derivation belongs to a dedicated number theory course, and this course's prerequisites (Linear Algebra A and B) don't cover it. What you can fully understand here is exactly where the quantum speedup enters, and why.</p>
+
+  <h2>1. The problem</h2>
+  <div class="box">
+    <span class="box-label">Problem — Integer Factoring</span>
+    Given a large composite integer N (say, a product of two large primes, N = p·q), find its prime factors.
+  </div>
+  <p>No known classical algorithm factors large integers efficiently. The best known classical method, the general number field sieve, runs in <em>sub-exponential</em> time — much better than brute force, but still infeasible for the large numbers (thousands of digits) used in practice. This classical hardness is not proven the way, say, the Deutsch-Jozsa separation is proven — it's a widely held belief, backed by decades of failed attempts to find a fast classical factoring algorithm, and it's exactly what real cryptographic systems currently rely on (Lesson 34 develops this fully).</p>
+
+  <h2>2. The reduction: factoring via period-finding</h2>
+  <div class="box">
+    <span class="box-label">Fact — Factoring Reduces to Finding an Order</span>
+    Factoring N can be reduced (via a chain of number-theoretic steps this course won't derive) to a different, more specific problem: given a random integer a with no common factor with N, find the smallest positive integer r — called the <strong>order</strong> of a modulo N — such that aʳ ≡ 1 (mod N). Once r is known, an efficient classical calculation (using the Euclidean algorithm to compute a couple of greatest common divisors) recovers N's actual factors with good probability.
+  </div>
+  <p>Put differently: f(x) = aˣ mod N is a <em>periodic</em> function of x, with period exactly r. Finding N's factors comes down to finding that period. Every step of this reduction — from "factor N" down to "find the period of aˣ mod N" — is itself classical and efficient. The one piece that's classically hard is period-finding itself: for large N, no known classical algorithm finds r efficiently.</p>
+
+  <h2>3. Where the quantum speedup enters</h2>
+  <div class="box why">
+    <span class="box-label">Why a quantum computer can find the period efficiently</span>
+    Finding the period of a periodic function is exactly the kind of task Units 6 and 7's interference toolkit is good at, scaled up. Shor's algorithm prepares a superposition over many values of x, computes aˣ mod N into a second register (an oracle, in this course's language), and then applies the <strong>Quantum Fourier Transform (QFT)</strong> — a generalization of the repeated Hadamard transforms from Lesson 29's Deutsch-Jozsa circuit — to the first register. The QFT is specifically built to reveal periodic structure in a superposition through constructive interference at frequencies matching the true period, in exactly the way Lesson 29's Hadamards concentrated amplitude on the all-zero string when f was constant. This course won't derive the QFT itself, but the underlying principle is one you've already seen twice: interference concentrates amplitude on the answer, and everything else cancels away.
+  </div>
+
+  <div class="box example">
+    <span class="box-label">Result — Why This Is Exponentially Faster</span>
+    Shor's algorithm runs in time <strong>polynomial</strong> in the number of digits of N (equivalently, polynomial in log N) — a dramatic improvement over the best classical algorithm's sub-exponential running time. For a 2048-bit number (roughly 617 decimal digits), the gap between "polynomial in 617" and "sub-exponential in 617" is the difference between practically instant and utterly infeasible, even on the largest classical supercomputers, given enough qubits to run the quantum algorithm.
+  </div>
+
+  <h2>Check your recall</h2>
+  <p>No peeking back up — answer from memory first, then check.</p>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">1. What problem does Shor's algorithm solve?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">Factoring a large composite integer into its prime factors.</button>
+      <button class="quiz-choice" data-correct="false">Unstructured search over an unsorted list.</button>
+      <button class="quiz-choice" data-correct="false">Determining whether a function is constant or balanced.</button>
+      <button class="quiz-choice" data-correct="false">Sorting a list of numbers.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Shor's algorithm is specifically a factoring algorithm — Grover's algorithm (Lessons 31-32) handles unstructured search, a different problem entirely.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">2. Factoring N is reduced to finding what, for a random a coprime to N?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">The order r of a modulo N — the smallest r such that aʳ ≡ 1 (mod N).</button>
+      <button class="quiz-choice" data-correct="false">The exact value of N itself.</button>
+      <button class="quiz-choice" data-correct="false">A random prime number larger than N.</button>
+      <button class="quiz-choice" data-correct="false">The square root of N directly.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The order-finding reduction is the key classical-to-quantum handoff: once r is known, efficient classical arithmetic (via the Euclidean algorithm) recovers N's factors.</p>
+  </div>
+
+  <div class="quiz" data-quiz>
+    <p class="quiz-prompt">3. What quantum tool does Shor's algorithm use to find this order efficiently?</p>
+    <div class="quiz-choices">
+      <button class="quiz-choice" data-correct="true">The Quantum Fourier Transform (QFT), a generalization of the repeated Hadamard transforms from Deutsch-Jozsa.</button>
+      <button class="quiz-choice" data-correct="false">The diffusion operator from Grover's algorithm.</button>
+      <button class="quiz-choice" data-correct="false">The no-cloning theorem.</button>
+      <button class="quiz-choice" data-correct="false">A classical brute-force search.</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>The QFT is specifically designed to reveal periodic structure through interference — the same principle behind Deutsch-Jozsa's Hadamard-based amplitude concentration, generalized.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="polynomial">
+    <p class="quiz-prompt">4. Fill in the blank: unlike the best known classical factoring algorithms, which run in sub-exponential time, Shor's algorithm runs in ___ time relative to the number of digits of N.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Polynomial-time scaling in log N is what makes Shor's algorithm practical for numbers far too large for any classical factoring approach.</p>
+  </div>
+
+  <div class="quiz" data-quiz-fill data-answers="order|period">
+    <p class="quiz-prompt">5. Fill in the blank: the smallest positive r satisfying aʳ ≡ 1 (mod N) is called the ___ of a modulo N.</p>
+    <div class="quiz-fill-row">
+      <input type="text" class="quiz-fill-input" aria-label="Your answer">
+      <button class="quiz-fill-check">Check</button>
+    </div>
+    <p class="quiz-feedback" hidden></p>
+    <p class="quiz-explain" hidden>Order (equivalently, the period of aˣ mod N) is the quantity Shor's algorithm is built to find efficiently.</p>
+  </div>
+
+  <h2>Go to the source</h2>
+  <p>Read before the next lesson: IBM Quantum Learning's <a href="https://learning.quantum.ibm.com/course/fundamentals-of-quantum-algorithms">Fundamentals of Quantum Algorithms</a> course covers the period-finding problem and the Quantum Fourier Transform's role in solving it, at the same conceptual level used here.</p>
+
+  <p class="ask-teacher">Ask your teacher for the full number-theoretic derivation of why an even order r with aʳ/² ≢ −1 (mod N) yields nontrivial factors via gcd(a^(r/2)−1, N) — it's a satisfying piece of classical number theory that this lesson deliberately set aside. Next up: why this algorithm, specifically, has consequences reaching into the security of the modern internet.</p>
+
+  <footer class="lesson-footer">STEM+ · Quantum Computing · Lesson 33 of the course sequence</footer>
+</div>
