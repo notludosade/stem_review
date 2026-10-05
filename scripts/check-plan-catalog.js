@@ -6,6 +6,8 @@ assert.ok(CATALOG.projects.length >= 7, `expected at least 7 recommendable proje
 assert.ok(!CATALOG.projects.some((p) => p.id === 'mathematics-capstone'), 'Mathematics Capstone must be excluded');
 assert.ok(CATALOG.applications.length >= 9, `expected at least 9 applications, got ${CATALOG.applications.length}`);
 assert.ok(CATALOG.problemSets.length >= 20, `expected at least 20 problem sets, got ${CATALOG.problemSets.length}`);
+const problemSetCourses = CATALOG.problemSets.map((p) => p.course);
+assert.strictEqual(new Set(problemSetCourses).size, problemSetCourses.length, `duplicate problem-set courses in the AI-plan catalog: ${problemSetCourses.join(', ')}`);
 
 // Every parsed entry must have real, non-empty text — a parsing bug that
 // silently produces empty strings should fail loudly here, not ship.

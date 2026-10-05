@@ -200,5 +200,6 @@ pages.forEach((page) => {
 const catalog = fs.readFileSync(path.join(root, 'problem-sets.html'), 'utf8');
 courses.forEach((course) => assert(catalog.includes(`problem-set.html?course=${course.slug}`), `Catalog missing ${course.slug}`));
 assert((catalog.match(/problem-set\.html\?course=/g) || []).length === courses.length, 'Catalog course count does not match bank data');
+timedCourses.forEach((course) => assert(catalog.includes(`timed-mastery.html?course=${course.slug}`), `Catalog missing Timed Mastery card for ${course.slug}`));
 
 console.log(`Problem-bank audit passed: ${courses.length} courses, ${total} answers + ${timedTotal} timed answers recomputed, ${localLinks} local references checked.`);
