@@ -4,7 +4,7 @@ const assert = require('assert');
 const fs = require('fs');
 const path = require('path');
 const { splitHtmlFragment } = require('../lib/content');
-const { extractScripts, stripScripts } = require('../lib/scripts');
+const { extractScripts, stripScripts, runWithDomReadyReplay } = require('../lib/scripts');
 const lessonAnswers = require('../public/assets/quiz.js');
 
 const { title, body } = splitHtmlFragment(
@@ -39,6 +39,34 @@ assert.strictEqual(
   2,
   'sanity check: the same input still yields 2 scripts via extractScripts before stripping — confirms getStaticProps extracts scripts from `html` first, then strips them from `body` separately, rather than losing them'
 );
+
+const delegatedEvents = [];
+let readyCalls = 0;
+const originalAddEventListener = function (type) { delegatedEvents.push(type); };
+const readyDocument = {
+  readyState: 'complete',
+  defaultView: { Event },
+  addEventListener: originalAddEventListener,
+};
+runWithDomReadyReplay(readyDocument, () => {
+  readyDocument.addEventListener('DOMContentLoaded', () => { readyCalls += 1; });
+  readyDocument.addEventListener('click', () => {});
+});
+assert.strictEqual(readyCalls, 1, 'late legacy DOMContentLoaded listeners should run immediately');
+assert.deepStrictEqual(delegatedEvents, ['click'], 'non-DOMContentLoaded listeners should still use the document');
+assert.strictEqual(readyDocument.addEventListener, originalAddEventListener, 'document.addEventListener should be restored after inline script execution');
+
+let loadingReadyCalls = 0;
+const loadingEvents = [];
+const loadingDocument = {
+  readyState: 'loading',
+  addEventListener(type, listener) { loadingEvents.push(type); this.readyListener = listener; },
+};
+runWithDomReadyReplay(loadingDocument, () => {
+  loadingDocument.addEventListener('DOMContentLoaded', () => { loadingReadyCalls += 1; });
+});
+assert.strictEqual(loadingReadyCalls, 0, 'DOMContentLoaded listeners should not run early while the document is loading');
+assert.deepStrictEqual(loadingEvents, ['DOMContentLoaded'], 'loading documents should keep native DOMContentLoaded registration');
 
 const sentenceCases = [
   ['The complement is an open set.', ['open'], true],

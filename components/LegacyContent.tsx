@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { runWithDomReadyReplay } from '../lib/scripts';
 
 interface ExtractedScript {
   src: string | null;
@@ -13,24 +14,33 @@ interface LegacyContentProps {
 export function LegacyContent({ body, scripts }: LegacyContentProps) {
   useEffect(() => {
     const created: HTMLScriptElement[] = [];
-    for (const script of scripts) {
-      const el = document.createElement('script');
-      if (script.src) {
-        el.src = script.src;
-        // `defer` is meaningless on a script inserted this way — the defer
-        // attribute only affects parser-inserted <script> tags. Scripts
-        // created via document.createElement default to async=true, which
-        // executes in network-completion order rather than document order.
-        // Phase B's pages depend on document order (data files before the
-        // logic that reads them, etc.) — async=false restores that.
-        el.async = false;
-      } else if (script.content) {
-        el.textContent = script.content;
+    let cancelled = false;
+
+    async function loadScripts() {
+      for (const script of scripts) {
+        if (cancelled) return;
+
+        const el = document.createElement('script');
+        created.push(el);
+        if (script.src) {
+          el.src = script.src;
+          // Dynamically inserted scripts ignore `defer`. Waiting for each
+          // load preserves the source order of external and inline scripts.
+          await new Promise<void>((resolve) => {
+            el.addEventListener('load', () => resolve(), { once: true });
+            el.addEventListener('error', () => resolve(), { once: true });
+            document.body.appendChild(el);
+          });
+        } else if (script.content) {
+          el.textContent = script.content;
+          runWithDomReadyReplay(document, () => document.body.appendChild(el));
+        }
       }
-      document.body.appendChild(el);
-      created.push(el);
     }
+
+    void loadScripts();
     return () => {
+      cancelled = true;
       created.forEach((el) => el.remove());
     };
   }, [scripts]);
