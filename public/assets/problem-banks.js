@@ -43,11 +43,26 @@
   // questions and saved-progress IDs never move) + `extra` drawn evenly
   // from a bounded grid, skipping any tuple whose prompt is already in the
   // topic. `build(...tuple)` only needs to return an object with `prompt`.
+  // Deterministic pseudo-random order (FNV-1a hash of each tuple): picks
+  // land across every grid dimension, with none of the stride aliasing an
+  // evenly spaced pick has on a nested grid (e.g. one parameter frozen), and
+  // the same tuples, so the same IDs, come out on every page load.
+  const hashOrder = (tuples) => tuples
+    .map((tuple) => {
+      const key = JSON.stringify(tuple);
+      let hash = 2166136261;
+      for (let k = 0; k < key.length; k += 1) hash = Math.imul(hash ^ key.charCodeAt(k), 16777619);
+      // murmur3 fmix32 avalanche — plain FNV clusters tuples that share a prefix.
+      hash = Math.imul(hash ^ (hash >>> 16), 0x85ebca6b);
+      hash = Math.imul(hash ^ (hash >>> 13), 0xc2b2ae35);
+      return [(hash ^ (hash >>> 16)) >>> 0, tuple];
+    })
+    .sort((x, y) => x[0] - y[0])
+    .map(([, tuple]) => tuple);
   const topicTuples = (regular, gridTuples, build, extra = 30) => {
     const seen = new Set(regular.map((tuple) => build(...tuple).prompt));
     const picked = [];
-    const candidates = [...spread(gridTuples, Math.min(extra, gridTuples.length)), ...gridTuples];
-    for (const tuple of candidates) {
+    for (const tuple of gridTuples.interleaved ? gridTuples : hashOrder(gridTuples)) {
       if (picked.length === extra) break;
       const prompt = build(...tuple).prompt;
       if (seen.has(prompt)) continue;
@@ -63,91 +78,90 @@
       questions.push(make(`${idPrefix}-${i + 1}`, ...tuple));
     });
   };
-  // Balanced mix of several grids (e.g. arithmetic + geometric sequences):
-  // spread each to `each` tuples so one large grid can't crowd out the rest.
-  const mixGrids = (each, ...grids) => grids.flatMap((g) => spread(g, Math.min(each, g.length)));
+  // Balanced mix of several question shapes (e.g. arithmetic + geometric
+  // sequences): each grid hash-ordered, then interleaved one at a time, and
+  // flagged so topicTuples keeps that order instead of re-shuffling it.
+  const mixGrids = (each, ...grids) => {
+    const ordered = grids.map((g) => hashOrder(g).slice(0, each));
+    const mixed = range(0, each - 1).flatMap((k) => ordered.filter((g) => k < g.length).map((g) => g[k]));
+    mixed.interleaved = true;
+    return mixed;
+  };
   const TF = [true, false];
   const LOGIC_OPS = ['and', 'or', 'implies', 'biconditional'];
   const evalLogic = (p, q, operation) => (operation === 'and' ? p && q : operation === 'or' ? p || q : operation === 'implies' ? !p || q : p === q);
   const intHypotenusePairs = (maxLeg) => grid(range(1, maxLeg), range(1, maxLeg)).filter(([a, b]) => Number.isInteger(Math.hypot(a, b)));
 
+  const agLinearQ = (id, a, x, b) => {
+    const c = a * x + b;
+    return qNumber(
+      id, 'Linear equations',
+      `Solve for x: ${a}x ${term(b, '')} = ${c}.`,
+      x, `Move the constant, then divide: x = (${c} − (${b}))/${a} = ${x}.`,
+      { kind: 'linear', a, b, c }
+    );
+  };
+  const agSystemQ = (id, x, y, a, b, d, e) => {
+    const c = a * x + b * y;
+    const f = d * x + e * y;
+    return qNumber(
+      id, 'Systems',
+      `Find x: ${a}x ${term(b, 'y')} = ${c} and ${d}x ${term(e, 'y')} = ${f}.`,
+      x, `Elimination gives the solution (x, y) = (${x}, ${y}), so x = ${x}.`,
+      { kind: 'system-x', a, b, c, d, e, f }
+    );
+  };
+  const agQuadraticQ = (id, r1, r2) => {
+    const sum = r1 + r2;
+    const product = r1 * r2;
+    return qNumber(
+      id, 'Quadratics',
+      `What is the larger real solution of x² ${term(-sum, 'x')} ${term(product, '')} = 0?`,
+      Math.max(r1, r2),
+      `The expression factors as (x − ${r1})(x − ${r2}), giving roots ${r1} and ${r2}.`,
+      { kind: 'quadratic-larger-root', sum, product }
+    );
+  };
+  const agExponentQ = (id, base, m, n, p) => {
+    const answer = base ** (m + n - p);
+    return qNumber(
+      id, 'Exponents',
+      `Evaluate (${base}^${m} · ${base}^${n}) ÷ ${base}^${p}.`,
+      answer,
+      `Add exponents when multiplying and subtract when dividing: ${base}^${m + n - p} = ${answer}.`,
+      { kind: 'exponent', base, m, n, p }
+    );
+  };
+  const agAreaQ = (id, width, height) => qNumber(
+    id, 'Area',
+    `A rectangle is ${width} units wide and ${height} units tall. What is its area in square units?`,
+    width * height, `Area = width × height = ${width} × ${height} = ${width * height}.`,
+    { kind: 'rectangle-area', width, height }
+  );
+  const agPythagoreanQ = (id, a, b) => {
+    const answer = Math.sqrt(a * a + b * b);
+    return qNumber(
+      id, 'Right triangles',
+      `A right triangle has legs ${a} and ${b}. Find its hypotenuse.`,
+      answer, `c = √(${a}² + ${b}²) = √${a * a + b * b} = ${answer}.`,
+      { kind: 'pythagorean', a, b }
+    );
+  };
+
   function algebraGeometry() {
     const questions = [];
-    for (let i = 0; i < 10; i += 1) {
-      const a = 2 + (i % 4);
-      const x = i - 4;
-      const b = (i % 5) - 2;
-      const c = a * x + b;
-      questions.push(qNumber(
-        `ag-linear-${i + 1}`, 'Linear equations',
-        `Solve for x: ${a}x ${term(b, '')} = ${c}.`,
-        x, `Move the constant, then divide: x = (${c} − (${b}))/${a} = ${x}.`,
-        { kind: 'linear', a, b, c }
-      ));
-    }
-    for (let i = 0; i < 10; i += 1) {
-      const x = i - 3;
-      const y = (i % 5) - 2;
-      const a = 1 + (i % 3);
-      const b = 1 + (i % 2);
-      const d = 2 + (i % 4);
-      const e = -(1 + (i % 3));
-      const c = a * x + b * y;
-      const f = d * x + e * y;
-      questions.push(qNumber(
-        `ag-system-${i + 1}`, 'Systems',
-        `Find x: ${a}x ${term(b, 'y')} = ${c} and ${d}x ${term(e, 'y')} = ${f}.`,
-        x, `Elimination gives the solution (x, y) = (${x}, ${y}), so x = ${x}.`,
-        { kind: 'system-x', a, b, c, d, e, f }
-      ));
-    }
-    for (let i = 0; i < 10; i += 1) {
-      const r1 = i - 6;
-      const r2 = i + 1;
-      const sum = r1 + r2;
-      const product = r1 * r2;
-      questions.push(qNumber(
-        `ag-quadratic-${i + 1}`, 'Quadratics',
-        `What is the larger real solution of x² ${term(-sum, 'x')} ${term(product, '')} = 0?`,
-        Math.max(r1, r2),
-        `The expression factors as (x − ${r1})(x − ${r2}), giving roots ${r1} and ${r2}.`,
-        { kind: 'quadratic-larger-root', sum, product }
-      ));
-    }
-    for (let i = 0; i < 10; i += 1) {
-      const base = 2 + (i % 4);
-      const m = 2 + (i % 3);
-      const n = 1 + (i % 4);
-      const p = 1 + (i % 2);
-      const answer = base ** (m + n - p);
-      questions.push(qNumber(
-        `ag-exponent-${i + 1}`, 'Exponents',
-        `Evaluate (${base}^${m} · ${base}^${n}) ÷ ${base}^${p}.`,
-        answer,
-        `Add exponents when multiplying and subtract when dividing: ${base}^${m + n - p} = ${answer}.`,
-        { kind: 'exponent', base, m, n, p }
-      ));
-    }
-    for (let i = 0; i < 10; i += 1) {
-      const width = 3 + i;
-      const height = 2 + (i % 6);
-      questions.push(qNumber(
-        `ag-area-${i + 1}`, 'Area',
-        `A rectangle is ${width} units wide and ${height} units tall. What is its area in square units?`,
-        width * height, `Area = width × height = ${width} × ${height} = ${width * height}.`,
-        { kind: 'rectangle-area', width, height }
-      ));
-    }
+    addTopic(questions, 'ag-linear', regular10((i) => [2 + (i % 4), i - 4, (i % 5) - 2]),
+      grid(range(2, 6), range(-6, 8), nonZero(-5, 5)), agLinearQ);
+    addTopic(questions, 'ag-system', regular10((i) => [i - 3, (i % 5) - 2, 1 + (i % 3), 1 + (i % 2), 2 + (i % 4), -(1 + (i % 3))]),
+      grid(range(-5, 6), range(-4, 4), range(1, 3), range(1, 2), range(2, 5), range(-3, -1)), agSystemQ);
+    addTopic(questions, 'ag-quadratic', regular10((i) => [i - 6, i + 1]),
+      grid(nonZero(-9, 9), nonZero(-9, 9)).filter(([r1, r2]) => r1 < r2 && r1 + r2 !== 0), agQuadraticQ);
+    addTopic(questions, 'ag-exponent', regular10((i) => [2 + (i % 4), 2 + (i % 3), 1 + (i % 4), 1 + (i % 2)]),
+      grid(range(2, 5), range(1, 4), range(1, 4), range(1, 3)).filter(([base, m, n, p]) => m + n - p >= 1 && base ** (m + n - p) <= 15625), agExponentQ);
+    addTopic(questions, 'ag-area', regular10((i) => [3 + i, 2 + (i % 6)]),
+      grid(range(3, 15), range(2, 12)), agAreaQ);
     const triples = [[3, 4], [5, 12], [8, 15], [7, 24], [9, 12], [12, 16], [15, 20], [10, 24], [18, 24], [20, 21]];
-    triples.forEach(([a, b], i) => {
-      const answer = Math.sqrt(a * a + b * b);
-      questions.push(qNumber(
-        `ag-pythagorean-${i + 1}`, 'Right triangles',
-        `A right triangle has legs ${a} and ${b}. Find its hypotenuse.`,
-        answer, `c = √(${a}² + ${b}²) = √${a * a + b * b} = ${answer}.`,
-        { kind: 'pythagorean', a, b }
-      ));
-    });
+    addTopic(questions, 'ag-pythagorean', triples, intHypotenusePairs(75), agPythagoreanQ);
     return questions;
   }
 
@@ -217,12 +231,18 @@
 
   function calculus() {
     const questions = [];
-    for (let i = 0; i < 10; i += 1) questions.push(calcLimitQ(`calc-limit-${i + 1}`, i - 4, (i % 5) - 2, 3 - (i % 4)));
-    for (let i = 0; i < 10; i += 1) questions.push(calcDerivativeQ(`calc-derivative-${i + 1}`, 1 + (i % 3), 2 + (i % 4), (i % 5) - 2, (i % 4) - 1));
-    for (let i = 0; i < 10; i += 1) questions.push(calcProductQ(`calc-product-${i + 1}`, 1 + (i % 4), 2 + (i % 3), (i % 5) - 2));
-    for (let i = 0; i < 10; i += 1) questions.push(calcIntegralQ(`calc-integral-${i + 1}`, 1 + (i % 4), (i % 5) - 1, 1 + (i % 5)));
-    for (let i = 0; i < 10; i += 1) questions.push(calcFtcQ(`calc-ftc-${i + 1}`, (i % 4) - 1, 2 + (i % 3), (i % 5) - 2));
-    for (let i = 0; i < 10; i += 1) questions.push(calcSeriesQ(`calc-series-${i + 1}`, 2 + i, 2 + (i % 4)));
+    addTopic(questions, 'calc-limit', regular10((i) => [i - 4, (i % 5) - 2, 3 - (i % 4)]),
+      grid(range(-5, 5), nonZero(-3, 3), nonZero(-4, 4)), calcLimitQ);
+    addTopic(questions, 'calc-derivative', regular10((i) => [1 + (i % 3), 2 + (i % 4), (i % 5) - 2, (i % 4) - 1]),
+      grid(range(1, 4), range(2, 5), nonZero(-3, 3), range(-2, 2)), calcDerivativeQ);
+    addTopic(questions, 'calc-product', regular10((i) => [1 + (i % 4), 2 + (i % 3), (i % 5) - 2]),
+      grid(range(1, 5), range(1, 5), range(-3, 3)), calcProductQ);
+    addTopic(questions, 'calc-integral', regular10((i) => [1 + (i % 4), (i % 5) - 1, 1 + (i % 5)]),
+      grid(range(1, 6), nonZero(-3, 3), range(1, 5)), calcIntegralQ);
+    addTopic(questions, 'calc-ftc', regular10((i) => [(i % 4) - 1, 2 + (i % 3), (i % 5) - 2]),
+      grid(nonZero(-3, 3), range(1, 5), range(-3, 3)), calcFtcQ);
+    addTopic(questions, 'calc-series', regular10((i) => [2 + i, 2 + (i % 4)]),
+      grid(range(1, 20), range(2, 6)), calcSeriesQ);
     return questions;
   }
 
@@ -315,6 +335,81 @@
     return questions;
   }
 
+  const tf = (value) => (value ? 'true' : 'false');
+  // Two-variable cases are the original 10; three-variable "(p op₁ q) op₂ r"
+  // forms extend the topic past the 16 two-variable truth-table rows.
+  const dmLogicQ = (id, shape, ...params) => {
+    if (shape === '2') {
+      const [p, q, operation] = params;
+      const answer = evalLogic(p, q, operation);
+      return qChoice(
+        id, 'Logic',
+        `Let p be ${tf(p)} and q be ${tf(q)}. Is “p ${operation} q” true or false?`,
+        ['True', 'False'], answer ? 'True' : 'False',
+        `Using the truth table for ${operation}, the statement is ${tf(answer)}.`,
+        { kind: 'logic', p, q, operation }
+      );
+    }
+    const [p, q, r, op1, op2] = params;
+    const inner = evalLogic(p, q, op1);
+    const answer = evalLogic(inner, r, op2);
+    return qChoice(
+      id, 'Logic',
+      `Let p be ${tf(p)}, q be ${tf(q)}, and r be ${tf(r)}. Is “(p ${op1} q) ${op2} r” true or false?`,
+      ['True', 'False'], answer ? 'True' : 'False',
+      `First, p ${op1} q is ${tf(inner)}. Then (${tf(inner)}) ${op2} r is ${tf(answer)}.`,
+      { kind: 'logic3', p, q, r, op1, op2 }
+    );
+  };
+  const dmSetQ = (id, start, aParity, bMod) => {
+    const universe = Array.from({ length: 8 }, (_, n) => n + start);
+    const a = universe.filter((n) => (n + aParity) % 2 === 0);
+    const b = universe.filter((n) => n % bMod !== 0);
+    const answer = a.filter((n) => b.includes(n)).length;
+    return qNumber(
+      id, 'Sets',
+      `If A = {${a.join(', ')}} and B = {${b.join(', ')}}, find |A ∩ B|.`,
+      answer, `A ∩ B contains elements appearing in both sets, so its cardinality is ${answer}.`,
+      { kind: 'intersection-size', a, b }
+    );
+  };
+  const dmCountQ = (id, n, r, permutation) => {
+    const answer = permutation ? factorial(n) / factorial(n - r) : choose(n, r);
+    return qNumber(
+      id, 'Combinatorics',
+      permutation
+        ? `How many ordered ways can ${r} objects be selected from ${n} distinct objects?`
+        : `How many unordered groups of ${r} can be selected from ${n} distinct objects?`,
+      answer,
+      permutation ? `Use P(${n}, ${r}) = ${n}!/(${n - r})! = ${answer}.` : `Use C(${n}, ${r}) = ${n}!/[${r}!(${n - r})!] = ${answer}.`,
+      { kind: permutation ? 'permutation' : 'combination', n, r }
+    );
+  };
+  const dmProbabilityQ = (id, favorable, other) => {
+    const answer = favorable / (favorable + other);
+    return qNumber(
+      id, 'Probability',
+      `A bag contains ${favorable} red and ${other} blue tokens. One token is drawn uniformly. What is P(red)? Enter a fraction or decimal.`,
+      answer, `P(red) = red/total = ${favorable}/${favorable + other} = ${fmt(answer)}.`,
+      { kind: 'simple-probability', favorable, total: favorable + other }
+    );
+  };
+  const dmTreeQ = (id, vertices) => qNumber(
+    id, 'Graph theory',
+    `A connected graph is a tree with ${vertices} vertices. How many edges does it have?`,
+    vertices - 1, `Every tree with v vertices has v − 1 edges: ${vertices} − 1 = ${vertices - 1}.`,
+    { kind: 'tree-edges', vertices }
+  );
+  const dmModularQ = (id, a, b, c, modulus) => {
+    const answer = (a * b + c) % modulus;
+    return qNumber(
+      id, 'Number theory',
+      `Find the least nonnegative remainder of (${a} · ${b} + ${c}) modulo ${modulus}.`,
+      answer, `${a} · ${b} + ${c} = ${a * b + c}; dividing by ${modulus} leaves remainder ${answer}.`,
+      { kind: 'modular', a, b, c, modulus }
+    );
+  };
+
   function discreteMath() {
     const questions = [];
     const logicCases = [
@@ -324,156 +419,90 @@
       [false, true, 'implies'], [false, false, 'implies'],
       [true, true, 'biconditional'], [true, false, 'biconditional']
     ];
-    logicCases.forEach(([p, q, operation], i) => {
-      const answer = operation === 'and' ? p && q
-        : operation === 'or' ? p || q
-          : operation === 'implies' ? !p || q
-            : p === q;
-      questions.push(qChoice(
-        `dm-logic-${i + 1}`, 'Logic',
-        `Let p be ${p ? 'true' : 'false'} and q be ${q ? 'true' : 'false'}. Is “p ${operation} q” true or false?`,
-        ['True', 'False'], answer ? 'True' : 'False',
-        `Using the truth table for ${operation}, the statement is ${answer ? 'true' : 'false'}.`,
-        { kind: 'logic', p, q, operation }
-      ));
-    });
-    for (let i = 0; i < 10; i += 1) {
-      const universe = Array.from({ length: 8 }, (_, n) => n + i + 1);
-      const a = universe.filter((n) => (n + i) % 2 === 0);
-      const b = universe.filter((n) => n % (2 + (i % 3)) !== 0);
-      const answer = a.filter((n) => b.includes(n)).length;
-      questions.push(qNumber(
-        `dm-set-${i + 1}`, 'Sets',
-        `If A = {${a.join(', ')}} and B = {${b.join(', ')}}, find |A ∩ B|.`,
-        answer, `A ∩ B contains elements appearing in both sets, so its cardinality is ${answer}.`,
-        { kind: 'intersection-size', a, b }
-      ));
-    }
-    for (let i = 0; i < 10; i += 1) {
-      const n = 5 + (i % 5);
-      const r = 2 + (i % 3);
-      const permutation = i % 2 === 0;
-      const answer = permutation ? factorial(n) / factorial(n - r) : choose(n, r);
-      questions.push(qNumber(
-        `dm-count-${i + 1}`, 'Combinatorics',
-        permutation
-          ? `How many ordered ways can ${r} objects be selected from ${n} distinct objects?`
-          : `How many unordered groups of ${r} can be selected from ${n} distinct objects?`,
-        answer,
-        permutation ? `Use P(${n}, ${r}) = ${n}!/(${n - r})! = ${answer}.` : `Use C(${n}, ${r}) = ${n}!/[${r}!(${n - r})!] = ${answer}.`,
-        { kind: permutation ? 'permutation' : 'combination', n, r }
-      ));
-    }
-    for (let i = 0; i < 10; i += 1) {
-      const favorable = 1 + (i % 6);
-      const other = 3 + (i % 5);
-      const answer = favorable / (favorable + other);
-      questions.push(qNumber(
-        `dm-probability-${i + 1}`, 'Probability',
-        `A bag contains ${favorable} red and ${other} blue tokens. One token is drawn uniformly. What is P(red)? Enter a fraction or decimal.`,
-        answer, `P(red) = red/total = ${favorable}/${favorable + other} = ${fmt(answer)}.`,
-        { kind: 'simple-probability', favorable, total: favorable + other }
-      ));
-    }
-    for (let i = 0; i < 10; i += 1) {
-      const vertices = 4 + i;
-      questions.push(qNumber(
-        `dm-tree-${i + 1}`, 'Graph theory',
-        `A connected graph is a tree with ${vertices} vertices. How many edges does it have?`,
-        vertices - 1, `Every tree with v vertices has v − 1 edges: ${vertices} − 1 = ${vertices - 1}.`,
-        { kind: 'tree-edges', vertices }
-      ));
-    }
-    for (let i = 0; i < 10; i += 1) {
-      const a = 7 + i * 3;
-      const b = 2 + (i % 5);
-      const c = 1 + (i % 4);
-      const modulus = 5 + (i % 6);
-      const answer = (a * b + c) % modulus;
-      questions.push(qNumber(
-        `dm-modular-${i + 1}`, 'Number theory',
-        `Find the least nonnegative remainder of (${a} · ${b} + ${c}) modulo ${modulus}.`,
-        answer, `${a} · ${b} + ${c} = ${a * b + c}; dividing by ${modulus} leaves remainder ${answer}.`,
-        { kind: 'modular', a, b, c, modulus }
-      ));
-    }
+    addTopic(questions, 'dm-logic', logicCases.map((c) => ['2', ...c]),
+      grid(TF, TF, TF, LOGIC_OPS, LOGIC_OPS).map((t) => ['3', ...t]), dmLogicQ);
+    addTopic(questions, 'dm-set', regular10((i) => [i + 1, i, 2 + (i % 3)]),
+      grid(range(1, 30), [0, 1], range(2, 5)), dmSetQ);
+    addTopic(questions, 'dm-count', regular10((i) => [5 + (i % 5), 2 + (i % 3), i % 2 === 0]),
+      grid(range(4, 11), range(2, 4), [true, false]).filter(([n, r]) => r < n), dmCountQ);
+    addTopic(questions, 'dm-probability', regular10((i) => [1 + (i % 6), 3 + (i % 5)]),
+      grid(range(1, 9), range(1, 9)), dmProbabilityQ);
+    addTopic(questions, 'dm-tree', regular10((i) => [4 + i]), range(14, 60).map((v) => [v]), dmTreeQ);
+    addTopic(questions, 'dm-modular', regular10((i) => [7 + i * 3, 2 + (i % 5), 1 + (i % 4), 5 + (i % 6)]),
+      grid(range(7, 40), range(2, 6), range(1, 4), range(5, 12)), dmModularQ);
     return questions;
   }
 
+  const physicsMotionQ = (id, initialVelocity, acceleration, time) => {
+    const answer = initialVelocity * time + 0.5 * acceleration * time * time;
+    return qNumber(
+      id, 'Kinematics',
+      `An object starts at x = 0 with v₀ = ${initialVelocity} m/s and constant a = ${acceleration} m/s². Find its position after ${time} s, in meters.`,
+      answer, `x = v₀t + ½at² = ${initialVelocity}(${time}) + ½(${acceleration})(${time}²) = ${answer} m.`,
+      { kind: 'kinematics', initialVelocity, acceleration, time }
+    );
+  };
+  const physicsForceQ = (id, mass, acceleration, friction) => {
+    const applied = mass * acceleration + friction;
+    return qNumber(
+      id, 'Forces',
+      `A ${mass} kg block is pushed with ${applied} N while ${friction} N of friction opposes motion. Find its acceleration in m/s².`,
+      acceleration, `Fnet = ${applied} − ${friction} = ${mass * acceleration} N, so a = Fnet/m = ${acceleration} m/s².`,
+      { kind: 'newton-second', mass, applied, friction }
+    );
+  };
+  const physicsEnergyQ = (id, mass, velocity) => {
+    const answer = 0.5 * mass * velocity * velocity;
+    return qNumber(
+      id, 'Energy',
+      `Find the kinetic energy of a ${mass} kg object moving at ${velocity} m/s, in joules.`,
+      answer, `K = ½mv² = ½(${mass})(${velocity}²) = ${answer} J.`,
+      { kind: 'kinetic-energy', mass, velocity }
+    );
+  };
+  const physicsMomentumQ = (id, mass1, velocity1, mass2, velocity2) => {
+    const answer = (mass1 * velocity1 + mass2 * velocity2) / (mass1 + mass2);
+    return qNumber(
+      id, 'Momentum',
+      `A ${mass1} kg cart at ${velocity1} m/s sticks to a ${mass2} kg cart at ${velocity2} m/s. Find their final velocity in m/s.`,
+      answer,
+      `Conserve momentum: vf = [${mass1}(${velocity1}) + ${mass2}(${velocity2})]/(${mass1 + mass2}) = ${fmt(answer)} m/s.`,
+      { kind: 'inelastic-collision', mass1, velocity1, mass2, velocity2 }
+    );
+  };
+  const physicsTorqueQ = (id, force, radius) => {
+    const answer = force * radius;
+    return qNumber(
+      id, 'Rotation',
+      `A ${force} N force acts perpendicular to a lever ${radius} m from its pivot. Find the torque magnitude in N·m.`,
+      answer, `For a perpendicular force, τ = rF = ${radius}(${force}) = ${fmt(answer)} N·m.`,
+      { kind: 'torque', force, radius }
+    );
+  };
+  const physicsCircleQ = (id, mass, velocity, radius) => {
+    const answer = mass * velocity * velocity / radius;
+    return qNumber(
+      id, 'Circular motion',
+      `A ${mass} kg object moves in a circle at ${velocity} m/s with radius ${radius} m. Find the required centripetal force in newtons.`,
+      answer, `Fc = mv²/r = ${mass}(${velocity}²)/${radius} = ${fmt(answer)} N.`,
+      { kind: 'centripetal-force', mass, velocity, radius }
+    );
+  };
+
   function physics() {
     const questions = [];
-    for (let i = 0; i < 10; i += 1) {
-      const initialVelocity = 1 + (i % 5);
-      const acceleration = 2 + (i % 4);
-      const time = 2 + (i % 5);
-      const answer = initialVelocity * time + 0.5 * acceleration * time * time;
-      questions.push(qNumber(
-        `physics-motion-${i + 1}`, 'Kinematics',
-        `An object starts at x = 0 with v₀ = ${initialVelocity} m/s and constant a = ${acceleration} m/s². Find its position after ${time} s, in meters.`,
-        answer, `x = v₀t + ½at² = ${initialVelocity}(${time}) + ½(${acceleration})(${time}²) = ${answer} m.`,
-        { kind: 'kinematics', initialVelocity, acceleration, time }
-      ));
-    }
-    for (let i = 0; i < 10; i += 1) {
-      const mass = 2 + (i % 4);
-      const acceleration = 1 + (i % 5);
-      const friction = 1 + (i % 3);
-      const applied = mass * acceleration + friction;
-      questions.push(qNumber(
-        `physics-force-${i + 1}`, 'Forces',
-        `A ${mass} kg block is pushed with ${applied} N while ${friction} N of friction opposes motion. Find its acceleration in m/s².`,
-        acceleration, `Fnet = ${applied} − ${friction} = ${mass * acceleration} N, so a = Fnet/m = ${acceleration} m/s².`,
-        { kind: 'newton-second', mass, applied, friction }
-      ));
-    }
-    for (let i = 0; i < 10; i += 1) {
-      const mass = 2 + (i % 5);
-      const velocity = 2 + (i % 6);
-      const answer = 0.5 * mass * velocity * velocity;
-      questions.push(qNumber(
-        `physics-energy-${i + 1}`, 'Energy',
-        `Find the kinetic energy of a ${mass} kg object moving at ${velocity} m/s, in joules.`,
-        answer, `K = ½mv² = ½(${mass})(${velocity}²) = ${answer} J.`,
-        { kind: 'kinetic-energy', mass, velocity }
-      ));
-    }
-    for (let i = 0; i < 10; i += 1) {
-      const mass1 = 1 + (i % 4);
-      const velocity1 = 2 + (i % 5);
-      const mass2 = 2 + (i % 5);
-      const velocity2 = i % 2 === 0 ? 0 : -1;
-      const answer = (mass1 * velocity1 + mass2 * velocity2) / (mass1 + mass2);
-      questions.push(qNumber(
-        `physics-momentum-${i + 1}`, 'Momentum',
-        `A ${mass1} kg cart at ${velocity1} m/s sticks to a ${mass2} kg cart at ${velocity2} m/s. Find their final velocity in m/s.`,
-        answer,
-        `Conserve momentum: vf = [${mass1}(${velocity1}) + ${mass2}(${velocity2})]/(${mass1 + mass2}) = ${fmt(answer)} m/s.`,
-        { kind: 'inelastic-collision', mass1, velocity1, mass2, velocity2 }
-      ));
-    }
-    for (let i = 0; i < 10; i += 1) {
-      const force = 3 + i;
-      const radius = 0.5 + (i % 5) * 0.5;
-      const answer = force * radius;
-      questions.push(qNumber(
-        `physics-torque-${i + 1}`, 'Rotation',
-        `A ${force} N force acts perpendicular to a lever ${radius} m from its pivot. Find the torque magnitude in N·m.`,
-        answer, `For a perpendicular force, τ = rF = ${radius}(${force}) = ${fmt(answer)} N·m.`,
-        { kind: 'torque', force, radius }
-      ));
-    }
-    for (let i = 0; i < 10; i += 1) {
-      const mass = 1 + (i % 4);
-      const velocity = 2 + (i % 5);
-      const radius = 1 + (i % 3);
-      const answer = mass * velocity * velocity / radius;
-      questions.push(qNumber(
-        `physics-circle-${i + 1}`, 'Circular motion',
-        `A ${mass} kg object moves in a circle at ${velocity} m/s with radius ${radius} m. Find the required centripetal force in newtons.`,
-        answer, `Fc = mv²/r = ${mass}(${velocity}²)/${radius} = ${fmt(answer)} N.`,
-        { kind: 'centripetal-force', mass, velocity, radius }
-      ));
-    }
+    addTopic(questions, 'physics-motion', regular10((i) => [1 + (i % 5), 2 + (i % 4), 2 + (i % 5)]),
+      grid(range(0, 8), range(1, 6), range(1, 8)), physicsMotionQ);
+    addTopic(questions, 'physics-force', regular10((i) => [2 + (i % 4), 1 + (i % 5), 1 + (i % 3)]),
+      grid(range(1, 10), range(1, 6), range(1, 6)), physicsForceQ);
+    addTopic(questions, 'physics-energy', regular10((i) => [2 + (i % 5), 2 + (i % 6)]),
+      grid(range(1, 10), range(1, 12)), physicsEnergyQ);
+    addTopic(questions, 'physics-momentum', regular10((i) => [1 + (i % 4), 2 + (i % 5), 2 + (i % 5), i % 2 === 0 ? 0 : -1]),
+      grid(range(1, 6), range(1, 8), range(1, 6), range(-3, 0)), physicsMomentumQ);
+    addTopic(questions, 'physics-torque', regular10((i) => [3 + i, 0.5 + (i % 5) * 0.5]),
+      grid(range(2, 30), [0.25, 0.5, 0.75, 1, 1.25, 1.5, 2, 2.5, 3]), physicsTorqueQ);
+    addTopic(questions, 'physics-circle', regular10((i) => [1 + (i % 4), 2 + (i % 5), 1 + (i % 3)]),
+      grid(range(1, 6), range(1, 10), range(1, 5)), physicsCircleQ);
     return questions;
   }
 
@@ -546,20 +575,26 @@
     );
   };
 
+  // Sequences mix two templates; a leading tag picks which one.
+  const precalcSequenceQ = (id, shape, ...params) => (shape === 'a' ? precalcArithmeticQ(id, ...params) : precalcGeometricQ(id, ...params));
+
   function precalculus() {
     const questions = [];
-    for (let i = 0; i < 10; i += 1) questions.push(precalcFunctionQ(`precalc-function-${i + 1}`, 1 + (i % 3), (i % 5) - 2, 3 - (i % 4), i - 4));
-    for (let i = 0; i < 10; i += 1) questions.push(precalcCompositionQ(`precalc-composition-${i + 1}`, 2 + (i % 3), (i % 4) - 1, 1 + (i % 4), 2 - (i % 5), i - 3));
-    for (let i = 0; i < 10; i += 1) questions.push(precalcPolynomialQ(`precalc-polynomial-${i + 1}`, i - 5, i + 2));
-    for (let i = 0; i < 10; i += 1) questions.push(precalcExponentialQ(`precalc-exponential-${i + 1}`, 2 + (i % 4), 1 + (i % 6)));
+    addTopic(questions, 'precalc-function', regular10((i) => [1 + (i % 3), (i % 5) - 2, 3 - (i % 4), i - 4]),
+      grid(range(1, 3), nonZero(-3, 3), nonZero(-4, 4), range(-3, 3)), precalcFunctionQ);
+    addTopic(questions, 'precalc-composition', regular10((i) => [2 + (i % 3), (i % 4) - 1, 1 + (i % 4), 2 - (i % 5), i - 3]),
+      grid(range(2, 4), nonZero(-3, 3), range(1, 4), nonZero(-3, 3), range(-3, 3)), precalcCompositionQ);
+    addTopic(questions, 'precalc-polynomial', regular10((i) => [i - 5, i + 2]),
+      grid(nonZero(-8, 8), nonZero(-8, 8)).filter(([r1, r2]) => r1 < r2 && r1 + r2 !== 0), precalcPolynomialQ);
+    addTopic(questions, 'precalc-exponential', regular10((i) => [2 + (i % 4), 1 + (i % 6)]),
+      grid(range(2, 10), range(-3, 6)).filter(([base, exponent]) => base ** Math.abs(exponent) <= 100000), precalcExponentialQ);
     const triples = [[3, 4], [5, 12], [8, 15], [7, 24], [9, 12], [12, 16], [15, 20], [10, 24], [18, 24], [20, 21]];
-    triples.forEach(([opposite, adjacent], i) => questions.push(precalcTrigQ(`precalc-trig-${i + 1}`, opposite, adjacent)));
-    for (let i = 0; i < 10; i += 1) {
-      const n = 4 + i;
-      questions.push(i % 2 === 0
-        ? precalcArithmeticQ(`precalc-sequence-${i + 1}`, 2 + i, 1 + (i % 4), n)
-        : precalcGeometricQ(`precalc-sequence-${i + 1}`, 1 + (i % 3), 2 + (i % 2), n));
-    }
+    addTopic(questions, 'precalc-trig', triples, intHypotenusePairs(75), precalcTrigQ);
+    addTopic(questions, 'precalc-sequence', regular10((i) => (i % 2 === 0 ? ['a', 2 + i, 1 + (i % 4), 4 + i] : ['g', 1 + (i % 3), 2 + (i % 2), 4 + i])),
+      mixGrids(40,
+        grid(range(1, 9), nonZero(-5, 5), range(5, 15)).map((t) => ['a', ...t]),
+        grid(range(1, 5), range(2, 4), range(3, 8)).filter(([first, ratio, n]) => first * ratio ** (n - 1) <= 50000).map((t) => ['g', ...t])),
+      precalcSequenceQ);
     return questions;
   }
 
@@ -580,88 +615,75 @@
     return questions;
   }
 
+  const multiDotQ = (id, u, v) => {
+    const answer = u.reduce((sum, value, index) => sum + value * v[index], 0);
+    return qNumber(
+      id, 'Vectors and dot products',
+      `Find ⟨${u.join(', ')}⟩ · ⟨${v.join(', ')}⟩.`,
+      answer, `Multiply matching components and add: the dot product is ${answer}.`,
+      { kind: 'vector-dot', u, v }
+    );
+  };
+  const multiCrossQ = (id, a, b, c, d) => {
+    const answer = a * d - b * c;
+    return qNumber(
+      id, 'Cross products',
+      `Find the z-component of ⟨${a}, ${b}, 0⟩ × ⟨${c}, ${d}, 0⟩.`,
+      answer, `The z-component is ad − bc = ${a}(${d}) − ${b}(${c}) = ${answer}.`,
+      { kind: 'cross-z', a, b, c, d }
+    );
+  };
+  const multiPartialXQ = (id, a, b, c, x, y) => {
+    const answer = 2 * a * x + b * y;
+    return qNumber(
+      id, 'Partial derivatives',
+      `For f(x,y) = ${a}x² ${term(b, 'xy')} ${term(c, 'y²')}, find f_x(${x}, ${y}).`,
+      answer, `Holding y constant gives f_x = ${2 * a}x ${term(b, 'y')}. At (${x}, ${y}), this is ${answer}.`,
+      { kind: 'partial-x', a, b, x, y }
+    );
+  };
+  const multiGradientQ = (id, a, b, c, x, y) => {
+    const answer = b * x + 2 * c * y;
+    return qNumber(
+      id, 'Gradients',
+      `For f(x,y) = ${a}x² ${term(b, 'xy')} ${term(c, 'y²')}, find the y-component of ∇f at (${x}, ${y}).`,
+      answer, `The y-component is f_y = ${b}x ${term(2 * c, 'y')}. Substitution gives ${answer}.`,
+      { kind: 'partial-y', b, c, x, y }
+    );
+  };
+  const multiDoubleIntegralQ = (id, a, b, width, height) => {
+    const answer = a * width ** 2 * height / 2 + b * width * height ** 2 / 2;
+    return qNumber(
+      id, 'Multiple integrals',
+      `Evaluate ∬_R (${a}x + ${b}y) dA over 0 ≤ x ≤ ${width}, 0 ≤ y ≤ ${height}.`,
+      answer, `Integrating over the rectangle gives (${a}/2)(${width}²)(${height}) + (${b}/2)(${width})(${height}²) = ${fmt(answer)}.`,
+      { kind: 'double-integral-linear', a, b, width, height }
+    );
+  };
+  const multiDivergenceQ = (id, a, b, c, x, y, z) => {
+    const answer = 2 * a * x + 2 * b * y + 2 * c * z;
+    return qNumber(
+      id, 'Vector fields',
+      `For F = ⟨${a}x², ${b}y², ${c}z²⟩, find div F at (${x}, ${y}, ${z}).`,
+      answer, `div F = ${2 * a}x + ${2 * b}y + ${2 * c}z. At the point, this equals ${answer}.`,
+      { kind: 'divergence-quadratic', a, b, c, x, y, z }
+    );
+  };
+
   function multivariableCalculus() {
     const questions = [];
-    for (let i = 0; i < 10; i += 1) {
-      const u = [i + 1, 2 - (i % 4), (i % 5) - 2];
-      const v = [2 + (i % 3), i - 3, 1 + (i % 4)];
-      const answer = u.reduce((sum, value, index) => sum + value * v[index], 0);
-      questions.push(qNumber(
-        `multi-dot-${i + 1}`, 'Vectors and dot products',
-        `Find ⟨${u.join(', ')}⟩ · ⟨${v.join(', ')}⟩.`,
-        answer, `Multiply matching components and add: the dot product is ${answer}.`,
-        { kind: 'vector-dot', u, v }
-      ));
-    }
-    for (let i = 0; i < 10; i += 1) {
-      const a = 1 + i;
-      const b = 2 + (i % 4);
-      const c = (i % 5) - 2;
-      const d = 3 + (i % 3);
-      const answer = a * d - b * c;
-      questions.push(qNumber(
-        `multi-cross-${i + 1}`, 'Cross products',
-        `Find the z-component of ⟨${a}, ${b}, 0⟩ × ⟨${c}, ${d}, 0⟩.`,
-        answer, `The z-component is ad − bc = ${a}(${d}) − ${b}(${c}) = ${answer}.`,
-        { kind: 'cross-z', a, b, c, d }
-      ));
-    }
-    for (let i = 0; i < 10; i += 1) {
-      const a = 1 + (i % 4);
-      const b = (i % 5) - 2;
-      const c = 1 + (i % 3);
-      const x = (i % 5) - 2;
-      const y = i - 3;
-      const answer = 2 * a * x + b * y;
-      questions.push(qNumber(
-        `multi-partial-x-${i + 1}`, 'Partial derivatives',
-        `For f(x,y) = ${a}x² ${term(b, 'xy')} ${term(c, 'y²')}, find f_x(${x}, ${y}).`,
-        answer, `Holding y constant gives f_x = ${2 * a}x ${term(b, 'y')}. At (${x}, ${y}), this is ${answer}.`,
-        { kind: 'partial-x', a, b, x, y }
-      ));
-    }
-    for (let i = 0; i < 10; i += 1) {
-      const a = 1 + (i % 3);
-      const b = (i % 5) - 2;
-      const c = 2 + (i % 4);
-      const x = i - 4;
-      const y = (i % 5) - 1;
-      const answer = b * x + 2 * c * y;
-      questions.push(qNumber(
-        `multi-gradient-${i + 1}`, 'Gradients',
-        `For f(x,y) = ${a}x² ${term(b, 'xy')} ${term(c, 'y²')}, find the y-component of ∇f at (${x}, ${y}).`,
-        answer, `The y-component is f_y = ${b}x ${term(2 * c, 'y')}. Substitution gives ${answer}.`,
-        { kind: 'partial-y', b, c, x, y }
-      ));
-    }
-    for (let i = 0; i < 10; i += 1) {
-      const a = 1 + (i % 3);
-      const b = 1 + (i % 4);
-      const width = 1 + (i % 5);
-      const height = 2 + (i % 4);
-      const answer = a * width ** 2 * height / 2 + b * width * height ** 2 / 2;
-      questions.push(qNumber(
-        `multi-double-integral-${i + 1}`, 'Multiple integrals',
-        `Evaluate ∬_R (${a}x + ${b}y) dA over 0 ≤ x ≤ ${width}, 0 ≤ y ≤ ${height}.`,
-        answer, `Integrating over the rectangle gives (${a}/2)(${width}²)(${height}) + (${b}/2)(${width})(${height}²) = ${fmt(answer)}.`,
-        { kind: 'double-integral-linear', a, b, width, height }
-      ));
-    }
-    for (let i = 0; i < 10; i += 1) {
-      const a = 1 + (i % 3);
-      const b = 2 + (i % 4);
-      const c = 1 + (i % 5);
-      const x = (i % 4) - 1;
-      const y = i - 3;
-      const z = (i % 5) - 2;
-      const answer = 2 * a * x + 2 * b * y + 2 * c * z;
-      questions.push(qNumber(
-        `multi-divergence-${i + 1}`, 'Vector fields',
-        `For F = ⟨${a}x², ${b}y², ${c}z²⟩, find div F at (${x}, ${y}, ${z}).`,
-        answer, `div F = ${2 * a}x + ${2 * b}y + ${2 * c}z. At the point, this equals ${answer}.`,
-        { kind: 'divergence-quadratic', a, b, c, x, y, z }
-      ));
-    }
+    addTopic(questions, 'multi-dot', regular10((i) => [[i + 1, 2 - (i % 4), (i % 5) - 2], [2 + (i % 3), i - 3, 1 + (i % 4)]]),
+      grid(range(1, 6), range(-3, 3), range(-2, 4)).map(([a, b, c]) => [[a, b, c], [b + 4, c - a, (a % 3) + 1]]), multiDotQ);
+    addTopic(questions, 'multi-cross', regular10((i) => [1 + i, 2 + (i % 4), (i % 5) - 2, 3 + (i % 3)]),
+      grid(range(1, 8), range(1, 6), range(-4, 4), range(1, 6)), multiCrossQ);
+    addTopic(questions, 'multi-partial-x', regular10((i) => [1 + (i % 4), (i % 5) - 2, 1 + (i % 3), (i % 5) - 2, i - 3]),
+      grid(range(1, 4), nonZero(-3, 3), range(1, 3), range(-3, 3), range(-3, 4)), multiPartialXQ);
+    addTopic(questions, 'multi-gradient', regular10((i) => [1 + (i % 3), (i % 5) - 2, 2 + (i % 4), i - 4, (i % 5) - 1]),
+      grid(range(1, 3), nonZero(-3, 3), range(1, 4), range(-3, 3), range(-3, 4)), multiGradientQ);
+    addTopic(questions, 'multi-double-integral', regular10((i) => [1 + (i % 3), 1 + (i % 4), 1 + (i % 5), 2 + (i % 4)]),
+      grid(range(1, 4), range(1, 4), range(1, 5), range(1, 5)), multiDoubleIntegralQ);
+    addTopic(questions, 'multi-divergence', regular10((i) => [1 + (i % 3), 2 + (i % 4), 1 + (i % 5), (i % 4) - 1, i - 3, (i % 5) - 2]),
+      grid(range(1, 3), range(1, 4), range(1, 4), range(-2, 2), range(-3, 3), range(-2, 2)), multiDivergenceQ);
     return questions;
   }
 
@@ -816,75 +838,82 @@
     return questions;
   }
 
+  const physics2ThermalQ = (id, mass, specificHeat, temperatureChange) => {
+    const answer = mass * specificHeat * temperatureChange;
+    return qNumber(
+      id, 'Thermodynamics',
+      `A ${mass} kg sample with specific heat ${specificHeat} J/(kg·°C) warms by ${temperatureChange}°C. How much heat is added, in joules?`,
+      answer, `Q = mcΔT = ${mass}(${specificHeat})(${temperatureChange}) = ${answer} J.`,
+      { kind: 'specific-heat', mass, specificHeat, temperatureChange }
+    );
+  };
+  const physics2ElectricQ = (id, charge1, charge2, distance) => {
+    const answer = 0.009 * charge1 * charge2 / distance ** 2;
+    return qNumber(
+      id, 'Electrostatics',
+      `Charges ${charge1} μC and ${charge2} μC are ${distance} m apart. Find the Coulomb-force magnitude in newtons; use k = 9.0×10⁹.`,
+      answer, `F = k|q₁q₂|/r² = ${fmt(answer)} N.`,
+      { kind: 'coulomb-micro', charge1, charge2, distance }
+    );
+  };
+  const physics2CircuitQ = (id, resistance, current) => {
+    const voltage = resistance * current;
+    return qNumber(
+      id, 'Electric circuits',
+      `A ${resistance} Ω resistor has ${voltage} V across it. Find the current in amperes.`,
+      current, `Ohm’s law gives I = V/R = ${voltage}/${resistance} = ${current} A.`,
+      { kind: 'ohms-law-current', voltage, resistance }
+    );
+  };
+  const physics2MagneticQ = (id, charge, velocity, field) => {
+    const answer = charge * velocity * field;
+    return qNumber(
+      id, 'Magnetism',
+      `A ${charge} μC charge moves perpendicular to a ${field} T field at ${velocity} m/s. Find the magnetic-force magnitude in μN.`,
+      answer, `F = qvB. With q in μC, the result is ${charge}(${velocity})(${field}) = ${fmt(answer)} μN.`,
+      { kind: 'magnetic-force-micro', charge, velocity, field }
+    );
+  };
+  // The original 10 place the object at exactly 2f; the extras use other
+  // object distances, so they get the general thin-lens explanation.
+  const physics2OpticsQ = (id, focalLength, objectDistance) => {
+    const imageDistance = focalLength * objectDistance / (objectDistance - focalLength);
+    return qNumber(
+      id, 'Geometric optics',
+      `A converging lens has focal length ${focalLength} cm. An object is ${objectDistance} cm away. Find the image distance in centimeters.`,
+      imageDistance,
+      objectDistance === 2 * focalLength
+        ? `1/f = 1/dₒ + 1/dᵢ. With dₒ = 2f, dᵢ = 2f = ${objectDistance} cm.`
+        : `1/f = 1/dₒ + 1/dᵢ, so dᵢ = f·dₒ/(dₒ − f) = ${focalLength}(${objectDistance})/${objectDistance - focalLength} = ${imageDistance} cm.`,
+      { kind: 'thin-lens-image', focalLength, objectDistance }
+    );
+  };
+  const physics2QuantumQ = (id, wavelength) => {
+    const answer = 1240 / wavelength;
+    return qNumber(
+      id, 'Modern physics',
+      `Using hc = 1240 eV·nm, find the energy in eV of a photon with wavelength ${wavelength} nm.`,
+      answer, `E = hc/λ = 1240/${wavelength} = ${fmt(answer)} eV.`,
+      { kind: 'photon-energy', wavelength }
+    );
+  };
+
   function physicsTwo() {
     const questions = [];
-    for (let i = 0; i < 10; i += 1) {
-      const mass = 1 + (i % 5);
-      const specificHeat = 2 + (i % 4);
-      const temperatureChange = 3 + i;
-      const answer = mass * specificHeat * temperatureChange;
-      questions.push(qNumber(
-        `physics2-thermal-${i + 1}`, 'Thermodynamics',
-        `A ${mass} kg sample with specific heat ${specificHeat} J/(kg·°C) warms by ${temperatureChange}°C. How much heat is added, in joules?`,
-        answer, `Q = mcΔT = ${mass}(${specificHeat})(${temperatureChange}) = ${answer} J.`,
-        { kind: 'specific-heat', mass, specificHeat, temperatureChange }
-      ));
-    }
-    for (let i = 0; i < 10; i += 1) {
-      const charge1 = 1 + (i % 5);
-      const charge2 = 2 + (i % 4);
-      const distance = 1 + (i % 3);
-      const answer = 0.009 * charge1 * charge2 / distance ** 2;
-      questions.push(qNumber(
-        `physics2-electric-${i + 1}`, 'Electrostatics',
-        `Charges ${charge1} μC and ${charge2} μC are ${distance} m apart. Find the Coulomb-force magnitude in newtons; use k = 9.0×10⁹.`,
-        answer, `F = k|q₁q₂|/r² = ${fmt(answer)} N.`,
-        { kind: 'coulomb-micro', charge1, charge2, distance }
-      ));
-    }
-    for (let i = 0; i < 10; i += 1) {
-      const resistance = 2 + (i % 6);
-      const current = 1 + (i % 5);
-      const voltage = resistance * current;
-      questions.push(qNumber(
-        `physics2-circuit-${i + 1}`, 'Electric circuits',
-        `A ${resistance} Ω resistor has ${voltage} V across it. Find the current in amperes.`,
-        current, `Ohm’s law gives I = V/R = ${voltage}/${resistance} = ${current} A.`,
-        { kind: 'ohms-law-current', voltage, resistance }
-      ));
-    }
-    for (let i = 0; i < 10; i += 1) {
-      const charge = 1 + (i % 5);
-      const velocity = 2 + (i % 6);
-      const field = 0.5 + (i % 4) * 0.5;
-      const answer = charge * velocity * field;
-      questions.push(qNumber(
-        `physics2-magnetic-${i + 1}`, 'Magnetism',
-        `A ${charge} μC charge moves perpendicular to a ${field} T field at ${velocity} m/s. Find the magnetic-force magnitude in μN.`,
-        answer, `F = qvB. With q in μC, the result is ${charge}(${velocity})(${field}) = ${fmt(answer)} μN.`,
-        { kind: 'magnetic-force-micro', charge, velocity, field }
-      ));
-    }
-    for (let i = 0; i < 10; i += 1) {
-      const focalLength = 2 + i;
-      const objectDistance = 2 * focalLength;
-      questions.push(qNumber(
-        `physics2-optics-${i + 1}`, 'Geometric optics',
-        `A converging lens has focal length ${focalLength} cm. An object is ${objectDistance} cm away. Find the image distance in centimeters.`,
-        objectDistance, `1/f = 1/dₒ + 1/dᵢ. With dₒ = 2f, dᵢ = 2f = ${objectDistance} cm.`,
-        { kind: 'thin-lens-image', focalLength, objectDistance }
-      ));
-    }
-    const wavelengths = [620, 496, 400, 310, 248, 200, 155, 124, 100, 80];
-    wavelengths.forEach((wavelength, i) => {
-      const answer = 1240 / wavelength;
-      questions.push(qNumber(
-        `physics2-quantum-${i + 1}`, 'Modern physics',
-        `Using hc = 1240 eV·nm, find the energy in eV of a photon with wavelength ${wavelength} nm.`,
-        answer, `E = hc/λ = 1240/${wavelength} = ${fmt(answer)} eV.`,
-        { kind: 'photon-energy', wavelength }
-      ));
-    });
+    addTopic(questions, 'physics2-thermal', regular10((i) => [1 + (i % 5), 2 + (i % 4), 3 + i]),
+      grid(range(1, 8), range(1, 6), range(2, 30)), physics2ThermalQ);
+    addTopic(questions, 'physics2-electric', regular10((i) => [1 + (i % 5), 2 + (i % 4), 1 + (i % 3)]),
+      grid(range(1, 9), range(1, 9), range(1, 5)), physics2ElectricQ);
+    addTopic(questions, 'physics2-circuit', regular10((i) => [2 + (i % 6), 1 + (i % 5)]),
+      grid(range(1, 20), range(1, 10)), physics2CircuitQ);
+    addTopic(questions, 'physics2-magnetic', regular10((i) => [1 + (i % 5), 2 + (i % 6), 0.5 + (i % 4) * 0.5]),
+      grid(range(1, 9), range(1, 12), [0.25, 0.5, 0.75, 1, 1.5, 2, 2.5, 3]), physics2MagneticQ);
+    addTopic(questions, 'physics2-optics', regular10((i) => [2 + i, 2 * (2 + i)]),
+      range(2, 30).flatMap((f) => range(f + 1, 4 * f).map((d) => [f, d]))
+        .filter(([f, d]) => Number.isInteger(f * d / (d - f)) && f * d / (d - f) <= 200),
+      physics2OpticsQ);
+    addTopic(questions, 'physics2-quantum', [620, 496, 400, 310, 248, 200, 155, 124, 100, 80].map((w) => [w]),
+      range(5, 50).map((k) => [k * 20]), physics2QuantumQ);
     return questions;
   }
 
