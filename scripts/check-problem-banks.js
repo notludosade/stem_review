@@ -163,16 +163,15 @@ const auditPool = (label, questions) => {
   return topics;
 };
 
-// Rollout: each set is either still 60 (10/topic) or fully expanded to 240
-// (40/topic). Tightened to exactly 240 once every set is expanded.
 courses.forEach((course) => {
-  const n = course.questions.length;
-  assert(n === 60 || n === 240, `${course.title}: expected 60 or 240 questions, found ${n}`);
+  assert(course.questions.length === 240, `${course.title}: expected 240 questions, found ${course.questions.length}`);
   const topics = auditPool(course.title, course.questions);
   assert(topics.size === 6, `${course.title}: expected 6 topics`);
-  topics.forEach((count, topic) => assert(count === n / 6, `${course.title}/${topic}: expected ${n / 6} questions, found ${count}`));
-  total += n;
+  topics.forEach((count, topic) => assert(count === 40, `${course.title}/${topic}: expected 40 questions, found ${count}`));
+  total += course.questions.length;
 });
+
+assert(total === 4800, `Expected 4800 total questions, found ${total}`);
 
 // Timed Mastery pools (timed-mastery.html) — separate from the regular 60.
 const timedCourses = courses.filter((course) => course.timedQuestions);

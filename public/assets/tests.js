@@ -1717,7 +1717,7 @@ window.STEMPlusTests = (function () {
 
     html += '<h2>Practice</h2>';
     html += '<div class="toc-list"><a class="toc-item" href="problem-sets.html"><span class="toc-num">Practice</span>'
-      + '<p class="toc-title">Problem Sets</p><p class="toc-sub">1,200 questions across 20 courses, filterable by topic.</p></a></div>';
+      + '<p class="toc-title">Problem Sets</p><p class="toc-sub">4,800 questions across 20 courses, filterable by topic.</p></a></div>';
 
     html += '<h2>Next Milestone</h2>';
     if (continueItem && nextUnitName) {
