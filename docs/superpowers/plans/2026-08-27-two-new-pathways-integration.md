@@ -13,6 +13,8 @@
 - No new problem sets or Applications pages for these 3 courses — out of scope.
 - No changes to `mountPathwayRoadmap`, `mountProjectStatus`, `mountProjectGate`, `mountReflection`, or any other shared function — pure data/content addition.
 - Real, already-shipped lesson counts: Quantum Computing 40 lessons/8 units, Mechatronics 43 lessons/8 units, Advanced Robotics 47 lessons/8 units (confirmed via each course's own `lesson-footer`).
+- Every place that lists courses, pathways, or projects must be updated in the same task that publishes them: hub pages, `pathways.html`, `projects.html` (also feeds the AI-plan catalog), the homepage `toc-stat` counts, and a `data-pathway` accent color in `style.css` for each new pathway slug.
+- `mountPathwayRoadmap` renders its own `<h2>Your Roadmap</h2>` — Pathway pages must NOT add one before `<div data-pathway-roadmap>` (see `content/Pathways/cloud-devops.html`).
 - Real, already-shipped directory names: `content/Advanced+ Courses/Quantum Computing/`, `content/Mechatronics/`, `content/Advanced Robotics/` — confirmed via `ls`, matching what `COURSE_PATHS` entries must point to.
 
 ---
@@ -24,6 +26,8 @@
 - Modify: `content/engineering.html`
 - Modify: `public/assets/tests.js`
 - Modify: `lib/plan-catalog.js`
+- Modify: `content/Advanced+ Courses/Linear Algebra B/Unit 7/0021-capstone-the-spectral-theorem-in-practice.html`
+- Modify: `content/index.html`
 
 **Interfaces:**
 - Consumes: nothing new.
@@ -267,6 +271,61 @@ with:
 };
 ```
 
+- [ ] **Step 5b: Give Quantum Computing the Advanced+ readiness box**
+
+In `public/assets/tests.js`, replace:
+
+```js
+  // "Requires AP Calculus BC") — only the 5 shipped Advanced+ courses, not
+  // the 4 "Coming Soon" placeholders with no real index.html to attach a
+```
+
+with:
+
+```js
+  // "Requires AP Calculus BC") — only the 6 shipped Advanced+ courses, not
+  // the 3 "Coming Soon" placeholders with no real index.html to attach a
+```
+
+and replace:
+
+```js
+    'Topology: Fundamentals': ['Real Analysis A'],
+  };
+
+  function courseMastery(course) {
+```
+
+with:
+
+```js
+    'Topology: Fundamentals': ['Real Analysis A'],
+    'Quantum Computing': ['Linear Algebra A', 'Linear Algebra B'],
+  };
+
+  function courseMastery(course) {
+```
+
+(`check-plan-catalog.js` asserts every `PREREQUISITES` entry equals its `PREREQUISITE_GRAPH` entry — Step 5 adds the identical one.)
+
+- [ ] **Step 5c: Link Linear Algebra B's "next course" mention**
+
+In `content/Advanced+ Courses/Linear Algebra B/Unit 7/0021-capstone-the-spectral-theorem-in-practice.html`, replace:
+
+```html
+The next course in this sequence, <strong>Quantum Computing</strong>, picks up exactly here.
+```
+
+with:
+
+```html
+The next course in this sequence, <strong><a href="../../Quantum%20Computing/index.html">Quantum Computing</a></strong>, picks up exactly here.
+```
+
+- [ ] **Step 5d: Homepage hub counts**
+
+In `content/index.html`, replace `<p class="toc-stat">4 courses · 78 lessons · 4 more soon</p>` (Engineering & Physics: 78 + 43 + 47) with `<p class="toc-stat">6 courses · 168 lessons · 2 more soon</p>`, and `<p class="toc-stat">5 courses · 141 lessons · 4 more soon</p>` (Advanced+: 141 + 40) with `<p class="toc-stat">6 courses · 181 lessons · 3 more soon</p>`.
+
 - [ ] **Step 6: `npm run build`**
 
 Run: `npm run build`
@@ -282,11 +341,16 @@ Expected: all 6 checks pass — `check-plan-catalog.js`'s existing cross-check n
 ```bash
 npm run build && npm run start > /tmp/next-start.log 2>&1 &
 ```
-Wait for `Ready`. Use this session cookie as `scripts/verify-page.mjs`'s 3rd argument (these pages are login-gated): `session=eyJ1c2VySWQiOjI3LCJpc0RldmVsb3BlciI6ZmFsc2UsImV4cCI6MTc4OTUyNzczNzE2OH0.K5zzSaws6MCbuC6uwHjWW9zCaZknr2VJr_Lh03Ig0Jc`.
+Wait for `Ready`. These pages are login-gated, so get a fresh session cookie for the test account (the one hardcoded here originally expired 2026-09-16) and pass it as `scripts/verify-page.mjs`'s 3rd argument:
 
 ```bash
-node scripts/verify-page.mjs "http://localhost:3000/advanced.html" "(() => { const link = document.querySelector('a[href=\"Advanced%2B%20Courses/Quantum%20Computing/index.html\"]'); return { ok: !!link && !document.querySelector('.is-soon p.toc-title')?.textContent?.includes('Quantum Computing') }; })()" "session=eyJ1c2VySWQiOjI3LCJpc0RldmVsb3BlciI6ZmFsc2UsImV4cCI6MTc4OTUyNzczNzE2OH0.K5zzSaws6MCbuC6uwHjWW9zCaZknr2VJr_Lh03Ig0Jc"
-node scripts/verify-page.mjs "http://localhost:3000/engineering.html" "(() => { const m = document.querySelector('a[href=\"Mechatronics/index.html\"]'); const r = document.querySelector('a[href=\"Advanced%20Robotics/index.html\"]'); return { ok: !!m && !!r }; })()" "session=eyJ1c2VySWQiOjI3LCJpc0RldmVsb3BlciI6ZmFsc2UsImV4cCI6MTc4OTUyNzczNzE2OH0.K5zzSaws6MCbuC6uwHjWW9zCaZknr2VJr_Lh03Ig0Jc"
+COOKIE=$(curl -s -i -X POST http://localhost:3000/api/auth/login -H 'Content-Type: application/json' \
+  -d '{"email":"sdd-verify-task1@example.com","password":"<test account password>"}' | grep -i '^set-cookie: session=' | sed -E 's/^[Ss]et-[Cc]ookie: (session=[^;]+).*/\1/')
+```
+
+```bash
+node scripts/verify-page.mjs "http://localhost:3000/advanced.html" "(() => { const link = document.querySelector('a[href=\"Advanced%2B%20Courses/Quantum%20Computing/index.html\"]'); return { ok: !!link && !document.querySelector('.is-soon p.toc-title')?.textContent?.includes('Quantum Computing') }; })()" "$COOKIE"
+node scripts/verify-page.mjs "http://localhost:3000/engineering.html" "(() => { const m = document.querySelector('a[href=\"Mechatronics/index.html\"]'); const r = document.querySelector('a[href=\"Advanced%20Robotics/index.html\"]'); return { ok: !!m && !!r }; })()" "$COOKIE"
 ```
 Expected: `PASS` on both — Quantum Computing is a real link on `advanced.html` and no longer in a `.is-soon` card; Mechatronics and Advanced Robotics are real links on `engineering.html`.
 
@@ -295,7 +359,7 @@ Stop the server: `lsof -ti tcp:3000 -sTCP:LISTEN | xargs kill -9`
 - [ ] **Step 9: Commit**
 
 ```bash
-git add content/advanced.html content/engineering.html public/assets/tests.js lib/plan-catalog.js
+git add content/advanced.html content/engineering.html public/assets/tests.js lib/plan-catalog.js content/index.html "content/Advanced+ Courses/Linear Algebra B/Unit 7/0021-capstone-the-spectral-theorem-in-practice.html"
 git commit -m "$(cat <<'EOF'
 Publish Quantum Computing, Mechatronics, Advanced Robotics as real courses
 
@@ -310,7 +374,7 @@ The 2 new Pathway pages, 2 new capstone Project pages, and the
 pathways.html Coming Soon -> published move are a separate follow-up
 task — this task only establishes catalog membership.
 
-Co-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
 EOF
 )"
 ```
@@ -325,6 +389,9 @@ EOF
 - Create: `content/Projects/quantum-science-capstone.html`
 - Create: `content/Projects/robotics-mechatronics-capstone.html`
 - Modify: `content/pathways.html`
+- Modify: `content/projects.html`
+- Modify: `public/assets/style.css`
+- Modify: `content/index.html`
 
 **Interfaces:**
 - Consumes: `PATHWAYS` entries `Quantum Science` and `Robotics & Mechatronics` (Task 1), `COURSE_PATHS` entries for the 3 new courses (Task 1) — both required for `mountPathwayRoadmap` and course links to resolve correctly.
@@ -346,7 +413,6 @@ EOF
 
   <div data-track-plan></div>
 
-  <h2>Your Roadmap</h2>
   <div data-pathway-roadmap="Quantum Science"></div>
 
   <footer class="lesson-footer">STEM+ · Pathways · Quantum Science — 4 courses, 124 lessons, one capstone</footer>
@@ -369,7 +435,6 @@ EOF
 
   <div data-track-plan></div>
 
-  <h2>Your Roadmap</h2>
   <div data-pathway-roadmap="Robotics &amp; Mechatronics"></div>
 
   <footer class="lesson-footer">STEM+ · Pathways · Robotics &amp; Mechatronics — 4 courses, 138 lessons, one capstone</footer>
@@ -560,6 +625,67 @@ with:
   <h2>Career Pathways</h2>
 ```
 
+- [ ] **Step 5b: List both capstones on `content/projects.html`**
+
+Replace:
+
+```html
+      <span data-project-status data-required-courses="Computer Programming 1|Cloud Computing A|Cloud Computing B / DevOps"></span>
+    </a>
+    <a class="toc-item" href="Projects/general-programmer-capstone.html" data-pathway="general-programmer">
+```
+
+with:
+
+```html
+      <span data-project-status data-required-courses="Computer Programming 1|Cloud Computing A|Cloud Computing B / DevOps"></span>
+    </a>
+    <a class="toc-item" href="Projects/robotics-mechatronics-capstone.html" data-pathway="robotics-mechatronics">
+      <span class="toc-num">Project</span>
+      <p class="toc-title">Robotics &amp; Mechatronics Capstone</p>
+      <p class="toc-sub">Design a simple autonomous system that ties a sensor, an actuator, a control loop, and a decision layer together, then defend every trade-off in it. Draws on Engineering 1, Computer Programming 1, Mechatronics, and Advanced Robotics.</p>
+      <span data-project-status data-required-courses="Engineering 1|Computer Programming 1|Mechatronics|Advanced Robotics"></span>
+    </a>
+    <a class="toc-item" href="Projects/quantum-science-capstone.html" data-pathway="quantum-science">
+      <span class="toc-num">Project</span>
+      <p class="toc-title">Quantum Science Capstone</p>
+      <p class="toc-sub">Trace a real quantum circuit from state vector to measurement outcome, then connect it back to the classical physics it grew out of. Draws on AP Physics 2, AP Physics C: Electricity and Magnetism, Quantum Physics &amp; Optics, and Quantum Computing.</p>
+      <span data-project-status data-required-courses="AP Physics 2|AP Physics C: Electricity and Magnetism|Quantum Physics &amp; Optics|Quantum Computing"></span>
+    </a>
+    <a class="toc-item" href="Projects/general-programmer-capstone.html" data-pathway="general-programmer">
+```
+
+(Same order as `pathways.html`. This card is also what puts both capstones into the AI-plan catalog — `buildProjects()` parses `projects.html`.)
+
+- [ ] **Step 5c: Pathway accent colors in `public/assets/style.css`**
+
+Two new hues in the palette's open gaps (violet ~268°, green ~129°), added to all four existing blocks — after each block's `ai-cbrwa` line:
+
+Light (after line `.page[data-pathway="ai-cbrwa"], .toc-item[data-pathway="ai-cbrwa"] { --accent: #8a1f6e; --accent-soft: #f4d9ec; }`):
+```css
+.page[data-pathway="quantum-science"], .toc-item[data-pathway="quantum-science"] { --accent: #6b35a8; --accent-soft: #ece2f7; }
+.page[data-pathway="robotics-mechatronics"], .toc-item[data-pathway="robotics-mechatronics"] { --accent: #2f7a3a; --accent-soft: #dcefdf; }
+```
+Dark media query (after `  .page[data-pathway="ai-cbrwa"], .toc-item[data-pathway="ai-cbrwa"] { --accent: #e06dc4; --accent-soft: #331228; }`):
+```css
+  .page[data-pathway="quantum-science"], .toc-item[data-pathway="quantum-science"] { --accent: #c19cf0; --accent-soft: #261a38; }
+  .page[data-pathway="robotics-mechatronics"], .toc-item[data-pathway="robotics-mechatronics"] { --accent: #79d08a; --accent-soft: #15301b; }
+```
+`:root[data-theme="dark"]` (after its `ai-cbrwa` line):
+```css
+:root[data-theme="dark"] .page[data-pathway="quantum-science"], :root[data-theme="dark"] .toc-item[data-pathway="quantum-science"] { --accent: #c19cf0; --accent-soft: #261a38; }
+:root[data-theme="dark"] .page[data-pathway="robotics-mechatronics"], :root[data-theme="dark"] .toc-item[data-pathway="robotics-mechatronics"] { --accent: #79d08a; --accent-soft: #15301b; }
+```
+`:root[data-theme="light"]` (after its `ai-cbrwa` line):
+```css
+:root[data-theme="light"] .page[data-pathway="quantum-science"], :root[data-theme="light"] .toc-item[data-pathway="quantum-science"] { --accent: #6b35a8; --accent-soft: #ece2f7; }
+:root[data-theme="light"] .page[data-pathway="robotics-mechatronics"], :root[data-theme="light"] .toc-item[data-pathway="robotics-mechatronics"] { --accent: #2f7a3a; --accent-soft: #dcefdf; }
+```
+
+- [ ] **Step 5d: Homepage track counts**
+
+In `content/index.html`, replace `<p class="toc-stat">6 pathways · 2 advanced · 2 more soon</p>` with `<p class="toc-stat">8 pathways · 2 advanced</p>`, and `<p class="toc-stat">8 projects · 1 per pathway</p>` with `<p class="toc-stat">10 projects · 1 per pathway</p>`.
+
 - [ ] **Step 6: `npm run build`**
 
 Run: `npm run build`
@@ -570,24 +696,30 @@ Expected: succeeds.
 ```bash
 npm run build && npm run start > /tmp/next-start.log 2>&1 &
 ```
-Wait for `Ready`. Use the same session cookie as Task 1's Step 8.
+Wait for `Ready`. Get `$COOKIE` the same way as Task 1's Step 8.
 
 ```bash
-node scripts/verify-page.mjs "http://localhost:3000/Pathways/quantum-science.html" "(() => { const nodes = document.querySelectorAll('.roadmap-node'); return { ok: nodes.length === 5, count: nodes.length }; })()" "session=eyJ1c2VySWQiOjI3LCJpc0RldmVsb3BlciI6ZmFsc2UsImV4cCI6MTc4OTUyNzczNzE2OH0.K5zzSaws6MCbuC6uwHjWW9zCaZknr2VJr_Lh03Ig0Jc"
-node scripts/verify-page.mjs "http://localhost:3000/Pathways/robotics-mechatronics.html" "(() => { const nodes = document.querySelectorAll('.roadmap-node'); return { ok: nodes.length === 5, count: nodes.length }; })()" "session=eyJ1c2VySWQiOjI3LCJpc0RldmVsb3BlciI6ZmFsc2UsImV4cCI6MTc4OTUyNzczNzE2OH0.K5zzSaws6MCbuC6uwHjWW9zCaZknr2VJr_Lh03Ig0Jc"
+node scripts/verify-page.mjs "http://localhost:3000/Pathways/quantum-science.html" "(() => { const nodes = document.querySelectorAll('.roadmap-node'); return { ok: nodes.length === 5, count: nodes.length }; })()" "$COOKIE"
+node scripts/verify-page.mjs "http://localhost:3000/Pathways/robotics-mechatronics.html" "(() => { const nodes = document.querySelectorAll('.roadmap-node'); return { ok: nodes.length === 5, count: nodes.length }; })()" "$COOKIE"
 ```
 Expected: `PASS` on both — 5 roadmap nodes (4 courses + capstone) on each, confirming `mountPathwayRoadmap` correctly resolved the new `PATHWAYS` entries.
 
 ```bash
-node scripts/verify-page.mjs "http://localhost:3000/Projects/quantum-science-capstone.html" "(() => { const gate = document.querySelector('[data-project-gate]'); return { ok: !!gate && gate.getAttribute('data-required-courses').split('|').length === 4 }; })()" "session=eyJ1c2VySWQiOjI3LCJpc0RldmVsb3BlciI6ZmFsc2UsImV4cCI6MTc4OTUyNzczNzE2OH0.K5zzSaws6MCbuC6uwHjWW9zCaZknr2VJr_Lh03Ig0Jc"
-node scripts/verify-page.mjs "http://localhost:3000/Projects/robotics-mechatronics-capstone.html" "(() => { const gate = document.querySelector('[data-project-gate]'); return { ok: !!gate && gate.getAttribute('data-required-courses').split('|').length === 4 }; })()" "session=eyJ1c2VySWQiOjI3LCJpc0RldmVsb3BlciI6ZmFsc2UsImV4cCI6MTc4OTUyNzczNzE2OH0.K5zzSaws6MCbuC6uwHjWW9zCaZknr2VJr_Lh03Ig0Jc"
+node scripts/verify-page.mjs "http://localhost:3000/Projects/quantum-science-capstone.html" "(() => { const gate = document.querySelector('[data-project-gate]'); return { ok: !!gate && gate.getAttribute('data-required-courses').split('|').length === 4 }; })()" "$COOKIE"
+node scripts/verify-page.mjs "http://localhost:3000/Projects/robotics-mechatronics-capstone.html" "(() => { const gate = document.querySelector('[data-project-gate]'); return { ok: !!gate && gate.getAttribute('data-required-courses').split('|').length === 4 }; })()" "$COOKIE"
 ```
 Expected: `PASS` on both — the project gate is present with all 4 required courses.
 
 ```bash
-node scripts/verify-page.mjs "http://localhost:3000/pathways.html" "(() => { const links = Array.from(document.querySelectorAll('a.toc-item')).map((a) => a.getAttribute('href')); const comingSoonHeading = Array.from(document.querySelectorAll('h2')).find((h) => h.textContent.trim() === 'Coming Soon'); return { ok: links.includes('Pathways/quantum-science.html') && links.includes('Pathways/robotics-mechatronics.html') && !comingSoonHeading, hasComingSoon: !!comingSoonHeading }; })()" "session=eyJ1c2VySWQiOjI3LCJpc0RldmVsb3BlciI6ZmFsc2UsImV4cCI6MTc4OTUyNzczNzE2OH0.K5zzSaws6MCbuC6uwHjWW9zCaZknr2VJr_Lh03Ig0Jc"
+node scripts/verify-page.mjs "http://localhost:3000/pathways.html" "(() => { const links = Array.from(document.querySelectorAll('a.toc-item')).map((a) => a.getAttribute('href')); const comingSoonHeading = Array.from(document.querySelectorAll('h2')).find((h) => h.textContent.trim() === 'Coming Soon'); return { ok: links.includes('Pathways/quantum-science.html') && links.includes('Pathways/robotics-mechatronics.html') && !comingSoonHeading, hasComingSoon: !!comingSoonHeading }; })()" "$COOKIE"
 ```
 Expected: `PASS` — both new pathways linked from the main list, and the "Coming Soon" section is gone entirely (it had exactly these 2 entries).
+
+```bash
+node scripts/verify-page.mjs "http://localhost:3000/Pathways/quantum-science.html" "(() => ({ ok: [...document.querySelectorAll('h2')].filter((h) => h.textContent.trim() === 'Your Roadmap').length === 1 && getComputedStyle(document.querySelector('.page')).getPropertyValue('--accent').trim() !== getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() }))()" "$COOKIE"
+node scripts/verify-page.mjs "http://localhost:3000/projects.html" "(() => { const links = [...document.querySelectorAll('a.toc-item')].map((a) => a.getAttribute('href')); return { ok: links.includes('Projects/quantum-science-capstone.html') && links.includes('Projects/robotics-mechatronics-capstone.html') && document.querySelectorAll('[data-project-status]').length === 10 }; })()" "$COOKIE"
+```
+Expected: `PASS` on both — exactly one "Your Roadmap" heading with the pathway's own accent color, and both capstones listed with live status badges.
 
 Stop the server: `lsof -ti tcp:3000 -sTCP:LISTEN | xargs kill -9`
 
@@ -599,7 +731,7 @@ Expected: all 6 checks pass — `check-content-links.js` confirms no broken link
 - [ ] **Step 9: Commit**
 
 ```bash
-git add "content/Pathways/quantum-science.html" "content/Pathways/robotics-mechatronics.html" "content/Projects/quantum-science-capstone.html" "content/Projects/robotics-mechatronics-capstone.html" content/pathways.html
+git add "content/Pathways/quantum-science.html" "content/Pathways/robotics-mechatronics.html" "content/Projects/quantum-science-capstone.html" "content/Projects/robotics-mechatronics-capstone.html" content/pathways.html content/projects.html public/assets/style.css content/index.html
 git commit -m "$(cat <<'EOF'
 Publish the Quantum Science and Robotics & Mechatronics pathways
 
@@ -612,15 +744,23 @@ had exactly these two entries, so it's now gone entirely, matching
 its own stated promise ("they'll move up to Published automatically
 once those courses ship").
 
-Co-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
 EOF
 )"
 ```
 
 ---
 
+### Task 3: Push and verify live
+
+- [ ] **Step 1:** `git push origin main`, then poll `curl -s -o /dev/null -w '%{http_code}' https://stem-review.vercel.app/assets/tests.js` + a content check that the deployed `tests.js` contains `'Quantum Science'`.
+- [ ] **Step 2:** Log in against `https://stem-review.vercel.app/api/auth/login` for a fresh production `$COOKIE`, then re-run Task 2 Step 7's checks against `https://stem-review.vercel.app`. Expected: `PASS` on every check.
+
+---
+
 ## Self-Review Notes
 
+- **Addendum (2026-10-04 review):** added `projects.html` cards, pathway accent colors, homepage counts, the Quantum Computing readiness entry, the Linear Algebra B link, fresh-login verification, and removed a duplicate `Your Roadmap` heading the original page skeletons would have rendered.
 - **Spec coverage:** hub page moves (Task 1 Steps 1-2), `PATHWAYS`/`COURSE_PATHS`/`PREREQUISITE_GRAPH` additions (Task 1 Steps 3-5), 2 new Pathway pages using `mountPathwayRoadmap` not the flat-list format (Task 2 Steps 1-2), 2 new capstone Project pages matching the existing 8-capstone structure with 4 reflection questions each (Task 2 Steps 3-4), `pathways.html` Coming Soon → published move (Task 2 Step 5). All spec sections covered.
 - **Placeholder scan:** none — every step has complete code or a runnable command with a stated expected result. Real lesson counts (40/43/47, sums 124/138) used throughout, not placeholders.
 - **Type consistency:** `PATHWAYS` entries' `name` fields (`'Quantum Science'`, `'Robotics & Mechatronics'`) match exactly between Task 1's array entries and Task 2's `data-pathway-roadmap="..."` marker values — verified character-for-character, including the `&amp;` HTML-entity encoding for the ampersand in the second name. `COURSE_PATHS` values match the real, `ls`-confirmed directory names exactly.

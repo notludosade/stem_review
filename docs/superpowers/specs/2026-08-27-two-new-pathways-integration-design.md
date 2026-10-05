@@ -68,3 +68,17 @@ Same discipline as every prior phase this session: `scripts/verify-page.mjs` aga
 - `content/advanced.html` and `content/engineering.html`: the 3 moved courses render as real, clickable cards; no `is-soon` styling remains on them.
 - `check-plan-catalog.js`'s existing cross-check assertion now also validates the 3 new `PREREQUISITE_GRAPH` entries automatically — confirm it still passes.
 - `npm test` (all 6 checks) passes.
+
+## Addendum (2026-10-04, pre-execution review)
+
+A review of the plan against the live codebase found gaps the original design missed. Added to scope:
+
+- `content/projects.html` lists both new capstones (it's also the AI-plan catalog's project source).
+- `data-pathway` accent colors in `public/assets/style.css` for `quantum-science` (violet) and `robotics-mechatronics` (green), in all four light/dark blocks.
+- Homepage `toc-stat` counts: Engineering & Physics 6 courses · 168 lessons · 2 more soon; Advanced+ 6 courses · 181 lessons · 3 more soon; Pathways 8 pathways · 2 advanced; Projects 10 projects.
+- `tests.js` `PREREQUISITES` gains Quantum Computing (Linear Algebra A, Linear Algebra B), so its course page shows the same readiness box as the other shipped Advanced+ courses.
+- Linear Algebra B's closing lesson links its "next course: Quantum Computing" mention.
+- New Pathway pages must not add their own `<h2>Your Roadmap</h2>` — `mountPathwayRoadmap` already renders it.
+- Verification uses a fresh login cookie (the old hardcoded one expired 2026-09-16), then repeats against production after push.
+
+Course sequences stay exactly as `pathways.html` already stated them (user kept them as-is).
