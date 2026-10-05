@@ -137,16 +137,14 @@ assert(courses.length === 20, `Expected 20 courses, found ${courses.length}`);
 const ids = new Set();
 let total = 0;
 
-courses.forEach((course) => {
-  assert(course.questions.length === 60, `${course.title}: expected 60 questions`);
+const auditPool = (label, questions) => {
   const topics = new Map();
   const prompts = new Set();
-
-  course.questions.forEach((question) => {
+  questions.forEach((question) => {
     assert(!ids.has(question.id), `Duplicate ID: ${question.id}`);
     ids.add(question.id);
     assert(question.prompt && question.explanation, `${question.id}: missing prompt or explanation`);
-    assert(!prompts.has(question.prompt), `${question.id}: duplicate prompt within course`);
+    assert(!prompts.has(question.prompt), `${question.id}: duplicate prompt within ${label}`);
     prompts.add(question.prompt);
     assert(equal(question.answer, expectedAnswer(question)), `${question.id}: answer audit failed`);
     topics.set(question.topic, (topics.get(question.topic) || 0) + 1);
@@ -159,13 +157,32 @@ courses.forEach((course) => {
       assert(question.tolerance > 0, `${question.id}: invalid tolerance`);
     }
   });
+  return topics;
+};
 
+courses.forEach((course) => {
+  assert(course.questions.length === 60, `${course.title}: expected 60 questions`);
+  const topics = auditPool(course.title, course.questions);
   assert(topics.size === 6, `${course.title}: expected 6 topics`);
   topics.forEach((count, topic) => assert(count === 10, `${course.title}/${topic}: expected 10 questions`));
   total += course.questions.length;
 });
 
 assert(total === 1200, `Expected 1200 total questions, found ${total}`);
+
+// Timed Mastery pools (timed-mastery.html) — separate from the regular 60.
+const timedCourses = courses.filter((course) => course.timedQuestions);
+assert(timedCourses.map((course) => course.slug).sort().join(',') === 'ap-calculus-bc,precalculus',
+  `Expected timed pools for exactly ap-calculus-bc and precalculus, found: ${timedCourses.map((course) => course.slug).join(', ') || 'none'}`);
+let timedTotal = 0;
+timedCourses.forEach((course) => {
+  assert(course.timedQuestions.length === 500, `${course.title}: expected 500 timed questions, found ${course.timedQuestions.length}`);
+  const topics = auditPool(`${course.title} timed pool`, course.timedQuestions);
+  const regularTopics = [...new Set(course.questions.map((question) => question.topic))].sort();
+  assert(JSON.stringify([...topics.keys()].sort()) === JSON.stringify(regularTopics), `${course.title}: timed topics must match the regular bank's topics`);
+  topics.forEach((count, topic) => assert(count === 83 || count === 84, `${course.title} timed/${topic}: expected 83 or 84 questions, found ${count}`));
+  timedTotal += course.timedQuestions.length;
+});
 
 const root = path.resolve(__dirname, '../content');
 const publicRoot = path.resolve(__dirname, '../public');
@@ -184,4 +201,4 @@ const catalog = fs.readFileSync(path.join(root, 'problem-sets.html'), 'utf8');
 courses.forEach((course) => assert(catalog.includes(`problem-set.html?course=${course.slug}`), `Catalog missing ${course.slug}`));
 assert((catalog.match(/problem-set\.html\?course=/g) || []).length === courses.length, 'Catalog course count does not match bank data');
 
-console.log(`Problem-bank audit passed: ${courses.length} courses, ${total} answers recomputed, ${localLinks} local references checked.`);
+console.log(`Problem-bank audit passed: ${courses.length} courses, ${total} answers + ${timedTotal} timed answers recomputed, ${localLinks} local references checked.`);

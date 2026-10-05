@@ -22,6 +22,22 @@
     return value;
   };
   const choose = (n, r) => factorial(n) / (factorial(r) * factorial(n - r));
+  const range = (lo, hi) => Array.from({ length: hi - lo + 1 }, (_, k) => lo + k);
+  const nonZero = (lo, hi) => range(lo, hi).filter((value) => value !== 0);
+  const grid = (...ranges) => ranges.reduce(
+    (tuples, values) => tuples.flatMap((tuple) => values.map((value) => [...tuple, value])),
+    [[]]
+  );
+  // Evenly spaced picks across a whole parameter grid, so a timed pool covers
+  // the full grid instead of only its first rows. Deterministic, so question
+  // IDs stay stable between page loads.
+  const spread = (items, count) => {
+    if (items.length < count) throw new Error(`Grid has ${items.length} tuples, needs ${count}`);
+    return Array.from({ length: count }, (_, j) => items[Math.floor(j * items.length / count)]);
+  };
+  const addFromGrid = (questions, idPrefix, count, tuples, make) => spread(tuples, count).forEach((tuple, j) => {
+    questions.push(make(`${idPrefix}-${j + 1}`, ...tuple));
+  });
 
   function algebraGeometry() {
     const questions = [];
@@ -103,86 +119,93 @@
     return questions;
   }
 
+  // One template per topic, shared by the regular 60-question loops and the
+  // 500-question Timed Mastery grids, so both pools word every question the
+  // same way and the audit recomputes both through the same meta kinds.
+  const calcLimitQ = (id, a, b, c) => {
+    const answer = a * a + b * a + c;
+    return qNumber(
+      id, 'Limits',
+      `Evaluate lim x→${a} of (x² ${term(b, 'x')} ${term(c, '')}).`,
+      answer, `Polynomials are continuous, so substitute x = ${a}. The limit is ${answer}.`,
+      { kind: 'polynomial-limit', a, b, c }
+    );
+  };
+  const calcDerivativeQ = (id, coefficient, power, linear, x) => {
+    const answer = coefficient * power * (x ** (power - 1)) + linear;
+    return qNumber(
+      id, 'Derivatives',
+      `If f(x) = ${coefficient}x^${power} ${term(linear, 'x')}, find f′(${x}).`,
+      answer,
+      `f′(x) = ${coefficient * power}x^${power - 1} ${term(linear, '')}; substituting ${x} gives ${answer}.`,
+      { kind: 'power-derivative', coefficient, power, linear, x }
+    );
+  };
+  const calcProductQ = (id, k, c, x) => {
+    const answer = (x * x + c) + (x + k) * 2 * x;
+    return qNumber(
+      id, 'Derivative applications',
+      `For f(x) = (x + ${k})(x² + ${c}), find the tangent-line slope at x = ${x}.`,
+      answer,
+      `Product rule: f′(x) = (x² + ${c}) + (x + ${k})(2x). At x = ${x}, f′ = ${answer}.`,
+      { kind: 'product-derivative', k, c, x }
+    );
+  };
+  const calcIntegralQ = (id, m, b, upper) => {
+    const answer = (m * upper * upper) / 2 + b * upper;
+    return qNumber(
+      id, 'Integrals',
+      `Evaluate ∫ from 0 to ${upper} of (${m}x ${term(b, '')}) dx.`,
+      answer,
+      `An antiderivative is (${m}/2)x² ${term(b, 'x')}. Evaluation from 0 to ${upper} gives ${fmt(answer)}.`,
+      { kind: 'linear-integral', m, b, upper }
+    );
+  };
+  const calcFtcQ = (id, k, c, x) => {
+    const answer = x * x + k * x + c;
+    return qNumber(
+      id, 'Fundamental Theorem',
+      `Let F(x) = ∫ from 0 to x of (t² ${term(k, 't')} ${term(c, '')}) dt. Find F′(${x}).`,
+      answer,
+      `By the Fundamental Theorem of Calculus, F′(x) equals the integrand at x. Result: ${answer}.`,
+      { kind: 'ftc', k, c, x }
+    );
+  };
+  const calcSeriesQ = (id, first, denominator) => {
+    const ratio = 1 / denominator;
+    const answer = first / (1 - ratio);
+    return qNumber(
+      id, 'Infinite series',
+      `Find the sum of the infinite geometric series with first term ${first} and common ratio 1/${denominator}. Round only if needed.`,
+      answer,
+      `Because |r| < 1, S = a/(1 − r) = ${first}/(1 − 1/${denominator}) = ${fmt(answer)}.`,
+      { kind: 'geometric-series', first, ratio }
+    );
+  };
+
   function calculus() {
     const questions = [];
-    for (let i = 0; i < 10; i += 1) {
-      const a = i - 4;
-      const b = (i % 5) - 2;
-      const c = 3 - (i % 4);
-      const answer = a * a + b * a + c;
-      questions.push(qNumber(
-        `calc-limit-${i + 1}`, 'Limits',
-        `Evaluate lim x→${a} of (x² ${term(b, 'x')} ${term(c, '')}).`,
-        answer, `Polynomials are continuous, so substitute x = ${a}. The limit is ${answer}.`,
-        { kind: 'polynomial-limit', a, b, c }
-      ));
-    }
-    for (let i = 0; i < 10; i += 1) {
-      const coefficient = 1 + (i % 3);
-      const power = 2 + (i % 4);
-      const linear = (i % 5) - 2;
-      const x = (i % 4) - 1;
-      const answer = coefficient * power * (x ** (power - 1)) + linear;
-      questions.push(qNumber(
-        `calc-derivative-${i + 1}`, 'Derivatives',
-        `If f(x) = ${coefficient}x^${power} ${term(linear, 'x')}, find f′(${x}).`,
-        answer,
-        `f′(x) = ${coefficient * power}x^${power - 1} ${term(linear, '')}; substituting ${x} gives ${answer}.`,
-        { kind: 'power-derivative', coefficient, power, linear, x }
-      ));
-    }
-    for (let i = 0; i < 10; i += 1) {
-      const k = 1 + (i % 4);
-      const c = 2 + (i % 3);
-      const x = (i % 5) - 2;
-      const answer = (x * x + c) + (x + k) * 2 * x;
-      questions.push(qNumber(
-        `calc-product-${i + 1}`, 'Derivative applications',
-        `For f(x) = (x + ${k})(x² + ${c}), find the tangent-line slope at x = ${x}.`,
-        answer,
-        `Product rule: f′(x) = (x² + ${c}) + (x + ${k})(2x). At x = ${x}, f′ = ${answer}.`,
-        { kind: 'product-derivative', k, c, x }
-      ));
-    }
-    for (let i = 0; i < 10; i += 1) {
-      const m = 1 + (i % 4);
-      const b = (i % 5) - 1;
-      const upper = 1 + (i % 5);
-      const answer = (m * upper * upper) / 2 + b * upper;
-      questions.push(qNumber(
-        `calc-integral-${i + 1}`, 'Integrals',
-        `Evaluate ∫ from 0 to ${upper} of (${m}x ${term(b, '')}) dx.`,
-        answer,
-        `An antiderivative is (${m}/2)x² ${term(b, 'x')}. Evaluation from 0 to ${upper} gives ${fmt(answer)}.`,
-        { kind: 'linear-integral', m, b, upper }
-      ));
-    }
-    for (let i = 0; i < 10; i += 1) {
-      const k = (i % 4) - 1;
-      const c = 2 + (i % 3);
-      const x = (i % 5) - 2;
-      const answer = x * x + k * x + c;
-      questions.push(qNumber(
-        `calc-ftc-${i + 1}`, 'Fundamental Theorem',
-        `Let F(x) = ∫ from 0 to x of (t² ${term(k, 't')} ${term(c, '')}) dt. Find F′(${x}).`,
-        answer,
-        `By the Fundamental Theorem of Calculus, F′(x) equals the integrand at x. Result: ${answer}.`,
-        { kind: 'ftc', k, c, x }
-      ));
-    }
-    for (let i = 0; i < 10; i += 1) {
-      const first = 2 + i;
-      const denominator = 2 + (i % 4);
-      const ratio = 1 / denominator;
-      const answer = first / (1 - ratio);
-      questions.push(qNumber(
-        `calc-series-${i + 1}`, 'Infinite series',
-        `Find the sum of the infinite geometric series with first term ${first} and common ratio 1/${denominator}. Round only if needed.`,
-        answer,
-        `Because |r| < 1, S = a/(1 − r) = ${first}/(1 − 1/${denominator}) = ${fmt(answer)}.`,
-        { kind: 'geometric-series', first, ratio }
-      ));
-    }
+    for (let i = 0; i < 10; i += 1) questions.push(calcLimitQ(`calc-limit-${i + 1}`, i - 4, (i % 5) - 2, 3 - (i % 4)));
+    for (let i = 0; i < 10; i += 1) questions.push(calcDerivativeQ(`calc-derivative-${i + 1}`, 1 + (i % 3), 2 + (i % 4), (i % 5) - 2, (i % 4) - 1));
+    for (let i = 0; i < 10; i += 1) questions.push(calcProductQ(`calc-product-${i + 1}`, 1 + (i % 4), 2 + (i % 3), (i % 5) - 2));
+    for (let i = 0; i < 10; i += 1) questions.push(calcIntegralQ(`calc-integral-${i + 1}`, 1 + (i % 4), (i % 5) - 1, 1 + (i % 5)));
+    for (let i = 0; i < 10; i += 1) questions.push(calcFtcQ(`calc-ftc-${i + 1}`, (i % 4) - 1, 2 + (i % 3), (i % 5) - 2));
+    for (let i = 0; i < 10; i += 1) questions.push(calcSeriesQ(`calc-series-${i + 1}`, 2 + i, 2 + (i % 4)));
+    return questions;
+  }
+
+  // Timed Mastery pool (timed-mastery.html): 500 questions over the same 6
+  // topics, from bounded parameter grids instead of the regular loops'
+  // i % k cycles, which repeat long before 84. Zero coefficients are left
+  // out so prompts never print "+ 0x".
+  function timedCalculus() {
+    const questions = [];
+    addFromGrid(questions, 'tm-calc-limit', 84, grid(range(-5, 5), nonZero(-3, 3), nonZero(-4, 4)), calcLimitQ);
+    addFromGrid(questions, 'tm-calc-derivative', 84, grid(range(1, 4), range(2, 5), nonZero(-3, 3), range(-2, 2)), calcDerivativeQ);
+    addFromGrid(questions, 'tm-calc-product', 83, grid(range(1, 5), range(1, 5), range(-3, 3)), calcProductQ);
+    addFromGrid(questions, 'tm-calc-integral', 83, grid(range(1, 6), nonZero(-3, 3), range(1, 5)), calcIntegralQ);
+    addFromGrid(questions, 'tm-calc-ftc', 83, grid(nonZero(-3, 3), range(1, 5), range(-3, 3)), calcFtcQ);
+    addFromGrid(questions, 'tm-calc-series', 83, grid(range(1, 20), range(2, 6)), calcSeriesQ);
     return questions;
   }
 
@@ -422,93 +445,106 @@
     return questions;
   }
 
+  const precalcFunctionQ = (id, a, b, c, x) => {
+    const answer = a * x * x + b * x + c;
+    return qNumber(
+      id, 'Functions',
+      `If f(x) = ${a}x² ${term(b, 'x')} ${term(c, '')}, find f(${x}).`,
+      answer, `Substitute x = ${x}: f(${x}) = ${answer}.`,
+      { kind: 'quadratic-eval', a, b, c, x }
+    );
+  };
+  const precalcCompositionQ = (id, a, b, c, d, x) => {
+    const answer = a * (c * x + d) + b;
+    return qNumber(
+      id, 'Composition and inverses',
+      `Let f(x) = ${a}x ${term(b, '')} and g(x) = ${c}x ${term(d, '')}. Find (f ∘ g)(${x}).`,
+      answer, `First g(${x}) = ${c * x + d}; then f(${c * x + d}) = ${answer}.`,
+      { kind: 'linear-composition', a, b, c, d, x }
+    );
+  };
+  const precalcPolynomialQ = (id, r1, r2) => {
+    const sum = r1 + r2;
+    const product = r1 * r2;
+    return qNumber(
+      id, 'Polynomial functions',
+      `What is the larger zero of x² ${term(-sum, 'x')} ${term(product, '')}?`,
+      Math.max(r1, r2), `Factoring gives (x − ${r1})(x − ${r2}), so the larger zero is ${Math.max(r1, r2)}.`,
+      { kind: 'quadratic-larger-root', sum, product }
+    );
+  };
+  // Negative exponents show the value as a fraction (2^x = 1/8) — the real
+  // notation, not a decimal like 0.125.
+  const precalcExponentialQ = (id, base, exponent) => {
+    const value = base ** exponent;
+    const shown = exponent < 0 ? `1/${base ** -exponent}` : value;
+    return qNumber(
+      id, 'Exponential and logarithmic functions',
+      `Solve for x: ${base}^x = ${shown}.`,
+      exponent, `Because ${shown} = ${base}^${exponent}, x = ${exponent}.`,
+      { kind: 'exponential-solve', base, value }
+    );
+  };
+  const precalcTrigQ = (id, opposite, adjacent) => {
+    const hypotenuse = Math.hypot(opposite, adjacent);
+    return qNumber(
+      id, 'Trigonometry',
+      `In a right triangle, angle θ has opposite side ${opposite} and adjacent side ${adjacent}. Find sin θ.`,
+      opposite / hypotenuse,
+      `The hypotenuse is ${hypotenuse}, so sin θ = opposite/hypotenuse = ${opposite}/${hypotenuse} = ${fmt(opposite / hypotenuse)}.`,
+      { kind: 'right-triangle-sine', opposite, adjacent }
+    );
+  };
+  const precalcArithmeticQ = (id, first, difference, n) => {
+    const answer = first + (n - 1) * difference;
+    return qNumber(
+      id, 'Sequences',
+      `An arithmetic sequence has a₁ = ${first} and common difference ${difference}. Find a_${n}.`,
+      answer, `a_n = a₁ + (n − 1)d = ${first} + (${n} − 1)(${difference}) = ${answer}.`,
+      { kind: 'arithmetic-term', first, difference, n }
+    );
+  };
+  const precalcGeometricQ = (id, first, ratio, n) => {
+    const answer = first * ratio ** (n - 1);
+    return qNumber(
+      id, 'Sequences',
+      `A geometric sequence has a₁ = ${first} and common ratio ${ratio}. Find a_${n}.`,
+      answer, `a_n = a₁r^(n−1) = ${first}(${ratio}^${n - 1}) = ${answer}.`,
+      { kind: 'geometric-term', first, ratio, n }
+    );
+  };
+
   function precalculus() {
     const questions = [];
-    for (let i = 0; i < 10; i += 1) {
-      const a = 1 + (i % 3);
-      const b = (i % 5) - 2;
-      const c = 3 - (i % 4);
-      const x = i - 4;
-      const answer = a * x * x + b * x + c;
-      questions.push(qNumber(
-        `precalc-function-${i + 1}`, 'Functions',
-        `If f(x) = ${a}x² ${term(b, 'x')} ${term(c, '')}, find f(${x}).`,
-        answer, `Substitute x = ${x}: f(${x}) = ${answer}.`,
-        { kind: 'quadratic-eval', a, b, c, x }
-      ));
-    }
-    for (let i = 0; i < 10; i += 1) {
-      const a = 2 + (i % 3);
-      const b = (i % 4) - 1;
-      const c = 1 + (i % 4);
-      const d = 2 - (i % 5);
-      const x = i - 3;
-      const answer = a * (c * x + d) + b;
-      questions.push(qNumber(
-        `precalc-composition-${i + 1}`, 'Composition and inverses',
-        `Let f(x) = ${a}x ${term(b, '')} and g(x) = ${c}x ${term(d, '')}. Find (f ∘ g)(${x}).`,
-        answer, `First g(${x}) = ${c * x + d}; then f(${c * x + d}) = ${answer}.`,
-        { kind: 'linear-composition', a, b, c, d, x }
-      ));
-    }
-    for (let i = 0; i < 10; i += 1) {
-      const r1 = i - 5;
-      const r2 = i + 2;
-      const sum = r1 + r2;
-      const product = r1 * r2;
-      questions.push(qNumber(
-        `precalc-polynomial-${i + 1}`, 'Polynomial functions',
-        `What is the larger zero of x² ${term(-sum, 'x')} ${term(product, '')}?`,
-        Math.max(r1, r2), `Factoring gives (x − ${r1})(x − ${r2}), so the larger zero is ${Math.max(r1, r2)}.`,
-        { kind: 'quadratic-larger-root', sum, product }
-      ));
-    }
-    for (let i = 0; i < 10; i += 1) {
-      const base = 2 + (i % 4);
-      const exponent = 1 + (i % 6);
-      const value = base ** exponent;
-      questions.push(qNumber(
-        `precalc-exponential-${i + 1}`, 'Exponential and logarithmic functions',
-        `Solve for x: ${base}^x = ${value}.`,
-        exponent, `Because ${value} = ${base}^${exponent}, x = ${exponent}.`,
-        { kind: 'exponential-solve', base, value }
-      ));
-    }
+    for (let i = 0; i < 10; i += 1) questions.push(precalcFunctionQ(`precalc-function-${i + 1}`, 1 + (i % 3), (i % 5) - 2, 3 - (i % 4), i - 4));
+    for (let i = 0; i < 10; i += 1) questions.push(precalcCompositionQ(`precalc-composition-${i + 1}`, 2 + (i % 3), (i % 4) - 1, 1 + (i % 4), 2 - (i % 5), i - 3));
+    for (let i = 0; i < 10; i += 1) questions.push(precalcPolynomialQ(`precalc-polynomial-${i + 1}`, i - 5, i + 2));
+    for (let i = 0; i < 10; i += 1) questions.push(precalcExponentialQ(`precalc-exponential-${i + 1}`, 2 + (i % 4), 1 + (i % 6)));
     const triples = [[3, 4], [5, 12], [8, 15], [7, 24], [9, 12], [12, 16], [15, 20], [10, 24], [18, 24], [20, 21]];
-    triples.forEach(([opposite, adjacent], i) => {
-      const hypotenuse = Math.hypot(opposite, adjacent);
-      questions.push(qNumber(
-        `precalc-trig-${i + 1}`, 'Trigonometry',
-        `In a right triangle, angle θ has opposite side ${opposite} and adjacent side ${adjacent}. Find sin θ.`,
-        opposite / hypotenuse,
-        `The hypotenuse is ${hypotenuse}, so sin θ = opposite/hypotenuse = ${opposite}/${hypotenuse} = ${fmt(opposite / hypotenuse)}.`,
-        { kind: 'right-triangle-sine', opposite, adjacent }
-      ));
-    });
+    triples.forEach(([opposite, adjacent], i) => questions.push(precalcTrigQ(`precalc-trig-${i + 1}`, opposite, adjacent)));
     for (let i = 0; i < 10; i += 1) {
       const n = 4 + i;
-      if (i % 2 === 0) {
-        const first = 2 + i;
-        const difference = 1 + (i % 4);
-        const answer = first + (n - 1) * difference;
-        questions.push(qNumber(
-          `precalc-sequence-${i + 1}`, 'Sequences',
-          `An arithmetic sequence has a₁ = ${first} and common difference ${difference}. Find a_${n}.`,
-          answer, `a_n = a₁ + (n − 1)d = ${first} + (${n} − 1)(${difference}) = ${answer}.`,
-          { kind: 'arithmetic-term', first, difference, n }
-        ));
-      } else {
-        const first = 1 + (i % 3);
-        const ratio = 2 + (i % 2);
-        const answer = first * ratio ** (n - 1);
-        questions.push(qNumber(
-          `precalc-sequence-${i + 1}`, 'Sequences',
-          `A geometric sequence has a₁ = ${first} and common ratio ${ratio}. Find a_${n}.`,
-          answer, `a_n = a₁r^(n−1) = ${first}(${ratio}^${n - 1}) = ${answer}.`,
-          { kind: 'geometric-term', first, ratio, n }
-        ));
-      }
+      questions.push(i % 2 === 0
+        ? precalcArithmeticQ(`precalc-sequence-${i + 1}`, 2 + i, 1 + (i % 4), n)
+        : precalcGeometricQ(`precalc-sequence-${i + 1}`, 1 + (i % 3), 2 + (i % 2), n));
     }
+    return questions;
+  }
+
+  // Timed Mastery pool — see timedCalculus() above.
+  function timedPrecalculus() {
+    const questions = [];
+    addFromGrid(questions, 'tm-precalc-function', 84, grid(range(1, 3), nonZero(-3, 3), nonZero(-4, 4), range(-3, 3)), precalcFunctionQ);
+    addFromGrid(questions, 'tm-precalc-composition', 84, grid(range(2, 4), nonZero(-3, 3), range(1, 4), nonZero(-3, 3), range(-3, 3)), precalcCompositionQ);
+    addFromGrid(questions, 'tm-precalc-polynomial', 83,
+      grid(nonZero(-8, 8), nonZero(-8, 8)).filter(([r1, r2]) => r1 < r2 && r1 + r2 !== 0), precalcPolynomialQ);
+    addFromGrid(questions, 'tm-precalc-exponential', 83,
+      grid(range(2, 10), range(-3, 6)).filter(([base, exponent]) => base ** Math.abs(exponent) <= 100000), precalcExponentialQ);
+    addFromGrid(questions, 'tm-precalc-trig', 83,
+      grid(range(1, 75), range(1, 75)).filter(([opposite, adjacent]) => Number.isInteger(Math.hypot(opposite, adjacent))), precalcTrigQ);
+    addFromGrid(questions, 'tm-precalc-arithmetic', 42, grid(range(1, 9), nonZero(-5, 5), range(5, 15)), precalcArithmeticQ);
+    addFromGrid(questions, 'tm-precalc-geometric', 41,
+      grid(range(1, 5), range(2, 4), range(3, 8)).filter(([first, ratio, n]) => first * ratio ** (n - 1) <= 50000), precalcGeometricQ);
     return questions;
   }
 
@@ -955,7 +991,8 @@
       title: 'AP Calculus BC',
       tier: 'core',
       summary: 'Limits, derivatives, applications, integrals, the Fundamental Theorem, and series.',
-      questions: calculus()
+      questions: calculus(),
+      timedQuestions: timedCalculus()
     },
     {
       slug: 'computer-programming-1',
@@ -983,7 +1020,8 @@
       title: 'Precalculus',
       tier: 'core',
       summary: 'Functions, composition, polynomials, exponentials, trigonometry, and sequences.',
-      questions: precalculus()
+      questions: precalculus(),
+      timedQuestions: timedPrecalculus()
     },
     {
       slug: 'multivariable-calculus',
