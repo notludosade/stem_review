@@ -156,6 +156,7 @@ window.STEMPlusTests = (function () {
     'AP Physics C: Electricity and Magnetism': 'AP Physics C Electricity and Magnetism',
     'AP Physics C: Mechanics': 'AP Physics C Mechanics',
     'Advanced Algorithms': 'Advanced+ Courses/Advanced Algorithms',
+    'Advanced Robotics': 'Advanced Robotics',
     'Algebra/Geometry Fundamentals Review': 'Algebra Geometry Fundamentals Review',
     'Applied Machine/Deep Learning': 'Applied Machine Deep Learning',
     'CAD & Prototyping': 'CAD & Prototyping',
@@ -175,9 +176,11 @@ window.STEMPlusTests = (function () {
     'Linear Algebra A': 'Linear Algebra A',
     'Linear Algebra B': 'Advanced+ Courses/Linear Algebra B',
     'Mathematical Proofs': 'Mathematical Proofs',
+    'Mechatronics': 'Mechatronics',
     'Multivariable Calculus': 'Multivariable Calculus',
     'Precalculus': 'Precalculus',
     'Programming with Packages': 'Programming with Packages',
+    'Quantum Computing': 'Advanced+ Courses/Quantum Computing',
     'Quantum Physics & Optics': 'Quantum Physics and Optics',
     'Real Analysis A': 'Advanced+ Courses/Real Analysis A',
     'Real Analysis B': 'Advanced+ Courses/Real Analysis B',
@@ -213,6 +216,8 @@ window.STEMPlusTests = (function () {
     { name: 'Cloud & DevOps', courses: ['Computer Programming 1', 'Cloud Computing A', 'Cloud Computing B / DevOps'], projectId: 'cloud-devops-capstone', lessons: 64 },
     { name: 'General Programmer', courses: ['Computer Programming 1', 'Computer Programming 2', 'Computer Programming Ethics', 'Computer Programming 2+', 'Software Engineering', 'Data Handling CB', 'Systems Programming & Architecture: CS', 'Computer Networking Fundamentals', 'Advanced Algorithms'], projectId: 'general-programmer-capstone', lessons: 241 },
     { name: 'AI Developer: CB/RWA', courses: ['Computer Programming 1', 'Computer Programming 2', 'Data Handling CB', 'AI Developer', 'Applied Machine/Deep Learning', 'Cloud Computing A', 'Cloud Computing B / DevOps'], projectId: 'ai-developer-cbrwa-capstone', lessons: 171 },
+    { name: 'Quantum Science', courses: ['AP Physics 2', 'AP Physics C: Electricity and Magnetism', 'Quantum Physics & Optics', 'Quantum Computing'], projectId: 'quantum-science-capstone', lessons: 124 },
+    { name: 'Robotics & Mechatronics', courses: ['Engineering 1', 'Computer Programming 1', 'Mechatronics', 'Advanced Robotics'], projectId: 'robotics-mechatronics-capstone', lessons: 138 },
   ];
 
   // Mastery is a continuous measure (not a pass/fail badge): the average
@@ -271,8 +276,8 @@ window.STEMPlusTests = (function () {
   };
 
   // Transcribed from content/advanced.html's own prerequisite prose (e.g.
-  // "Requires AP Calculus BC") — only the 5 shipped Advanced+ courses, not
-  // the 4 "Coming Soon" placeholders with no real index.html to attach a
+  // "Requires AP Calculus BC") — only the 6 shipped Advanced+ courses, not
+  // the 3 "Coming Soon" placeholders with no real index.html to attach a
   // context box to. Every key and every listed value already exists in
   // COURSE_PATHS, verified against the file directly.
   var PREREQUISITES = {
@@ -281,6 +286,7 @@ window.STEMPlusTests = (function () {
     'Advanced Algorithms': ['Computer Programming 1', 'Computer Programming 2'],
     'Linear Algebra B': ['Linear Algebra A'],
     'Topology: Fundamentals': ['Real Analysis A'],
+    'Quantum Computing': ['Linear Algebra A', 'Linear Algebra B'],
   };
 
   function courseMastery(course) {
