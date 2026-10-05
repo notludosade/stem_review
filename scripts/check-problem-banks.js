@@ -11,6 +11,7 @@ const factorial = (n) => {
   return value;
 };
 const choose = (n, r) => factorial(n) / (factorial(r) * factorial(n - r));
+const evalLogic = (p, q, operation) => (operation === 'and' ? p && q : operation === 'or' ? p || q : operation === 'implies' ? !p || q : p === q);
 const expectedAnswer = ({ meta }) => {
   const m = meta;
   switch (m.kind) {
@@ -37,6 +38,8 @@ const expectedAnswer = ({ meta }) => {
       if (m.operation === 'or') return m.p || m.q ? 'True' : 'False';
       if (m.operation === 'implies') return !m.p || m.q ? 'True' : 'False';
       return m.p === m.q ? 'True' : 'False';
+    case 'logic3': return evalLogic(evalLogic(m.p, m.q, m.op1), m.r, m.op2) ? 'True' : 'False';
+    case 'logic3-number': return Number(evalLogic(evalLogic(m.p, m.q, m.op1), m.r, m.op2));
     case 'intersection-size': return new Set(m.a.filter((value) => m.b.includes(value))).size;
     case 'permutation': return factorial(m.n) / factorial(m.n - m.r);
     case 'combination': return choose(m.n, m.r);
@@ -160,15 +163,16 @@ const auditPool = (label, questions) => {
   return topics;
 };
 
+// Rollout: each set is either still 60 (10/topic) or fully expanded to 240
+// (40/topic). Tightened to exactly 240 once every set is expanded.
 courses.forEach((course) => {
-  assert(course.questions.length === 60, `${course.title}: expected 60 questions`);
+  const n = course.questions.length;
+  assert(n === 60 || n === 240, `${course.title}: expected 60 or 240 questions, found ${n}`);
   const topics = auditPool(course.title, course.questions);
   assert(topics.size === 6, `${course.title}: expected 6 topics`);
-  topics.forEach((count, topic) => assert(count === 10, `${course.title}/${topic}: expected 10 questions`));
-  total += course.questions.length;
+  topics.forEach((count, topic) => assert(count === n / 6, `${course.title}/${topic}: expected ${n / 6} questions, found ${count}`));
+  total += n;
 });
-
-assert(total === 1200, `Expected 1200 total questions, found ${total}`);
 
 // Timed Mastery pools (timed-mastery.html) — separate from the regular 60.
 const timedCourses = courses.filter((course) => course.timedQuestions);

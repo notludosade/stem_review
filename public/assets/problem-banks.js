@@ -38,6 +38,38 @@
   const addFromGrid = (questions, idPrefix, count, tuples, make) => spread(tuples, count).forEach((tuple, j) => {
     questions.push(make(`${idPrefix}-${j + 1}`, ...tuple));
   });
+  const regular10 = (tupleAt) => Array.from({ length: 10 }, (_, i) => tupleAt(i));
+  // A topic's 40 parameter tuples: the original 10 (unchanged, so their
+  // questions and saved-progress IDs never move) + `extra` drawn evenly
+  // from a bounded grid, skipping any tuple whose prompt is already in the
+  // topic. `build(...tuple)` only needs to return an object with `prompt`.
+  const topicTuples = (regular, gridTuples, build, extra = 30) => {
+    const seen = new Set(regular.map((tuple) => build(...tuple).prompt));
+    const picked = [];
+    const candidates = [...spread(gridTuples, Math.min(extra, gridTuples.length)), ...gridTuples];
+    for (const tuple of candidates) {
+      if (picked.length === extra) break;
+      const prompt = build(...tuple).prompt;
+      if (seen.has(prompt)) continue;
+      seen.add(prompt);
+      picked.push(tuple);
+    }
+    if (picked.length < extra) throw new Error(`Only ${picked.length} fresh tuples for "${build(...regular[0]).prompt}"`);
+    return [...regular, ...picked];
+  };
+  // Older courses (per-topic IDs): push all 40 of a topic through its template.
+  const addTopic = (questions, idPrefix, regular, gridTuples, make) => {
+    topicTuples(regular, gridTuples, (...t) => make('', ...t)).forEach((tuple, i) => {
+      questions.push(make(`${idPrefix}-${i + 1}`, ...tuple));
+    });
+  };
+  // Balanced mix of several grids (e.g. arithmetic + geometric sequences):
+  // spread each to `each` tuples so one large grid can't crowd out the rest.
+  const mixGrids = (each, ...grids) => grids.flatMap((g) => spread(g, Math.min(each, g.length)));
+  const TF = [true, false];
+  const LOGIC_OPS = ['and', 'or', 'implies', 'biconditional'];
+  const evalLogic = (p, q, operation) => (operation === 'and' ? p && q : operation === 'or' ? p || q : operation === 'implies' ? !p || q : p === q);
+  const intHypotenusePairs = (maxLeg) => grid(range(1, maxLeg), range(1, maxLeg)).filter(([a, b]) => Number.isInteger(Math.hypot(a, b)));
 
   function algebraGeometry() {
     const questions = [];
