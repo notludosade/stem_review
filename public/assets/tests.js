@@ -1770,6 +1770,69 @@ window.STEMPlusTests = (function () {
       + '</div>';
   }
 
+  function trackPickerHtml(active) {
+    const options = PATHWAYS.map((p) => {
+      const selected = active && active.type === 'pathway' && active.name === p.name ? ' selected' : '';
+      return '<option value="' + escapeHtml('pathway:' + p.name) + '"' + selected + '>' + escapeHtml(p.name) + '</option>';
+    });
+    if (loadCustomPlan()) {
+      options.push('<option value="plan"' + (active && active.type === 'plan' ? ' selected' : '') + '>My AI plan</option>');
+    }
+    return '<p class="track-picker"><label class="sr-only" for="track-picker-select">Track</label>'
+      + '<select id="track-picker-select" data-track-select>' + options.join('') + '</select> '
+      + '<button type="button" class="widget-btn" data-track-confirm>Confirm</button></p>';
+  }
+
+  // Continue Learning's lead card: the active track's progress and next
+  // step, or a picker when no (valid) track is chosen or the track is done.
+  function trackCardHtml() {
+    const active = loadActiveTrack();
+    const resolved = resolveTrack(active);
+    if (!resolved) {
+      return '<div class="toc-item track-card"><span class="toc-num">Your track</span>'
+        + '<p class="toc-title">Pick your track</p>'
+        + '<p class="toc-sub">Choose the Pathway you’re working through — or your AI plan — and it will lead this card.</p>'
+        + trackPickerHtml(null) + '</div>';
+    }
+    const status = trackStatus(resolved);
+    const title = '<p class="toc-title"><a href="' + resolved.href + '">' + (status.complete ? '✓ ' : '') + escapeHtml(resolved.label) + '</a></p>';
+    if (status.complete) {
+      return '<div class="toc-item track-card"><span class="toc-num">Track complete</span>' + title
+        + '<p class="toc-sub">Every course' + (resolved.projectId ? ' and the capstone are' : ' is') + ' done — pick your next track.</p>'
+        + trackPickerHtml(active) + '</div>';
+    }
+    let sub;
+    if (status.next) {
+      const dir = coursePath(status.next);
+      const href = dir ? dir + '/index.html' : 'pathways.html';
+      sub = status.passed + ' of ' + status.total + ' courses passed · Up next: <a href="' + href + '">' + escapeHtml(status.next) + '</a>'
+        + (status.nextUnit ? ' · ' + escapeHtml(status.nextUnit) : '');
+    } else {
+      sub = 'All ' + status.total + ' courses passed · Up next: <a href="Projects/' + resolved.projectId + '.html">' + escapeHtml(resolved.capstoneLabel) + '</a>';
+    }
+    return '<div class="toc-item track-card"><span class="toc-num">Your track</span>' + title
+      + '<p class="toc-sub">' + sub + '</p>'
+      + '<p class="track-card-actions"><button type="button" class="link-button" data-track-change>Change track</button></p>'
+      + '<div data-track-picker hidden>' + trackPickerHtml(active) + '</div></div>';
+  }
+
+  function wireTrackCard(el) {
+    const change = el.querySelector('[data-track-change]');
+    if (change) {
+      change.addEventListener('click', () => {
+        el.querySelector('[data-track-picker]').hidden = false;
+        change.hidden = true;
+      });
+    }
+    const confirm = el.querySelector('[data-track-confirm]');
+    if (!confirm) return;
+    confirm.addEventListener('click', () => {
+      const value = el.querySelector('[data-track-select]').value;
+      saveActiveTrack(value === 'plan' ? { type: 'plan' } : { type: 'pathway', name: value.slice('pathway:'.length) });
+      renderDashboard(el);
+    });
+  }
+
   // The real dashboard — reads every result this browser has ever saved and
   // renders Continue Learning / Review / Practice / Next Milestone / Your Path
   // from it. No new storage, no new data model — this is purely an
@@ -1779,7 +1842,9 @@ window.STEMPlusTests = (function () {
     const results = loadResults();
     const skippedCourses = loadSkippedCourses();
     if (results.length === 0 && skippedCourses.length === 0) {
-      el.innerHTML = '<p class="toc-empty">You haven’t started anything yet in this browser. <a href="new.html">Choose a goal</a> or browse <a href="pathways.html">Pathways</a> to get going.</p>';
+      el.innerHTML = '<h2>Continue Learning</h2><div class="toc-list">' + trackCardHtml() + '</div>'
+        + '<p class="toc-empty">You haven’t started anything yet in this browser. <a href="new.html">Choose a goal</a> or browse <a href="pathways.html">Pathways</a> to get going.</p>';
+      wireTrackCard(el);
       return;
     }
 
@@ -1797,25 +1862,24 @@ window.STEMPlusTests = (function () {
     inProgress.sort((a, b) => (a.lastTakenAt < b.lastTakenAt ? 1 : -1));
     const continueItem = inProgress[0] || null;
 
-    let nextUnitName = null;
-    if (continueItem) {
-      const unitEntries = Object.keys(continueItem.report.units)
-        .map((name) => ({ name, num: parseInt(name.replace(/\D/g, ''), 10) || 0, cleared: continueItem.report.units[name].cleared }))
-        .sort((a, b) => a.num - b.num);
-      const pending = unitEntries.find((u) => !u.cleared);
-      nextUnitName = pending ? pending.name : null;
-    }
+    const nextUnitName = continueItem ? nextUnitFor(continueItem.course) : null;
 
     let html = '';
 
-    html += '<h2>Continue Learning</h2>';
-    if (continueItem) {
+    // The track card leads; the most recent in-progress course follows
+    // unless it's the same course the track already points to.
+    const activeResolved = resolveTrack(loadActiveTrack());
+    const trackNext = activeResolved ? trackStatus(activeResolved).next : null;
+    html += '<h2>Continue Learning</h2><div class="toc-list">' + trackCardHtml();
+    if (continueItem && continueItem.course !== trackNext) {
       const dir = coursePath(continueItem.course);
       const href = dir ? dir + '/index.html' : 'pathways.html';
-      html += '<div class="toc-list"><a class="toc-item" href="' + href + '"><span class="toc-num">In progress</span>'
+      html += '<a class="toc-item" href="' + href + '"><span class="toc-num">In progress</span>'
         + '<p class="toc-title">' + continueItem.course + '</p>'
-        + '<p class="toc-sub">' + (nextUnitName ? 'Next up: ' + nextUnitName : 'Cleared every unit test attempted so far — open the course to see what’s next.') + '</p></a></div>';
-    } else {
+        + '<p class="toc-sub">' + (nextUnitName ? 'Next up: ' + nextUnitName : 'Cleared every unit test attempted so far — open the course to see what’s next.') + '</p></a>';
+    }
+    html += '</div>';
+    if (!continueItem) {
       html += '<p class="toc-empty">Every course you’ve touched is fully passed. <a href="pathways.html">Start a new one</a>.</p>';
     }
 
@@ -1874,6 +1938,7 @@ window.STEMPlusTests = (function () {
     html += '</div>';
 
     el.innerHTML = html;
+    wireTrackCard(el);
   }
 
   // Cross-course Learning Record: <div data-learning-record></div> — the
@@ -1964,6 +2029,33 @@ window.STEMPlusTests = (function () {
     el.innerHTML = html;
   }
 
+  // "Make this my track" on a Pathway page or the AI plan page:
+  // <div data-track-choice="<PATHWAYS name>|plan" data-root="../"></div>.
+  // Removes itself when the track can't resolve (e.g. no AI plan saved yet).
+  function mountTrackChoice(el) {
+    if (el.dataset.mounted) return;
+    el.dataset.mounted = '1';
+    const value = el.getAttribute('data-track-choice');
+    const track = value === 'plan' ? { type: 'plan' } : { type: 'pathway', name: value };
+    if (!resolveTrack(track)) {
+      el.remove();
+      return;
+    }
+    const root = el.getAttribute('data-root') || '';
+    const render = () => {
+      if (sameTrack(loadActiveTrack(), track)) {
+        el.innerHTML = '<p class="track-choice is-active">✓ This is your track — it leads your <a href="' + root + 'index.html">Dashboard</a>. '
+          + '<button type="button" class="link-button" data-track-stop>Stop following</button></p>';
+        el.querySelector('[data-track-stop]').addEventListener('click', () => { saveActiveTrack(null); render(); });
+      } else {
+        el.innerHTML = '<p class="track-choice"><button type="button" class="widget-btn" data-track-follow>'
+          + (track.type === 'plan' ? 'Make this plan my track' : 'Make this my track') + '</button></p>';
+        el.querySelector('[data-track-follow]').addEventListener('click', () => { saveActiveTrack(track); render(); });
+      }
+    };
+    render();
+  }
+
   function initTests() {
     document.querySelectorAll('[data-test]').forEach((container) => {
       if (!container.closest('[data-exam-gate], [data-pathway-exam-gate], [data-pathway-final-exam-gate]')) mountTest(container);
@@ -1983,6 +2075,7 @@ window.STEMPlusTests = (function () {
     document.querySelectorAll('[data-reflection]').forEach(mountReflection);
     document.querySelectorAll('[data-devmode]').forEach(mountDevModePage);
     document.querySelectorAll('[data-dashboard]').forEach(mountDashboard);
+    document.querySelectorAll('[data-track-choice]').forEach(mountTrackChoice);
     document.querySelectorAll('[data-learning-record]').forEach(mountLearningRecord);
     // mountPathwayRoadmap must run before mountTrackPlan: it injects the
     // data-course-status spans mountTrackPlan's own querySelectorAll scrape
