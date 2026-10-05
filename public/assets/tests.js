@@ -118,6 +118,7 @@ window.STEMPlusTests = (function () {
   var SKIPPED_STORAGE_KEY = 'stemplus:skipped-courses:v1';
   var TRACK_PACE_STORAGE_KEY = 'stemplus:track-pace:v1';
   var CUSTOM_PLAN_STORAGE_KEY = 'stemplus:custom-plan:v1';
+  var ACTIVE_TRACK_STORAGE_KEY = 'stemplus:active-track:v1';
   var DEV_MODE_KEY = 'stemplus:devmode:v1';
   var DEV_CODE = 'stem_developer67!';
 
@@ -572,6 +573,87 @@ window.STEMPlusTests = (function () {
     const coursesDone = (plan.courses || []).every((c) => isCourseExamPassed(c.name));
     const projectDone = !plan.project || !plan.project.id || isProjectComplete(plan.project.id);
     return coursesDone && projectDone;
+  }
+
+  // Active track — the Dashboard's Continue Learning lead card. One Pathway
+  // or the student's AI plan, chosen on a Pathway page, the plan page, or the
+  // Dashboard picker. Stored as { type: 'pathway', name } or { type: 'plan' }.
+  function loadActiveTrack() {
+    try {
+      const raw = window.localStorage.getItem(ACTIVE_TRACK_STORAGE_KEY);
+      return raw ? JSON.parse(raw) : null;
+    } catch (err) {
+      console.error('Could not read active track', err);
+      return null;
+    }
+  }
+
+  function saveActiveTrack(track) {
+    try {
+      if (track) window.localStorage.setItem(ACTIVE_TRACK_STORAGE_KEY, JSON.stringify(track));
+      else window.localStorage.removeItem(ACTIVE_TRACK_STORAGE_KEY);
+      return true;
+    } catch (err) {
+      console.error('Could not save active track', err);
+      return false;
+    }
+  }
+
+  function sameTrack(a, b) {
+    return !!a && !!b && a.type === b.type && (a.type === 'plan' || a.name === b.name);
+  }
+
+  // Turns a stored track into what the card needs, or null if it no longer
+  // exists (a renamed pathway, no saved AI plan). Every pathway's page slug
+  // is its capstone projectId minus "-capstone".
+  function resolveTrack(track) {
+    if (!track) return null;
+    if (track.type === 'plan') {
+      const plan = loadCustomPlan();
+      if (!plan) return null;
+      const project = plan.project && plan.project.id ? plan.project : null;
+      return {
+        label: 'My AI plan',
+        href: 'my-plan.html',
+        courses: (plan.courses || []).map((c) => c.name),
+        projectId: project ? project.id : null,
+        capstoneLabel: project ? project.title : null,
+      };
+    }
+    const pathway = PATHWAYS.find((p) => p.name === track.name);
+    if (!pathway) return null;
+    return {
+      label: pathway.name,
+      href: 'Pathways/' + pathway.projectId.replace(/-capstone$/, '') + '.html',
+      courses: pathway.courses.slice(),
+      projectId: pathway.projectId,
+      capstoneLabel: pathway.name + ' Capstone',
+    };
+  }
+
+  // First attempted-but-uncleared unit of a course, by unit number — the
+  // "next unit" rule the Dashboard's in-progress card has always used.
+  function nextUnitFor(course) {
+    const units = buildReport(course).units;
+    const pending = Object.keys(units)
+      .map((name) => ({ name, num: parseInt(name.replace(/\D/g, ''), 10) || 0, cleared: units[name].cleared }))
+      .sort((a, b) => a.num - b.num)
+      .find((u) => !u.cleared);
+    return pending ? pending.name : null;
+  }
+
+  function trackStatus(resolved) {
+    const passed = resolved.courses.filter((c) => isCourseExamPassed(c)).length;
+    const next = resolved.courses.find((c) => !isCourseExamPassed(c)) || null;
+    const projectDone = !resolved.projectId || isProjectComplete(resolved.projectId);
+    return {
+      passed,
+      total: resolved.courses.length,
+      next,
+      nextUnit: next ? nextUnitFor(next) : null,
+      projectDone,
+      complete: !next && projectDone,
+    };
   }
 
   function loadTrackPace() {
@@ -1931,5 +2013,6 @@ window.STEMPlusTests = (function () {
     mountPathwayExamGate, mountPathwayFinalExamGate, mountRouteLock, mountDevModePage,
     isCourseExamPassed, isProjectComplete, isPathwayExamPassed, isPathwayFinalExamPassed,
     isDevMode, setDevMode, answerMatches, masteryForProblemSet,
+    loadActiveTrack, saveActiveTrack, resolveTrack, trackStatus, nextUnitFor,
   };
 })();
