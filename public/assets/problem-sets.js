@@ -18,6 +18,10 @@
     module.exports = { parseNumber, answersClose };
     return;
   }
+  // Shared with timed-mastery.js, which grades answers exactly the same way.
+  // That page has no [data-problem-set] mount, so the rest of this file
+  // exits early there.
+  window.STEMProblemAnswers = { parseNumber, answersClose };
 
   const bankApi = window.STEMProblemBanks;
   const slug = new URLSearchParams(window.location.search).get('course');

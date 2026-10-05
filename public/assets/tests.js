@@ -290,6 +290,15 @@ window.STEMPlusTests = (function () {
     return Math.round((sum / topics.length) * 100);
   }
 
+  // Timed Mastery's personal benchmark (timed-mastery.js): mastery for a
+  // problem-sets.html ?course= slug, via the same PROBLEM_SET_SLUGS table
+  // the Recommended Practice strip already ranks by. null for an unknown
+  // slug or a course with no graded attempts in this browser.
+  function masteryForProblemSet(slug) {
+    const course = Object.keys(PROBLEM_SET_SLUGS).find((name) => PROBLEM_SET_SLUGS[name] === slug);
+    return course ? courseMastery(course) : null;
+  }
+
   function passThresholdFor(kind) {
     return Object.prototype.hasOwnProperty.call(PASS_THRESHOLDS, kind) ? PASS_THRESHOLDS[kind] : DEFAULT_PASS_THRESHOLD;
   }
@@ -1874,6 +1883,6 @@ window.STEMPlusTests = (function () {
     mountProjectGate, mountProjectStatus, mountCourseStatus, mountReflection,
     mountPathwayExamGate, mountPathwayFinalExamGate, mountRouteLock, mountDevModePage,
     isCourseExamPassed, isProjectComplete, isPathwayExamPassed, isPathwayFinalExamPassed,
-    isDevMode, setDevMode, answerMatches,
+    isDevMode, setDevMode, answerMatches, masteryForProblemSet,
   };
 })();

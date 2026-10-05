@@ -186,7 +186,7 @@ timedCourses.forEach((course) => {
 
 const root = path.resolve(__dirname, '../content');
 const publicRoot = path.resolve(__dirname, '../public');
-const pages = ['problem-sets.html', 'problem-set.html', 'sandbox.html'];
+const pages = ['problem-sets.html', 'problem-set.html', 'timed-mastery.html', 'sandbox.html'];
 let localLinks = 0;
 pages.forEach((page) => {
   const html = fs.readFileSync(path.join(root, page), 'utf8');
