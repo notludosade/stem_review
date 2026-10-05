@@ -132,11 +132,15 @@ window.STEMPlusTests = (function () {
   // client-side can spoof it. Exposed on window (not just this closure) so
   // quiz.js and frq.js can reuse the same check instead of each firing
   // their own /api/me request when this file happens to load alongside them.
+  // The same request also records the signed-in account (or null) in
+  // window.STEMPlusDev.me — the homepage Dashboard waits on it to decide
+  // between the real dashboard and the locked preview.
   if (typeof window !== 'undefined' && !window.STEMPlusDevReady) {
-    window.STEMPlusDev = { isDeveloper: false };
+    window.STEMPlusDev = { isDeveloper: false, me: null };
     window.STEMPlusDevReady = fetch('/api/me')
       .then(function (res) { return res.ok ? res.json() : null; })
       .then(function (me) {
+        window.STEMPlusDev.me = me || null;
         window.STEMPlusDev.isDeveloper = !!(me && me.isDeveloper);
         return window.STEMPlusDev.isDeveloper;
       })
@@ -1644,15 +1648,52 @@ window.STEMPlusTests = (function () {
     if (body) body.innerHTML = html;
   }
 
-  // Student dashboard: <div data-dashboard></div> — reads every result this
-  // browser has ever saved and renders Continue Learning / Review / Practice /
-  // Next Milestone / Your Path from it. No new storage, no new data model —
-  // this is purely an aggregation view over loadResults()/buildReport(),
-  // the same functions mountProgressReport already uses per-course.
+  // Homepage Dashboard: <div data-dashboard></div>. Waits for the signed-in
+  // check (the /api/me request at the top of this file) so a signed-in
+  // visitor never sees the lock flash, then renders the real dashboard or,
+  // when signed out, the locked preview. The lock gates the homepage view
+  // only — progress itself lives in this browser's localStorage.
   function mountDashboard(el) {
     if (el.dataset.mounted) return;
     el.dataset.mounted = '1';
+    el.innerHTML = '<p class="toc-empty">Loading your dashboard…</p>';
+    (window.STEMPlusDevReady || Promise.resolve(false)).then(() => {
+      if (window.STEMPlusDev && window.STEMPlusDev.me) renderDashboard(el);
+      else renderLockedDashboard(el);
+    });
+  }
 
+  // Signed-out homepage: the Dashboard's sections with placeholder rows —
+  // never this browser's real progress — blurred and inert under a lock card.
+  function renderLockedDashboard(el) {
+    const section = (title, rows) => '<h2>' + title + '</h2><div class="toc-list">'
+      + rows.map((row) => '<div class="toc-item"><span class="toc-num">' + row[0] + '</span>'
+        + '<p class="toc-title">' + row[1] + '</p><p class="toc-sub">' + row[2] + '</p></div>').join('')
+      + '</div>';
+    el.innerHTML = '<div class="dashboard-locked">'
+      + '<div class="dashboard-preview" aria-hidden="true" inert>'
+      + section('Continue Learning', [['In progress', 'Your current course', 'Next up: your next unit']])
+      + section('Review', [['62%', 'A topic to revisit', 'From a course you’re taking'], ['71%', 'Another weak spot', 'From a course you’re taking']])
+      + section('Next Milestone', [['Milestone', 'Pass your next unit test', 'Score 80% or higher to clear it and move on.']])
+      + section('Your Path', [['Exam passed · 92% mastery', 'A course you finished', 'Completed'], ['In progress · 64% mastery', 'A course you started', 'Keep going']])
+      + '</div>'
+      + '<div class="dashboard-lock-card" role="region" aria-label="Dashboard locked">'
+      + '<p class="box-label">Dashboard locked</p>'
+      + '<h2>Sign in to see your Dashboard</h2>'
+      + '<p>Your next unit, weak topics, and milestones — built from what you’ve done on this device.</p>'
+      + '<p class="nav-links"><a class="widget-btn" href="login.html?next=%2F">Sign in</a>'
+      + ' <a class="widget-btn" href="login.html?next=%2F#create-account">Create account</a></p>'
+      + '<p><a href="about.html">What is STEM+? →</a></p>'
+      + '</div>'
+      + '</div>';
+  }
+
+  // The real dashboard — reads every result this browser has ever saved and
+  // renders Continue Learning / Review / Practice / Next Milestone / Your Path
+  // from it. No new storage, no new data model — this is purely an
+  // aggregation view over loadResults()/buildReport(), the same functions
+  // mountProgressReport already uses per-course.
+  function renderDashboard(el) {
     const results = loadResults();
     const skippedCourses = loadSkippedCourses();
     if (results.length === 0 && skippedCourses.length === 0) {

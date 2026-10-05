@@ -11,6 +11,12 @@ const nextConfig = {
         destination: '/',
         permanent: true,
       },
+      // The Dashboard is the homepage now; keeps old links and bookmarks working.
+      {
+        source: '/dashboard.html',
+        destination: '/',
+        permanent: true,
+      },
     ];
   },
 };
