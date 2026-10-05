@@ -24,10 +24,22 @@
   const choose = (n, r) => factorial(n) / (factorial(r) * factorial(n - r));
   const range = (lo, hi) => Array.from({ length: hi - lo + 1 }, (_, k) => lo + k);
   const nonZero = (lo, hi) => range(lo, hi).filter((value) => value !== 0);
-  const grid = (...ranges) => ranges.reduce(
-    (tuples, values) => tuples.flatMap((tuple) => values.map((value) => [...tuple, value])),
-    [[]]
-  );
+  // Cartesian product, last range varying fastest. Fills each tuple by
+  // index arithmetic instead of copying every intermediate level.
+  const grid = (...ranges) => {
+    const total = ranges.reduce((count, values) => count * values.length, 1);
+    const tuples = new Array(total);
+    for (let k = 0; k < total; k += 1) {
+      const tuple = new Array(ranges.length);
+      let rest = k;
+      for (let d = ranges.length - 1; d >= 0; d -= 1) {
+        tuple[d] = ranges[d][rest % ranges[d].length];
+        rest = Math.floor(rest / ranges[d].length);
+      }
+      tuples[k] = tuple;
+    }
+    return tuples;
+  };
   // Evenly spaced picks across a whole parameter grid, so a timed pool covers
   // the full grid instead of only its first rows. Deterministic, so question
   // IDs stay stable between page loads.
@@ -43,46 +55,63 @@
   // questions and saved-progress IDs never move) + `extra` drawn evenly
   // from a bounded grid, skipping any tuple whose prompt is already in the
   // topic. `build(...tuple)` only needs to return an object with `prompt`.
-  // Deterministic pseudo-random order (FNV-1a hash of each tuple): picks
-  // land across every grid dimension, with none of the stride aliasing an
-  // evenly spaced pick has on a nested grid (e.g. one parameter frozen), and
-  // the same tuples, so the same IDs, come out on every page load.
-  const hashOrder = (tuples) => tuples
-    .map((tuple) => {
-      const key = JSON.stringify(tuple);
-      let hash = 2166136261;
-      for (let k = 0; k < key.length; k += 1) hash = Math.imul(hash ^ key.charCodeAt(k), 16777619);
-      // murmur3 fmix32 avalanche — plain FNV clusters tuples that share a prefix.
-      hash = Math.imul(hash ^ (hash >>> 16), 0x85ebca6b);
-      hash = Math.imul(hash ^ (hash >>> 13), 0xc2b2ae35);
-      return [(hash ^ (hash >>> 16)) >>> 0, tuple];
-    })
-    .sort((x, y) => x[0] - y[0])
-    .map(([, tuple]) => tuple);
-  const topicTuples = (regular, gridTuples, build, extra = 30) => {
-    const seen = new Set(regular.map((tuple) => build(...tuple).prompt));
-    const picked = [];
-    for (const tuple of gridTuples.interleaved ? gridTuples : hashOrder(gridTuples)) {
-      if (picked.length === extra) break;
-      const prompt = build(...tuple).prompt;
-      if (seen.has(prompt)) continue;
-      seen.add(prompt);
-      picked.push(tuple);
+  // Deterministic pseudo-random order over a grid: a lazy Fisher–Yates
+  // shuffle driven by mulberry32, seeded from the grid's size and end tuples.
+  // Picks land across every grid dimension (an evenly spaced pick on a
+  // nested grid can freeze a whole parameter), the same tuples, so the same
+  // IDs, come out on every page load, and only the positions actually
+  // consumed get shuffled — no hashing or sorting the whole grid.
+  function* seededOrder(tuples) {
+    let seed = tuples.length ^ 0x9e3779b9;
+    for (const ch of JSON.stringify([tuples[0], tuples[tuples.length - 1]])) seed = Math.imul(seed ^ ch.charCodeAt(0), 16777619);
+    const next = () => {
+      seed = (seed + 0x6d2b79f5) | 0;
+      let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+    const index = Array.from(tuples.keys());
+    for (let k = 0; k < index.length; k += 1) {
+      const j = k + Math.floor(next() * (index.length - k));
+      [index[k], index[j]] = [index[j], index[k]];
+      yield tuples[index[k]];
     }
-    if (picked.length < extra) throw new Error(`Only ${picked.length} fresh tuples for "${build(...regular[0]).prompt}"`);
-    return [...regular, ...picked];
+  }
+  const takeOrdered = (tuples, count) => {
+    const out = [];
+    for (const tuple of seededOrder(tuples)) {
+      if (out.length === count) break;
+      out.push(tuple);
+    }
+    return out;
   };
-  // Older courses (per-topic IDs): push all 40 of a topic through its template.
+  // A topic's 40 questions: the original 10 parameter tuples (unchanged, so
+  // their questions and saved-progress IDs never move) + `extra` drawn from
+  // a bounded grid, skipping any tuple whose prompt is already in the topic.
+  // `buildAt(index, tuple)` builds the question at its final position, so
+  // each question is built exactly once.
+  const topicQuestions = (regular, gridTuples, buildAt, extra = 30) => {
+    const built = regular.map((tuple, i) => buildAt(i, tuple));
+    const seen = new Set(built.map((item) => item.prompt));
+    for (const tuple of gridTuples.interleaved ? gridTuples : seededOrder(gridTuples)) {
+      if (built.length === regular.length + extra) break;
+      const item = buildAt(built.length, tuple);
+      if (seen.has(item.prompt)) continue;
+      seen.add(item.prompt);
+      built.push(item);
+    }
+    if (built.length < regular.length + extra) throw new Error(`Only ${built.length - regular.length} fresh tuples for "${built[0].prompt}"`);
+    return built;
+  };
+  // Older courses (per-topic IDs): all 40 of a topic through its template.
   const addTopic = (questions, idPrefix, regular, gridTuples, make) => {
-    topicTuples(regular, gridTuples, (...t) => make('', ...t)).forEach((tuple, i) => {
-      questions.push(make(`${idPrefix}-${i + 1}`, ...tuple));
-    });
+    questions.push(...topicQuestions(regular, gridTuples, (i, tuple) => make(`${idPrefix}-${i + 1}`, ...tuple)));
   };
   // Balanced mix of several question shapes (e.g. arithmetic + geometric
-  // sequences): each grid hash-ordered, then interleaved one at a time, and
-  // flagged so topicTuples keeps that order instead of re-shuffling it.
+  // sequences): each grid in seeded order, then interleaved one at a time, and
+  // flagged so topicQuestions keeps that order instead of re-shuffling it.
   const mixGrids = (each, ...grids) => {
-    const ordered = grids.map((g) => hashOrder(g).slice(0, each));
+    const ordered = grids.map((g) => takeOrdered(g, each));
     const mixed = range(0, each - 1).flatMap((k) => ordered.filter((g) => k < g.length).map((g) => g[k]));
     mixed.interleaved = true;
     return mixed;
@@ -90,7 +119,9 @@
   const TF = [true, false];
   const LOGIC_OPS = ['and', 'or', 'implies', 'biconditional'];
   const evalLogic = (p, q, operation) => (operation === 'and' ? p && q : operation === 'or' ? p || q : operation === 'implies' ? !p || q : p === q);
-  const intHypotenusePairs = (maxLeg) => grid(range(1, maxLeg), range(1, maxLeg)).filter(([a, b]) => Number.isInteger(Math.hypot(a, b)));
+  // Integer-hypotenuse right triangles with legs ≤ 75 — built once, shared by
+  // Algebra & Geometry, Precalculus, and the Timed Mastery pool.
+  const RIGHT_TRIANGLE_LEGS = grid(range(1, 75), range(1, 75)).filter(([a, b]) => Number.isInteger(Math.hypot(a, b)));
 
   const agLinearQ = (id, a, x, b) => {
     const c = a * x + b;
@@ -153,7 +184,7 @@
     addTopic(questions, 'ag-linear', regular10((i) => [2 + (i % 4), i - 4, (i % 5) - 2]),
       grid(range(2, 6), range(-6, 8), nonZero(-5, 5)), agLinearQ);
     addTopic(questions, 'ag-system', regular10((i) => [i - 3, (i % 5) - 2, 1 + (i % 3), 1 + (i % 2), 2 + (i % 4), -(1 + (i % 3))]),
-      grid(range(-5, 6), range(-4, 4), range(1, 3), range(1, 2), range(2, 5), range(-3, -1)), agSystemQ);
+      grid(range(-4, 5), range(-3, 3), range(1, 3), [1, 2], [2, 4], [-1, -3]), agSystemQ);
     addTopic(questions, 'ag-quadratic', regular10((i) => [i - 6, i + 1]),
       grid(nonZero(-9, 9), nonZero(-9, 9)).filter(([r1, r2]) => r1 < r2 && r1 + r2 !== 0), agQuadraticQ);
     addTopic(questions, 'ag-exponent', regular10((i) => [2 + (i % 4), 2 + (i % 3), 1 + (i % 4), 1 + (i % 2)]),
@@ -161,7 +192,7 @@
     addTopic(questions, 'ag-area', regular10((i) => [3 + i, 2 + (i % 6)]),
       grid(range(3, 15), range(2, 12)), agAreaQ);
     const triples = [[3, 4], [5, 12], [8, 15], [7, 24], [9, 12], [12, 16], [15, 20], [10, 24], [18, 24], [20, 21]];
-    addTopic(questions, 'ag-pythagorean', triples, intHypotenusePairs(75), agPythagoreanQ);
+    addTopic(questions, 'ag-pythagorean', triples, RIGHT_TRIANGLE_LEGS, agPythagoreanQ);
     return questions;
   }
 
@@ -229,20 +260,31 @@
     );
   };
 
+  // Parameter grids shared by the regular AP Calculus BC set and its Timed
+  // Mastery pool — built once, not once per pool.
+  const CALC_GRIDS = {
+    limit: grid(range(-5, 5), nonZero(-3, 3), nonZero(-4, 4)),
+    derivative: grid(range(1, 4), range(2, 5), nonZero(-3, 3), range(-2, 2)),
+    product: grid(range(1, 5), range(1, 5), range(-3, 3)),
+    integral: grid(range(1, 6), nonZero(-3, 3), range(1, 5)),
+    ftc: grid(nonZero(-3, 3), range(1, 5), range(-3, 3)),
+    series: grid(range(1, 20), range(2, 6)),
+  };
+
   function calculus() {
     const questions = [];
     addTopic(questions, 'calc-limit', regular10((i) => [i - 4, (i % 5) - 2, 3 - (i % 4)]),
-      grid(range(-5, 5), nonZero(-3, 3), nonZero(-4, 4)), calcLimitQ);
+      CALC_GRIDS.limit, calcLimitQ);
     addTopic(questions, 'calc-derivative', regular10((i) => [1 + (i % 3), 2 + (i % 4), (i % 5) - 2, (i % 4) - 1]),
-      grid(range(1, 4), range(2, 5), nonZero(-3, 3), range(-2, 2)), calcDerivativeQ);
+      CALC_GRIDS.derivative, calcDerivativeQ);
     addTopic(questions, 'calc-product', regular10((i) => [1 + (i % 4), 2 + (i % 3), (i % 5) - 2]),
-      grid(range(1, 5), range(1, 5), range(-3, 3)), calcProductQ);
+      CALC_GRIDS.product, calcProductQ);
     addTopic(questions, 'calc-integral', regular10((i) => [1 + (i % 4), (i % 5) - 1, 1 + (i % 5)]),
-      grid(range(1, 6), nonZero(-3, 3), range(1, 5)), calcIntegralQ);
+      CALC_GRIDS.integral, calcIntegralQ);
     addTopic(questions, 'calc-ftc', regular10((i) => [(i % 4) - 1, 2 + (i % 3), (i % 5) - 2]),
-      grid(nonZero(-3, 3), range(1, 5), range(-3, 3)), calcFtcQ);
+      CALC_GRIDS.ftc, calcFtcQ);
     addTopic(questions, 'calc-series', regular10((i) => [2 + i, 2 + (i % 4)]),
-      grid(range(1, 20), range(2, 6)), calcSeriesQ);
+      CALC_GRIDS.series, calcSeriesQ);
     return questions;
   }
 
@@ -252,12 +294,12 @@
   // out so prompts never print "+ 0x".
   function timedCalculus() {
     const questions = [];
-    addFromGrid(questions, 'tm-calc-limit', 84, grid(range(-5, 5), nonZero(-3, 3), nonZero(-4, 4)), calcLimitQ);
-    addFromGrid(questions, 'tm-calc-derivative', 84, grid(range(1, 4), range(2, 5), nonZero(-3, 3), range(-2, 2)), calcDerivativeQ);
-    addFromGrid(questions, 'tm-calc-product', 83, grid(range(1, 5), range(1, 5), range(-3, 3)), calcProductQ);
-    addFromGrid(questions, 'tm-calc-integral', 83, grid(range(1, 6), nonZero(-3, 3), range(1, 5)), calcIntegralQ);
-    addFromGrid(questions, 'tm-calc-ftc', 83, grid(nonZero(-3, 3), range(1, 5), range(-3, 3)), calcFtcQ);
-    addFromGrid(questions, 'tm-calc-series', 83, grid(range(1, 20), range(2, 6)), calcSeriesQ);
+    addFromGrid(questions, 'tm-calc-limit', 84, CALC_GRIDS.limit, calcLimitQ);
+    addFromGrid(questions, 'tm-calc-derivative', 84, CALC_GRIDS.derivative, calcDerivativeQ);
+    addFromGrid(questions, 'tm-calc-product', 83, CALC_GRIDS.product, calcProductQ);
+    addFromGrid(questions, 'tm-calc-integral', 83, CALC_GRIDS.integral, calcIntegralQ);
+    addFromGrid(questions, 'tm-calc-ftc', 83, CALC_GRIDS.ftc, calcFtcQ);
+    addFromGrid(questions, 'tm-calc-series', 83, CALC_GRIDS.series, calcSeriesQ);
     return questions;
   }
 
@@ -429,7 +471,7 @@
       grid(range(1, 9), range(1, 9)), dmProbabilityQ);
     addTopic(questions, 'dm-tree', regular10((i) => [4 + i]), range(14, 60).map((v) => [v]), dmTreeQ);
     addTopic(questions, 'dm-modular', regular10((i) => [7 + i * 3, 2 + (i % 5), 1 + (i % 4), 5 + (i % 6)]),
-      grid(range(7, 40), range(2, 6), range(1, 4), range(5, 12)), dmModularQ);
+      grid(range(7, 40).filter((a) => a % 3 === 1), range(2, 6), range(1, 4), range(5, 12)), dmModularQ);
     return questions;
   }
 
@@ -575,21 +617,29 @@
     );
   };
 
+  // Shared by the regular Precalculus set and its Timed Mastery pool.
+  const PRECALC_GRIDS = {
+    function: grid(range(1, 3), nonZero(-3, 3), nonZero(-4, 4), range(-3, 3)),
+    composition: grid(range(2, 4), nonZero(-3, 3), range(1, 4), nonZero(-3, 3), range(-3, 3)),
+    polynomial: grid(nonZero(-8, 8), nonZero(-8, 8)).filter(([r1, r2]) => r1 < r2 && r1 + r2 !== 0),
+    exponential: grid(range(2, 10), range(-3, 6)).filter(([base, exponent]) => base ** Math.abs(exponent) <= 100000),
+  };
+
   // Sequences mix two templates; a leading tag picks which one.
   const precalcSequenceQ = (id, shape, ...params) => (shape === 'a' ? precalcArithmeticQ(id, ...params) : precalcGeometricQ(id, ...params));
 
   function precalculus() {
     const questions = [];
     addTopic(questions, 'precalc-function', regular10((i) => [1 + (i % 3), (i % 5) - 2, 3 - (i % 4), i - 4]),
-      grid(range(1, 3), nonZero(-3, 3), nonZero(-4, 4), range(-3, 3)), precalcFunctionQ);
+      PRECALC_GRIDS.function, precalcFunctionQ);
     addTopic(questions, 'precalc-composition', regular10((i) => [2 + (i % 3), (i % 4) - 1, 1 + (i % 4), 2 - (i % 5), i - 3]),
-      grid(range(2, 4), nonZero(-3, 3), range(1, 4), nonZero(-3, 3), range(-3, 3)), precalcCompositionQ);
+      PRECALC_GRIDS.composition, precalcCompositionQ);
     addTopic(questions, 'precalc-polynomial', regular10((i) => [i - 5, i + 2]),
-      grid(nonZero(-8, 8), nonZero(-8, 8)).filter(([r1, r2]) => r1 < r2 && r1 + r2 !== 0), precalcPolynomialQ);
+      PRECALC_GRIDS.polynomial, precalcPolynomialQ);
     addTopic(questions, 'precalc-exponential', regular10((i) => [2 + (i % 4), 1 + (i % 6)]),
-      grid(range(2, 10), range(-3, 6)).filter(([base, exponent]) => base ** Math.abs(exponent) <= 100000), precalcExponentialQ);
+      PRECALC_GRIDS.exponential, precalcExponentialQ);
     const triples = [[3, 4], [5, 12], [8, 15], [7, 24], [9, 12], [12, 16], [15, 20], [10, 24], [18, 24], [20, 21]];
-    addTopic(questions, 'precalc-trig', triples, intHypotenusePairs(75), precalcTrigQ);
+    addTopic(questions, 'precalc-trig', triples, RIGHT_TRIANGLE_LEGS, precalcTrigQ);
     addTopic(questions, 'precalc-sequence', regular10((i) => (i % 2 === 0 ? ['a', 2 + i, 1 + (i % 4), 4 + i] : ['g', 1 + (i % 3), 2 + (i % 2), 4 + i])),
       mixGrids(40,
         grid(range(1, 9), nonZero(-5, 5), range(5, 15)).map((t) => ['a', ...t]),
@@ -601,14 +651,13 @@
   // Timed Mastery pool — see timedCalculus() above.
   function timedPrecalculus() {
     const questions = [];
-    addFromGrid(questions, 'tm-precalc-function', 84, grid(range(1, 3), nonZero(-3, 3), nonZero(-4, 4), range(-3, 3)), precalcFunctionQ);
-    addFromGrid(questions, 'tm-precalc-composition', 84, grid(range(2, 4), nonZero(-3, 3), range(1, 4), nonZero(-3, 3), range(-3, 3)), precalcCompositionQ);
+    addFromGrid(questions, 'tm-precalc-function', 84, PRECALC_GRIDS.function, precalcFunctionQ);
+    addFromGrid(questions, 'tm-precalc-composition', 84, PRECALC_GRIDS.composition, precalcCompositionQ);
     addFromGrid(questions, 'tm-precalc-polynomial', 83,
-      grid(nonZero(-8, 8), nonZero(-8, 8)).filter(([r1, r2]) => r1 < r2 && r1 + r2 !== 0), precalcPolynomialQ);
+      PRECALC_GRIDS.polynomial, precalcPolynomialQ);
     addFromGrid(questions, 'tm-precalc-exponential', 83,
-      grid(range(2, 10), range(-3, 6)).filter(([base, exponent]) => base ** Math.abs(exponent) <= 100000), precalcExponentialQ);
-    addFromGrid(questions, 'tm-precalc-trig', 83,
-      grid(range(1, 75), range(1, 75)).filter(([opposite, adjacent]) => Number.isInteger(Math.hypot(opposite, adjacent))), precalcTrigQ);
+      PRECALC_GRIDS.exponential, precalcExponentialQ);
+    addFromGrid(questions, 'tm-precalc-trig', 83, RIGHT_TRIANGLE_LEGS, precalcTrigQ);
     addFromGrid(questions, 'tm-precalc-arithmetic', 42, grid(range(1, 9), nonZero(-5, 5), range(5, 15)), precalcArithmeticQ);
     addFromGrid(questions, 'tm-precalc-geometric', 41,
       grid(range(1, 5), range(2, 4), range(3, 8)).filter(([first, ratio, n]) => first * ratio ** (n - 1) <= 50000), precalcGeometricQ);
@@ -675,15 +724,15 @@
     addTopic(questions, 'multi-dot', regular10((i) => [[i + 1, 2 - (i % 4), (i % 5) - 2], [2 + (i % 3), i - 3, 1 + (i % 4)]]),
       grid(range(1, 6), range(-3, 3), range(-2, 4)).map(([a, b, c]) => [[a, b, c], [b + 4, c - a, (a % 3) + 1]]), multiDotQ);
     addTopic(questions, 'multi-cross', regular10((i) => [1 + i, 2 + (i % 4), (i % 5) - 2, 3 + (i % 3)]),
-      grid(range(1, 8), range(1, 6), range(-4, 4), range(1, 6)), multiCrossQ);
+      grid(range(1, 8), range(1, 5), range(-4, 4), range(1, 4)), multiCrossQ);
     addTopic(questions, 'multi-partial-x', regular10((i) => [1 + (i % 4), (i % 5) - 2, 1 + (i % 3), (i % 5) - 2, i - 3]),
-      grid(range(1, 4), nonZero(-3, 3), range(1, 3), range(-3, 3), range(-3, 4)), multiPartialXQ);
+      grid(range(1, 3), nonZero(-3, 3), [1, 2], range(-3, 3), range(-2, 3)), multiPartialXQ);
     addTopic(questions, 'multi-gradient', regular10((i) => [1 + (i % 3), (i % 5) - 2, 2 + (i % 4), i - 4, (i % 5) - 1]),
-      grid(range(1, 3), nonZero(-3, 3), range(1, 4), range(-3, 3), range(-3, 4)), multiGradientQ);
+      grid([1, 2], nonZero(-3, 3), range(1, 4), range(-3, 3), range(-2, 2)), multiGradientQ);
     addTopic(questions, 'multi-double-integral', regular10((i) => [1 + (i % 3), 1 + (i % 4), 1 + (i % 5), 2 + (i % 4)]),
       grid(range(1, 4), range(1, 4), range(1, 5), range(1, 5)), multiDoubleIntegralQ);
     addTopic(questions, 'multi-divergence', regular10((i) => [1 + (i % 3), 2 + (i % 4), 1 + (i % 5), (i % 4) - 1, i - 3, (i % 5) - 2]),
-      grid(range(1, 3), range(1, 4), range(1, 4), range(-2, 2), range(-3, 3), range(-2, 2)), multiDivergenceQ);
+      grid(range(1, 3), range(2, 4), range(1, 3), [-2, -1, 1, 2], [-3, -1, 2], [-2, 0, 1]), multiDivergenceQ);
     return questions;
   }
 
@@ -917,242 +966,478 @@
     return questions;
   }
 
+  // Each topic: [name, make(...params) → { prompt, answer, explanation, meta, tolerance },
+  // regular(i) → params (the original 10, unchanged), new-question grid].
+  // The original 60 come first with today's sequential IDs (<prefix>-1…60);
+  // the 180 new ones follow as <prefix>-61…240, topic by topic.
   const generatedCourse = (prefix, topics) => {
     const questions = [];
-    topics.forEach(([topic, build]) => {
-      for (let i = 0; i < 10; i += 1) {
-        const item = build(i);
-        questions.push(qNumber(`${prefix}-${questions.length + 1}`, topic, item.prompt, item.answer, item.explanation, item.meta, item.tolerance));
-      }
-    });
+    const push = (topic, item) => questions.push(qNumber(`${prefix}-${questions.length + 1}`, topic, item.prompt, item.answer, item.explanation, item.meta, item.tolerance));
+    const all = topics.map(([topic, make, regular, gridTuples]) => [topic, topicQuestions(regular10(regular), gridTuples, (i, tuple) => make(...tuple))]);
+    all.forEach(([topic, items]) => items.slice(0, 10).forEach((item) => push(topic, item)));
+    all.forEach(([topic, items]) => items.slice(10).forEach((item) => push(topic, item)));
     return questions;
   };
+  const pairs = (gridTuples) => gridTuples.map(([a, b, c, d]) => [[a, b], [c, d]]);
 
   function linearAlgebra() {
     return generatedCourse('la', [
-      ['Vectors and dot products', (i) => { const u = [i + 1, i % 4 - 2], v = [i % 3 + 2, 3 - i]; const answer = u[0] * v[0] + u[1] * v[1]; return { prompt: `Find (${u.join(', ')}) · (${v.join(', ')}).`, answer, explanation: `Multiply aligned components and add: ${answer}.`, meta: { kind: 'vector-dot', u, v } }; }],
-      ['Vector magnitude', (i) => { const a = i + 3, b = 2 * i + 4; const answer = Math.hypot(a, b); return { prompt: `Find the magnitude of vector (${a}, ${b}).`, answer, explanation: `The magnitude is √(${a}² + ${b}²) = ${fmt(answer)}.`, meta: { kind: 'pythagorean', a, b } }; }],
-      ['Matrix determinants', (i) => { const a = i + 1, b = i % 4, c = 2 - i, d = i % 5 + 2, answer = a * d - b * c; return { prompt: `Find det([[${a}, ${b}], [${c}, ${d}]]).`, answer, explanation: `For a 2×2 matrix, det = ad − bc = ${answer}.`, meta: { kind: 'determinant-2', a, b, c, d } }; }],
-      ['Matrix traces', (i) => { const diagonal = [i - 3, i + 2, 2 * i + 1], answer = diagonal.reduce((sum, value) => sum + value, 0); return { prompt: `Find the trace of a 3×3 matrix whose diagonal entries are ${diagonal.join(', ')}.`, answer, explanation: `The trace is the sum of diagonal entries: ${answer}.`, meta: { kind: 'sum-values', values: diagonal } }; }],
-      ['Matrix multiplication', (i) => { const row = [i + 1, 2 - i], column = [i % 3 + 1, i + 2], answer = row[0] * column[0] + row[1] * column[1]; return { prompt: `A matrix row is [${row.join(', ')}] and the aligned column is [${column.join(', ')}]. Find their product entry.`, answer, explanation: `The entry is the row-column dot product: ${answer}.`, meta: { kind: 'vector-dot', u: row, v: column } }; }],
-      ['Eigenvalues', (i) => { const values = [i - 2, 2 * i + 1, 5 - i], answer = Math.max(...values); return { prompt: `A diagonal matrix has diagonal entries ${values.join(', ')}. Find its largest eigenvalue.`, answer, explanation: `A diagonal matrix’s eigenvalues are its diagonal entries, so the largest is ${answer}.`, meta: { kind: 'max-values', values } }; }]
+      ['Vectors and dot products',
+        (u, v) => { const answer = u[0] * v[0] + u[1] * v[1]; return { prompt: `Find (${u.join(', ')}) · (${v.join(', ')}).`, answer, explanation: `Multiply aligned components and add: ${answer}.`, meta: { kind: 'vector-dot', u, v } }; },
+        (i) => [[i + 1, i % 4 - 2], [i % 3 + 2, 3 - i]],
+        pairs(grid(range(1, 5), range(-3, 3), range(1, 5), range(-4, 4)))],
+      ['Vector magnitude',
+        (a, b) => { const answer = Math.hypot(a, b); return { prompt: `Find the magnitude of vector (${a}, ${b}).`, answer, explanation: `The magnitude is √(${a}² + ${b}²) = ${fmt(answer)}.`, meta: { kind: 'pythagorean', a, b } }; },
+        (i) => [i + 3, 2 * i + 4],
+        grid(range(1, 15), range(1, 15))],
+      ['Matrix determinants',
+        (a, b, c, d) => { const answer = a * d - b * c; return { prompt: `Find det([[${a}, ${b}], [${c}, ${d}]]).`, answer, explanation: `For a 2×2 matrix, det = ad − bc = ${answer}.`, meta: { kind: 'determinant-2', a, b, c, d } }; },
+        (i) => [i + 1, i % 4, 2 - i, i % 5 + 2],
+        grid(range(1, 5), range(-3, 4), range(-4, 4), range(1, 5))],
+      ['Matrix traces',
+        (diagonal) => { const answer = diagonal.reduce((sum, value) => sum + value, 0); return { prompt: `Find the trace of a 3×3 matrix whose diagonal entries are ${diagonal.join(', ')}.`, answer, explanation: `The trace is the sum of diagonal entries: ${answer}.`, meta: { kind: 'sum-values', values: diagonal } }; },
+        (i) => [[i - 3, i + 2, 2 * i + 1]],
+        grid(range(-5, 8), range(-2, 8), range(-4, 5)).map((d) => [d])],
+      ['Matrix multiplication',
+        (row, column) => { const answer = row[0] * column[0] + row[1] * column[1]; return { prompt: `A matrix row is [${row.join(', ')}] and the aligned column is [${column.join(', ')}]. Find their product entry.`, answer, explanation: `The entry is the row-column dot product: ${answer}.`, meta: { kind: 'vector-dot', u: row, v: column } }; },
+        (i) => [[i + 1, 2 - i], [i % 3 + 1, i + 2]],
+        pairs(grid(range(-2, 5), range(-4, 3), range(1, 4), range(-2, 5)))],
+      ['Eigenvalues',
+        (values) => { const answer = Math.max(...values); return { prompt: `A diagonal matrix has diagonal entries ${values.join(', ')}. Find its largest eigenvalue.`, answer, explanation: `A diagonal matrix’s eigenvalues are its diagonal entries, so the largest is ${answer}.`, meta: { kind: 'max-values', values } }; },
+        (i) => [[i - 2, 2 * i + 1, 5 - i]],
+        grid(range(-7, 6), range(-2, 10), range(-5, 4)).map((d) => [d])]
     ]);
   }
 
   function differentialEquations() {
     return generatedCourse('de', [
-      ['Differential equations', (i) => { const coefficient = i + 2, rate = i % 5 - 2, answer = coefficient * rate; return { prompt: `If y = ${coefficient}e^(${rate}t), find y′(0).`, answer, explanation: `y′ = ${coefficient * rate}e^(${rate}t), so y′(0) = ${answer}.`, meta: { kind: 'exponential-derivative-zero', coefficient, rate } }; }],
-      ['Growth and decay', (i) => { const initial = i + 3, ratio = i % 2 ? 0.5 : 2, time = i % 4 + 1, answer = initial * ratio ** time; return { prompt: `A model satisfies y(t) = ${initial}(${ratio})^t. Find y(${time}).`, answer, explanation: `Substitution gives ${initial}(${ratio})^${time} = ${fmt(answer)}.`, meta: { kind: 'geometric-term-zero', initial, ratio, time } }; }],
-      ['Characteristic equations', (i) => { const r1 = i % 5 - 3, r2 = i + 1, sum = r1 + r2, product = r1 * r2; return { prompt: `Find the larger root of r² − ${sum}r + ${product} = 0.`, answer: Math.max(r1, r2), explanation: `The polynomial factors with roots ${r1} and ${r2}.`, meta: { kind: 'quadratic-larger-root', sum, product } }; }],
-      ['Euler’s method', (i) => { const y = i + 1, h = 0.1 * (i % 4 + 1), a = i % 3 + 1, b = i - 2, answer = y + h * (a * y + b); return { prompt: `Use one Euler step for y′ = ${a}y ${term(b, '')}, starting at y = ${y} with h = ${fmt(h)}. Find the next y-value.`, answer, explanation: `y_next = y + h·f = ${fmt(answer)}.`, meta: { kind: 'euler-step-linear', y, h, a, b } }; }],
-      ['Oscillations', (i) => { const mass = i % 4 + 1, omega = i % 5 + 1, spring = mass * omega ** 2; return { prompt: `A mass-spring system has m = ${mass} kg and k = ${spring} N/m. Find angular frequency ω in rad/s.`, answer: omega, explanation: `ω = √(k/m) = √(${spring}/${mass}) = ${omega}.`, meta: { kind: 'angular-frequency', mass, spring } }; }],
-      ['Laplace transforms', (i) => { const power = i % 5, s = i % 4 + 1, answer = factorial(power) / s ** (power + 1); return { prompt: `For F(s) = L{t^${power}} = ${power}!/s^${power + 1}, find F(${s}).`, answer, explanation: `Evaluate ${power}!/${s}^${power + 1} = ${fmt(answer)}.`, meta: { kind: 'laplace-power', power, s } }; }]
+      ['Differential equations',
+        (coefficient, rate) => { const answer = coefficient * rate; return { prompt: `If y = ${coefficient}e^(${rate}t), find y′(0).`, answer, explanation: `y′ = ${coefficient * rate}e^(${rate}t), so y′(0) = ${answer}.`, meta: { kind: 'exponential-derivative-zero', coefficient, rate } }; },
+        (i) => [i + 2, i % 5 - 2],
+        grid(range(1, 15), nonZero(-4, 4))],
+      ['Growth and decay',
+        (initial, ratio, time) => { const answer = initial * ratio ** time; return { prompt: `A model satisfies y(t) = ${initial}(${ratio})^t. Find y(${time}).`, answer, explanation: `Substitution gives ${initial}(${ratio})^${time} = ${fmt(answer)}.`, meta: { kind: 'geometric-term-zero', initial, ratio, time } }; },
+        (i) => [i + 3, i % 2 ? 0.5 : 2, i % 4 + 1],
+        grid(range(1, 20), [0.5, 2, 3], range(1, 4))],
+      ['Characteristic equations',
+        (r1, r2) => { const sum = r1 + r2, product = r1 * r2; return { prompt: `Find the larger root of r² − ${sum}r + ${product} = 0.`, answer: Math.max(r1, r2), explanation: `The polynomial factors with roots ${r1} and ${r2}.`, meta: { kind: 'quadratic-larger-root', sum, product } }; },
+        (i) => [i % 5 - 3, i + 1],
+        grid(range(1, 12), range(1, 12)).filter(([r1, r2]) => r1 < r2)],
+      ['Euler’s method',
+        (y, h, a, b) => { const answer = y + h * (a * y + b); return { prompt: `Use one Euler step for y′ = ${a}y ${term(b, '')}, starting at y = ${y} with h = ${fmt(h)}. Find the next y-value.`, answer, explanation: `y_next = y + h·f = ${fmt(answer)}.`, meta: { kind: 'euler-step-linear', y, h, a, b } }; },
+        (i) => [i + 1, 0.1 * (i % 4 + 1), i % 3 + 1, i - 2],
+        grid(range(1, 10), [0.1, 0.2, 0.5], range(1, 3), nonZero(-3, 3))],
+      ['Oscillations',
+        (mass, omega) => { const spring = mass * omega ** 2; return { prompt: `A mass-spring system has m = ${mass} kg and k = ${spring} N/m. Find angular frequency ω in rad/s.`, answer: omega, explanation: `ω = √(k/m) = √(${spring}/${mass}) = ${omega}.`, meta: { kind: 'angular-frequency', mass, spring } }; },
+        (i) => [i % 4 + 1, i % 5 + 1],
+        grid(range(1, 10), range(1, 10))],
+      ['Laplace transforms',
+        (power, s) => { const answer = factorial(power) / s ** (power + 1); return { prompt: `For F(s) = L{t^${power}} = ${power}!/s^${power + 1}, find F(${s}).`, answer, explanation: `Evaluate ${power}!/${s}^${power + 1} = ${fmt(answer)}.`, meta: { kind: 'laplace-power', power, s } }; },
+        (i) => [i % 5, i % 4 + 1],
+        grid(range(0, 5), [0.5, 1, 1.5, 2, 2.5, 3, 4, 5, 6, 7, 8]).filter(([power, s]) => factorial(power) / s ** (power + 1) >= 0.01)]
     ]);
   }
 
   function mathematicalProofs() {
     const logicCases = [[true, true, 'and'], [true, false, 'and'], [false, true, 'or'], [false, false, 'or'], [true, true, 'implies'], [true, false, 'implies'], [false, true, 'implies'], [false, false, 'implies'], [true, true, 'biconditional'], [true, false, 'biconditional']];
     return generatedCourse('proof', [
-      ['Statements and logic', (i) => { const [p, q, operation] = logicCases[i]; const truth = operation === 'and' ? p && q : operation === 'or' ? p || q : operation === 'implies' ? !p || q : p === q; return { prompt: `Encode true as 1 and false as 0. With p=${Number(p)} and q=${Number(q)}, evaluate p ${operation} q.`, answer: Number(truth), explanation: `The truth table gives ${Number(truth)}.`, meta: { kind: 'logic-number', p, q, operation } }; }],
-      ['Parity and divisibility', (i) => { const a = 2 * i + 1, b = 3 * i + 2, answer = (a + b) % 2; return { prompt: `Encode even as 0 and odd as 1. What is the parity of ${a} + ${b}?`, answer, explanation: `${a + b} has parity ${answer}.`, meta: { kind: 'sum-parity', a, b } }; }],
-      ['Direct proofs', (i) => { const divisor = i % 5 + 2, multiple = i + 3, value = divisor * multiple; return { prompt: `In a direct divisibility proof, ${value} = ${divisor}k. What integer value of k witnesses that ${divisor} divides ${value}?`, answer: multiple, explanation: `${value} = ${divisor}(${multiple}), so k = ${multiple}.`, meta: { kind: 'division', dividend: value, divisor } }; }],
-      ['Proofs about sets', (i) => { const a = Array.from({ length: 6 }, (_, n) => n + i).filter((n) => n % 2 === 0), b = Array.from({ length: 7 }, (_, n) => n + i).filter((n) => n % 3 !== 0), answer = new Set(a.filter((value) => b.includes(value))).size; return { prompt: `Find |A ∩ B| for A={${a.join(', ')}} and B={${b.join(', ')}}.`, answer, explanation: `Counting the shared elements gives ${answer}.`, meta: { kind: 'intersection-size', a, b } }; }],
-      ['Mathematical induction', (i) => { const n = i + 4, answer = n * (n + 1) / 2; return { prompt: `The induction formula is 1 + ··· + n = n(n+1)/2. Evaluate its right side for n=${n}.`, answer, explanation: `${n}(${n + 1})/2 = ${answer}.`, meta: { kind: 'loop-sum', n } }; }],
-      ['Quantifiers and witnesses', (i) => { const limit = i + 8, divisor = i % 4 + 2, values = Array.from({ length: limit }, (_, n) => n + 1), answer = values.filter((value) => value % divisor === 0).length; return { prompt: `Over integers 1 through ${limit}, how many witnesses satisfy “${divisor} divides x”?`, answer, explanation: `The satisfying integers are the multiples of ${divisor}; there are ${answer}.`, meta: { kind: 'count-divisible', limit, divisor } }; }]
+      ['Statements and logic',
+        (shape, ...params) => {
+          if (shape === '2') {
+            const [p, q, operation] = params;
+            const truth = evalLogic(p, q, operation);
+            return { prompt: `Encode true as 1 and false as 0. With p=${Number(p)} and q=${Number(q)}, evaluate p ${operation} q.`, answer: Number(truth), explanation: `The truth table gives ${Number(truth)}.`, meta: { kind: 'logic-number', p, q, operation } };
+          }
+          const [p, q, r, op1, op2] = params;
+          const inner = evalLogic(p, q, op1);
+          const truth = evalLogic(inner, r, op2);
+          return { prompt: `Encode true as 1 and false as 0. With p=${Number(p)}, q=${Number(q)}, and r=${Number(r)}, evaluate (p ${op1} q) ${op2} r.`, answer: Number(truth), explanation: `p ${op1} q gives ${Number(inner)}; then ${Number(inner)} ${op2} r gives ${Number(truth)}.`, meta: { kind: 'logic3-number', p, q, r, op1, op2 } };
+        },
+        (i) => ['2', ...logicCases[i]],
+        grid(TF, TF, TF, LOGIC_OPS, LOGIC_OPS).map((t) => ['3', ...t])],
+      ['Parity and divisibility',
+        (a, b) => { const answer = (a + b) % 2; return { prompt: `Encode even as 0 and odd as 1. What is the parity of ${a} + ${b}?`, answer, explanation: `${a + b} has parity ${answer}.`, meta: { kind: 'sum-parity', a, b } }; },
+        (i) => [2 * i + 1, 3 * i + 2],
+        grid(range(1, 40), range(1, 25))],
+      ['Direct proofs',
+        (divisor, multiple) => { const value = divisor * multiple; return { prompt: `In a direct divisibility proof, ${value} = ${divisor}k. What integer value of k witnesses that ${divisor} divides ${value}?`, answer: multiple, explanation: `${value} = ${divisor}(${multiple}), so k = ${multiple}.`, meta: { kind: 'division', dividend: value, divisor } }; },
+        (i) => [i % 5 + 2, i + 3],
+        grid(range(2, 12), range(2, 15))],
+      ['Proofs about sets',
+        (start, mod) => { const a = Array.from({ length: 6 }, (_, n) => n + start).filter((n) => n % 2 === 0), b = Array.from({ length: 7 }, (_, n) => n + start).filter((n) => n % mod !== 0), answer = new Set(a.filter((value) => b.includes(value))).size; return { prompt: `Find |A ∩ B| for A={${a.join(', ')}} and B={${b.join(', ')}}.`, answer, explanation: `Counting the shared elements gives ${answer}.`, meta: { kind: 'intersection-size', a, b } }; },
+        (i) => [i, 3],
+        grid(range(0, 40), range(3, 5))],
+      ['Mathematical induction',
+        (n) => { const answer = n * (n + 1) / 2; return { prompt: `The induction formula is 1 + ··· + n = n(n+1)/2. Evaluate its right side for n=${n}.`, answer, explanation: `${n}(${n + 1})/2 = ${answer}.`, meta: { kind: 'loop-sum', n } }; },
+        (i) => [i + 4],
+        range(14, 60).map((n) => [n])],
+      ['Quantifiers and witnesses',
+        (limit, divisor) => { const values = Array.from({ length: limit }, (_, n) => n + 1), answer = values.filter((value) => value % divisor === 0).length; return { prompt: `Over integers 1 through ${limit}, how many witnesses satisfy “${divisor} divides x”?`, answer, explanation: `The satisfying integers are the multiples of ${divisor}; there are ${answer}.`, meta: { kind: 'count-divisible', limit, divisor } }; },
+        (i) => [i + 8, i % 4 + 2],
+        grid(range(10, 60), range(2, 9))]
     ]);
   }
 
   function networking() {
     return generatedCourse('net', [
-      ['Bandwidth and transmission', (i) => { const bits = (i + 2) * 1000, rate = (i % 5 + 1) * 1000, answer = bits / rate; return { prompt: `How many seconds transmit ${bits} bits over a ${rate} bit/s link?`, answer, explanation: `Transmission time = bits/rate = ${fmt(answer)} s.`, meta: { kind: 'division', dividend: bits, divisor: rate } }; }],
-      ['Latency and propagation', (i) => { const distance = (i + 1) * 200, speed = 200, answer = distance / speed; return { prompt: `A signal travels ${distance} km through fiber at 200,000 km/s. Find propagation delay in milliseconds.`, answer, explanation: `(${distance}/200000)×1000 = ${answer} ms.`, meta: { kind: 'propagation-ms', distance, speedThousands: speed } }; }],
-      ['IPv4 addressing', (i) => { const hostBits = i + 2, answer = 2 ** hostBits - 2; return { prompt: `A traditional IPv4 subnet has ${hostBits} host bits. How many usable host addresses does it provide?`, answer, explanation: `2^${hostBits} − 2 = ${answer} usable addresses.`, meta: { kind: 'subnet-hosts', hostBits } }; }],
-      ['CIDR notation', (i) => { const prefix = 22 + i, answer = 2 ** (32 - prefix); return { prompt: `How many total IPv4 addresses are in a /${prefix} block?`, answer, explanation: `A /${prefix} leaves ${32 - prefix} bits, so the block has ${answer} addresses.`, meta: { kind: 'cidr-addresses', prefix } }; }],
-      ['Bandwidth-delay product', (i) => { const rateMbps = i + 1, rttMs = (i % 5 + 1) * 10, answer = rateMbps * rttMs * 125; return { prompt: `Find the bandwidth-delay product in bytes for ${rateMbps} Mb/s and ${rttMs} ms RTT.`, answer, explanation: `Mb/s × ms converts to 1000 bits; divide by 8: ${answer} bytes.`, meta: { kind: 'bandwidth-delay-bytes', rateMbps, rttMs } }; }],
-      ['Ports and multiplexing', (i) => { const low = 1000 + i * 100, high = low + 20 + i; return { prompt: `How many inclusive port numbers are in the range ${low}–${high}?`, answer: high - low + 1, explanation: `${high} − ${low} + 1 = ${high - low + 1}.`, meta: { kind: 'inclusive-count', low, high } }; }]
+      ['Bandwidth and transmission',
+        (bits, rate) => { const answer = bits / rate; return { prompt: `How many seconds transmit ${bits} bits over a ${rate} bit/s link?`, answer, explanation: `Transmission time = bits/rate = ${fmt(answer)} s.`, meta: { kind: 'division', dividend: bits, divisor: rate } }; },
+        (i) => [(i + 2) * 1000, (i % 5 + 1) * 1000],
+        grid(range(1, 20).map((k) => k * 1000), range(1, 8).map((r) => r * 1000))],
+      ['Latency and propagation',
+        (distance) => { const speed = 200, answer = distance / speed; return { prompt: `A signal travels ${distance} km through fiber at 200,000 km/s. Find propagation delay in milliseconds.`, answer, explanation: `(${distance}/200000)×1000 = ${answer} ms.`, meta: { kind: 'propagation-ms', distance, speedThousands: speed } }; },
+        (i) => [(i + 1) * 200],
+        range(1, 120).map((k) => [k * 100])],
+      ['IPv4 addressing',
+        (shape, n) => {
+          if (shape === 'bits') { const answer = 2 ** n - 2; return { prompt: `A traditional IPv4 subnet has ${n} host bits. How many usable host addresses does it provide?`, answer, explanation: `2^${n} − 2 = ${answer} usable addresses.`, meta: { kind: 'subnet-hosts', hostBits: n } }; }
+          if (shape === 'prefix') { const hostBits = 32 - n, answer = 2 ** hostBits - 2; return { prompt: `How many usable host addresses does a /${n} IPv4 subnet provide?`, answer, explanation: `A /${n} leaves ${hostBits} host bits; subtracting the network and broadcast addresses gives 2^${hostBits} − 2 = ${answer}.`, meta: { kind: 'subnet-hosts', hostBits } }; }
+          return { prompt: `An IPv4 address with a /${n} prefix has how many host bits?`, answer: 32 - n, explanation: `IPv4 addresses are 32 bits, so 32 − ${n} = ${32 - n} bits are left for hosts.`, meta: { kind: 'difference', a: 32, b: n } };
+        },
+        (i) => ['bits', i + 2],
+        mixGrids(15, range(12, 16).map((n) => ['bits', n]), range(16, 30).map((n) => ['prefix', n]), range(8, 30).map((n) => ['hostbits', n]))],
+      ['CIDR notation',
+        (shape, p, q) => {
+          if (shape === 'addresses') { const answer = 2 ** (32 - p); return { prompt: `How many total IPv4 addresses are in a /${p} block?`, answer, explanation: `A /${p} leaves ${32 - p} bits, so the block has ${answer} addresses.`, meta: { kind: 'cidr-addresses', prefix: p } }; }
+          const answer = 2 ** (p - q);
+          return { prompt: `How many /${p} subnets fit inside one /${q} block?`, answer, explanation: `Each extra prefix bit halves the block, so 2^(${p} − ${q}) = ${answer} subnets.`, meta: { kind: 'power-two', exponent: p - q } };
+        },
+        (i) => ['addresses', 22 + i],
+        mixGrids(25, range(13, 21).map((p) => ['addresses', p]), range(16, 28).flatMap((q) => range(q + 1, Math.min(q + 6, 30)).map((p) => ['subnets', p, q])))],
+      ['Bandwidth-delay product',
+        (rateMbps, rttMs) => { const answer = rateMbps * rttMs * 125; return { prompt: `Find the bandwidth-delay product in bytes for ${rateMbps} Mb/s and ${rttMs} ms RTT.`, answer, explanation: `Mb/s × ms converts to 1000 bits; divide by 8: ${answer} bytes.`, meta: { kind: 'bandwidth-delay-bytes', rateMbps, rttMs } }; },
+        (i) => [i + 1, (i % 5 + 1) * 10],
+        grid([1, 2, 5, 10, 20, 50, 100], [5, 10, 15, 20, 25, 30, 40, 50, 60, 80, 100]).filter(([rate, rtt]) => rate * rtt * 125 <= 1e6)],
+      ['Ports and multiplexing',
+        (low, high) => ({ prompt: `How many inclusive port numbers are in the range ${low}–${high}?`, answer: high - low + 1, explanation: `${high} − ${low} + 1 = ${high - low + 1}.`, meta: { kind: 'inclusive-count', low, high } }),
+        (i) => { const low = 1000 + i * 100; return [low, low + 20 + i]; },
+        grid([80, 443, 1024, 3000, 5000, 8000, 8080, 20000, 49152, 60000], [5, 10, 20, 40, 50, 60]).map(([low, width]) => [low, low + width])]
     ]);
   }
 
   function systemsProgramming() {
     return generatedCourse('sys', [
-      ['Binary representation', (i) => { const value = i * 7 + 5, binary = value.toString(2); return { prompt: `Convert binary ${binary} to decimal.`, answer: value, explanation: `Summing its powers of two gives ${value}.`, meta: { kind: 'binary-value', binary } }; }],
-      ['Hexadecimal', (i) => { const value = i * 19 + 16, hex = value.toString(16).toUpperCase(); return { prompt: `Convert hexadecimal 0x${hex} to decimal.`, answer: value, explanation: `Base-16 expansion gives ${value}.`, meta: { kind: 'hex-value', hex } }; }],
-      ['Two’s complement', (i) => { const bits = 8, unsigned = 128 + i * 7; return { prompt: `Interpret 8-bit two’s-complement ${unsigned.toString(2).padStart(8, '0')} as a signed decimal integer.`, answer: unsigned - 256, explanation: `The sign bit is 1, so subtract 256: ${unsigned - 256}.`, meta: { kind: 'twos-complement', unsigned, bits } }; }],
-      ['Memory addressing', (i) => { const base = 1024 + i * 64, index = i + 2, width = i % 4 + 1, answer = base + index * width; return { prompt: `An array begins at byte address ${base}; elements are ${width} bytes. Find the address of element ${index}.`, answer, explanation: `base + index×width = ${answer}.`, meta: { kind: 'array-address', base, index, width } }; }],
-      ['Cache performance', (i) => { const hitRate = 0.8 + i * 0.01, hitTime = 1 + i % 3, missTime = 40 + i, answer = hitRate * hitTime + (1 - hitRate) * missTime; return { prompt: `A cache hits with probability ${fmt(hitRate)}, taking ${hitTime} ns; a miss takes ${missTime} ns. Find average access time in ns.`, answer, explanation: `Weighted average = ${fmt(answer)} ns.`, meta: { kind: 'cache-average', hitRate, hitTime, missTime } }; }],
-      ['CPU scheduling', (i) => { const arrival = i, burst = i % 5 + 2, start = arrival + i % 3, answer = start + burst - arrival; return { prompt: `A process arrives at t=${arrival}, starts at t=${start}, and runs for ${burst} time units. Find turnaround time.`, answer, explanation: `Completion is ${start + burst}; turnaround = completion − arrival = ${answer}.`, meta: { kind: 'turnaround', arrival, start, burst } }; }]
+      ['Binary representation',
+        (value) => { const binary = value.toString(2); return { prompt: `Convert binary ${binary} to decimal.`, answer: value, explanation: `Summing its powers of two gives ${value}.`, meta: { kind: 'binary-value', binary } }; },
+        (i) => [i * 7 + 5],
+        range(70, 255).map((v) => [v])],
+      ['Hexadecimal',
+        (value) => { const hex = value.toString(16).toUpperCase(); return { prompt: `Convert hexadecimal 0x${hex} to decimal.`, answer: value, explanation: `Base-16 expansion gives ${value}.`, meta: { kind: 'hex-value', hex } }; },
+        (i) => [i * 19 + 16],
+        range(200, 4095).map((v) => [v])],
+      ['Two’s complement',
+        (unsigned, bits) => {
+          const signed = unsigned >= 2 ** (bits - 1) ? unsigned - 2 ** bits : unsigned;
+          return { prompt: `Interpret ${bits}-bit two’s-complement ${unsigned.toString(2).padStart(bits, '0')} as a signed decimal integer.`, answer: signed, explanation: signed < 0 ? `The sign bit is 1, so subtract ${2 ** bits}: ${signed}.` : `The sign bit is 0, so the value is just ${signed}.`, meta: { kind: 'twos-complement', unsigned, bits } };
+        },
+        (i) => [128 + i * 7, 8],
+        [...range(0, 15).map((v) => [v, 4]), ...range(0, 255).map((v) => [v, 8])]],
+      ['Memory addressing',
+        (base, index, width) => { const answer = base + index * width; return { prompt: `An array begins at byte address ${base}; elements are ${width} bytes. Find the address of element ${index}.`, answer, explanation: `base + index×width = ${answer}.`, meta: { kind: 'array-address', base, index, width } }; },
+        (i) => [1024 + i * 64, i + 2, i % 4 + 1],
+        grid([1000, 2048, 4096, 8192, 16384], range(0, 20), [1, 2, 4, 8])],
+      ['Cache performance',
+        (hitRate, hitTime, missTime) => { const answer = hitRate * hitTime + (1 - hitRate) * missTime; return { prompt: `A cache hits with probability ${fmt(hitRate)}, taking ${hitTime} ns; a miss takes ${missTime} ns. Find average access time in ns.`, answer, explanation: `Weighted average = ${fmt(answer)} ns.`, meta: { kind: 'cache-average', hitRate, hitTime, missTime } }; },
+        (i) => [0.8 + i * 0.01, 1 + i % 3, 40 + i],
+        grid([0.6, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 0.98, 0.99], range(1, 4), [20, 40, 50, 80, 100, 120])],
+      ['CPU scheduling',
+        (arrival, start, burst) => { const answer = start + burst - arrival; return { prompt: `A process arrives at t=${arrival}, starts at t=${start}, and runs for ${burst} time units. Find turnaround time.`, answer, explanation: `Completion is ${start + burst}; turnaround = completion − arrival = ${answer}.`, meta: { kind: 'turnaround', arrival, start, burst } }; },
+        (i) => [i, i + i % 3, i % 5 + 2],
+        grid(range(0, 20), range(0, 6), range(2, 10)).map(([arrival, wait, burst]) => [arrival, arrival + wait, burst])]
     ]);
   }
 
   function engineeringOne() {
     return generatedCourse('eng', [
-      ['Units and measurement', (i) => { const meters = i + 1.25, answer = meters * 1000; return { prompt: `Convert ${meters} meters to millimeters.`, answer, explanation: `Multiply by 1000: ${answer} mm.`, meta: { kind: 'meters-to-mm', meters } }; }],
-      ['Vectors and resultants', (i) => { const a = i + 3, b = i * 2 + 4; return { prompt: `Perpendicular forces have magnitudes ${a} N and ${b} N. Find the resultant magnitude.`, answer: Math.hypot(a, b), explanation: `Use the Pythagorean theorem: ${fmt(Math.hypot(a, b))} N.`, meta: { kind: 'pythagorean', a, b } }; }],
-      ['Statics and moments', (i) => { const force = i + 5, distance = i % 4 + 0.5, answer = force * distance; return { prompt: `A perpendicular ${force} N force acts ${distance} m from a pivot. Find its moment in N·m.`, answer, explanation: `Moment = Fd = ${fmt(answer)} N·m.`, meta: { kind: 'torque', force, radius: distance } }; }],
-      ['Stress and strain', (i) => { const force = (i + 2) * 1000, area = (i % 5 + 1) * 100, answer = force / area; return { prompt: `A member carries ${force} N over ${area} mm². Find stress in N/mm².`, answer, explanation: `Stress = force/area = ${fmt(answer)} N/mm².`, meta: { kind: 'division', dividend: force, divisor: area } }; }],
-      ['Work and power', (i) => { const work = (i + 2) * 120, time = i % 5 + 2, answer = work / time; return { prompt: `A system performs ${work} J of work in ${time} s. Find average power in watts.`, answer, explanation: `P = W/t = ${answer} W.`, meta: { kind: 'division', dividend: work, divisor: time } }; }],
-      ['Electric circuits', (i) => { const resistance = i % 6 + 2, current = i + 1, voltage = resistance * current; return { prompt: `A ${resistance} Ω resistor has ${voltage} V across it. Find current in amperes.`, answer: current, explanation: `I = V/R = ${current} A.`, meta: { kind: 'ohms-law-current', voltage, resistance } }; }]
+      ['Units and measurement',
+        (meters) => { const answer = meters * 1000; return { prompt: `Convert ${meters} meters to millimeters.`, answer, explanation: `Multiply by 1000: ${fmt(answer)} mm.`, meta: { kind: 'meters-to-mm', meters } }; },
+        (i) => [i + 1.25],
+        range(1, 200).filter((k) => k % 8 !== 0).map((k) => [k / 8])],
+      ['Vectors and resultants',
+        (a, b) => ({ prompt: `Perpendicular forces have magnitudes ${a} N and ${b} N. Find the resultant magnitude.`, answer: Math.hypot(a, b), explanation: `Use the Pythagorean theorem: ${fmt(Math.hypot(a, b))} N.`, meta: { kind: 'pythagorean', a, b } }),
+        (i) => [i + 3, i * 2 + 4],
+        grid(range(1, 20), range(1, 20))],
+      ['Statics and moments',
+        (force, distance) => { const answer = force * distance; return { prompt: `A perpendicular ${force} N force acts ${distance} m from a pivot. Find its moment in N·m.`, answer, explanation: `Moment = Fd = ${fmt(answer)} N·m.`, meta: { kind: 'torque', force, radius: distance } }; },
+        (i) => [i + 5, i % 4 + 0.5],
+        grid(range(2, 40), [0.25, 0.5, 0.75, 1, 1.5, 2, 2.5, 3, 4])],
+      ['Stress and strain',
+        (force, area) => { const answer = force / area; return { prompt: `A member carries ${force} N over ${area} mm². Find stress in N/mm².`, answer, explanation: `Stress = force/area = ${fmt(answer)} N/mm².`, meta: { kind: 'division', dividend: force, divisor: area } }; },
+        (i) => [(i + 2) * 1000, (i % 5 + 1) * 100],
+        grid(range(1, 40).map((k) => k * 500), [50, 100, 200, 250, 400, 500])],
+      ['Work and power',
+        (work, time) => { const answer = work / time; return { prompt: `A system performs ${work} J of work in ${time} s. Find average power in watts.`, answer, explanation: `P = W/t = ${fmt(answer)} W.`, meta: { kind: 'division', dividend: work, divisor: time } }; },
+        (i) => [(i + 2) * 120, i % 5 + 2],
+        grid(range(1, 40).map((k) => k * 60), range(1, 12))],
+      ['Electric circuits',
+        (resistance, current) => { const voltage = resistance * current; return { prompt: `A ${resistance} Ω resistor has ${voltage} V across it. Find current in amperes.`, answer: current, explanation: `I = V/R = ${current} A.`, meta: { kind: 'ohms-law-current', voltage, resistance } }; },
+        (i) => [i % 6 + 2, i + 1],
+        grid(range(1, 12), range(1, 15))]
     ]);
   }
 
   function physicsCMechanics() {
     return generatedCourse('physc', [
-      ['Calculus-based kinematics', (i) => { const a = i % 4 + 1, b = i - 2, t = i % 5 + 1, answer = 3 * a * t ** 2 + 2 * b * t; return { prompt: `Position is x(t)=${a}t³ ${term(b, 't²')}. Find velocity at t=${t}.`, answer, explanation: `v=3(${a})t²+2(${b})t, giving ${answer}.`, meta: { kind: 'cubic-position-velocity', a, b, t } }; }],
-      ['Force and acceleration', (i) => { const mass = i % 5 + 1, force = (i + 2) * mass; return { prompt: `A ${mass} kg mass experiences net force ${force} N. Find acceleration in m/s².`, answer: force / mass, explanation: `a=F/m=${force / mass} m/s².`, meta: { kind: 'division', dividend: force, divisor: mass } }; }],
-      ['Work by variable forces', (i) => { const k = i + 2, upper = i % 5 + 1, answer = k * upper ** 2 / 2; return { prompt: `Evaluate the work ∫₀^${upper} ${k}x dx, in joules.`, answer, explanation: `Work = (${k}/2)(${upper})² = ${fmt(answer)} J.`, meta: { kind: 'linear-integral', m: k, b: 0, upper } }; }],
-      ['Impulse and momentum', (i) => { const force = i + 3, duration = i % 4 + 0.5, answer = force * duration; return { prompt: `A constant ${force} N force acts for ${duration} s. Find impulse in N·s.`, answer, explanation: `J=FΔt=${fmt(answer)} N·s.`, meta: { kind: 'product', a: force, b: duration } }; }],
-      ['Rotational dynamics', (i) => { const torque = (i + 2) * (i % 4 + 1), inertia = i % 4 + 1; return { prompt: `Net torque is ${torque} N·m and moment of inertia is ${inertia} kg·m². Find angular acceleration.`, answer: torque / inertia, explanation: `α=τ/I=${torque / inertia} rad/s².`, meta: { kind: 'division', dividend: torque, divisor: inertia } }; }],
-      ['Gravitation and orbits', (i) => { const radius = i % 5 + 1, speed = i + 2; return { prompt: `In scaled units, a circular orbit has speed ${speed} and radius ${radius}. Find centripetal acceleration v²/r.`, answer: speed ** 2 / radius, explanation: `a=v²/r=${fmt(speed ** 2 / radius)}.`, meta: { kind: 'square-over', value: speed, divisor: radius } }; }]
+      ['Calculus-based kinematics',
+        (a, b, t) => { const answer = 3 * a * t ** 2 + 2 * b * t; return { prompt: `Position is x(t)=${a}t³ ${term(b, 't²')}. Find velocity at t=${t}.`, answer, explanation: `v=3(${a})t²+2(${b})t, giving ${answer}.`, meta: { kind: 'cubic-position-velocity', a, b, t } }; },
+        (i) => [i % 4 + 1, i - 2, i % 5 + 1],
+        grid(range(1, 5), nonZero(-4, 6), range(1, 6))],
+      ['Force and acceleration',
+        (mass, force) => ({ prompt: `A ${mass} kg mass experiences net force ${force} N. Find acceleration in m/s².`, answer: force / mass, explanation: `a=F/m=${force / mass} m/s².`, meta: { kind: 'division', dividend: force, divisor: mass } }),
+        (i) => [i % 5 + 1, (i + 2) * (i % 5 + 1)],
+        grid(range(1, 10), range(1, 15)).map(([mass, acceleration]) => [mass, acceleration * mass])],
+      ['Work by variable forces',
+        (k, upper) => { const answer = k * upper ** 2 / 2; return { prompt: `Evaluate the work ∫₀^${upper} ${k}x dx, in joules.`, answer, explanation: `Work = (${k}/2)(${upper})² = ${fmt(answer)} J.`, meta: { kind: 'linear-integral', m: k, b: 0, upper } }; },
+        (i) => [i + 2, i % 5 + 1],
+        grid(range(1, 20), range(1, 8))],
+      ['Impulse and momentum',
+        (force, duration) => { const answer = force * duration; return { prompt: `A constant ${force} N force acts for ${duration} s. Find impulse in N·s.`, answer, explanation: `J=FΔt=${fmt(answer)} N·s.`, meta: { kind: 'product', a: force, b: duration } }; },
+        (i) => [i + 3, i % 4 + 0.5],
+        grid(range(2, 40), [0.25, 0.5, 1, 1.5, 2, 2.5, 3, 4, 5])],
+      ['Rotational dynamics',
+        (torque, inertia) => ({ prompt: `Net torque is ${torque} N·m and moment of inertia is ${inertia} kg·m². Find angular acceleration.`, answer: torque / inertia, explanation: `α=τ/I=${torque / inertia} rad/s².`, meta: { kind: 'division', dividend: torque, divisor: inertia } }),
+        (i) => [(i + 2) * (i % 4 + 1), i % 4 + 1],
+        grid(range(1, 8), range(1, 12)).map(([inertia, alpha]) => [alpha * inertia, inertia])],
+      ['Gravitation and orbits',
+        (speed, radius) => ({ prompt: `In scaled units, a circular orbit has speed ${speed} and radius ${radius}. Find centripetal acceleration v²/r.`, answer: speed ** 2 / radius, explanation: `a=v²/r=${fmt(speed ** 2 / radius)}.`, meta: { kind: 'square-over', value: speed, divisor: radius } }),
+        (i) => [i + 2, i % 5 + 1],
+        grid(range(1, 20), range(1, 8))]
     ]);
   }
 
   function quantumPhysicsOptics() {
     return generatedCourse('quantum', [
-      ['Wave optics', (i) => { const wavelength = i + 2, distance = i % 5 + 1, slit = i % 4 + 1, answer = wavelength * distance / slit; return { prompt: `In scaled units, double-slit spacing is Δy=λL/d. Find Δy for λ=${wavelength}, L=${distance}, d=${slit}.`, answer, explanation: `Δy=${wavelength}(${distance})/${slit}=${fmt(answer)}.`, meta: { kind: 'triple-product-division', a: wavelength, b: distance, divisor: slit } }; }],
-      ['Diffraction', (i) => { const wavelength = i % 5 + 1, slit = wavelength * (i + 2); return { prompt: `For first-minimum diffraction, sin θ=λ/a. Find sin θ when λ=${wavelength} and a=${slit}.`, answer: wavelength / slit, explanation: `sin θ=λ/a=${fmt(wavelength / slit)}.`, meta: { kind: 'division', dividend: wavelength, divisor: slit } }; }],
-      ['Photons', (i) => { const wavelength = 100 + i * 40, answer = 1240 / wavelength; return { prompt: `Using hc=1240 eV·nm, find photon energy for λ=${wavelength} nm.`, answer, explanation: `E=1240/${wavelength}=${fmt(answer)} eV.`, meta: { kind: 'photon-energy', wavelength } }; }],
-      ['Photoelectric effect', (i) => { const photon = i + 4, workFunction = i % 3 + 1.5, answer = photon - workFunction; return { prompt: `A photon has energy ${photon} eV and the work function is ${workFunction} eV. Find maximum electron kinetic energy.`, answer, explanation: `Kmax=E−φ=${answer} eV.`, meta: { kind: 'difference', a: photon, b: workFunction } }; }],
-      ['Matter waves', (i) => { const momentum = i + 2, answer = 1 / momentum; return { prompt: `In units where h=1, find de Broglie wavelength for momentum p=${momentum}.`, answer, explanation: `λ=h/p=1/${momentum}=${fmt(answer)}.`, meta: { kind: 'reciprocal', value: momentum } }; }],
-      ['Particle in a box', (i) => { const n = i % 5 + 1, baseEnergy = i + 2, answer = n ** 2 * baseEnergy; return { prompt: `For a particle in a box, Eₙ=n²E₁. Find E_${n} when E₁=${baseEnergy}.`, answer, explanation: `E_${n}=${n}²(${baseEnergy})=${answer}.`, meta: { kind: 'square-times', value: n, factor: baseEnergy } }; }]
+      ['Wave optics',
+        (wavelength, distance, slit) => { const answer = wavelength * distance / slit; return { prompt: `In scaled units, double-slit spacing is Δy=λL/d. Find Δy for λ=${wavelength}, L=${distance}, d=${slit}.`, answer, explanation: `Δy=${wavelength}(${distance})/${slit}=${fmt(answer)}.`, meta: { kind: 'triple-product-division', a: wavelength, b: distance, divisor: slit } }; },
+        (i) => [i + 2, i % 5 + 1, i % 4 + 1],
+        grid(range(1, 12), range(1, 8), range(1, 6))],
+      ['Diffraction',
+        (wavelength, slit) => ({ prompt: `For first-minimum diffraction, sin θ=λ/a. Find sin θ when λ=${wavelength} and a=${slit}.`, answer: wavelength / slit, explanation: `sin θ=λ/a=${fmt(wavelength / slit)}.`, meta: { kind: 'division', dividend: wavelength, divisor: slit } }),
+        (i) => { const wavelength = i % 5 + 1; return [wavelength, wavelength * (i + 2)]; },
+        grid(range(1, 9), range(2, 15)).map(([wavelength, multiple]) => [wavelength, wavelength * multiple])],
+      ['Photons',
+        (wavelength) => { const answer = 1240 / wavelength; return { prompt: `Using hc=1240 eV·nm, find photon energy for λ=${wavelength} nm.`, answer, explanation: `E=1240/${wavelength}=${fmt(answer)} eV.`, meta: { kind: 'photon-energy', wavelength } }; },
+        (i) => [100 + i * 40],
+        range(12, 200).map((k) => [k * 10])],
+      ['Photoelectric effect',
+        (photon, workFunction) => { const answer = photon - workFunction; return { prompt: `A photon has energy ${photon} eV and the work function is ${workFunction} eV. Find maximum electron kinetic energy.`, answer, explanation: `Kmax=E−φ=${fmt(answer)} eV.`, meta: { kind: 'difference', a: photon, b: workFunction } }; },
+        (i) => [i + 4, i % 3 + 1.5],
+        grid(range(2, 12), [1.8, 2.1, 2.3, 2.5, 4.3, 4.7]).filter(([photon, workFunction]) => photon > workFunction)],
+      ['Matter waves',
+        (momentum) => { const answer = 1 / momentum; return { prompt: `In units where h=1, find de Broglie wavelength for momentum p=${momentum}.`, answer, explanation: `λ=h/p=1/${momentum}=${fmt(answer)}.`, meta: { kind: 'reciprocal', value: momentum } }; },
+        (i) => [i + 2],
+        range(1, 40).filter((k) => k % 4 !== 0).map((k) => [k / 4])],
+      ['Particle in a box',
+        (n, baseEnergy) => { const answer = n ** 2 * baseEnergy; return { prompt: `For a particle in a box, Eₙ=n²E₁. Find E_${n} when E₁=${baseEnergy}.`, answer, explanation: `E_${n}=${n}²(${baseEnergy})=${answer}.`, meta: { kind: 'square-times', value: n, factor: baseEnergy } }; },
+        (i) => [i % 5 + 1, i + 2],
+        grid(range(1, 8), range(1, 20))]
     ]);
   }
 
   function realAnalysisA() {
+    const epsilons = [0.45, 0.4, 0.35, 0.3, 0.25, 0.2, 0.15, 0.12, 0.09, 0.08, 0.07, 0.06, 0.05, 0.045, 0.04, 0.035, 0.03, 0.024, 0.02, 0.018, 0.016, 0.015, 0.012, 0.01, 0.009, 0.008, 0.007, 0.006, 0.005, 0.004, 0.003, 0.002, 0.001];
     return generatedCourse('real', [
-      ['Absolute value and bounds', (i) => { const x = i - 6, center = i % 4 - 1; return { prompt: `Find the distance |${x}−(${center})| on the real line.`, answer: Math.abs(x - center), explanation: `Absolute value gives distance: ${Math.abs(x - center)}.`, meta: { kind: 'absolute-difference', a: x, b: center } }; }],
-      ['Supremum and infimum', (i) => { const lower = i - 3, upper = lower + i % 5 + 1; return { prompt: `Find sup S for S=(${lower}, ${upper}).`, answer: upper, explanation: `The least upper bound is ${upper}, whether or not it belongs to S.`, meta: { kind: 'identity', value: upper } }; }],
-      ['Sequences and limits', (i) => { const limit = i - 4, n = (i + 2) * 10, answer = limit + 1 / n; return { prompt: `For aₙ=${limit}+1/n, find a_${n}.`, answer, explanation: `Substitute n=${n}: ${fmt(answer)}.`, meta: { kind: 'limit-sequence-term', limit, n } }; }],
-      ['Epsilon-N arguments', (i) => { const epsilon = 1 / (i + 2), answer = i + 3; return { prompt: `For aₙ=1/n, give the smallest positive integer N such that 1/n<${fmt(epsilon)} for every n≥N.`, answer, explanation: `n must exceed ${i + 2}, so the smallest N is ${answer}.`, meta: { kind: 'epsilon-n-reciprocal', epsilon } }; }],
-      ['Topology of the real line', (i) => { const left = i - 5, right = left + i % 4 + 2, point = i % 2 ? left : (left + right) / 2, answer = Math.min(Math.abs(point - left), Math.abs(right - point)); return { prompt: `For interval (${left}, ${right}) and point x=${point}, find the distance from x to the nearer endpoint.`, answer, explanation: `The endpoint distances are ${fmt(Math.abs(point - left))} and ${fmt(Math.abs(right - point))}; minimum ${fmt(answer)}.`, meta: { kind: 'nearest-endpoint', left, right, point } }; }],
-      ['Riemann integration', (i) => { const n = i + 2, width = 1 / n, sum = width * Array.from({ length: n }, (_, k) => (k + 1) / n).reduce((total, x) => total + x, 0); return { prompt: `Use ${n} equal subintervals and right endpoints to approximate ∫₀¹x dx.`, answer: sum, explanation: `The right sum is (1/${n})Σ(k/${n})=${fmt(sum)}.`, meta: { kind: 'right-riemann-x', n } }; }]
+      ['Absolute value and bounds',
+        (x, center) => ({ prompt: `Find the distance |${x}−(${center})| on the real line.`, answer: Math.abs(x - center), explanation: `Absolute value gives distance: ${Math.abs(x - center)}.`, meta: { kind: 'absolute-difference', a: x, b: center } }),
+        (i) => [i - 6, i % 4 - 1],
+        grid(range(-12, 12), range(-6, 6))],
+      ['Supremum and infimum',
+        (lower, upper) => ({ prompt: `Find sup S for S=(${lower}, ${upper}).`, answer: upper, explanation: `The least upper bound is ${upper}, whether or not it belongs to S.`, meta: { kind: 'identity', value: upper } }),
+        (i) => { const lower = i - 3; return [lower, lower + i % 5 + 1]; },
+        grid(range(-10, 10), range(1, 8)).map(([lower, width]) => [lower, lower + width])],
+      ['Sequences and limits',
+        (limit, n) => { const answer = limit + 1 / n; return { prompt: `For aₙ=${limit}+1/n, find a_${n}.`, answer, explanation: `Substitute n=${n}: ${fmt(answer)}.`, meta: { kind: 'limit-sequence-term', limit, n } }; },
+        (i) => [i - 4, (i + 2) * 10],
+        grid(range(-5, 8), [5, 8, 10, 20, 25, 40, 50, 100])],
+      ['Epsilon-N arguments',
+        // bound = 1/ε; the regular 10 pass it as an exact integer (i + 2).
+        (epsilon, bound) => { const answer = Math.floor(bound) + 1; return { prompt: `For aₙ=1/n, give the smallest positive integer N such that 1/n<${fmt(epsilon)} for every n≥N.`, answer, explanation: `n must exceed ${fmt(bound)}, so the smallest N is ${answer}.`, meta: { kind: 'epsilon-n-reciprocal', epsilon } }; },
+        (i) => [1 / (i + 2), i + 2],
+        epsilons.map((epsilon) => [epsilon, 1 / epsilon])],
+      ['Topology of the real line',
+        (left, right, point) => { const answer = Math.min(Math.abs(point - left), Math.abs(right - point)); return { prompt: `For interval (${left}, ${right}) and point x=${point}, find the distance from x to the nearer endpoint.`, answer, explanation: `The endpoint distances are ${fmt(Math.abs(point - left))} and ${fmt(Math.abs(right - point))}; minimum ${fmt(answer)}.`, meta: { kind: 'nearest-endpoint', left, right, point } }; },
+        (i) => { const left = i - 5, right = left + i % 4 + 2; return [left, right, i % 2 ? left : (left + right) / 2]; },
+        grid(range(-8, 8), range(2, 8)).flatMap(([left, width]) => range(1, width - 1).map((offset) => [left, left + width, left + offset]))],
+      ['Riemann integration',
+        (n) => { const width = 1 / n, sum = width * Array.from({ length: n }, (_, k) => (k + 1) / n).reduce((total, x) => total + x, 0); return { prompt: `Use ${n} equal subintervals and right endpoints to approximate ∫₀¹x dx.`, answer: sum, explanation: `The right sum is (1/${n})Σ(k/${n})=${fmt(sum)}.`, meta: { kind: 'right-riemann-x', n } }; },
+        (i) => [i + 2],
+        range(12, 50).map((n) => [n])]
     ]);
   }
 
   function advancedAlgorithms() {
     return generatedCourse('algo', [
-      ['Asymptotic analysis', (i) => { const exponent = i + 3, size = 2 ** exponent; return { prompt: `How many exact halvings reduce an input of size ${size} to 1?`, answer: exponent, explanation: `${size}=2^${exponent}, so ${exponent} halvings are required.`, meta: { kind: 'binary-halvings', size } }; }],
-      ['Divide and conquer', (i) => { const exponent = i + 2, n = 2 ** exponent, answer = n * exponent; return { prompt: `A merge-style recurrence performs n log₂n units. Evaluate it for n=${n}.`, answer, explanation: `${n}·${exponent}=${answer}.`, meta: { kind: 'n-log2-n', n } }; }],
-      ['Minimum spanning trees', (i) => { const vertices = i + 5; return { prompt: `Any spanning tree on ${vertices} vertices has how many edges?`, answer: vertices - 1, explanation: `Every tree on V vertices has V−1=${vertices - 1} edges.`, meta: { kind: 'tree-edges', vertices } }; }],
-      ['Shortest paths', (i) => { const edges = [i + 2, i % 4 + 1, i + 5], answer = edges.reduce((sum, edge) => sum + edge, 0); return { prompt: `A path uses edge weights ${edges.join(', ')}. Find its total weight.`, answer, explanation: `Path length is the edge-weight sum: ${answer}.`, meta: { kind: 'sum-values', values: edges } }; }],
-      ['Dynamic programming', (i) => { const n = i + 5, sequence = [0, 1]; for (let k = 2; k <= n; k += 1) sequence[k] = sequence[k - 1] + sequence[k - 2]; return { prompt: `Using F₀=0, F₁=1, and Fₙ=Fₙ₋₁+Fₙ₋₂, find F_${n}.`, answer: sequence[n], explanation: `Building the DP table gives F_${n}=${sequence[n]}.`, meta: { kind: 'fibonacci', n } }; }],
-      ['Bitmask algorithms', (i) => { const bits = i + 1, answer = 2 ** bits; return { prompt: `How many subsets can a ${bits}-bit mask represent?`, answer, explanation: `Each bit has two states, so there are 2^${bits}=${answer} subsets.`, meta: { kind: 'power-two', exponent: bits } }; }]
+      ['Asymptotic analysis',
+        (shape, a, b) => {
+          if (shape === 'halve') { const size = 2 ** a; return { prompt: `How many exact halvings reduce an input of size ${size} to 1?`, answer: a, explanation: `${size}=2^${a}, so ${a} halvings are required.`, meta: { kind: 'binary-halvings', size } }; }
+          if (shape === 'triangle') { const answer = a * (a + 1) / 2; return { prompt: `An inner loop runs i times for each i from 1 to ${a}. How many inner-loop iterations run in total?`, answer, explanation: `1 + 2 + ··· + ${a} = ${a}(${a + 1})/2 = ${answer}.`, meta: { kind: 'loop-sum', n: a } }; }
+          return { prompt: `An outer loop runs ${a} times and an inner loop runs ${b} times per outer iteration. How many times does the inner body execute?`, answer: a * b, explanation: `Nested loops multiply: ${a} × ${b} = ${a * b}.`, meta: { kind: 'product', a, b } };
+        },
+        (i) => ['halve', i + 3],
+        mixGrids(12, range(13, 20).map((k) => ['halve', k]), range(5, 30).map((n) => ['triangle', n]), grid(range(5, 20), range(5, 20)).map(([a, b]) => ['nested', a, b]))],
+      ['Divide and conquer',
+        (shape, k) => {
+          if (shape === 'nlogn') { const n = 2 ** k, answer = n * k; return { prompt: `A merge-style recurrence performs n log₂n units. Evaluate it for n=${n}.`, answer, explanation: `${n}·${k}=${answer}.`, meta: { kind: 'n-log2-n', n } }; }
+          if (shape === 'depth') { const size = 2 ** k; return { prompt: `A divide-and-conquer algorithm halves its input at every level. How many levels does an input of size ${size} need to reach size 1?`, answer: k, explanation: `${size}=2^${k}, so ${k} levels of halving reach size 1.`, meta: { kind: 'binary-halvings', size } }; }
+          const answer = 2 ** k;
+          return { prompt: `A recursion tree splits every call into 2 subcalls. How many calls sit at depth ${k} (the root is depth 0)?`, answer, explanation: `Each level doubles the calls, so depth ${k} has 2^${k} = ${answer}.`, meta: { kind: 'power-two', exponent: k } };
+        },
+        (i) => ['nlogn', i + 2],
+        mixGrids(14, range(12, 15).map((k) => ['nlogn', k]), range(3, 19).map((k) => ['depth', k]), range(2, 16).map((k) => ['leaves', k]))],
+      ['Minimum spanning trees',
+        (vertices) => ({ prompt: `Any spanning tree on ${vertices} vertices has how many edges?`, answer: vertices - 1, explanation: `Every tree on V vertices has V−1=${vertices - 1} edges.`, meta: { kind: 'tree-edges', vertices } }),
+        (i) => [i + 5],
+        range(15, 80).map((v) => [v])],
+      ['Shortest paths',
+        (edges) => { const answer = edges.reduce((sum, edge) => sum + edge, 0); return { prompt: `A path uses edge weights ${edges.join(', ')}. Find its total weight.`, answer, explanation: `Path length is the edge-weight sum: ${answer}.`, meta: { kind: 'sum-values', values: edges } }; },
+        (i) => [[i + 2, i % 4 + 1, i + 5]],
+        grid(range(1, 12), range(1, 9), range(1, 12)).map((edges) => [edges])],
+      ['Dynamic programming',
+        (shape, n) => {
+          const fib = (k) => { const sequence = [0, 1]; for (let j = 2; j <= k; j += 1) sequence[j] = sequence[j - 1] + sequence[j - 2]; return sequence[k]; };
+          if (shape === 'fib') return { prompt: `Using F₀=0, F₁=1, and Fₙ=Fₙ₋₁+Fₙ₋₂, find F_${n}.`, answer: fib(n), explanation: `Building the DP table gives F_${n}=${fib(n)}.`, meta: { kind: 'fibonacci', n } };
+          return { prompt: `You climb stairs 1 or 2 steps at a time, so ways(1)=1, ways(2)=2, and ways(n)=ways(n−1)+ways(n−2). How many ways are there to climb ${n} stairs?`, answer: fib(n + 1), explanation: `ways(n) is the Fibonacci recurrence shifted by one: ways(${n}) = F_${n + 1} = ${fib(n + 1)}.`, meta: { kind: 'fibonacci', n: n + 1 } };
+        },
+        (i) => ['fib', i + 5],
+        mixGrids(16, range(15, 30).map((n) => ['fib', n]), range(5, 25).map((n) => ['stairs', n]))],
+      ['Bitmask algorithms',
+        (shape, n) => {
+          if (shape === 'subsets') { const answer = 2 ** n; return { prompt: `How many subsets can a ${n}-bit mask represent?`, answer, explanation: `Each bit has two states, so there are 2^${n}=${answer} subsets.`, meta: { kind: 'power-two', exponent: n } }; }
+          if (shape === 'shift') { const answer = 2 ** n; return { prompt: `What integer does the expression 1 << ${n} produce?`, answer, explanation: `Shifting 1 left by ${n} places multiplies it by 2^${n}: ${answer}.`, meta: { kind: 'power-two', exponent: n } }; }
+          const binary = n.toString(2);
+          return { prompt: `Which integer does the bitmask 0b${binary} represent?`, answer: n, explanation: `Adding the place values of its set bits gives ${n}.`, meta: { kind: 'binary-value', binary } };
+        },
+        (i) => ['subsets', i + 1],
+        mixGrids(12, range(11, 19).map((n) => ['subsets', n]), range(0, 19).map((n) => ['shift', n]), range(9, 63).map((n) => ['mask', n]))]
     ]);
   }
 
+  // A page shows one course, so each set's questions (and Timed Mastery
+  // pool) are built on first access instead of all 20 at load — 4,800+
+  // questions is real work on a phone. Built once, then cached.
+  const lazyQuestions = (course) => {
+    ['questions', 'timedQuestions'].forEach((key) => {
+      const build = course[key];
+      if (!build) return;
+      let value = null;
+      Object.defineProperty(course, key, { enumerable: true, get: () => value || (value = build()) });
+    });
+    return course;
+  };
   const courses = [
     {
       slug: 'algebra-geometry',
       title: 'Algebra & Geometry Fundamentals Review',
       tier: 'intro',
       summary: 'Linear equations, systems, quadratics, exponents, area, and right triangles.',
-      questions: algebraGeometry()
+      questions: algebraGeometry
     },
     {
       slug: 'ap-calculus-bc',
       title: 'AP Calculus BC',
       tier: 'core',
       summary: 'Limits, derivatives, applications, integrals, the Fundamental Theorem, and series.',
-      questions: calculus(),
-      timedQuestions: timedCalculus()
+      questions: calculus,
+      timedQuestions: timedCalculus
     },
     {
       slug: 'computer-programming-1',
       title: 'Computer Programming 1',
       tier: 'intro',
       summary: 'Language fundamentals, operators, control flow, loops, functions, and collections.',
-      questions: programming()
+      questions: programming
     },
     {
       slug: 'discrete-math',
       title: 'Discrete Math',
       tier: 'core',
       summary: 'Logic, sets, combinatorics, probability, graph theory, and modular arithmetic.',
-      questions: discreteMath()
+      questions: discreteMath
     },
     {
       slug: 'ap-physics-1',
       title: 'AP Physics 1',
       tier: 'intro',
       summary: 'Kinematics, forces, energy, momentum, rotation, and circular motion.',
-      questions: physics()
+      questions: physics
     },
     {
       slug: 'precalculus',
       title: 'Precalculus',
       tier: 'core',
       summary: 'Functions, composition, polynomials, exponentials, trigonometry, and sequences.',
-      questions: precalculus(),
-      timedQuestions: timedPrecalculus()
+      questions: precalculus,
+      timedQuestions: timedPrecalculus
     },
     {
       slug: 'multivariable-calculus',
       title: 'Multivariable Calculus',
       tier: 'advanced',
       summary: 'Vectors, cross products, partial derivatives, gradients, multiple integrals, and vector fields.',
-      questions: multivariableCalculus()
+      questions: multivariableCalculus
     },
     {
       slug: 'computer-programming-2',
       title: 'Computer Programming 2',
       tier: 'core',
       summary: 'OOP, exceptions, data structures, recursion, complexity, memory, and concurrency.',
-      questions: programmingTwo()
+      questions: programmingTwo
     },
     {
       slug: 'data-handling-cb',
       title: 'Data Handling CB',
       tier: 'core',
       summary: 'Spreadsheets, SQL, descriptive statistics, cleaning, regression, and visualization.',
-      questions: dataHandling()
+      questions: dataHandling
     },
     {
       slug: 'ap-physics-2',
       title: 'AP Physics 2',
       tier: 'core',
       summary: 'Thermodynamics, electrostatics, circuits, magnetism, optics, and modern physics.',
-      questions: physicsTwo()
+      questions: physicsTwo
     },
     {
       slug: 'linear-algebra-a', title: 'Linear Algebra A', tier: 'core',
-      summary: 'Vectors, matrices, determinants, transformations, and eigenvalues.', questions: linearAlgebra()
+      summary: 'Vectors, matrices, determinants, transformations, and eigenvalues.', questions: linearAlgebra
     },
     {
       slug: 'differential-equations', title: 'Differential Equations', tier: 'core',
-      summary: 'First-order models, characteristic equations, Euler’s method, oscillations, and Laplace transforms.', questions: differentialEquations()
+      summary: 'First-order models, characteristic equations, Euler’s method, oscillations, and Laplace transforms.', questions: differentialEquations
     },
     {
       slug: 'mathematical-proofs', title: 'Mathematical Proofs', tier: 'core',
-      summary: 'Logic, divisibility, sets, direct arguments, induction, and quantifiers.', questions: mathematicalProofs()
+      summary: 'Logic, divisibility, sets, direct arguments, induction, and quantifiers.', questions: mathematicalProofs
     },
     {
       slug: 'computer-networking-fundamentals', title: 'Computer Networking Fundamentals', tier: 'intro',
-      summary: 'Bandwidth, latency, IPv4, CIDR, bandwidth-delay products, and ports.', questions: networking()
+      summary: 'Bandwidth, latency, IPv4, CIDR, bandwidth-delay products, and ports.', questions: networking
     },
     {
       slug: 'systems-programming-architecture', title: 'Systems Programming & Architecture', tier: 'core',
-      summary: 'Binary, hexadecimal, two’s complement, memory, caches, and CPU scheduling.', questions: systemsProgramming()
+      summary: 'Binary, hexadecimal, two’s complement, memory, caches, and CPU scheduling.', questions: systemsProgramming
     },
     {
       slug: 'engineering-1', title: 'Engineering 1', tier: 'intro',
-      summary: 'Measurement, vectors, statics, stress, power, and circuits.', questions: engineeringOne()
+      summary: 'Measurement, vectors, statics, stress, power, and circuits.', questions: engineeringOne
     },
     {
       slug: 'ap-physics-c-mechanics', title: 'AP Physics C: Mechanics', tier: 'core',
-      summary: 'Calculus-based motion, forces, work, impulse, rotation, and gravitation.', questions: physicsCMechanics()
+      summary: 'Calculus-based motion, forces, work, impulse, rotation, and gravitation.', questions: physicsCMechanics
     },
     {
       slug: 'quantum-physics-optics', title: 'Quantum Physics and Optics', tier: 'core',
-      summary: 'Wave optics, diffraction, photons, photoelectricity, matter waves, and quantum energy.', questions: quantumPhysicsOptics()
+      summary: 'Wave optics, diffraction, photons, photoelectricity, matter waves, and quantum energy.', questions: quantumPhysicsOptics
     },
     {
       slug: 'real-analysis-a', title: 'Real Analysis A', tier: 'advanced',
-      summary: 'Bounds, sequences, epsilon arguments, topology, continuity, and Riemann integration.', questions: realAnalysisA()
+      summary: 'Bounds, sequences, epsilon arguments, topology, continuity, and Riemann integration.', questions: realAnalysisA
     },
     {
       slug: 'advanced-algorithms', title: 'Advanced Algorithms', tier: 'advanced',
-      summary: 'Asymptotic analysis, divide and conquer, graph algorithms, dynamic programming, and bitmasks.', questions: advancedAlgorithms()
+      summary: 'Asymptotic analysis, divide and conquer, graph algorithms, dynamic programming, and bitmasks.', questions: advancedAlgorithms
     }
-  ];
+  ].map(lazyQuestions);
   const courseBySlug = Object.fromEntries(courses.map((course) => [course.slug, course]));
 
   return {
