@@ -15,17 +15,163 @@ interface Me {
   name: string | null;
 }
 
-const NAV_LINKS = [
-  { href: '/pathways.html', label: 'Tracks' },
-  { href: '/problem-sets.html', label: 'Problem Sets' },
-  { href: '/sandbox.html', label: 'Sandbox' },
+type NavItem = readonly [label: string, href: string];
+
+interface NavCategory {
+  readonly label: string;
+  readonly href: string;
+  readonly items: readonly NavItem[];
+}
+
+// Hand-maintained, mirroring each hub page (pathways.html, projects.html,
+// applications.html, Goals/, problem-sets.html, sandbox.html). Every href is
+// checked against content/ by scripts/check-nav-links.js in npm test.
+const TRACK_CATEGORIES: readonly NavCategory[] = [
+  {
+    label: 'Pathways',
+    href: '/pathways.html',
+    items: [
+      ['Software Engineer', '/Pathways/software-engineer.html'],
+      ['AI & Data', '/Pathways/ai-data.html'],
+      ['Mathematics', '/Pathways/mathematics.html'],
+      ['Engineering & Physics', '/Pathways/engineering-physics.html'],
+      ['Competitive Programmer', '/Pathways/competitive-programmer.html'],
+      ['Cloud & DevOps', '/Pathways/cloud-devops.html'],
+      ['Robotics & Mechatronics', '/Pathways/robotics-mechatronics.html'],
+      ['Quantum Science', '/Pathways/quantum-science.html'],
+      ['General Programmer (Career)', '/Pathways/general-programmer.html'],
+      ['AI Developer: CB/RWA (Career)', '/Pathways/ai-developer-cbrwa.html'],
+    ],
+  },
+  {
+    label: 'Projects',
+    href: '/projects.html',
+    items: [
+      ['Software Engineer Capstone', '/Projects/software-engineer-capstone.html'],
+      ['AI & Data Capstone', '/Projects/ai-data-capstone.html'],
+      ['Mathematics Capstone', '/Projects/mathematics-capstone.html'],
+      ['Engineering & Physics Capstone', '/Projects/engineering-physics-capstone.html'],
+      ['Competitive Programmer Capstone', '/Projects/competitive-programmer-capstone.html'],
+      ['Cloud & DevOps Capstone', '/Projects/cloud-devops-capstone.html'],
+      ['Robotics & Mechatronics Capstone', '/Projects/robotics-mechatronics-capstone.html'],
+      ['Quantum Science Capstone', '/Projects/quantum-science-capstone.html'],
+      ['General Programmer Capstone', '/Projects/general-programmer-capstone.html'],
+      ['AI Developer: CB/RWA Capstone', '/Projects/ai-developer-cbrwa-capstone.html'],
+    ],
+  },
+  {
+    label: 'Applications',
+    href: '/applications.html',
+    items: [
+      ['Scaling a Viral App Overnight', '/Applications/scaling-a-viral-app.html'],
+      ['A/B Testing a Feature Launch', '/Applications/ab-testing-a-feature-launch.html'],
+      ['Why Your Video Call Freezes', '/Applications/why-your-video-call-freezes.html'],
+      ['Designing a Roller Coaster Safely', '/Applications/designing-a-roller-coaster-safely.html'],
+      ['How Recommendation Engines Actually Work', '/Applications/how-recommendation-engines-work.html'],
+      ['Modeling an Epidemic', '/Applications/modeling-an-epidemic.html'],
+      ['Route Planning Like a GPS App', '/Applications/route-planning-like-gps.html'],
+      ['The Bias Hiding in a Hiring Algorithm', '/Applications/bias-in-a-hiring-algorithm.html'],
+      ['Keeping a Satellite in Orbit', '/Applications/keeping-a-satellite-in-orbit.html'],
+    ],
+  },
+  {
+    label: 'Goals',
+    href: '/new.html',
+    items: [
+      ['Get Ahead in School', '/Goals/get-ahead.html'],
+      ['Prepare for College STEM', '/Goals/prepare-for-college.html'],
+      ['Become Stronger at Math', '/Goals/stronger-at-math.html'],
+      ['Challenge Myself', '/Goals/challenge-myself.html'],
+      ['Review & Test Myself', '/Goals/review-and-test.html'],
+      ['Describe Your Own Goal', '/new.html#explore'],
+      ['My Plan', '/my-plan.html'],
+    ],
+  },
 ];
 
-const SUBJECT_CATEGORIES = [
+const PROBLEM_SET_CATEGORIES: readonly NavCategory[] = [
+  {
+    label: 'Timed Mastery',
+    href: '/problem-sets.html',
+    items: [
+      ['Precalculus (Timed)', '/timed-mastery.html?course=precalculus'],
+      ['AP Calculus BC (Timed)', '/timed-mastery.html?course=ap-calculus-bc'],
+    ],
+  },
+  {
+    label: 'Mathematics',
+    href: '/problem-sets.html',
+    items: [
+      ['Algebra & Geometry Fundamentals Review', '/problem-set.html?course=algebra-geometry'],
+      ['Precalculus', '/problem-set.html?course=precalculus'],
+      ['AP Calculus BC', '/problem-set.html?course=ap-calculus-bc'],
+      ['Multivariable Calculus', '/problem-set.html?course=multivariable-calculus'],
+      ['Linear Algebra A', '/problem-set.html?course=linear-algebra-a'],
+      ['Differential Equations', '/problem-set.html?course=differential-equations'],
+      ['Mathematical Proofs', '/problem-set.html?course=mathematical-proofs'],
+      ['Discrete Math', '/problem-set.html?course=discrete-math'],
+    ],
+  },
+  {
+    label: 'Technology & Computer Science',
+    href: '/problem-sets.html',
+    items: [
+      ['Computer Programming 1', '/problem-set.html?course=computer-programming-1'],
+      ['Computer Programming 2', '/problem-set.html?course=computer-programming-2'],
+      ['Data Handling CB', '/problem-set.html?course=data-handling-cb'],
+      ['Computer Networking Fundamentals', '/problem-set.html?course=computer-networking-fundamentals'],
+      ['Systems Programming & Architecture', '/problem-set.html?course=systems-programming-architecture'],
+    ],
+  },
+  {
+    label: 'Science, Engineering & Physics',
+    href: '/problem-sets.html',
+    items: [
+      ['AP Physics 1', '/problem-set.html?course=ap-physics-1'],
+      ['AP Physics 2', '/problem-set.html?course=ap-physics-2'],
+      ['AP Physics C: Mechanics', '/problem-set.html?course=ap-physics-c-mechanics'],
+      ['Quantum Physics & Optics', '/problem-set.html?course=quantum-physics-optics'],
+      ['Engineering 1', '/problem-set.html?course=engineering-1'],
+    ],
+  },
+  {
+    label: 'Advanced+',
+    href: '/problem-sets.html',
+    items: [
+      ['Real Analysis A', '/problem-set.html?course=real-analysis-a'],
+      ['Advanced Algorithms', '/problem-set.html?course=advanced-algorithms'],
+    ],
+  },
+];
+
+const SANDBOX_CATEGORIES: readonly NavCategory[] = [
+  {
+    label: 'Core Languages',
+    href: '/sandbox.html',
+    items: [
+      ['Python Sandbox', '/python-sandbox.html'],
+      ['Java Sandbox', '/java-sandbox.html'],
+      ['JavaScript Sandbox', '/javascript-sandbox.html'],
+      ['C++ Sandbox', '/cpp-sandbox.html'],
+    ],
+  },
+  {
+    label: 'Package Mastery',
+    href: '/sandbox.html',
+    items: [['Pandas Package Mastery', '/pandas-sandbox.html']],
+  },
+  {
+    label: 'Guided Projects',
+    href: '/sandbox.html',
+    items: [['Guided Programming Projects', '/python-projects.html']],
+  },
+];
+
+const SUBJECT_CATEGORIES: readonly NavCategory[] = [
   {
     label: 'Math',
     href: '/math.html',
-    courses: [
+    items: [
       ['Algebra/Geometry Fundamentals Review', '/Algebra%20Geometry%20Fundamentals%20Review/index.html'],
       ['Precalculus', '/Precalculus/index.html'],
       ['Discrete Math', '/Discrete%20Math/index.html'],
@@ -39,7 +185,7 @@ const SUBJECT_CATEGORIES = [
   {
     label: 'Science',
     href: '/science.html',
-    courses: [
+    items: [
       ['AP Physics 1', '/AP%20Physics%201/index.html'],
       ['AP Physics 2', '/AP%20Physics%202/index.html'],
       ['AP Physics C: Mechanics', '/AP%20Physics%20C%20Mechanics/index.html'],
@@ -50,7 +196,7 @@ const SUBJECT_CATEGORIES = [
   {
     label: 'Technology & Computer Science',
     href: '/technology.html',
-    courses: [
+    items: [
       ['Computer Programming Ethics', '/Computer%20Programming%20Ethics/index.html'],
       ['Computer Programming 1', '/Computer%20Programming%201/index.html'],
       ['Computer Programming 2', '/Computer%20Programming%202/index.html'],
@@ -71,7 +217,7 @@ const SUBJECT_CATEGORIES = [
   {
     label: 'Engineering & Physics',
     href: '/engineering.html',
-    courses: [
+    items: [
       ['Engineering 1', '/Engineering%201/index.html'],
       ['Career Applied Engineering', '/Career%20Applied%20Engineering/index.html'],
       ['CAD & Prototyping', '/CAD%20%26%20Prototyping/index.html'],
@@ -83,7 +229,7 @@ const SUBJECT_CATEGORIES = [
   {
     label: 'Advanced+',
     href: '/advanced.html',
-    courses: [
+    items: [
       ['Real Analysis A', '/Advanced%2B%20Courses/Real%20Analysis%20A/index.html'],
       ['Real Analysis B', '/Advanced%2B%20Courses/Real%20Analysis%20B/index.html'],
       ['Advanced Algorithms', '/Advanced%2B%20Courses/Advanced%20Algorithms/index.html'],
@@ -92,21 +238,29 @@ const SUBJECT_CATEGORIES = [
       ['Quantum Computing', '/Advanced%2B%20Courses/Quantum%20Computing/index.html'],
     ],
   },
-] as const;
+];
 
-function SubjectsMenu() {
+interface NavMenuProps {
+  label: string;
+  eyebrow: string;
+  categories: readonly NavCategory[];
+}
+
+// One dropdown per top-level section. All top-level menus share
+// name="nav-menu", so opening one closes whichever other was open.
+function NavMenu({ label, eyebrow, categories }: NavMenuProps) {
   return (
-    <details className="group/subjects sm:relative">
+    <details name="nav-menu" className="group/menu sm:relative">
       <summary
         className={cn(
           'flex cursor-pointer list-none items-center gap-1 text-sm whitespace-nowrap text-[var(--site-text)]',
           'hover:text-[var(--site-accent)] [&::-webkit-details-marker]:hidden'
         )}
       >
-        Subjects
+        {label}
         <ChevronDown
           aria-hidden="true"
-          className="size-3.5 transition-transform group-open/subjects:rotate-180"
+          className="size-3.5 transition-transform group-open/menu:rotate-180"
         />
       </summary>
       <div
@@ -117,12 +271,12 @@ function SubjectsMenu() {
         )}
       >
         <p className="px-3 pt-1 pb-2 text-xs font-semibold tracking-wide text-[var(--site-muted)] uppercase">
-          Course categories
+          {eyebrow}
         </p>
-        {SUBJECT_CATEGORIES.map((category) => (
+        {categories.map((category) => (
           <details
-            key={category.href}
-            name="subject-category"
+            key={category.label}
+            name={`${label}-category`}
             className="group/category border-t border-[var(--site-border)] first:border-t-0"
           >
             <summary
@@ -134,7 +288,7 @@ function SubjectsMenu() {
             >
               <span>{category.label}</span>
               <span className="flex items-center gap-2 text-xs font-normal text-[var(--site-muted)]">
-                {category.courses.length}
+                {category.items.length}
                 <ChevronDown
                   aria-hidden="true"
                   className="size-3.5 transition-transform group-open/category:rotate-180"
@@ -148,13 +302,13 @@ function SubjectsMenu() {
               >
                 Browse all {category.label} →
               </a>
-              {category.courses.map(([label, href]) => (
+              {category.items.map(([itemLabel, href]) => (
                 <a
                   key={href}
                   href={href}
                   className="rounded-md px-2 py-1.5 text-sm text-[var(--site-text)] hover:bg-[var(--site-accent-soft)] hover:text-[var(--site-accent)]"
                 >
-                  {label}
+                  {itemLabel}
                 </a>
               ))}
             </div>
@@ -210,22 +364,16 @@ export function Layout({ title, children }: LayoutProps) {
           STEM+
         </Link>
         <nav className="flex flex-wrap items-center gap-x-3 gap-y-1 sm:gap-x-6">
+          <NavMenu label="Subjects" eyebrow="Course categories" categories={SUBJECT_CATEGORIES} />
+          <NavMenu label="Tracks" eyebrow="Guided routes" categories={TRACK_CATEGORIES} />
+          <NavMenu label="Problem Sets" eyebrow="Practice banks" categories={PROBLEM_SET_CATEGORIES} />
+          <NavMenu label="Sandbox" eyebrow="Code practice" categories={SANDBOX_CATEGORIES} />
           <a
-            href="/dashboard.html"
+            href="/about.html"
             className="text-sm whitespace-nowrap text-[var(--site-text)] hover:text-[var(--site-accent)]"
           >
-            Dashboard
+            About
           </a>
-          <SubjectsMenu />
-          {NAV_LINKS.map((link) => (
-            <a
-              key={link.href}
-              href={link.href}
-              className="text-sm whitespace-nowrap text-[var(--site-text)] hover:text-[var(--site-accent)]"
-            >
-              {link.label}
-            </a>
-          ))}
           <AuthStatus />
         </nav>
       </header>

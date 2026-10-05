@@ -21,6 +21,8 @@ export const config = {
 const FREE_PATHS = [
   '/new.html',
   '/login.html',
+  // Public site overview, patch notes, and disclaimer.
+  '/about.html',
   '/math.html',
   '/science.html',
   '/technology.html',
