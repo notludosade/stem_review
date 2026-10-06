@@ -513,7 +513,33 @@ function SiteFooter() {
   );
 }
 
+// Lesson views feed the mastery engine's "Learning" state
+// (public/assets/mastery.js). Like all progress, only saved when signed in.
+const LESSON_VIEWS_KEY = 'stemplus:lessons:v1';
+
+function useLessonViews() {
+  const { asPath } = useRouter();
+  useEffect(() => {
+    const pathname = decodeURIComponent(location.pathname);
+    const page = pathname + location.search;
+    if (!/\/Unit \d+\/\d{4}-[^/]+\.html$/.test(pathname) && !/\/lesson\.html\?id=/.test(page)) return;
+    const account = (window as unknown as { STEMPlusAccount?: { ready: Promise<unknown>; canSave: () => boolean } }).STEMPlusAccount;
+    account?.ready.then(() => {
+      if (!account.canSave()) return;
+      try {
+        const views = JSON.parse(localStorage.getItem(LESSON_VIEWS_KEY) || '{}');
+        if (views[page]) return;
+        views[page] = new Date().toISOString();
+        localStorage.setItem(LESSON_VIEWS_KEY, JSON.stringify(views));
+      } catch {
+        // Lessons still work when storage is unavailable.
+      }
+    });
+  }, [asPath]);
+}
+
 export function Layout({ title, children }: LayoutProps) {
+  useLessonViews();
   return (
     <>
       <Head>
