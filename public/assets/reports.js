@@ -31,7 +31,7 @@
     const button = document.createElement('button');
     button.type = 'button';
     button.className = 'widget-btn';
-    button.textContent = report.resolvedAt ? 'Reopen' : 'Resolve';
+    button.textContent = report.resolvedAt ? 'Reopen issue' : 'Close issue';
     button.addEventListener('click', async () => {
       button.disabled = true;
       const res = await fetch('/api/reports', {
@@ -65,7 +65,7 @@
       return;
     }
     const { open, resolved } = await res.json();
-    mount.replaceChildren(...section('Open', open, 'No open reports.'), ...section('Recently resolved', resolved, 'Nothing resolved yet.'));
+    mount.replaceChildren(...section('Open issues', open, 'No open issues.'), ...section('Recently closed', resolved, 'No closed issues yet.'));
   }
 
   load();
