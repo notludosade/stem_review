@@ -3,12 +3,12 @@
 // Pins the mastery rules (public/assets/mastery.js) against the real skill
 // catalog: each state's threshold, and which evidence reaches which skill.
 const assert = require('node:assert');
-const { computeMastery, STATES } = require('../public/assets/mastery.js');
+const { computeMastery, readiness, STATES } = require('../public/assets/mastery.js');
 const catalog = require('../public/assets/skill-catalog.json');
 
 assert.deepStrictEqual(STATES, ['unseen', 'learning', 'practiced', 'proficient', 'mastered', 'applied']);
 
-const empty = { lessons: {}, results: [], problems: {}, completedProjects: [] };
+const empty = { lessons: {}, results: [], problems: {}, completedProjects: [], diagnostics: {} };
 const stateOf = (evidence, id) => computeMastery(catalog, { ...empty, ...evidence })[id].state;
 const unitTest = (unit, score, passed, course = 'Precalculus') => ({ course, unit, kind: 'unit_test', score, total: 10, passed });
 const seen = '2026-10-05T00:00:00.000Z';
@@ -46,5 +46,29 @@ assert.strictEqual(stateOf({ results: [{ ...exam.results[0], passed: false }] },
 assert.strictEqual(stateOf({ completedProjects: ['mathematics-capstone'] }, 'precalculus.u3'), 'unseen');
 assert.strictEqual(stateOf({ ...exam, completedProjects: ['mathematics-capstone'] }, 'precalculus.u3'), 'applied');
 assert.strictEqual(stateOf({ ...exam, completedProjects: ['cloud-devops-capstone'] }, 'precalculus.u3'), 'mastered');
+
+// Diagnostics: all right → Proficient, some right → Practiced, none → no
+// change; never Mastered; the newest diagnostic that tested a skill wins.
+const diagnostic = (takenAt, answers) => ({ takenAt, answers: answers.map(([skillId, correct], i) => ({ skillId, questionId: `q${i}`, correct })) });
+const diag = (answers) => ({ diagnostics: { mathematics: diagnostic('2026-10-05T10:00:00.000Z', answers) } });
+assert.strictEqual(stateOf(diag([['precalculus.u3', true], ['precalculus.u3', true]]), 'precalculus.u3'), 'proficient');
+assert.strictEqual(stateOf(diag([['precalculus.u3', true], ['precalculus.u3', false]]), 'precalculus.u3'), 'practiced');
+assert.strictEqual(stateOf(diag([['precalculus.u3', false], ['precalculus.u3', false]]), 'precalculus.u3'), 'unseen');
+assert.strictEqual(stateOf(diag([['precalculus.u3', true], ['precalculus.u3', true]]), 'precalculus.u2'), 'unseen');
+assert.strictEqual(stateOf({ ...diag([['precalculus.u3', true], ['precalculus.u3', true]]), results: [unitTest('Unit 3', 9, true)] }, 'precalculus.u3'), 'mastered');
+const both = { diagnostics: {
+  mathematics: diagnostic('2026-10-05T10:00:00.000Z', [['precalculus.u3', true], ['precalculus.u3', true]]),
+  'engineering-physics': diagnostic('2026-10-05T11:00:00.000Z', [['precalculus.u3', false]]),
+} };
+assert.strictEqual(stateOf(both, 'precalculus.u3'), 'unseen');
+both.diagnostics['engineering-physics'].takenAt = '2026-10-05T09:00:00.000Z';
+assert.strictEqual(stateOf(both, 'precalculus.u3'), 'proficient');
+
+// Readiness: Pathway skills at Proficient or above, over all its skills.
+const mathematics = catalog.pathways.find((pathway) => pathway.slug === 'mathematics');
+const mathSkills = catalog.skills.filter((skill) => mathematics.courses.includes(skill.course)).length;
+assert.deepStrictEqual(readiness(catalog, computeMastery(catalog, empty), mathematics), { ready: 0, total: mathSkills, percent: 0 });
+const examReady = readiness(catalog, computeMastery(catalog, { ...empty, ...exam }), mathematics);
+assert.deepStrictEqual(examReady, { ready: 6, total: mathSkills, percent: Math.round(600 / mathSkills) });
 
 console.log(`check-mastery: OK (${catalog.skills.length} skills)`);

@@ -25,10 +25,28 @@
     prefix.endsWith('/') ? page.startsWith(prefix) : page === prefix
   ));
 
+  // Each skill's answers from the newest saved diagnostic that tested it.
+  function diagnosticAnswers(diagnostics) {
+    const bySkill = new Map();
+    Object.values(diagnostics || {})
+      .sort((a, b) => String(a.takenAt).localeCompare(String(b.takenAt)))
+      .forEach((attempt) => {
+        const tally = new Map();
+        (attempt.answers || []).forEach(({ skillId, correct }) => {
+          const t = tally.get(skillId) || { asked: 0, correct: 0 };
+          tally.set(skillId, { asked: t.asked + 1, correct: t.correct + (correct ? 1 : 0) });
+        });
+        tally.forEach((t, skillId) => bySkill.set(skillId, t));
+      });
+    return bySkill;
+  }
+
   // evidence: { lessons: { page: iso }, results: [saved test rows],
-  //   problems: { skillId: { attempted, correct } }, completedProjects: [id] }
+  //   problems: { skillId: { attempted, correct } }, completedProjects: [id],
+  //   diagnostics: { pathwaySlug: { takenAt, answers: [{ skillId, correct }] } } }
   function computeMastery(catalog, evidence) {
     const pages = Object.keys(evidence.lessons || {});
+    const diagnostics = diagnosticAnswers(evidence.diagnostics);
     const results = evidence.results || [];
     const completed = new Set(evidence.completedProjects || []);
     const examPassed = new Set(results.filter((row) => row.kind === 'course_exam' && row.passed).map((row) => row.course));
@@ -39,23 +57,33 @@
       const practice = (evidence.problems || {})[skill.id] || { attempted: 0, correct: 0 };
       const lessonsViewed = pages.filter((page) => isLessonOf(skill, page)).length;
       const mastered = tests.some((row) => row.passed) || examPassed.has(skill.course);
+      // A diagnostic raises a unit to Practiced or Proficient, never Mastered.
+      const diagnostic = diagnostics.get(skill.id) || { asked: 0, correct: 0 };
 
       // Each rule raises the state, so the highest one earned wins.
       let state = 'unseen';
       if (lessonsViewed > 0) state = 'learning';
-      if (practice.attempted >= PRACTICED_ATTEMPTS || tests.length > 0) state = 'practiced';
+      if (practice.attempted >= PRACTICED_ATTEMPTS || tests.length > 0 || diagnostic.correct > 0) state = 'practiced';
       if ((practice.attempted >= PROFICIENT_ATTEMPTS && practice.correct / practice.attempted >= PROFICIENT_ACCURACY)
-        || best >= PROFICIENT_UNIT_TEST) state = 'proficient';
+        || best >= PROFICIENT_UNIT_TEST
+        || (diagnostic.asked > 0 && diagnostic.correct === diagnostic.asked)) state = 'proficient';
       if (mastered) state = 'mastered';
       if (mastered && (catalog.capstones[skill.course] || []).some((id) => completed.has(id))) state = 'applied';
 
-      mastery[skill.id] = { state, lessonsViewed, practice, bestUnitTest: tests.length ? best : null };
+      mastery[skill.id] = { state, lessonsViewed, practice, diagnostic, bestUnitTest: tests.length ? best : null };
     });
     return mastery;
   }
 
+  // A Pathway's readiness: its skills at Proficient or above, over all of them.
+  function readiness(catalog, mastery, pathway) {
+    const skills = catalog.skills.filter((skill) => pathway.courses.includes(skill.course));
+    const ready = skills.filter((skill) => STATES.indexOf(mastery[skill.id].state) >= STATES.indexOf('proficient')).length;
+    return { ready, total: skills.length, percent: skills.length ? Math.round(ready * 100 / skills.length) : 0 };
+  }
+
   if (typeof module === 'object' && module.exports) {
-    module.exports = { STATES, LABELS, computeMastery };
+    module.exports = { STATES, LABELS, computeMastery, readiness };
     return;
   }
 
@@ -103,17 +131,24 @@
     return evidence;
   }
 
-  async function studentMastery() {
-    const catalog = await loadCatalog();
+  async function studentEvidence(catalog) {
     const projects = read('stemplus:projects:v1', {});
-    const mastery = computeMastery(catalog, {
+    return {
       lessons: read('stemplus:lessons:v1', {}),
       results: read('stemplus:results:v1', []),
       problems: await problemEvidence(catalog),
       completedProjects: Object.keys(projects).filter((id) => projects[id] && projects[id].complete),
-    });
-    return { catalog, mastery };
+      diagnostics: read('stemplus:diagnostics:v1', {}),
+    };
   }
+
+  async function studentMastery() {
+    const catalog = await loadCatalog();
+    return { catalog, mastery: computeMastery(catalog, await studentEvidence(catalog)) };
+  }
+
+  // For the diagnostic page (assets/diagnostic.js).
+  window.STEMPlusMastery = { STATES, LABELS, computeMastery, readiness, studentEvidence, loadCatalog };
 
   const chip = (state) => `<span class="mastery-chip" data-state="${state}">${LABELS[state]}</span>`;
 
