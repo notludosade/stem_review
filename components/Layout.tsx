@@ -323,10 +323,12 @@ function AuthStatus() {
   const [me, setMe] = useState<Me | null | undefined>(undefined);
 
   useEffect(() => {
-    fetch('/api/me')
-      .then((res) => (res.ok ? res.json() : null))
-      .then(setMe)
-      .catch(() => setMe(null));
+    // Reuse the page's single /api/me request (public/assets/account.js).
+    const account = (window as unknown as { STEMPlusAccount?: { ready: Promise<Me | null> } }).STEMPlusAccount;
+    const request: Promise<Me | null> = account
+      ? account.ready
+      : fetch('/api/me').then((res) => (res.ok ? res.json() : null));
+    request.then(setMe).catch(() => setMe(null));
   }, []);
 
   if (me === undefined) return null;

@@ -138,8 +138,12 @@ window.STEMPlusTests = (function () {
   // between the real dashboard and the locked preview.
   if (typeof window !== 'undefined' && !window.STEMPlusDevReady) {
     window.STEMPlusDev = { isDeveloper: false, me: null };
-    window.STEMPlusDevReady = fetch('/api/me')
-      .then(function (res) { return res.ok ? res.json() : null; })
+    // Reuses the page's single /api/me request from assets/account.js when it's
+    // loaded (every page in the shell); falls back to its own request otherwise.
+    var meRequest = window.STEMPlusAccount
+      ? window.STEMPlusAccount.ready
+      : fetch('/api/me').then(function (res) { return res.ok ? res.json() : null; });
+    window.STEMPlusDevReady = meRequest
       .then(function (me) {
         window.STEMPlusDev.me = me || null;
         window.STEMPlusDev.isDeveloper = !!(me && me.isDeveloper);
@@ -331,6 +335,17 @@ window.STEMPlusTests = (function () {
     }
   }
 
+  // Guests can use everything; saving needs an account (assets/account.js).
+  // Gating happens at the UI action, never inside the storage functions, so
+  // Node checks (where account.js isn't loaded) keep saving as before.
+  function canSave() {
+    return !window.STEMPlusAccount || window.STEMPlusAccount.canSave();
+  }
+
+  function signInHref() {
+    return window.STEMPlusAccount ? window.STEMPlusAccount.signInHref() : '/login.html';
+  }
+
   function normalizeSentenceAnswer(value) {
     return String(value)
       .replace(/[εϵ]/g, ' epsilon ')
@@ -413,10 +428,14 @@ window.STEMPlusTests = (function () {
     }
   }
 
-  function recordAttempt({ course, unit, kind, version, answers }) {
+  function scoreAttempt(kind, answers) {
     const total = answers.length;
     const score = answers.reduce((sum, a) => sum + a.correct, 0);
-    const passed = score / total >= passThresholdFor(kind);
+    return { score, total, passed: score / total >= passThresholdFor(kind) };
+  }
+
+  function recordAttempt({ course, unit, kind, version, answers }) {
+    const { score, total, passed } = scoreAttempt(kind, answers);
     const results = loadResults();
     results.push({
       course, unit, kind, version: version || null,
@@ -848,6 +867,11 @@ window.STEMPlusTests = (function () {
     if (line) { statusEl.textContent = line; statusEl.classList.add('is-saved'); }
 
     el.querySelector('[data-track-plan-save]').addEventListener('click', () => {
+      if (!canSave()) {
+        statusEl.classList.remove('is-saved');
+        statusEl.innerHTML = 'Not saved. <a href="' + signInHref() + '">Sign in</a> to save your plan.';
+        return;
+      }
       const current = loadSkippedCourses();
       Array.from(el.querySelectorAll('[data-track-plan-course]:not(:disabled)')).forEach((box) => {
         const course = box.getAttribute('data-track-plan-course');
@@ -1232,6 +1256,13 @@ window.STEMPlusTests = (function () {
 
     if (!saveBtn) return;
     saveBtn.addEventListener('click', () => {
+      if (!canSave()) {
+        if (status) {
+          status.classList.remove('is-saved');
+          status.innerHTML = 'Not saved. <a href="' + signInHref() + '">Sign in</a> to save your reflection.';
+        }
+        return;
+      }
       const answers = {};
       items.forEach((item) => {
         const key = item.getAttribute('data-key');
@@ -1355,7 +1386,7 @@ window.STEMPlusTests = (function () {
     return null;
   }
 
-  function renderResult(container, { score, total, passed, version, kind, saved }) {
+  function renderResult(container, { score, total, passed, version, kind, saved, guest }) {
     const result = container.querySelector('[data-test-result]');
     if (!result) return;
     const pct = Math.round((score / total) * 100);
@@ -1366,26 +1397,32 @@ window.STEMPlusTests = (function () {
     let html = '<p class="test-result-score">' + score + ' / ' + total + ' (' + pct + '%) — ' +
       (passed ? 'Passed' : 'Not yet — ' + thresholdPct + '% is required to pass') + '</p>';
 
-    if (kind === 'unit_test') {
-      if (passed) {
-        html += '<p class="test-result-note">This unit is cleared. <a href="../index.html" class="nav-toc">Back to course contents</a></p>';
+    // A guest's pass isn't saved, so skip notes that claim progress.
+    if (!(guest && passed)) {
+      if (kind === 'unit_test') {
+        if (passed) {
+          html += '<p class="test-result-note">This unit is cleared. <a href="../index.html" class="nav-toc">Back to course contents</a></p>';
+        } else {
+          const retry = otherVersionHref(version);
+          html += '<p class="test-result-note">Review the questions above, then ' +
+            (retry ? '<a href="' + retry + '">try the other version of this test</a>' : 'try again') + '.</p>';
+        }
+      } else if (kind === 'pathway_exam') {
+        html += '<p class="test-result-note">' + (passed
+          ? 'Pathway exam passed — the rest of this pathway’s route is now unlocked.'
+          : 'Review the questions above, then retake this exam.') + '</p>';
+      } else if (kind === 'pathway_final_exam') {
+        html += '<p class="test-result-note">' + (passed
+          ? 'End-of-Pathway Exam passed — the capstone project is now unlocked.'
+          : 'Review the questions above, then retake this exam.') + '</p>';
       } else {
-        const retry = otherVersionHref(version);
-        html += '<p class="test-result-note">Review the questions above, then ' +
-          (retry ? '<a href="' + retry + '">try the other version of this test</a>' : 'try again') + '.</p>';
+        html += '<p class="test-result-note">' + (passed
+          ? 'Course exam passed — congratulations.'
+          : 'Review your weak topics on the <a href="progress-report.html">progress report</a>, then retake the exam.') + '</p>';
       }
-    } else if (kind === 'pathway_exam') {
-      html += '<p class="test-result-note">' + (passed
-        ? 'Pathway exam passed — the rest of this pathway’s route is now unlocked.'
-        : 'Review the questions above, then retake this exam.') + '</p>';
-    } else if (kind === 'pathway_final_exam') {
-      html += '<p class="test-result-note">' + (passed
-        ? 'End-of-Pathway Exam passed — the capstone project is now unlocked.'
-        : 'Review the questions above, then retake this exam.') + '</p>';
-    } else {
-      html += '<p class="test-result-note">' + (passed
-        ? 'Course exam passed — congratulations.'
-        : 'Review your weak topics on the <a href="progress-report.html">progress report</a>, then retake the exam.') + '</p>';
+    }
+    if (guest) {
+      html += '<p class="test-result-note signin-prompt">This attempt wasn’t saved. <a href="' + signInHref() + '">Sign in</a> to keep your results.</p>';
     }
     if (saved === false) html += '<p class="test-result-note test-result-error">This browser could not save your result (storage may be disabled or full), so this attempt may not be remembered next time.</p>';
 
@@ -1470,7 +1507,9 @@ window.STEMPlusTests = (function () {
       const kind = container.getAttribute('data-kind');
       const version = container.getAttribute('data-version');
 
-      const result = recordAttempt({ course, unit, kind, version, answers });
+      const result = canSave()
+        ? recordAttempt({ course, unit, kind, version, answers })
+        : { ...scoreAttempt(kind, answers), guest: true };
       renderResult(container, { ...result, version, kind });
     });
   }
@@ -1730,44 +1769,18 @@ window.STEMPlusTests = (function () {
     if (body) body.innerHTML = html;
   }
 
-  // Homepage Dashboard: <div data-dashboard></div>. Waits for the signed-in
-  // check (the /api/me request at the top of this file) so a signed-in
-  // visitor never sees the lock flash, then renders the real dashboard or,
-  // when signed out, the locked preview. The lock gates the homepage view
-  // only — progress itself lives in this browser's localStorage.
+  // Homepage Dashboard: <div data-dashboard></div>, inside the homepage's
+  // signed-in section. Waits for the signed-in check (assets/account.js),
+  // then renders the dashboard for signed-in visitors; signed-out visitors
+  // see the homepage's landing section instead (mountAuthSections).
   function mountDashboard(el) {
     if (el.dataset.mounted) return;
     el.dataset.mounted = '1';
     el.innerHTML = '<p class="toc-empty">Loading your dashboard…</p>';
     (window.STEMPlusDevReady || Promise.resolve(false)).then(() => {
       if (window.STEMPlusDev && window.STEMPlusDev.me) renderDashboard(el);
-      else renderLockedDashboard(el);
+      else el.innerHTML = '';
     });
-  }
-
-  // Signed-out homepage: the Dashboard's sections with placeholder rows —
-  // never this browser's real progress — blurred and inert under a lock card.
-  function renderLockedDashboard(el) {
-    const section = (title, rows) => '<h2>' + title + '</h2><div class="toc-list">'
-      + rows.map((row) => '<div class="toc-item"><span class="toc-num">' + row[0] + '</span>'
-        + '<p class="toc-title">' + row[1] + '</p><p class="toc-sub">' + row[2] + '</p></div>').join('')
-      + '</div>';
-    el.innerHTML = '<div class="dashboard-locked">'
-      + '<div class="dashboard-preview" aria-hidden="true" inert>'
-      + section('Continue Learning', [['In progress', 'Your current course', 'Next up: your next unit']])
-      + section('Review', [['62%', 'A topic to revisit', 'From a course you’re taking'], ['71%', 'Another weak spot', 'From a course you’re taking']])
-      + section('Next Milestone', [['Milestone', 'Pass your next unit test', 'Score 80% or higher to clear it and move on.']])
-      + section('Your Path', [['Exam passed · 92% mastery', 'A course you finished', 'Completed'], ['In progress · 64% mastery', 'A course you started', 'Keep going']])
-      + '</div>'
-      + '<div class="dashboard-lock-card" role="region" aria-label="Dashboard locked">'
-      + '<p class="box-label">Dashboard locked</p>'
-      + '<h2>Sign in to see your Dashboard</h2>'
-      + '<p>Your next unit, weak topics, and milestones — built from what you’ve done on this device.</p>'
-      + '<p class="nav-links"><a class="widget-btn" href="login.html?next=%2F">Sign in</a>'
-      + ' <a class="widget-btn" href="login.html?next=%2F#create-account">Create account</a></p>'
-      + '<p><a href="about.html">What is STEM+? →</a></p>'
-      + '</div>'
-      + '</div>';
   }
 
   function trackPickerHtml(active) {
@@ -2043,6 +2056,10 @@ window.STEMPlusTests = (function () {
     }
     const root = el.getAttribute('data-root') || '';
     const render = () => {
+      if (!canSave()) {
+        el.innerHTML = '<p class="track-choice"><a class="widget-btn" href="' + signInHref() + '">Sign in to make this your track</a></p>';
+        return;
+      }
       if (sameTrack(loadActiveTrack(), track)) {
         el.innerHTML = '<p class="track-choice is-active">✓ This is your track — it leads your <a href="' + root + 'index.html">Dashboard</a>. '
           + '<button type="button" class="link-button" data-track-stop>Stop following</button></p>';
@@ -2053,10 +2070,23 @@ window.STEMPlusTests = (function () {
         el.querySelector('[data-track-follow]').addEventListener('click', () => { saveActiveTrack(track); render(); });
       }
     };
-    render();
+    (window.STEMPlusAccount ? window.STEMPlusAccount.ready : Promise.resolve()).then(render);
+  }
+
+  // Homepage: <section data-signed-in hidden> and <section data-signed-out hidden>,
+  // revealed once sign-in state is known; [data-auth-pending] shows until then.
+  function mountAuthSections() {
+    if (!document.querySelector('[data-signed-in], [data-signed-out]')) return;
+    const ready = window.STEMPlusAccount ? window.STEMPlusAccount.ready : Promise.resolve(null);
+    ready.then((me) => {
+      document.querySelectorAll('[data-signed-in]').forEach((section) => { section.hidden = !me; });
+      document.querySelectorAll('[data-signed-out]').forEach((section) => { section.hidden = !!me; });
+      document.querySelectorAll('[data-auth-pending]').forEach((node) => node.remove());
+    });
   }
 
   function initTests() {
+    mountAuthSections();
     document.querySelectorAll('[data-test]').forEach((container) => {
       if (!container.closest('[data-exam-gate], [data-pathway-exam-gate], [data-pathway-final-exam-gate]')) mountTest(container);
     });
