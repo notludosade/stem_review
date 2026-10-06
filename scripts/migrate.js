@@ -24,7 +24,24 @@ async function main() {
   // request in pages/api/generate-plan.js, not embedded in the session
   // token (a token could be stale for up to 30 days).
   await sql`alter table users add column if not exists last_plan_generated_at timestamptz`;
-  console.log('migrate: users table ready');
+  // Report a Problem (pages/api/report.js). Anyone can report, so rows keep
+  // an HMAC of the IP for rate limiting, never the IP itself.
+  await sql`
+    create table if not exists reports (
+      id serial primary key,
+      created_at timestamptz not null default now(),
+      page text not null,
+      page_title text,
+      course text,
+      question_id text,
+      category text not null,
+      description text not null,
+      user_id integer references users(id) on delete set null,
+      ip_hash text not null,
+      resolved_at timestamptz
+    )
+  `;
+  console.log('migrate: users and reports tables ready');
 }
 
 main().catch((err) => {
