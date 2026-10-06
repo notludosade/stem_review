@@ -18,9 +18,12 @@ assert.strictEqual(Object.keys(blank).length, catalog.skills.length);
 assert.ok(Object.values(blank).every((skill) => skill.state === 'unseen'));
 
 // Learning: a lesson in the unit's folder; course.js lessons match exactly.
-assert.strictEqual(stateOf({ lessons: { '/Precalculus/Unit 3/0015-exponential-functions.html': seen } }, 'precalculus.u3'), 'learning');
-assert.strictEqual(stateOf({ lessons: { '/Precalculus/Unit 3/0015-exponential-functions.html': seen } }, 'precalculus.u2'), 'unseen');
-const packageLesson = catalog.skills.find((skill) => skill.id === 'programming-with-packages.u1').pagePrefixes[0];
+const skill = (id) => catalog.skills.find((s) => s.id === id);
+const precalcLesson = skill('precalculus.u3').lessons[0].page;
+assert.strictEqual(stateOf({ lessons: { [precalcLesson]: seen } }, 'precalculus.u3'), 'learning');
+assert.strictEqual(stateOf({ lessons: { [precalcLesson]: seen } }, 'precalculus.u2'), 'unseen');
+assert.strictEqual(stateOf({ lessons: { '/Precalculus/Unit 3/unit-test-a.html': seen } }, 'precalculus.u3'), 'unseen');
+const packageLesson = skill('programming-with-packages.u1').lessons[0].page;
 assert.strictEqual(stateOf({ lessons: { [packageLesson]: seen } }, 'programming-with-packages.u1'), 'learning');
 assert.strictEqual(stateOf({ lessons: { [`${packageLesson}-extra`]: seen } }, 'programming-with-packages.u1'), 'unseen');
 

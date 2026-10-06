@@ -19,9 +19,11 @@ assert.strictEqual(skills.length, expectedSkillCount(), 'every unit (folder or c
 Object.keys(COURSE_PATHS).forEach((course) => assert.ok(skills.some((skill) => skill.course === course), `${course} has no skills`));
 skills.forEach((skill) => {
   assert.match(skill.id, /^[a-z0-9-]+\.u\d+$/, `bad skill ID ${skill.id}`);
-  assert.ok(skill.lessons >= 1, `${skill.id} has no lessons`);
+  assert.ok(skill.lessons.length >= 1, `${skill.id} has no lessons`);
+  const onDisk = (page) => fs.existsSync(path.join(__dirname, '../content', page.split('?')[0]));
+  skill.lessons.forEach((lesson) => assert.ok(lesson.title && onDisk(lesson.page), `${skill.id}: missing lesson ${lesson.page}`));
+  assert.ok(onDisk(skill.testPage), `${skill.id}: missing unit test ${skill.testPage}`);
   skill.prerequisites.forEach((id) => assert.ok(byId.has(id), `${skill.id} requires missing skill ${id}`));
-  assert.ok(skill.pagePrefixes.length >= 1 && skill.pagePrefixes.every((prefix) => prefix.startsWith('/')), `${skill.id} has no lesson pages`);
   assert.ok('problemSet' in skill, `${skill.id} is missing problemSet`);
 });
 
@@ -53,9 +55,11 @@ pin('quantum-computing.u1', null, ['linear-algebra-a.u7', lastUnit('linear-algeb
 assert.ok(byId.has('computer-programming-2-plus.u1') && byId.has('computer-programming-2.u1'));
 pin('programming-with-packages.u1', 'Package Foundations', ['computer-programming-1.u8']);
 const packages = byId.get('programming-with-packages.u1');
-assert.strictEqual(packages.lessons, 3);
-assert.deepStrictEqual(packages.pagePrefixes.map((prefix) => prefix.replace(/=.*/, '=')), Array(3).fill('/Programming with Packages/lesson.html?id='));
-assert.deepStrictEqual(byId.get('precalculus.u3').pagePrefixes, ['/Precalculus/Unit 3/']);
+assert.strictEqual(fresh.version, 2);
+assert.deepStrictEqual(packages.lessons.map((lesson) => lesson.page.replace(/=.*/, '=')), Array(3).fill('/Programming with Packages/lesson.html?id='));
+assert.strictEqual(packages.testPage, '/Programming with Packages/unit-test.html?unit=1');
+assert.strictEqual(byId.get('precalculus.u3').testPage, '/Precalculus/Unit 3/unit-test-a.html');
+assert.deepStrictEqual(byId.get('precalculus.u3').lessons[0], { page: '/Precalculus/Unit 3/0014-exponential-functions-and-their-graphs.html', title: 'Exponential Functions and Their Graphs' });
 assert.strictEqual(byId.get('precalculus.u3').problemSet, 'precalculus');
 
 // Applied needs each course's capstones; every ID must be a real project page.

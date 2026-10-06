@@ -85,8 +85,8 @@ function courseUnits(course, dir) {
     return script.units.map((unit, index) => ({
       number: index + 1,
       name: unit.title,
-      lessons: unit.lessons.length,
-      pagePrefixes: unit.lessons.map((lesson) => `/${dir}/lesson.html?id=${lesson.slug}`),
+      lessons: unit.lessons.map((lesson) => ({ page: `/${dir}/lesson.html?id=${lesson.slug}`, title: lesson.title })),
+      testPage: `/${dir}/unit-test.html?unit=${index + 1}`,
     }));
   }
   const html = fs.readFileSync(path.join(CONTENT, dir, 'index.html'), 'utf8');
@@ -98,10 +98,16 @@ function courseUnits(course, dir) {
   }
   return units.map((unit) => ({
     ...unit,
-    lessons: fs.readdirSync(path.join(CONTENT, dir, `Unit ${unit.number}`)).filter((name) => /^\d{4}-.*\.html$/.test(name)).length,
-    // Lesson pages live under this folder (unit tests too, but only lesson
-    // views are recorded).
-    pagePrefixes: [`/${dir}/Unit ${unit.number}/`],
+    // Lesson pages in order, titled by their <h1>; mastery matches lesson
+    // views against these exact paths.
+    lessons: fs.readdirSync(path.join(CONTENT, dir, `Unit ${unit.number}`))
+      .filter((name) => /^\d{4}-.*\.html$/.test(name))
+      .sort()
+      .map((name) => ({
+        page: `/${dir}/Unit ${unit.number}/${name}`,
+        title: decodeEntities(fs.readFileSync(path.join(CONTENT, dir, `Unit ${unit.number}`, name), 'utf8').match(/<h1>([^<]+)<\/h1>/)[1].trim()),
+      })),
+    testPage: `/${dir}/Unit ${unit.number}/unit-test-a.html`,
   }));
 }
 
@@ -131,11 +137,11 @@ function buildCatalog() {
       : (PREREQUISITE_GRAPH[course] || []).map((before) => idFor(before, units[before][units[before].length - 1].number)),
     problemTopics: topicsByUnit.get(idFor(course, unit.number)) || [],
     problemSet: PROBLEM_SET_SLUGS[course] || null,
-    pagePrefixes: unit.pagePrefixes,
+    testPage: unit.testPage,
   })));
   const capstones = capstonesByCourse();
   return {
-    version: 1,
+    version: 2,
     pathways: PATHWAYS.map(({ name, slug, courses }) => ({ name, slug, courses })),
     capstones: Object.fromEntries(Object.keys(COURSE_PATHS).filter((c) => capstones[c]).map((c) => [c, capstones[c]])),
     skills,

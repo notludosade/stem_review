@@ -19,11 +19,12 @@
   const PROFICIENT_ACCURACY = 0.8;
   const PROFICIENT_UNIT_TEST = 0.7;
 
-  // Folder prefixes ("/Course/Unit 3/") match any page inside; course.js
-  // lesson pages ("…/lesson.html?id=slug") must match exactly.
-  const isLessonOf = (skill, page) => skill.pagePrefixes.some((prefix) => (
-    prefix.endsWith('/') ? page.startsWith(prefix) : page === prefix
-  ));
+  // Lesson views are recorded by exact page (decoded path + search).
+  const isLessonOf = (skill, page) => skill.lessons.some((lesson) => lesson.page === page);
+  const encodePath = (page) => page.split('/').map(encodeURIComponent).join('/');
+  // The course page: the unit test's folder, minus "Unit N/".
+  const courseFolder = (skill) => skill.testPage.replace(/(Unit \d+\/)?unit-test[^/]*$/, '');
+  const courseHref = (skill) => `${encodePath(courseFolder(skill))}index.html`;
 
   // Each skill's answers from the newest saved diagnostic that tested it.
   function diagnosticAnswers(diagnostics) {
@@ -96,8 +97,6 @@
     }
   };
   const escapeHtml = (text) => String(text).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
-  const courseFolder = (skill) => skill.pagePrefixes[0].replace(/(Unit \d+\/|lesson\.html\?id=.*)$/, '');
-  const courseHref = (skill) => `${courseFolder(skill).split('/').map(encodeURIComponent).join('/')}index.html`;
 
   const loadCatalog = () => fetch('/assets/skill-catalog.json').then((res) => res.json());
   const loadBanks = () => (window.STEMProblemBanks ? Promise.resolve(window.STEMProblemBanks) : new Promise((resolve, reject) => {
@@ -148,7 +147,7 @@
   }
 
   // For the diagnostic page (assets/diagnostic.js).
-  window.STEMPlusMastery = { STATES, LABELS, computeMastery, readiness, studentEvidence, loadCatalog };
+  window.STEMPlusMastery = { STATES, LABELS, computeMastery, readiness, studentEvidence, loadCatalog, courseHref };
 
   const chip = (state) => `<span class="mastery-chip" data-state="${state}">${LABELS[state]}</span>`;
 

@@ -72,7 +72,6 @@
       return false;
     }
   };
-  const courseHref = (skill) => `${skill.pagePrefixes[0].replace(/(Unit \d+\/|lesson\.html\?id=.*)$/, '').split('/').map(encodeURIComponent).join('/')}index.html`;
   const pathwaySkills = (catalog, pathway) => pathway.courses.flatMap((course) => catalog.skills.filter((skill) => skill.course === course));
 
   function renderPicker(catalog) {
@@ -180,7 +179,7 @@
     const next = pathwaySkills(catalog, pathway)
       .find((skill) => masteryApi.STATES.indexOf(mastery[skill.id].state) < masteryApi.STATES.indexOf('proficient'));
     const startHere = next
-      ? `<a class="toc-item" href="${escapeHtml(courseHref(next))}"><span class="toc-num">Start here</span><p class="toc-title">${escapeHtml(next.course)} · ${escapeHtml(next.unit)}</p><p class="toc-sub">${escapeHtml(next.name)} — ${masteryApi.LABELS[mastery[next.id].state]}</p></a>`
+      ? `<a class="toc-item" href="${escapeHtml(masteryApi.courseHref(next))}"><span class="toc-num">Start here</span><p class="toc-title">${escapeHtml(next.course)} · ${escapeHtml(next.unit)}</p><p class="toc-sub">${escapeHtml(next.name)} — ${masteryApi.LABELS[mastery[next.id].state]}</p></a>`
       : `<a class="toc-item" href="Projects/${encodeURIComponent(pathway.slug)}-capstone.html"><span class="toc-num">Ready</span><p class="toc-title">You're ready for the ${escapeHtml(pathway.name)} capstone</p><p class="toc-sub">Every skill on this Pathway is at Proficient or above.</p></a>`;
 
     const note = {
