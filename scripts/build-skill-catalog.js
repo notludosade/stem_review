@@ -51,12 +51,37 @@ const PROBLEM_SET_SLUGS = readTable('PROBLEM_SET_SLUGS');
 const courseSlug = (name) => name.toLowerCase().replace(/\+/g, '-plus').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 
 const unitFolders = (dir) => fs.readdirSync(path.join(CONTENT, dir)).filter((name) => /^Unit \d+$/.test(name));
-const unitFolderCount = () => Object.values(COURSE_PATHS).reduce((sum, dir) => sum + unitFolders(dir).length, 0);
+// A few courses (Programming with Packages) build every page from a
+// public/<dir>/course.js data file instead of Unit N folders.
+const courseScript = (dir) => {
+  const file = path.join(ROOT, 'public', dir, 'course.js');
+  return fs.existsSync(file) ? require(file) : null;
+};
+const expectedSkillCount = () => Object.values(COURSE_PATHS)
+  .reduce((sum, dir) => sum + (courseScript(dir) ? courseScript(dir).units.length : unitFolders(dir).length), 0);
+
+// Capstone projects per course, from tests.js PATHWAYS — "Applied" mastery.
+const capstonesByCourse = () => {
+  const capstones = {};
+  for (const m of testsSrc.matchAll(/courses: \[([^\]]*)\], projectId: '([^']+)'/g)) {
+    [...m[1].matchAll(/'([^']+)'/g)].forEach(([, course]) => { capstones[course] = [...(capstones[course] || []), m[2]]; });
+  }
+  return capstones;
+};
 
 const problemSetTopics = () => Object.entries(PROBLEM_SET_SLUGS).flatMap(([course, slug]) =>
   [...new Set(banks.getCourse(slug).questions.map((question) => question.topic))].map((topic) => ({ course, slug, topic })));
 
 function courseUnits(course, dir) {
+  const script = courseScript(dir);
+  if (script) {
+    return script.units.map((unit, index) => ({
+      number: index + 1,
+      name: unit.title,
+      lessons: unit.lessons.length,
+      pagePrefixes: unit.lessons.map((lesson) => `/${dir}/lesson.html?id=${lesson.slug}`),
+    }));
+  }
   const html = fs.readFileSync(path.join(CONTENT, dir, 'index.html'), 'utf8');
   const units = [...html.matchAll(/<summary>\s*Unit (\d+)\s*[:—-]\s*([^<]+)<\/summary>/g)]
     .map((m) => ({ number: Number(m[1]), name: decodeEntities(m[2].trim()) }));
@@ -67,6 +92,9 @@ function courseUnits(course, dir) {
   return units.map((unit) => ({
     ...unit,
     lessons: fs.readdirSync(path.join(CONTENT, dir, `Unit ${unit.number}`)).filter((name) => /^\d{4}-.*\.html$/.test(name)).length,
+    // Lesson pages live under this folder (unit tests too, but only lesson
+    // views are recorded).
+    pagePrefixes: [`/${dir}/Unit ${unit.number}/`],
   }));
 }
 
@@ -95,8 +123,11 @@ function buildCatalog() {
       ? [idFor(course, courseUnitList[index - 1].number)]
       : (PREREQUISITE_GRAPH[course] || []).map((before) => idFor(before, units[before][units[before].length - 1].number)),
     problemTopics: topicsByUnit.get(idFor(course, unit.number)) || [],
+    problemSet: PROBLEM_SET_SLUGS[course] || null,
+    pagePrefixes: unit.pagePrefixes,
   })));
-  return { version: 1, skills };
+  const capstones = capstonesByCourse();
+  return { version: 1, capstones: Object.fromEntries(Object.keys(COURSE_PATHS).filter((c) => capstones[c]).map((c) => [c, capstones[c]])), skills };
 }
 
 const catalogText = (catalog) => `${JSON.stringify(catalog, null, 2)}\n`;
@@ -107,4 +138,4 @@ if (require.main === module) {
   console.log(`wrote ${path.relative(ROOT, CATALOG_FILE)}: ${catalog.skills.length} skills`);
 }
 
-module.exports = { buildCatalog, catalogText, CATALOG_FILE, unitFolderCount, problemSetTopics };
+module.exports = { buildCatalog, catalogText, CATALOG_FILE, expectedSkillCount, problemSetTopics, COURSE_PATHS };

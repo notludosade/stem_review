@@ -6,7 +6,7 @@
 const assert = require('node:assert');
 const fs = require('node:fs');
 const path = require('node:path');
-const { buildCatalog, catalogText, CATALOG_FILE, unitFolderCount, problemSetTopics } = require('./build-skill-catalog');
+const { buildCatalog, catalogText, CATALOG_FILE, expectedSkillCount, problemSetTopics, COURSE_PATHS } = require('./build-skill-catalog');
 
 const fresh = buildCatalog();
 assert.strictEqual(fs.readFileSync(CATALOG_FILE, 'utf8'), catalogText(fresh),
@@ -15,11 +15,14 @@ assert.strictEqual(fs.readFileSync(CATALOG_FILE, 'utf8'), catalogText(fresh),
 const skills = fresh.skills;
 const byId = new Map(skills.map((skill) => [skill.id, skill]));
 assert.strictEqual(byId.size, skills.length, 'duplicate skill IDs');
-assert.strictEqual(skills.length, unitFolderCount(), 'every unit folder needs exactly one skill');
+assert.strictEqual(skills.length, expectedSkillCount(), 'every unit (folder or course.js) needs exactly one skill');
+Object.keys(COURSE_PATHS).forEach((course) => assert.ok(skills.some((skill) => skill.course === course), `${course} has no skills`));
 skills.forEach((skill) => {
   assert.match(skill.id, /^[a-z0-9-]+\.u\d+$/, `bad skill ID ${skill.id}`);
   assert.ok(skill.lessons >= 1, `${skill.id} has no lessons`);
   skill.prerequisites.forEach((id) => assert.ok(byId.has(id), `${skill.id} requires missing skill ${id}`));
+  assert.ok(skill.pagePrefixes.length >= 1 && skill.pagePrefixes.every((prefix) => prefix.startsWith('/')), `${skill.id} has no lesson pages`);
+  assert.ok('problemSet' in skill, `${skill.id} is missing problemSet`);
 });
 
 // Acyclic: depth-first search with an on-stack marker.
@@ -48,5 +51,19 @@ pin('precalculus.u3', 'Exponential and Logarithmic Functions', ['precalculus.u2'
 pin('ap-calculus-bc.u1', 'Limits and Continuity', ['precalculus.u6']);
 pin('quantum-computing.u1', null, ['linear-algebra-a.u7', lastUnit('linear-algebra-b')]);
 assert.ok(byId.has('computer-programming-2-plus.u1') && byId.has('computer-programming-2.u1'));
+pin('programming-with-packages.u1', 'Package Foundations', ['computer-programming-1.u8']);
+const packages = byId.get('programming-with-packages.u1');
+assert.strictEqual(packages.lessons, 3);
+assert.deepStrictEqual(packages.pagePrefixes.map((prefix) => prefix.replace(/=.*/, '=')), Array(3).fill('/Programming with Packages/lesson.html?id='));
+assert.deepStrictEqual(byId.get('precalculus.u3').pagePrefixes, ['/Precalculus/Unit 3/']);
+assert.strictEqual(byId.get('precalculus.u3').problemSet, 'precalculus');
+
+// Applied needs each course's capstones; every ID must be a real project page.
+const courses = new Set(skills.map((skill) => skill.course));
+Object.entries(fresh.capstones).forEach(([course, ids]) => {
+  assert.ok(courses.has(course), `capstones names unknown course ${course}`);
+  ids.forEach((id) => assert.ok(fs.existsSync(path.join(__dirname, '../content/Projects', `${id}.html`)), `no project page for ${id}`));
+});
+assert.ok(fresh.capstones.Precalculus.includes('mathematics-capstone'));
 
 console.log(`check-skill-catalog: OK (${skills.length} skills, ${assigned.length} Problem Set topics)`);
