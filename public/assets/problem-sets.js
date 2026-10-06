@@ -77,6 +77,7 @@
   const explanation = document.querySelector('[data-problem-explanation]');
   const stats = document.querySelector('[data-problem-stats]');
   const resetButton = document.querySelector('[data-problem-reset]');
+  const reportButton = document.querySelector('[data-problem-report]');
 
   document.title = `${course.title} Problem Set — STEM+`;
   document.querySelector('.page').dataset.tier = course.tier;
@@ -138,6 +139,7 @@
     feedback.hidden = false;
     explanation.textContent = current.explanation;
     explanation.hidden = false;
+    reportButton.hidden = false;
     nextButton.hidden = false;
     nextButton.focus();
   };
@@ -156,6 +158,8 @@
     if (!deck.length) rebuildDeck();
     current = deck.shift();
     answered = false;
+    // The shell's Report a problem form prefills this question.
+    window.STEMPlusReportQuestion = current.id;
 
     const filtered = filteredQuestions();
     const position = filtered.length - deck.length;
@@ -167,6 +171,7 @@
     choices.hidden = current.type !== 'choice';
     feedback.hidden = true;
     explanation.hidden = true;
+    reportButton.hidden = true;
     nextButton.hidden = true;
     input.value = '';
     input.disabled = false;
@@ -196,6 +201,9 @@
     if (event.key === 'Enter') checkFill();
   });
   nextButton.addEventListener('click', renderQuestion);
+  reportButton.addEventListener('click', () => {
+    window.dispatchEvent(new CustomEvent('stemplus:report', { detail: { questionId: current.id } }));
+  });
   resetButton.addEventListener('click', () => {
     if (!window.confirm(`Reset saved progress for ${course.title}?`)) return;
     progress = { attempted: {}, correct: {} };

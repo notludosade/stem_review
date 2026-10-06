@@ -121,6 +121,7 @@
 
   const renderStart = () => {
     stopClock();
+    window.STEMPlusReportQuestion = undefined;
     const saved = loadHistory()[course.slug];
     mount.innerHTML = `
       <div class="box why"><span class="box-label">Your benchmark</span>
@@ -146,6 +147,8 @@
 
   const renderQuestion = () => {
     const current = deck[results.length];
+    // The shell's Report a problem form prefills the question on screen.
+    window.STEMPlusReportQuestion = current.id;
     let wrongTries = 0;
     let solved = false;
     mount.innerHTML = `
@@ -261,6 +264,7 @@
 
   const renderResults = () => {
     stopClock();
+    window.STEMPlusReportQuestion = undefined;
     const pct = Math.round(results.reduce((sum, r) => sum + r.score, 0) / results.length);
     const grade = letterGrade(pct);
     const saved = saveRun({ pct, grade, reps: results.length, factor: Number(factor.toFixed(3)), at: new Date().toISOString() });

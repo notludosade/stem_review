@@ -1,7 +1,9 @@
 import Head from 'next/head';
 import Link from 'next/link';
+import { useRouter } from 'next/router';
 import { ChevronDown } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import REPORT_CATEGORIES from '../lib/report-categories';
 import { cn } from '../lib/utils';
 
 interface LayoutProps {
@@ -100,6 +102,22 @@ const LEARN_CATEGORIES: readonly NavCategory[] = [
     ],
   },
 ];
+
+// Course pages show their review status in the footer. Every course starts
+// as AI generated; promote one by adding it here, e.g.
+// 'AP Calculus BC': { status: 'Human reviewed', reviewed: 'November 2026' }.
+// Statuses: Draft, AI generated, Human reviewed, Verified, Needs review.
+const CONTENT_REVIEWS: Readonly<Record<string, { status: string; reviewed?: string }>> = {};
+
+// A page belongs to the Learn-menu course whose folder prefixes its path.
+const COURSE_FOLDERS = LEARN_CATEGORIES.flatMap((category) => category.items).map(
+  ([label, href]) => [label, decodeURIComponent(href.replace(/index\.html$/, ''))] as const
+);
+
+function courseFor(asPath: string): string | null {
+  const pathname = decodeURIComponent(asPath.split(/[?#]/)[0]);
+  return COURSE_FOLDERS.find(([, folder]) => pathname.startsWith(folder))?.[0] ?? null;
+}
 
 const PRACTICE_CATEGORIES: readonly NavCategory[] = [
   {
@@ -343,6 +361,158 @@ function AuthStatus() {
   );
 }
 
+const fieldClass = cn(
+  'w-full rounded-md border border-[var(--site-border)] bg-[var(--site-bg)] px-2 py-1.5 text-sm text-[var(--site-text)]',
+  'focus:border-[var(--site-accent)] focus:outline-none'
+);
+
+// Report a Problem: a native <dialog> on every page. Page scripts prefill the
+// question with window.dispatchEvent(new CustomEvent('stemplus:report',
+// { detail: { questionId } })) or by keeping window.STEMPlusReportQuestion set
+// to the question on screen.
+function ReportProblem({ course }: { course: string | null }) {
+  const dialog = useRef<HTMLDialogElement>(null);
+  const [questionId, setQuestionId] = useState('');
+  const [status, setStatus] = useState<{ text: string; error: boolean } | null>(null);
+  const [sending, setSending] = useState(false);
+
+  const open = useCallback((id?: string) => {
+    const onScreen = (window as unknown as { STEMPlusReportQuestion?: string }).STEMPlusReportQuestion;
+    setQuestionId(id || onScreen || '');
+    setStatus(null);
+    dialog.current?.showModal();
+  }, []);
+
+  useEffect(() => {
+    const onReport = (event: Event) => open((event as CustomEvent<{ questionId?: string }>).detail?.questionId);
+    window.addEventListener('stemplus:report', onReport);
+    return () => window.removeEventListener('stemplus:report', onReport);
+  }, [open]);
+
+  async function submit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const form = event.currentTarget;
+    const fields = new FormData(form);
+    setSending(true);
+    try {
+      const res = await fetch('/api/report', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          page: location.pathname + location.search,
+          pageTitle: document.title,
+          course,
+          questionId,
+          category: fields.get('category'),
+          description: fields.get('description'),
+        }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (res.ok) {
+        form.reset();
+        setQuestionId('');
+        setStatus({ text: 'Thanks — report sent.', error: false });
+      } else {
+        setStatus({ text: data.error || 'Could not send the report. Try again later.', error: true });
+      }
+    } catch {
+      setStatus({ text: 'Could not send the report. Try again later.', error: true });
+    } finally {
+      setSending(false);
+    }
+  }
+
+  return (
+    <>
+      <button type="button" onClick={() => open()} className="text-[var(--site-accent)] hover:underline">
+        Report a problem
+      </button>
+      <dialog
+        ref={dialog}
+        aria-labelledby="report-title"
+        className={cn(
+          'm-auto w-[calc(100%-2rem)] max-w-md rounded-xl border border-[var(--site-border)] bg-[var(--site-bg)] p-5',
+          'text-left text-[var(--site-text)] shadow-xl backdrop:bg-black/60'
+        )}
+      >
+        <form onSubmit={submit} className="grid gap-3 text-sm">
+          <h2 id="report-title" className="text-base font-semibold">
+            Report a problem
+          </h2>
+          <label className="grid gap-1">
+            Category
+            <select name="category" required defaultValue="" className={fieldClass}>
+              <option value="" disabled>
+                Choose one
+              </option>
+              {REPORT_CATEGORIES.map((category: string) => (
+                <option key={category}>{category}</option>
+              ))}
+            </select>
+          </label>
+          <label className="grid gap-1">
+            What&apos;s wrong
+            <textarea name="description" required minLength={5} maxLength={2000} rows={4} className={fieldClass} />
+          </label>
+          <label className="grid gap-1">
+            Which question (optional)
+            <input
+              name="questionId"
+              maxLength={100}
+              value={questionId}
+              onChange={(event) => setQuestionId(event.target.value)}
+              className={fieldClass}
+            />
+          </label>
+          {status && (
+            <p role="status" className={status.error ? 'text-red-400' : 'text-[var(--site-accent)]'}>
+              {status.text}
+            </p>
+          )}
+          <div className="flex justify-end gap-3">
+            <button type="button" onClick={() => dialog.current?.close()} className="text-[var(--site-muted)] hover:underline">
+              Close
+            </button>
+            <button
+              type="submit"
+              disabled={sending}
+              className="rounded-md border border-[var(--site-accent)] px-3 py-1.5 text-[var(--site-accent)] hover:bg-[var(--site-accent-soft)] disabled:opacity-60"
+            >
+              {sending ? 'Sending…' : 'Send report'}
+            </button>
+          </div>
+        </form>
+      </dialog>
+    </>
+  );
+}
+
+function SiteFooter() {
+  const course = courseFor(useRouter().asPath);
+  const review = course ? CONTENT_REVIEWS[course] : undefined;
+  return (
+    <footer
+      className={cn(
+        'flex flex-wrap items-center justify-center gap-x-3 gap-y-1 border-t border-[var(--site-border)]',
+        'px-4 py-4 text-center text-xs text-[var(--site-muted)]'
+      )}
+    >
+      {course && (
+        <>
+          <span data-content-status>
+            {course} · Content status: {review ? review.status : 'AI generated · review in progress'}
+            {review?.reviewed && ` · Last reviewed ${review.reviewed}`}
+          </span>
+          <a href="/about.html#content-review" className="text-[var(--site-accent)] hover:underline">
+            How we review →
+          </a>
+        </>
+      )}
+      <ReportProblem course={course} />
+    </footer>
+  );
+}
+
 export function Layout({ title, children }: LayoutProps) {
   return (
     <>
@@ -374,6 +544,7 @@ export function Layout({ title, children }: LayoutProps) {
         </nav>
       </header>
       <main>{children}</main>
+      <SiteFooter />
     </>
   );
 }
