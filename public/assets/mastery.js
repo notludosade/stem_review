@@ -289,19 +289,82 @@
     }).join('')}</div>`;
   }
 
+  const APPLICATIONS_KEY = 'stemplus:applications:v1';
+
+  // Application page: the concepts it uses (everyone) and, for signed-in
+  // students, their mastery of each plus completion — both "Check your
+  // understanding" questions answered correctly (quiz.js locks each
+  // question after one answer).
+  function mountApplication(el, catalog, mastery) {
+    const slug = (decodeURIComponent(window.location.pathname).match(/\/Applications\/([^/]+)\.html$/) || [])[1];
+    const application = (catalog.applications || []).find((a) => a.slug === slug);
+    if (!application) return;
+    const account = window.STEMPlusAccount;
+    const skillById = new Map(catalog.skills.map((skill) => [skill.id, skill]));
+    const rows = application.skills.map((id) => {
+      const skill = skillById.get(id);
+      const state = mastery && mastery[id].state;
+      const mark = state ? `<span class="concept-mark" aria-hidden="true">${rank(state) >= rank('proficient') ? '✓' : '○'}</span>` : '';
+      return `<li>${mark}<a href="${escapeHtml(encodePath(skill.lessons[0].page))}">${escapeHtml(where(skill))}</a>${state ? ` ${chip(state)}` : ''}</li>`;
+    }).join('');
+    const completed = () => !!read(APPLICATIONS_KEY, {})[slug];
+    el.innerHTML = `<div class="box concepts-box"><span class="box-label">Concepts used</span><ul class="concept-list">${rows}</ul>`
+      + '<p class="concept-status" data-application-status></p></div>';
+    const status = el.querySelector('[data-application-status]');
+    if (!mastery) {
+      status.innerHTML = `<a href="${escapeHtml(account ? account.signInHref() : 'login.html')}">Sign in</a> to record completing this Application.`;
+      return;
+    }
+    status.textContent = completed() ? 'Completed ✓' : 'Answer both questions below correctly to complete this Application.';
+    document.addEventListener('click', (event) => {
+      if (!event.target.closest('[data-quiz] .quiz-choice')) return;
+      const quizzes = [...document.querySelectorAll('[data-quiz]')];
+      if (!quizzes.every((quiz) => [...quiz.querySelectorAll('.quiz-choice')].every((choice) => choice.disabled))) return;
+      if (quizzes.some((quiz) => quiz.querySelector('.is-incorrect'))) {
+        if (!completed()) status.textContent = 'Not quite — reload the page to try both questions again.';
+        return;
+      }
+      if (!completed() && account && account.canSave()) {
+        try {
+          window.localStorage.setItem(APPLICATIONS_KEY, JSON.stringify({ ...read(APPLICATIONS_KEY, {}), [slug]: new Date().toISOString() }));
+        } catch (_) {
+          // Completion just isn't remembered when storage is unavailable.
+        }
+      }
+      status.textContent = 'Completed ✓';
+    });
+  }
+
+  // Applications hub: a Completed chip on each finished Application.
+  function mountHubChips(cards) {
+    const done = read(APPLICATIONS_KEY, {});
+    cards.forEach((card) => {
+      const slug = (card.getAttribute('href').match(/Applications\/([^/]+)\.html$/) || [])[1];
+      const title = card.querySelector('.toc-title');
+      if (!done[slug] || !title || title.querySelector('.mastery-chip')) return;
+      title.insertAdjacentHTML('beforeend', ' <span class="mastery-chip" data-state="applied">Completed</span>');
+    });
+  }
+
   function init() {
     const summary = document.querySelector('[data-mastery-summary]');
     const coursePage = document.querySelector('details.unit-toc');
     const nextEl = document.querySelector('[data-next-step]');
     const reviewEl = document.querySelector('[data-skill-review]');
+    const applicationEl = document.querySelector('[data-application-concepts]');
+    const hubCards = document.querySelectorAll('a.toc-item[href^="Applications/"]');
     const account = window.STEMPlusAccount;
-    if ((!summary && !coursePage && !nextEl && !reviewEl) || !account) return;
+    if (!account || (!summary && !coursePage && !nextEl && !reviewEl && !applicationEl && !hubCards.length)) return;
     account.ready.then((me) => {
-      if (!me) return null;
+      // Guests still see an Application's concepts, without mastery.
+      if (!me) return applicationEl ? loadCatalog().then((catalog) => mountApplication(applicationEl, catalog, null)) : null;
+      if (hubCards.length) mountHubChips(hubCards);
+      if (!summary && !coursePage && !nextEl && !reviewEl && !applicationEl) return null;
       return studentMastery().then(({ catalog, evidence, mastery }) => {
         if (coursePage) mountCourseChips(catalog, mastery);
         if (summary) mountSummary(summary, catalog, mastery);
         if (reviewEl) mountReview(reviewEl, catalog, mastery);
+        if (applicationEl) mountApplication(applicationEl, catalog, mastery);
         if (nextEl) {
           mountNextStep(nextEl, catalog, mastery, evidence);
           window.addEventListener('stemplus:track-change', () => mountNextStep(nextEl, catalog, mastery, evidence));
