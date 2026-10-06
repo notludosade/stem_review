@@ -66,4 +66,12 @@ Object.entries(fresh.capstones).forEach(([course, ids]) => {
 });
 assert.ok(fresh.capstones.Precalculus.includes('mathematics-capstone'));
 
+// Diagnostics are built per Pathway; each slug must be a real Pathway page.
+assert.strictEqual(fresh.pathways.length, 10);
+fresh.pathways.forEach((pathway) => {
+  assert.ok(fs.existsSync(path.join(__dirname, '../content/Pathways', `${pathway.slug}.html`)), `no Pathway page for ${pathway.slug}`);
+  pathway.courses.forEach((course) => assert.ok(courses.has(course), `${pathway.name} lists unknown course ${course}`));
+});
+assert.deepStrictEqual(fresh.pathways.find((p) => p.slug === 'mathematics').courses, ['Precalculus', 'AP Calculus BC', 'Real Analysis A', 'Real Analysis B']);
+
 console.log(`check-skill-catalog: OK (${skills.length} skills, ${assigned.length} Problem Set topics)`);

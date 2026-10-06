@@ -60,12 +60,19 @@ const courseScript = (dir) => {
 const expectedSkillCount = () => Object.values(COURSE_PATHS)
   .reduce((sum, dir) => sum + (courseScript(dir) ? courseScript(dir).units.length : unitFolders(dir).length), 0);
 
-// Capstone projects per course, from tests.js PATHWAYS — "Applied" mastery.
+// tests.js PATHWAYS: diagnostics are built per Pathway, and a completed
+// capstone makes its courses "Applied". The slug names content/Pathways/<slug>.html.
+const PATHWAYS = [...testsSrc.matchAll(/\{ name: '([^']+)', courses: \[([^\]]*)\], projectId: '([^']+)'/g)].map((m) => ({
+  name: m[1],
+  slug: m[3].replace(/-capstone$/, ''),
+  courses: [...m[2].matchAll(/'([^']+)'/g)].map(([, course]) => course),
+  projectId: m[3],
+}));
 const capstonesByCourse = () => {
   const capstones = {};
-  for (const m of testsSrc.matchAll(/courses: \[([^\]]*)\], projectId: '([^']+)'/g)) {
-    [...m[1].matchAll(/'([^']+)'/g)].forEach(([, course]) => { capstones[course] = [...(capstones[course] || []), m[2]]; });
-  }
+  PATHWAYS.forEach((pathway) => pathway.courses.forEach((course) => {
+    capstones[course] = [...(capstones[course] || []), pathway.projectId];
+  }));
   return capstones;
 };
 
@@ -127,7 +134,12 @@ function buildCatalog() {
     pagePrefixes: unit.pagePrefixes,
   })));
   const capstones = capstonesByCourse();
-  return { version: 1, capstones: Object.fromEntries(Object.keys(COURSE_PATHS).filter((c) => capstones[c]).map((c) => [c, capstones[c]])), skills };
+  return {
+    version: 1,
+    pathways: PATHWAYS.map(({ name, slug, courses }) => ({ name, slug, courses })),
+    capstones: Object.fromEntries(Object.keys(COURSE_PATHS).filter((c) => capstones[c]).map((c) => [c, capstones[c]])),
+    skills,
+  };
 }
 
 const catalogText = (catalog) => `${JSON.stringify(catalog, null, 2)}\n`;
