@@ -8,7 +8,7 @@ const catalog = require('../public/assets/skill-catalog.json');
 
 assert.deepStrictEqual(STATES, ['unseen', 'learning', 'practiced', 'proficient', 'mastered', 'applied']);
 
-const empty = { lessons: {}, results: [], problems: {}, completedProjects: [], diagnostics: {} };
+const empty = { lessons: {}, results: [], problems: {}, completedProjects: [], diagnostics: {}, completedApplications: [] };
 const stateOf = (evidence, id) => computeMastery(catalog, { ...empty, ...evidence })[id].state;
 const unitTest = (unit, score, passed, course = 'Precalculus') => ({ course, unit, kind: 'unit_test', score, total: 10, passed });
 const seen = '2026-10-05T00:00:00.000Z';
@@ -49,6 +49,14 @@ assert.strictEqual(stateOf({ results: [{ ...exam.results[0], passed: false }] },
 assert.strictEqual(stateOf({ completedProjects: ['mathematics-capstone'] }, 'precalculus.u3'), 'unseen');
 assert.strictEqual(stateOf({ ...exam, completedProjects: ['mathematics-capstone'] }, 'precalculus.u3'), 'applied');
 assert.strictEqual(stateOf({ ...exam, completedProjects: ['cloud-devops-capstone'] }, 'precalculus.u3'), 'mastered');
+
+// Applications: a completed one makes its listed Mastered skills Applied.
+const satellite = { completedApplications: ['keeping-a-satellite-in-orbit'] };
+const physicsPassed = { results: [unitTest('Unit 2', 9, true, 'AP Physics 1'), unitTest('Unit 3', 9, true, 'AP Physics 1')] };
+assert.strictEqual(stateOf({ ...physicsPassed, ...satellite }, 'ap-physics-1.u2'), 'applied');
+assert.strictEqual(stateOf({ ...physicsPassed, ...satellite }, 'ap-physics-1.u3'), 'mastered');
+assert.strictEqual(stateOf(satellite, 'ap-physics-c-mechanics.u7'), 'unseen');
+assert.strictEqual(stateOf(physicsPassed, 'ap-physics-1.u2'), 'mastered');
 
 // Diagnostics: all right → Proficient, some right → Practiced, none → no
 // change; never Mastered; the newest diagnostic that tested a skill wins.

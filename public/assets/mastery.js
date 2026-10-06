@@ -47,12 +47,17 @@
 
   // evidence: { lessons: { page: iso }, results: [saved test rows],
   //   problems: { skillId: { attempted, correct } }, completedProjects: [id],
-  //   diagnostics: { pathwaySlug: { takenAt, answers: [{ skillId, correct }] } } }
+  //   diagnostics: { pathwaySlug: { takenAt, answers: [{ skillId, correct }] } },
+  //   completedApplications: [slug] }
   function computeMastery(catalog, evidence) {
     const pages = Object.keys(evidence.lessons || {});
     const diagnostics = diagnosticAnswers(evidence.diagnostics);
     const results = evidence.results || [];
     const completed = new Set(evidence.completedProjects || []);
+    // Skills put to work by a completed Application.
+    const appliedByApplication = new Set((catalog.applications || [])
+      .filter((application) => (evidence.completedApplications || []).includes(application.slug))
+      .flatMap((application) => application.skills));
     const examPassed = new Set(results.filter((row) => row.kind === 'course_exam' && row.passed).map((row) => row.course));
     const mastery = {};
     catalog.skills.forEach((skill) => {
@@ -72,7 +77,7 @@
         || best >= PROFICIENT_UNIT_TEST
         || (diagnostic.asked > 0 && diagnostic.correct === diagnostic.asked)) state = 'proficient';
       if (mastered) state = 'mastered';
-      if (mastered && (catalog.capstones[skill.course] || []).some((id) => completed.has(id))) state = 'applied';
+      if (mastered && ((catalog.capstones[skill.course] || []).some((id) => completed.has(id)) || appliedByApplication.has(skill.id))) state = 'applied';
 
       mastery[skill.id] = { state, lessonsViewed, practice, diagnostic, bestUnitTest: tests.length ? best : null };
     });
@@ -178,6 +183,7 @@
       problems: await problemEvidence(catalog),
       completedProjects: Object.keys(projects).filter((id) => projects[id] && projects[id].complete),
       diagnostics: read('stemplus:diagnostics:v1', {}),
+      completedApplications: Object.keys(read('stemplus:applications:v1', {})),
     };
   }
 
