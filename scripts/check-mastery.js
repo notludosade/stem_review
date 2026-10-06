@@ -3,7 +3,7 @@
 // Pins the mastery rules (public/assets/mastery.js) against the real skill
 // catalog: each state's threshold, and which evidence reaches which skill.
 const assert = require('node:assert');
-const { computeMastery, readiness, nextStep, reviewList, STATES } = require('../public/assets/mastery.js');
+const { computeMastery, readiness, courseReadiness, nextStep, reviewList, STATES } = require('../public/assets/mastery.js');
 const catalog = require('../public/assets/skill-catalog.json');
 
 assert.deepStrictEqual(STATES, ['unseen', 'learning', 'practiced', 'proficient', 'mastered', 'applied']);
@@ -117,5 +117,22 @@ assert.deepStrictEqual(list[1].action, { kind: 'test' });
 const many = review({ problems: Object.fromEntries(['u1', 'u2', 'u3', 'u4', 'u6'].map((u) => [`precalculus.${u}`, { attempted: 5, correct: 0 }]).concat([['ap-calculus-bc.u1', { attempted: 5, correct: 0 }], ['ap-calculus-bc.u2', { attempted: 5, correct: 0 }]])) });
 assert.strictEqual(many.length, 5);
 assert.deepStrictEqual(review({}), []);
+
+// courseReadiness: same rule as readiness(), scoped to one course by name
+// instead of a pathway's course list.
+const blankPrecalc = courseReadiness(catalog, blank, 'Precalculus');
+assert.deepStrictEqual(blankPrecalc, { ready: 0, total: 6, percent: 0 });
+
+const onePassed = computeMastery(catalog, { ...empty, results: [unitTest('Unit 1', 9, true)] });
+const onePassedPrecalc = courseReadiness(catalog, onePassed, 'Precalculus');
+assert.deepStrictEqual(onePassedPrecalc, { ready: 1, total: 6, percent: 17 });
+
+// Unknown course name: total 0, never a divide-by-zero NaN.
+const unknown = courseReadiness(catalog, blank, 'Not A Real Course');
+assert.deepStrictEqual(unknown, { ready: 0, total: 0, percent: 0 });
+
+// Matches readiness() exactly when given a one-course "pathway."
+const viaReadiness = readiness(catalog, onePassed, { courses: ['Precalculus'] });
+assert.deepStrictEqual(courseReadiness(catalog, onePassed, 'Precalculus'), viaReadiness);
 
 console.log(`check-mastery: OK (${catalog.skills.length} skills)`);

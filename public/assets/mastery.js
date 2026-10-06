@@ -91,6 +91,15 @@
     return { ready, total: skills.length, percent: skills.length ? Math.round(ready * 100 / skills.length) : 0 };
   }
 
+  // A single course's readiness, by name — same rule as readiness() above,
+  // scoped to one course instead of a pathway's course list. Used by the
+  // Learning Record so its per-course figure agrees with the mastery states
+  // every other mastery-aware page already shows (diagnostics, Applications,
+  // the dashboard), instead of computing its own separate number.
+  function courseReadiness(catalog, mastery, course) {
+    return readiness(catalog, mastery, { courses: [course] });
+  }
+
   const rank = (state) => STATES.indexOf(state);
 
   // The single next action on a track: the first unit (track course order,
@@ -129,7 +138,7 @@
   }
 
   if (typeof module === 'object' && module.exports) {
-    module.exports = { STATES, LABELS, computeMastery, readiness, nextStep, reviewList };
+    module.exports = { STATES, LABELS, computeMastery, readiness, courseReadiness, nextStep, reviewList };
     return;
   }
 
@@ -193,8 +202,9 @@
     return { catalog, evidence, mastery: computeMastery(catalog, evidence) };
   }
 
-  // For the diagnostic page (assets/diagnostic.js).
-  window.STEMPlusMastery = { STATES, LABELS, computeMastery, readiness, studentEvidence, loadCatalog, courseHref };
+  // For the diagnostic page (assets/diagnostic.js) and the Learning Record
+  // (assets/tests.js's mountLearningRecord).
+  window.STEMPlusMastery = { STATES, LABELS, computeMastery, readiness, courseReadiness, studentEvidence, loadCatalog, courseHref };
 
   const chip = (state) => `<span class="mastery-chip" data-state="${state}">${LABELS[state]}</span>`;
 
