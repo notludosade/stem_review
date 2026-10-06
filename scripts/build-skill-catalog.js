@@ -38,6 +38,21 @@ const PROBLEM_TOPIC_UNITS = {
   'advanced-algorithms': { 'Asymptotic analysis': 1, 'Divide and conquer': 2, 'Minimum spanning trees': 3, 'Shortest paths': 4, 'Dynamic programming': 5, 'Bitmask algorithms': 5 },
 };
 
+// Application slug (content/Applications/<slug>.html) → the skills it puts
+// to work. Hand-written; shown as "Concepts used" and counted toward the
+// Applied mastery state.
+const APPLICATION_SKILLS = {
+  'ab-testing-a-feature-launch': ['data-handling-cb.u4', 'data-handling-cb.u6', 'discrete-math.u4'],
+  'bias-in-a-hiring-algorithm': ['computer-programming-ethics.u5', 'data-handling-cb.u4', 'data-handling-cb.u7', 'ai-developer.u9'],
+  'designing-a-roller-coaster-safely': ['ap-physics-1.u2', 'ap-physics-1.u3'],
+  'how-recommendation-engines-work': ['linear-algebra-a.u1', 'linear-algebra-a.u7', 'ai-developer.u3'],
+  'keeping-a-satellite-in-orbit': ['ap-physics-1.u2', 'ap-physics-c-mechanics.u2', 'ap-physics-c-mechanics.u7'],
+  'modeling-an-epidemic': ['ap-calculus-bc.u7', 'differential-equations.u6', 'differential-equations.u7'],
+  'route-planning-like-gps': ['discrete-math.u5', 'computer-programming-2.u3', 'advanced-algorithms.u4'],
+  'scaling-a-viral-app': ['cloud-computing-a.u2', 'cloud-computing-a.u4', 'cloud-computing-a.u6'],
+  'why-your-video-call-freezes': ['computer-networking-fundamentals.u1', 'computer-networking-fundamentals.u2', 'computer-networking-fundamentals.u5'],
+};
+
 // tests.js is a browser script, so its tables are read from source (the same
 // approach check-plan-catalog.js uses).
 const testsSrc = fs.readFileSync(path.join(ROOT, 'public/assets/tests.js'), 'utf8');
@@ -139,10 +154,20 @@ function buildCatalog() {
     problemSet: PROBLEM_SET_SLUGS[course] || null,
     testPage: unit.testPage,
   })));
+  const ids = new Set(skills.map((skill) => skill.id));
+  const applications = fs.readdirSync(path.join(CONTENT, 'Applications')).filter((f) => f.endsWith('.html')).sort().map((file) => {
+    const slug = file.slice(0, -5);
+    const skillIds = APPLICATION_SKILLS[slug];
+    if (!skillIds) throw new Error(`Application ${slug} has no entry in APPLICATION_SKILLS`);
+    skillIds.forEach((id) => { if (!ids.has(id)) throw new Error(`Application ${slug} lists unknown skill ${id}`); });
+    const html = fs.readFileSync(path.join(CONTENT, 'Applications', file), 'utf8');
+    return { slug, title: decodeEntities(html.match(/<h1>([^<]+)<\/h1>/)[1].trim()), skills: skillIds };
+  });
   const capstones = capstonesByCourse();
   return {
     version: 2,
     pathways: PATHWAYS.map(({ name, slug, courses }) => ({ name, slug, courses })),
+    applications,
     capstones: Object.fromEntries(Object.keys(COURSE_PATHS).filter((c) => capstones[c]).map((c) => [c, capstones[c]])),
     skills,
   };

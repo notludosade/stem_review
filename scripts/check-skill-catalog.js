@@ -78,4 +78,14 @@ fresh.pathways.forEach((pathway) => {
 });
 assert.deepStrictEqual(fresh.pathways.find((p) => p.slug === 'mathematics').courses, ['Precalculus', 'AP Calculus BC', 'Real Analysis A', 'Real Analysis B']);
 
+// Applications: every page listed, with its title and real skills.
+const applicationPages = fs.readdirSync(path.join(__dirname, '../content/Applications')).filter((f) => f.endsWith('.html')).map((f) => f.slice(0, -5)).sort();
+assert.deepStrictEqual(fresh.applications.map((a) => a.slug).sort(), applicationPages);
+fresh.applications.forEach((application) => {
+  assert.ok(application.title, `${application.slug} has no title`);
+  assert.ok(application.skills.length >= 2, `${application.slug} lists too few skills`);
+  application.skills.forEach((id) => assert.ok(byId.has(id), `${application.slug} lists missing skill ${id}`));
+});
+assert.strictEqual(fresh.applications.find((a) => a.slug === 'keeping-a-satellite-in-orbit').title, 'Keeping a Satellite in Orbit');
+
 console.log(`check-skill-catalog: OK (${skills.length} skills, ${assigned.length} Problem Set topics)`);
