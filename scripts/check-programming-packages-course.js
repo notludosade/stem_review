@@ -2,8 +2,11 @@
 
 const fs = require('node:fs');
 const path = require('node:path');
-const { course, units, lessons } = require('../Programming with Packages/course.js');
-const root = path.resolve(__dirname, '..');
+// Pages live under content/ (served by the Next.js shell); the course data
+// and shared assets live under public/ (served as static files).
+const { course, units, lessons } = require('../public/Programming with Packages/course.js');
+const root = path.resolve(__dirname, '../content');
+const publicRoot = path.resolve(__dirname, '../public');
 const assert = (condition, message) => { if (!condition) throw new Error(message); };
 
 assert(course === 'Programming with Packages', 'Wrong course name');
@@ -40,7 +43,9 @@ pages.forEach((page) => {
   for (const match of html.matchAll(/(?:href|src)="([^"]+)"/g)) {
     const target = match[1].split(/[?#]/)[0];
     if (!target || /^(?:https?:|mailto:)/.test(target)) continue;
-    assert(fs.existsSync(path.resolve(path.dirname(file), decodeURIComponent(target))), `${page}: broken local reference ${match[1]}`);
+    const resolved = path.resolve(path.dirname(file), decodeURIComponent(target));
+    const exists = fs.existsSync(resolved) || fs.existsSync(path.join(publicRoot, path.relative(root, resolved)));
+    assert(exists, `${page}: broken local reference ${match[1]}`);
     references += 1;
   }
 });
