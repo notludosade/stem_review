@@ -83,8 +83,45 @@
     return { ready, total: skills.length, percent: skills.length ? Math.round(ready * 100 / skills.length) : 0 };
   }
 
+  const rank = (state) => STATES.indexOf(state);
+
+  // The single next action on a track: the first unit (track course order,
+  // then unit order) below Mastered. While it's Unseen or Learning, open its
+  // next unopened lesson; after that, take its unit test.
+  function nextStep(catalog, mastery, evidence, courses) {
+    const viewed = new Set(Object.keys((evidence && evidence.lessons) || {}));
+    const skill = courses.flatMap((course) => catalog.skills.filter((s) => s.course === course))
+      .find((s) => rank(mastery[s.id].state) < rank('mastered'));
+    if (!skill) return { kind: 'done' };
+    if (rank(mastery[skill.id].state) <= rank('learning')) {
+      const lesson = skill.lessons.find((l) => !viewed.has(l.page));
+      if (lesson) return { kind: 'lesson', skill, lesson };
+    }
+    return { kind: 'test', skill };
+  }
+
+  // Units started but not mastered, weakest first by their best evidence.
+  function reviewList(catalog, mastery, limit = 5) {
+    const strength = (m) => Math.max(
+      m.practice.attempted ? m.practice.correct / m.practice.attempted : 0,
+      m.bestUnitTest || 0,
+      m.diagnostic.asked ? m.diagnostic.correct / m.diagnostic.asked : 0,
+    );
+    return catalog.skills
+      .map((skill, index) => ({ skill, index, m: mastery[skill.id] }))
+      .filter(({ m }) => m.state === 'practiced' || m.state === 'proficient')
+      .sort((a, b) => strength(a.m) - strength(b.m) || a.index - b.index)
+      .slice(0, limit)
+      .map(({ skill }) => ({
+        skill,
+        action: skill.problemSet && skill.problemTopics.length
+          ? { kind: 'practice', slug: skill.problemSet, topic: skill.problemTopics[0] }
+          : { kind: 'test' },
+      }));
+  }
+
   if (typeof module === 'object' && module.exports) {
-    module.exports = { STATES, LABELS, computeMastery, readiness };
+    module.exports = { STATES, LABELS, computeMastery, readiness, nextStep, reviewList };
     return;
   }
 

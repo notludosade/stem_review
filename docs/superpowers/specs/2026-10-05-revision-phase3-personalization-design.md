@@ -18,7 +18,7 @@ Spec §9 (Skip-by-Mastery), §10 (Dashboard as recommender). Built on the skill 
 ## 3. Pure helpers in `mastery.js`
 
 - `nextStep(catalog, mastery, evidence, courses)` → for the first skill in `courses` order (then unit order) below Mastered:
-  - state Unseen/Learning and an unopened lesson → `{ kind: 'lesson', skill, lesson, number }` (first unopened lesson, 1-based position in the unit);
+  - state Unseen/Learning and an unopened lesson → `{ kind: 'lesson', skill, lesson }` (first unopened lesson in unit order);
   - otherwise → `{ kind: 'test', skill }`;
   - no such skill → `{ kind: 'done' }`.
 - `reviewList(catalog, mastery)` → up to 5 skills in state Practiced or Proficient, weakest first by their best evidence ratio (max of Problem Set first-try accuracy, best unit-test score, diagnostic share; missing evidence = 0), ties in catalog order; each `{ skill, action }` with action `{ kind: 'practice', slug, topic }` (first `problemTopics` entry) when the skill has a Problem Set, else `{ kind: 'test' }`.
@@ -28,7 +28,7 @@ Spec §9 (Skip-by-Mastery), §10 (Dashboard as recommender). Built on the skill 
 - `<div data-next-step>` before `data-dashboard`: **Your Next Step**.
   - Track from `STEMPlusTests.resolveTrack(STEMPlusTests.loadActiveTrack())` (Pathway or AI plan).
   - Line: "<Track> · NN% ready (R of T skills)" via `readiness`.
-  - Card: lesson → "Lesson N: Title" (links the lesson), sub "Course · Unit N: Name — State"; test → "Take the Unit N test" (links `testPage`), sub "Pass at 80% to master Course · Unit N: Name"; plus "Already know this? Prove mastery →" (testPage) on lesson steps; done → capstone link (Pathway) or "Every course on this plan is mastered".
+  - Card: lesson → "Next lesson: Title" (links the lesson; site lesson numbers run course-wide, so no unit-relative number), sub "Course · Unit N: Name — State"; test → "Take the Unit N test" (links `testPage`), sub "Pass at 80% to master Course · Unit N: Name"; plus "Already know this? Prove mastery →" (testPage) on lesson steps; done → capstone link (Pathway) or "Every course on this plan is mastered".
   - No track: "Pick a track in Continue Learning below, or take a diagnostic" (links `diagnostic.html`).
 - `<div data-skill-review>` after `data-dashboard`: **Review**, `reviewList` rows: practice → "Practise <topic>" linking `problem-set.html?course=<slug>&topic=<topic>`; test → "Retake the Unit N test". Empty: "Nothing to review — units you've started but not mastered show up here."
 - `tests.js` `renderDashboard`: remove the old Review and Next Milestone sections.
