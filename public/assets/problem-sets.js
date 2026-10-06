@@ -42,6 +42,8 @@
     }
   };
   const saveProgress = () => {
+    // Guests can practice freely; progress is only saved for signed-in students.
+    if (typeof window !== 'undefined' && window.STEMPlusAccount && !window.STEMPlusAccount.canSave()) return;
     try {
       localStorage.setItem(storageKey, JSON.stringify(progress));
     } catch (_) {
@@ -89,6 +91,7 @@
     topicSelect.appendChild(option);
   });
 
+  if (typeof window !== 'undefined' && window.STEMPlusAccount) window.STEMPlusAccount.noteIfGuest('Progress on this problem set isn’t saved for guests.');
   let progress = loadProgress();
   let deck = [];
   let current = null;

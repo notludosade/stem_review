@@ -15,8 +15,11 @@
   };
   let state = loadState();
   const saveState = () => {
+    if (typeof window !== 'undefined' && window.STEMPlusAccount && !window.STEMPlusAccount.canSave()) return;
     try { localStorage.setItem(config.storageKey, JSON.stringify(state)); } catch (_) { /* Keep progress in memory. */ }
   };
+  if (typeof window !== 'undefined' && window.STEMPlusAccount) window.STEMPlusAccount.noteIfGuest('Sandbox progress isn’t saved for guests.');
+
   const displayValue = (value) => Array.isArray(value)
     ? `[${value.map(displayValue).join(', ')}]`
     : typeof value === 'string' ? JSON.stringify(value) : String(value);

@@ -15,12 +15,14 @@
     }
   };
   const saveState = () => {
+    if (typeof window !== 'undefined' && window.STEMPlusAccount && !window.STEMPlusAccount.canSave()) return;
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
     } catch (_) {
       // Sandbox still runs if storage is unavailable.
     }
   };
+  if (typeof window !== 'undefined' && window.STEMPlusAccount) window.STEMPlusAccount.noteIfGuest('Sandbox progress isn’t saved for guests.');
   const pythonRepr = (value) => {
     if (value === null) return 'None';
     if (value === true) return 'True';

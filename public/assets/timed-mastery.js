@@ -74,6 +74,10 @@
   if (title) title.textContent = `${course.title} Timed Mastery`;
   if (subtitle) subtitle.textContent = `${course.timedQuestions.length} questions · answer each one correctly, as fast as you can.`;
 
+  // Guests can run Timed Mastery; results are only saved for signed-in students.
+  const signedInOrUnknown = () => !window.STEMPlusAccount || window.STEMPlusAccount.canSave();
+  if (window.STEMPlusAccount) window.STEMPlusAccount.noteIfGuest('Timed Mastery runs aren’t saved for guests.');
+
   const loadHistory = () => {
     try {
       return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
@@ -82,6 +86,7 @@
     }
   };
   const saveRun = (record) => {
+    if (!signedInOrUnknown()) return false;
     const history = loadHistory();
     const previous = history[course.slug] || {};
     history[course.slug] = {
@@ -264,7 +269,9 @@
       <div class="box why" data-timed-result><span class="box-label">Result</span>
         <p class="test-result-score">${grade} · ${pct}%</p>
         <p data-timed-benchmark></p>
-        ${saved ? '' : '<p class="test-result-note test-result-error">This browser couldn’t save this result.</p>'}
+        ${saved ? '' : signedInOrUnknown()
+          ? '<p class="test-result-note test-result-error">This browser couldn’t save this result.</p>'
+          : `<p class="test-result-note signin-prompt">This run wasn’t saved. <a href="${window.STEMPlusAccount.signInHref()}">Sign in</a> to keep your results.</p>`}
       </div>
       <table>
         <thead><tr><th>#</th><th>Topic</th><th>Time</th><th>Wrong tries</th><th>With penalty</th><th>Score</th></tr></thead>

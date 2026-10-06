@@ -23,8 +23,11 @@
     }
   };
   const saveState = () => {
+    if (typeof window !== 'undefined' && window.STEMPlusAccount && !window.STEMPlusAccount.canSave()) return;
     try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (_) { /* Progress remains in memory. */ }
   };
+  if (typeof window !== 'undefined' && window.STEMPlusAccount) window.STEMPlusAccount.noteIfGuest('Sandbox progress isn’t saved for guests.');
+
 
   const javaLiteral = (type, value) => {
     if (type.endsWith('[]')) {

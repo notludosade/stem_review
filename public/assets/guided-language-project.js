@@ -22,8 +22,11 @@
   if (active < 0) active = project.tasks.length - 1;
   const save = () => {
     state.active = active;
+    if (typeof window !== 'undefined' && window.STEMPlusAccount && !window.STEMPlusAccount.canSave()) return;
     try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (_) { /* Keep work in memory. */ }
   };
+  if (typeof window !== 'undefined' && window.STEMPlusAccount) window.STEMPlusAccount.noteIfGuest('Project progress isn’t saved for guests.');
+
 
   const equalSource = `
 const equal = (a, b) => {
