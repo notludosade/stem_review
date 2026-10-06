@@ -21,7 +21,10 @@
 
   // Lesson views are recorded by exact page (decoded path + search).
   const isLessonOf = (skill, page) => skill.lessons.some((lesson) => lesson.page === page);
-  const encodePath = (page) => page.split('/').map(encodeURIComponent).join('/');
+  const encodePath = (page) => {
+    const [pathname, query] = page.split('?');
+    return pathname.split('/').map(encodeURIComponent).join('/') + (query ? `?${query}` : '');
+  };
   // The course page: the unit test's folder, minus "Unit N/".
   const courseFolder = (skill) => skill.testPage.replace(/(Unit \d+\/)?unit-test[^/]*$/, '');
   const courseHref = (skill) => `${encodePath(courseFolder(skill))}index.html`;
@@ -180,7 +183,8 @@
 
   async function studentMastery() {
     const catalog = await loadCatalog();
-    return { catalog, mastery: computeMastery(catalog, await studentEvidence(catalog)) };
+    const evidence = await studentEvidence(catalog);
+    return { catalog, evidence, mastery: computeMastery(catalog, evidence) };
   }
 
   // For the diagnostic page (assets/diagnostic.js).
@@ -196,7 +200,12 @@
       const unit = summary.textContent.match(/^\s*(Unit \d+)/);
       const skill = unit && skills.find((s) => s.unit === unit[1]);
       if (!skill || summary.querySelector('.mastery-chip')) return;
-      summary.insertAdjacentHTML('beforeend', ` ${chip(mastery[skill.id].state)}`);
+      const state = mastery[skill.id].state;
+      // Skip-by-mastery: passing the unit test marks the unit Mastered.
+      const prove = rank(state) < rank('mastered')
+        ? ` <a class="mastery-prove" href="${escapeHtml(encodePath(skill.testPage))}">Prove mastery →</a>`
+        : '';
+      summary.insertAdjacentHTML('beforeend', ` ${chip(state)}${prove}`);
     });
   }
 
@@ -224,16 +233,73 @@
     }).join('')}`;
   }
 
+  const where = (skill) => `${skill.course} · ${skill.unit}: ${skill.name}`;
+
+  // Dashboard: the active track's readiness and its one next action.
+  function mountNextStep(el, catalog, mastery, evidence) {
+    const tests = window.STEMPlusTests;
+    const track = tests && tests.resolveTrack(tests.loadActiveTrack());
+    if (!track) {
+      el.innerHTML = '<h2>Your Next Step</h2><p class="toc-empty">Pick a track in Continue Learning below, or <a href="diagnostic.html">take a diagnostic</a> to see where to start.</p>';
+      return;
+    }
+    const ready = readiness(catalog, mastery, track);
+    const step = nextStep(catalog, mastery, evidence, track.courses);
+    let card;
+    let prove = '';
+    if (step.kind === 'lesson') {
+      card = `<a class="toc-item" href="${escapeHtml(encodePath(step.lesson.page))}"><span class="toc-num">Next lesson</span>`
+        + `<p class="toc-title">${escapeHtml(step.lesson.title)}</p><p class="toc-sub">${escapeHtml(where(step.skill))} — ${LABELS[mastery[step.skill.id].state]}</p></a>`;
+      prove = `<p class="next-step-prove"><a href="${escapeHtml(encodePath(step.skill.testPage))}">Already know this? Prove mastery →</a></p>`;
+    } else if (step.kind === 'test') {
+      card = `<a class="toc-item" href="${escapeHtml(encodePath(step.skill.testPage))}"><span class="toc-num">Unit test</span>`
+        + `<p class="toc-title">Take the ${escapeHtml(step.skill.unit)} test</p><p class="toc-sub">Pass at 80% to master ${escapeHtml(where(step.skill))}</p></a>`;
+    } else if (track.projectId) {
+      card = `<a class="toc-item" href="Projects/${encodeURIComponent(track.projectId)}.html"><span class="toc-num">Capstone</span>`
+        + `<p class="toc-title">${escapeHtml(track.capstoneLabel)}</p><p class="toc-sub">Every unit on this track is mastered.</p></a>`;
+    } else {
+      card = '<p class="toc-empty">Every course on this plan is mastered.</p>';
+    }
+    el.innerHTML = '<h2>Your Next Step</h2>'
+      + `<p class="next-step-track"><a href="${escapeHtml(track.href)}">${escapeHtml(track.label)}</a> · <strong>${ready.percent}% ready</strong> (${ready.ready} of ${ready.total} skills)</p>`
+      + `<div class="toc-list">${card}</div>${prove}`;
+  }
+
+  // Dashboard: units started but not mastered, each with one review action.
+  function mountReview(el, catalog, mastery) {
+    const items = reviewList(catalog, mastery);
+    if (!items.length) {
+      el.innerHTML = '<h2>Review</h2><p class="toc-empty">Nothing to review — units you’ve started but not mastered show up here.</p>';
+      return;
+    }
+    el.innerHTML = `<h2>Review</h2><div class="toc-list">${items.map(({ skill, action }) => {
+      const practice = action.kind === 'practice';
+      const href = practice
+        ? `problem-set.html?course=${encodeURIComponent(action.slug)}&topic=${encodeURIComponent(action.topic)}`
+        : encodePath(skill.testPage);
+      const title = practice ? `Practice ${action.topic}` : `Retake the ${skill.unit} test`;
+      return `<a class="toc-item" href="${escapeHtml(href)}"><span class="toc-num">${LABELS[mastery[skill.id].state]}</span>`
+        + `<p class="toc-title">${escapeHtml(title)}</p><p class="toc-sub">${escapeHtml(where(skill))}</p></a>`;
+    }).join('')}</div>`;
+  }
+
   function init() {
     const summary = document.querySelector('[data-mastery-summary]');
     const coursePage = document.querySelector('details.unit-toc');
+    const nextEl = document.querySelector('[data-next-step]');
+    const reviewEl = document.querySelector('[data-skill-review]');
     const account = window.STEMPlusAccount;
-    if ((!summary && !coursePage) || !account) return;
+    if ((!summary && !coursePage && !nextEl && !reviewEl) || !account) return;
     account.ready.then((me) => {
       if (!me) return null;
-      return studentMastery().then(({ catalog, mastery }) => {
+      return studentMastery().then(({ catalog, evidence, mastery }) => {
         if (coursePage) mountCourseChips(catalog, mastery);
         if (summary) mountSummary(summary, catalog, mastery);
+        if (reviewEl) mountReview(reviewEl, catalog, mastery);
+        if (nextEl) {
+          mountNextStep(nextEl, catalog, mastery, evidence);
+          window.addEventListener('stemplus:track-change', () => mountNextStep(nextEl, catalog, mastery, evidence));
+        }
       });
     }).catch((err) => console.error('Could not load skill mastery', err));
   }

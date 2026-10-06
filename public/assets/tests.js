@@ -1842,12 +1842,14 @@ window.STEMPlusTests = (function () {
     confirm.addEventListener('click', () => {
       const value = el.querySelector('[data-track-select]').value;
       saveActiveTrack(value === 'plan' ? { type: 'plan' } : { type: 'pathway', name: value.slice('pathway:'.length) });
+      // Your Next Step (mastery.js) follows the active track.
+      window.dispatchEvent(new Event('stemplus:track-change'));
       renderDashboard(el);
     });
   }
 
   // The real dashboard — reads every result this browser has ever saved and
-  // renders Continue Learning / Review / Practice / Next Milestone / Your Path
+  // renders Continue Learning / Practice / Your Path
   // from it. No new storage, no new data model — this is purely an
   // aggregation view over loadResults()/buildReport(), the same functions
   // mountProgressReport already uses per-course.
@@ -1896,45 +1898,9 @@ window.STEMPlusTests = (function () {
       html += '<p class="toc-empty">Every course you’ve touched is fully passed. <a href="pathways.html">Start a new one</a>.</p>';
     }
 
-    const allWeak = [];
-    reports.forEach((r) => {
-      r.report.topics.forEach((t) => { if (t.status === 'weak') allWeak.push({ course: r.course, topic: t.topic, accuracy: t.accuracy }); });
-    });
-    allWeak.sort((a, b) => a.accuracy - b.accuracy);
-    html += '<h2>Review</h2>';
-    if (allWeak.length > 0) {
-      html += '<div class="toc-list">';
-      allWeak.slice(0, 5).forEach((t) => {
-        const dir = coursePath(t.course);
-        const href = dir ? dir + '/progress-report.html' : 'pathways.html';
-        html += '<a class="toc-item" href="' + href + '"><span class="toc-num">' + Math.round(t.accuracy * 100) + '%</span>'
-          + '<p class="toc-title">' + t.topic + '</p><p class="toc-sub">' + t.course + '</p></a>';
-      });
-      html += '</div>';
-    } else {
-      html += '<p class="toc-empty">No weak topics identified yet — take a few unit tests and this fills in automatically.</p>';
-    }
-
     html += '<h2>Practice</h2>';
     html += '<div class="toc-list"><a class="toc-item" href="problem-sets.html"><span class="toc-num">Practice</span>'
       + '<p class="toc-title">Problem Sets</p><p class="toc-sub">4,800 questions across 20 courses, filterable by topic.</p></a></div>';
-
-    html += '<h2>Next Milestone</h2>';
-    if (continueItem && nextUnitName) {
-      const dir = coursePath(continueItem.course);
-      const href = dir ? dir + '/' + encodeURIComponent(nextUnitName) + '/unit-test-a.html' : 'pathways.html';
-      html += '<div class="toc-list"><a class="toc-item" href="' + href + '">'
-        + '<span class="toc-num">Milestone</span><p class="toc-title">Pass the ' + nextUnitName + ' test in ' + continueItem.course + '</p>'
-        + '<p class="toc-sub">Score 80% or higher to clear it and move on.</p></a></div>';
-    } else if (continueItem) {
-      const dir = coursePath(continueItem.course);
-      const href = dir ? dir + '/index.html' : 'pathways.html';
-      html += '<div class="toc-list"><a class="toc-item" href="' + href + '">'
-        + '<span class="toc-num">Milestone</span><p class="toc-title">Pick your next unit in ' + continueItem.course + '</p>'
-        + '<p class="toc-sub">Open the course contents to see what comes after what you’ve already cleared.</p></a></div>';
-    } else {
-      html += '<p class="toc-empty">Pick a new course from <a href="pathways.html">Pathways</a> to set your next milestone.</p>';
-    }
 
     html += '<h2>Your Path</h2>';
     html += '<div class="toc-list">';

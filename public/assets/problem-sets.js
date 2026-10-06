@@ -91,6 +91,9 @@
     option.textContent = topic;
     topicSelect.appendChild(option);
   });
+  // Dashboard Review links open a Problem Set on one topic (?topic=).
+  const requestedTopic = new URLSearchParams(window.location.search).get('topic');
+  if (topics.includes(requestedTopic)) topicSelect.value = requestedTopic;
 
   if (typeof window !== 'undefined' && window.STEMPlusAccount) window.STEMPlusAccount.noteIfGuest('Progress on this problem set isn’t saved for guests.');
   let progress = loadProgress();
