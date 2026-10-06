@@ -42,7 +42,7 @@ create table if not exists reports (
 - `pages/api/reports.js` (developer only — session `isDeveloper`, else 403):
   - `GET` → `{ open: [...], resolved: [...] }`: all open reports newest first, and the 50 most recently resolved.
   - `POST { id, resolved: boolean }` → sets or clears `resolved_at`.
-- `content/reports.html` + `public/assets/reports.js`: developer review page listing each report (time, category, course, linked page, question ID, description, signed-in or guest) with a Resolve / Reopen button. Every user-supplied field is rendered with `textContent`. Non-developers see "Reports are only visible to developer accounts." Linked from `content/developer.html`.
+- `content/reports.html` + `public/assets/reports.js`: developer review page listing each report (time, category, course, linked page, question ID, description, reporter email or "guest") with a Resolve / Reopen button. Every user-supplied field is rendered with `textContent`. Non-developers see "Reports are only visible to developer accounts." Linked from `content/developer.html`.
 
 ## 3. Content status (course pages)
 
