@@ -1818,8 +1818,8 @@ window.STEMPlusTests = (function () {
     if (status.next) {
       const dir = coursePath(status.next);
       const href = dir ? dir + '/index.html' : 'pathways.html';
-      sub = status.passed + ' of ' + status.total + ' courses passed · Up next: <a href="' + href + '">' + escapeHtml(status.next) + '</a>'
-        + (status.nextUnit ? ' · ' + escapeHtml(status.nextUnit) : '');
+      // The unit-level next action lives in Your Next Step (mastery.js).
+      sub = status.passed + ' of ' + status.total + ' courses passed · Up next: <a href="' + href + '">' + escapeHtml(status.next) + '</a>';
     } else {
       sub = 'All ' + status.total + ' courses passed · Up next: <a href="Projects/' + resolved.projectId + '.html">' + escapeHtml(resolved.capstoneLabel) + '</a>';
     }
