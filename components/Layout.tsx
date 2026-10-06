@@ -231,6 +231,7 @@ const GOAL_CATEGORIES: readonly NavCategory[] = [
       ['Challenge Myself', '/Goals/challenge-myself.html'],
       ['Review & Test Myself', '/Goals/review-and-test.html'],
       ['Describe Your Own Goal', '/new.html#explore'],
+      ['Take a Diagnostic', '/diagnostic.html'],
       ['My Plan', '/my-plan.html'],
     ],
   },
