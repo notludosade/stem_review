@@ -1908,10 +1908,9 @@ window.STEMPlusTests = (function () {
       const dir = coursePath(r.course);
       const skipped = !isDevMode() && isSkippedCourse(r.course);
       const passed = isCourseExamPassed(r.course);
-      const mastery = courseMastery(r.course);
       const label = skipped ? 'Skipped' : (passed ? 'Exam passed' : 'In progress');
       html += '<a class="toc-item" href="' + (dir ? dir + '/index.html' : 'pathways.html') + '">'
-        + '<span class="toc-num">' + label + (mastery != null ? ' · ' + mastery + '% mastery' : '') + '</span>'
+        + '<span class="toc-num">' + label + '</span>'
         + '<p class="toc-title">' + r.course + '</p></a>';
     });
     html += '</div>';
@@ -1920,10 +1919,6 @@ window.STEMPlusTests = (function () {
     wireTrackCard(el);
   }
 
-  // Cross-course Learning Record: <div data-learning-record></div> — the
-  // "how much have I actually done" view, distinct from the Dashboard's
-  // "what should I do today" view. Stats + per-course mastery percentages +
-  // which capstone projects are unlocked or one course away.
   // Per-course mastery %, sourced from the same skill-state engine
   // (mastery.js) that drives diagnostics, Applications, and the dashboard —
   // not this file's own topic-accuracy average (courseMastery), so the
@@ -1937,7 +1932,7 @@ window.STEMPlusTests = (function () {
     const unknown = () => Object.fromEntries(courseNames.map((course) => [course, null]));
     if (!window.STEMPlusMastery) return Promise.resolve(unknown());
     const m = window.STEMPlusMastery;
-    return m.loadCatalog()
+    const lookup = m.loadCatalog()
       .then((catalog) => m.studentEvidence(catalog).then((evidence) => {
         const mastery = m.computeMastery(catalog, evidence);
         return Object.fromEntries(courseNames.map((course) => {
@@ -1946,8 +1941,17 @@ window.STEMPlusTests = (function () {
         }));
       }))
       .catch(() => unknown());
+    // A stalled (not failed) request would otherwise hang mountLearningRecord
+    // forever — this page used to render synchronously from localStorage
+    // alone with zero network dependency, so bound the wait.
+    const timeout = new Promise((resolve) => setTimeout(() => resolve(unknown()), 5000));
+    return Promise.race([lookup, timeout]);
   }
 
+  // Cross-course Learning Record: <div data-learning-record></div> — the
+  // "how much have I actually done" view, distinct from the Dashboard's
+  // "what should I do today" view. Stats + per-course mastery percentages +
+  // which capstone projects are unlocked or one course away.
   function mountLearningRecord(el) {
     if (el.dataset.mounted) return;
     el.dataset.mounted = '1';

@@ -40,11 +40,12 @@ export const getStaticProps: GetStaticProps<PageProps> = async ({ params }) => {
   const slugParts = (params?.slug as string[] | undefined) || [];
   const fileName = slugParts.length === 0 ? 'index.html' : slugParts.join('/');
   const filePath = path.join(CONTENT_DIR, fileName);
+  const route = slugParts.length === 0 ? '/' : `/${fileName}`;
   let html: string;
   try {
     html = fs.readFileSync(filePath, 'utf8');
   } catch (err) {
-    throw new Error(`Could not read content file "${filePath}" for route "/${fileName}": ${(err as Error).message}`);
+    throw new Error(`Could not read content file "${filePath}" for route "${route}": ${(err as Error).message}`, { cause: err });
   }
   const { title, body } = splitHtmlFragment(html);
   // extractScripts must run on the full `html`, never on `body` alone: 11 of
