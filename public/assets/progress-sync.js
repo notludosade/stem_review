@@ -104,7 +104,14 @@
       return undefined;
     }
   };
-  const nativeSetItem = window.localStorage.setItem.bind(window.localStorage);
+  // Patched on the Storage prototype, not the window.localStorage instance:
+  // localStorage is a WebIDL legacy platform object, so assigning
+  // window.localStorage.setItem = fn hits its named-property setter (storing
+  // "setItem" as a stored item) rather than overriding the method on
+  // spec-faithful implementations — Chrome's non-masking interceptor just
+  // happens to paper over this. Patching the prototype works everywhere.
+  const storage = Object.getPrototypeOf(window.localStorage);
+  const nativeSetItem = storage.setItem.bind(window.localStorage);
   const writeNative = (key, value) => {
     try {
       nativeSetItem(key, JSON.stringify(value));
@@ -144,10 +151,18 @@
   // Every existing feature file (tests.js, mastery.js, diagnostic.js,
   // problem-sets.js, timed-mastery.js) keeps calling localStorage.setItem
   // exactly as it does today — this patch is the only thing that changes.
-  window.localStorage.setItem = function (key, value) {
+  storage.setItem = function (key, value) {
     nativeSetItem(key, value);
     if (isSyncedKey(key) && account.canSave()) schedulePush(key);
   };
+
+  // The full static set of synced keys, not just Object.keys(remote) — a
+  // brand-new account (or any key the server has no row for yet) returns
+  // {} for that key, so visiting only remote's own keys would skip exactly
+  // the "guest progress made before sign-in" keys this pull exists to catch.
+  const ALL_SYNCED_KEYS = Array.from(EXACT_KEYS).concat(
+    PROBLEM_SET_COURSES.map((course) => PROBLEM_SET_PREFIX + course)
+  );
 
   account.ready.then((me) => {
     if (!me) return;
@@ -155,7 +170,8 @@
       .then((res) => (res.ok ? res.json() : null))
       .then((remote) => {
         if (!remote) return;
-        Object.keys(remote).forEach((key) => {
+        const keys = new Set(Object.keys(remote).concat(ALL_SYNCED_KEYS));
+        keys.forEach((key) => {
           if (!isSyncedKey(key)) return;
           const local = read(key);
           const merged = mergeForKey(key, local, remote[key]);
