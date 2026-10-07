@@ -533,6 +533,19 @@ interface CourseReview {
   sources?: string;
 }
 
+// content_reviews is keyed by the skill catalog's course name
+// (public/assets/skill-catalog.json's skill.course), which for two courses
+// differs from the shorter nav label used in LEARN_CATEGORIES above. Map
+// nav label -> catalog course name here so the footer looks up the same
+// row the Developer Panel writes. scripts/check-content-review.js asserts
+// every catalog course is reachable through this map (or matches its nav
+// label directly), so a newly added course with a similarly diverging name
+// fails npm test instead of silently never showing a status.
+const REVIEW_KEYS: Readonly<Record<string, string>> = {
+  'AP Physics C: Electricity & Magnetism': 'AP Physics C: Electricity and Magnetism',
+  'Systems Programming & Architecture': 'Systems Programming & Architecture: CS',
+};
+
 function SiteFooter() {
   const course = courseFor(useRouter().asPath);
   const [reviews, setReviews] = useState<Record<string, CourseReview> | undefined>(undefined);
@@ -544,7 +557,7 @@ function SiteFooter() {
       .catch(() => setReviews({}));
   }, []);
 
-  const review = course && reviews ? reviews[course] : undefined;
+  const review = course && reviews ? reviews[REVIEW_KEYS[course] ?? course] : undefined;
   const reviewedLabel = review?.reviewed
     ? new Date(review.reviewed).toLocaleDateString('en-US', { year: 'numeric', month: 'long' })
     : null;

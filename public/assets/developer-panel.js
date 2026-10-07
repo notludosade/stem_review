@@ -28,7 +28,7 @@
     row.append(label);
 
     const statusText = (status, reviewedAt) =>
-      reviewedAt ? `${status} · last reviewed ${new Date(reviewedAt).toLocaleDateString()}` : status;
+      reviewedAt ? `${status} · last reviewed ${new Date(reviewedAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long' })}` : status;
     const statusLine = paragraph(statusText(current ? current.status : 'AI Generated', current && current.reviewed), 'toc-sub');
     row.append(statusLine);
 

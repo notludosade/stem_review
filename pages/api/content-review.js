@@ -1,6 +1,9 @@
 const { getDb } = require('../../lib/db');
 const { verify } = require('../../lib/session');
 const { isValidStatus } = require('../../lib/content-review');
+const catalog = require('../../public/assets/skill-catalog.json');
+
+const KNOWN_COURSES = new Set(catalog.skills.map((skill) => skill.course));
 
 // Public read (every page footer shows a course's status), developer-only
 // write (content/developer-panel.html).
@@ -24,7 +27,7 @@ module.exports = async (req, res) => {
           sources: row.sources || undefined,
         };
       });
-      res.setHeader('Cache-Control', 'public, max-age=300');
+      res.setHeader('Cache-Control', 'public, max-age=60, s-maxage=300, stale-while-revalidate=600');
       res.statusCode = 200;
       return res.json(byCourse);
     }
@@ -42,7 +45,7 @@ module.exports = async (req, res) => {
 
     const course = typeof req.body?.course === 'string' ? req.body.course.trim() : '';
     const status = req.body?.status;
-    if (!course || !isValidStatus(status)) {
+    if (!KNOWN_COURSES.has(course) || !isValidStatus(status)) {
       res.statusCode = 400;
       return res.json({ error: 'course and a valid status are required' });
     }
