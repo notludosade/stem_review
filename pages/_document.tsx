@@ -8,6 +8,8 @@ export default function Document() {
             (sign-in state, one /api/me request) and must find it already defined. */}
         {/* eslint-disable-next-line @next/next/no-sync-scripts */}
         <script src="/assets/account.js" />
+        {/* eslint-disable-next-line @next/next/no-sync-scripts */}
+        <script src="/assets/progress-sync.js" />
       </Head>
       <body>
         <Main />

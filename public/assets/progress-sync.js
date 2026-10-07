@@ -92,4 +92,82 @@
     module.exports = { PROBLEM_SET_COURSES, isSyncedKey, mergeForKey };
     return;
   }
+
+  const account = window.STEMPlusAccount;
+  if (!account) return;
+
+  const read = (key) => {
+    try {
+      const raw = window.localStorage.getItem(key);
+      return raw === null ? undefined : JSON.parse(raw);
+    } catch (_) {
+      return undefined;
+    }
+  };
+  const nativeSetItem = window.localStorage.setItem.bind(window.localStorage);
+  const writeNative = (key, value) => {
+    try {
+      nativeSetItem(key, JSON.stringify(value));
+    } catch (_) {
+      // Sync just doesn't take effect when storage is unavailable.
+    }
+  };
+
+  let pendingKeys = new Set();
+  let pushTimer = null;
+  const PUSH_DEBOUNCE_MS = 2000;
+
+  function flushPush() {
+    pushTimer = null;
+    const keys = Array.from(pendingKeys);
+    pendingKeys = new Set();
+    if (!keys.length) return;
+    const entries = {};
+    keys.forEach((key) => { entries[key] = read(key); });
+    fetch('/api/progress', {
+      method: 'PUT',
+      credentials: 'same-origin',
+      keepalive: true,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ entries }),
+    }).catch(() => {
+      // Best-effort — the next write, or the next page's pull, retries.
+    });
+  }
+
+  function schedulePush(key) {
+    pendingKeys.add(key);
+    if (pushTimer) window.clearTimeout(pushTimer);
+    pushTimer = window.setTimeout(flushPush, PUSH_DEBOUNCE_MS);
+  }
+
+  // Every existing feature file (tests.js, mastery.js, diagnostic.js,
+  // problem-sets.js, timed-mastery.js) keeps calling localStorage.setItem
+  // exactly as it does today — this patch is the only thing that changes.
+  window.localStorage.setItem = function (key, value) {
+    nativeSetItem(key, value);
+    if (isSyncedKey(key) && account.canSave()) schedulePush(key);
+  };
+
+  account.ready.then((me) => {
+    if (!me) return;
+    fetch('/api/progress', { credentials: 'same-origin' })
+      .then((res) => (res.ok ? res.json() : null))
+      .then((remote) => {
+        if (!remote) return;
+        Object.keys(remote).forEach((key) => {
+          if (!isSyncedKey(key)) return;
+          const local = read(key);
+          const merged = mergeForKey(key, local, remote[key]);
+          writeNative(key, merged);
+          // Local had something the server didn't (e.g. guest progress made
+          // before sign-in) — push it now rather than waiting on an
+          // unrelated future write to carry it up.
+          if (JSON.stringify(merged) !== JSON.stringify(remote[key])) schedulePush(key);
+        });
+      })
+      .catch(() => {
+        // No cloud data yet, or offline — localStorage keeps working alone.
+      });
+  });
 }());
