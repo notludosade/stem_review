@@ -58,7 +58,21 @@ async function main() {
       updated_at timestamptz not null default now()
     )
   `;
-  console.log('migrate: users, reports, and content_reviews tables ready');
+  // Signed-in students' progress, synced across devices
+  // (public/assets/progress-sync.js, pages/api/progress.js). Generic
+  // key/value shape — `key` is one of the 6 localStorage key patterns
+  // progress-sync.js's isSyncedKey() recognizes. Adding a 7th synced key
+  // later needs no schema change, only extending that allowlist.
+  await sql`
+    create table if not exists progress_sync (
+      user_id integer not null references users(id) on delete cascade,
+      key text not null,
+      value jsonb not null,
+      updated_at timestamptz not null default now(),
+      primary key (user_id, key)
+    )
+  `;
+  console.log('migrate: users, reports, content_reviews, and progress_sync tables ready');
 }
 
 main().catch((err) => {
