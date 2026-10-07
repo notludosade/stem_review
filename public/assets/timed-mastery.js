@@ -55,7 +55,7 @@
 
   if (!course || !course.timedQuestions || !baseScale || !answerApi) {
     if (subtitle) subtitle.textContent = '';
-    mount.innerHTML = '<p class="toc-empty">Timed Mastery isn’t available for this course. <a href="problem-sets.html">Back to Problem Sets</a></p>';
+    mount.innerHTML = '<p class="toc-empty">Fluency Training isn’t available for this course. <a href="problem-sets.html">Back to Problem Sets</a></p>';
     return;
   }
 
@@ -69,14 +69,14 @@
     ? `No graded ${course.title} unit tests or exams in this browser yet, so you’re on the standard scale: full credit at or under ${seconds(fast)}, zero at ${seconds(slow)}.`
     : `Tuned to your ${mastery}% ${course.title} mastery: full credit at or under ${seconds(fast)}, zero at ${seconds(slow)}.`;
 
-  document.title = `${course.title} Timed Mastery — STEM+`;
+  document.title = `${course.title} Fluency Training — STEM+`;
   document.querySelector('.page').dataset.tier = course.tier;
-  if (title) title.textContent = `${course.title} Timed Mastery`;
+  if (title) title.textContent = `${course.title} Fluency Training`;
   if (subtitle) subtitle.textContent = `${course.timedQuestions.length} questions · answer each one correctly, as fast as you can.`;
 
-  // Guests can run Timed Mastery; results are only saved for signed-in students.
+  // Guests can run Fluency Training; results are only saved for signed-in students.
   const signedInOrUnknown = () => !window.STEMPlusAccount || window.STEMPlusAccount.canSave();
-  if (window.STEMPlusAccount) window.STEMPlusAccount.noteIfGuest('Timed Mastery runs aren’t saved for guests.');
+  if (window.STEMPlusAccount) window.STEMPlusAccount.noteIfGuest('Fluency Training runs aren’t saved for guests.');
 
   const loadHistory = () => {
     try {

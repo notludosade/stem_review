@@ -116,7 +116,7 @@ function courseFor(asPath: string): string | null {
 
 const PRACTICE_CATEGORIES: readonly NavCategory[] = [
   {
-    label: 'Timed Mastery',
+    label: 'Fluency Training',
     href: '/problem-sets.html',
     items: [
       ['Precalculus (Timed)', '/timed-mastery.html?course=precalculus'],
