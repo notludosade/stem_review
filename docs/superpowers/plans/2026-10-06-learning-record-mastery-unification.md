@@ -168,12 +168,14 @@ In `content/learning-record.html`, find:
 <script src="assets/tests.js" defer></script>
 ```
 
-Change it to (matching the order already used on `content/index.html`, the only other page that loads both):
+Change it to — **`mastery.js` first, then `tests.js`**:
 
 ```html
-<script src="assets/tests.js" defer></script>
 <script src="assets/mastery.js" defer></script>
+<script src="assets/tests.js" defer></script>
 ```
+
+(Corrected during implementation — this plan originally said to match `content/index.html`'s order, `tests.js` then `mastery.js`. That's wrong for this page: `components/LegacyContent.tsx` re-injects `<script>` tags dynamically one at a time, awaiting each one's `load` event — native `defer`/`DOMContentLoaded` ordering doesn't apply. Since the injection happens post-hydration, `document.readyState` is already `'complete'`, so whichever script is processed first runs its own init immediately and synchronously. `mountLearningRecord` reads `window.STEMPlusMastery` at call time, so `mastery.js` must be the one that runs first. `index.html`'s tag order never exercises this dependency — `mastery.js`'s own `init()` mounts its elements independently of `tests.js` having run. `content/diagnostic.html` already uses the correct `mastery.js`-before-`diagnostic.js` order for the same reason — that's the real precedent to match, not `index.html`. Verified by reproducing the failure with the original order and the fix with the corrected order, independently, during both implementation and task review.)
 
 - [ ] **Step 2: Replace mountLearningRecord's mastery lookup**
 
