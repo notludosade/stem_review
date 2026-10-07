@@ -747,7 +747,7 @@ async function main() {
   await new Promise((r) => setTimeout(r, 2500)); // past account.ready + the pull-and-merge
 
   const bSeesA = await evaluate(b.ws, `JSON.parse(localStorage.getItem('stemplus:results:v1') || '[]')`);
-  console.log('Device B sees device A\\'s result:', JSON.stringify(bSeesA.result.value));
+  console.log('Device B sees device A\'s result:', JSON.stringify(bSeesA.result.value));
   const bHasResult = Array.isArray(bSeesA.result.value) && bSeesA.result.value.some((r) => r.course === 'Precalculus' && r.takenAt === '2026-01-01T00:00:00.000Z');
 
   // Device B adds its own, distinct progress on a different course.
