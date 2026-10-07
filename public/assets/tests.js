@@ -1924,6 +1924,30 @@ window.STEMPlusTests = (function () {
   // "how much have I actually done" view, distinct from the Dashboard's
   // "what should I do today" view. Stats + per-course mastery percentages +
   // which capstone projects are unlocked or one course away.
+  // Per-course mastery %, sourced from the same skill-state engine
+  // (mastery.js) that drives diagnostics, Applications, and the dashboard —
+  // not this file's own topic-accuracy average (courseMastery), so the
+  // Learning Record agrees with the rest of the site about how a student is
+  // doing. A course mastery.js doesn't recognize (courseReadiness's `total`
+  // is 0) renders as "—", same as courseMastery's own null case — never
+  // falls back to the old, differently-computed number. Works with no
+  // account: mastery.js's data comes straight from localStorage, the same
+  // place courseMastery already reads from.
+  function getCourseMasteryPercents(courseNames) {
+    const unknown = () => Object.fromEntries(courseNames.map((course) => [course, null]));
+    if (!window.STEMPlusMastery) return Promise.resolve(unknown());
+    const m = window.STEMPlusMastery;
+    return m.loadCatalog()
+      .then((catalog) => m.studentEvidence(catalog).then((evidence) => {
+        const mastery = m.computeMastery(catalog, evidence);
+        return Object.fromEntries(courseNames.map((course) => {
+          const r = m.courseReadiness(catalog, mastery, course);
+          return [course, r.total > 0 ? r.percent : null];
+        }));
+      }))
+      .catch(() => unknown());
+  }
+
   function mountLearningRecord(el) {
     if (el.dataset.mounted) return;
     el.dataset.mounted = '1';
@@ -1940,72 +1964,75 @@ window.STEMPlusTests = (function () {
     const courseNames = [];
     results.forEach((r) => { if (courseNames.indexOf(r.course) === -1) courseNames.push(r.course); });
     skippedCourses.forEach((c) => { if (courseNames.indexOf(c) === -1) courseNames.push(c); });
-    const reports = courseNames.map((course) => ({ course, report: buildReport(course), mastery: courseMastery(course) }));
 
-    const coursesCompleted = reports.filter((r) => isCourseExamPassed(r.course)).length;
-    const unitTestsPassed = reports.reduce((sum, r) => sum + Object.keys(r.report.units).filter((u) => r.report.units[u].cleared).length, 0);
-    const questionsAnswered = results.reduce((sum, r) => sum + (r.topicBreakdown || []).length, 0);
-    const projectsCompleted = Object.keys(projectData).filter((id) => projectData[id].complete).length;
+    getCourseMasteryPercents(courseNames).then((masteryPercents) => {
+      const reports = courseNames.map((course) => ({ course, report: buildReport(course), mastery: masteryPercents[course] }));
 
-    let html = '';
+      const coursesCompleted = reports.filter((r) => isCourseExamPassed(r.course)).length;
+      const unitTestsPassed = reports.reduce((sum, r) => sum + Object.keys(r.report.units).filter((u) => r.report.units[u].cleared).length, 0);
+      const questionsAnswered = results.reduce((sum, r) => sum + (r.topicBreakdown || []).length, 0);
+      const projectsCompleted = Object.keys(projectData).filter((id) => projectData[id].complete).length;
 
-    html += '<div class="toc-list">';
-    [
-      ['Courses Completed', coursesCompleted],
-      ['Unit Tests Passed', unitTestsPassed],
-      ['Questions Answered', questionsAnswered],
-      ['Projects Completed', projectsCompleted],
-    ].forEach((stat) => {
-      html += '<div class="toc-item"><span class="toc-num">' + stat[1] + '</span><p class="toc-title">' + stat[0] + '</p></div>';
-    });
-    html += '</div>';
+      let html = '';
 
-    html += '<h2>Mastery by Course</h2>';
-    if (reports.length > 0) {
       html += '<div class="toc-list">';
-      reports.forEach((r) => {
-        const dir = coursePath(r.course);
-        const href = dir ? dir + '/progress-report.html' : 'pathways.html';
-        const skipped = !isDevMode() && isSkippedCourse(r.course);
-        const label = skipped ? 'Skipped' : (isCourseExamPassed(r.course) ? 'Completed' : 'In progress');
-        html += '<a class="toc-item" href="' + href + '"><span class="toc-num">' + (r.mastery != null ? r.mastery + '%' : '—') + '</span>'
-          + '<p class="toc-title">' + r.course + '</p><p class="toc-sub">' + label + '</p></a>';
+      [
+        ['Courses Completed', coursesCompleted],
+        ['Unit Tests Passed', unitTestsPassed],
+        ['Questions Answered', questionsAnswered],
+        ['Projects Completed', projectsCompleted],
+      ].forEach((stat) => {
+        html += '<div class="toc-item"><span class="toc-num">' + stat[1] + '</span><p class="toc-title">' + stat[0] + '</p></div>';
       });
       html += '</div>';
-    } else {
-      html += '<p class="toc-empty">No graded work yet.</p>';
-    }
 
-    const pathwayStatus = PATHWAYS.map((p) => {
-      const passedCount = p.courses.filter((c) => isCourseExamPassed(c)).length;
-      return { name: p.name, projectId: p.projectId, passedCount, total: p.courses.length };
+      html += '<h2>Mastery by Course</h2>';
+      if (reports.length > 0) {
+        html += '<div class="toc-list">';
+        reports.forEach((r) => {
+          const dir = coursePath(r.course);
+          const href = dir ? dir + '/progress-report.html' : 'pathways.html';
+          const skipped = !isDevMode() && isSkippedCourse(r.course);
+          const label = skipped ? 'Skipped' : (isCourseExamPassed(r.course) ? 'Completed' : 'In progress');
+          html += '<a class="toc-item" href="' + href + '"><span class="toc-num">' + (r.mastery != null ? r.mastery + '%' : '—') + '</span>'
+            + '<p class="toc-title">' + r.course + '</p><p class="toc-sub">' + label + '</p></a>';
+        });
+        html += '</div>';
+      } else {
+        html += '<p class="toc-empty">No graded work yet.</p>';
+      }
+
+      const pathwayStatus = PATHWAYS.map((p) => {
+        const passedCount = p.courses.filter((c) => isCourseExamPassed(c)).length;
+        return { name: p.name, projectId: p.projectId, passedCount, total: p.courses.length };
+      });
+      const ready = pathwayStatus.filter((p) => p.passedCount === p.total && !isProjectComplete(p.projectId));
+      const almostReady = pathwayStatus.filter((p) => p.passedCount > 0 && p.total - p.passedCount === 1);
+
+      html += '<h2>What You’re Ready For</h2>';
+      if (ready.length > 0) {
+        html += '<div class="toc-list">';
+        ready.forEach((p) => {
+          html += '<a class="toc-item" href="Projects/' + p.projectId + '.html"><span class="toc-num">✓ Unlocked</span>'
+            + '<p class="toc-title">' + p.name + ' Capstone</p><p class="toc-sub">Every required course exam passed.</p></a>';
+        });
+        html += '</div>';
+      } else {
+        html += '<p class="toc-empty">No capstone is fully unlocked yet.</p>';
+      }
+
+      if (almostReady.length > 0) {
+        html += '<h3>Almost Ready</h3><div class="toc-list">';
+        almostReady.forEach((p) => {
+          const missing = PATHWAYS.find((x) => x.name === p.name).courses.find((c) => !isCourseExamPassed(c));
+          html += '<a class="toc-item" href="pathways.html"><span class="toc-num">○ ' + p.passedCount + '/' + p.total + '</span>'
+            + '<p class="toc-title">' + p.name + '</p><p class="toc-sub">Recommended next: ' + missing + '</p></a>';
+        });
+        html += '</div>';
+      }
+
+      el.innerHTML = html;
     });
-    const ready = pathwayStatus.filter((p) => p.passedCount === p.total && !isProjectComplete(p.projectId));
-    const almostReady = pathwayStatus.filter((p) => p.passedCount > 0 && p.total - p.passedCount === 1);
-
-    html += '<h2>What You’re Ready For</h2>';
-    if (ready.length > 0) {
-      html += '<div class="toc-list">';
-      ready.forEach((p) => {
-        html += '<a class="toc-item" href="Projects/' + p.projectId + '.html"><span class="toc-num">✓ Unlocked</span>'
-          + '<p class="toc-title">' + p.name + ' Capstone</p><p class="toc-sub">Every required course exam passed.</p></a>';
-      });
-      html += '</div>';
-    } else {
-      html += '<p class="toc-empty">No capstone is fully unlocked yet.</p>';
-    }
-
-    if (almostReady.length > 0) {
-      html += '<h3>Almost Ready</h3><div class="toc-list">';
-      almostReady.forEach((p) => {
-        const missing = PATHWAYS.find((x) => x.name === p.name).courses.find((c) => !isCourseExamPassed(c));
-        html += '<a class="toc-item" href="pathways.html"><span class="toc-num">○ ' + p.passedCount + '/' + p.total + '</span>'
-          + '<p class="toc-title">' + p.name + '</p><p class="toc-sub">Recommended next: ' + missing + '</p></a>';
-      });
-      html += '</div>';
-    }
-
-    el.innerHTML = html;
   }
 
   // "Make this my track" on a Pathway page or the AI plan page:
