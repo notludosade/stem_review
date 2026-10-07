@@ -167,19 +167,23 @@
     const tested = new Set(attempt.answers.map((answer) => answer.skillId)).size;
     const skillCourse = new Map(catalog.skills.map((skill) => [skill.id, skill.course]));
 
+    const tierFor = (ratio) => (ratio >= 0.8 ? ['Strong', 'correct'] : ratio >= 0.5 ? ['Developing', 'proficient'] : ['Needs work', 'incorrect']);
+
     const bars = pathway.courses.map((course) => {
       const asked = attempt.answers.filter((answer) => skillCourse.get(answer.skillId) === course);
       if (!asked.length) return '';
       const correct = asked.filter((answer) => answer.correct).length;
+      const [tierLabel, tierColor] = tierFor(correct / asked.length);
       return `<div class="diag-bar"><span class="diag-course">${escapeHtml(course)}</span>`
         + `<span class="diag-track"><span class="diag-fill" style="width:${Math.round(correct * 100 / asked.length)}%"></span></span>`
-        + `<span class="diag-score">${correct}/${asked.length}</span></div>`;
+        + `<span class="diag-score">${correct}/${asked.length}</span>`
+        + `<span class="diag-tier" style="color:var(--${tierColor})">${tierLabel}</span></div>`;
     }).join('');
 
     const next = pathwaySkills(catalog, pathway)
       .find((skill) => masteryApi.STATES.indexOf(mastery[skill.id].state) < masteryApi.STATES.indexOf('proficient'));
     const startHere = next
-      ? `<a class="toc-item" href="${escapeHtml(masteryApi.courseHref(next))}"><span class="toc-num">Start here</span><p class="toc-title">${escapeHtml(next.course)} · ${escapeHtml(next.unit)}</p><p class="toc-sub">${escapeHtml(next.name)} — ${masteryApi.LABELS[mastery[next.id].state]}</p></a>`
+      ? `<a class="toc-item" href="${escapeHtml(masteryApi.courseHref(next))}"><span class="toc-num">Start here</span><p class="toc-title">${escapeHtml(next.course)} · ${escapeHtml(next.unit)}</p><p class="toc-sub">${escapeHtml(next.name)} — ${masteryApi.LABELS[mastery[next.id].state]}</p><p class="toc-why">Why: it's the first ${escapeHtml(pathway.name)} skill below Proficient, in course order.</p></a>`
       : `<a class="toc-item" href="Projects/${encodeURIComponent(pathway.slug)}-capstone.html"><span class="toc-num">Ready</span><p class="toc-title">You're ready for the ${escapeHtml(pathway.name)} capstone</p><p class="toc-sub">Every skill on this Pathway is at Proficient or above.</p></a>`;
 
     const note = {
