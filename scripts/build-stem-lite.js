@@ -35,7 +35,7 @@ const PROJECTS = [
   { title: 'AI & Data Capstone', slug: 'ai-data-capstone' },
 ];
 
-const BLOCKED_SCRIPTS = new Set(['account.js', 'auth.js', 'frq.js', 'mastery.js', 'reports.js', 'tests.js']);
+const BLOCKED_SCRIPTS = new Set(['account.js', 'auth.js', 'frq.js', 'mastery.js', 'reports.js', 'tests.js', 'lesson-applications.js']);
 const EXCLUDED_PAGE = /(?:^|\/)(?:unit-test-[ab]|course-exam|progress-report)\.html$/;
 
 function mkdir(file) { fs.mkdirSync(path.dirname(file), { recursive: true }); }
