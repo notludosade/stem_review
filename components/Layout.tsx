@@ -105,9 +105,29 @@ const LEARN_CATEGORIES: readonly NavCategory[] = [
 
 // Course pages show their review status in the footer. Every course starts
 // as AI generated; promote one by adding it here, e.g.
-// 'AP Calculus BC': { status: 'Human reviewed', reviewed: 'November 2026' }.
+// 'AP Calculus BC': {
+//   status: 'Verified',
+//   reviewed: 'November 2026',
+//   reviewedBy: 'Jane Doe, math curriculum lead',
+//   verifiedAgainst: 'College Board AP Calculus BC Course and Exam Description',
+//   sources: ['College Board', 'OpenStax Calculus Volume 2'],
+// }.
 // Statuses: Draft, AI generated, Human reviewed, Verified, Needs review.
-const CONTENT_REVIEWS: Readonly<Record<string, { status: string; reviewed?: string }>> = {};
+// reviewedBy/verifiedAgainst/sources only make sense once a human has
+// actually done that work — leave them unset for AI generated/Draft/Needs
+// review entries (or omit the entry entirely, which defaults to AI generated).
+const CONTENT_REVIEWS: Readonly<
+  Record<
+    string,
+    {
+      status: string;
+      reviewed?: string;
+      reviewedBy?: string;
+      verifiedAgainst?: string;
+      sources?: readonly string[];
+    }
+  >
+> = {};
 
 // A page belongs to the Learn-menu course whose folder prefixes its path.
 const COURSE_FOLDERS = LEARN_CATEGORIES.flatMap((category) => category.items).map(
@@ -503,6 +523,9 @@ function SiteFooter() {
           <span data-content-status>
             {course} · Content status: {review ? review.status : 'AI generated · review in progress'}
             {review?.reviewed && ` · Last reviewed ${review.reviewed}`}
+            {review?.verifiedAgainst && ` · Verified against: ${review.verifiedAgainst}`}
+            {review?.reviewedBy && ` · Reviewed by: ${review.reviewedBy}`}
+            {review?.sources && review.sources.length > 0 && ` · Sources: ${review.sources.join(', ')}`}
           </span>
           <a href="/about.html#content-review" className="text-[var(--site-accent)] hover:underline">
             How we review →
