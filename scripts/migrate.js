@@ -41,7 +41,24 @@ async function main() {
       resolved_at timestamptz
     )
   `;
-  console.log('migrate: users and reports tables ready');
+  // Developer-editable per-course review status (content/developer-panel.html,
+  // pages/api/content-review.js). A course with no row defaults to
+  // "AI Generated" — see lib/content-review.js for the full list of allowed
+  // status values. reviewed_by/verified_against/sources are not written by
+  // the panel yet (status-only for now) but exist so they can be set by hand
+  // later without another migration.
+  await sql`
+    create table if not exists content_reviews (
+      course text primary key,
+      status text not null default 'AI Generated',
+      reviewed_at timestamptz,
+      reviewed_by text,
+      verified_against text,
+      sources text,
+      updated_at timestamptz not null default now()
+    )
+  `;
+  console.log('migrate: users, reports, and content_reviews tables ready');
 }
 
 main().catch((err) => {
