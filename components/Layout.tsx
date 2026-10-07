@@ -104,32 +104,6 @@ const LEARN_CATEGORIES: readonly NavCategory[] = [
   },
 ];
 
-// Course pages show their review status in the footer. Every course starts
-// as AI generated; promote one by adding it here, e.g.
-// 'AP Calculus BC': {
-//   status: 'Verified',
-//   reviewed: 'November 2026',
-//   reviewedBy: 'Jane Doe, math curriculum lead',
-//   verifiedAgainst: 'College Board AP Calculus BC Course and Exam Description',
-//   sources: ['College Board', 'OpenStax Calculus Volume 2'],
-// }.
-// Statuses: Draft, AI generated, Human reviewed, Verified, Needs review.
-// reviewedBy/verifiedAgainst/sources only make sense once a human has
-// actually done that work — leave them unset for AI generated/Draft/Needs
-// review entries (or omit the entry entirely, which defaults to AI generated).
-const CONTENT_REVIEWS: Readonly<
-  Record<
-    string,
-    {
-      status: string;
-      reviewed?: string;
-      reviewedBy?: string;
-      verifiedAgainst?: string;
-      sources?: readonly string[];
-    }
-  >
-> = {};
-
 // A page belongs to the Learn-menu course whose folder prefixes its path.
 const COURSE_FOLDERS = LEARN_CATEGORIES.flatMap((category) => category.items).map(
   ([label, href]) => [label, decodeURIComponent(href.replace(/index\.html$/, ''))] as const
@@ -536,9 +510,30 @@ function ReportProblem({ course }: { course: string | null }) {
   );
 }
 
+interface CourseReview {
+  status: string;
+  reviewed?: string;
+  reviewedBy?: string;
+  verifiedAgainst?: string;
+  sources?: string;
+}
+
 function SiteFooter() {
   const course = courseFor(useRouter().asPath);
-  const review = course ? CONTENT_REVIEWS[course] : undefined;
+  const [reviews, setReviews] = useState<Record<string, CourseReview> | undefined>(undefined);
+
+  useEffect(() => {
+    fetch('/api/content-review')
+      .then((res) => (res.ok ? res.json() : {}))
+      .then(setReviews)
+      .catch(() => setReviews({}));
+  }, []);
+
+  const review = course && reviews ? reviews[course] : undefined;
+  const reviewedLabel = review?.reviewed
+    ? new Date(review.reviewed).toLocaleDateString('en-US', { year: 'numeric', month: 'long' })
+    : null;
+
   return (
     <footer
       className={cn(
@@ -549,11 +544,12 @@ function SiteFooter() {
       {course && (
         <>
           <span data-content-status>
-            {course} · Content status: {review ? review.status : 'AI generated · review in progress'}
-            {review?.reviewed && ` · Last reviewed ${review.reviewed}`}
+            {course}
+            {reviews && ` · Content status: ${review ? review.status : 'AI Generated'}`}
+            {reviewedLabel && ` · Last reviewed ${reviewedLabel}`}
             {review?.verifiedAgainst && ` · Verified against: ${review.verifiedAgainst}`}
             {review?.reviewedBy && ` · Reviewed by: ${review.reviewedBy}`}
-            {review?.sources && review.sources.length > 0 && ` · Sources: ${review.sources.join(', ')}`}
+            {review?.sources && ` · Sources: ${review.sources}`}
           </span>
           <a href="/about.html#content-review" className="text-[var(--site-accent)] hover:underline">
             How we review →
