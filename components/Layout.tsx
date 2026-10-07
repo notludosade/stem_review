@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { ChevronDown } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { GlobalSearch, type SearchSeed } from './GlobalSearch';
 import REPORT_CATEGORIES from '../lib/report-categories';
 import { cn } from '../lib/utils';
 
@@ -271,6 +272,33 @@ const GOAL_CATEGORIES: readonly NavCategory[] = [
       ['AI Developer: CB/RWA (Career)', '/Pathways/ai-developer-cbrwa.html'],
     ],
   },
+];
+
+const SEARCH_SEEDS: readonly SearchSeed[] = [
+  ...LEARN_CATEGORIES.flatMap((category) => category.items.map(([title, href]) => ({
+    type: 'COURSE', title, href, context: category.label,
+  }))),
+  ...PRACTICE_CATEGORIES.flatMap((category) => category.items.map(([title, href]) => ({
+    type: 'PRACTICE', title, href, context: category.label,
+  }))),
+  ...BUILD_CATEGORIES.flatMap((category) => category.items.map(([title, href]) => ({
+    type: category.label === 'Sandbox' ? 'SANDBOX' : category.label === 'Applications' ? 'APPLICATION' : 'PROJECT',
+    title,
+    href,
+    context: category.label,
+  }))),
+  ...GOAL_CATEGORIES.flatMap((category) => category.items.map(([title, href]) => ({
+    type: category.label === 'Pathways' ? 'PATHWAY' : 'GOAL', title, href, context: category.label,
+  }))),
+  { type: 'PAGE', title: 'Dashboard', href: '/', keywords: ['home progress next step'] },
+  { type: 'PAGE', title: 'Learning Record', href: '/learning-record.html', keywords: ['mastery progress skills'] },
+  { type: 'PAGE', title: 'Problem Sets', href: '/problem-sets.html', keywords: ['practice questions banks'] },
+  { type: 'PAGE', title: 'Applications', href: '/applications.html', keywords: ['real world concepts'] },
+  { type: 'PAGE', title: 'Projects', href: '/projects.html', keywords: ['build capstones'] },
+  { type: 'PAGE', title: 'Pathways', href: '/pathways.html', keywords: ['roadmaps tracks'] },
+  { type: 'PAGE', title: 'Goals', href: '/new.html', keywords: ['plan roadmap'] },
+  { type: 'PAGE', title: 'Patch Notes', href: '/patch-notes.html', keywords: ['updates changes release'] },
+  { type: 'PAGE', title: 'About STEM+', href: '/about.html', keywords: ['content review accuracy'] },
 ];
 
 interface NavMenuProps {
@@ -580,6 +608,7 @@ export function Layout({ title, children }: LayoutProps) {
           STEM+
         </Link>
         <nav className="flex flex-wrap items-center gap-x-3 gap-y-1 sm:gap-x-6">
+          <GlobalSearch seeds={SEARCH_SEEDS} />
           <NavMenu label="Learn" eyebrow="Courses by subject" categories={LEARN_CATEGORIES} />
           <NavMenu label="Practice" eyebrow="Problem sets & timed drills" categories={PRACTICE_CATEGORIES} />
           <NavMenu label="Build" eyebrow="Code, apply, create" categories={BUILD_CATEGORIES} />
