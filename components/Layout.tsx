@@ -248,21 +248,34 @@ const GOAL_CATEGORIES: readonly NavCategory[] = [
   },
 ];
 
+const SEARCH_KEYWORDS_BY_HREF: Readonly<Record<string, readonly string[]>> = {
+  '/Computer%20Programming%201/index.html': ['python', 'javascript', 'java', 'c++'],
+  '/Computer%20Programming%202/index.html': ['python', 'javascript', 'java', 'c++'],
+  '/Programming%20with%20Packages/index.html': ['python', 'pandas', 'numpy'],
+  '/AI%20Developer/index.html': ['python', 'ai engineer', 'artificial intelligence'],
+  '/pandas-sandbox.html': ['python', 'data analysis'],
+  '/python-projects.html': ['python', 'java', 'javascript', 'c++', 'labs'],
+  '/Pathways/ai-data.html': ['ai engineer', 'machine learning engineer', 'data scientist'],
+  '/Goals/prepare-for-college.html': ['ai engineer', 'computer science career'],
+};
+
 const SEARCH_SEEDS: readonly SearchSeed[] = [
   ...LEARN_CATEGORIES.flatMap((category) => category.items.map(([title, href]) => ({
-    type: 'COURSE', title, href, context: category.label,
+    type: 'COURSE', title, href, context: category.label, keywords: SEARCH_KEYWORDS_BY_HREF[href],
   }))),
   ...PRACTICE_CATEGORIES.flatMap((category) => category.items.map(([title, href]) => ({
-    type: 'PRACTICE', title, href, context: category.label,
+    type: 'PRACTICE', title, href, context: category.label, keywords: SEARCH_KEYWORDS_BY_HREF[href],
   }))),
   ...BUILD_CATEGORIES.flatMap((category) => category.items.map(([title, href]) => ({
-    type: category.label === 'Sandbox' ? 'SANDBOX' : category.label === 'Applications' ? 'APPLICATION' : 'PROJECT',
+    type: href.endsWith('-projects.html') ? 'PROJECT' : category.label === 'Sandbox' ? 'SANDBOX' : category.label === 'Applications' ? 'APPLICATION' : 'PROJECT',
     title,
     href,
     context: category.label,
+    keywords: SEARCH_KEYWORDS_BY_HREF[href],
   }))),
   ...GOAL_CATEGORIES.flatMap((category) => category.items.map(([title, href]) => ({
     type: category.label === 'Pathways' ? 'PATHWAY' : 'GOAL', title, href, context: category.label,
+    keywords: SEARCH_KEYWORDS_BY_HREF[href],
   }))),
   { type: 'PAGE', title: 'Dashboard', href: '/', keywords: ['home progress next step'] },
   { type: 'PAGE', title: 'Learning Record', href: '/learning-record.html', keywords: ['mastery progress skills'] },
@@ -271,6 +284,8 @@ const SEARCH_SEEDS: readonly SearchSeed[] = [
   { type: 'PAGE', title: 'Projects', href: '/projects.html', keywords: ['build capstones'] },
   { type: 'PAGE', title: 'Pathways', href: '/pathways.html', keywords: ['roadmaps tracks'] },
   { type: 'PAGE', title: 'Goals', href: '/new.html', keywords: ['plan roadmap'] },
+  { type: 'CALCULATOR', title: 'Scientific Calculator', href: '/Calculators/scientific.html', context: 'Desmos Tools', keywords: ['math arithmetic trigonometry logarithms fractions'] },
+  { type: 'CALCULATOR', title: 'Graphing Calculator', href: '/Calculators/graphing.html', context: 'Desmos Tools', keywords: ['math graph functions plots tables sliders'] },
   { type: 'PAGE', title: 'Patch Notes', href: '/patch-notes.html', keywords: ['updates changes release'] },
   { type: 'PAGE', title: 'About STEM+', href: '/about.html', keywords: ['content review accuracy'] },
 ];
@@ -593,6 +608,9 @@ export function Layout({ title, children }: LayoutProps) {
       <Head>
         <title>{title}</title>
         <link rel="stylesheet" href="/assets/style.css" />
+        {process.env.NEXT_PUBLIC_DESMOS_API_KEY && (
+          <meta name="desmos-api-key" content={process.env.NEXT_PUBLIC_DESMOS_API_KEY} />
+        )}
       </Head>
       <header
         className={cn(
@@ -609,6 +627,12 @@ export function Layout({ title, children }: LayoutProps) {
           <NavMenu label="Practice" eyebrow="Problem sets & timed drills" categories={PRACTICE_CATEGORIES} />
           <NavMenu label="Build" eyebrow="Code, apply, create" categories={BUILD_CATEGORIES} />
           <NavMenu label="Goals" eyebrow="Where you're headed" categories={GOAL_CATEGORIES} />
+          <a
+            href="/calculators.html"
+            className="text-sm whitespace-nowrap text-[var(--site-text)] hover:text-[var(--site-accent)]"
+          >
+            Calculators
+          </a>
           <a
             href="/about.html"
             className="text-sm whitespace-nowrap text-[var(--site-text)] hover:text-[var(--site-accent)]"

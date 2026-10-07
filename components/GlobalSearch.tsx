@@ -14,6 +14,8 @@ export interface SearchSeed {
 interface SearchEntry extends SearchSeed {
   searchText: string;
   label?: string;
+  matchTerms?: string[];
+  correctedQuery?: string;
   score?: number;
 }
 
@@ -24,10 +26,27 @@ interface SkillCatalog {
   capstones: Record<string, string[]>;
 }
 
-const { buildSearchIndex, searchIndex } = searchApi as {
+const { buildSearchIndex, searchIndex, normalize } = searchApi as {
   buildSearchIndex: (catalog: SkillCatalog, seeds: readonly SearchSeed[]) => SearchEntry[];
   searchIndex: (entries: SearchEntry[], query: string, limit?: number) => SearchEntry[];
+  normalize: (value: string) => string;
 };
+
+const SUGGESTIONS = ['chain rule', 'satellite', 'python', 'AI engineer'];
+const GROUP_ORDER = ['LESSON', 'PRACTICE', 'COURSE', 'SKILL', 'APPLICATION', 'SANDBOX', 'PROJECT', 'CALCULATOR', 'PATHWAY', 'GOAL', 'RELATED', 'PAGE'];
+
+function HighlightedText({ text, terms = [] }: { text: string; terms?: string[] }) {
+  const sortedTerms = terms.filter(Boolean).sort((left, right) => right.length - left.length);
+  const patterns = sortedTerms
+    .map((term) => term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+  if (!patterns.length) return text;
+  const expression = new RegExp(`(${patterns.join('|')})`, 'gi');
+  return <>{text.split(expression).map((part, index) => (
+    sortedTerms.some((term) => normalize(part) === normalize(term))
+      ? <mark key={`${part}-${index}`} className="rounded-sm bg-amber-200 px-0.5 text-inherit dark:bg-amber-800">{part}</mark>
+      : part
+  ))}</>;
+}
 
 export function GlobalSearch({ seeds }: { seeds: readonly SearchSeed[] }) {
   const dialog = useRef<HTMLDialogElement>(null);
@@ -37,7 +56,16 @@ export function GlobalSearch({ seeds }: { seeds: readonly SearchSeed[] }) {
   const [query, setQuery] = useState('');
   const [active, setActive] = useState(0);
   const [error, setError] = useState(false);
-  const results = useMemo(() => entries ? searchIndex(entries, query) : [], [entries, query]);
+  const results = useMemo(() => entries ? searchIndex(entries, query, entries.length) : [], [entries, query]);
+  const groupedResults = useMemo(() => {
+    let index = 0;
+    return GROUP_ORDER.map((label) => ({
+      label,
+      items: results.filter((result) => (result.label || result.type) === label).slice(0, 3).map((result) => ({ result, index: index++ })),
+    })).filter((group) => group.items.length > 0);
+  }, [results]);
+  const displayedResults = groupedResults.flatMap((group) => group.items.map(({ result }) => result));
+  const correctedQuery = results.find((result) => result.correctedQuery)?.correctedQuery || '';
 
   const load = useCallback(() => {
     if (entries || loading.current) return loading.current;
@@ -82,16 +110,26 @@ export function GlobalSearch({ seeds }: { seeds: readonly SearchSeed[] }) {
   }, [active]);
 
   const onInputKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
-    if (!results.length) return;
+    if (!displayedResults.length) return;
     if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
       event.preventDefault();
-      setActive((current) => (current + (event.key === 'ArrowDown' ? 1 : -1) + results.length) % results.length);
+      setActive((current) => (current + (event.key === 'ArrowDown' ? 1 : -1) + displayedResults.length) % displayedResults.length);
     }
     if (event.key === 'Enter') {
       event.preventDefault();
-      window.location.assign(results[active].href);
+      window.location.assign((displayedResults[active] || displayedResults[0]).href);
     }
   };
+
+  const suggestions = (
+    <div className="flex flex-wrap justify-center gap-2 px-3 pb-6">
+      {SUGGESTIONS.map((suggestion) => (
+        <button key={suggestion} type="button" onClick={() => { setQuery(suggestion); input.current?.focus(); }} className="rounded-full border border-[var(--site-border)] px-3 py-1.5 text-xs text-[var(--site-accent)] hover:bg-[var(--site-accent-soft)]">
+          {suggestion}
+        </button>
+      ))}
+    </div>
+  );
 
   return (
     <>
@@ -134,7 +172,7 @@ export function GlobalSearch({ seeds }: { seeds: readonly SearchSeed[] }) {
             role="combobox"
             aria-expanded={query.length > 0}
             aria-controls="global-search-results"
-            aria-activedescendant={results.length ? `search-result-${active}` : undefined}
+            aria-activedescendant={displayedResults.length ? `search-result-${active}` : undefined}
             className="min-w-0 flex-1 bg-transparent py-2 text-base outline-none placeholder:text-[var(--site-muted)]"
           />
           <button type="button" onClick={() => dialog.current?.close()} aria-label="Close search" className="rounded-md p-1 text-[var(--site-muted)] hover:bg-[var(--site-accent-soft)] hover:text-[var(--site-text)]">
@@ -144,25 +182,30 @@ export function GlobalSearch({ seeds }: { seeds: readonly SearchSeed[] }) {
         <div id="global-search-results" role="listbox" className="max-h-[min(65vh,36rem)] overflow-y-auto p-2">
           {!entries && !error && <p className="px-3 py-8 text-center text-sm text-[var(--site-muted)]">Loading the STEM+ catalog…</p>}
           {error && <p className="px-3 py-8 text-center text-sm text-red-500">Search could not load. Close this window and try again.</p>}
-          {entries && !query && <p className="px-3 py-8 text-center text-sm text-[var(--site-muted)]">Type a concept, course, lesson, skill, project, or tool.</p>}
-          {entries && query && results.length === 0 && <p className="px-3 py-8 text-center text-sm text-[var(--site-muted)]">No results for “{query}”. Try a shorter phrase.</p>}
-          {results.map((result, index) => (
-            <a
-              key={`${result.type}-${result.href}-${result.title}`}
-              id={`search-result-${index}`}
-              role="option"
-              aria-selected={index === active}
-              href={result.href}
-              onMouseMove={() => setActive(index)}
-              className={cn(
-                'grid gap-0.5 rounded-xl px-3 py-2.5 no-underline',
-                index === active ? 'bg-[var(--site-accent-soft)]' : 'hover:bg-[var(--site-accent-soft)]'
-              )}
-            >
-              <span className="text-[10px] font-semibold tracking-wider text-[var(--site-accent)] uppercase">{result.label || result.type}</span>
-              <span className="font-medium text-[var(--site-text)]">{result.title}</span>
-              {result.context && <span className="text-xs text-[var(--site-muted)]">{result.context}</span>}
-            </a>
+          {entries && !query && <><p className="px-3 pt-8 pb-4 text-center text-sm text-[var(--site-muted)]">Search the whole curriculum, or try one of these.</p>{suggestions}</>}
+          {entries && query && results.length === 0 && <><p className="px-3 pt-8 pb-4 text-center text-sm text-[var(--site-muted)]">No results for “{query}”. Try a broader search.</p>{suggestions}</>}
+          {correctedQuery && <p className="px-3 py-2 text-xs text-[var(--site-muted)]">Showing results for <button type="button" onClick={() => setQuery(correctedQuery)} className="font-semibold text-[var(--site-accent)] hover:underline">{correctedQuery}</button></p>}
+          {groupedResults.map((group) => (
+            <section key={group.label} aria-labelledby={`search-group-${group.label}`} className="border-t border-[var(--site-border)] first:border-t-0">
+              <h3 id={`search-group-${group.label}`} className="px-3 pt-3 pb-1 text-[10px] font-semibold tracking-wider text-[var(--site-muted)] uppercase">{group.label}</h3>
+              {group.items.map(({ result, index }) => (
+                <a
+                  key={`${result.type}-${result.href}-${result.title}`}
+                  id={`search-result-${index}`}
+                  role="option"
+                  aria-selected={index === active}
+                  href={result.href}
+                  onMouseMove={() => setActive(index)}
+                  className={cn(
+                    'grid gap-0.5 rounded-xl px-3 py-2.5 no-underline',
+                    index === active ? 'bg-[var(--site-accent-soft)]' : 'hover:bg-[var(--site-accent-soft)]'
+                  )}
+                >
+                  <span className="font-medium text-[var(--site-text)]"><HighlightedText text={result.title} terms={result.matchTerms} /></span>
+                  {result.context && <span className="text-xs text-[var(--site-muted)]"><HighlightedText text={result.context} terms={result.matchTerms} /></span>}
+                </a>
+              ))}
+            </section>
           ))}
         </div>
         <p className="border-t border-[var(--site-border)] px-4 py-2 text-xs text-[var(--site-muted)]">↑↓ choose · Enter open · Esc close · / search anywhere</p>
