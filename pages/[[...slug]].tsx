@@ -40,7 +40,12 @@ export const getStaticProps: GetStaticProps<PageProps> = async ({ params }) => {
   const slugParts = (params?.slug as string[] | undefined) || [];
   const fileName = slugParts.length === 0 ? 'index.html' : slugParts.join('/');
   const filePath = path.join(CONTENT_DIR, fileName);
-  const html = fs.readFileSync(filePath, 'utf8');
+  let html: string;
+  try {
+    html = fs.readFileSync(filePath, 'utf8');
+  } catch (err) {
+    throw new Error(`Could not read content file "${filePath}" for route "/${fileName}": ${(err as Error).message}`);
+  }
   const { title, body } = splitHtmlFragment(html);
   // extractScripts must run on the full `html`, never on `body` alone: 11 of
   // the 23 real content files have their <script> tags in the head, before
