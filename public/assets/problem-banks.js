@@ -11,6 +11,7 @@
   const qChoice = (id, topic, prompt, choices, answer, explanation, meta) => ({
     id, topic, prompt, type: 'choice', choices, answer, explanation, meta
   });
+  const withSkills = (question, ...skills) => ({ ...question, skills });
   const fmt = (value) => Number.isInteger(value) ? String(value) : String(Number(value.toFixed(3)));
   const term = (coefficient, variable) => {
     const sign = coefficient < 0 ? '−' : '+';
@@ -210,23 +211,55 @@
   };
   const calcDerivativeQ = (id, coefficient, power, linear, x) => {
     const answer = coefficient * power * (x ** (power - 1)) + linear;
-    return qNumber(
+    return withSkills(qNumber(
       id, 'Derivatives',
       `If f(x) = ${coefficient}x^${power} ${term(linear, 'x')}, find f′(${x}).`,
       answer,
       `f′(x) = ${coefficient * power}x^${power - 1} ${term(linear, '')}; substituting ${x} gives ${answer}.`,
       { kind: 'power-derivative', coefficient, power, linear, x }
-    );
+    ), 'ap-calculus-bc.power-rule');
   };
   const calcProductQ = (id, k, c, x) => {
     const answer = (x * x + c) + (x + k) * 2 * x;
-    return qNumber(
+    return withSkills(qNumber(
       id, 'Derivative applications',
       `For f(x) = (x + ${k})(x² + ${c}), find the tangent-line slope at x = ${x}.`,
       answer,
       `Product rule: f′(x) = (x² + ${c}) + (x + ${k})(2x). At x = ${x}, f′ = ${answer}.`,
       { kind: 'product-derivative', k, c, x }
-    );
+    ), 'ap-calculus-bc.product-rule');
+  };
+  const calcQuotientQ = (id, k, c, x) => {
+    const answer = (c - k) / ((x + c) ** 2);
+    return withSkills(qNumber(
+      id, 'Quotient Rule',
+      `For f(x) = (x ${term(k, '')})/(x ${term(c, '')}), find f′(${x}).`,
+      answer,
+      `Quotient rule: f′(x) = ((x ${term(c, '')}) − (x ${term(k, '')}))/(x ${term(c, '')})² = ${c - k}/(x ${term(c, '')})². At x = ${x}, f′ = ${fmt(answer)}.`,
+      { kind: 'quotient-derivative', k, c, x }
+    ), 'ap-calculus-bc.quotient-rule');
+  };
+  const calcChainQ = (id, a, b, power, x) => {
+    const inner = a * x + b;
+    const answer = power * a * (inner ** (power - 1));
+    return withSkills(qNumber(
+      id, 'Chain Rule',
+      `If f(x) = (${a}x ${term(b, '')})^${power}, find f′(${x}).`,
+      answer,
+      `Chain rule: f′(x) = ${power}(${a}x ${term(b, '')})^${power - 1} · ${a}. At x = ${x}, f′ = ${answer}.`,
+      { kind: 'chain-derivative', a, b, power, x }
+    ), 'ap-calculus-bc.chain-rule');
+  };
+  const calcImplicitQ = (id, a, b, x, y) => {
+    const constant = a * x * x + b * y * y;
+    const answer = -(a * x) / (b * y);
+    return withSkills(qNumber(
+      id, 'Implicit Differentiation',
+      `The curve ${a}x² + ${b}y² = ${constant} passes through (${x}, ${y}). Find dy/dx at that point.`,
+      answer,
+      `Differentiate implicitly: ${2 * a}x + ${2 * b}y(dy/dx) = 0, so dy/dx = −${a}x/(${b}y). At (${x}, ${y}), dy/dx = ${fmt(answer)}.`,
+      { kind: 'implicit-derivative', a, b, x, y }
+    ), 'ap-calculus-bc.implicit-differentiation');
   };
   const calcIntegralQ = (id, m, b, upper) => {
     const answer = (m * upper * upper) / 2 + b * upper;
@@ -266,6 +299,9 @@
     limit: grid(range(-5, 5), nonZero(-3, 3), nonZero(-4, 4)),
     derivative: grid(range(1, 4), range(2, 5), nonZero(-3, 3), range(-2, 2)),
     product: grid(range(1, 5), range(1, 5), range(-3, 3)),
+    quotient: grid(nonZero(-5, 5), nonZero(-5, 5), range(-4, 4)).filter(([k, c, x]) => k !== c && x + c !== 0),
+    chain: grid(range(1, 4), nonZero(-5, 5), range(2, 5), range(-3, 3)),
+    implicit: grid(range(1, 4), range(1, 4), nonZero(-5, 5), nonZero(-5, 5)),
     integral: grid(range(1, 6), nonZero(-3, 3), range(1, 5)),
     ftc: grid(nonZero(-3, 3), range(1, 5), range(-3, 3)),
     series: grid(range(1, 20), range(2, 6)),
@@ -279,6 +315,9 @@
       CALC_GRIDS.derivative, calcDerivativeQ);
     addTopic(questions, 'calc-product', regular10((i) => [1 + (i % 4), 2 + (i % 3), (i % 5) - 2]),
       CALC_GRIDS.product, calcProductQ);
+    addFromGrid(questions, 'calc-quotient', 20, CALC_GRIDS.quotient, calcQuotientQ);
+    addFromGrid(questions, 'calc-chain', 20, CALC_GRIDS.chain, calcChainQ);
+    addFromGrid(questions, 'calc-implicit', 20, CALC_GRIDS.implicit, calcImplicitQ);
     addTopic(questions, 'calc-integral', regular10((i) => [1 + (i % 4), (i % 5) - 1, 1 + (i % 5)]),
       CALC_GRIDS.integral, calcIntegralQ);
     addTopic(questions, 'calc-ftc', regular10((i) => [(i % 4) - 1, 2 + (i % 3), (i % 5) - 2]),

@@ -1,6 +1,8 @@
 'use strict';
 
 const assert = require('node:assert');
+const fs = require('node:fs');
+const path = require('node:path');
 
 const store = new Map();
 global.window = {
@@ -66,5 +68,18 @@ assert.strictEqual(T.trackStatus(plan).complete, true, 'a plan with no project c
 
 T.saveActiveTrack(null);
 assert.strictEqual(T.loadActiveTrack(), null, 'saving null clears the track');
+
+// Dashboard hierarchy: one compact top row, Review second, broad history
+// afterward. This prevents the old Continue/Practice/Path stack from pushing
+// Review below the first viewport.
+const root = path.resolve(__dirname, '..');
+const home = fs.readFileSync(path.join(root, 'content/index.html'), 'utf8');
+const source = fs.readFileSync(path.join(root, 'public/assets/tests.js'), 'utf8');
+const styles = fs.readFileSync(path.join(root, 'public/assets/style.css'), 'utf8');
+assert.ok(home.includes('class="dashboard-layout"'));
+assert.ok(home.indexOf('data-next-step') < home.indexOf('data-skill-review'));
+assert.ok(source.includes('class="dashboard-track-panel"'));
+assert.ok(source.includes('class="dashboard-secondary"'));
+assert.match(styles, /\.dashboard-review\s*\{[^}]*grid-row:\s*2;/s);
 
 console.log('check-active-track: OK');

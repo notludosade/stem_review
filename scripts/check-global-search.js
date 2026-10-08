@@ -25,6 +25,8 @@ assert.strictEqual(chain[0].title, 'The Chain Rule');
 assert.ok(chain.some((entry) => entry.type === 'PRACTICE' && entry.context === 'Mathematics'));
 assert.ok(chain.some((entry) => entry.type === 'COURSE' && entry.title === 'AP Calculus BC'));
 assert.ok(chain.some((entry) => entry.type === 'SKILL' && entry.context.startsWith('AP Calculus BC')));
+assert.ok(chain.some((entry) => entry.type === 'SKILL' && entry.title === 'Chain Rule'));
+assert.ok(chain.some((entry) => entry.type === 'PRACTICE' && entry.href.includes('skill=ap-calculus-bc.chain-rule')));
 assert.strictEqual(searchIndex(index, 'c++')[0].title, 'C++ Sandbox');
 assert.strictEqual(searchIndex(index, 'principal component', 30).find((entry) => entry.type === 'APPLICATION').label, 'RELATED');
 const typo = searchIndex(index, 'derivitives', 30);

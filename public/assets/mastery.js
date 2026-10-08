@@ -18,6 +18,9 @@
   const PROFICIENT_ATTEMPTS = 10;
   const PROFICIENT_ACCURACY = 0.8;
   const PROFICIENT_UNIT_TEST = 0.7;
+  const CONCEPT_MIN_ATTEMPTS = 3;
+  const CONCEPT_REVIEW_ACCURACY = 0.6;
+  const CONCEPT_STRONG_ACCURACY = 0.8;
 
   // Lesson views are recorded by exact page (decoded path + search).
   const isLessonOf = (skill, page) => skill.lessons.some((lesson) => lesson.page === page);
@@ -137,8 +140,32 @@
       }));
   }
 
+  // Concept analytics deliberately remain separate from formal unit mastery.
+  // They describe first-try practice accuracy and only recommend review after
+  // enough evidence to avoid labeling a student from one or two answers.
+  function conceptAnalytics(concepts, questions, progress) {
+    const attemptedMap = (progress && progress.attempted) || {};
+    const correctMap = (progress && progress.correct) || {};
+    return concepts.map((concept) => {
+      const tagged = questions.filter((question) => (question.skills || []).includes(concept.id));
+      const attempted = tagged.filter((question) => attemptedMap[question.id]).length;
+      const correct = tagged.filter((question) => correctMap[question.id]).length;
+      const accuracy = attempted ? correct / attempted : null;
+      let status = 'insufficient-data';
+      if (attempted >= CONCEPT_MIN_ATTEMPTS) {
+        if (accuracy < CONCEPT_REVIEW_ACCURACY) status = 'needs-review';
+        else if (accuracy < CONCEPT_STRONG_ACCURACY) status = 'developing';
+        else status = 'strong';
+      }
+      return { ...concept, attempted, correct, accuracy, status, questionCount: tagged.length };
+    });
+  }
+
   if (typeof module === 'object' && module.exports) {
-    module.exports = { STATES, LABELS, computeMastery, readiness, courseReadiness, nextStep, reviewList };
+    module.exports = {
+      STATES, LABELS, computeMastery, readiness, courseReadiness, nextStep, reviewList, conceptAnalytics,
+      CONCEPT_MIN_ATTEMPTS, CONCEPT_REVIEW_ACCURACY, CONCEPT_STRONG_ACCURACY,
+    };
     return;
   }
 
@@ -184,12 +211,27 @@
     return evidence;
   }
 
+  async function conceptEvidence(catalog) {
+    const conceptsBySet = {};
+    (catalog.concepts || []).filter((concept) => concept.problemSet).forEach((concept) => {
+      (conceptsBySet[concept.problemSet] = conceptsBySet[concept.problemSet] || []).push(concept);
+    });
+    if (!Object.keys(conceptsBySet).length) return {};
+    const banks = await loadBanks();
+    return Object.fromEntries(Object.entries(conceptsBySet).flatMap(([slug, concepts]) => {
+      const progress = read(`stemplus:problem-sets:v1:${slug}`, {});
+      return conceptAnalytics(concepts, banks.getCourse(slug).questions, progress).map((row) => [row.id, row]);
+    }));
+  }
+
   async function studentEvidence(catalog) {
     const projects = read('stemplus:projects:v1', {});
+    const problems = await problemEvidence(catalog);
     return {
       lessons: read('stemplus:lessons:v1', {}),
       results: read('stemplus:results:v1', []),
-      problems: await problemEvidence(catalog),
+      problems,
+      concepts: await conceptEvidence(catalog),
       completedProjects: Object.keys(projects).filter((id) => projects[id] && projects[id].complete),
       diagnostics: read('stemplus:diagnostics:v1', {}),
       completedApplications: Object.keys(read('stemplus:applications:v1', {})),
@@ -204,7 +246,7 @@
 
   // For the diagnostic page (assets/diagnostic.js) and the Learning Record
   // (assets/tests.js's mountLearningRecord).
-  window.STEMPlusMastery = { STATES, LABELS, computeMastery, readiness, courseReadiness, studentEvidence, loadCatalog, courseHref };
+  window.STEMPlusMastery = { STATES, LABELS, computeMastery, readiness, courseReadiness, conceptAnalytics, studentEvidence, loadCatalog, courseHref };
 
   const chip = (state) => `<span class="mastery-chip" data-state="${state}">${LABELS[state]}</span>`;
 
@@ -256,7 +298,7 @@
     const tests = window.STEMPlusTests;
     const track = tests && tests.resolveTrack(tests.loadActiveTrack());
     if (!track) {
-      el.innerHTML = '<h2>Your Next Step</h2><p class="toc-empty">Pick a track in Continue Learning below, or <a href="diagnostic.html">take a diagnostic</a> to see where to start.</p>';
+      el.innerHTML = '<h2>Your Next Step</h2><p class="toc-empty">Pick an Enrolled Track, or <a href="diagnostic.html">take a diagnostic</a> to see where to start.</p>';
       return;
     }
     const ready = readiness(catalog, mastery, track);
@@ -265,14 +307,17 @@
     let prove = '';
     if (step.kind === 'lesson') {
       card = `<a class="toc-item" href="${escapeHtml(encodePath(step.lesson.page))}"><span class="toc-num">Next lesson</span>`
-        + `<p class="toc-title">${escapeHtml(step.lesson.title)}</p><p class="toc-sub">${escapeHtml(where(step.skill))} — ${LABELS[mastery[step.skill.id].state]}</p></a>`;
+        + `<p class="toc-title">${escapeHtml(step.lesson.title)}</p><p class="toc-sub">${escapeHtml(where(step.skill))} — ${LABELS[mastery[step.skill.id].state]}</p>`
+        + '<span class="dashboard-primary-action">Continue learning →</span></a>';
       prove = `<p class="next-step-prove"><a href="${escapeHtml(encodePath(step.skill.testPage))}">Already know this? Prove mastery →</a></p>`;
     } else if (step.kind === 'test') {
       card = `<a class="toc-item" href="${escapeHtml(encodePath(step.skill.testPage))}"><span class="toc-num">Unit test</span>`
-        + `<p class="toc-title">Take the ${escapeHtml(step.skill.unit)} test</p><p class="toc-sub">Pass at 80% to master ${escapeHtml(where(step.skill))}</p></a>`;
+        + `<p class="toc-title">Take the ${escapeHtml(step.skill.unit)} test</p><p class="toc-sub">Pass at 80% to master ${escapeHtml(where(step.skill))}</p>`
+        + '<span class="dashboard-primary-action">Start test →</span></a>';
     } else if (track.projectId) {
       card = `<a class="toc-item" href="Projects/${encodeURIComponent(track.projectId)}.html"><span class="toc-num">Capstone</span>`
-        + `<p class="toc-title">${escapeHtml(track.capstoneLabel)}</p><p class="toc-sub">Every unit on this track is mastered.</p></a>`;
+        + `<p class="toc-title">${escapeHtml(track.capstoneLabel)}</p><p class="toc-sub">Every unit on this track is mastered.</p>`
+        + '<span class="dashboard-primary-action">Open capstone →</span></a>';
     } else {
       card = '<p class="toc-empty">Every course on this plan is mastered.</p>';
     }
@@ -283,20 +328,49 @@
 
   // Dashboard: units started but not mastered, each with one review action.
   function mountReview(el, catalog, mastery) {
-    const items = reviewList(catalog, mastery);
+    const allItems = reviewList(catalog, mastery, catalog.skills.length);
+    const items = allItems.slice(0, 3);
     if (!items.length) {
-      el.innerHTML = '<h2>Review</h2><p class="toc-empty">Nothing to review — units you’ve started but not mastered show up here.</p>';
+      el.innerHTML = '<div class="dashboard-section-heading"><div><h2>Review</h2><p>Practice opportunities appear after you start a unit.</p></div><a href="problem-sets.html">All practice →</a></div>'
+        + '<p class="toc-empty">Nothing needs review yet.</p>';
       return;
     }
-    el.innerHTML = `<h2>Review</h2><div class="toc-list">${items.map(({ skill, action }) => {
+    el.innerHTML = `<div class="dashboard-section-heading"><div><h2>Review <span class="review-count">${allItems.length}</span></h2><p>Focused practice based on skills you have started.</p></div><a href="problem-sets.html">All practice →</a></div><div class="dashboard-review-list">${items.map(({ skill, action }) => {
       const practice = action.kind === 'practice';
       const href = practice
         ? `problem-set.html?course=${encodeURIComponent(action.slug)}&topic=${encodeURIComponent(action.topic)}`
         : encodePath(skill.testPage);
       const title = practice ? `Practice ${action.topic}` : `Retake the ${skill.unit} test`;
-      return `<a class="toc-item" href="${escapeHtml(href)}"><span class="toc-num">${LABELS[mastery[skill.id].state]}</span>`
+      return `<a class="toc-item" href="${escapeHtml(href)}"><span class="toc-num">Review · ${LABELS[mastery[skill.id].state]}</span>`
         + `<p class="toc-title">${escapeHtml(title)}</p><p class="toc-sub">${escapeHtml(where(skill))}</p></a>`;
     }).join('')}</div>`;
+  }
+
+  function mountConceptSkills(el, catalog, evidence) {
+    const course = el.dataset.course;
+    const concepts = (catalog.concepts || []).filter((concept) => concept.course === course);
+    if (!concepts.length) return;
+    const rows = concepts.map((concept) => (evidence.concepts || {})[concept.id] || {
+      ...concept, attempted: 0, correct: 0, accuracy: null, status: 'insufficient-data',
+    });
+    const labels = {
+      'insufficient-data': 'Not enough data',
+      'needs-review': 'Needs review',
+      developing: 'Developing',
+      strong: 'Strong',
+    };
+    const root = document.querySelector('[data-course-context]')?.dataset.root || '';
+    const practiceHref = (ids) => `${root}problem-set.html?course=${encodeURIComponent(rows[0].problemSet)}&${ids.length === 1 ? 'skill' : 'skills'}=${encodeURIComponent(ids.join(','))}`;
+    const weak = rows.filter((row) => row.status === 'needs-review' && row.questionCount);
+    el.innerHTML = '<h2>Concept Skills</h2><p class="subtitle">First-try accuracy from practice. Formal unit mastery remains separate.</p>'
+      + `<div class="concept-skill-list">${rows.map((row) => {
+        const score = row.accuracy === null ? '—' : `${Math.round(row.accuracy * 100)}%`;
+        const detail = row.attempted < CONCEPT_MIN_ATTEMPTS ? `${row.attempted}/${CONCEPT_MIN_ATTEMPTS} answers needed` : `${row.correct} of ${row.attempted} first-try correct`;
+        const link = row.questionCount ? `<a class="concept-practice" href="${escapeHtml(practiceHref([row.id]))}">Practice ${escapeHtml(row.name)}</a>` : '';
+        return `<div class="concept-skill-row" data-status="${row.status}"><div><strong>${escapeHtml(row.name)}</strong><span>${escapeHtml(detail)}</span></div>`
+          + `<div class="concept-score"><strong>${score}</strong><span>${labels[row.status]}</span></div>${link}</div>`;
+      }).join('')}</div>`
+      + (weak.length ? `<div class="box concept-recommendation"><span class="box-label">Recommended Review</span><p><strong>${escapeHtml(weak.map((row) => row.name).join(' · '))}</strong></p><a class="concept-practice" href="${escapeHtml(practiceHref(weak.map((row) => row.id)))}">Practice weak skills</a></div>` : '');
   }
 
   const APPLICATIONS_KEY = 'stemplus:applications:v1';
@@ -361,19 +435,24 @@
     const coursePage = document.querySelector('details.unit-toc');
     const nextEl = document.querySelector('[data-next-step]');
     const reviewEl = document.querySelector('[data-skill-review]');
+    const conceptEl = document.querySelector('[data-concept-skills]');
     const applicationEl = document.querySelector('[data-application-concepts]');
     const hubCards = document.querySelectorAll('a.toc-item[href^="Applications/"]');
     const account = window.STEMPlusAccount;
-    if (!account || (!summary && !coursePage && !nextEl && !reviewEl && !applicationEl && !hubCards.length)) return;
+    if (!account || (!summary && !coursePage && !nextEl && !reviewEl && !conceptEl && !applicationEl && !hubCards.length)) return;
     account.ready.then((me) => {
       // Guests still see an Application's concepts, without mastery.
-      if (!me) return applicationEl ? loadCatalog().then((catalog) => mountApplication(applicationEl, catalog, null)) : null;
+      if (!me) return (applicationEl || conceptEl) ? loadCatalog().then((catalog) => {
+        if (applicationEl) mountApplication(applicationEl, catalog, null);
+        if (conceptEl) mountConceptSkills(conceptEl, catalog, { concepts: {} });
+      }) : null;
       if (hubCards.length) mountHubChips(hubCards);
-      if (!summary && !coursePage && !nextEl && !reviewEl && !applicationEl) return null;
+      if (!summary && !coursePage && !nextEl && !reviewEl && !conceptEl && !applicationEl) return null;
       return studentMastery().then(({ catalog, evidence, mastery }) => {
         if (coursePage) mountCourseChips(catalog, mastery);
         if (summary) mountSummary(summary, catalog, mastery);
         if (reviewEl) mountReview(reviewEl, catalog, mastery);
+        if (conceptEl) mountConceptSkills(conceptEl, catalog, evidence);
         if (applicationEl) mountApplication(applicationEl, catalog, mastery);
         if (nextEl) {
           mountNextStep(nextEl, catalog, mastery, evidence);

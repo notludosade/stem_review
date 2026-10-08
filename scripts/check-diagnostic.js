@@ -34,7 +34,7 @@ catalog.pathways.forEach((pathway) => {
   counts[pathway.slug] = items.length;
 });
 
-assert.strictEqual(counts.mathematics, 26);
+assert.strictEqual(counts.mathematics, 28);
 assert.strictEqual(counts['engineering-physics'], 20);
 assert.strictEqual(counts['general-programmer'], 28);
 assert.strictEqual(counts['cloud-devops'], 10);

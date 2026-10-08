@@ -3,7 +3,7 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const { courses } = require('../public/assets/problem-banks.js');
-const { parseNumber, answersClose } = require('../public/assets/problem-sets.js');
+const { parseNumber, answersClose, questionsForSkills } = require('../public/assets/problem-sets.js');
 
 const factorial = (n) => {
   let value = 1;
@@ -24,6 +24,9 @@ const expectedAnswer = ({ meta }) => {
     case 'polynomial-limit': return m.a ** 2 + m.b * m.a + m.c;
     case 'power-derivative': return m.coefficient * m.power * m.x ** (m.power - 1) + m.linear;
     case 'product-derivative': return m.x ** 2 + m.c + 2 * m.x * (m.x + m.k);
+    case 'quotient-derivative': return (m.c - m.k) / (m.x + m.c) ** 2;
+    case 'chain-derivative': return m.power * m.a * (m.a * m.x + m.b) ** (m.power - 1);
+    case 'implicit-derivative': return -(m.a * m.x) / (m.b * m.y);
     case 'linear-integral': return m.m * m.upper ** 2 / 2 + m.b * m.upper;
     case 'ftc': return m.x ** 2 + m.k * m.x + m.c;
     case 'geometric-series': return m.first / (1 - m.ratio);
@@ -164,14 +167,24 @@ const auditPool = (label, questions) => {
 };
 
 courses.forEach((course) => {
-  assert(course.questions.length === 240, `${course.title}: expected 240 questions, found ${course.questions.length}`);
+  const calculus = course.slug === 'ap-calculus-bc';
+  assert(course.questions.length === (calculus ? 300 : 240), `${course.title}: unexpected question count ${course.questions.length}`);
   const topics = auditPool(course.title, course.questions);
-  assert(topics.size === 6, `${course.title}: expected 6 topics`);
-  topics.forEach((count, topic) => assert(count === 40, `${course.title}/${topic}: expected 40 questions, found ${count}`));
+  assert(topics.size === (calculus ? 9 : 6), `${course.title}: unexpected topic count`);
+  topics.forEach((count, topic) => {
+    const expected = calculus && ['Quotient Rule', 'Chain Rule', 'Implicit Differentiation'].includes(topic) ? 20 : 40;
+    assert(count === expected, `${course.title}/${topic}: expected ${expected} questions, found ${count}`);
+  });
   total += course.questions.length;
 });
 
-assert(total === 4800, `Expected 4800 total questions, found ${total}`);
+assert(total === 4860, `Expected 4860 total questions, found ${total}`);
+
+const calculus = courses.find((course) => course.slug === 'ap-calculus-bc');
+const conceptIds = ['power-rule', 'product-rule', 'quotient-rule', 'chain-rule', 'implicit-differentiation'].map((name) => `ap-calculus-bc.${name}`);
+conceptIds.forEach((id) => assert(questionsForSkills(calculus.questions, [id]).length >= 20, `${id}: missing tagged questions`));
+assert(questionsForSkills(calculus.questions, ['ap-calculus-bc.chain-rule']).every((question) => question.skills.includes('ap-calculus-bc.chain-rule')), 'single-skill filtering leaked another concept');
+assert(questionsForSkills(calculus.questions, []).length === calculus.questions.length, 'untargeted practice must keep every question');
 
 // Timed Mastery pools (timed-mastery.html) — separate from the regular 60.
 const timedCourses = courses.filter((course) => course.timedQuestions);
@@ -182,7 +195,7 @@ timedCourses.forEach((course) => {
   assert(course.timedQuestions.length === 500, `${course.title}: expected 500 timed questions, found ${course.timedQuestions.length}`);
   const topics = auditPool(`${course.title} timed pool`, course.timedQuestions);
   const regularTopics = [...new Set(course.questions.map((question) => question.topic))].sort();
-  assert(JSON.stringify([...topics.keys()].sort()) === JSON.stringify(regularTopics), `${course.title}: timed topics must match the regular bank's topics`);
+  assert([...topics.keys()].every((topic) => regularTopics.includes(topic)), `${course.title}: timed topics must exist in the regular bank`);
   topics.forEach((count, topic) => assert(count === 83 || count === 84, `${course.title} timed/${topic}: expected 83 or 84 questions, found ${count}`));
   timedTotal += course.timedQuestions.length;
 });

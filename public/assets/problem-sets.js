@@ -14,8 +14,11 @@
     const allowed = Number.isInteger(answer) ? tolerance : Math.max(tolerance, Math.min(0.1, Math.max(0.01, Math.abs(answer) * 0.01)));
     return Math.abs(value - answer) <= allowed;
   };
+  const questionsForSkills = (questions, skillIds) => !skillIds.length
+    ? questions
+    : questions.filter((question) => (question.skills || []).some((id) => skillIds.includes(id)));
   if (typeof module === 'object' && module.exports) {
-    module.exports = { parseNumber, answersClose };
+    module.exports = { parseNumber, answersClose, questionsForSkills };
     return;
   }
   // Shared with timed-mastery.js, which grades answers exactly the same way.
@@ -24,7 +27,8 @@
   window.STEMProblemAnswers = { parseNumber, answersClose };
 
   const bankApi = window.STEMProblemBanks;
-  const slug = new URLSearchParams(window.location.search).get('course');
+  const params = new URLSearchParams(window.location.search);
+  const slug = params.get('course');
   const course = bankApi && bankApi.getCourse(slug);
   const mount = document.querySelector('[data-problem-set]');
 
@@ -89,12 +93,26 @@
   const resetButton = document.querySelector('[data-problem-reset]');
   const reportButton = document.querySelector('[data-problem-report]');
 
-  document.title = `${course.title} Problem Set — STEM+`;
-  document.querySelector('.page').dataset.tier = course.tier;
-  title.textContent = `${course.title} Problem Set`;
-  subtitle.textContent = `${course.questions.length} practice questions · ${course.summary}`;
+  const selectedSkills = [...new Set([
+    params.get('skill'),
+    ...(params.get('skills') || '').split(','),
+  ].filter(Boolean).map((id) => id.trim()).filter(Boolean))];
+  const skillQuestions = questionsForSkills(course.questions, selectedSkills);
+  if (selectedSkills.length && !skillQuestions.length) {
+    mount.textContent = 'No questions are tagged for that skill yet. Choose another review from the course page.';
+    return;
+  }
+  const skillName = (id) => id.split('.').pop().split('-').map((word) => word[0].toUpperCase() + word.slice(1)).join(' ');
+  const focusedTitle = selectedSkills.length === 1 ? `${skillName(selectedSkills[0])} Practice` : `${course.title} Weak-Skills Practice`;
 
-  const topics = [...new Set(course.questions.map((question) => question.topic))];
+  document.title = `${selectedSkills.length ? focusedTitle : `${course.title} Problem Set`} — STEM+`;
+  document.querySelector('.page').dataset.tier = course.tier;
+  title.textContent = selectedSkills.length ? focusedTitle : `${course.title} Problem Set`;
+  subtitle.textContent = selectedSkills.length
+    ? `${skillQuestions.length} focused questions from the existing ${course.title} bank`
+    : `${course.questions.length} practice questions · ${course.summary}`;
+
+  const topics = [...new Set(skillQuestions.map((question) => question.topic))];
   topics.forEach((topic) => {
     const option = document.createElement('option');
     option.value = topic;
@@ -102,7 +120,7 @@
     topicSelect.appendChild(option);
   });
   // Dashboard Review links open a Problem Set on one topic (?topic=).
-  const requestedTopic = new URLSearchParams(window.location.search).get('topic');
+  const requestedTopic = params.get('topic');
   if (topics.includes(requestedTopic)) topicSelect.value = requestedTopic;
 
   if (typeof window !== 'undefined' && window.STEMPlusAccount) window.STEMPlusAccount.noteIfGuest('Progress on this problem set isn’t saved for guests.');
@@ -113,7 +131,7 @@
 
   const filteredQuestions = () => {
     const selected = topicSelect.value;
-    return selected === 'all' ? course.questions : course.questions.filter((question) => question.topic === selected);
+    return selected === 'all' ? skillQuestions : skillQuestions.filter((question) => question.topic === selected);
   };
   const rebuildDeck = () => {
     const filtered = filteredQuestions();
@@ -122,10 +140,10 @@
     deck = [...shuffle(unseen), ...shuffle(seen)];
   };
   const renderStats = () => {
-    const attempted = course.questions.filter((question) => progress.attempted[question.id]).length;
-    const correct = course.questions.filter((question) => progress.correct[question.id]).length;
+    const attempted = skillQuestions.filter((question) => progress.attempted[question.id]).length;
+    const correct = skillQuestions.filter((question) => progress.correct[question.id]).length;
     const accuracy = attempted ? Math.round(correct / attempted * 100) : 0;
-    stats.textContent = `${attempted}/${course.questions.length} answered · ${correct} first-try correct · ${accuracy}% accuracy`;
+    stats.textContent = `${attempted}/${skillQuestions.length} answered · ${correct} first-try correct · ${accuracy}% accuracy`;
   };
   const finishAnswer = (isCorrect, selectedButton) => {
     if (answered) return;

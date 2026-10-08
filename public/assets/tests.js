@@ -1776,7 +1776,7 @@ window.STEMPlusTests = (function () {
   function mountDashboard(el) {
     if (el.dataset.mounted) return;
     el.dataset.mounted = '1';
-    el.innerHTML = '<p class="toc-empty">Loading your dashboard…</p>';
+    el.innerHTML = '<section class="dashboard-track-panel"><p class="toc-empty">Loading your dashboard…</p></section>';
     (window.STEMPlusDevReady || Promise.resolve(false)).then(() => {
       if (window.STEMPlusDev && window.STEMPlusDev.me) renderDashboard(el);
       else el.innerHTML = '';
@@ -1849,20 +1849,13 @@ window.STEMPlusTests = (function () {
   }
 
   // The real dashboard — reads every result this browser has ever saved and
-  // renders Continue Learning / Practice / Your Path
-  // from it. No new storage, no new data model — this is purely an
+  // renders the enrolled track plus lower-priority Practice and course history.
+  // No new storage or data model — this is purely an
   // aggregation view over loadResults()/buildReport(), the same functions
   // mountProgressReport already uses per-course.
   function renderDashboard(el) {
     const results = loadResults();
     const skippedCourses = loadSkippedCourses();
-    if (results.length === 0 && skippedCourses.length === 0) {
-      el.innerHTML = '<h2>Continue Learning</h2><div class="toc-list">' + trackCardHtml() + '</div>'
-        + '<p class="toc-empty">You haven’t started anything yet in this browser. <a href="new.html">Choose a goal</a> or browse <a href="pathways.html">Pathways</a> to get going.</p>';
-      wireTrackCard(el);
-      return;
-    }
-
     const courseNames = [];
     results.forEach((r) => { if (courseNames.indexOf(r.course) === -1) courseNames.push(r.course); });
     skippedCourses.forEach((c) => { if (courseNames.indexOf(c) === -1) courseNames.push(c); });
@@ -1876,34 +1869,28 @@ window.STEMPlusTests = (function () {
     const inProgress = reports.filter((r) => !isCourseExamPassed(r.course));
     inProgress.sort((a, b) => (a.lastTakenAt < b.lastTakenAt ? 1 : -1));
     const continueItem = inProgress[0] || null;
-
     const nextUnitName = continueItem ? nextUnitFor(continueItem.course) : null;
-
-    let html = '';
-
-    // The track card leads; the most recent in-progress course follows
-    // unless it's the same course the track already points to.
     const activeResolved = resolveTrack(loadActiveTrack());
     const trackNext = activeResolved ? trackStatus(activeResolved).next : null;
-    html += '<h2>Continue Learning</h2><div class="toc-list">' + trackCardHtml();
+
+    // Top-right companion to mastery.js's single next action. Keep the broad
+    // Practice and course-history views below Review so Review stays visible.
+    let html = '<section class="dashboard-track-panel"><h2>Enrolled Track</h2><div class="toc-list">' + trackCardHtml();
     if (continueItem && continueItem.course !== trackNext) {
       const dir = coursePath(continueItem.course);
       const href = dir ? dir + '/index.html' : 'pathways.html';
       html += '<a class="toc-item" href="' + href + '"><span class="toc-num">In progress</span>'
-        + '<p class="toc-title">' + continueItem.course + '</p>'
+        + '<p class="toc-title">' + escapeHtml(continueItem.course) + '</p>'
         + '<p class="toc-sub">' + (nextUnitName ? 'Next up: ' + nextUnitName : 'Cleared every unit test attempted so far — open the course to see what’s next.') + '</p></a>';
     }
-    html += '</div>';
-    if (!continueItem) {
-      html += '<p class="toc-empty">Every course you’ve touched is fully passed. <a href="pathways.html">Start a new one</a>.</p>';
-    }
+    html += '</div></section>';
 
-    html += '<h2>Practice</h2>';
-    html += '<div class="toc-list"><a class="toc-item" href="problem-sets.html"><span class="toc-num">Practice</span>'
-      + '<p class="toc-title">Problem Sets</p><p class="toc-sub">4,800 questions across 20 courses, filterable by topic.</p></a></div>';
+    html += '<section class="dashboard-secondary"><div class="dashboard-practice-panel"><h2>Practice</h2>'
+      + '<div class="toc-list"><a class="toc-item" href="problem-sets.html"><span class="toc-num">All practice</span>'
+      + '<p class="toc-title">Problem Sets</p><p class="toc-sub">4,860 checked questions across 20 courses.</p></a></div></div>';
 
-    html += '<h2>Your Path</h2>';
-    html += '<div class="toc-list">';
+    html += '<div class="dashboard-path-panel"><h2>Course Progress</h2>';
+    html += reports.length ? '<div class="toc-list">' : '<p class="toc-empty">You haven’t started a course yet. <a href="new.html">Choose a goal</a> or browse <a href="pathways.html">Pathways</a>.</p>';
     reports.forEach((r) => {
       const dir = coursePath(r.course);
       const skipped = !isDevMode() && isSkippedCourse(r.course);
@@ -1911,9 +1898,10 @@ window.STEMPlusTests = (function () {
       const label = skipped ? 'Skipped' : (passed ? 'Exam passed' : 'In progress');
       html += '<a class="toc-item" href="' + (dir ? dir + '/index.html' : 'pathways.html') + '">'
         + '<span class="toc-num">' + label + '</span>'
-        + '<p class="toc-title">' + r.course + '</p></a>';
+        + '<p class="toc-title">' + escapeHtml(r.course) + '</p></a>';
     });
-    html += '</div>';
+    if (reports.length) html += '</div>';
+    html += '</div></section>';
 
     el.innerHTML = html;
     wireTrackCard(el);

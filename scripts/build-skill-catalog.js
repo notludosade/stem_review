@@ -18,7 +18,7 @@ const CATALOG_FILE = path.join(ROOT, 'public/assets/skill-catalog.json');
 const PROBLEM_TOPIC_UNITS = {
   'algebra-geometry': { 'Linear equations': 1, Systems: 1, Quadratics: 2, Exponents: 3, Area: 5, 'Right triangles': 6 },
   precalculus: { Functions: 1, 'Composition and inverses': 1, 'Polynomial functions': 2, 'Exponential and logarithmic functions': 3, Trigonometry: 4, Sequences: 6 },
-  'ap-calculus-bc': { Limits: 1, Derivatives: 2, 'Derivative applications': 2, Integrals: 6, 'Fundamental Theorem': 6, 'Infinite series': 10 },
+  'ap-calculus-bc': { Limits: 1, Derivatives: 2, 'Derivative applications': 2, 'Quotient Rule': 2, 'Chain Rule': 3, 'Implicit Differentiation': 3, Integrals: 6, 'Fundamental Theorem': 6, 'Infinite series': 10 },
   'multivariable-calculus': { 'Vectors and dot products': 1, 'Cross products': 1, 'Partial derivatives': 2, Gradients: 2, 'Multiple integrals': 4, 'Vector fields': 6 },
   'linear-algebra-a': { 'Vectors and dot products': 1, 'Vector magnitude': 1, 'Matrix determinants': 5, 'Matrix traces': 2, 'Matrix multiplication': 2, Eigenvalues: 6 },
   'differential-equations': { 'Differential equations': 1, 'Growth and decay': 2, 'Characteristic equations': 3, 'Euler’s method': 7, Oscillations: 4, 'Laplace transforms': 5 },
@@ -37,6 +37,31 @@ const PROBLEM_TOPIC_UNITS = {
   'real-analysis-a': { 'Absolute value and bounds': 1, 'Supremum and infimum': 1, 'Sequences and limits': 2, 'Epsilon-N arguments': 2, 'Topology of the real line': 3, 'Riemann integration': 6 },
   'advanced-algorithms': { 'Asymptotic analysis': 1, 'Divide and conquer': 2, 'Minimum spanning trees': 3, 'Shortest paths': 4, 'Dynamic programming': 5, 'Bitmask algorithms': 5 },
 };
+
+// Concept-level metadata complements (but never replaces) the unit skills
+// above. Questions opt in through `skills`; untagged content remains valid.
+const CONCEPT_DEFINITIONS = [
+  {
+    id: 'ap-calculus-bc.power-rule', name: 'Power Rule', course: 'AP Calculus BC', unit: 2,
+    lessons: ['/AP STEM+/AP_CALC/Unit 2/0004-the-power-rule-and-basic-derivative-rules.html'], prerequisites: [],
+  },
+  {
+    id: 'ap-calculus-bc.product-rule', name: 'Product Rule', course: 'AP Calculus BC', unit: 2,
+    lessons: ['/AP STEM+/AP_CALC/Unit 2/0006-the-product-and-quotient-rules.html'], prerequisites: ['ap-calculus-bc.power-rule'],
+  },
+  {
+    id: 'ap-calculus-bc.quotient-rule', name: 'Quotient Rule', course: 'AP Calculus BC', unit: 2,
+    lessons: ['/AP STEM+/AP_CALC/Unit 2/0006-the-product-and-quotient-rules.html'], prerequisites: ['ap-calculus-bc.product-rule'],
+  },
+  {
+    id: 'ap-calculus-bc.chain-rule', name: 'Chain Rule', course: 'AP Calculus BC', unit: 3,
+    lessons: ['/AP STEM+/AP_CALC/Unit 3/0001-the-chain-rule.html'], prerequisites: ['ap-calculus-bc.power-rule'],
+  },
+  {
+    id: 'ap-calculus-bc.implicit-differentiation', name: 'Implicit Differentiation', course: 'AP Calculus BC', unit: 3,
+    lessons: ['/AP STEM+/AP_CALC/Unit 3/0002-implicit-differentiation.html'], prerequisites: ['ap-calculus-bc.chain-rule'],
+  },
+];
 
 // Application slug (content/Applications/<slug>.html) → the skills it puts
 // to work. Hand-written; shown as "Concepts used" and counted toward the
@@ -141,12 +166,34 @@ function buildCatalog() {
   const mapped = Object.values(PROBLEM_TOPIC_UNITS).reduce((sum, topics) => sum + Object.keys(topics).length, 0);
   if (mapped !== problemSetTopics().length) throw new Error('PROBLEM_TOPIC_UNITS names a topic no Problem Set has');
 
+  const concepts = CONCEPT_DEFINITIONS.map((concept) => {
+    const unitSkill = idFor(concept.course, concept.unit);
+    const courseLessons = units[concept.course]?.flatMap((unit) => unit.lessons.map((lesson) => lesson.page)) || [];
+    concept.lessons.forEach((page) => {
+      if (!courseLessons.includes(page)) throw new Error(`${concept.id} lists unknown lesson ${page}`);
+    });
+    const problemSet = PROBLEM_SET_SLUGS[concept.course] || null;
+    const questionCount = problemSet
+      ? banks.getCourse(problemSet).questions.filter((question) => question.skills?.includes(concept.id)).length
+      : 0;
+    return { ...concept, subject: 'Mathematics', unitSkill, problemSet, questionCount };
+  });
+  const conceptIds = new Set(concepts.map((concept) => concept.id));
+  Object.entries(PROBLEM_SET_SLUGS).forEach(([, slug]) => banks.getCourse(slug).questions.forEach((question) => {
+    (question.skills || []).forEach((id) => {
+      if (!conceptIds.has(id)) throw new Error(`${slug} question ${question.id} lists unknown concept ${id}`);
+    });
+  }));
+
   const skills = Object.entries(units).flatMap(([course, courseUnitList]) => courseUnitList.map((unit, index) => ({
     id: idFor(course, unit.number),
     name: unit.name,
     course,
     unit: `Unit ${unit.number}`,
-    lessons: unit.lessons,
+    lessons: unit.lessons.map((lesson) => {
+      const lessonConcepts = concepts.filter((concept) => concept.lessons.includes(lesson.page)).map((concept) => concept.id);
+      return lessonConcepts.length ? { ...lesson, concepts: lessonConcepts } : lesson;
+    }),
     prerequisites: index > 0
       ? [idFor(course, courseUnitList[index - 1].number)]
       : (PREREQUISITE_GRAPH[course] || []).map((before) => idFor(before, units[before][units[before].length - 1].number)),
@@ -165,11 +212,12 @@ function buildCatalog() {
   });
   const capstones = capstonesByCourse();
   return {
-    version: 2,
+    version: 3,
     pathways: PATHWAYS.map(({ name, slug, courses }) => ({ name, slug, courses })),
     applications,
     capstones: Object.fromEntries(Object.keys(COURSE_PATHS).filter((c) => capstones[c]).map((c) => [c, capstones[c]])),
     skills,
+    concepts,
   };
 }
 

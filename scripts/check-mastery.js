@@ -3,8 +3,9 @@
 // Pins the mastery rules (public/assets/mastery.js) against the real skill
 // catalog: each state's threshold, and which evidence reaches which skill.
 const assert = require('node:assert');
-const { computeMastery, readiness, courseReadiness, nextStep, reviewList, STATES } = require('../public/assets/mastery.js');
+const { computeMastery, readiness, courseReadiness, nextStep, reviewList, conceptAnalytics, STATES } = require('../public/assets/mastery.js');
 const catalog = require('../public/assets/skill-catalog.json');
+const banks = require('../public/assets/problem-banks.js');
 
 assert.deepStrictEqual(STATES, ['unseen', 'learning', 'practiced', 'proficient', 'mastered', 'applied']);
 
@@ -16,6 +17,22 @@ const seen = '2026-10-05T00:00:00.000Z';
 const blank = computeMastery(catalog, empty);
 assert.strictEqual(Object.keys(blank).length, catalog.skills.length);
 assert.ok(Object.values(blank).every((skill) => skill.state === 'unseen'));
+
+// Concept accuracy requires three unique first attempts before recommending
+// review, and remains independent of the formal unit mastery states.
+const chainConcept = catalog.concepts.find((concept) => concept.id === 'ap-calculus-bc.chain-rule');
+const calcQuestions = banks.getCourse('ap-calculus-bc').questions;
+const chainIds = calcQuestions.filter((question) => question.skills?.includes(chainConcept.id)).map((question) => question.id);
+const conceptRow = (attempts, correct) => conceptAnalytics([chainConcept], calcQuestions, {
+  attempted: Object.fromEntries(chainIds.slice(0, attempts).map((id) => [id, true])),
+  correct: Object.fromEntries(chainIds.slice(0, correct).map((id) => [id, true])),
+})[0];
+assert.deepStrictEqual([conceptRow(0, 0).status, conceptRow(0, 0).accuracy], ['insufficient-data', null]);
+assert.strictEqual(conceptRow(2, 0).status, 'insufficient-data');
+assert.strictEqual(conceptRow(3, 1).status, 'needs-review');
+assert.strictEqual(conceptRow(5, 3).status, 'developing');
+assert.strictEqual(conceptRow(5, 4).status, 'strong');
+assert.notStrictEqual(stateOf({ problems: { 'ap-calculus-bc.u3': { attempted: 20, correct: 20 } } }, 'ap-calculus-bc.u3'), 'mastered');
 
 // Learning: a lesson in the unit's folder; course.js lessons match exactly.
 const skill = (id) => catalog.skills.find((s) => s.id === id);
