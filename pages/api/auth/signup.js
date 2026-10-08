@@ -1,6 +1,6 @@
 const { getDb } = require('../../../lib/db');
 const { hashPassword } = require('../../../lib/password');
-const { sign } = require('../../../lib/session');
+const { sessionCookie } = require('../../../lib/session');
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -23,7 +23,7 @@ module.exports = async (req, res) => {
 
   try {
     const sql = getDb();
-    const existing = await sql`select id from users where email = ${email}`;
+    const existing = await sql`select id from users where lower(email) = lower(${email})`;
     if (existing.length > 0) {
       res.statusCode = 409;
       return res.json({ error: 'an account with that email already exists' });
@@ -32,19 +32,14 @@ module.exports = async (req, res) => {
     const passwordHash = hashPassword(password);
     const rows = await sql`
       insert into users (email, password_hash, name)
-      values (${email}, ${passwordHash}, ${name || null})
+      values (${email.toLowerCase()}, ${passwordHash}, ${name || null})
       returning id
     `;
     const userId = rows[0].id;
 
     // New accounts are never developers — is_developer defaults to false in
     // the DB and is only ever flipped by hand (scripts/migrate.js's history).
-    const token = sign(
-      { userId, isDeveloper: false, exp: Date.now() + 30 * 24 * 60 * 60 * 1000 },
-      process.env.SESSION_SECRET
-    );
-
-    res.setHeader('Set-Cookie', `session=${token}; HttpOnly; Secure; SameSite=Lax; Max-Age=${30 * 24 * 60 * 60}; Path=/`);
+    res.setHeader('Set-Cookie', sessionCookie(userId, false));
     res.statusCode = 200;
     res.json({ ok: true });
   } catch (err) {

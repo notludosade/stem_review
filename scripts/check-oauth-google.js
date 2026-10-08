@@ -59,24 +59,36 @@ assert.strictEqual(validateGoogleClaims({ ...goodClaims, email: undefined }, 'ab
 assert.strictEqual(validateGoogleClaims({ ...goodClaims, iss: 'accounts.google.com' }, 'abc123').ok, true, 'bare-domain issuer form must also be accepted');
 assert.strictEqual(validateGoogleClaims({ ...goodClaims, exp: 'not-a-number' }, 'abc123').ok, false, 'non-numeric exp must be rejected');
 assert.strictEqual(validateGoogleClaims({ ...goodClaims, exp: undefined }, 'abc123').ok, false, 'missing exp must be rejected');
+assert.strictEqual(validateGoogleClaims({ ...goodClaims, exp: NaN }, 'abc123').ok, false, 'NaN exp must be rejected');
 
 // decideLinkAction
 assert.deepStrictEqual(
-  decideLinkAction({ existingLinkUserId: 42, existingUserIdByEmail: null, emailVerified: true }),
+  decideLinkAction({ existingLinkUserId: 42, existingUserIdByEmail: null, existingUserHasPassword: false, emailVerified: true }),
   { action: 'use_existing_link', userId: 42 },
   'a returning Google user must always win over any email lookup'
 );
 assert.deepStrictEqual(
-  decideLinkAction({ existingLinkUserId: null, existingUserIdByEmail: 7, emailVerified: true }),
-  { action: 'link_to_existing_user', userId: 7 }
+  decideLinkAction({ existingLinkUserId: 42, existingUserIdByEmail: 7, existingUserHasPassword: true, emailVerified: true }),
+  { action: 'use_existing_link', userId: 42 },
+  'a returning Google user still links by oauth_accounts row even when a password-holding email match exists'
 );
 assert.deepStrictEqual(
-  decideLinkAction({ existingLinkUserId: null, existingUserIdByEmail: 7, emailVerified: false }),
+  decideLinkAction({ existingLinkUserId: null, existingUserIdByEmail: 7, existingUserHasPassword: false, emailVerified: true }),
+  { action: 'link_to_existing_user', userId: 7 },
+  'a passwordless (OAuth-created) email match is the only safe auto-link'
+);
+assert.deepStrictEqual(
+  decideLinkAction({ existingLinkUserId: null, existingUserIdByEmail: 7, existingUserHasPassword: true, emailVerified: true }),
+  { action: 'create_new_user' },
+  'a password-holding email match must NOT be auto-linked — email+password signup never verified emails, so that row may be an attacker pre-registering the victim address'
+);
+assert.deepStrictEqual(
+  decideLinkAction({ existingLinkUserId: null, existingUserIdByEmail: 7, existingUserHasPassword: false, emailVerified: false }),
   { action: 'create_new_user' },
   'an unverified email match must never be used to link accounts'
 );
 assert.deepStrictEqual(
-  decideLinkAction({ existingLinkUserId: null, existingUserIdByEmail: null, emailVerified: true }),
+  decideLinkAction({ existingLinkUserId: null, existingUserIdByEmail: null, existingUserHasPassword: false, emailVerified: true }),
   { action: 'create_new_user' }
 );
 
