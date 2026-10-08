@@ -1,7 +1,7 @@
 const { getDb } = require('../../../../lib/db');
 const { sign, verify } = require('../../../../lib/session');
 const {
-  redirectUriForRequest, decodeIdToken, validateGoogleClaims, decideLinkAction,
+  redirectUriForRequest, decodeIdToken, validateGoogleClaims, decideLinkAction, safeNextPath,
 } = require('../../../../lib/oauth-google');
 
 function redirectToLogin(res, errorCode) {
@@ -19,7 +19,7 @@ module.exports = async (req, res) => {
   const stateCookie = verify(req.cookies?.oauth_state, process.env.SESSION_SECRET);
   if (!stateCookie || stateCookie.state !== queryState) return redirectToLogin(res, 'expired');
 
-  const next = stateCookie.next || '/';
+  const next = safeNextPath(stateCookie.next);
   if (!code) return redirectToLogin(res, 'failed');
 
   try {
@@ -51,7 +51,7 @@ module.exports = async (req, res) => {
 
     let existingUserIdByEmail = null;
     if (!existingLinkUserId && validated.claims.email_verified) {
-      const emailRows = await sql`select id from users where email = ${validated.claims.email}`;
+      const emailRows = await sql`select id from users where lower(email) = lower(${validated.claims.email})`;
       existingUserIdByEmail = emailRows.length ? emailRows[0].id : null;
     }
 
@@ -70,7 +70,7 @@ module.exports = async (req, res) => {
     } else {
       const newUserRows = await sql`
         insert into users (email, password_hash, name)
-        values (${validated.claims.email}, null, ${validated.claims.name || null})
+        values (${validated.claims.email.toLowerCase()}, null, ${validated.claims.name || null})
         returning id
       `;
       userId = newUserRows[0].id;

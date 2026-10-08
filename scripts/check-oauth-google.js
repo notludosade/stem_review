@@ -10,6 +10,7 @@ const {
 assert.strictEqual(safeNextPath('/diagnostic.html'), '/diagnostic.html');
 assert.strictEqual(safeNextPath('//evil.example/'), '/', 'protocol-relative path must be rejected');
 assert.strictEqual(safeNextPath('https://evil.example/'), '/', 'absolute URL must be rejected');
+assert.strictEqual(safeNextPath('/\\evil.com'), '/', 'a path containing a backslash must be rejected (WHATWG URL treats it as a second slash)');
 assert.strictEqual(safeNextPath(undefined), '/');
 assert.strictEqual(safeNextPath(null), '/');
 assert.strictEqual(safeNextPath(42), '/');
