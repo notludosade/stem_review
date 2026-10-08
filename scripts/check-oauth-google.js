@@ -56,6 +56,8 @@ assert.strictEqual(validateGoogleClaims({ ...goodClaims, exp: Math.floor(Date.no
 assert.strictEqual(validateGoogleClaims({ ...goodClaims, sub: undefined }, 'abc123').ok, false, 'missing subject must be rejected');
 assert.strictEqual(validateGoogleClaims({ ...goodClaims, email: undefined }, 'abc123').ok, false, 'missing email must be rejected');
 assert.strictEqual(validateGoogleClaims({ ...goodClaims, iss: 'accounts.google.com' }, 'abc123').ok, true, 'bare-domain issuer form must also be accepted');
+assert.strictEqual(validateGoogleClaims({ ...goodClaims, exp: 'not-a-number' }, 'abc123').ok, false, 'non-numeric exp must be rejected');
+assert.strictEqual(validateGoogleClaims({ ...goodClaims, exp: undefined }, 'abc123').ok, false, 'missing exp must be rejected');
 
 // decideLinkAction
 assert.deepStrictEqual(
