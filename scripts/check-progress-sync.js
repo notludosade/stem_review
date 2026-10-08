@@ -2,8 +2,16 @@
 
 const assert = require('node:assert');
 const { PROBLEM_SET_COURSES, isSyncedKey, mergeForKey } = require('../public/assets/progress-sync.js');
+const { courses } = require('../public/assets/problem-banks.js');
 
 assert.strictEqual(PROBLEM_SET_COURSES.length, 20);
+// The allowlist is hardcoded, so a 21st problem bank would otherwise sync
+// silently never — cross-check it against the real source of truth.
+assert.deepStrictEqual(
+  PROBLEM_SET_COURSES.slice().sort(),
+  courses.map((c) => c.slug).sort(),
+  'synced problem-set courses must match the real problem banks'
+);
 
 assert.strictEqual(isSyncedKey('stemplus:results:v1'), true);
 assert.strictEqual(isSyncedKey('stemplus:projects:v1'), true);
@@ -16,7 +24,11 @@ assert.strictEqual(isSyncedKey('stemplus:skipped-courses:v1'), false, 'pathway/p
 assert.strictEqual(isSyncedKey('stemplus:track-pace:v1'), false);
 assert.strictEqual(isSyncedKey('stemplus:custom-plan:v1'), false);
 assert.strictEqual(isSyncedKey('stemplus:active-track:v1'), false);
-assert.strictEqual(isSyncedKey('stemplus:lessons:v1'), false, 'dead key with no current writer is never synced');
+// Written by components/Layout.tsx's useLessonViews on every lesson page a
+// signed-in student opens, and mastery.js's studentEvidence() reads it as the
+// sole driver of the "Learning" state — synced like applications.
+assert.strictEqual(isSyncedKey('stemplus:lessons:v1'), true);
+assert.strictEqual(isSyncedKey('stemplus:sync-owner:v1'), false, 'the shared-device owner marker is browser-local, never pushed');
 
 // Shape 1: append-only array, dedup by (course, unit, kind, version, takenAt)
 const localResults = [{ course: 'Precalculus', unit: 'Unit 1', kind: 'unit_test', version: 'a', score: 8, total: 10, passed: true, takenAt: '2026-01-01T00:00:00.000Z' }];
@@ -46,6 +58,14 @@ assert.deepStrictEqual(
   ['app-a', 'app-b']
 );
 
+// Shape 2: lesson views — union of keys, same presence-map shape as applications
+assert.deepStrictEqual(
+  Object.keys(mergeForKey('stemplus:lessons:v1',
+    { '/Precalculus/Unit 1/0001-intro.html': '2026-01-01T00:00:00.000Z' },
+    { '/Precalculus/Unit 2/0002-limits.html': '2026-01-02T00:00:00.000Z' })).sort(),
+  ['/Precalculus/Unit 1/0001-intro.html', '/Precalculus/Unit 2/0002-limits.html']
+);
+
 // Shape 3: diagnostics — latest attempt per pathway wins, regardless of which side it's on
 const mergedDiagnostics = mergeForKey('stemplus:diagnostics:v1',
   { mathematics: { takenAt: '2026-01-01T00:00:00.000Z', answers: ['local'] } },
@@ -59,4 +79,4 @@ const mergedTimed = mergeForKey('stemplus:timed-mastery:v1',
 assert.strictEqual(mergedTimed.precalculus.best.pct, 90, 'the higher-scoring best survives regardless of which side it came from');
 assert.strictEqual(mergedTimed.precalculus.last.pct, 70, 'the more recent last survives regardless of which side it came from');
 
-console.log('check-progress-sync: OK (allowlist and merge rules for all 6 synced-key shapes verified)');
+console.log('check-progress-sync: OK (allowlist and merge rules for all 7 synced-key shapes verified)');

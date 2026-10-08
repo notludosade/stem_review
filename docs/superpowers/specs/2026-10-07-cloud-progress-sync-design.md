@@ -31,6 +31,7 @@ Dashboard, Learning Record, and mastery computation) plus Fluency Training:
 | `stemplus:applications:v1` | map: application slug → ISO timestamp | `mastery.js` (Application completion) |
 | `stemplus:problem-sets:v1:<course-slug>` (×20) | `{attempted: {}, correct: {}}` | `problem-sets.js` |
 | `stemplus:timed-mastery:v1` | map: course slug → `{best, last}` | `timed-mastery.js` |
+| `stemplus:lessons:v1` | map: lesson page → ISO timestamp | `components/Layout.tsx`'s `useLessonViews` (lesson views) |
 
 **Explicitly out of scope for v1** (stays localStorage-only, can be a later
 pass if it proves worth it):
@@ -38,8 +39,14 @@ pass if it proves worth it):
   `stemplus:custom-plan:v1`, `stemplus:active-track:v1`.
 - Sandbox/code-editor state (`function-sandbox-ui.js`, `java-sandbox.js`,
   `python-sandbox.js`, `python-project.js`, `guided-language-project.js`).
-- `stemplus:lessons:v1` — read by `mastery.js`'s `studentEvidence()` but never
-  written by any current code; nothing to sync.
+- The shared-device owner marker `stemplus:sync-owner:v1` — browser-local
+  bookkeeping written by `progress-sync.js` itself, never pushed.
+
+(An earlier draft of this spec listed `stemplus:lessons:v1` here as having no
+writer. That was wrong — `components/Layout.tsx`'s `useLessonViews` writes it on
+every lesson page a signed-in student opens, and `mastery.js`'s
+`studentEvidence()` reads it as the sole driver of a unit's "Learning" state and
+of the next-lesson recommendation, so it is in scope above.)
 
 **No new UI.** Sync is fully invisible — the same silent gating pattern
 `canSave()`/`account.ready` already uses everywhere else on the site. No
@@ -47,7 +54,7 @@ pass if it proves worth it):
 
 ## Architecture
 
-One generic table, not six:
+One generic table, not one per key:
 
 ```sql
 create table if not exists progress_sync (
@@ -78,7 +85,7 @@ new script tag on the site — **zero edits** to `tests.js`, `mastery.js`,
   before sign-in — queue that key for the next push batch immediately,
   rather than waiting for an unrelated future write to carry it up.
 - **Push** — monkey-patches `window.localStorage.setItem` once, at script
-  load. Any call whose key matches the synced-key allowlist (the 6 exact/
+  load. Any call whose key matches the synced-key allowlist (the 7 exact/
   prefixed keys above) schedules a debounced (2s) batch. After the debounce
   window, every changed key's *current* localStorage value is sent in one
   `PUT /api/progress` call. Calls to `setItem` for keys outside the
@@ -98,7 +105,7 @@ merged by then. Accepted as a documented v1 gap, not fixed here.
 ## Merge rules
 
 Every rule is additive — the goal is "never silently lose progress," not
-"pick a winner." Three shapes cover all six keys:
+"pick a winner." Three shapes cover all seven keys:
 
 **1. Append-only array** (`results`): union of both sides' records, deduped
 by the tuple `(course, unit, kind, version, takenAt)`. Two records that
@@ -127,7 +134,7 @@ no `is_developer` requirement, any signed-in user.
   belonging to the signed-in user. 401 if not signed in.
 - **`PUT /api/progress`** → body `{ entries: { [key]: value } }`. Every key
   in `entries` is checked against a server-side allowlist built from the
-  same 6 exact/prefixed key patterns (prefix match for
+  same 7 exact/prefixed key patterns (prefix match for
   `stemplus:problem-sets:v1:<course-slug>`, validated against the real
   course slugs from `skill-catalog.json`, mirroring how
   `pages/api/content-review.js` validates `course` against

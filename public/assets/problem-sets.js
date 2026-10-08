@@ -41,9 +41,19 @@
       return { attempted: {}, correct: {} };
     }
   };
-  const saveProgress = () => {
+  const saveProgress = (replace) => {
     // Guests can practice freely; progress is only saved for signed-in students.
     if (typeof window !== 'undefined' && window.STEMPlusAccount && !window.STEMPlusAccount.canSave()) return;
+    if (!replace) {
+      // Cross-device sync (progress-sync.js) may have merged newer data into
+      // localStorage since `progress` was last read — union with whatever is
+      // there now instead of overwriting it with our possibly-stale copy.
+      const fresh = loadProgress();
+      progress = {
+        attempted: Object.assign({}, fresh.attempted, progress.attempted),
+        correct: Object.assign({}, fresh.correct, progress.correct),
+      };
+    }
     try {
       localStorage.setItem(storageKey, JSON.stringify(progress));
     } catch (_) {
@@ -210,7 +220,7 @@
   resetButton.addEventListener('click', () => {
     if (!window.confirm(`Reset saved progress for ${course.title}?`)) return;
     progress = { attempted: {}, correct: {} };
-    saveProgress();
+    saveProgress(true);
     rebuildDeck();
     renderStats();
     renderQuestion();

@@ -3,13 +3,15 @@ const { verify } = require('../../lib/session');
 const { isSyncedKey } = require('../../public/assets/progress-sync.js');
 
 module.exports = async (req, res) => {
-  const payload = verify(req.cookies?.session, process.env.SESSION_SECRET);
-  if (!payload) {
-    res.statusCode = 401;
-    return res.json({ error: 'sign in required' });
-  }
-
   try {
+    // Inside the try (like pages/api/me.js): a missing SESSION_SECRET must 500
+    // as JSON, not reject unhandled and return an HTML error page.
+    const payload = verify(req.cookies?.session, process.env.SESSION_SECRET);
+    if (!payload) {
+      res.statusCode = 401;
+      return res.json({ error: 'sign in required' });
+    }
+
     const sql = getDb();
 
     if (req.method === 'GET') {

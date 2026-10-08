@@ -1,5 +1,5 @@
 // Cloud progress sync (ChatGPT's revision report flagged this as the
-// platform's biggest remaining gap): mirrors the 6 localStorage keys that
+// platform's biggest remaining gap): mirrors the 7 localStorage keys that
 // define real progress to progress_sync via GET/PUT /api/progress, so a
 // signed-in student sees the same progress on any device. Every merge rule
 // here is additive — the goal is never to silently lose progress, not to
@@ -24,6 +24,7 @@
     'stemplus:diagnostics:v1',
     'stemplus:applications:v1',
     'stemplus:timed-mastery:v1',
+    'stemplus:lessons:v1',
   ]);
   const PROBLEM_SET_PREFIX = 'stemplus:problem-sets:v1:';
 
@@ -83,6 +84,9 @@
     if (key === 'stemplus:projects:v1') return mergeProjects(local, remote);
     if (key === 'stemplus:diagnostics:v1') return mergeDiagnostics(local, remote);
     if (key === 'stemplus:applications:v1') return mergeIdMap(local, remote, keepEither);
+    // Lesson views: same presence-map shape as applications (id -> timestamp),
+    // written by components/Layout.tsx's useLessonViews.
+    if (key === 'stemplus:lessons:v1') return mergeIdMap(local, remote, keepEither);
     if (key === 'stemplus:timed-mastery:v1') return mergeTimedMastery(local, remote);
     if (typeof key === 'string' && key.indexOf(PROBLEM_SET_PREFIX) === 0) return mergeProblemSet(local, remote);
     return remote !== undefined ? remote : local;
@@ -111,32 +115,55 @@
   // spec-faithful implementations — Chrome's non-masking interceptor just
   // happens to paper over this. Patching the prototype works everywhere.
   const storage = Object.getPrototypeOf(window.localStorage);
-  const nativeSetItem = storage.setItem.bind(window.localStorage);
+  const nativeSetItem = storage.setItem;
   const writeNative = (key, value) => {
     try {
-      nativeSetItem(key, JSON.stringify(value));
+      nativeSetItem.call(window.localStorage, key, JSON.stringify(value));
     } catch (_) {
       // Sync just doesn't take effect when storage is unavailable.
     }
   };
+  // Postgres normalizes jsonb object key order, so a value round-tripped
+  // through the API comes back with its keys reshuffled. Compare canonical
+  // (sorted-key) serializations or every pull re-pushes every key forever.
+  const canon = (value) => JSON.stringify(value, (_, val) => (
+    val && typeof val === 'object' && !Array.isArray(val)
+      ? Object.keys(val).sort().reduce((sorted, k) => { sorted[k] = val[k]; return sorted; }, {})
+      : val
+  ));
+
+  // Who the synced localStorage data belongs to. Deliberately NOT a synced key:
+  // it is browser-local bookkeeping, never pushed to the server.
+  const OWNER_KEY = 'stemplus:sync-owner:v1';
 
   let pendingKeys = new Set();
   let pushTimer = null;
+  // Until a pull has succeeded we have no idea what the server already holds,
+  // so pushing a local-only snapshot could overwrite a richer row.
+  let pulledSuccessfully = false;
   const PUSH_DEBOUNCE_MS = 2000;
 
   function flushPush() {
     pushTimer = null;
+    // Keys stay queued (not cleared) so the next write's debounce retries them;
+    // if the pull never succeeds this page load they are simply never pushed —
+    // nothing is lost, localStorage still has everything and the next page
+    // load's pull re-uploads it (pushes are always full snapshots).
+    if (!pulledSuccessfully) return;
     const keys = Array.from(pendingKeys);
     pendingKeys = new Set();
     if (!keys.length) return;
     const entries = {};
     keys.forEach((key) => { entries[key] = read(key); });
+    const body = JSON.stringify({ entries });
     fetch('/api/progress', {
       method: 'PUT',
       credentials: 'same-origin',
-      keepalive: true,
+      // Per the Fetch spec a keepalive request body over 64KB is a network
+      // error before it is even sent, and the catch below would swallow it.
+      keepalive: body.length < 60000,
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ entries }),
+      body,
     }).catch(() => {
       // Best-effort — the next write, or the next page's pull, retries.
     });
@@ -151,9 +178,11 @@
   // Every existing feature file (tests.js, mastery.js, diagnostic.js,
   // problem-sets.js, timed-mastery.js) keeps calling localStorage.setItem
   // exactly as it does today — this patch is the only thing that changes.
+  // `this`, not a pre-bound localStorage: sessionStorage shares this same
+  // prototype, so binding would silently redirect its writes to localStorage.
   storage.setItem = function (key, value) {
-    nativeSetItem(key, value);
-    if (isSyncedKey(key) && account.canSave()) schedulePush(key);
+    nativeSetItem.call(this, key, value);
+    if (this === window.localStorage && isSyncedKey(key) && account.canSave()) schedulePush(key);
   };
 
   // The full static set of synced keys, not just Object.keys(remote) — a
@@ -166,21 +195,51 @@
 
   account.ready.then((me) => {
     if (!me) return;
+    // Shared devices (school/library): data left in localStorage by whoever
+    // signed in last is theirs, not this account's, and merges are additive
+    // with no undo — so never fold it in. No marker at all means nobody has
+    // ever signed in here, so genuine pre-sign-in guest progress still merges.
+    let ownerMismatch = false;
+    try {
+      const owner = window.localStorage.getItem(OWNER_KEY);
+      ownerMismatch = owner !== null && owner !== String(me.id);
+    } catch (_) {
+      // Storage unavailable — nothing local to misattribute anyway.
+    }
     fetch('/api/progress', { credentials: 'same-origin' })
       .then((res) => (res.ok ? res.json() : null))
       .then((remote) => {
         if (!remote) return;
         const keys = new Set(Object.keys(remote).concat(ALL_SYNCED_KEYS));
         keys.forEach((key) => {
-          if (!isSyncedKey(key)) return;
-          const local = read(key);
-          const merged = mergeForKey(key, local, remote[key]);
-          writeNative(key, merged);
-          // Local had something the server didn't (e.g. guest progress made
-          // before sign-in) — push it now rather than waiting on an
-          // unrelated future write to carry it up.
-          if (JSON.stringify(merged) !== JSON.stringify(remote[key])) schedulePush(key);
+          // One malformed value must not abort the merge for every other key.
+          try {
+            if (!isSyncedKey(key)) return;
+            let local = read(key);
+            if (ownerMismatch && local !== undefined) {
+              // Drop the previous user's leftovers so neither this merge nor a
+              // later write (problem-sets.js unions against storage) can push
+              // them into this account.
+              window.localStorage.removeItem(key);
+              local = undefined;
+            }
+            if (local === undefined && remote[key] === undefined) return;
+            const merged = mergeForKey(key, local, remote[key]);
+            writeNative(key, merged);
+            // Local had something the server didn't (e.g. guest progress made
+            // before sign-in) — push it now rather than waiting on an
+            // unrelated future write to carry it up.
+            if (local !== undefined && canon(merged) !== canon(remote[key])) schedulePush(key);
+          } catch (_) {
+            // Skip just this key.
+          }
         });
+        pulledSuccessfully = true;
+        try {
+          nativeSetItem.call(window.localStorage, OWNER_KEY, String(me.id));
+        } catch (_) {
+          // Owner marker is best-effort; a missing one only costs a re-merge.
+        }
       })
       .catch(() => {
         // No cloud data yet, or offline — localStorage keeps working alone.
