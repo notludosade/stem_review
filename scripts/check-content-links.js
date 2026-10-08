@@ -20,6 +20,7 @@ const { listContentFiles } = require('../lib/content');
 const ROOT = path.resolve(__dirname, '..');
 const CONTENT_DIR = path.join(ROOT, 'content');
 const PUBLIC_DIR = path.join(ROOT, 'public');
+const PAGES_DIR = path.join(ROOT, 'pages');
 
 const REF_RE = /(?:href|src)\s*=\s*"([^"]*)"/g;
 const SKIP_RE = /^(?:https?:|mailto:|tel:|data:|javascript:|#|\/\/)/i;
@@ -51,6 +52,17 @@ for (const relFile of files) {
       assert.ok(
         fs.existsSync(path.join(CONTENT_DIR, urlPath)),
         `${relFile}: broken reference "${match[1]}" — expected content/${urlPath} to exist`
+      );
+    } else if (urlPath.startsWith('api/')) {
+      // API routes are served by Next's own router (pages/api/**), never by
+      // content/ or public/ — resolve against the two standard file-route
+      // conventions instead: pages/api/foo.js, or pages/api/foo/index.js.
+      const exists =
+        fs.existsSync(path.join(PAGES_DIR, `${urlPath}.js`)) ||
+        fs.existsSync(path.join(PAGES_DIR, urlPath, 'index.js'));
+      assert.ok(
+        exists,
+        `${relFile}: broken reference "${match[1]}" — expected pages/${urlPath}.js (or pages/${urlPath}/index.js) to exist`
       );
     } else {
       assert.ok(
