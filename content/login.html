@@ -5,13 +5,16 @@
 <div class="page page-auth">
   <span class="kicker">STEM+ · Account</span>
   <h1>Sign in</h1>
-  <p class="subtitle">Everything on STEM+ is open without an account — signing in saves your progress across visits, shows your Dashboard, and lets you generate an AI learning plan.</p>
+  <p class="subtitle">Everything on STEM+ is open without an account. Sign in to sync your progress across every device, keep your Learning Record, save goals and diagnostics, and keep project evidence.</p>
   <p class="auth-context" id="auth-context" hidden></p>
+  <p class="auth-error" id="google-error" hidden></p>
 
   <div class="auth-card">
     <div class="auth-panel">
       <h2 class="auth-heading">Sign in</h2>
       <p class="auth-error" id="login-error" hidden></p>
+      <a class="widget-btn" id="google-signin-btn" href="/api/auth/google/start">Continue with Google</a>
+      <div class="auth-divider"><span>or</span></div>
       <form id="login-form" class="auth-form">
         <label class="auth-field">
           <span>Email</span>
@@ -70,11 +73,26 @@
   // the swap without needing to detect it precisely. Form submission uses a
   // document-level delegated listener instead of listeners on the form
   // elements themselves, so it isn't affected by the swap at all.
+  const GOOGLE_ERROR_MESSAGES = {
+    cancelled: ‘Google sign-in was cancelled.’,
+    expired: ‘Your session expired. Please sign in again.’,
+    failed: ‘We couldn’t complete Google sign-in. Please try again.’,
+  };
+
   function applyContext() {
-    const context = document.getElementById('auth-context');
-    if (!context || target === '/') return;
-    context.textContent = 'You’ll return to ' + decodeURIComponent(target) + ' after signing in.';
-    context.hidden = false;
+    const context = document.getElementById(‘auth-context’);
+    if (context && target !== ‘/’) {
+      context.textContent = ‘You’ll return to ‘ + decodeURIComponent(target) + ‘ after signing in.’;
+      context.hidden = false;
+    }
+    const googleBtn = document.getElementById(‘google-signin-btn’);
+    if (googleBtn) googleBtn.href = ‘/api/auth/google/start?next=’ + encodeURIComponent(target);
+    const googleError = document.getElementById(‘google-error’);
+    const errorCode = new URLSearchParams(location.search).get(‘google_error’);
+    if (googleError && errorCode && GOOGLE_ERROR_MESSAGES[errorCode]) {
+      googleError.textContent = GOOGLE_ERROR_MESSAGES[errorCode];
+      googleError.hidden = false;
+    }
   }
   applyContext();
   let resyncCount = 0;
@@ -105,6 +123,11 @@
     location.href = target;
   }
 
+  document.addEventListener('click', (e) => {
+    if (e.target && e.target.id === 'google-signin-btn') {
+      e.target.textContent = 'Redirecting to Google…';
+    }
+  });
   document.addEventListener('submit', (e) => {
     if (e.target && e.target.id === 'login-form') {
       e.preventDefault();
