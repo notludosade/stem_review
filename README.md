@@ -17,5 +17,7 @@ At the end, I still am considering making this paid for $0.99 for the Full versi
 DISCLAIMER: If you use this product and are still unsure of the content that is Human Verified, you have the freedom to search it up. I STRONGLY suggest you first report it, and if the report doesn't get resolved by your standard range of time, then go ahead.
 
 Link/URL for Stem Lite: notludosade.github.io/stem_review/  or  notludosade.github.io/stem_review/index.html
+Another thing: If the page gives a cached 404 error, try reloading the page first! 
+If you are one of those weird high school students who spam useless reports, please don't cause I will set up a feature where the report should be reasonable before turning it in.
 
 THANK YOU FOR USING MY TOOL! <3
