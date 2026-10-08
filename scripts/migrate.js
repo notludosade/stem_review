@@ -24,6 +24,23 @@ async function main() {
   // request in pages/api/generate-plan.js, not embedded in the session
   // token (a token could be stale for up to 30 days).
   await sql`alter table users add column if not exists last_plan_generated_at timestamptz`;
+  // Google (and future OAuth providers') identity links — see
+  // lib/oauth-google.js and pages/api/auth/google/callback.js. A row here
+  // means "this provider account signs in as this STEM+ user"; the unique
+  // constraint makes find-or-create race-safe for two concurrent callbacks
+  // for the same Google account.
+  await sql`
+    create table if not exists oauth_accounts (
+      id serial primary key,
+      user_id integer not null references users(id) on delete cascade,
+      provider text not null,
+      provider_account_id text not null,
+      created_at timestamptz not null default now(),
+      unique (provider, provider_account_id)
+    )
+  `;
+  // A Google-only user has no password to hash.
+  await sql`alter table users alter column password_hash drop not null`;
   // Report a Problem (pages/api/report.js). Anyone can report, so rows keep
   // an HMAC of the IP for rate limiting, never the IP itself.
   await sql`
@@ -72,7 +89,7 @@ async function main() {
       primary key (user_id, key)
     )
   `;
-  console.log('migrate: users, reports, content_reviews, and progress_sync tables ready');
+  console.log('migrate: users, oauth_accounts, reports, content_reviews, and progress_sync tables ready');
 }
 
 main().catch((err) => {
