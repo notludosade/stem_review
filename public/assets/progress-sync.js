@@ -1,5 +1,5 @@
 // Cloud progress sync (ChatGPT's revision report flagged this as the
-// platform's biggest remaining gap): mirrors the 7 localStorage keys that
+// platform's biggest remaining gap): mirrors the 8 localStorage keys that
 // define real progress to progress_sync via GET/PUT /api/progress, so a
 // signed-in student sees the same progress on any device. Every merge rule
 // here is additive — the goal is never to silently lose progress, not to
@@ -25,6 +25,7 @@
     'stemplus:applications:v1',
     'stemplus:timed-mastery:v1',
     'stemplus:lessons:v1',
+    'stemplus:custom-plan:v1',
   ]);
   const PROBLEM_SET_PREFIX = 'stemplus:problem-sets:v1:';
 
@@ -89,6 +90,14 @@
     if (key === 'stemplus:lessons:v1') return mergeIdMap(local, remote, keepEither);
     if (key === 'stemplus:timed-mastery:v1') return mergeTimedMastery(local, remote);
     if (typeof key === 'string' && key.indexOf(PROBLEM_SET_PREFIX) === 0) return mergeProblemSet(local, remote);
+    // stemplus:custom-plan:v1 falls through to here deliberately: it's a
+    // single whole value (the AI-generated plan), replaced wholesale on
+    // every regeneration, not merged piece-by-piece — "prefer the server's
+    // copy, otherwise keep/push whatever's local" is exactly right for it.
+    // pages/api/generate-plan.js writes the authoritative copy directly to
+    // progress_sync at generation time, so remote is correct the instant a
+    // plan exists; this path only pushes local up for a pre-existing,
+    // not-yet-synced plan from before this key was added.
     return remote !== undefined ? remote : local;
   }
 

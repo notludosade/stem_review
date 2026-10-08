@@ -98,6 +98,19 @@ async function handler(req, res) {
 
     const plan = validatePlan(rawPlan, CATALOG);
 
+    // Best-effort: the student already has their plan either way (the
+    // client also saves it to localStorage itself) — a failure here just
+    // means this generation doesn't reach other devices until the next one.
+    try {
+      await sql`
+        insert into progress_sync (user_id, key, value, updated_at)
+        values (${payload.userId}, 'stemplus:custom-plan:v1', ${JSON.stringify(plan)}::jsonb, now())
+        on conflict (user_id, key) do update set value = excluded.value, updated_at = now()
+      `;
+    } catch (syncErr) {
+      console.error('generate-plan: failed to sync plan to progress_sync', syncErr);
+    }
+
     res.statusCode = 200;
     res.json(plan);
   } catch (err) {

@@ -32,11 +32,12 @@ Dashboard, Learning Record, and mastery computation) plus Fluency Training:
 | `stemplus:problem-sets:v1:<course-slug>` (×20) | `{attempted: {}, correct: {}}` | `problem-sets.js` |
 | `stemplus:timed-mastery:v1` | map: course slug → `{best, last}` | `timed-mastery.js` |
 | `stemplus:lessons:v1` | map: lesson page → ISO timestamp | `components/Layout.tsx`'s `useLessonViews` (lesson views) |
+| `stemplus:custom-plan:v1` | single whole value (replaced wholesale, not merged) | `pages/api/generate-plan.js` writes directly to `progress_sync` at generation time; `tests.js`'s `saveCustomPlan` writes the localStorage mirror |
 
 **Explicitly out of scope for v1** (stays localStorage-only, can be a later
 pass if it proves worth it):
 - Pathway/plan preferences: `stemplus:skipped-courses:v1`, `stemplus:track-pace:v1`,
-  `stemplus:custom-plan:v1`, `stemplus:active-track:v1`.
+  `stemplus:active-track:v1`.
 - Sandbox/code-editor state (`function-sandbox-ui.js`, `java-sandbox.js`,
   `python-sandbox.js`, `python-project.js`, `guided-language-project.js`).
 - The shared-device owner marker `stemplus:sync-owner:v1` — browser-local
