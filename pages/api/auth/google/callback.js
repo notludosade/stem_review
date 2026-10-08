@@ -81,6 +81,15 @@ module.exports = async (req, res) => {
     if (decision.action === 'create_new_user' && validated.claims.email_verified !== true) {
       return redirectToLogin(res, 'failed');
     }
+    // decideLinkAction deliberately refuses to link when the matched account
+    // has a password (see the design decision in docs/superpowers/specs/
+    // 2026-10-07-google-oauth-design.md's account-linking fix) — but "create
+    // a new user" with that same email is impossible (users.email is
+    // unique), so this exact case needs its own clear message instead of
+    // falling through to a doomed insert.
+    if (decision.action === 'create_new_user' && existingUserIdByEmail) {
+      return redirectToLogin(res, 'account_exists');
+    }
 
     let userId;
     if (decision.action === 'use_existing_link') {
