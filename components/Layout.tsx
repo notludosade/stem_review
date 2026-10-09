@@ -114,6 +114,16 @@ function courseFor(asPath: string): string | null {
   return COURSE_FOLDERS.find(([, folder]) => pathname.startsWith(folder))?.[0] ?? null;
 }
 
+// Best-effort: most courses follow content/<Course>/Unit N/000X-slug.html.
+// Not every course does, and that's fine — this only enriches a report,
+// it never blocks submission when it doesn't match.
+function unitLessonFor(pathname: string): { unit: string | null; lesson: string | null } {
+  const decoded = decodeURIComponent(pathname.split(/[?#]/)[0]);
+  const match = decoded.match(/\/(Unit \d+)\/([^/]+)\.html$/);
+  if (!match) return { unit: null, lesson: null };
+  return { unit: match[1], lesson: match[2] };
+}
+
 const PRACTICE_CATEGORIES: readonly NavCategory[] = [
   {
     label: 'Fluency Training',
@@ -433,6 +443,7 @@ function ReportProblem({ course }: { course: string | null }) {
     const fields = new FormData(form);
     setSending(true);
     try {
+      const { unit, lesson } = unitLessonFor(location.pathname);
       const res = await fetch('/api/report', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -440,6 +451,8 @@ function ReportProblem({ course }: { course: string | null }) {
           page: location.pathname + location.search,
           pageTitle: document.title,
           course,
+          unit,
+          lesson,
           questionId,
           category: fields.get('category'),
           description: fields.get('description'),
