@@ -208,7 +208,7 @@ function build() {
   ]), 'calculators.html'));
   write('search.html', page('Search STEM Lite', 'Find a course, lesson, skill, practice topic, application, project, or calculator.', '<div data-lite-search><label class="sr-only" for="lite-search-input">Search STEM Lite</label><div class="lite-search-form"><input id="lite-search-input" type="search" autocomplete="off" placeholder="Try chain rule, satellite, or python…"></div><div class="lite-search-results" data-lite-results aria-live="polite"><p>Loading the catalog…</p></div></div>', 'search.html', '<script src="assets/global-search.js" defer></script>'));
 
-  ['style.css', 'interactive.js', 'quiz.js', 'applications.js', 'problem-banks.js', 'problem-sets.js', 'desmos.js'].forEach((name) => copy(path.join(PUBLIC, 'assets', name), `assets/${name}`));
+  ['style.css', 'interactive.js', 'quiz.js', 'applications.js', 'problem-banks.js', 'problem-sets.js', 'desmos.js', 'trust-panel.js'].forEach((name) => copy(path.join(PUBLIC, 'assets', name), `assets/${name}`));
   copy(path.join(ROOT, 'stem-lite/lite.css'), 'assets/lite.css');
   copy(path.join(ROOT, 'stem-lite/lite.js'), 'assets/lite.js');
   copy(path.join(ROOT, 'lib/global-search.js'), 'assets/global-search.js');
