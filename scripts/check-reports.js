@@ -5,10 +5,12 @@
 const assert = require('node:assert');
 const { CATEGORIES, validateReport, hashIp } = require('../lib/reports');
 
-const good = { page: '/problem-set.html?course=precalculus', pageTitle: 'Precalculus Problem Set — STEM+', course: null, questionId: 'precalc-function-1', category: 'Incorrect answer', description: 'Answer key says 3 but it should be 4.' };
+const good = { page: '/problem-set.html?course=precalculus', pageTitle: 'Precalculus Problem Set — STEM+', course: null, unit: 'Unit 3', lesson: '0005-chain-rule', questionId: 'precalc-function-1', category: 'Incorrect answer', description: 'Answer key says 3 but it should be 4.' };
 const ok = validateReport(good);
 assert.ok(ok.ok, ok.error);
 assert.strictEqual(ok.report.course, null);
+assert.strictEqual(ok.report.unit, 'Unit 3');
+assert.strictEqual(ok.report.lesson, '0005-chain-rule');
 assert.strictEqual(validateReport({ ...good, description: '  Typo here  ' }).report.description, 'Typo here');
 assert.deepStrictEqual(CATEGORIES, ['Incorrect answer', 'Broken explanation', 'Typo', 'Broken link', 'Misleading diagram', 'Code error', 'Other']);
 
@@ -21,6 +23,8 @@ const rejects = {
   'long page': { ...good, page: `/${'x'.repeat(300)}` },
   'long title': { ...good, pageTitle: 'x'.repeat(201) },
   'long question id': { ...good, questionId: 'x'.repeat(101) },
+  'long unit': { ...good, unit: 'x'.repeat(101) },
+  'long lesson': { ...good, lesson: 'x'.repeat(151) },
   'non-string description': { ...good, description: 12345 },
   'empty body': undefined,
 };
