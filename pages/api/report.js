@@ -29,8 +29,8 @@ module.exports = async (req, res) => {
     }
     // The subselect leaves user_id null if the session's account was deleted.
     await sql`
-      insert into reports (page, page_title, course, question_id, category, description, user_id, ip_hash)
-      values (${report.page}, ${report.pageTitle}, ${report.course}, ${report.questionId}, ${report.category},
+      insert into reports (page, page_title, course, unit, lesson, question_id, category, description, user_id, ip_hash)
+      values (${report.page}, ${report.pageTitle}, ${report.course}, ${report.unit}, ${report.lesson}, ${report.questionId}, ${report.category},
         ${report.description}, (select id from users where id = ${session ? session.userId : null}), ${ipHash})
     `;
     res.statusCode = 201;
