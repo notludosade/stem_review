@@ -1,6 +1,8 @@
 'use strict';
 
 const assert = require('assert');
+const fs = require('fs');
+const path = require('path');
 const {
   ASSESSMENT_STATUSES, REPORT_STATUSES, SOURCE_ROLES,
   isValidAssessmentStatus, isValidReportStatus,
@@ -74,5 +76,14 @@ assert.strictEqual(
   false,
   'Human Verified should fail without at least one source'
 );
+
+// public/assets/assessment-review-panel.js can't require() lib/content-trust.js
+// (it's a browser script), so its STATUSES list is a hand-maintained
+// duplicate — this assertion catches the two drifting apart.
+const panelJs = fs.readFileSync(path.join(__dirname, '../public/assets/assessment-review-panel.js'), 'utf8');
+const panelStatusesMatch = panelJs.match(/const STATUSES = (\[[^\]]+\]);/);
+assert.ok(panelStatusesMatch, 'could not find STATUSES in public/assets/assessment-review-panel.js');
+const panelStatuses = JSON.parse(panelStatusesMatch[1].replace(/'/g, '"'));
+assert.deepStrictEqual(panelStatuses, ASSESSMENT_STATUSES, 'assessment-review-panel.js STATUSES is out of sync with ASSESSMENT_STATUSES');
 
 console.log('check-content-trust: OK (assessment/report status enums, source parsing, and Human Reviewed/Verified gating all verified)');

@@ -1,4 +1,4 @@
-// Developer panel: set each course's content-review status
+// Developer panel: set each course's content-review status and metadata
 // (pages/api/content-review.js). Course names come from the skill catalog
 // — the same file assets/mastery.js already fetches — not a separate
 // hardcoded list, so a newly-cataloged course shows up here automatically.
@@ -18,6 +18,16 @@
     return p;
   };
 
+  const field = (labelText, inputEl) => {
+    const label = document.createElement('label');
+    label.className = 'fm-row';
+    const span = document.createElement('span');
+    span.textContent = labelText;
+    span.style.minWidth = '9rem';
+    label.append(span, inputEl);
+    return label;
+  };
+
   function courseRow(course, current) {
     const row = document.createElement('div');
     row.className = 'widget';
@@ -32,10 +42,6 @@
     const statusLine = paragraph(statusText(current ? current.status : 'AI Generated', current && current.reviewed), 'toc-sub');
     row.append(statusLine);
 
-    const controls = document.createElement('div');
-    controls.className = 'fm-row';
-    controls.style.gap = '0.6rem';
-
     const select = document.createElement('select');
     select.setAttribute('aria-label', `Status for ${course}`);
     STATUSES.forEach((status) => {
@@ -46,6 +52,57 @@
       select.append(option);
     });
 
+    const reviewedByInput = document.createElement('input');
+    reviewedByInput.type = 'text';
+    reviewedByInput.value = (current && current.reviewedBy) || '';
+    reviewedByInput.placeholder = 'e.g. Mathematics Reviewer';
+
+    const reviewerRoleInput = document.createElement('input');
+    reviewerRoleInput.type = 'text';
+    reviewerRoleInput.value = (current && current.reviewerRole) || '';
+    reviewerRoleInput.placeholder = 'e.g. Calculus Reviewer';
+
+    const frameworkInput = document.createElement('input');
+    frameworkInput.type = 'text';
+    frameworkInput.value = (current && current.framework) || '';
+    frameworkInput.placeholder = 'e.g. College Board AP Calculus BC Course and Exam Description';
+
+    const frameworkVersionInput = document.createElement('input');
+    frameworkVersionInput.type = 'text';
+    frameworkVersionInput.value = (current && current.frameworkVersion) || '';
+    frameworkVersionInput.placeholder = 'e.g. 2026';
+
+    const sourcesInput = document.createElement('textarea');
+    sourcesInput.rows = 3;
+    sourcesInput.value = (current && current.sources) || '';
+    sourcesInput.placeholder = 'primary|College Board AP Calculus BC CED\nreference|OpenStax Calculus';
+
+    const details = document.createElement('details');
+    const summary = document.createElement('summary');
+    summary.textContent = 'Reviewer, framework & sources';
+    details.append(summary);
+    const detailGrid = document.createElement('div');
+    detailGrid.style.display = 'grid';
+    detailGrid.style.gap = '0.6rem';
+    detailGrid.style.marginTop = '0.6rem';
+    detailGrid.append(
+      field('Reviewed by', reviewedByInput),
+      field('Reviewer role', reviewerRoleInput),
+      field('Framework', frameworkInput),
+      field('Framework version', frameworkVersionInput),
+      field('Sources (one per line)', sourcesInput)
+    );
+    details.append(detailGrid);
+    row.append(details);
+
+    const controls = document.createElement('div');
+    controls.className = 'fm-row';
+    controls.style.gap = '0.6rem';
+    controls.style.marginTop = '0.8rem';
+
+    const errorLine = paragraph('', 'toc-empty');
+    errorLine.hidden = true;
+
     const button = document.createElement('button');
     button.type = 'button';
     button.className = 'widget-btn';
@@ -53,12 +110,22 @@
     button.addEventListener('click', async () => {
       button.disabled = true;
       button.textContent = 'Saving…';
+      errorLine.hidden = true;
       const res = await fetch('/api/content-review', {
         method: 'POST',
         credentials: 'same-origin',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ course, status: select.value }),
+        body: JSON.stringify({
+          course,
+          status: select.value,
+          reviewedBy: reviewedByInput.value,
+          reviewerRole: reviewerRoleInput.value,
+          framework: frameworkInput.value,
+          frameworkVersion: frameworkVersionInput.value,
+          sources: sourcesInput.value,
+        }),
       }).catch(() => null);
+      const data = res ? await res.json().catch(() => ({})) : {};
       if (res && res.ok) {
         statusLine.textContent = statusText(select.value, new Date().toISOString());
         button.textContent = 'Saved';
@@ -67,13 +134,15 @@
           button.disabled = false;
         }, 1500);
       } else {
+        errorLine.textContent = data.error || 'Could not save.';
+        errorLine.hidden = false;
         button.textContent = 'Try again';
         button.disabled = false;
       }
     });
 
     controls.append(select, button);
-    row.append(controls);
+    row.append(controls, errorLine);
     return row;
   }
 
