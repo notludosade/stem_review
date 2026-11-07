@@ -131,7 +131,11 @@ function courseUnits(course, dir) {
   }
   const html = fs.readFileSync(path.join(CONTENT, dir, 'index.html'), 'utf8');
   const units = [...html.matchAll(/<summary>\s*Unit (\d+)\s*[:—-]\s*([^<]+)<\/summary>/g)]
-    .map((m) => ({ number: Number(m[1]), name: decodeEntities(m[2].trim()) }));
+    .map((m) => ({
+      number: Number(m[1]),
+      name: decodeEntities(m[2].trim()),
+      optional: /\(Beyond AP\)$/.test(decodeEntities(m[2].trim())),
+    }));
   const folders = unitFolders(dir).map((name) => Number(name.slice(5))).sort((a, b) => a - b);
   if (units.map((u) => u.number).join() !== folders.join()) {
     throw new Error(`${course}: unit headings (${units.map((u) => u.number)}) don't match unit folders (${folders})`);
@@ -190,13 +194,17 @@ function buildCatalog() {
     name: unit.name,
     course,
     unit: `Unit ${unit.number}`,
+    ...(unit.optional ? { optional: true } : {}),
     lessons: unit.lessons.map((lesson) => {
       const lessonConcepts = concepts.filter((concept) => concept.lessons.includes(lesson.page)).map((concept) => concept.id);
       return lessonConcepts.length ? { ...lesson, concepts: lessonConcepts } : lesson;
     }),
     prerequisites: index > 0
       ? [idFor(course, courseUnitList[index - 1].number)]
-      : (PREREQUISITE_GRAPH[course] || []).map((before) => idFor(before, units[before][units[before].length - 1].number)),
+      : (PREREQUISITE_GRAPH[course] || []).map((before) => {
+        const prerequisite = units[before].filter((candidate) => !candidate.optional).at(-1);
+        return idFor(before, prerequisite.number);
+      }),
     problemTopics: topicsByUnit.get(idFor(course, unit.number)) || [],
     problemSet: PROBLEM_SET_SLUGS[course] || null,
     testPage: unit.testPage,

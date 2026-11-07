@@ -62,6 +62,15 @@ assert.ok(catalog.skills.filter((skill) => skill.course === 'Precalculus').every
 assert.strictEqual(stateOf(exam, 'ap-calculus-bc.u1'), 'unseen');
 assert.strictEqual(stateOf({ results: [{ ...exam.results[0], passed: false }] }, 'precalculus.u3'), 'unseen');
 
+// Optional beyond-course extensions require their own unit test: the core
+// exam neither masters them nor makes the next-step engine require them.
+const mechanicsExtension = skill('ap-physics-c-mechanics.u9');
+assert.strictEqual(mechanicsExtension.optional, true);
+const mechanicsExam = { results: [{ course: 'AP Physics C: Mechanics', unit: 'Course Exam', kind: 'course_exam', score: 24, total: 24, passed: true }] };
+assert.strictEqual(stateOf(mechanicsExam, mechanicsExtension.id), 'unseen');
+assert.strictEqual(stateOf({ results: [unitTest('Unit 9', 8, true, 'AP Physics C: Mechanics')] }, mechanicsExtension.id), 'mastered');
+assert.deepStrictEqual(skill('ap-physics-c-electricity-and-magnetism.u1').prerequisites, ['ap-physics-c-mechanics.u8']);
+
 // Applied: mastered and a completed capstone covering the course.
 assert.strictEqual(stateOf({ completedProjects: ['mathematics-capstone'] }, 'precalculus.u3'), 'unseen');
 assert.strictEqual(stateOf({ ...exam, completedProjects: ['mathematics-capstone'] }, 'precalculus.u3'), 'applied');

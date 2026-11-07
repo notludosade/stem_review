@@ -68,7 +68,7 @@
       const best = tests.reduce((max, row) => Math.max(max, row.total ? row.score / row.total : 0), 0);
       const practice = (evidence.problems || {})[skill.id] || { attempted: 0, correct: 0 };
       const lessonsViewed = pages.filter((page) => isLessonOf(skill, page)).length;
-      const mastered = tests.some((row) => row.passed) || examPassed.has(skill.course);
+      const mastered = tests.some((row) => row.passed) || (!skill.optional && examPassed.has(skill.course));
       // A diagnostic raises a unit to Practiced or Proficient, never Mastered.
       const diagnostic = diagnostics.get(skill.id) || { asked: 0, correct: 0 };
 
@@ -89,7 +89,7 @@
 
   // A Pathway's readiness: its skills at Proficient or above, over all of them.
   function readiness(catalog, mastery, pathway) {
-    const skills = catalog.skills.filter((skill) => pathway.courses.includes(skill.course));
+    const skills = catalog.skills.filter((skill) => pathway.courses.includes(skill.course) && !skill.optional);
     const ready = skills.filter((skill) => STATES.indexOf(mastery[skill.id].state) >= STATES.indexOf('proficient')).length;
     return { ready, total: skills.length, percent: skills.length ? Math.round(ready * 100 / skills.length) : 0 };
   }
@@ -110,7 +110,7 @@
   // next unopened lesson; after that, take its unit test.
   function nextStep(catalog, mastery, evidence, courses) {
     const viewed = new Set(Object.keys((evidence && evidence.lessons) || {}));
-    const skill = courses.flatMap((course) => catalog.skills.filter((s) => s.course === course))
+    const skill = courses.flatMap((course) => catalog.skills.filter((s) => s.course === course && !s.optional))
       .find((s) => rank(mastery[s.id].state) < rank('mastered'));
     if (!skill) return { kind: 'done' };
     if (rank(mastery[skill.id].state) <= rank('learning')) {
