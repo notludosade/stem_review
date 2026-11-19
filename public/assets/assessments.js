@@ -322,6 +322,7 @@
   function runAttempt(mount, catalog, target, attempt, byId, notice) {
     const order = attempt.sections.flatMap((s, si) => s.ids.map((id) => ({ id, si, slug: s.slug })));
     let saveTimer = null;
+    let submitted = false;
     const persist = (now) => {
       window.clearTimeout(saveTimer);
       const write = () => { attempt.at = new Date().toISOString(); const store = loadStore(); store.inProgress[attempt.id] = attempt; saveStore(store); };
@@ -394,14 +395,16 @@
       out.textContent = x.language === 'python' && !pyReady ? 'Loading Python (first run takes a few seconds)…' : 'Running tests…';
       try {
         const result = await runCode(x, code);
+        if (submitted) return;
         const results = result.results || [];
         const passed = results.filter((t) => t.passed).length;
-        setResponse(x.id, { code, passed, total: x.tests.length, ranCode: code }, true);
+        setResponse(x.id, Object.assign({}, attempt.responses[x.id], { passed, total: x.tests.length, ranCode: code }), true);
         out.innerHTML = result.error && !results.length
           ? `<span class="assess-bad">${esc(result.error)}</span>`
           : `${passed} of ${x.tests.length} tests passed.<ul class="assess-tests">${results.map((t) => `<li class="${t.passed ? 'assess-good' : 'assess-bad'}">${t.passed ? '✓' : '✗'} Test ${t.index}${t.passed ? '' : `: got ${esc(t.error || t.actual)}, expected ${esc(t.expected)}`}</li>`).join('')}</ul>`;
       } catch (err) {
-        setResponse(x.id, { code, passed: 0, total: x.tests.length, ranCode: code }, true);
+        if (submitted) return;
+        setResponse(x.id, Object.assign({}, attempt.responses[x.id], { passed: 0, total: x.tests.length, ranCode: code }), true);
         out.innerHTML = `<span class="assess-bad">${esc(err.message)}</span>`;
       } finally { button.disabled = false; }
     }
@@ -409,6 +412,7 @@
     async function submit() {
       const unanswered = order.filter((o) => !isAnswered(byId[o.id], attempt.responses[o.id])).length;
       if (unanswered && !window.confirm(`${unanswered} question${unanswered === 1 ? ' is' : 's are'} unanswered and will score 0. Submit anyway?`)) return;
+      submitted = true;
       mount.innerHTML = '<p class="toc-empty">Checking your code and scoring…</p>';
       for (const o of order) {
         const x = byId[o.id];
