@@ -1,0 +1,417 @@
+{
+  "course": "Applied Machine/Deep Learning",
+  "slug": "applied-machine-deep-learning",
+  "questions": [
+    {
+      "id": "applied-machine-deep-learning.u1.q1",
+      "unit": 1,
+      "type": "single",
+      "prompt": "Which loss function is the usual choice when a network's output is a continuous number?",
+      "choices": [
+        "Mean squared error",
+        "Accuracy",
+        "Argmax",
+        "Dropout"
+      ],
+      "answer": "Mean squared error",
+      "explanation": "Regression outputs are measured with a distance-based loss such as mean squared error."
+    },
+    {
+      "id": "applied-machine-deep-learning.u1.q2",
+      "unit": 1,
+      "type": "number",
+      "prompt": "A weight is 2, its gradient is 4, and the learning rate is 0.25. What is the weight after one gradient descent update?",
+      "answer": 1,
+      "explanation": "New weight = 2 - 0.25 * 4 = 1."
+    },
+    {
+      "id": "applied-machine-deep-learning.u1.q3",
+      "unit": 1,
+      "type": "code",
+      "language": "python",
+      "prompt": "Write `mse(y_true, y_pred)` that returns the mean of the squared differences between two equal-length, non-empty lists.",
+      "functionName": "mse",
+      "starter": "def mse(y_true, y_pred):\n    # your code here\n    pass",
+      "tests": [
+        {
+          "args": [
+            [
+              1,
+              2,
+              3
+            ],
+            [
+              1,
+              2,
+              3
+            ]
+          ],
+          "expected": 0
+        },
+        {
+          "args": [
+            [
+              0,
+              0
+            ],
+            [
+              1,
+              3
+            ]
+          ],
+          "expected": 5
+        },
+        {
+          "args": [
+            [
+              2
+            ],
+            [
+              4
+            ]
+          ],
+          "expected": 4
+        },
+        {
+          "args": [
+            [
+              1,
+              -1
+            ],
+            [
+              -1,
+              1
+            ]
+          ],
+          "expected": 4
+        }
+      ],
+      "reference": "def mse(y_true, y_pred):\n    n = len(y_true)\n    return sum((t - p) ** 2 for t, p in zip(y_true, y_pred)) / n",
+      "explanation": "Square each error, then average them."
+    },
+    {
+      "id": "applied-machine-deep-learning.u2.q1",
+      "unit": 2,
+      "type": "truefalse",
+      "prompt": "Backpropagation reuses the gradient computed for a later layer when computing the gradient for an earlier layer.",
+      "answer": true,
+      "explanation": "Walking backward lets each layer's result be reused instead of recomputed."
+    },
+    {
+      "id": "applied-machine-deep-learning.u2.q2",
+      "unit": 2,
+      "type": "number",
+      "prompt": "A training set has 1,000 examples. With a batch size of 100, how many weight updates happen in 5 epochs?",
+      "answer": 50,
+      "explanation": "One epoch is 10 batches, so 5 epochs give 50 updates."
+    },
+    {
+      "id": "applied-machine-deep-learning.u2.q3",
+      "unit": 2,
+      "type": "multi",
+      "prompt": "Which of these help reduce overfitting?",
+      "choices": [
+        "Dropout",
+        "Weight decay",
+        "Removing the validation set",
+        "Doubling the number of layers"
+      ],
+      "answers": [
+        "Dropout",
+        "Weight decay"
+      ],
+      "explanation": "Dropout and weight decay are regularization methods; removing validation hides overfitting and adding layers tends to worsen it."
+    },
+    {
+      "id": "applied-machine-deep-learning.u3.q1",
+      "unit": 3,
+      "type": "single",
+      "prompt": "Why is a convolutional layer better for images than a fully connected layer on flattened pixels?",
+      "choices": [
+        "It shares one small filter across positions, using far fewer weights",
+        "It ignores nearby pixels",
+        "It needs no training",
+        "It only works on grayscale images"
+      ],
+      "answer": "It shares one small filter across positions, using far fewer weights",
+      "explanation": "Weight sharing cuts parameters and detects a pattern wherever it appears."
+    },
+    {
+      "id": "applied-machine-deep-learning.u3.q2",
+      "unit": 3,
+      "type": "number",
+      "prompt": "A 5-position input is convolved with a filter of size 3, stride 1 and no padding. How many positions does the output have?",
+      "answer": 3,
+      "explanation": "The output length is 5 - 3 + 1 = 3."
+    },
+    {
+      "id": "applied-machine-deep-learning.u3.q3",
+      "unit": 3,
+      "type": "code",
+      "language": "python",
+      "prompt": "Write `conv1d(x, k)` that slides filter `k` across list `x` (stride 1, no padding) and returns the sum of elementwise products at each position. Return an empty list if `k` is longer than `x`.",
+      "functionName": "conv1d",
+      "starter": "def conv1d(x, k):\n    # your code here\n    pass",
+      "tests": [
+        {
+          "args": [
+            [
+              1,
+              2,
+              3,
+              4
+            ],
+            [
+              1,
+              1
+            ]
+          ],
+          "expected": [
+            3,
+            5,
+            7
+          ]
+        },
+        {
+          "args": [
+            [
+              1,
+              2,
+              3
+            ],
+            [
+              2
+            ]
+          ],
+          "expected": [
+            2,
+            4,
+            6
+          ]
+        },
+        {
+          "args": [
+            [
+              1
+            ],
+            [
+              1,
+              1
+            ]
+          ],
+          "expected": []
+        },
+        {
+          "args": [
+            [
+              1,
+              0,
+              -1
+            ],
+            [
+              1,
+              -1
+            ]
+          ],
+          "expected": [
+            1,
+            1
+          ]
+        }
+      ],
+      "reference": "def conv1d(x, k):\n    out = []\n    for i in range(len(x) - len(k) + 1):\n        out.append(sum(x[i + j] * k[j] for j in range(len(k))))\n    return out",
+      "explanation": "At each position multiply the filter with the matching patch of x and add the products."
+    },
+    {
+      "id": "applied-machine-deep-learning.u4.q1",
+      "unit": 4,
+      "type": "truefalse",
+      "prompt": "An RNN applies the same weights at every time step.",
+      "answer": true,
+      "explanation": "The same recurrence is reused at each step, which is also why gradients can vanish over long sequences."
+    },
+    {
+      "id": "applied-machine-deep-learning.u4.q2",
+      "unit": 4,
+      "type": "text",
+      "prompt": "What problem causes an RNN's gradients to shrink toward zero over many time steps, so early inputs are forgotten? Give the two-word name.",
+      "answers": [
+        "vanishing gradient",
+        "vanishing gradients",
+        "the vanishing gradient problem"
+      ],
+      "explanation": "Repeated multiplication of small factors makes the gradient vanish."
+    },
+    {
+      "id": "applied-machine-deep-learning.u4.q3",
+      "unit": 4,
+      "type": "match",
+      "prompt": "Match each LSTM gate to its job.",
+      "pairs": [
+        [
+          "Forget gate",
+          "Decides what to erase from the cell state"
+        ],
+        [
+          "Input gate",
+          "Decides what new information to write"
+        ],
+        [
+          "Output gate",
+          "Decides what part of the cell state to expose"
+        ]
+      ],
+      "explanation": "The three gates control erasing, writing, and reading the cell state."
+    },
+    {
+      "id": "applied-machine-deep-learning.u5.q1",
+      "unit": 5,
+      "type": "single",
+      "prompt": "What limitation of the encoder-decoder LSTM does attention fix?",
+      "choices": [
+        "The whole input is squeezed into one fixed-size context vector",
+        "The decoder cannot output words",
+        "LSTMs cannot be trained",
+        "Inputs must be images"
+      ],
+      "answer": "The whole input is squeezed into one fixed-size context vector",
+      "explanation": "Attention lets the decoder look at all input positions instead of one summary."
+    },
+    {
+      "id": "applied-machine-deep-learning.u5.q2",
+      "unit": 5,
+      "type": "order",
+      "prompt": "Put the steps of one self-attention head in order.",
+      "items": [
+        "Each token produces a query, key, and value",
+        "Compute scores with Q @ K.T scaled by sqrt(d)",
+        "Apply softmax to get weights",
+        "Blend the values using those weights"
+      ],
+      "explanation": "Scores come from queries and keys, softmax turns them into weights, and the weights blend the values."
+    },
+    {
+      "id": "applied-machine-deep-learning.u5.q3",
+      "unit": 5,
+      "type": "truefalse",
+      "prompt": "Self-attention by itself encodes token order, so Transformers need no positional encoding.",
+      "answer": false,
+      "explanation": "Shuffling the tokens just shuffles the scores, so position must be added separately."
+    },
+    {
+      "id": "applied-machine-deep-learning.u6.q1",
+      "unit": 6,
+      "type": "single",
+      "prompt": "Why are GPUs so useful for deep learning?",
+      "choices": [
+        "Neural networks reduce to huge numbers of parallel matrix multiplications",
+        "They store more text than CPUs",
+        "They remove the need for gradients",
+        "They make models smaller"
+      ],
+      "answer": "Neural networks reduce to huge numbers of parallel matrix multiplications",
+      "explanation": "GPUs run many simple multiply-adds at once, which is what training needs."
+    },
+    {
+      "id": "applied-machine-deep-learning.u6.q2",
+      "unit": 6,
+      "type": "multi",
+      "prompt": "Which of these are hyperparameters?",
+      "choices": [
+        "Learning rate",
+        "Batch size",
+        "Dropout rate",
+        "A weight in the first layer",
+        "A bias term"
+      ],
+      "answers": [
+        "Learning rate",
+        "Batch size",
+        "Dropout rate"
+      ],
+      "explanation": "Hyperparameters are set before training; weights and biases are parameters gradient descent adjusts."
+    },
+    {
+      "id": "applied-machine-deep-learning.u6.q3",
+      "unit": 6,
+      "type": "written",
+      "prompt": "Explain why transfer learning works for a CNN and how you would use a pretrained CNN on a small new dataset.",
+      "rubric": [
+        "Says early layers learn general features such as edges and textures",
+        "Says those features transfer to new image tasks",
+        "Describes freezing early layers and replacing or training the final layers",
+        "Mentions needing less data or training time"
+      ],
+      "model": "Early CNN layers learn general features like edges and textures that are useful for many image tasks. On a small dataset, freeze the early layers, replace the final classifier with a new one, and train that on your data, which needs far less data and time than training from scratch.",
+      "explanation": "Reusing general features lets a small dataset benefit from a large pretraining run."
+    },
+    {
+      "id": "applied-machine-deep-learning.u7.q1",
+      "unit": 7,
+      "type": "code",
+      "language": "python",
+      "prompt": "Write `f1(tp, fp, fn)` that returns the F1 score computed as 2*tp / (2*tp + fp + fn). If the denominator is 0, return 0.",
+      "functionName": "f1",
+      "starter": "def f1(tp, fp, fn):\n    # your code here\n    pass",
+      "tests": [
+        {
+          "args": [
+            2,
+            2,
+            2
+          ],
+          "expected": 0.5
+        },
+        {
+          "args": [
+            3,
+            0,
+            0
+          ],
+          "expected": 1
+        },
+        {
+          "args": [
+            0,
+            0,
+            0
+          ],
+          "expected": 0
+        },
+        {
+          "args": [
+            6,
+            2,
+            2
+          ],
+          "expected": 0.75
+        }
+      ],
+      "reference": "def f1(tp, fp, fn):\n    d = 2 * tp + fp + fn\n    if d == 0:\n        return 0\n    return 2 * tp / d",
+      "explanation": "F1 is the harmonic mean of precision and recall, which simplifies to this formula."
+    },
+    {
+      "id": "applied-machine-deep-learning.u7.q2",
+      "unit": 7,
+      "type": "number",
+      "prompt": "A model has TP = 30 and FN = 20. What is its recall, as a decimal?",
+      "answer": 0.6,
+      "explanation": "Recall is TP / (TP + FN) = 30 / 50 = 0.6.",
+      "tolerance": 0.001
+    },
+    {
+      "id": "applied-machine-deep-learning.u7.q3",
+      "unit": 7,
+      "type": "single",
+      "prompt": "What is model drift?",
+      "choices": [
+        "Live data gradually changes so the model's performance degrades",
+        "The model's weights change by themselves",
+        "The training set shrinks",
+        "The code is rewritten"
+      ],
+      "answer": "Live data gradually changes so the model's performance degrades",
+      "explanation": "Drift is a mismatch between what the model learned and the data it now sees, even though no code changed."
+    }
+  ]
+}
