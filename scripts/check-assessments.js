@@ -282,4 +282,8 @@ const pools = poolFiles.map((name) => {
 const problems = pools.flatMap(({ file, pool }) => validatePool(file, pool)).concat(validateCode(pools));
 assert.ok(!problems.length, `assessment pool problems:\n  ${problems.join('\n  ')}`);
 
+// Every catalog course has a pool (so every course, track, and goal assessment is complete).
+const missingPools = courseNames.filter((name) => !poolFiles.includes(`${slugOf(name)}.json`));
+assert.ok(!missingPools.length, `missing assessment pools: ${missingPools.join(', ')}`);
+
 console.log(`check-assessments: engine OK, ${pools.length} pools / ${pools.reduce((n, p) => n + p.pool.questions.length, 0)} questions OK`);
