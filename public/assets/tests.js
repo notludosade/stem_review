@@ -189,6 +189,8 @@ window.STEMPlusTests = (function () {
     'Multivariable Calculus': 'Multivariable Calculus',
     'Precalculus': 'Precalculus',
     'Programming with Packages': 'Programming with Packages',
+    'Cybersecurity+': 'Cybersecurity+',
+    'Bash for Cybersecurity': 'Bash for Cybersecurity',
     'Quantum Computing': 'Advanced+ Courses/Quantum Computing',
     'Quantum Physics & Optics': 'Quantum Physics and Optics',
     'Real Analysis A': 'Advanced+ Courses/Real Analysis A',

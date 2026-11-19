@@ -35,7 +35,9 @@
       const label = apps.length > 1 ? 'See these concepts in action' : 'See this concept in action';
       box.innerHTML += `<span class="box-label">${label}</span><p class="nav-links">${applicationLinks}</p>`;
     }
-    footer.parentNode.insertBefore(box, footer);
+    const apply = document.querySelector('[data-lesson-apply]');
+    if (apply) apply.appendChild(box);
+    else footer.parentNode.insertBefore(box, footer);
   }
 
   function init() {

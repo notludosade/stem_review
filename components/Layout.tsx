@@ -66,6 +66,8 @@ const LEARN_CATEGORIES: readonly NavCategory[] = [
       ['Computer Programming 2', '/Computer%20Programming%202/index.html'],
       ['Computer Programming 2+', '/Computer%20Programming%202%2B/index.html'],
       ['Programming with Packages', '/Programming%20with%20Packages/index.html'],
+      ['Cybersecurity+', '/Cybersecurity%2B/index.html'],
+      ['Bash for Cybersecurity', '/Bash%20for%20Cybersecurity/index.html'],
       ['AI Developer', '/AI%20Developer/index.html'],
       ['Software Engineering', '/Software%20Engineering/index.html'],
       ['Data Handling CB', '/Data%20Handling%20CB/index.html'],

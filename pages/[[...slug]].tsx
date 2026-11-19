@@ -59,6 +59,8 @@ export const getStaticProps: GetStaticProps<PageProps> = async ({ params }) => {
   // .auth-slot markup itself is harmless (invisible, unpopulated) and is left
   // alone; only the script that would populate it is filtered out.
   const scripts = extractScripts(html).filter((script) => script.src !== 'assets/auth.js');
+  const isLesson = /\/Unit \d+\/\d{4}-[^/]+\.html$/.test(route) || /\/lesson\.html$/.test(route);
+  if (isLesson) scripts.push({ src: '/assets/lesson-experience.js', content: null });
   // Strip every <script> tag from `body` itself so the only execution path
   // left is LegacyContent's deliberate re-creation from `scripts` above —
   // otherwise the raw tags surviving in `body` fire a second, uncontrolled
