@@ -137,7 +137,7 @@ readers. Styling reuses `assets/style.css` tokens; new rules prefixed
   `Developing` (60–84%), `Review` (< 60%).
 - **Review next:** for every `Review` unit, a link to that unit's first lesson
   (`skill.lessons[0].page`) and its unit test page (`skill.testPage`).
-- **Written questions:** shown first with the student's answer, the model
+- **Written questions:** shown right after the score, with the student's answer, the model
   answer, and rubric checkboxes; the score updates as they tick. Saved when
   they press **Save score** (written questions count 0 until then).
 - Answer review: every question with the student's answer, the correct answer,
@@ -168,9 +168,9 @@ Key `stemplus:assessments:v1`:
 - Every write returns early when `window.STEMPlusAccount` exists and
   `canSave()` is false (site rule). Guests see `noteIfGuest(…)`. Writes still
   happen when `STEMPlusAccount` is absent (Node checks).
-- Autosave: `inProgress` updated on every answer change (debounced) for
-  track/goal assessments; cleared on submit. Opening a track/goal with saved
-  progress offers **Resume** or **Start over**.
+- Autosave: `inProgress` updated on every answer change (debounced) for every
+  assessment (one code path); cleared on submit. Opening an assessment with
+  saved progress offers **Resume** or **Start over**.
 - Cloud sync: add the key to `EXACT_KEYS` in `public/assets/progress-sync.js`
   with a merge that keeps the higher `best` per result id and the newer `at`
   per `inProgress` id.
