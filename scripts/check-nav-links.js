@@ -14,7 +14,7 @@ const hrefs = [...layout.matchAll(/'(\/[^']*)'|href="(\/[^"]*)"/g)]
   .filter((href) => !href.startsWith('/api/'));
 
 assert.ok(hrefs.length > 80, `expected the nav to contain 80+ links, found ${hrefs.length}`);
-for (const required of ['/about.html', '/pathways.html', '/projects.html', '/applications.html', '/new.html', '/problem-sets.html', '/sandbox.html']) {
+for (const required of ['/about.html', '/pathways.html', '/projects.html', '/applications.html', '/new.html', '/problem-sets.html', '/assessments.html', '/sandbox.html']) {
   assert.ok(hrefs.includes(required), `nav is missing ${required}`);
 }
 const menus = [...layout.matchAll(/<NavMenu label="([^"]+)"/g)].map((m) => m[1]);

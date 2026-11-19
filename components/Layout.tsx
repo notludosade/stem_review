@@ -292,6 +292,7 @@ const SEARCH_SEEDS: readonly SearchSeed[] = [
   { type: 'PAGE', title: 'Dashboard', href: '/', keywords: ['home progress next step'] },
   { type: 'PAGE', title: 'Learning Record', href: '/learning-record.html', keywords: ['mastery progress skills'] },
   { type: 'PAGE', title: 'Problem Sets', href: '/problem-sets.html', keywords: ['practice questions banks'] },
+  { type: 'PAGE', title: 'Assessments', href: '/assessments.html', keywords: ['course track pathway goal quiz readiness review'] },
   { type: 'PAGE', title: 'Applications', href: '/applications.html', keywords: ['real world concepts'] },
   { type: 'PAGE', title: 'Projects', href: '/projects.html', keywords: ['build capstones'] },
   { type: 'PAGE', title: 'Pathways', href: '/pathways.html', keywords: ['roadmaps tracks'] },
@@ -655,6 +656,12 @@ export function Layout({ title, children }: LayoutProps) {
           <NavMenu label="Practice" eyebrow="Problem sets & timed drills" categories={PRACTICE_CATEGORIES} />
           <NavMenu label="Build" eyebrow="Code, apply, create" categories={BUILD_CATEGORIES} />
           <NavMenu label="Goals" eyebrow="Where you're headed" categories={GOAL_CATEGORIES} />
+          <a
+            href="/assessments.html"
+            className="text-sm whitespace-nowrap text-[var(--site-text)] hover:text-[var(--site-accent)]"
+          >
+            Assessments
+          </a>
           <a
             href="/calculators.html"
             className="text-sm whitespace-nowrap text-[var(--site-text)] hover:text-[var(--site-accent)]"
