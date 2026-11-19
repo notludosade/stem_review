@@ -6,11 +6,11 @@
 
   function scenario(course, title, subtitle) {
     const name = `<strong>${title}</strong>`;
-    if (/physics|engineering|robot|thermodynamics|mechatronics/i.test(course)) return `An engineering team must predict, measure, or improve a physical system governed by ${name}.`;
-    if (/calculus|algebra|math|analysis|topology|equations|precalculus/i.test(course)) return `A modeler must turn real measurements into a defensible decision using ${name}.`;
-    if (/program|software|comput|network|cloud|data|ai|game/i.test(course)) return `A technical team must build, inspect, or debug a real system involving ${name}.`;
-    if (/ethic|career/i.test(course)) return `A project team faces a real decision involving ${name} and must justify its choice to the people affected.`;
-    return `A team must investigate a real situation using ${name}, then explain what the evidence supports.`;
+    if (/physics|engineering|robot|thermodynamics|mechatronics/i.test(course)) return `An engineering team must predict, measure, or improve a physical system governed by ${name}. Their recommendation must connect the lesson's model to measurements, operating limits, and the behavior they expect to observe.`;
+    if (/calculus|algebra|math|analysis|topology|equations|precalculus/i.test(course)) return `A modeler must turn real measurements into a defensible decision using ${name}. They need to define the quantities clearly, choose a method that matches the situation, and explain what the result means outside the calculation.`;
+    if (/program|software|comput|network|cloud|data|ai|game/i.test(course)) return `A technical team must build, inspect, or debug a real system involving ${name}. They must identify the relevant input and expected behavior, choose the lesson's technique, and verify the result rather than relying on a guess.`;
+    if (/ethic|career/i.test(course)) return `A project team faces a real decision involving ${name} and must justify its choice to the people affected. A strong response identifies the stakeholders, weighs the evidence, and explains both the benefit and the possible harm.`;
+    return `A team must investigate a real situation using ${name}, then explain what the evidence supports. Their response should connect the lesson idea to an observable result and acknowledge what the available information cannot prove.`;
   }
 
   function wrapConcepts(learn) {
@@ -87,9 +87,9 @@
     path.innerHTML = '<a href="#learn-it"><span>Step 1</span>Learn it</a><a href="#study-it"><span>Step 2</span>Study it</a><a href="#apply-it"><span>Step 3</span>Apply it</a>';
     nav.after(path);
 
-    const learn = stage('learn-it', 'Learn it', 'Build the idea in plain language. Key concepts and useful details are separated so you can scan before reading deeply.');
-    const study = stage('study-it', 'Study it', 'Turn recognition into recall: identify what matters, choose the right practice, and explain mistakes without looking back.');
-    const apply = stage('apply-it', 'Apply it', 'Use the lesson in a realistic decision—not a full exam question, but enough to connect the idea to practice.');
+    const learn = stage('learn-it', 'Learn it', 'Begin with the lesson in plain language, then move into the details. Each highlighted block keeps one key concept or useful supporting idea together, so you can understand what it means, when it is used, and how it connects to the rest of the lesson.');
+    const study = stage('study-it', 'Study it', 'Decide what you must remember and what you must learn by doing. Work from memory, practice choosing the correct method, and use every mistake to identify the exact idea that needs another look.');
+    const apply = stage('apply-it', 'Apply it', 'Place the lesson inside a realistic situation without turning it into a full exam. Focus on identifying the goal, selecting useful information, choosing the lesson concept that fits, and explaining what the result would mean in practice.');
     apply.dataset.lessonApply = '';
     path.after(learn);
     footer.before(study, apply);
@@ -103,14 +103,14 @@
     const concepts = wrapConcepts(learn);
     const guide = document.createElement('div');
     guide.className = 'box why';
-    guide.innerHTML = `<span class="box-label">What to remember</span><ul class="lesson-study-list"><li>Explain ${title} in one sentence without notes.</li><li>For each key concept, state when it applies, what information it needs, and one common mistake.</li><li>Work the recall questions closed-note. Revisit only the part connected to a missed answer, then try again.</li>${concepts.length ? `<li>Highest priority: ${concepts.slice(0, 4).join('; ')}.</li>` : ''}</ul>`;
+    guide.innerHTML = `<span class="box-label">What to remember</span><ul class="lesson-study-list"><li>Explain ${title} in your own words and name the type of problem or question it helps you solve.</li><li>For each key concept, state when it applies, what information it needs, the main reasoning step, and one common mistake.</li><li>Try one representative problem by first identifying what is known, what is being asked, and why this lesson provides an appropriate method.</li><li>Work the recall questions closed-note. For each miss, revisit only the connected explanation, describe why your first answer failed, and try again.</li>${concepts.length ? `<li>Give the most attention to these lesson anchors: ${concepts.slice(0, 4).join('; ')}.</li>` : ''}</ul>`;
     study.insertBefore(guide, study.children[2] || null);
     const oldRecall = [...study.querySelectorAll('h2')].find((heading) => /check your/i.test(clean(heading.textContent)));
     if (oldRecall) { oldRecall.textContent = 'Practice from memory'; oldRecall.className = 'lesson-concept-heading'; }
 
     const application = document.createElement('div');
     application.className = 'box lesson-apply-scenario';
-    application.innerHTML = `<span class="box-label">Real-world scenario</span><p>${scenario(course, title, subtitle)}</p>${subtitle ? `<p><strong>Context:</strong> ${subtitle}</p>` : ''}<ul class="lesson-apply-list"><li>Identify the information the team must know or measure.</li><li>Choose the lesson concept that fits and explain why.</li><li>Predict a result or recommend an action using evidence.</li><li>Name one assumption or limitation that could change the conclusion.</li></ul>`;
+    application.innerHTML = `<span class="box-label">Real-world scenario</span><p>${scenario(course, title, subtitle)}</p>${subtitle ? `<p><strong>Lesson connection:</strong> ${subtitle}</p>` : ''}<ul class="lesson-apply-list"><li>Restate the team's goal in one clear sentence before choosing a method.</li><li>Identify the information that must be known, measured, or observed, including any important units or constraints.</li><li>Choose the lesson concept that fits and explain why it is more useful than an unrelated method.</li><li>Use the evidence to predict a result or recommend an action, then explain what that result means for the team.</li><li>Name one assumption, source of uncertainty, or limitation that could change the conclusion.</li></ul>`;
     apply.insertBefore(application, apply.children[2] || null);
 
     const linked = page.querySelector('[data-lesson-applications]');
