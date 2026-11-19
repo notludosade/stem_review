@@ -89,4 +89,14 @@ const mergedTimed = mergeForKey('stemplus:timed-mastery:v1',
 assert.strictEqual(mergedTimed.precalculus.best.pct, 90, 'the higher-scoring best survives regardless of which side it came from');
 assert.strictEqual(mergedTimed.precalculus.last.pct, 70, 'the more recent last survives regardless of which side it came from');
 
-console.log('check-progress-sync: OK (allowlist and merge rules for all 8 synced-key shapes verified)');
+// Shape: assessments — higher best wins, newer last wins, stale in-progress attempts drop.
+assert.ok(isSyncedKey('stemplus:assessments:v1'), 'assessments key is synced');
+const mergedAssess = mergeForKey('stemplus:assessments:v1',
+  { results: { 'course:precalculus': { best: 0.9, last: 0.6, at: '2026-11-20T00:00:00.000Z', units: {} } }, inProgress: { 'track:mathematics': { at: '2026-11-18T00:00:00.000Z', responses: { a: 1 } } } },
+  { results: { 'course:precalculus': { best: 0.7, last: 0.7, at: '2026-11-19T00:00:00.000Z', units: {} }, 'track:mathematics': { best: 0.5, last: 0.5, at: '2026-11-19T00:00:00.000Z', units: {} } }, inProgress: {} });
+assert.strictEqual(mergedAssess.results['course:precalculus'].best, 0.9, 'higher best survives');
+assert.strictEqual(mergedAssess.results['course:precalculus'].last, 0.6, 'newer last survives');
+assert.strictEqual(mergedAssess.inProgress['track:mathematics'], undefined, 'in-progress older than a finished result is dropped');
+assert.deepStrictEqual(mergeForKey('stemplus:assessments:v1', undefined, { results: {}, inProgress: {} }), { results: {}, inProgress: {} }, 'remote-only passes through');
+
+console.log('check-progress-sync: OK (allowlist and merge rules for all 9 synced-key shapes verified)');

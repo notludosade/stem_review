@@ -26,6 +26,7 @@
     'stemplus:timed-mastery:v1',
     'stemplus:lessons:v1',
     'stemplus:custom-plan:v1',
+    'stemplus:assessments:v1',
   ]);
   const PROBLEM_SET_PREFIX = 'stemplus:problem-sets:v1:';
 
@@ -69,6 +70,20 @@
     };
   }
 
+  // Assessments: best score by value, everything else from the newer attempt;
+  // an in-progress attempt older than that assessment's finished result is stale.
+  function mergeAssessments(local, remote) {
+    const l = local || {};
+    const r = remote || {};
+    const newer = (a, b) => ((a.at || '') >= (b.at || '') ? a : b);
+    const results = mergeIdMap(l.results, r.results, (a, b) => Object.assign({}, newer(a, b), { best: Math.max(a.best || 0, b.best || 0) }));
+    const inProgress = mergeIdMap(l.inProgress, r.inProgress, newer);
+    Object.keys(inProgress).forEach((id) => {
+      if (results[id] && (results[id].at || '') >= (inProgress[id].at || '')) delete inProgress[id];
+    });
+    return { results, inProgress };
+  }
+
   function mergeDiagnostics(local, remote) {
     return mergeIdMap(local, remote, (a, b) => (Date.parse(b.takenAt || 0) > Date.parse(a.takenAt || 0) ? b : a));
   }
@@ -81,6 +96,7 @@
   }
 
   function mergeForKey(key, local, remote) {
+    if (key === 'stemplus:assessments:v1') return mergeAssessments(local, remote);
     if (key === 'stemplus:results:v1') return mergeResultsArray(local, remote);
     if (key === 'stemplus:projects:v1') return mergeProjects(local, remote);
     if (key === 'stemplus:diagnostics:v1') return mergeDiagnostics(local, remote);
