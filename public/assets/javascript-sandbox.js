@@ -2,7 +2,6 @@
   'use strict';
 
   const api = window.STEMJavaScriptProblems;
-  if (!api) return;
   const DEFAULT_FREE_CODE = `const course = 'Computer Programming';
 
 for (let number = 1; number <= 3; number += 1) {
@@ -70,6 +69,9 @@ onmessage = ({ data }) => {
   });
   const jsLiteral = (value) => JSON.stringify(value);
 
+  // Assessments use the runner directly; they don't load the problem list.
+  window.STEMJavaScriptRunner = runWorker;
+  if (!api) return;
   window.STEMFunctionSandbox = {
     api,
     storageKey: 'stemplus:javascript-sandbox:v1',
