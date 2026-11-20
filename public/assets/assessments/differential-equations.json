@@ -42,9 +42,9 @@
    "id": "differential-equations.u2.q1",
    "unit": 2,
    "type": "truefalse",
-   "prompt": "For Newton's law of cooling dT/dt = −k(T − T_env) with k > 0, the temperature T approaches T_env as t → ∞.",
+   "prompt": "For Newton's law of cooling dT/dt = k(T − T_a) with k < 0, the temperature T approaches T_a as t → ∞.",
    "answer": true,
-   "explanation": "The solution is T = T_env + Ce^(−kt), and the exponential term decays to 0."
+   "explanation": "The solution is T(t) = T_a + (T₀ − T_a)e^(kt), and since k < 0 the exponential term decays to 0."
   },
   {
    "id": "differential-equations.u2.q2",
@@ -61,14 +61,14 @@
    "prompt": "For logistic growth dP/dt = rP(1 − P/K) with 0 < P < K, which statements are true?",
    "choices": [
     "The population is increasing",
-    "The growth rate is largest at P = K/2",
+    "The rate dP/dt is largest when P = K/2",
     "P = K is an equilibrium solution",
     "The population eventually exceeds K",
     "The population grows exponentially forever"
    ],
    "answers": [
     "The population is increasing",
-    "The growth rate is largest at P = K/2",
+    "The rate dP/dt is largest when P = K/2",
     "P = K is an equilibrium solution"
    ],
    "explanation": "rP(1 − P/K) is positive for 0 < P < K, peaks at K/2, and is 0 at K, so P levels off at K rather than exceeding it or growing exponentially."
@@ -97,7 +97,9 @@
     "complex conjugate",
     "complex conjugates",
     "complex roots",
-    "complex conjugate roots"
+    "complex conjugate roots",
+    "complex-conjugate",
+    "complex conjugate pair"
    ],
    "explanation": "Complex conjugate roots produce solutions e^(αx)(C₁cos βx + C₂sin βx)."
   },
@@ -130,23 +132,23 @@
    "id": "differential-equations.u4.q1",
    "unit": 4,
    "type": "number",
-   "prompt": "A mass-spring system satisfies 2y″ + 50y = 0. What is the angular frequency ω in rad/s?",
+   "prompt": "A mass-spring system satisfies 2x″ + 50x = 0. What is its natural angular frequency ω in rad/s?",
    "answer": 5,
-   "explanation": "Dividing by 2 gives y″ + 25y = 0, so ω² = 25 and ω = 5."
+   "explanation": "Dividing by 2 gives x″ + 25x = 0, which has the form x″ + ω²x = 0 with ω² = k/m = 25, so ω = 5."
   },
   {
    "id": "differential-equations.u4.q2",
    "unit": 4,
    "type": "single",
-   "prompt": "For m y″ + c y′ + k y = 0, which condition gives critical damping?",
+   "prompt": "A damped spring satisfies x″ + 4x′ + 4x = 0. Which damping regime is this?",
    "choices": [
-    "c² = 4mk",
-    "c² > 4mk",
-    "c² < 4mk",
-    "c = 0"
+    "Critically damped",
+    "Underdamped",
+    "Overdamped",
+    "Undamped"
    ],
-   "answer": "c² = 4mk",
-   "explanation": "The characteristic discriminant c² − 4mk is zero, giving a repeated root and the boundary between oscillating and non-oscillating motion."
+   "answer": "Critically damped",
+   "explanation": "Matching x″ + 2βx′ + ω₀²x = 0 gives β = 2 and ω₀ = 2; β = ω₀ means a repeated characteristic root, which is critical damping."
   },
   {
    "id": "differential-equations.u4.q3",
@@ -159,7 +161,7 @@
     "Says the particular solution contains a t·sin/cos term",
     "Says the amplitude grows without bound (linearly in t) in the undamped case"
    ],
-   "model": "Resonance happens when the forcing frequency equals the natural frequency. The forcing then pushes in phase with the motion, so the particular solution has a term like t·cos(ωt) and the amplitude grows without bound when there is no damping.",
+   "model": "Resonance happens when the driving frequency ω equals the natural frequency ω₀. The forcing then keeps pumping energy in, in step with the motion, so the trial solution needs an extra factor of t: x_p(t) = [f₀/(2ω₀)]·t·sin(ω₀t). With no damping, this amplitude grows without bound, linearly in t.",
    "explanation": "Matching frequencies make the forcing term a solution of the homogeneous equation, forcing a t-multiplied particular solution."
   },
   {
@@ -196,15 +198,15 @@
    "id": "differential-equations.u6.q1",
    "unit": 6,
    "type": "single",
-   "prompt": "The system x′ = Ax has eigenvalues 2 and 3 (both real and positive). What is the origin?",
+   "prompt": "The system X′ = AX has eigenvalues 2 and 3 (both real and positive). What is the origin?",
    "choices": [
-    "An unstable node",
-    "A stable node",
+    "A source (unstable node)",
+    "A sink (stable node)",
     "A saddle",
     "A center"
    ],
-   "answer": "An unstable node",
-   "explanation": "Both eigenvalues are positive, so every solution grows away from the origin."
+   "answer": "A source (unstable node)",
+   "explanation": "Both eigenvalues are positive, so both exponential modes grow and every trajectory moves away from the origin."
   },
   {
    "id": "differential-equations.u6.q2",
@@ -218,7 +220,7 @@
    "id": "differential-equations.u6.q3",
    "unit": 6,
    "type": "multi",
-   "prompt": "For which sets of eigenvalues is the origin asymptotically stable for x′ = Ax?",
+   "prompt": "For which eigenvalue pairs of a 2×2 matrix A is the origin of X′ = AX a sink, with every trajectory decaying toward it?",
    "choices": [
     "−1 and −2",
     "−1 ± 3i",
@@ -230,16 +232,15 @@
     "−1 and −2",
     "−1 ± 3i"
    ],
-   "explanation": "Asymptotic stability requires every eigenvalue to have negative real part; ±i is stable but not asymptotically so."
+   "explanation": "A sink needs both eigenvalues to have negative real part (a node for −1, −2; a spiral sink for −1 ± 3i). ±i has zero real part, so trajectories circle without decaying; 2 and −1 is a saddle; 0.5 ± i spirals outward."
   },
   {
    "id": "differential-equations.u7.q1",
    "unit": 7,
    "type": "number",
-   "prompt": "Use Euler's method with step h = 0.1 on y′ = x + y, y(0) = 1. What is the approximation of y(0.2)?",
+   "prompt": "Use Euler's method with step h = 0.1 on y′ = t + y, y(0) = 1. What is the approximation of y(0.2)?",
    "answer": 1.22,
-   "explanation": "y₁ = 1 + 0.1(0 + 1) = 1.1, then y₂ = 1.1 + 0.1(0.1 + 1.1) = 1.22.",
-   "tolerance": 0.001
+   "explanation": "y₁ = 1 + 0.1(0 + 1) = 1.1, then y₂ = 1.1 + 0.1(0.1 + 1.1) = 1.22."
   },
   {
    "id": "differential-equations.u7.q2",
@@ -247,18 +248,19 @@
    "type": "written",
    "prompt": "Give two situations where you would choose a numerical method over an analytical solution, and explain why.",
    "rubric": [
-    "Says some equations have no closed-form solution",
+    "Names a situation with no closed-form solution, such as a nonlinear equation",
+    "Names a second situation, such as a nonlinear coupled system or a solution formula too messy to be practical",
     "Says numerical methods give approximate values at chosen points",
-    "Mentions a tradeoff such as accuracy depending on step size"
+    "Mentions checking accuracy, such as refining the step size"
    ],
-   "model": "If the equation is nonlinear or otherwise has no closed-form solution, a numerical method like Euler's can still approximate values at chosen points. The tradeoff is that accuracy depends on the step size, so you get approximations rather than an exact formula.",
+   "model": "First, if the equation is nonlinear and has no elementary closed-form solution, a numerical method like Euler's can still approximate values at chosen points. Second, for a nonlinear coupled system, finding an exact formula is usually impractical, so you find the equilibria and integrate numerically. The answers are approximations, so you check them by shrinking the step size and confirming the result barely changes.",
    "explanation": "Analytical solutions are exact but not always available; numerical methods are general but approximate."
   },
   {
    "id": "differential-equations.u7.q3",
    "unit": 7,
    "type": "truefalse",
-   "prompt": "If dy/dx = f(y) depends only on y, the slope field has the same slope along every horizontal line.",
+   "prompt": "If y′ = f(y) depends only on y, the slope field has the same slope at every point of any horizontal line.",
    "answer": true,
    "explanation": "Slope depends only on the y-value, so all points at the same height share one slope."
   }
