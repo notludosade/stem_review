@@ -140,6 +140,14 @@
   const esc = (value) => String(value).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const fmt = (value) => esc(value).replace(/`([^`]+)`/g, '<code>$1</code>');
   const pct = (fraction) => `${Math.round(fraction * 100)}%`;
+  // Test values written the way the question's language writes them (Python: True/False/None).
+  const literal = (x, value) => {
+    if (x.language !== 'python') return JSON.stringify(value);
+    if (value === null) return 'None';
+    if (typeof value === 'boolean') return value ? 'True' : 'False';
+    if (Array.isArray(value)) return `[${value.map((v) => literal(x, v)).join(', ')}]`;
+    return JSON.stringify(value);
+  };
   const canSave = () => !window.STEMPlusAccount || window.STEMPlusAccount.canSave();
   const loadStore = () => {
     try {
@@ -235,13 +243,18 @@
   let pyWorker = null;
   let pyId = 0;
   const pyPending = new Map();
+  let pyQueue = Promise.resolve();
   const startPython = () => {
     if (pyReady) return pyReady;
     pyReady = new Promise((resolve, reject) => {
       pyWorker = new Worker('/assets/python-worker.js', { type: 'module' });
-      pyWorker.onmessage = ({ data }) => {
-        if (data.type === 'ready') resolve(pyWorker);
-        else if (data.type === 'fatal') reject(new Error(data.error));
+      const worker = pyWorker;
+      const fail = (message) => { window.clearTimeout(loadTimer); worker.terminate(); reject(new Error(message)); };
+      // Same limit as python-sandbox.js, so a stalled Pyodide download can't hang submit.
+      const loadTimer = window.setTimeout(() => fail('Python took too long to load. Check your connection and try again.'), 30000);
+      worker.onmessage = ({ data }) => {
+        if (data.type === 'ready') { window.clearTimeout(loadTimer); resolve(worker); }
+        else if (data.type === 'fatal') fail(`Python could not load: ${data.error}`);
         else if (data.type === 'result' && pyPending.has(data.id)) {
           const entry = pyPending.get(data.id);
           pyPending.delete(data.id);
@@ -249,12 +262,12 @@
           entry.resolve(data.payload);
         }
       };
-      pyWorker.onerror = () => reject(new Error('Python could not start. Check your connection and try again.'));
+      worker.onerror = () => fail('Python could not start. Check your connection and try again.');
     });
     pyReady.catch(() => { pyReady = null; });
     return pyReady;
   };
-  const runPython = async (payload) => {
+  const sendPython = async (payload) => {
     const worker = await startPython();
     return new Promise((resolve, reject) => {
       const id = ++pyId;
@@ -267,6 +280,11 @@
       pyPending.set(id, { resolve, timer });
       worker.postMessage(Object.assign({ id }, payload));
     });
+  };
+  // One run at a time: a timeout kills the shared worker, so it must never take another run down with it.
+  const runPython = (payload) => {
+    pyQueue = pyQueue.catch(() => {}).then(() => sendPython(payload));
+    return pyQueue;
   };
   const runCode = (question, code) => {
     const payload = { mode: 'problem', code, functionName: question.functionName, tests: question.tests };
@@ -359,7 +377,7 @@
           return `<label class="assess-field"><span>Your answer</span><textarea class="reflection-textarea" data-input rows="6">${esc((r && r.text) || '')}</textarea></label>`;
         case 'code': {
           const code = (r && r.code) || x.starter;
-          return `<p class="assess-hint">Language: ${x.language === 'python' ? 'Python' : 'JavaScript'} · write <code>${esc(x.functionName)}</code></p><textarea class="assess-code" data-input spellcheck="false" rows="10" aria-label="Your code">${esc(code)}</textarea><p class="assess-hint">Tests:</p><ul class="assess-tests">${x.tests.map((t) => `<li><code>${esc(x.functionName)}(${esc(t.args.map((a) => JSON.stringify(a)).join(', '))})</code> → <code>${esc(JSON.stringify(t.expected))}</code></li>`).join('')}</ul><p><button type="button" class="widget-btn" data-run>Run tests</button></p><div class="assess-run-out" data-run-out aria-live="polite">${r && r.total ? `${r.passed} of ${r.total} tests passed.` : ''}</div>`;
+          return `<p class="assess-hint">Language: ${x.language === 'python' ? 'Python' : 'JavaScript'} · write <code>${esc(x.functionName)}</code></p><textarea class="assess-code" data-input spellcheck="false" rows="10" aria-label="Your code">${esc(code)}</textarea><p class="assess-hint">Tests:</p><ul class="assess-tests">${x.tests.map((t) => `<li><code>${esc(x.functionName)}(${esc(t.args.map((a) => literal(x, a)).join(', '))})</code> → <code>${esc(literal(x, t.expected))}</code></li>`).join('')}</ul><p><button type="button" class="widget-btn" data-run>Run tests</button></p><div class="assess-run-out" data-run-out aria-live="polite">${r && r.total && r.ranCode === r.code ? `${r.passed} of ${r.total} tests passed.` : ''}</div>`;
         }
         default: return '';
       }
@@ -405,13 +423,16 @@
         if (submitted) return;
         const results = result.results || [];
         const passed = results.filter((t) => t.passed).length;
-        setResponse(x.id, Object.assign({}, attempt.responses[x.id], { passed, total: x.tests.length, ranCode: code }), true);
+        // The run's code is the response's code, unless the student kept typing while it ran.
+        setResponse(x.id, Object.assign({ code }, attempt.responses[x.id], { passed, total: x.tests.length, ranCode: code }), true);
+        if (attempt.responses[x.id].code !== code) return;
         out.innerHTML = result.error && !results.length
           ? `<span class="assess-bad">${esc(result.error)}</span>`
           : `${passed} of ${x.tests.length} tests passed.<ul class="assess-tests">${results.map((t) => `<li class="${t.passed ? 'assess-good' : 'assess-bad'}">${t.passed ? '✓' : '✗'} Test ${t.index}${t.passed ? '' : `: got ${esc(t.error || t.actual)}, expected ${esc(t.expected)}`}</li>`).join('')}</ul>`;
       } catch (err) {
         if (submitted) return;
-        setResponse(x.id, Object.assign({}, attempt.responses[x.id], { passed: 0, total: x.tests.length, ranCode: code }), true);
+        // ranCode null: the runner failed, not the code, so submit runs it again.
+        setResponse(x.id, Object.assign({ code }, attempt.responses[x.id], { passed: 0, total: x.tests.length, ranCode: null }), true);
         out.innerHTML = `<span class="assess-bad">${esc(err.message)}</span>`;
       } finally { button.disabled = false; }
     }
@@ -477,7 +498,10 @@
       const x = byId[order[attempt.index].id];
       const value = event.target.value;
       if (x.type === 'written') setResponse(x.id, Object.assign({}, attempt.responses[x.id], { text: value }));
-      else if (x.type === 'code') setResponse(x.id, Object.assign({ passed: 0, total: 0, ranCode: null }, attempt.responses[x.id], { code: value }));
+      else if (x.type === 'code') {
+        setResponse(x.id, Object.assign({ passed: 0, total: 0, ranCode: null }, attempt.responses[x.id], { code: value }));
+        mount.querySelector('[data-run-out]').textContent = '';
+      }
       else setResponse(x.id, value);
     };
     render();
