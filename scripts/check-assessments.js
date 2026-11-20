@@ -48,6 +48,13 @@ assert.strictEqual(A.grade(num, '3/4'), 1, 'fraction accepted');
 assert.strictEqual(A.grade(num, '75%'), 1, 'percent accepted');
 assert.strictEqual(A.grade(num, '0.8'), 0);
 assert.strictEqual(A.grade(num, ''), 0);
+// An explicit tolerance is the whole window; "%" falls back to the bare number.
+assert.strictEqual(A.grade({ type: 'number', answer: 0.11, tolerance: 0.001 }, '0.10'), 0, 'tolerance is not widened');
+assert.strictEqual(A.grade({ type: 'number', answer: 0.11, tolerance: 0.001 }, '0.11'), 1);
+assert.strictEqual(A.grade({ type: 'number', answer: 87 }, '87%'), 1, 'percent of a whole-number key');
+assert.strictEqual(A.grade({ type: 'number', answer: 87 }, '87'), 1);
+assert.strictEqual(A.grade({ type: 'number', answer: 0.003, tolerance: 0.0005 }, '0'), 0, 'small key rejects 0');
+assert.strictEqual(A.grade(num, '19.6 m'), 0, 'units make it unparseable');
 assert.strictEqual(A.grade(multi, ['c', 'a']), 1, 'order of picks irrelevant');
 assert.strictEqual(A.grade(multi, ['a']), 0, 'missing one');
 assert.strictEqual(A.grade(multi, ['a', 'b', 'c']), 0, 'extra wrong pick');
@@ -57,15 +64,21 @@ assert.strictEqual(A.grade(match, { 1: 'one', 2: 'two', 3: 'one' }), 2 / 3, 'par
 const text = { type: 'text', answers: ['Big O', 'O notation'] };
 assert.strictEqual(A.grade(text, '  big   o '), 1, 'case and spaces ignored');
 assert.strictEqual(A.grade(text, 'theta'), 0);
+assert.strictEqual(A.grade(text, 'Big O.'), 1, 'one trailing period ignored');
+assert.strictEqual(A.grade(text, 'big o!'), 1, 'one trailing ! ignored');
 const written = { type: 'written', rubric: ['a', 'b', 'c', 'd'], model: 'm' };
 assert.strictEqual(A.grade(written, { text: 'x', rubric: [true, false, true, false] }), 0.5);
 assert.strictEqual(A.grade(written, { text: 'x' }), 0, 'not self-scored yet');
 const code = { type: 'code', tests: [1, 2, 3, 4], starter: 'def f(x):\n    pass' };
 assert.strictEqual(A.grade(code, { code: 'x', passed: 3, total: 4 }), 0.75);
+assert.strictEqual(A.grade(code, { code: 'x', passed: 6, total: 4 }), 1, 'code score is capped at 1');
 assert.strictEqual(A.grade(single, undefined), 0, 'unanswered');
 
 // isAnswered.
 assert.strictEqual(A.isAnswered(num, '  '), false);
+assert.strictEqual(A.isAnswered(num, '19.6 m'), false, 'unparseable number is unanswered');
+assert.strictEqual(A.isAnswered(num, '3/4'), true);
+assert.strictEqual(A.isAnswered(text, '19.6 m'), true, 'text answers unchanged');
 assert.strictEqual(A.isAnswered(multi, []), false);
 assert.strictEqual(A.isAnswered(order, ['x', 'y', 'z']), true);
 assert.strictEqual(A.isAnswered(code, { code: 'def f(x):\n    pass' }), false, 'untouched starter');
@@ -126,11 +139,18 @@ const CHECKS = {
     !(uniqueStrings(x.answers, 2, (x.choices?.length || 1) - 1) && x.answers.every((a) => x.choices.includes(a))) && 'answers: ≥2 choices, not all of them',
   ],
   truefalse: (x) => [typeof x.answer !== 'boolean' && 'answer must be true or false'],
-  number: (x) => [
-    !Number.isFinite(x.answer) && 'answer must be a finite number',
-    x.tolerance !== undefined && !(x.tolerance > 0) && 'tolerance must be > 0',
-    Number.isFinite(x.answer) && A.grade(x, String(x.answer)) !== 1 && 'answer does not grade as correct',
-  ],
+  number: (x) => {
+    // The accepted window may be at most 5% of the key (±0.05 when the key is 0), and never include 0.
+    const limit = x.answer ? Math.abs(x.answer) * 0.05 : 0.05;
+    const ok = Number.isFinite(x.answer);
+    return [
+      !ok && 'answer must be a finite number',
+      x.tolerance !== undefined && !(x.tolerance > 0) && 'tolerance must be > 0',
+      ok && A.grade(x, String(x.answer)) !== 1 && 'answer does not grade as correct',
+      ok && !(x.tolerance <= limit) && [x.answer - limit, x.answer + limit].some((v) => A.grade(x, String(v)) === 1) && 'accepts answers more than 5% off the key; set a tighter tolerance',
+      ok && x.answer !== 0 && A.grade(x, '0') === 1 && 'accepts 0 for a nonzero key',
+    ];
+  },
   text: (x) => [!uniqueStrings(x.answers, 1, 8) && 'answers: 1–8 unique non-empty strings'],
   order: (x) => [!uniqueStrings(x.items, 3, 6) && 'items: 3–6 unique non-empty strings'],
   match: (x) => [
@@ -262,10 +282,12 @@ function validateCode(pools) {
 // The validator catches bad pools (self-test with a deliberately broken pool).
 const broken = { course: 'Computer Programming 1', slug: 'computer-programming-1', questions: [
   { id: 'computer-programming-1.u1.q1', unit: 1, type: 'single', prompt: 'p', explanation: 'e', choices: ['a', 'b', 'c'], answer: 'z' },
+  { id: 'computer-programming-1.u1.q2', unit: 1, type: 'number', prompt: 'p', explanation: 'e', answer: 0.125 },
 ] };
 const brokenErrors = validatePool('computer-programming-1.json', broken);
 assert.ok(brokenErrors.some((e) => e.includes('answer must be one of choices')), 'validator flags a bad single answer');
 assert.ok(brokenErrors.some((e) => e.includes('unit 2 has 0 questions')), 'validator flags a missing unit');
+assert.ok(brokenErrors.some((e) => e.includes('u1.q2: accepts answers more than 5% off')), 'validator flags a number window wider than 5%');
 assert.ok(validateCode([{ file: 'x.json', pool: { questions: [
   { id: 'x.u1.q1', type: 'code', language: 'python', functionName: 'f', starter: 'def f(x):\n    pass', reference: 'def f(x):\n    return x + 2', tests: [{ args: [1], expected: 2 }, { args: [2], expected: 3 }, { args: [3], expected: 4 }] },
   { id: 'x.u1.q2', type: 'code', language: 'javascript', functionName: 'g', starter: 'function g(x) {}', reference: 'function g(x) { return x * 2; }', tests: [{ args: [1], expected: 2 }, { args: [2], expected: 4 }, { args: [3], expected: 6 }] },

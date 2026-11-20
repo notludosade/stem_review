@@ -13,7 +13,7 @@
     single: { badge: 'Multiple choice', icon: '◉', how: 'Pick the one best answer.' },
     multi: { badge: 'Select all that apply', icon: '▣', how: 'Tick every correct option. You need all of them, and no wrong ones, to score.' },
     truefalse: { badge: 'True / False', icon: '⇄', how: 'Decide whether the statement is true or false.' },
-    number: { badge: 'Type a number', icon: '#', how: 'Type a number. Fractions like 3/4, decimals, and percents are accepted.' },
+    number: { badge: 'Type a number', icon: '#', how: 'Type a number. Fractions like 3/4, decimals, and percents are accepted. Leave off units.' },
     text: { badge: 'Type a short answer', icon: '✎', how: 'Type a word or short phrase. Capital letters and extra spaces don’t matter.' },
     order: { badge: 'Put in order', icon: '⇅', how: 'Use the ↑ and ↓ buttons to put the items in order, first at the top. The whole order must be right to score.' },
     match: { badge: 'Match pairs', icon: '⇔', how: 'Choose the partner for each item on the left. Each correct pair earns part of the point.' },
@@ -71,12 +71,14 @@
   const drawCourse = (pool, rng = Math.random) => pick(pool, 2, rng);
   const drawSections = (pools, rng = Math.random) => pools.map((pool) => ({ course: pool.course, slug: pool.slug, questions: pick(pool, 1, rng) }));
 
-  const normalizeText = (value) => String(value).trim().toLowerCase().replace(/\s+/g, ' ');
+  // One trailing "." or "!" doesn't change a short answer ("entry point." = "entry point").
+  const normalizeText = (value) => String(value).trim().toLowerCase().replace(/\s+/g, ' ').replace(/\s*[.!]$/, '');
 
   const isAnswered = (question, response) => {
     if (response === undefined || response === null) return false;
     switch (question.type) {
-      case 'number': case 'text': return String(response).trim() !== '';
+      case 'number': return Number.isFinite(numbers.parseNumber(String(response)));
+      case 'text': return String(response).trim() !== '';
       case 'multi': return response.length > 0;
       case 'match': return Object.keys(response).length > 0;
       case 'written': return String(response.text || '').trim() !== '';
@@ -94,14 +96,19 @@
         return response.length === wanted.size && response.every((choice) => wanted.has(choice)) ? 1 : 0;
       }
       case 'number': {
-        const value = numbers.parseNumber(String(response));
-        return Number.isFinite(value) && numbers.answersClose(value, question.answer, question.tolerance ?? 0.001) ? 1 : 0;
+        // An explicit tolerance is the whole window; otherwise use the shared problem-set rule.
+        const close = (value) => Number.isFinite(value) && (question.tolerance !== undefined
+          ? Math.abs(value - question.answer) <= question.tolerance
+          : numbers.answersClose(value, question.answer, 0.001));
+        const raw = String(response).trim();
+        // "87%" reads as 0.87 first; if that misses, the bare 87 is tried too.
+        return close(numbers.parseNumber(raw)) || (raw.endsWith('%') && close(numbers.parseNumber(raw.slice(0, -1)))) ? 1 : 0;
       }
       case 'text': return question.answers.some((answer) => normalizeText(answer) === normalizeText(response)) ? 1 : 0;
       case 'order': return response.length === question.items.length && response.every((item, i) => item === question.items[i]) ? 1 : 0;
       case 'match': return question.pairs.filter(([left, right]) => response[left] === right).length / question.pairs.length;
       case 'written': return Array.isArray(response.rubric) ? response.rubric.filter(Boolean).length / question.rubric.length : 0;
-      case 'code': return response.total ? response.passed / response.total : 0;
+      case 'code': return response.total ? Math.min(1, response.passed / response.total) : 0;
       default: return 0;
     }
   };
