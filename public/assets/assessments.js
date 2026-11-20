@@ -343,7 +343,7 @@
     if (subtitle) subtitle.textContent = target.kind === 'course'
       ? 'Two questions from every unit. Answer in any order, then submit to see your results.'
       : 'One question from every unit of every course, grouped by course. Your answers save as you go.';
-    if (window.STEMPlusAccount) window.STEMPlusAccount.noteIfGuest('Assessment results aren’t saved for guests.');
+    if (window.STEMPlusAccount) window.STEMPlusAccount.noteIfGuest('Assessment progress isn’t saved for guests.');
     mount.innerHTML = '<p class="toc-empty">Loading questions…</p>';
     const slugs = target.courses.map((name) => courseList(catalog).find((c) => c.name === name).slug);
     const loaded = await Promise.all(slugs.map((slug) => loadPool(slug).catch(() => null)));
@@ -415,7 +415,7 @@
     function renderMap() {
       const map = mount.querySelector('[data-map]');
       if (!map) return;
-      map.innerHTML = order.map((o, i) => `<button type="button" data-goto="${i}" class="assess-map-btn${i === attempt.index ? ' is-current' : ''}${isAnswered(byId[o.id], attempt.responses[o.id]) ? ' is-answered' : ''}" aria-label="Question ${i + 1}${isAnswered(byId[o.id], attempt.responses[o.id]) ? ', answered' : ''}">${i + 1}</button>`).join('');
+      map.innerHTML = order.map((o, i) => `<button type="button" data-goto="${i}"${i === attempt.index ? ' aria-current="step"' : ''} class="assess-map-btn${i === attempt.index ? ' is-current' : ''}${isAnswered(byId[o.id], attempt.responses[o.id]) ? ' is-answered' : ''}" aria-label="Question ${i + 1}${isAnswered(byId[o.id], attempt.responses[o.id]) ? ', answered' : ''}">${i + 1}</button>`).join('');
     }
 
     function render() {
@@ -495,7 +495,11 @@
       else if (el.hasAttribute('data-prev')) go(attempt.index - 1);
       else if (el.hasAttribute('data-next')) go(attempt.index + 1);
       else if (el.hasAttribute('data-submit')) submit();
-      else if (el.dataset.tf !== undefined) { setResponse(x.id, el.dataset.tf === 'true', true); render(); }
+      else if (el.dataset.tf !== undefined) {
+        setResponse(x.id, el.dataset.tf === 'true', true);
+        render();
+        mount.querySelector(`[data-tf="${el.dataset.tf}"]`).focus();
+      }
       else if (el.dataset.move !== undefined) {
         const items = (attempt.responses[x.id] || attempt.layout[x.id]).slice();
         const i = Number(el.dataset.move);
@@ -503,7 +507,7 @@
         [items[i], items[j]] = [items[j], items[i]];
         setResponse(x.id, items, true);
         render();
-        const again = mount.querySelector(`[data-move="${j}"][data-dir="${el.dataset.dir}"]`) || mount.querySelector(`[data-move="${j}"]`);
+        const again = mount.querySelector(`[data-move="${j}"][data-dir="${el.dataset.dir}"]:not(:disabled)`) || mount.querySelector(`[data-move="${j}"]:not(:disabled)`);
         if (again) again.focus();
       } else if (el.hasAttribute('data-run')) runTests(x, el);
     };
@@ -592,7 +596,7 @@
         const head = attempt.sections.length > 1 ? `<h3>${esc(s.course)} — ${pct(c.total ? c.points / c.total : 0)}</h3>` : '';
         return `${head}<table class="assess-table"><thead><tr><th>Unit</th><th>Score</th><th>Status</th></tr></thead><tbody>${unitRows(s.slug)}</tbody></table>`;
       }).join('');
-      return `<div class="box"><span class="box-label">Your score</span><p class="assess-score">${pct(fraction)} <span>(${Math.round(score.points * 10) / 10} of ${score.total} points) · ${label(fraction)}</span></p>${written.length ? '<p class="assess-hint">Written answers count once you score them below.</p>' : ''}</div>${sections}`;
+      return `<div class="box" tabindex="-1" data-score><span class="box-label">Your score</span><p class="assess-score">${pct(fraction)} <span>(${Math.round(score.points * 10) / 10} of ${score.total} points) · ${label(fraction)}</span></p>${written.length ? '<p class="assess-hint">Written answers count once you score them below.</p>' : ''}</div>${sections}`;
     };
 
     const writtenHtml = written.map((e) => {
@@ -600,14 +604,15 @@
       return `<div class="box" data-written="${esc(e.question.id)}"><span class="box-label">Score your written answer</span><p>${fmt(e.question.prompt)}</p><p class="assess-hint">Your answer</p><p class="assess-written-text">${esc(r.text || 'No answer')}</p><p class="assess-hint">Model answer</p><p>${fmt(e.question.model)}</p><p class="assess-hint">Tick each point your answer covered:</p>${e.question.rubric.map((point, i) => `<label class="assess-option"><input type="checkbox" data-rubric="${i}"${r.rubric && r.rubric[i] ? ' checked' : ''}${isAnswered(e.question, r) ? '' : ' disabled'}> ${fmt(point)}</label>`).join('')}</div>`;
     }).join('');
 
-    const reviewHtml = entries.map((e, i) => {
+    const reviewRow = (e, i, open) => {
       const x = e.question;
       const value = grade(x, e.response);
       const correct = x.type === 'written' ? '' : x.type === 'code'
         ? `<p class="assess-hint">Reference solution</p><pre class="code-block"><code>${esc(x.reference)}</code></pre>`
         : `<p><strong>Correct answer:</strong> ${fmt(showCorrect(x))}</p>`;
-      return `<details class="assess-review ${value === 1 ? 'is-right' : value > 0 ? 'is-partial' : 'is-wrong'}"><summary>${i + 1}. ${esc(TYPES[x.type].badge)} · ${Math.round(value * 100) / 100} pt</summary><p>${fmt(x.prompt)}</p>${x.code ? `<pre class="code-block"><code>${esc(x.code)}</code></pre>` : ''}<p><strong>Your answer:</strong> ${fmt(showResponse(x, e.response))}</p>${correct}<p class="assess-explain">${fmt(x.explanation)}</p></details>`;
-    }).join('');
+      return `<details class="assess-review ${value === 1 ? 'is-right' : value > 0 ? 'is-partial' : 'is-wrong'}" data-review="${i}"${open ? ' open' : ''}><summary>${i + 1}. ${esc(TYPES[x.type].badge)} · ${Math.round(value * 100) / 100} pt</summary><p>${fmt(x.prompt)}</p>${x.code ? `<pre class="code-block"><code>${esc(x.code)}</code></pre>` : ''}<p><strong>Your answer:</strong> ${fmt(showResponse(x, e.response))}</p>${correct}<p class="assess-explain">${fmt(x.explanation)}</p></details>`;
+    };
+    const reviewHtml = entries.map((e, i) => reviewRow(e, i, false)).join('');
 
     mount.innerHTML = `<div data-summary>${summary()}</div>${writtenHtml}${written.length ? '<p><button type="button" class="widget-btn" data-save-written>Save score</button> <span class="assess-hint" data-saved></span></p>' : ''}<h2>Review your answers</h2>${reviewHtml}<p class="assess-nav"><a class="widget-btn" href="assessments.html?${attempt.kind}=${encodeURIComponent(attempt.id.split(':')[1])}" data-retake>Retake</a> <a class="widget-btn" href="assessments.html">Back to Assessments</a></p>`;
     mount.onclick = (event) => {
@@ -630,9 +635,13 @@
       score = scoreAttempt(entries);
       fraction = score.total ? score.points / score.total : 0;
       mount.querySelector('[data-summary]').innerHTML = summary();
+      const i = entries.indexOf(entry);
+      const row = mount.querySelector(`[data-review="${i}"]`);
+      row.outerHTML = reviewRow(entry, i, row.open);
     };
     mount.oninput = null;
     window.scrollTo(0, 0);
+    mount.querySelector('[data-score]').focus();
   }
 
   // ---------- Init ----------
