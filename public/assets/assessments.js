@@ -174,7 +174,7 @@
     pools[slug] = pools[slug] || fetch(`/assets/assessments/${encodeURIComponent(slug)}.json`).then((res) => {
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       return res.json();
-    });
+    }).catch((e) => { delete pools[slug]; throw e; });
     return pools[slug];
   };
 
@@ -294,21 +294,45 @@
   };
 
   // ---------- Runner ----------
+  // The shuffled choices / items / right-hand values a question shows (none for other types).
+  const layoutValues = (x) => (x.type === 'single' || x.type === 'multi' ? x.choices
+    : x.type === 'order' ? x.items : x.type === 'match' ? x.pairs.map((p) => p[1]) : null);
+  const freshLayout = (x) => (x.type === 'order' ? scramble(x.items) : layoutValues(x) && shuffle(layoutValues(x)));
+
   function newAttempt(target, loaded) {
     const sections = target.kind === 'course'
       ? [{ course: loaded[0].course, slug: loaded[0].slug, questions: drawCourse(loaded[0]) }]
       : drawSections(loaded);
     const layout = {};
+    const types = {};
     sections.forEach((s) => s.questions.forEach((x) => {
-      if (x.type === 'single' || x.type === 'multi') layout[x.id] = shuffle(x.choices);
-      if (x.type === 'order') layout[x.id] = scramble(x.items);
-      if (x.type === 'match') layout[x.id] = shuffle(x.pairs.map((p) => p[1]));
+      types[x.id] = x.type;
+      if (layoutValues(x)) layout[x.id] = freshLayout(x);
     }));
     return {
       id: target.id, kind: target.kind, title: target.title,
       sections: sections.map((s) => ({ course: s.course, slug: s.slug, ids: s.questions.map((x) => x.id) })),
-      layout, responses: {}, index: 0, at: new Date().toISOString(),
+      layout, types, responses: {}, index: 0, at: new Date().toISOString(),
     };
+  }
+
+  // A saved attempt may predate a content fix: any question whose type or choices changed
+  // gets a fresh layout and loses its old answer.
+  function reconcile(attempt, byId) {
+    attempt.layout = attempt.layout || {};
+    attempt.types = attempt.types || {};
+    attempt.sections.forEach((s) => s.ids.forEach((id) => {
+      const x = byId[id];
+      const want = layoutValues(x);
+      const have = attempt.layout[id];
+      const same = want ? Array.isArray(have) && have.length === want.length && want.every((v) => have.includes(v)) : have === undefined;
+      if (!same || (attempt.types[id] && attempt.types[id] !== x.type)) {
+        if (want) attempt.layout[id] = freshLayout(x); else delete attempt.layout[id];
+        delete attempt.responses[id];
+      }
+      attempt.types[id] = x.type;
+    }));
+    return attempt;
   }
 
   async function mountRunner(mount, catalog, target) {
@@ -325,6 +349,12 @@
     const loaded = await Promise.all(slugs.map((slug) => loadPool(slug).catch(() => null)));
     const available = loaded.filter(Boolean);
     const skipped = target.courses.filter((_, i) => !loaded[i]);
+    const saved = loadStore().inProgress[target.id];
+    // Starting fresh would overwrite saved progress, so wait for every pool.
+    if (saved && skipped.length) {
+      mount.innerHTML = `<p class="toc-empty">Couldn’t load ${esc(skipped.join(', '))}. Refresh to resume your saved progress. <a href="assessments.html">Back to Assessments</a></p>`;
+      return;
+    }
     if (!available.length) {
       mount.innerHTML = '<p class="toc-empty">These questions couldn’t load. <a href="assessments.html">Back to Assessments</a></p>';
       return;
@@ -332,12 +362,11 @@
     const byId = {};
     available.forEach((pool) => pool.questions.forEach((x) => { byId[x.id] = x; }));
     const notice = skipped.length ? `<p class="assess-hint">Skipped (questions couldn’t load): ${esc(skipped.join(', '))}.</p>` : '';
-    const saved = loadStore().inProgress[target.id];
     const begin = (attempt) => runAttempt(mount, catalog, target, attempt, byId, notice);
     if (saved && saved.sections.every((s) => s.ids.every((id) => byId[id]))) {
       const answered = Object.keys(saved.responses).length;
       mount.innerHTML = `${notice}<div class="box"><span class="box-label">Saved progress</span><p>You answered ${answered} question${answered === 1 ? '' : 's'} on ${esc(new Date(saved.at).toLocaleDateString())}.</p><p><button type="button" class="widget-btn" data-resume>Resume</button> <button type="button" class="widget-btn" data-restart>Start over</button></p></div>`;
-      mount.querySelector('[data-resume]').addEventListener('click', () => begin(saved));
+      mount.querySelector('[data-resume]').addEventListener('click', () => begin(reconcile(saved, byId)));
       mount.querySelector('[data-restart]').addEventListener('click', () => begin(newAttempt(target, available)));
     } else {
       begin(newAttempt(target, available));
